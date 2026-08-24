@@ -394,3 +394,18 @@ test("mock-test question targets and isolated test operations are database prote
   assert.match(deleteAction, /delete_question_safely/);
   assert.match(deleteAction, /makeQuestionUnavailable/);
 });
+
+test("admin mock-test totals are aggregated in the database without row-limit truncation", async () => {
+  const [migration, page] = await Promise.all([
+    read("supabase/migrations/20260824100000_add_admin_mock_test_summaries.sql"),
+    read("app/admin/mock-tests/page.tsx"),
+  ]);
+
+  assert.match(migration, /get_admin_mock_test_summaries/);
+  assert.match(migration, /count\(assignment\.id\) as question_count/);
+  assert.match(migration, /usable_question_count/);
+  assert.match(migration, /Administrator MFA verification is required/);
+  assert.match(page, /supabase\.rpc\("get_admin_mock_test_summaries"\)/);
+  assert.doesNotMatch(page, /from\("mock_test_questions"\)/);
+  assert.doesNotMatch(page, /from\("test_attempts"\)/);
+});
