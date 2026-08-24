@@ -108,7 +108,7 @@ export function ForgotPasswordForm({
           aria-busy={loading}
           className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <PendingButtonContent pending={loading} pendingLabel="Sending reset instructions…">Send password reset instructions</PendingButtonContent>
+          <PendingButtonContent pending={loading} pendingLabel="Requesting reset instructions…">Request password reset instructions</PendingButtonContent>
         </button>
         <LongPendingNotice pending={loading} />
         {notice && (
