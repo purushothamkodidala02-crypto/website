@@ -349,9 +349,10 @@ test("student attempt history keeps lifetime summaries and limits detailed snaps
 });
 
 test("mock-test question targets and destructive operations are database protected", async () => {
-  const [migration, createAction, editPage, importer, assignments, deleteAction] = await Promise.all([
+  const [migration, createAction, editAction, editPage, importer, assignments, deleteAction] = await Promise.all([
     read("supabase/migrations/20260821230000_add_safe_mock_question_management.sql"),
     read("app/admin/mock-tests/actions.ts"),
+    read("app/admin/mock-tests/[id]/edit/actions.ts"),
     read("app/admin/mock-tests/[id]/edit/page.tsx"),
     read("app/admin/questions/import-actions.ts"),
     read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
@@ -371,6 +372,10 @@ test("mock-test question targets and destructive operations are database protect
   assert.match(migration, /attempt_responses where question_id/);
   assert.match(migration, /actual_question_count <> test_record\.target_question_count/);
   assert.match(createAction, /paper\.question_count \?\? requestedTarget/);
+  assert.match(editAction, /const resultAffectingChange =/);
+  assert.match(editAction, /duration !== current\.duration_minutes/);
+  assert.match(editAction, /targetQuestionCount !== current\.target_question_count/);
+  assert.match(editAction, /You can still update its description, instructions and URL slug/);
   assert.match(editPage, /targetQuestionCount=\{test\.target_question_count\}/);
   assert.match(importer, /mode === "replace"/);
   assert.match(importer, /replace_mock_test_questions_atomic/);
