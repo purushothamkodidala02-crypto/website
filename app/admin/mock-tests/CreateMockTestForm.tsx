@@ -6,6 +6,7 @@ import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { mockTestLabel } from "@/lib/exam-catalog";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { createMockTest, type CreateMockTestState } from "./actions";
+import type { MockTestAccessType } from "@/types/mock-test";
 
 type ExamState = { id: string; name: string; code: string; slug: string };
 type Category = { id: string; stateId: string; name: string };
@@ -34,6 +35,8 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [paperId, setPaperId] = useState("");
   const [subjectId, setSubjectId] = useState("");
   const [scope, setScope] = useState<"paper" | "subject">("paper");
+  const [accessType, setAccessType] = useState<MockTestAccessType>("free");
+  const [priceInr, setPriceInr] = useState("");
   const state = states.find((item) => item.id === stateId);
   const availableCategories = useMemo(() => categories.filter((item) => item.stateId === stateId), [categories, stateId]);
   const availableExams = useMemo(() => exams.filter((item) => item.categoryId === categoryId), [exams, categoryId]);
@@ -74,7 +77,40 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       <label className="block text-sm font-bold md:col-span-2">Description <span className="font-normal text-slate-500">(optional)</span><textarea name="description" rows={3} placeholder="Tell students what this mock covers" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
       <label className="block text-sm font-bold">Duration in minutes<input name="duration_minutes" type="number" min="1" required defaultValue={paper?.duration ?? 150} key={paperId || "duration"} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
       <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required defaultValue={scope === "paper" ? paper?.questionCount ?? 1 : 25} key={`${paperId}-${scope}`} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2"><strong>Student access: Free</strong><p className="mt-1 leading-5">Paid tests stay disabled until a verified payment flow is available.</p><input type="hidden" name="access_type" value="free" /></div>
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
+        <strong>Student access</strong>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <label className="block text-sm font-semibold">
+            Access type
+            <select
+              name="access_type"
+              value={accessType}
+              onChange={(event) => setAccessType(event.target.value as MockTestAccessType)}
+              className="mt-2 w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 font-normal text-slate-900"
+            >
+              <option value="free">Free</option>
+              <option value="paid">Paid</option>
+            </select>
+          </label>
+          <label className="block text-sm font-semibold">
+            Price in ₹
+            <input
+              name="price_inr"
+              type="number"
+              min="1"
+              step="0.01"
+              value={accessType === "paid" ? priceInr : ""}
+              onChange={(event) => setPriceInr(event.target.value)}
+              disabled={accessType !== "paid"}
+              placeholder="Only for paid tests"
+              className="mt-2 w-full rounded-xl border border-emerald-200 px-4 py-3 font-normal text-slate-900 disabled:bg-slate-100"
+            />
+          </label>
+        </div>
+        <p className="mt-2 leading-5 text-emerald-900">
+          Free tests open to everyone. Paid tests stay visible in admin now, and the payment flow can be connected later.
+        </p>
+      </div>
       <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId)} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(nextSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
     </form>
   </section>;

@@ -46,17 +46,19 @@ test("production CSP uses per-request nonces and no production unsafe-inline scr
 });
 
 test("launch policy enforces strong passwords and disables unverified paid tests", async () => {
-  const [policy, createAction, updateAction, createForm] = await Promise.all([
+  const [policy, createAction, updateAction, createForm, editForm] = await Promise.all([
     read("lib/auth/password-policy.ts"),
     read("app/admin/mock-tests/actions.ts"),
     read("app/admin/mock-tests/[id]/edit/actions.ts"),
     read("app/admin/mock-tests/CreateMockTestForm.tsx"),
+    read("app/admin/mock-tests/[id]/edit/EditMockTestForm.tsx"),
   ]);
 
   assert.match(policy, /MIN_PASSWORD_LENGTH = 10/);
-  assert.match(createAction, /access_type: "free"/);
-  assert.match(updateAction, /access_type: "free"/);
-  assert.doesNotMatch(createForm, /value="paid"/);
+  assert.match(createAction, /readMockTestAccess\(formData\)/);
+  assert.match(updateAction, /readMockTestAccess\(formData\)/);
+  assert.match(createForm, /<option value="paid">Paid<\/option>/);
+  assert.match(editForm, /<option value="paid">Paid<\/option>/);
 });
 
 test("password recovery works across devices without consuming tokens on email prefetch", async () => {

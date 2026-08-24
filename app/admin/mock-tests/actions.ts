@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
+import { readMockTestAccess } from "@/lib/mock-test-access";
 import { mockTestSlug } from "@/lib/public-urls";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { createClient } from "@/lib/supabase/server";
@@ -25,11 +26,13 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   const subjectId = String(formData.get("subject_id") ?? "").trim() || null;
   const duration = Number(formData.get("duration_minutes") ?? 0);
   const requestedTarget = Number(formData.get("target_question_count") ?? 0);
+  const pricing = readMockTestAccess(formData);
   if (!stateId || !categoryId || !examId || !paperId) return { success: false, message: "Choose the state, board, exam and paper." };
   if (!Number.isInteger(duration) || duration <= 0) return { success: false, message: "Enter a valid duration." };
   if (!Number.isInteger(requestedTarget) || requestedTarget < 1 || requestedTarget > 500) return { success: false, message: "Enter a target between 1 and 500 Questions." };
   if (scope !== "paper" && scope !== "subject") return { success: false, message: "Choose a valid practice coverage." };
   if (scope === "subject" && !subjectId) return { success: false, message: "Choose a subject for a subject-only mock." };
+  if (pricing.error) return { success: false, message: pricing.error };
 
   const [stateResult, categoryResult, groupResult, paperResult, papersResult, subjectResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").eq("id", stateId).maybeSingle(),
@@ -72,8 +75,8 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     version: 1,
     display_order: seriesNumber,
     published_at: null,
-    access_type: "free",
-    price_inr: null,
+    access_type: pricing.accessType,
+    price_inr: pricing.priceInr,
   });
   if (error?.code === "23505") return { success: false, message: "This series number was just used. Submit again to create the next number." };
   if (error) return { success: false, message: error.message };

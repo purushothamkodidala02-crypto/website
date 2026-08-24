@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
+import { readMockTestAccess } from "@/lib/mock-test-access";
 import { PUBLIC_SLUG_PATTERN } from "@/lib/public-urls";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { createClient } from "@/lib/supabase/server";
@@ -27,10 +28,12 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const targetQuestionCount = Number(formData.get("target_question_count") ?? 0);
   const status = String(formData.get("status") ?? "draft") as MockTestStatus;
   const slug = String(formData.get("slug") ?? current.slug).trim().toLowerCase();
+  const pricing = readMockTestAccess(formData);
   if (!paperId || !Number.isInteger(duration) || duration <= 0) return { success: false, message: "Choose a paper and enter a valid duration." };
   if (!Number.isInteger(targetQuestionCount) || targetQuestionCount < 1 || targetQuestionCount > 500) return { success: false, message: "Enter a target between 1 and 500 Questions." };
   if ((scope !== "paper" && scope !== "subject") || (scope === "subject" && !subjectId) || status !== "draft") return { success: false, message: "Check the mock type and draft status." };
   if (!PUBLIC_SLUG_PATTERN.test(slug) || ["attempt", "subject", "specialization", "opengraph-image"].includes(slug)) return { success: false, message: "Enter a URL slug using lowercase letters, numbers and single hyphens." };
+  if (pricing.error) return { success: false, message: pricing.error };
   const structureChanged = paperId !== current.paper_id || scope !== current.test_scope || (scope === "subject" ? subjectId : null) !== current.subject_id;
   const resultAffectingChange =
     structureChanged ||
@@ -76,8 +79,8 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
     display_order: seriesNumber,
     status,
     published_at: null,
-    access_type: "free",
-    price_inr: null,
+    access_type: pricing.accessType,
+    price_inr: pricing.priceInr,
   }).eq("id", mockTestId);
   if (error?.code === "23505") return { success: false, message: "That paper already has this mock-test number." };
   if (error) return { success: false, message: error.message };

@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
-import type { MockTest } from "@/types/mock-test";
+import type { MockTest, MockTestAccessType } from "@/types/mock-test";
 import { mockTestLabel } from "@/lib/exam-catalog";
 import { updateMockTest, type UpdateMockTestState } from "./actions";
 
@@ -28,6 +28,8 @@ export function EditMockTestForm({
   const [paperId, setPaperId] = useState(mockTest.paper_id);
   const [subjectId, setSubjectId] = useState(mockTest.subject_id ?? "");
   const [scope, setScope] = useState(mockTest.test_scope);
+  const [accessType, setAccessType] = useState<MockTestAccessType>(mockTest.access_type);
+  const [priceInr, setPriceInr] = useState(mockTest.price_inr?.toString() ?? "");
   const availableSubjects = useMemo(
     () => subjects.filter((subject) => subject.paperId === paperId),
     [subjects, paperId],
@@ -119,17 +121,40 @@ export function EditMockTestForm({
           <span className="mt-1 block text-xs font-normal text-slate-500">Locked after publishing or after the first student attempt.</span>
         </label>
         <input type="hidden" name="status" value={mockTest.status} />
-        <label className="block text-sm font-bold">
-          Student access
-          <SearchableSelect
-            name="access_type"
-            value="free"
-            onChange={() => undefined}
-            options={[{ value: "free", label: "Free" }]}
-            placeholder="Free"
-            disabled
-          />
-        </label>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
+          <strong>Student access</strong>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <label className="block text-sm font-semibold">
+              Access type
+              <select
+                name="access_type"
+                value={accessType}
+                onChange={(event) => setAccessType(event.target.value as MockTestAccessType)}
+                className="mt-2 w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 font-normal text-slate-900"
+              >
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
+            </label>
+            <label className="block text-sm font-semibold">
+              Price in ₹
+              <input
+                name="price_inr"
+                type="number"
+                min="1"
+                step="0.01"
+                value={accessType === "paid" ? priceInr : ""}
+                onChange={(event) => setPriceInr(event.target.value)}
+                disabled={accessType !== "paid"}
+                placeholder="Only for paid tests"
+                className="mt-2 w-full rounded-xl border border-emerald-200 px-4 py-3 font-normal text-slate-900 disabled:bg-slate-100"
+              />
+            </label>
+          </div>
+          <p className="mt-2 leading-5 text-emerald-900">
+            Free tests are open to everyone. Paid tests remain protected until payment is connected.
+          </p>
+        </div>
         <div className="md:col-span-2">
           <button
             disabled={pending}
