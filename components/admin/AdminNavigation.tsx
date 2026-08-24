@@ -20,6 +20,7 @@ const sections = [
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
+      { href: "/admin/access", label: "Exam passes", icon: "passes" as const },
       { href: "/admin/results", label: "Results", icon: "results" as const },
     ],
   },
@@ -32,7 +33,8 @@ type NavIconName =
   | "subjects"
   | "questions"
   | "tests"
-  | "results";
+  | "results"
+  | "passes";
 
 function NavIcon({ name }: { name: NavIconName }) {
   const common = {
@@ -95,6 +97,7 @@ function NavIcon({ name }: { name: NavIconName }) {
           <rect x="15.2" y="4" width="2.8" height="14" rx=".7" />
         </>
       )}
+      {name === "passes" && <><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7Z" /><path d="M12 4v16M4 8.5l8 4.5 8-4.5" /></>}
     </svg>
   );
 }

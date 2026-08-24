@@ -41,12 +41,9 @@ export default async function TakeMockTestPage({ params, searchParams }: PagePro
 
   const { data: mockTest } = await supabase.from("mock_tests").select("id, title, status, access_type").eq("id", id).eq("status", "published").maybeSingle();
   if (!mockTest) notFound();
-  let hasAccess = mockTest.access_type === "free";
-  if (mockTest.access_type === "paid") {
-    const { data: entitlement } = await supabase.from("mock_test_entitlements").select("id").eq("mock_test_id", mockTest.id).maybeSingle();
-    hasAccess = Boolean(entitlement);
-  }
-  if (!hasAccess) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test is not publicly available right now." />;
+  const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
+  const hasAccess = Boolean(access);
+  if (!hasAccess) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test needs an active Exam Pass. Return to the test details to unlock it." />;
 
   const requestedSessionId = typeof query.session === "string" ? query.session : "";
   if (!/^[0-9a-f-]{36}$/i.test(requestedSessionId)) redirect(testPath);

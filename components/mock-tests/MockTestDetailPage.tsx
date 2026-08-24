@@ -10,6 +10,7 @@ import { resolveSeoFields } from "@/lib/seo-fields";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { TestStartActions } from "@/app/mock-tests/[id]/TestStartActions";
+import { BuyExamPassForm } from "@/app/dashboard/passes/BuyExamPassForm";
 
 type MockTestDetailsProps = {
   id: string;
@@ -33,7 +34,6 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
     )
     .eq("id", id)
     .eq("status", "published")
-    .eq("access_type", "free")
     .maybeSingle();
 
   if (!test) {
@@ -229,11 +229,10 @@ export async function MockTestDetailsPage({
     supabase
       .from("mock_tests")
       .select(
-        "id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type",
+        "id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, price_inr",
       )
       .eq("id", id)
       .eq("status", "published")
-      .eq("access_type", "free")
       .maybeSingle(),
 
     supabase.auth.getUser(),
@@ -348,6 +347,17 @@ export async function MockTestDetailsPage({
 
   const isLoggedIn = Boolean(authResult.data.user);
 
+  const accessResult = test.access_type === "paid" && exam
+    ? await Promise.all([
+        supabase.from("access_product_exam_groups").select("access_products(id, name, price_inr, duration_days)").eq("exam_group_id", exam.id),
+        isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
+      ])
+    : [{ data: [] }, { data: true }];
+  const paidProducts = ((accessResult[0].data ?? []) as unknown as { access_products: { id: string; name: string; price_inr: number; duration_days: number } | null }[])
+    .map((item) => item.access_products).filter((product): product is { id: string; name: string; price_inr: number; duration_days: number } => Boolean(product));
+  const isUnlocked = test.access_type === "free" || Boolean(accessResult[1].data);
+  const purchaseProduct = paidProducts[0] ?? null;
+
   const [resumableSessionResult, previousAttemptResult] =
     isLoggedIn && authResult.data.user
       ? await Promise.all([
@@ -400,7 +410,7 @@ export async function MockTestDetailsPage({
 
   const resourceDescription =
     test.description ??
-    `A free, timed ${resourceName} for focused competitive-exam preparation.`;
+    `A ${test.access_type === "free" ? "free" : "premium"}, timed ${resourceName} for focused competitive-exam preparation.`;
 
   const jsonLd = [
     {
@@ -409,7 +419,7 @@ export async function MockTestDetailsPage({
       name: resourceName,
       description: resourceDescription,
       url: absoluteUrl(canonicalPath),
-      isAccessibleForFree: true,
+      isAccessibleForFree: test.access_type === "free",
       educationalUse: "Practice",
       learningResourceType: "Mock test",
       timeRequired: `PT${test.duration_minutes}M`,
@@ -476,7 +486,7 @@ export async function MockTestDetailsPage({
           <section>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                Free
+                {test.access_type === "free" ? "Free" : "Exam Pass"}
               </span>
 
               <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
@@ -603,19 +613,16 @@ export async function MockTestDetailsPage({
 
               <p className="flex justify-between gap-3">
                 <span className="text-slate-400">Access</span>
-                <strong>Free</strong>
+                <strong>{test.access_type === "free" ? "Free" : isUnlocked ? "Pass active" : "Exam Pass"}</strong>
               </p>
             </div>
 
-            <TestStartActions
-              testId={id}
-              testPath={canonicalPath}
-              isLoggedIn={isLoggedIn}
-              hasResumableSession={hasResumableSession}
-            />
+            {isUnlocked ? <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} /> : purchaseProduct ? <><p className="mt-6 text-sm font-bold text-teal-100">Unlock every paid test in this exam for {purchaseProduct.duration_days} days.</p><BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} /></> : <Link href="/dashboard/passes" className="mt-6 block rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950">View Exam Passes</Link>}
 
             <p className="mt-4 text-center text-xs leading-5 text-slate-400">
-              {!isLoggedIn
+              {!isUnlocked
+                ? "Purchase an Exam Pass to unlock this and other paid tests in the same exam."
+                : !isLoggedIn
                 ? "Sign in or create an account, then return directly to this test."
                 : hasResumableSession
                   ? "Resume keeps your progress. Start test begins again after confirmation."

@@ -76,7 +76,7 @@ export async function publishMockTest(mockTestId: string): Promise<MockTestManag
       "Add at least one Question before publishing.",
       "Every assigned Question and mark must be active and valid.",
       "The assigned Question count must exactly match the Mock Test target.",
-      "Paid Mock Tests cannot be published before payment verification is enabled.",
+      "Create an active Exam Pass for this Exam before publishing a paid Mock Test.",
     ].find((message) => error.message.includes(message));
     return {
       success: false,
