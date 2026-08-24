@@ -16,9 +16,16 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
     const { error } = await admin.rpc("consume_custom_email_login_challenge", { requested_email: email, requested_code_hash: hashOtp(`${email}:${code}`) });
     if (error) return Response.json({ message: error.message.includes("Too many") ? error.message : "That code is invalid or has expired." }, { status: 400 });
-    const { data, error: linkError } = await admin.auth.admin.generateLink({ type: "magiclink", email, options: { redirectTo: absoluteUrl(safeNext(payload?.nextPath)) } });
-    const redirectUrl = data?.properties?.action_link;
-    if (linkError || !redirectUrl) return Response.json({ message: "We could not complete sign-in. Please try again." }, { status: 503 });
+    const nextPath = safeNext(payload?.nextPath);
+    const { data, error: linkError } = await admin.auth.admin.generateLink({ type: "magiclink", email, options: { redirectTo: absoluteUrl(nextPath) } });
+    const tokenHash = data?.properties?.hashed_token;
+    if (linkError || !tokenHash) return Response.json({ message: "We could not complete sign-in. Please try again." }, { status: 503 });
+    // The callback verifies Supabase's one-time token server-side and persists
+    // the session cookies before sending the student to the requested page.
+    const callbackUrl = new URL("/auth/email-otp/callback", absoluteUrl("/"));
+    callbackUrl.searchParams.set("token_hash", tokenHash);
+    callbackUrl.searchParams.set("next", nextPath);
+    const redirectUrl = callbackUrl.toString();
     return Response.json({ redirectUrl });
   } catch (error) { return Response.json({ message: error instanceof Error ? error.message : "We could not verify the code." }, { status: 503 }); }
 }
