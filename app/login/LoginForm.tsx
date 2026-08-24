@@ -138,7 +138,7 @@ export function LoginForm({
       <p className="mt-3 text-sm leading-6 text-slate-600">
         Use the same email and password you entered during registration.
       </p>
-      <button type="button" onClick={() => setLoginMethod("otp")} className="mt-4 w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in with Email OTP instead</button>
+      <button type="button" onClick={() => setLoginMethod("otp")} className="mt-4 w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in using a six-digit email code</button>
       <form onSubmit={handleLogin} className="mt-7 space-y-5">
         <label htmlFor="login_email" className="block text-sm font-bold text-slate-800">
           Email

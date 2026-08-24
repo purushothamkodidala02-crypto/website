@@ -70,7 +70,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
       setNotice({
         tone: "error",
         message: mayAlreadyExist
-          ? "This email may already have a Varadhi Prep account. Try signing in instead."
+          ? "This email may already have a Varadhi Prep account. Please sign in with your existing credentials."
           : error.code === "over_email_send_rate_limit"
             ? "Too many confirmation emails were requested. Wait a few minutes, then try again."
             : "We could not create the account right now. Check the details and try again.",
@@ -83,7 +83,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
       setNotice({
         tone: "error",
         message:
-          "This email may already have a Varadhi Prep account. Sign in with your existing password instead.",
+          "This email may already have a Varadhi Prep account. Please sign in with your existing password.",
       });
       setLoading(false);
       return;
@@ -186,7 +186,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
             <LongPendingNotice pending={resending} />
           </div>
           <button type="button" onClick={useDifferentEmail} className="mt-4 w-full text-sm font-bold text-teal-700 hover:text-teal-800">
-            Use a different email
+            Change email address
           </button>
           <LongPendingNotice pending={loading} />
         </div>

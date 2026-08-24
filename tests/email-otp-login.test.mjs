@@ -15,7 +15,7 @@ test("email OTP login keeps password login and protects OTP requests", async () 
     read("app/auth/email-otp/callback/route.ts"),
     read("lib/auth/custom-email-otp.ts"),
   ]);
-  assert.match(login, /Sign in with Email OTP instead/);
+  assert.match(login, /Sign in using a six-digit email code/);
   assert.match(login, /EmailOtpLoginForm/);
   assert.match(otp, /\/api\/auth\/email-otp\/request/);
   assert.match(otp, /captchaToken/);

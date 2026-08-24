@@ -122,7 +122,7 @@ export function ForgotPasswordForm({
       </form>
 
       <p className="mt-6 border-t border-slate-100 pt-5 text-sm text-slate-600">
-        Remembered your password?{" "}
+        Have your password?{" "}
         <Link href={loginHref} className="font-bold text-teal-700 hover:text-teal-800">
           Return to sign in
         </Link>
