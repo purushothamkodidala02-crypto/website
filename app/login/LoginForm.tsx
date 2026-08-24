@@ -7,6 +7,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { loginWithPassword, type LoginResult } from "./actions";
+import { EmailOtpLoginForm } from "./EmailOtpLoginForm";
 
 type Notice = {
   tone: "error" | "success" | "info";
@@ -36,8 +37,13 @@ export function LoginForm({
   const [resending, setResending] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [loginMethod, setLoginMethod] = useState<"password" | "otp">("password");
   const registerHref = `/register?next=${encodeURIComponent(nextPath)}`;
   const forgotPasswordHref = `/forgot-password?next=${encodeURIComponent(nextPath)}`;
+
+  if (loginMethod === "otp") {
+    return <EmailOtpLoginForm nextPath={nextPath} onUsePassword={() => setLoginMethod("password")} />;
+  }
 
   function confirmationRedirectUrl() {
     const redirectUrl = new URL("/login", window.location.origin);
@@ -132,6 +138,7 @@ export function LoginForm({
       <p className="mt-3 text-sm leading-6 text-slate-600">
         Use the same email and password you entered during registration.
       </p>
+      <button type="button" onClick={() => setLoginMethod("otp")} className="mt-4 w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in with Email OTP instead</button>
       <form onSubmit={handleLogin} className="mt-7 space-y-5">
         <label htmlFor="login_email" className="block text-sm font-bold text-slate-800">
           Email
