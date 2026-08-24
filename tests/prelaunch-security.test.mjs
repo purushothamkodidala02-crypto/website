@@ -388,6 +388,8 @@ test("mock-test question targets and isolated test operations are database prote
   assert.match(assignments, /moveAssignedQuestion/);
   assert.match(assignments, /Adding, editing, or removing them here does not change another mock test/);
   assert.match(assignments, /Add question to this mock test/);
+  assert.match(assignments, /Search questions in this mock test/);
+  assert.match(assignments, /No questions match your search/);
   assert.doesNotMatch(assignments, /Search the question bank/);
   assert.match(deleteAction, /delete_question_safely/);
   assert.match(deleteAction, /makeQuestionUnavailable/);
