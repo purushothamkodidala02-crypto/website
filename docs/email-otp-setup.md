@@ -1,22 +1,30 @@
-# Email OTP sign-in setup
+# Six-digit Email OTP setup
 
-Varadhi Prep sends Email OTPs through Supabase Auth using the existing Brevo SMTP configuration. Password sign-in remains available.
+Varadhi Prep uses its own six-digit login codes. The raw code is held only in server memory while Brevo receives the message; the database stores a keyed hash, expiry, attempt count, and rate-limit metadata.
 
-Before enabling this feature in production, open **Supabase Dashboard → Authentication → Email Templates → Magic Link** and replace the email body with a branded message that includes the one-time code:
+Add these server-only values to Vercel Production and Preview. Do not add a `NEXT_PUBLIC_` prefix and never paste them into chat:
 
-```html
-<h2>Your Varadhi Prep sign-in code</h2>
-<p>Use this code to sign in:</p>
-<p style="font-size:28px;font-weight:700;letter-spacing:6px">{{ .Token }}</p>
-<p>This code expires automatically. Do not share it with anyone.</p>
+```
+BREVO_API_KEY=
+CUSTOM_OTP_PEPPER=
+TURNSTILE_SECRET_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+CUSTOM_OTP_FROM_EMAIL=no-reply@varadhiprep.in
+CUSTOM_OTP_FROM_NAME=Varadhi Prep
 ```
 
-The Magic Link template controls passwordless email delivery. `{{ .Token }}` is required for the 6-digit code; do not use only `{{ .ConfirmationURL }}`.
+- Create `BREVO_API_KEY` in Brevo → Transactional → SMTP & API → API Keys. The sender address must be verified in Brevo.
+- Generate `CUSTOM_OTP_PEPPER` as a long random secret, for example 32 or more random bytes encoded as text. It cannot be changed casually because it protects active code hashes.
+- Copy `TURNSTILE_SECRET_KEY` from Cloudflare Turnstile. It is the secret paired with the existing public site key.
+- `SUPABASE_SERVICE_ROLE_KEY` is required only on the server to look up and sign in a verified user. Never expose it to the browser.
 
-Keep **Captcha protection** enabled in Supabase Auth. Set the authentication rate limits deliberately:
+Apply the migration `20260824140000_add_custom_six_digit_email_otp.sql` in Supabase before enabling the feature. It creates the secure OTP challenge table and service-only database functions.
 
-- OTP resend cooldown: at least 60 seconds
-- OTP requests: start at 10 per hour per project/IP
-- OTP verification: retain Supabase defaults unless there is evidence users need a change
+Protections included:
 
-Brevo should stay configured as the custom SMTP sender, with a verified Varadhi Prep sender address. Never expose SMTP credentials in the website or repository.
+- code is exactly 6 digits and expires after 10 minutes
+- one request per user per minute
+- at most 5 requests per user per hour and 10 per connection per hour
+- at most 5 incorrect attempts per code
+- Cloudflare Turnstile is validated on the server before any email is sent
+- email responses do not disclose whether an account exists
