@@ -260,6 +260,9 @@ async function importQuestions(
 
   parsedFile.rows.forEach(({ values: row, rowNumber }) => {
     const importKey = (row.import_key ?? "").trim().toLocaleLowerCase();
+    // A file uploaded from a mock test owns its Questions. This prevents the
+    // same import_key in another mock test from updating this test's content.
+    const storedImportKey = mockTest ? `mock:${mockTest.id}:${importKey}` : importKey;
     const subject = subjectByName.get(normalizeLookup(row.subject ?? ""));
     const correctAnswer = (row.correct_answer ?? "").trim().toUpperCase() as CorrectAnswer;
     const lifecycle = ((row.content_lifecycle ?? "permanent").trim().toLowerCase() || "permanent") as QuestionLifecycle;
@@ -276,6 +279,7 @@ async function importQuestions(
     const image = embeddedImage ? { url: null, error: null } : normalizeQuestionImageUrl(row.image_url ?? "");
 
     if (!importKey) errors.push(`Row ${rowNumber}: import_key is required.`);
+    if (storedImportKey.length > 200) errors.push(`Row ${rowNumber}: import_key is too long.`);
     if (!subject) errors.push(`Row ${rowNumber}: Subject "${row.subject || "(blank)"}" does not exist in the chosen Paper.`);
     if (subject && importKeys.has(`${subject.id}:${importKey}`)) errors.push(`Row ${rowNumber}: import_key "${importKey}" is repeated for ${subject.name}.`);
     if (subject && importKey) importKeys.add(`${subject.id}:${importKey}`);
@@ -311,7 +315,7 @@ async function importQuestions(
     const importIndex = importRows.length;
     importRows.push({
       subject_id: subject.id,
-      import_key: importKey,
+      import_key: storedImportKey,
       question_text: canonical.question,
       question_type: "mcq",
       option_a: canonical.options[0],
@@ -336,7 +340,7 @@ async function importQuestions(
       expires_on: lifecycle === "expires" ? expiresOn : null,
     });
     if (embeddedImage) embeddedImageTargets.push({ importIndex, image: embeddedImage, rowNumber });
-    assignmentPreferences.push({ key: `${subject.id}:${importKey}`, rowNumber, questionOrder, marks, negativeMarks });
+    assignmentPreferences.push({ key: `${subject.id}:${storedImportKey}`, rowNumber, questionOrder, marks, negativeMarks });
   });
 
   if (errors.length) {
@@ -406,6 +410,7 @@ async function importQuestions(
   revalidatePath("/admin/mock-tests");
   if (mockTest) {
     revalidatePath(`/admin/mock-tests/${mockTest.id}/edit`);
+    revalidatePath(`/admin/mock-tests/${mockTest.id}/questions`);
     if (mode === "replace") return { success: true, message: `Replacement completed safely: ${assigned} Questions assigned, ${added} added to the Question Bank, ${updated} updated, and ${Number(summary.deleted_orphans ?? 0)} unused old Question${Number(summary.deleted_orphans ?? 0) === 1 ? "" : "s"} removed.` };
     return { success: true, message: `${added} Question${added === 1 ? "" : "s"} added, ${updated} updated, and ${assigned} assigned to this Mock Test from ${file.name}.${alreadyAssigned ? ` ${alreadyAssigned} already assigned Question${alreadyAssigned === 1 ? " was" : "s were"} kept.` : ""}` };
   }

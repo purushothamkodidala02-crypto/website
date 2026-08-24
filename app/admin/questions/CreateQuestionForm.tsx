@@ -18,6 +18,13 @@ type Subject = {
   name: string;
   contentLanguageMode: SubjectContentLanguageMode;
 };
+type MockTestContext = {
+  id: string;
+  paperId: string;
+  subjectId: string | null;
+  testScope: "paper" | "subject";
+  label: string;
+};
 
 const initialState: CreateQuestionState = { success: false, message: "" };
 
@@ -27,19 +34,22 @@ export function CreateQuestionForm({
   specializations,
   papers,
   subjects,
+  mockTest,
 }: {
   categories: Category[];
   exams: Exam[];
   specializations: Specialization[];
   papers: Paper[];
   subjects: Subject[];
+  mockTest?: MockTestContext;
 }) {
   const [state, action, pending] = useActionState(createQuestion, initialState);
+  const scopedPaper = mockTest ? papers.find((paper) => paper.id === mockTest.paperId) : undefined;
   const [categoryId, setCategoryId] = useState("");
-  const [examId, setExamId] = useState("");
+  const [examId, setExamId] = useState(scopedPaper?.examId ?? "");
   const [specializationId, setSpecializationId] = useState("");
-  const [paperId, setPaperId] = useState("");
-  const [subjectId, setSubjectId] = useState("");
+  const [paperId, setPaperId] = useState(mockTest?.paperId ?? "");
+  const [subjectId, setSubjectId] = useState(mockTest?.testScope === "subject" ? mockTest.subjectId ?? "" : "");
   const [lifecycle, setLifecycle] = useState<QuestionLifecycle | "">("");
   const [correctAnswer, setCorrectAnswer] = useState("");
 
@@ -107,13 +117,14 @@ export function CreateQuestionForm({
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           <section className="rounded-2xl bg-slate-50 p-5">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">1. Question location</p>
-            <div className="mt-4 space-y-4">
+            {mockTest ? <div className="mt-4 rounded-xl border border-teal-100 bg-teal-50 p-4 text-sm leading-6 text-teal-950"><p className="font-black">This question will be added only to:</p><p className="mt-1">{mockTest.label}</p><input type="hidden" name="mock_test_id" value={mockTest.id} /><input type="hidden" name="paper_id" value={mockTest.paperId} /><input type="hidden" name="exam_group_id" value={scopedPaper?.examId ?? ""} /><input type="hidden" name="exam_id" value={categoryId} /></div> : <div className="mt-4 space-y-4">
               <SelectField label="Exam Category" name="exam_id" value={categoryId} onChange={changeCategory} options={categories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a category" />
               <SelectField label="Exam" name="exam_group_id" value={examId} onChange={changeExam} options={visibleExams.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose an Exam" disabled={!categoryId} />
               <SelectField label="Specialisation (optional)" value={specializationId} onChange={changeSpecialization} options={[{ value: "", label: visibleSpecializations.length ? "No specialisation — direct Papers" : "No specialisation" }, ...visibleSpecializations.map((item) => ({ value: item.id, label: item.name }))]} placeholder="Choose a Specialisation" disabled={!examId} />
               <SelectField label="Paper" name="paper_id" value={paperId} onChange={changePaper} options={visiblePapers.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a Paper" disabled={!examId} />
               <SelectField label="Subject" name="subject_id" value={subjectId} onChange={setSubjectId} options={visibleSubjects.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a Subject" disabled={!paperId} />
-            </div>
+            </div>}
+            {mockTest && (mockTest.testScope === "subject" ? <><input type="hidden" name="subject_id" value={subjectId} /><p className="mt-4 rounded-xl border bg-white p-3 text-sm font-bold">Subject: {subjects.find((item) => item.id === subjectId)?.name ?? "Selected subject"}</p></> : <label className="mt-4 block text-sm font-bold">Subject<SearchableSelect name="subject_id" value={subjectId} onChange={setSubjectId} options={visibleSubjects.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a Subject" /></label>)}
             {languageMode && (
               <div className="mt-5 rounded-xl border border-teal-100 bg-teal-50 p-3 text-sm text-teal-950">
                 <span className="font-black">Required: </span>

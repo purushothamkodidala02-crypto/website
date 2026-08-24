@@ -19,12 +19,14 @@ const initialState: UpdateQuestionState = { success: false, message: "" };
 export function EditQuestionForm({
   question,
   subjects,
+  mockTestId,
 }: {
   question: Question;
   subjects: SubjectOption[];
+  mockTestId?: string;
 }) {
   const [state, action, pending] = useActionState(
-    updateQuestion.bind(null, question.id),
+    (previousState: UpdateQuestionState, formData: FormData) => updateQuestion(question.id, previousState, formData, mockTestId),
     initialState,
   );
   const [subjectId, setSubjectId] = useState(question.subject_id);

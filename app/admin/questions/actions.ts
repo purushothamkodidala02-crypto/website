@@ -54,14 +54,15 @@ export async function createQuestion(
 
   const categoryId = String(formData.get("exam_id") ?? "").trim();
   const examId = String(formData.get("exam_group_id") ?? "").trim();
-  const paperId = String(formData.get("paper_id") ?? "").trim();
+  const requestedPaperId = String(formData.get("paper_id") ?? "").trim();
   const subjectId = String(formData.get("subject_id") ?? "").trim();
+  const mockTestId = String(formData.get("mock_test_id") ?? "").trim();
   const correctAnswer = String(formData.get("correct_answer") ?? "") as CorrectAnswer;
   const lifecycle = String(formData.get("content_lifecycle") ?? "") as QuestionLifecycle;
   const reviewOn = String(formData.get("review_on") ?? "").trim();
   const expiresOn = String(formData.get("expires_on") ?? "").trim();
 
-  if (!categoryId || !examId || !paperId || !subjectId) {
+  if ((!mockTestId && (!categoryId || !examId || !requestedPaperId)) || !subjectId) {
     return { success: false, message: "Choose an Exam Category, Exam, Paper, and Subject." };
   }
   if (!answers.includes(correctAnswer)) {
@@ -75,24 +76,38 @@ export async function createQuestion(
     return { success: false, message: "Choose a valid question lifetime and date." };
   }
 
-  const [{ data: subject }, { data: paper }, { data: group }] = await Promise.all([
+  const { data: mockTest } = mockTestId
+    ? await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count").eq("id", mockTestId).maybeSingle()
+    : { data: null };
+  if (mockTestId && (!mockTest || mockTest.status !== "draft")) {
+    return { success: false, message: "Only a draft Mock Test can receive a new question." };
+  }
+  if (mockTestId) {
+    const { count } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId);
+    if ((count ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
+  }
+  const paperId = mockTest?.paper_id ?? requestedPaperId;
+  const [{ data: subject }, { data: paper }, { data: group }, assignmentCountResult] = await Promise.all([
     supabase
       .from("subjects")
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    supabase.from("papers").select("id, exam_group_id").eq("id", paperId).maybeSingle(),
-    supabase.from("exam_groups").select("id, exam_id").eq("id", examId).maybeSingle(),
+    supabase.from("papers").select("id, exam_group_id, default_correct_marks, default_negative_marks").eq("id", paperId).maybeSingle(),
+    mockTest ? Promise.resolve({ data: null }) : supabase.from("exam_groups").select("id, exam_id").eq("id", examId).maybeSingle(),
+    mockTest ? supabase.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTest.id) : Promise.resolve({ count: 0 }),
   ]);
   if (
     !subject ||
     !paper ||
-    !group ||
     subject.paper_id !== paper.id ||
-    paper.exam_group_id !== group.id ||
-    group.exam_id !== categoryId
+    (!mockTest && (!group || paper.exam_group_id !== group.id || group.exam_id !== categoryId)) ||
+    (mockTest && (paper.id !== mockTest.paper_id || (mockTest.test_scope === "subject" && subject.id !== mockTest.subject_id)))
   ) {
     return { success: false, message: "The selected category, Exam, Paper, and Subject do not belong together." };
+  }
+  if (mockTest && (assignmentCountResult.count ?? 0) >= mockTest.target_question_count) {
+    return { success: false, message: `This Mock Test already has its target of ${mockTest.target_question_count} Questions.` };
   }
 
   const languageMode =
@@ -117,7 +132,7 @@ export async function createQuestion(
     .eq("subject_id", subjectId)
     .eq("question_text", canonical.question)
     .maybeSingle();
-  if (duplicate) {
+  if (duplicate && !mockTest) {
     return { success: false, message: "This Question already exists under the selected Subject." };
   }
 
@@ -131,7 +146,7 @@ export async function createQuestion(
     : { url: normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };
 
-  const { error } = await supabase.from("questions").insert({
+  const { data: createdQuestion, error } = await supabase.from("questions").insert({
     subject_id: subjectId,
     question_text: canonical.question,
     question_type: "mcq",
@@ -155,13 +170,31 @@ export async function createQuestion(
     content_lifecycle: lifecycle,
     review_on: lifecycle === "review" ? reviewOn : null,
     expires_on: lifecycle === "expires" ? expiresOn : null,
-  });
+  }).select("id").single();
   if (error) {
     await removeQuestionImage(supabase, uploadedImage.path);
     return { success: false, message: error.message };
   }
 
+  if (mockTest && createdQuestion) {
+    const { error: assignmentError } = await supabase.from("mock_test_questions").insert({
+      mock_test_id: mockTest.id,
+      question_id: createdQuestion.id,
+      question_order: (assignmentCountResult.count ?? 0) + 1,
+      marks: paper.default_correct_marks ?? 1,
+      negative_marks: paper.default_negative_marks ?? 0,
+    });
+    if (assignmentError) {
+      await supabase.from("questions").delete().eq("id", createdQuestion.id);
+      await removeQuestionImage(supabase, uploadedImage.path);
+      return { success: false, message: assignmentError.message };
+    }
+  }
   revalidatePath("/admin/questions");
   revalidatePath("/admin/mock-tests");
+  if (mockTest) {
+    revalidatePath(`/admin/mock-tests/${mockTest.id}/questions`);
+    return { success: true, message: "Question added only to this Mock Test." };
+  }
   return { success: true, message: "Question added with the required language content." };
 }

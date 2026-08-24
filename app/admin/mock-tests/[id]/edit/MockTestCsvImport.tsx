@@ -44,7 +44,8 @@ export function MockTestCsvImport({
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           This draft already belongs to <strong>{paperName}</strong>
           {subjectName ? <> and <strong>{subjectName}</strong></> : ""}. The upload saves every
-          valid Question in the Question Bank and adds it to this mock test at the same time.
+          valid Question for this mock test and adds it here at the same time. The same
+          import key in another mock test does not update this test's Questions.
         </p>
       </div>
 

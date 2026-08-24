@@ -38,6 +38,7 @@ export async function updateQuestion(
   questionId: string,
   _previous: UpdateQuestionState,
   formData: FormData,
+  mockTestId?: string,
 ): Promise<UpdateQuestionState> {
   const supabase = await createClient();
   const {
@@ -73,16 +74,27 @@ export async function updateQuestion(
     return { success: false, message: "Choose a valid question lifetime and date." };
   }
 
-  const [{ data: subject }, { data: existingQuestion }] = await Promise.all([
+  const [{ data: subject }, { data: existingQuestion }, { data: mockTest }] = await Promise.all([
     supabase
       .from("subjects")
-      .select("id, content_language_mode")
+      .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
     supabase.from("questions").select("id, image_url").eq("id", questionId).maybeSingle(),
+    mockTestId ? supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
     return { success: false, message: "The selected Subject could not be found." };
+  }
+  if (mockTestId) {
+    if (!mockTest || mockTest.status !== "draft") return { success: false, message: "Only draft Mock Tests can change their Questions." };
+    if (subject.paper_id !== mockTest.paper_id || (mockTest.test_scope === "subject" && subject.id !== mockTest.subject_id)) return { success: false, message: "This Question must stay inside this Mock Test's Paper and Subject." };
+    const [{ count: attemptCount }, { data: assignment }] = await Promise.all([
+      supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
+      supabase.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
+    ]);
+    if ((attemptCount ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
+    if (!assignment) return { success: false, message: "This Question is not assigned to the selected Mock Test." };
   }
 
   const languageMode =
@@ -108,7 +120,7 @@ export async function updateQuestion(
     .eq("question_text", canonical.question)
     .neq("id", questionId)
     .maybeSingle();
-  if (duplicate) {
+  if (duplicate && !mockTestId) {
     return { success: false, message: "This Question already exists under the selected Subject." };
   }
 
@@ -123,9 +135,7 @@ export async function updateQuestion(
     : { url: removeImage ? null : normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };
 
-  const { error } = await supabase
-    .from("questions")
-    .update({
+  const nextQuestion = {
       subject_id: subjectId,
       question_text: canonical.question,
       option_a: canonical.options[0],
@@ -147,18 +157,45 @@ export async function updateQuestion(
       content_lifecycle: lifecycle,
       review_on: lifecycle === "review" ? reviewOn : null,
       expires_on: lifecycle === "expires" ? expiresOn : null,
-    })
-    .eq("id", questionId);
+    };
 
-  if (error) {
-    await removeQuestionImage(supabase, uploadedImage.path);
-    return { success: false, message: error.message };
+  let copiedForThisMock = false;
+  let updateError: { message: string } | null = null;
+  if (mockTestId) {
+    const { count: otherAssignmentCount } = await supabase.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("question_id", questionId).neq("mock_test_id", mockTestId);
+    if ((otherAssignmentCount ?? 0) > 0) {
+      const { data: copiedQuestion, error: copyError } = await supabase.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
+      if (copyError || !copiedQuestion) {
+        await removeQuestionImage(supabase, uploadedImage.path);
+        return { success: false, message: copyError?.message ?? "The separate Question copy could not be created." };
+      }
+      const { error: assignmentError } = await supabase.from("mock_test_questions").update({ question_id: copiedQuestion.id }).eq("mock_test_id", mockTestId).eq("question_id", questionId);
+      if (assignmentError) {
+        await supabase.from("questions").delete().eq("id", copiedQuestion.id);
+        await removeQuestionImage(supabase, uploadedImage.path);
+        return { success: false, message: assignmentError.message };
+      }
+      copiedForThisMock = true;
+    }
   }
-  if (existingQuestion.image_url && existingQuestion.image_url !== uploadedImage.url) {
+  if (!copiedForThisMock) {
+    const { error } = await supabase.from("questions").update(nextQuestion).eq("id", questionId);
+    updateError = error;
+  }
+
+  if (updateError) {
+    await removeQuestionImage(supabase, uploadedImage.path);
+    return { success: false, message: updateError.message };
+  }
+  if (!copiedForThisMock && existingQuestion.image_url && existingQuestion.image_url !== uploadedImage.url) {
     await removeQuestionImage(supabase, questionMediaPath(existingQuestion.image_url));
   }
   revalidatePath("/admin/questions");
   revalidatePath(`/admin/questions/${questionId}/edit`);
   revalidatePath("/admin/mock-tests");
+  if (mockTestId) {
+    revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
+    return { success: true, message: copiedForThisMock ? "Question updated only in this Mock Test. A separate copy was kept for its other use." : "Question updated only in this Mock Test." };
+  }
   return { success: true, message: "Question updated in English and Telugu." };
 }

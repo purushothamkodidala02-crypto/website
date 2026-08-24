@@ -350,12 +350,13 @@ test("student attempt history keeps lifetime summaries and limits detailed snaps
   assert.match(reviewPage, /latest 100 attempts/);
 });
 
-test("mock-test question targets and destructive operations are database protected", async () => {
-  const [migration, createAction, editAction, editPage, importer, assignments, deleteAction] = await Promise.all([
+test("mock-test question targets and isolated test operations are database protected", async () => {
+  const [migration, createAction, editAction, editPage, questionsPage, importer, assignments, deleteAction] = await Promise.all([
     read("supabase/migrations/20260821230000_add_safe_mock_question_management.sql"),
     read("app/admin/mock-tests/actions.ts"),
     read("app/admin/mock-tests/[id]/edit/actions.ts"),
     read("app/admin/mock-tests/[id]/edit/page.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
     read("app/admin/questions/import-actions.ts"),
     read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
     read("app/admin/questions/deleteAction.ts"),
@@ -378,15 +379,16 @@ test("mock-test question targets and destructive operations are database protect
   assert.match(editAction, /duration !== current\.duration_minutes/);
   assert.match(editAction, /targetQuestionCount !== current\.target_question_count/);
   assert.match(editAction, /You can still update its description, instructions and URL slug/);
-  assert.match(editPage, /targetQuestionCount=\{test\.target_question_count\}/);
+  assert.match(editPage, /Manage Questions/);
+  assert.match(questionsPage, /targetQuestionCount=\{test\.target_question_count\}/);
   assert.match(importer, /mode === "replace"/);
   assert.match(importer, /replace_mock_test_questions_atomic/);
   assert.match(importer, /questionMediaPath/);
-  assert.match(assignments, /Fill remaining with latest/);
+  assert.match(importer, /storedImportKey = mockTest/);
   assert.match(assignments, /moveAssignedQuestion/);
-  assert.match(assignments, /options=\{availableQuestions\.map/);
-  assert.match(assignments, /No unassigned Question matches those words/);
-  assert.doesNotMatch(assignments, /matchingQuestions\.slice/);
+  assert.match(assignments, /Adding, editing, or removing them here does not change another mock test/);
+  assert.match(assignments, /Add question to this mock test/);
+  assert.doesNotMatch(assignments, /Search the question bank/);
   assert.match(deleteAction, /delete_question_safely/);
   assert.match(deleteAction, /makeQuestionUnavailable/);
 });
