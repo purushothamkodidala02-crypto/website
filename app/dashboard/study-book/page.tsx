@@ -4,6 +4,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
+import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { createClient } from "@/lib/supabase/server";
 
 type StudyRow = {
@@ -77,7 +78,7 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
     <article className="overflow-hidden rounded-3xl border bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50 px-5 py-4 sm:px-6">
         <div><p className="text-xs font-black uppercase tracking-wide text-teal-700">{row.subject_name}</p><p className="mt-1 text-xs font-semibold text-slate-500">Question {index + 1}{row.mistake_count > 0 ? ` · Incorrect ${row.mistake_count} time${row.mistake_count === 1 ? "" : "s"}` : ""}</p></div>
-        <BookmarkButton questionId={row.question_id} initialBookmarked={row.bookmarked} />
+        <div className="flex flex-wrap gap-2"><ReportQuestionButton questionId={row.question_id} /><BookmarkButton questionId={row.question_id} initialBookmarked={row.bookmarked} /></div>
       </div>
       <div className="p-5 sm:p-6">
         <FormattedQuestionText text={row.question_text} className="text-lg leading-8 text-slate-950" />

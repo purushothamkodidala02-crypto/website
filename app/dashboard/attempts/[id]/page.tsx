@@ -120,7 +120,7 @@ export default async function AttemptReviewPage({
           />
         </section>
 
-        <AttemptReviewNavigator rows={rows} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />
+        <AttemptReviewNavigator attemptId={id} rows={rows} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />
 
         <section className="mt-10 flex flex-wrap items-center justify-between gap-5 rounded-3xl bg-teal-50 p-6 sm:p-8">
           <div>

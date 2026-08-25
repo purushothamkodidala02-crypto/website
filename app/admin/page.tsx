@@ -4,7 +4,7 @@ import { indiaDateKey } from "@/lib/date";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
-  const [testsResult, assignmentsResult, questionsResult, attemptsResult] =
+  const [testsResult, assignmentsResult, questionsResult, attemptsResult, reportsResult] =
     await Promise.all([
       supabase
         .from("mock_tests")
@@ -15,6 +15,7 @@ export default async function AdminDashboard() {
         .select("mock_test_id, question_id, marks, negative_marks"),
       supabase.from("questions").select("id, is_active, expires_on"),
       supabase.from("test_attempts").select("id", { count: "exact", head: true }),
+      supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     ]);
 
   const tests = testsResult.data ?? [];
@@ -146,6 +147,12 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="grid gap-3 p-6">
+            <AttentionItem
+              count={reportsResult.count ?? 0}
+              title="Student question reports are open"
+              detail="Review reported answers, wording, translations, and images."
+              tone="amber"
+            />
             <AttentionItem
               count={draftsNeedingWork.length}
               title="Draft tests are not ready"

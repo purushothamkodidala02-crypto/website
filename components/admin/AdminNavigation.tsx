@@ -19,6 +19,7 @@ const sections = [
     label: "Assessment",
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
+      { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
       { href: "/admin/access", label: "Exam passes", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations", icon: "students" as const },
@@ -36,7 +37,8 @@ type NavIconName =
   | "tests"
   | "results"
   | "passes"
-  | "students";
+  | "students"
+  | "reports";
 
 function NavIcon({ name }: { name: NavIconName }) {
   const common = {
@@ -101,6 +103,7 @@ function NavIcon({ name }: { name: NavIconName }) {
       )}
       {name === "passes" && <><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7Z" /><path d="M12 4v16M4 8.5l8 4.5 8-4.5" /></>}
       {name === "students" && <><circle cx="9" cy="8" r="3" /><path d="M3.5 20v-2.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V20" /><path d="M15 5.5a3 3 0 0 1 0 5.8M16 14a4.5 4.5 0 0 1 4.5 4.5V20" /></>}
+      {name === "reports" && <><path d="M5 4h14v16H5z" /><path d="M8 8h8M8 12h5M8 16h4" /><path d="m15 15 1.5 1.5L19 14" /></>}
     </svg>
   );
 }
