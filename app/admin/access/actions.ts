@@ -135,6 +135,50 @@ export async function removeAccessProduct(id: string): Promise<AccessProductStat
   return { success: true, message: `“${product.name}” was removed.` };
 }
 
+export async function permanentlyDeleteAccessProduct(
+  id: string,
+  confirmationName: string,
+): Promise<AccessProductState> {
+  const result = await adminClient();
+  if ("error" in result) return { success: false, message: result.error ?? "Administrator access is required." };
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { success: false, message: "Exam series not found." };
+
+  const { data: assurance } = await result.supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance?.currentLevel !== "aal2") {
+    return { success: false, message: "Complete administrator MFA before permanently deleting payment history." };
+  }
+
+  const { data: product } = await result.supabase
+    .from("access_products")
+    .select("id, name, is_active")
+    .eq("id", id)
+    .maybeSingle();
+  if (!product) return { success: false, message: "Exam series not found." };
+  if (product.is_active) return { success: false, message: "Pause selling before permanently deleting this series." };
+  if (confirmationName.trim() !== product.name) {
+    return { success: false, message: "Enter the exact Exam Series name to confirm permanent deletion." };
+  }
+
+  const cleanupSteps = [
+    () => result.supabase.from("referral_redemptions").delete().eq("product_id", id),
+    () => result.supabase.from("student_entitlements").delete().eq("product_id", id),
+    () => result.supabase.from("payment_orders").delete().eq("product_id", id),
+    () => result.supabase.from("referral_codes").delete().eq("product_id", id),
+    () => result.supabase.from("access_product_exam_groups").delete().eq("product_id", id),
+  ];
+  for (const cleanup of cleanupSteps) {
+    const { error } = await cleanup();
+    if (error) {
+      return { success: false, message: "Permanent cleanup stopped safely before deleting the Exam Series. Try again or contact support." };
+    }
+  }
+
+  const { error: productError } = await result.supabase.from("access_products").delete().eq("id", id);
+  if (productError) return { success: false, message: "History was cleared, but the Exam Series could not be deleted. Try Remove again." };
+  revalidatePath("/admin/access"); revalidatePath("/admin/students"); revalidatePath("/dashboard/passes"); revalidatePath("/mock-tests", "layout");
+  return { success: true, message: `“${product.name}” and its testing payment history were permanently deleted.` };
+}
+
 export async function createReferralCode(formData: FormData) {
   const result = await adminClient(); if ("error" in result) return;
   const code = String(formData.get("code") ?? "").trim().toUpperCase(); const productId = String(formData.get("product_id") ?? ""); const type = String(formData.get("discount_type") ?? ""); const value = Number(formData.get("discount_value") ?? 0);

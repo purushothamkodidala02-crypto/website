@@ -57,6 +57,12 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(adminActions, /removeAccessProduct/);
   assert.match(adminAccess, /\/admin\/access\/\$\{product\.id\}\/edit/);
   assert.match(removeButton, /paused safely instead of deleted/);
+  assert.match(removeButton, /Permanently delete series/);
+  assert.match(adminActions, /permanentlyDeleteAccessProduct/);
+  assert.match(adminActions, /currentLevel !== "aal2"/);
+  assert.match(adminActions, /referral_redemptions/);
+  assert.match(adminActions, /student_entitlements/);
+  assert.match(adminActions, /payment_orders/);
   assert.match(checkoutPage, /\(await headers\(\)\)\.get\("x-nonce"\)/);
   assert.match(checkoutPage, /provider_payload/);
   assert.match(checkoutPage, /payment_session_id/);
