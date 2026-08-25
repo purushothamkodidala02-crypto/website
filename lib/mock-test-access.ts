@@ -24,19 +24,11 @@ export function readMockTestAccess(formData: FormData): {
     };
   }
 
-  const rawPrice = String(formData.get("price_inr") ?? "").trim();
-  const priceInr = rawPrice ? Number(rawPrice) : NaN;
-  if (!Number.isFinite(priceInr) || priceInr <= 0) {
-    return {
-      accessType: "paid",
-      priceInr: null,
-      error: "Enter a price greater than zero for paid access.",
-    };
-  }
-
   return {
     accessType: "paid",
-    priceInr,
+    // Required only by the legacy database constraint. Students purchase an
+    // Exam Series and never see or pay this internal value.
+    priceInr: 1,
     error: null,
   };
 }

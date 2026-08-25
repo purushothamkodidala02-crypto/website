@@ -229,7 +229,7 @@ export async function MockTestDetailsPage({
     supabase
       .from("mock_tests")
       .select(
-        "id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, price_inr",
+        "id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type",
       )
       .eq("id", id)
       .eq("status", "published")
@@ -349,7 +349,7 @@ export async function MockTestDetailsPage({
 
   const accessResult = test.access_type === "paid" && exam
     ? await Promise.all([
-        supabase.from("access_product_exam_groups").select("access_products(id, name, price_inr, duration_days)").eq("exam_group_id", exam.id),
+        supabase.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", exam.id).eq("access_products.is_active", true),
         isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
       ])
     : [{ data: [] }, { data: true }];
@@ -482,6 +482,10 @@ export async function MockTestDetailsPage({
           >
             {query.payment_error === "phone_required"
               ? "Enter a valid 10-digit Indian mobile number before continuing to payment."
+              : query.payment_error === "already_active"
+                ? "This exam series is already active in your account. Open My Purchases to view your access."
+              : query.payment_error === "unavailable"
+                ? "Purchases for this exam series are temporarily paused. Existing access remains valid."
               : query.payment_error === "cashfree"
                 ? "We could not open the secure payment page. Please try again shortly. If the problem continues, contact support."
                 : "We could not start this purchase. Please review the exam-series details and try again."}
@@ -630,7 +634,20 @@ export async function MockTestDetailsPage({
               </p>
             </div>
 
-            {isUnlocked ? <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} /> : purchaseProduct ? <><p className="mt-6 text-sm font-bold text-teal-100">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p><p className="mt-2 text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p><ul className="mt-4 space-y-2 text-sm text-slate-300"><li>• Access every paid test under this exam</li><li>• Start immediately after payment</li><li>• Keep full answer review and result history</li></ul><BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Buy Exam Series" pendingLabel="Opening exam-series checkout..." /></> : <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-4 text-sm leading-6 text-slate-300">This paid mock test does not have a live exam-series purchase yet. Please contact support before trying again.</div>}
+            {isUnlocked ? (
+              <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
+            ) : purchaseProduct ? (
+              <>
+                <p className="mt-6 text-sm font-bold text-teal-100">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-300"><li>• Access every paid test under this exam</li><li>• Start immediately after payment</li><li>• Keep full answer review and result history</li></ul>
+                <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
+              </>
+            ) : (
+              <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-4 text-sm leading-6 text-slate-300">
+                Purchases for this exam series are temporarily unavailable. Existing purchases remain valid. <Link href="/dashboard/passes" className="font-bold text-teal-300 underline">View My Purchases</Link>.
+              </div>
+            )}
 
             <p className="mt-4 text-center text-xs leading-5 text-slate-400">
               {!isUnlocked

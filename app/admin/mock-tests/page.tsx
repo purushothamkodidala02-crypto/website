@@ -32,7 +32,7 @@ export default async function MockTestsPage({
   const supabase = await createClient();
   const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, summariesResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").order("display_order"),
-    supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, price_inr, display_order, created_at").order("series_number"),
+    supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at").order("series_number"),
     supabase.from("subjects").select("id, paper_id, name"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, duration_minutes, question_count, display_order").order("display_order"),
     supabase.from("exam_groups").select("id, exam_id, name, slug").order("display_order"),

@@ -51,6 +51,34 @@ export async function beginExamPassCheckout(formData: FormData) {
   if (!product?.is_active) redirectWithPaymentError(returnTo, "unavailable");
   const activeProduct = product as NonNullable<typeof product>;
 
+  const now = new Date();
+  const [{ data: activeEntitlement }, { data: recentOrder }] = await Promise.all([
+    admin
+      .from("student_entitlements")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", activeProduct.id)
+      .lte("starts_at", now.toISOString())
+      .gt("expires_at", now.toISOString())
+      .limit(1)
+      .maybeSingle(),
+    admin
+      .from("payment_orders")
+      .select("id, provider_payload")
+      .eq("user_id", user.id)
+      .eq("product_id", activeProduct.id)
+      .in("status", ["created", "pending"])
+      .gte("created_at", new Date(now.getTime() - 4 * 60 * 1000).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  if (activeEntitlement) redirectWithPaymentError(returnTo, "already_active");
+  const recentPayload = recentOrder?.provider_payload as { payment_session_id?: unknown } | null;
+  if (recentOrder && typeof recentPayload?.payment_session_id === "string") {
+    redirect(`/billing/cashfree?order=${encodeURIComponent(recentOrder.id)}&return_to=${encodeURIComponent(returnTo)}`);
+  }
+
   let amountPaise = Math.round(Number(activeProduct.price_inr) * 100);
   let referralId: string | null = null;
   let bonusDays = 0;

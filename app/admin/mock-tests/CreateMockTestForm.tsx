@@ -36,7 +36,6 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [subjectId, setSubjectId] = useState("");
   const [scope, setScope] = useState<"paper" | "subject">("paper");
   const [accessType, setAccessType] = useState<MockTestAccessType>("free");
-  const [priceInr, setPriceInr] = useState("");
   const state = states.find((item) => item.id === stateId);
   const availableCategories = useMemo(() => categories.filter((item) => item.stateId === stateId), [categories, stateId]);
   const availableExams = useMemo(() => exams.filter((item) => item.categoryId === categoryId), [exams, categoryId]);
@@ -79,7 +78,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required defaultValue={scope === "paper" ? paper?.questionCount ?? 1 : 25} key={`${paperId}-${scope}`} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
         <strong>Student access</strong>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className="mt-3">
           <label className="block text-sm font-semibold">
             Access type
             <select
@@ -92,23 +91,9 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
               <option value="paid">Paid</option>
             </select>
           </label>
-          <label className="block text-sm font-semibold">
-            Individual-test reference price
-            <input
-              name="price_inr"
-              type="number"
-              min="1"
-              step="0.01"
-              value={accessType === "paid" ? priceInr : ""}
-              onChange={(event) => setPriceInr(event.target.value)}
-              disabled={accessType !== "paid"}
-              placeholder="Required for paid tests"
-              className="mt-2 w-full rounded-xl border border-emerald-200 px-4 py-3 font-normal text-slate-900 disabled:bg-slate-100"
-            />
-          </label>
         </div>
         <p className="mt-2 leading-5 text-emerald-900">
-          Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Students pay the Exam Series price, not this individual-test reference price.
+          Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam Passes.
         </p>
       </div>
       <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId)} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(nextSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>

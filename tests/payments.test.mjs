@@ -74,3 +74,43 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(register, /normaliseIndianMobile/);
   assert.match(purchaseForm, /customer_phone/);
 });
+
+test("exam series are the only customer-facing paid product", async () => {
+  const [
+    checkout,
+    detail,
+    catalog,
+    dashboard,
+    purchases,
+    accountActions,
+    accessReader,
+    createMock,
+    editMock,
+  ] = await Promise.all([
+    read("app/dashboard/passes/actions.ts"),
+    read("components/mock-tests/MockTestDetailPage.tsx"),
+    read("app/mock-tests/page.tsx"),
+    read("app/dashboard/page.tsx"),
+    read("app/dashboard/passes/page.tsx"),
+    read("components/site/PublicAccountActions.tsx"),
+    read("lib/mock-test-access.ts"),
+    read("app/admin/mock-tests/CreateMockTestForm.tsx"),
+    read("app/admin/mock-tests/[id]/edit/EditMockTestForm.tsx"),
+  ]);
+
+  assert.match(checkout, /already_active/);
+  assert.match(checkout, /recentOrder/);
+  assert.match(detail, /access_products!inner/);
+  assert.match(detail, /\.eq\("access_products\.is_active", true\)/);
+  assert.match(detail, /temporarily unavailable/);
+  assert.match(catalog, /Paid series/);
+  assert.match(dashboard, /Paid series/);
+  assert.match(purchases, /Purchased exam series/);
+  assert.match(purchases, /Payment history/);
+  assert.match(purchases, /Already active/);
+  assert.match(accountActions, /\/dashboard\/passes/);
+  assert.match(accountActions, /Purchases/);
+  assert.doesNotMatch(accessReader, /formData\.get\("price_inr"\)/);
+  assert.doesNotMatch(createMock, /Individual-test reference price/);
+  assert.doesNotMatch(editMock, /Individual-test reference price/);
+});

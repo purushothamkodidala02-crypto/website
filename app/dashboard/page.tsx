@@ -32,6 +32,7 @@ type AvailableMockTest = {
   title: string;
   duration_minutes: number;
   slug: string;
+  access_type: "free" | "paid";
 };
 
 type SubjectAnalytics = {
@@ -85,7 +86,7 @@ export default async function Dashboard({
     supabase.rpc("get_student_subject_analytics"),
     supabase
       .from("mock_tests")
-      .select("id, paper_id, title, duration_minutes, slug")
+      .select("id, paper_id, title, duration_minutes, slug, access_type")
       .eq("status", "published")
       .order("display_order", { ascending: true }),
     supabase.from("mock_tests").select("id, title"),
@@ -222,8 +223,8 @@ export default async function Dashboard({
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50 text-xs font-black text-teal-800">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                      Free
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
+                      {test.access_type === "free" ? "Free" : "Paid series"}
                     </span>
                   </div>
                   <h3 className="mt-5 text-lg font-black leading-7 text-slate-950">

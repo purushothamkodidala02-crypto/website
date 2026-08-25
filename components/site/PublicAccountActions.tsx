@@ -7,15 +7,32 @@ import { createClient } from "@/lib/supabase/client";
 
 export function PublicAccountActions() {
   const [email, setEmail] = useState<string | null>(null);
+  const [activePurchases, setActivePurchases] = useState(0);
 
   useEffect(() => {
     let active = true;
     const supabase = createClient();
+    const loadAccount = async (userEmail: string | null, userId?: string) => {
+      if (!active) return;
+      setEmail(userEmail);
+      if (!userId) {
+        setActivePurchases(0);
+        return;
+      }
+      const now = new Date().toISOString();
+      const { count } = await supabase
+        .from("student_entitlements")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .lte("starts_at", now)
+        .gt("expires_at", now);
+      if (active) setActivePurchases(count ?? 0);
+    };
     void supabase.auth.getUser().then(({ data }) => {
-      if (active) setEmail(data.user?.email ?? null);
+      void loadAccount(data.user?.email ?? null, data.user?.id);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setEmail(session?.user.email ?? null);
+      void loadAccount(session?.user.email ?? null, session?.user.id);
     });
     return () => {
       active = false;
@@ -27,9 +44,22 @@ export function PublicAccountActions() {
     <div className="flex shrink-0 items-center gap-2 sm:gap-3">
       {email ? (
         <>
-          <span className="hidden max-w-48 truncate text-xs font-semibold text-slate-500 lg:block">
-            {email}
-          </span>
+          <Link
+            href="/dashboard/passes"
+            aria-label={`My purchases${activePurchases ? `, ${activePurchases} active` : ""}`}
+            className="relative inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
+              <path d="M6 8h12l-1 12H7L6 8Z" />
+              <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+            </svg>
+            <span className="hidden sm:inline">Purchases</span>
+            {activePurchases > 0 && (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-teal-600 px-1 text-[10px] font-black text-white">
+                {activePurchases}
+              </span>
+            )}
+          </Link>
           <LogoutButton />
         </>
       ) : (

@@ -29,7 +29,6 @@ export function EditMockTestForm({
   const [subjectId, setSubjectId] = useState(mockTest.subject_id ?? "");
   const [scope, setScope] = useState(mockTest.test_scope);
   const [accessType, setAccessType] = useState<MockTestAccessType>(mockTest.access_type);
-  const [priceInr, setPriceInr] = useState(mockTest.price_inr?.toString() ?? "");
   const availableSubjects = useMemo(
     () => subjects.filter((subject) => subject.paperId === paperId),
     [subjects, paperId],
@@ -123,7 +122,7 @@ export function EditMockTestForm({
         <input type="hidden" name="status" value={mockTest.status} />
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
           <strong>Student access</strong>
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div className="mt-3">
             <label className="block text-sm font-semibold">
               Access type
               <select
@@ -136,23 +135,9 @@ export function EditMockTestForm({
                 <option value="paid">Paid</option>
               </select>
             </label>
-            <label className="block text-sm font-semibold">
-              Individual-test reference price
-              <input
-                name="price_inr"
-                type="number"
-                min="1"
-                step="0.01"
-                value={accessType === "paid" ? priceInr : ""}
-                onChange={(event) => setPriceInr(event.target.value)}
-                disabled={accessType !== "paid"}
-                placeholder="Required for paid tests"
-                className="mt-2 w-full rounded-xl border border-emerald-200 px-4 py-3 font-normal text-slate-900 disabled:bg-slate-100"
-              />
-            </label>
           </div>
           <p className="mt-2 leading-5 text-emerald-900">
-            Free tests are open to everyone. Paid tests require an active Exam Series that includes this exam. Students pay the Exam Series price, not this individual-test reference price.
+            Free tests are open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam Passes.
           </p>
         </div>
         <div className="md:col-span-2">
