@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { CashfreeCheckoutLauncher } from "./CashfreeCheckoutLauncher";
 import { getCashfreeCheckoutMode } from "@/lib/payments/cashfree";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -14,6 +15,7 @@ export default async function CashfreeCheckoutPage({
   searchParams: Promise<{ order?: string; session?: string; return_to?: string }>;
 }) {
   const query = await searchParams;
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const returnTo = safePath(query.return_to);
   if (!query.order || !/^[0-9a-f-]{36}$/i.test(query.order) || !query.session) {
     redirect("/dashboard/passes?payment_error=invalid_order");
@@ -48,6 +50,7 @@ export default async function CashfreeCheckoutPage({
       mode={getCashfreeCheckoutMode()}
       paymentSessionId={query.session}
       returnTo={returnTo}
+      nonce={nonce}
     />
   );
 }

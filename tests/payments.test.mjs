@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("exam passes use verified payment-provider checks and preserve legacy test access", async () => {
-  const [migration, providerMigration, checkout, phonepe, cashfree, webhook, confirmOrder, detail, adminAccess, seriesForm, adminActions] = await Promise.all([
+  const [migration, providerMigration, checkout, phonepe, cashfree, webhook, confirmOrder, detail, adminAccess, seriesForm, adminActions, checkoutPage, launcher] = await Promise.all([
     read("supabase/migrations/20260824110000_add_phonepe_exam_passes.sql"),
     read("supabase/migrations/20260825121500_add_cashfree_provider_support.sql"),
     read("app/dashboard/passes/actions.ts"),
@@ -17,6 +17,8 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
     read("app/admin/access/page.tsx"),
     read("app/admin/access/CreateExamSeriesForm.tsx"),
     read("app/admin/access/actions.ts"),
+    read("app/billing/cashfree/page.tsx"),
+    read("app/billing/cashfree/CashfreeCheckoutLauncher.tsx"),
   ]);
   assert.match(migration, /create table public\.access_products/);
   assert.match(migration, /create table public\.student_entitlements/);
@@ -42,4 +44,8 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(adminActions, /Select at least one exam for this series/);
   assert.match(adminActions, /revalidatePath\("\/mock-tests", "layout"\)/);
   assert.match(adminActions, /slugify\(requestedSlug \|\| name\)/);
+  assert.match(checkoutPage, /\(await headers\(\)\)\.get\("x-nonce"\)/);
+  assert.match(launcher, /nonce=\{nonce\}/);
+  assert.match(launcher, /await checkout\.checkout/);
+  assert.match(launcher, /taking too long to load/);
 });

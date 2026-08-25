@@ -16,9 +16,18 @@ type Props = {
   mode: "production" | "sandbox";
   paymentSessionId: string;
   returnTo: string;
+  nonce?: string;
 };
 
-export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo }: Props) {
+function checkoutErrorMessage(result: unknown) {
+  if (!result || typeof result !== "object" || !("error" in result)) return "";
+  const error = (result as { error?: unknown }).error;
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
+  return "Cashfree could not open the secure payment page.";
+}
+
+export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo, nonce }: Props) {
   const [scriptReady, setScriptReady] = useState(false);
   const [error, setError] = useState("");
   const launchedRef = useRef(false);
@@ -26,25 +35,35 @@ export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo }: P
   useEffect(() => {
     if (!scriptReady || launchedRef.current || !window.Cashfree) return;
 
-    try {
+    async function openCheckout() {
       launchedRef.current = true;
-      const checkout = window.Cashfree({ mode });
-      void checkout.checkout({
-        paymentSessionId,
-        redirectTarget: "_self",
-      });
-    } catch {
-      window.setTimeout(() => {
+      try {
+        const checkout = window.Cashfree?.({ mode });
+        if (!checkout) throw new Error("Cashfree checkout did not initialise.");
+        const result = await checkout.checkout({ paymentSessionId, redirectTarget: "_self" });
+        const providerMessage = checkoutErrorMessage(result);
+        if (providerMessage) setError(providerMessage);
+      } catch {
         setError("We could not open the secure payment page. Please try again.");
-      }, 0);
+      }
     }
+    void openCheckout();
   }, [mode, paymentSessionId, scriptReady]);
+
+  useEffect(() => {
+    if (scriptReady || error) return;
+    const timeout = window.setTimeout(() => {
+      setError("The payment page is taking too long to load. Please try again.");
+    }, 12000);
+    return () => window.clearTimeout(timeout);
+  }, [error, scriptReady]);
 
   return (
     <>
       <Script
         src="https://sdk.cashfree.com/js/v3/cashfree.js"
         strategy="afterInteractive"
+        nonce={nonce}
         onLoad={() => setScriptReady(true)}
         onError={() => setError("The payment page could not be loaded right now. Please try again.")}
       />

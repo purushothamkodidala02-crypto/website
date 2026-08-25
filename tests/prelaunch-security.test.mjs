@@ -39,6 +39,7 @@ test("production CSP uses per-request nonces and no production unsafe-inline scr
 
   assert.match(proxy, /'nonce-\$\{nonce\}'/);
   assert.match(proxy, /'strict-dynamic'/);
+  assert.match(proxy, /https:\/\/sdk\.cashfree\.com/);
   assert.match(proxy, /requestHeaders\.set\("x-nonce", nonce\)/);
   assert.match(layout, /await connection\(\)/);
   assert.doesNotMatch(config, /Content-Security-Policy/);
