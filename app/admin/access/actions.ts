@@ -61,6 +61,25 @@ export async function toggleAccessProduct(formData: FormData) {
   revalidatePath("/admin/access"); revalidatePath("/dashboard/passes"); revalidatePath("/mock-tests", "layout");
 }
 
+export async function togglePaidSales(formData: FormData) {
+  const result = await adminClient();
+  if ("error" in result) return;
+  const enabled = String(formData.get("enabled")) === "true";
+  const {
+    data: { user },
+  } = await result.supabase.auth.getUser();
+  await result.supabase.from("site_settings").upsert({
+    key: "paid_sales",
+    enabled: !enabled,
+    updated_at: new Date().toISOString(),
+    updated_by: user?.id ?? null,
+  });
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/access");
+  revalidatePath("/dashboard/passes");
+  revalidatePath("/mock-tests", "layout");
+}
+
 export async function updateAccessProduct(_previous: AccessProductState, formData: FormData): Promise<AccessProductState> {
   const result = await adminClient();
   if ("error" in result) return { success: false, message: result.error ?? "Administrator access is required." };

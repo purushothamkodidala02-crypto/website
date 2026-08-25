@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { createClient } from "@/lib/supabase/server";
 import { BuyExamPassForm } from "./BuyExamPassForm";
+import { isPaidSalesEnabled } from "@/lib/paid-sales";
 
 type ProductRow = {
   id: string;
@@ -53,6 +54,7 @@ export default async function ExamPassesPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/dashboard/passes");
+  if (!(await isPaidSalesEnabled())) redirect("/dashboard");
 
   const now = new Date();
   const [productsResult, entitlementsResult, paymentsResult] = await Promise.all([

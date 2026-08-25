@@ -6,6 +6,7 @@ import { absoluteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { normaliseIndianMobile } from "@/lib/phone";
+import { isPaidSalesEnabled } from "@/lib/paid-sales";
 
 function safeReturnPath(value: FormDataEntryValue | null) {
   const path = String(value ?? "/dashboard/passes");
@@ -20,6 +21,7 @@ export async function beginExamPassCheckout(formData: FormData) {
   const productId = String(formData.get("product_id") ?? "");
   const referralCode = String(formData.get("referral_code") ?? "").trim().toUpperCase();
   const returnTo = safeReturnPath(formData.get("return_to"));
+  if (!(await isPaidSalesEnabled())) redirectWithPaymentError(returnTo, "sales_disabled");
   if (!/^[0-9a-f-]{36}$/i.test(productId)) redirectWithPaymentError(returnTo, "invalid_product");
 
   const sessionClient = await createClient();

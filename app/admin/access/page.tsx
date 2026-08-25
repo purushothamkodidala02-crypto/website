@@ -3,7 +3,7 @@ import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { createClient } from "@/lib/supabase/server";
 import { CreateExamSeriesForm } from "./CreateExamSeriesForm";
 import { RemoveExamSeriesButton } from "./RemoveExamSeriesButton";
-import { createReferralCode, toggleAccessProduct } from "./actions";
+import { createReferralCode, toggleAccessProduct, togglePaidSales } from "./actions";
 
 type Product = {
   id: string;
@@ -17,10 +17,11 @@ type Product = {
 
 export default async function AdminAccessPage() {
   const supabase = await createClient();
-  const [groupsResult, productsResult, referralResult] = await Promise.all([
+  const [groupsResult, productsResult, referralResult, salesSettingResult] = await Promise.all([
     supabase.from("exam_groups").select("id, name, exams(id, name, state_id, exam_states(id, name))").order("display_order"),
     supabase.from("access_products").select("id, name, slug, price_inr, duration_days, is_active, access_product_exam_groups(exam_groups(id, name))").order("display_order"),
     supabase.from("referral_codes").select("id, code, discount_type, discount_value, is_active, access_products(name)").order("created_at", { ascending: false }).limit(25),
+    supabase.from("site_settings").select("enabled").eq("key", "paid_sales").maybeSingle(),
   ]);
   const products = (productsResult.data ?? []) as unknown as Product[];
   const examGroups = (groupsResult.data ?? []).flatMap((group) => {
@@ -29,11 +30,32 @@ export default async function AdminAccessPage() {
     return board && state ? [{ id: group.id, name: group.name, boardId: board.id, boardName: board.name, stateId: state.id, stateName: state.name }] : [];
   });
   const activeCount = products.filter((product) => product.is_active).length;
+  const paidSalesEnabled = salesSettingResult.data?.enabled === true;
 
   return <div>
     <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Payments and student access</p>
     <h1 className="mt-2 text-3xl font-black text-slate-950">Free and paid mock tests</h1>
     <p className="mt-2 max-w-3xl text-slate-600">Set each Mock Test as free or paid. Paid tests are sold as an exam series: students pay once and unlock all paid tests in the selected exam or exams.</p>
+
+    <section className={`mt-7 rounded-3xl border p-5 shadow-sm ${paidSalesEnabled ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-600">Student purchase visibility</p>
+          <h2 className="mt-1 text-xl font-black text-slate-950">Paid sales are {paidSalesEnabled ? "ON" : "OFF"}</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-700">
+            {paidSalesEnabled
+              ? "Students can see Purchases and buy active Exam Series."
+              : "Purchases, prices, and Buy buttons are hidden from students. Existing payment and access records are preserved."}
+          </p>
+        </div>
+        <form action={togglePaidSales}>
+          <input type="hidden" name="enabled" value={String(paidSalesEnabled)} />
+          <PendingSubmitButton pendingLabel="Updating…" className={`min-w-40 rounded-xl px-5 py-3 text-sm font-black text-white disabled:opacity-60 ${paidSalesEnabled ? "bg-slate-800" : "bg-teal-700"}`}>
+            Turn paid sales {paidSalesEnabled ? "off" : "on"}
+          </PendingSubmitButton>
+        </form>
+      </div>
+    </section>
 
     <section className="mt-7 grid gap-4 lg:grid-cols-2">
       <div className="rounded-3xl border border-teal-200 bg-teal-50 p-5">

@@ -140,3 +140,28 @@ test("admins can review registrations and series-level sales", async () => {
   assert.match(navigation, /Registrations/);
   assert.match(access, /View registrations/);
 });
+
+test("admins can globally hide paid sales without deleting purchase history", async () => {
+  const [migration, adminPage, adminActions, accountActions, purchases, checkout, detail] = await Promise.all([
+    read("supabase/migrations/20260825190000_add_paid_sales_site_setting.sql"),
+    read("app/admin/access/page.tsx"),
+    read("app/admin/access/actions.ts"),
+    read("components/site/PublicAccountActions.tsx"),
+    read("app/dashboard/passes/page.tsx"),
+    read("app/dashboard/passes/actions.ts"),
+    read("components/mock-tests/MockTestDetailPage.tsx"),
+  ]);
+
+  assert.match(migration, /'paid_sales', false/);
+  assert.match(migration, /Public can read site settings/);
+  assert.match(migration, /Admins can manage site settings/);
+  assert.match(adminPage, /Paid sales are \{paidSalesEnabled \? "ON" : "OFF"\}/);
+  assert.match(adminActions, /togglePaidSales/);
+  assert.match(adminActions, /updated_by/);
+  assert.match(accountActions, /paidSalesEnabled &&/);
+  assert.match(purchases, /isPaidSalesEnabled/);
+  assert.match(purchases, /redirect\("\/dashboard"\)/);
+  assert.match(checkout, /sales_disabled/);
+  assert.match(detail, /paidSalesEnabled && purchaseProduct/);
+  assert.match(detail, /can_access_mock_test/);
+});
