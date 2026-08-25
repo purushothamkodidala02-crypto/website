@@ -220,7 +220,7 @@ export async function MockTestDetailsPage({
   canonicalPath,
   searchParams,
 }: MockTestDetailsProps & {
-  searchParams: Promise<{ start_error?: string }>;
+  searchParams: Promise<{ start_error?: string; payment_error?: string }>;
 }) {
   const query = await searchParams;
   const supabase = await createClient();
@@ -472,6 +472,17 @@ export async function MockTestDetailsPage({
             This test could not be started because its setup is incomplete.
             The administrator needs to verify its active questions and Paper
             count.
+          </p>
+        )}
+
+        {query.payment_error && (
+          <p
+            role="alert"
+            className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-900"
+          >
+            {query.payment_error === "cashfree"
+              ? "We could not open the secure payment page. Please try again shortly. If the problem continues, contact support."
+              : "We could not start this purchase. Please review the exam-series details and try again."}
           </p>
         )}
 

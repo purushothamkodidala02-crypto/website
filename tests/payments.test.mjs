@@ -54,4 +54,5 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(terms, /Indian Rupees \(INR\)/);
   assert.match(refunds, /Refund review/);
   assert.match(refunds, /support@varadhiprep\.in/);
+  assert.match(detail, /We could not open the secure payment page/);
 });
