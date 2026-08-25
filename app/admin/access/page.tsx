@@ -17,16 +17,16 @@ type Product = {
 export default async function AdminAccessPage() {
   const supabase = await createClient();
   const [groupsResult, productsResult, referralResult] = await Promise.all([
-    supabase.from("exam_groups").select("id, name, exams(name)").order("display_order"),
+    supabase.from("exam_groups").select("id, name, exams(id, name, state_id, exam_states(id, name))").order("display_order"),
     supabase.from("access_products").select("id, name, slug, price_inr, duration_days, is_active, access_product_exam_groups(exam_groups(name))").order("display_order"),
     supabase.from("referral_codes").select("id, code, discount_type, discount_value, is_active, access_products(name)").order("created_at", { ascending: false }).limit(25),
   ]);
   const products = (productsResult.data ?? []) as unknown as Product[];
-  const examGroups = (groupsResult.data ?? []).map((group) => ({
-    id: group.id,
-    name: group.name,
-    examName: (group.exams as unknown as { name: string } | null)?.name ?? "Exam",
-  }));
+  const examGroups = (groupsResult.data ?? []).flatMap((group) => {
+    const board = group.exams as unknown as { id: string; name: string; state_id: string; exam_states: { id: string; name: string } | null } | null;
+    const state = board?.exam_states;
+    return board && state ? [{ id: group.id, name: group.name, boardId: board.id, boardName: board.name, stateId: state.id, stateName: state.name }] : [];
+  });
   const activeCount = products.filter((product) => product.is_active).length;
 
   return <div>

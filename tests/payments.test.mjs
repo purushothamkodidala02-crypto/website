@@ -34,8 +34,11 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(detail, /BuyExamPassForm/);
   assert.match(detail, /isAccessibleForFree: test\.access_type === "free"/);
   assert.match(adminAccess, /Manage Mock Tests/);
-  assert.match(seriesForm, /type="checkbox" name="exam_group_ids"/);
+  assert.match(seriesForm, /name="exam_group_ids"/);
   assert.match(seriesForm, /useActionState/);
+  assert.match(seriesForm, /Choose a state/);
+  assert.match(seriesForm, /Recruiting board \/ category/);
+  assert.match(seriesForm, /Search exact exam/);
   assert.match(adminActions, /Select at least one exam for this series/);
   assert.match(adminActions, /revalidatePath\("\/mock-tests", "layout"\)/);
 });
