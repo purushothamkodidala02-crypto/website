@@ -30,25 +30,29 @@ function checkoutErrorMessage(result: unknown) {
 export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo, nonce }: Props) {
   const [scriptReady, setScriptReady] = useState(false);
   const [error, setError] = useState("");
+  const [isOpening, setIsOpening] = useState(false);
   const launchedRef = useRef(false);
 
-  useEffect(() => {
+  async function openCheckout() {
     if (!scriptReady || launchedRef.current || !window.Cashfree) return;
-
-    async function openCheckout() {
-      launchedRef.current = true;
-      try {
-        const checkout = window.Cashfree?.({ mode });
-        if (!checkout) throw new Error("Cashfree checkout did not initialise.");
-        const result = await checkout.checkout({ paymentSessionId, redirectTarget: "_self" });
-        const providerMessage = checkoutErrorMessage(result);
-        if (providerMessage) setError(providerMessage);
-      } catch {
-        setError("We could not open the secure payment page. Please try again.");
+    launchedRef.current = true;
+    setError("");
+    setIsOpening(true);
+    try {
+      const checkout = window.Cashfree({ mode });
+      const result = await checkout.checkout({ paymentSessionId, redirectTarget: "_self" });
+      const providerMessage = checkoutErrorMessage(result);
+      if (providerMessage) {
+        setError(providerMessage);
+        launchedRef.current = false;
       }
+    } catch {
+      setError("We could not open the secure payment page. Please try again.");
+      launchedRef.current = false;
+    } finally {
+      setIsOpening(false);
     }
-    void openCheckout();
-  }, [mode, paymentSessionId, scriptReady]);
+  }
 
   useEffect(() => {
     if (scriptReady || error) return;
@@ -68,24 +72,36 @@ export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo, non
         onError={() => setError("The payment page could not be loaded right now. Please try again.")}
       />
       <main className="grid min-h-screen place-items-center bg-slate-50 px-5">
-        <section className="w-full max-w-lg rounded-3xl border bg-white p-8 text-center shadow-sm">
+        <section aria-busy={isOpening} className="w-full max-w-lg rounded-3xl border bg-white p-8 text-center shadow-sm">
           <p className={`text-xs font-black uppercase tracking-[0.14em] ${error ? "text-red-700" : "text-teal-700"}`}>
-            {error ? "Payment page unavailable" : "Secure checkout"}
+            {error ? "Payment page unavailable" : scriptReady ? "Secure checkout ready" : "Secure checkout"}
           </p>
           <h1 className="mt-3 text-3xl font-black">
-            {error ? "We could not open Cashfree checkout." : "Opening Cashfree checkout..."}
+            {error ? "We could not open Cashfree checkout." : scriptReady ? "Continue to secure payment" : "Preparing secure checkout..."}
           </h1>
-          <p className="mt-4 leading-7 text-slate-600">
+          <p aria-live="polite" className="mt-4 leading-7 text-slate-600">
             {error
               ? "Please try again from the locked mock test or Purchases page. If the issue continues, confirm that varadhiprep.in is whitelisted in Cashfree."
-              : "Please wait while we open the secure payment page for your exam series."}
+              : scriptReady
+                ? "Select the button below to open the Cashfree payment page for your exam series."
+                : "Please wait while we prepare the secure payment page for your exam series."}
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
+            {(scriptReady || error) && (
+              <button
+                type="button"
+                onClick={openCheckout}
+                disabled={!scriptReady || isOpening}
+                className="inline-flex min-w-52 items-center justify-center rounded-xl bg-teal-600 px-5 py-3 text-sm font-black text-white hover:bg-teal-700 disabled:cursor-wait disabled:opacity-70"
+              >
+                {isOpening ? "Opening secure payment..." : error ? "Try secure payment again" : "Continue to Cashfree"}
+              </button>
+            )}
             <Link
-              href={error ? "/dashboard/passes" : returnTo}
+              href={returnTo}
               className="inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white"
             >
-              {error ? "Back to Purchases" : "Back"}
+              Back to mock test
             </Link>
           </div>
         </section>

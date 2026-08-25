@@ -33,6 +33,7 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(checkout, /referral_redemptions/);
   assert.match(checkout, /provider: "cashfree"/);
   assert.match(checkout, /createCashfreeOrder/);
+  assert.doesNotMatch(checkout, /session=\$\{encodeURIComponent\(readyCheckout\.paymentSessionId\)\}/);
   assert.match(webhook, /verifyCashfreeWebhookSignature/);
   assert.match(confirmOrder, /grant_payment_entitlement/);
   assert.match(detail, /BuyExamPassForm/);
@@ -47,8 +48,11 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(adminActions, /revalidatePath\("\/mock-tests", "layout"\)/);
   assert.match(adminActions, /slugify\(requestedSlug \|\| name\)/);
   assert.match(checkoutPage, /\(await headers\(\)\)\.get\("x-nonce"\)/);
+  assert.match(checkoutPage, /provider_payload/);
+  assert.match(checkoutPage, /payment_session_id/);
   assert.match(launcher, /nonce=\{nonce\}/);
   assert.match(launcher, /await checkout\.checkout/);
+  assert.match(launcher, /Continue to Cashfree/);
   assert.match(launcher, /taking too long to load/);
   assert.match(terms, /Payments and pricing/);
   assert.match(terms, /Indian Rupees \(INR\)/);

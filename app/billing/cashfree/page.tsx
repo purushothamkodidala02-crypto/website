@@ -17,7 +17,7 @@ export default async function CashfreeCheckoutPage({
   const query = await searchParams;
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const returnTo = safePath(query.return_to);
-  if (!query.order || !/^[0-9a-f-]{36}$/i.test(query.order) || !query.session) {
+  if (!query.order || !/^[0-9a-f-]{36}$/i.test(query.order)) {
     redirect("/dashboard/passes?payment_error=invalid_order");
   }
 
@@ -26,13 +26,13 @@ export default async function CashfreeCheckoutPage({
     data: { user },
   } = await session.auth.getUser();
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent(`/billing/cashfree?order=${query.order}&session=${query.session}&return_to=${returnTo}`)}`);
+    redirect(`/login?next=${encodeURIComponent(`/billing/cashfree?order=${query.order}&return_to=${returnTo}`)}`);
   }
 
   const admin = createAdminClient();
   const { data: order } = await admin
     .from("payment_orders")
-    .select("id, user_id, provider, status")
+    .select("id, user_id, provider, status, provider_payload")
     .eq("id", query.order)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -45,10 +45,19 @@ export default async function CashfreeCheckoutPage({
     redirect(`${returnTo}?payment=success`);
   }
 
+  const providerPayload = order.provider_payload as { payment_session_id?: unknown } | null;
+  const paymentSessionId =
+    typeof providerPayload?.payment_session_id === "string"
+      ? providerPayload.payment_session_id
+      : "";
+  if (!paymentSessionId) {
+    redirect(`${returnTo}?payment_error=checkout_session`);
+  }
+
   return (
     <CashfreeCheckoutLauncher
       mode={getCashfreeCheckoutMode()}
-      paymentSessionId={query.session}
+      paymentSessionId={paymentSessionId}
       returnTo={returnTo}
       nonce={nonce}
     />

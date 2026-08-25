@@ -167,6 +167,6 @@ export async function beginExamPassCheckout(formData: FormData) {
     .eq("id", createdOrder.id);
 
   redirect(
-    `/billing/cashfree?order=${encodeURIComponent(createdOrder.id)}&session=${encodeURIComponent(readyCheckout.paymentSessionId)}&return_to=${encodeURIComponent(returnTo)}`,
+    `/billing/cashfree?order=${encodeURIComponent(createdOrder.id)}&return_to=${encodeURIComponent(returnTo)}`,
   );
 }
