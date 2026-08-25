@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { indiaDateKey } from "@/lib/date";
 import { DownloadQuestionsButton } from "../../DownloadQuestionsButton";
 import { MockTestCsvImport } from "../edit/MockTestCsvImport";
 import { QuestionAssignments } from "../edit/QuestionAssignments";
@@ -8,24 +9,37 @@ import { QuestionAssignments } from "../edit/QuestionAssignments";
 export default async function MockTestQuestionsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const [testResult, papersResult, subjectsResult, assignmentsResult, questionsResult] = await Promise.all([
+  const [testResult, papersResult, subjectsResult, assignmentsResult] = await Promise.all([
     supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, title, status, target_question_count").eq("id", id).maybeSingle(),
     supabase.from("papers").select("id, name, default_correct_marks, default_negative_marks"),
     supabase.from("subjects").select("id, paper_id, name"),
     supabase.from("mock_test_questions").select("id, question_id, question_order, marks, negative_marks").eq("mock_test_id", id).order("question_order"),
-    supabase.from("questions").select("id, question_text, is_active"),
   ]);
   if (!testResult.data) notFound();
   const test = testResult.data;
+  const assignmentRows = assignmentsResult.data ?? [];
+  const questionIds = [...new Set(assignmentRows.map((item) => item.question_id))];
+  const questionsResult = questionIds.length
+    ? await supabase.from("questions").select("id, question_text, is_active, expires_on").in("id", questionIds)
+    : { data: [], error: null };
+  if (assignmentsResult.error || questionsResult.error) {
+    throw new Error("Assigned questions could not be loaded.");
+  }
   const paper = (papersResult.data ?? []).find((item) => item.id === test.paper_id);
   const subjects = subjectsResult.data ?? [];
   const questionById = new Map((questionsResult.data ?? []).map((item) => [item.id, item]));
-  const assignments = (assignmentsResult.data ?? []).map((item) => ({
-    ...item,
-    question_text: questionById.get(item.question_id)?.question_text ?? "Question unavailable",
-    is_active: questionById.get(item.question_id)?.is_active ?? false,
-    is_score_valid: Number(item.marks) > 0 && Number(item.negative_marks) >= 0,
-  }));
+  const today = indiaDateKey();
+  const assignments = assignmentRows.map((item) => {
+    const question = questionById.get(item.question_id);
+    return {
+      ...item,
+      question_text: question?.question_text ?? "Question unavailable",
+      is_active: Boolean(
+        question?.is_active && (!question.expires_on || question.expires_on >= today),
+      ),
+      is_score_valid: Number(item.marks) > 0 && Number(item.negative_marks) >= 0,
+    };
+  });
   const subjectName = test.subject_id ? subjects.find((item) => item.id === test.subject_id)?.name ?? null : null;
   const questionsPath = `/admin/mock-tests/${test.id}/questions`;
 

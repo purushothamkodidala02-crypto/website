@@ -188,6 +188,8 @@ export function AdminNavigation() {
         <div className="mt-auto border-t border-slate-800 pt-5">
           <Link
             href="/"
+            target="_blank"
+            rel="noreferrer"
             className="flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white"
           >
             <span>Student site</span>
@@ -208,6 +210,8 @@ export function AdminNavigation() {
             <NavigationLinks />
             <Link
               href="/"
+              target="_blank"
+              rel="noreferrer"
               className="mt-5 flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-3 text-sm font-bold text-slate-200"
             >
               <span>View student site</span>

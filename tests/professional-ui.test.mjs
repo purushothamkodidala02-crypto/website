@@ -48,3 +48,26 @@ test("professional labels remain consistent across student and admin pages", asy
   assert.doesNotMatch(adminNavigation, /label: "Exam passes"/);
   assert.match(assignments, /No negative marking/);
 });
+
+test("only administrators receive a direct switch between student and admin workspaces", async () => {
+  const [actions, publicMenu, adminNavigation] = await Promise.all([
+    read("components/site/PublicAccountActions.tsx"),
+    read("components/site/PublicNavigationMenu.tsx"),
+    read("components/admin/AdminNavigation.tsx"),
+  ]);
+
+  assert.match(actions, /from\("profiles"\)\.select\("role"\)/);
+  assert.match(actions, /profile\?\.role === "admin"/);
+  assert.match(actions, /Return to admin workspace/);
+  assert.match(publicMenu, /label: "Admin workspace"/);
+  assert.match(publicMenu, /hasAdminRole/);
+  assert.match(adminNavigation, /target="_blank"/);
+});
+
+test("mock-test question management fetches only questions assigned to that test", async () => {
+  const page = await read("app/admin/mock-tests/[id]/questions/page.tsx");
+
+  assert.match(page, /const questionIds = \[\.\.\.new Set\(/);
+  assert.match(page, /from\("questions"\)[\s\S]*\.in\("id", questionIds\)/);
+  assert.doesNotMatch(page, /supabase\.from\("questions"\)\.select\("id, question_text, is_active"\),/);
+});

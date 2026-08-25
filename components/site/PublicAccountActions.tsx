@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 export function PublicAccountActions() {
   const [email, setEmail] = useState<string | null>(null);
   const [accountReady, setAccountReady] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [activePurchases, setActivePurchases] = useState(0);
   const [paidSalesEnabled, setPaidSalesEnabled] = useState(false);
 
@@ -28,16 +29,23 @@ export function PublicAccountActions() {
       setAccountReady(true);
       if (!userId) {
         setActivePurchases(0);
+        setIsAdmin(false);
         return;
       }
       const now = new Date().toISOString();
-      const { count } = await supabase
-        .from("student_entitlements")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .lte("starts_at", now)
-        .gt("expires_at", now);
-      if (active) setActivePurchases(count ?? 0);
+      const [{ count }, { data: profile }] = await Promise.all([
+        supabase
+          .from("student_entitlements")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .lte("starts_at", now)
+          .gt("expires_at", now),
+        supabase.from("profiles").select("role").eq("id", userId).maybeSingle(),
+      ]);
+      if (active) {
+        setActivePurchases(count ?? 0);
+        setIsAdmin(profile?.role === "admin");
+      }
     };
     void supabase.auth.getSession().then(({ data }) => {
       void loadAccount(data.session?.user.email ?? null, data.session?.user.id);
@@ -63,6 +71,19 @@ export function PublicAccountActions() {
         />
       ) : email ? (
         <>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              aria-label="Return to admin workspace"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm font-bold text-white transition hover:border-teal-700 hover:bg-teal-800"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
+                <path d="M4 20V8l8-4 8 4v12" />
+                <path d="M8 20v-6h8v6M9 9h.01M15 9h.01" />
+              </svg>
+              <span className="hidden sm:inline">Admin workspace</span>
+            </Link>
+          )}
           {paidSalesEnabled && (
             <Link
               href="/dashboard/passes"

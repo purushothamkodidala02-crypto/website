@@ -5,7 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore }
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
-type NavigationIconName = "home" | "tests" | "support" | "progress";
+type NavigationIconName = "home" | "tests" | "support" | "progress" | "admin";
 
 type NavigationItem = {
   href: string;
@@ -21,12 +21,15 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
   const [open, setOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
   const [hasUser, setHasUser] = useState(false);
+  const [hasAdminRole, setHasAdminRole] = useState(false);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const visibleItems = hasUser
-    ? [...items, { href: "/dashboard", label: "My progress", icon: "progress" as const }]
-    : items;
+  const visibleItems = [
+    ...items,
+    ...(hasUser ? [{ href: "/dashboard", label: "My progress", icon: "progress" as const }] : []),
+    ...(hasAdminRole ? [{ href: "/admin", label: "Admin workspace", icon: "admin" as const }] : []),
+  ];
 
   const closeMenu = useCallback(() => {
     setOpen(false);
@@ -36,11 +39,25 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
   useEffect(() => {
     let active = true;
     const supabase = createClient();
+    const updateAccount = async (userId?: string) => {
+      if (!active) return;
+      setHasUser(Boolean(userId));
+      if (!userId) {
+        setHasAdminRole(false);
+        return;
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+      if (active) setHasAdminRole(profile?.role === "admin");
+    };
     void supabase.auth.getSession().then(({ data }) => {
-      if (active) setHasUser(Boolean(data.session?.user));
+      void updateAccount(data.session?.user.id);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setHasUser(Boolean(session?.user));
+      void updateAccount(session?.user.id);
     });
     return () => {
       active = false;
@@ -159,6 +176,10 @@ const navigationToneStyles = {
     link: "border-slate-900 bg-slate-950 text-white hover:border-teal-400 hover:bg-slate-800",
     icon: "bg-teal-300 text-slate-950",
   },
+  admin: {
+    link: "border-violet-100 bg-violet-50 text-violet-950 hover:border-violet-200 hover:bg-violet-100",
+    icon: "bg-violet-200/70 text-violet-950",
+  },
   support: {
     link: "border-cyan-100 bg-cyan-50 text-cyan-900 hover:border-cyan-200 hover:bg-cyan-100",
     icon: "bg-cyan-200/70 text-cyan-900",
@@ -169,5 +190,6 @@ function NavigationIcon({ name }: { name: NavigationIconName }) {
   if (name === "home") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="m4 10 8-6 8 6v9.5h-6v-6h-4v6H4z" strokeLinejoin="round" /></svg>;
   if (name === "tests") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M7 3.5h8l3 3V20H7z" strokeLinejoin="round" /><path d="M15 3.5V7h3M9.5 11h6M9.5 14.5h6" strokeLinecap="round" /></svg>;
   if (name === "support") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><rect x="3.5" y="5.5" width="17" height="13" rx="2" /><path d="m5 7 7 5.5L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  if (name === "admin") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M4 20V8l8-4 8 4v12" strokeLinejoin="round" /><path d="M8 20v-6h8v6M9 9h.01M15 9h.01" strokeLinecap="round" /></svg>;
   return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M5 19V9m7 10V5m7 14v-7" strokeLinecap="round" /><path d="M3.5 19.5h17" strokeLinecap="round" /></svg>;
 }
