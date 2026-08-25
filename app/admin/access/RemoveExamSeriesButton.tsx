@@ -6,14 +6,15 @@ import { permanentlyDeleteAccessProduct, removeAccessProduct } from "./actions";
 export function RemoveExamSeriesButton({ productId, productName }: { productId: string; productName: string }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showPermanentDelete, setShowPermanentDelete] = useState(false);
   const [confirmationName, setConfirmationName] = useState("");
 
   function remove() {
-    if (!window.confirm(`Remove “${productName}”? If students have purchased it, it will be paused safely instead of deleted.`)) return;
     startTransition(async () => {
       const result = await removeAccessProduct(productId);
       setMessage(result.message);
+      setShowRemoveConfirm(false);
       setShowPermanentDelete(result.message.includes("paused instead of deleted"));
     });
   }
@@ -27,7 +28,15 @@ export function RemoveExamSeriesButton({ productId, productName }: { productId: 
   }
 
   return <span className="inline-flex max-w-80 flex-col items-end gap-2">
-    <button type="button" onClick={remove} disabled={pending} className="rounded-lg px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-50">{pending ? "Removing…" : "Remove"}</button>
+    <button type="button" onClick={() => setShowRemoveConfirm(true)} disabled={pending} className="rounded-lg px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-50">Remove</button>
+    {showRemoveConfirm && <span className="w-full rounded-xl border border-amber-200 bg-amber-50 p-3 text-left">
+      <strong className="block text-xs text-amber-950">Remove “{productName}”?</strong>
+      <span className="mt-1 block text-[11px] leading-4 text-amber-800">Unused series are deleted. A series with purchase history is paused first so student records stay safe.</span>
+      <span className="mt-2 flex gap-2">
+        <button type="button" onClick={() => setShowRemoveConfirm(false)} disabled={pending} className="flex-1 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">Cancel</button>
+        <button type="button" onClick={remove} disabled={pending} className="flex-1 rounded-lg bg-red-700 px-3 py-2 text-xs font-black text-white disabled:opacity-40">{pending ? "Removing…" : "Confirm removal"}</button>
+      </span>
+    </span>}
     {message && <span role="status" className="text-right text-xs leading-5 text-slate-600">{message}</span>}
     {showPermanentDelete && <span className="w-full rounded-xl border border-red-200 bg-red-50 p-3 text-left">
       <strong className="block text-xs text-red-900">Delete testing history permanently</strong>
