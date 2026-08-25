@@ -22,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const add = (path: string, priority: number, changeFrequency: "daily" | "weekly", lastModified?: string | null) => entries.set(path, { url: absoluteUrl(path), priority, changeFrequency, lastModified: lastModified ? new Date(lastModified) : undefined });
   add("/", 1, "weekly"); add("/mock-tests", 0.9, "daily");
   entries.set("/support", { url: absoluteUrl("/support"), priority: 0.5, changeFrequency: "yearly" });
+  entries.set("/terms-and-conditions", { url: absoluteUrl("/terms-and-conditions"), priority: 0.3, changeFrequency: "yearly" });
+  entries.set("/refunds-and-cancellations", { url: absoluteUrl("/refunds-and-cancellations"), priority: 0.3, changeFrequency: "yearly" });
   for (const { test, paper, exam, category, state } of contexts) {
     add(stateUrl(state.slug), 0.85, "daily");
     add(categoryUrl(state.slug, category.slug), 0.75, "weekly");

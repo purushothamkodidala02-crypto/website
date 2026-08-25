@@ -91,6 +91,10 @@ export default function SupportPage() {
             <p className="mt-5 text-sm leading-6 text-slate-500">
               If no email app is configured on your device, use Open Gmail or copy the address shown above.
             </p>
+            <div className="mt-7 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              <p className="font-black text-slate-900">Policies</p>
+              <p className="mt-1">Read our <Link href="/terms-and-conditions" className="font-bold text-teal-700 underline">Terms and Conditions</Link> and <Link href="/refunds-and-cancellations" className="font-bold text-teal-700 underline">Refunds and Cancellations</Link>.</p>
+            </div>
             <Link href="/" className="mt-8 inline-flex text-sm font-black text-teal-700 hover:text-teal-900">
               ← Back to Varadhi Prep
             </Link>
