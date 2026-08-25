@@ -41,4 +41,5 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(seriesForm, /Search exact exam/);
   assert.match(adminActions, /Select at least one exam for this series/);
   assert.match(adminActions, /revalidatePath\("\/mock-tests", "layout"\)/);
+  assert.match(adminActions, /slugify\(requestedSlug \|\| name\)/);
 });

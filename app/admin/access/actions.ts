@@ -19,7 +19,9 @@ function slugify(value: string) { return value.trim().toLowerCase().replace(/[^a
 export async function createAccessProduct(_previous: AccessProductState, formData: FormData): Promise<AccessProductState> {
   const result = await adminClient();
   if ("error" in result) return { success: false, message: result.error ?? "Administrator access is required." };
-  const name = String(formData.get("name") ?? "").trim(); const slug = slugify(String(formData.get("slug") ?? name));
+  const name = String(formData.get("name") ?? "").trim();
+  const requestedSlug = String(formData.get("slug") ?? "").trim();
+  const slug = slugify(requestedSlug || name);
   const price = Number(formData.get("price_inr")); const duration = Number(formData.get("duration_days")); const examGroupIds = formData.getAll("exam_group_ids").map(String).filter((id) => /^[0-9a-f-]{36}$/i.test(id));
   if (!name || !slug) return { success: false, message: "Enter a name for the exam series." };
   if (!Number.isFinite(price) || price <= 0) return { success: false, message: "Enter a price greater than ₹0." };
