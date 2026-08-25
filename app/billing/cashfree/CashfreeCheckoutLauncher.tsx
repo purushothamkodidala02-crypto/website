@@ -58,15 +58,15 @@ export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo }: P
           </h1>
           <p className="mt-4 leading-7 text-slate-600">
             {error
-              ? "Please try again from the Exam Pass page. If the issue continues, confirm that varadhiprep.in is whitelisted in Cashfree."
-              : "Please wait while we open the secure payment page for your Exam Pass."}
+              ? "Please try again from the locked mock test or Purchases page. If the issue continues, confirm that varadhiprep.in is whitelisted in Cashfree."
+              : "Please wait while we open the secure payment page for your exam series."}
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href={error ? "/dashboard/passes" : returnTo}
               className="inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white"
             >
-              {error ? "Back to Exam Passes" : "Back"}
+              {error ? "Back to Purchases" : "Back"}
             </Link>
           </div>
         </section>

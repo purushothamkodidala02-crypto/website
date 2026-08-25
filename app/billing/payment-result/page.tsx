@@ -59,7 +59,7 @@ export default async function PaymentResultPage({
           {success ? "Payment successful" : status === "failed" ? "Payment not completed" : "Payment processing"}
         </p>
         <h1 className="mt-3 text-3xl font-black">
-          {success ? "Your Exam Pass is active." : status === "failed" ? "We could not confirm payment." : "We are confirming your payment."}
+          {success ? "Your exam series is active." : status === "failed" ? "We could not confirm payment." : "We are confirming your payment."}
         </h1>
         <p className="mt-4 leading-7 text-slate-600">
           {success
@@ -70,7 +70,7 @@ export default async function PaymentResultPage({
           href={success ? returnTo : "/dashboard/passes"}
           className="mt-7 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white"
         >
-          {success ? "Continue" : "View Exam Passes"}
+          {success ? "Continue" : "View Purchases"}
         </Link>
       </section>
     </main>

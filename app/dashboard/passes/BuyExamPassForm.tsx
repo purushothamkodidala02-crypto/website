@@ -8,10 +8,14 @@ export function BuyExamPassForm({
   productId,
   price,
   returnTo,
+  buttonLabel = "Buy Exam Series",
+  pendingLabel = "Opening secure checkout...",
 }: {
   productId: string;
   price: number;
   returnTo: string;
+  buttonLabel?: string;
+  pendingLabel?: string;
 }) {
   const [showReferral, setShowReferral] = useState(false);
 
@@ -39,10 +43,10 @@ export function BuyExamPassForm({
         </button>
       )}
       <PendingSubmitButton
-        pendingLabel="Opening secure checkout..."
+        pendingLabel={pendingLabel}
         className="w-full rounded-xl bg-teal-300 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70"
       >
-        Unlock for ₹{price.toFixed(0)}
+        {buttonLabel} · ₹{price.toFixed(0)}
       </PendingSubmitButton>
     </form>
   );

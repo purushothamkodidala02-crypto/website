@@ -43,7 +43,7 @@ export default async function TakeMockTestPage({ params, searchParams }: PagePro
   if (!mockTest) notFound();
   const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
   const hasAccess = Boolean(access);
-  if (!hasAccess) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test needs an active Exam Pass. Return to the test details to unlock it." />;
+  if (!hasAccess) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test needs an active exam-series purchase. Return to the test details page to unlock it there." />;
 
   const requestedSessionId = typeof query.session === "string" ? query.session : "";
   if (!/^[0-9a-f-]{36}$/i.test(requestedSessionId)) redirect(testPath);
