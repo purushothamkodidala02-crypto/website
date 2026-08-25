@@ -55,14 +55,13 @@ export const getMockTestCatalogData = unstable_cache(
         statesResult.error ||
           categoriesResult.error ||
           examsResult.error ||
-          specializationsResult.error ||
           papersResult.error ||
           subjectsResult.error ||
-          testsResult.error ||
-          statsResult.error,
+          testsResult.error,
       ),
+      hasSupplementaryError: Boolean(specializationsResult.error || statsResult.error),
     };
   },
-  ["mock-test-catalog-v3"],
+  ["mock-test-catalog-v4"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );

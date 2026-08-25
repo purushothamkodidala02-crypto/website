@@ -60,13 +60,12 @@ export default async function AdminStudentsPage() {
   if (assurance?.currentLevel !== "aal2") redirect("/admin-mfa");
 
   const admin = createAdminClient();
-  const [studentsResult, productsResult, recentOrdersResult, paidOrdersResult, activeResult, authUsersResult] = await Promise.all([
+  const [studentsResult, productsResult, recentOrdersResult, paidOrdersResult, activeResult] = await Promise.all([
     admin.from("profiles").select("id, full_name, created_at", { count: "exact" }).eq("role", "student").order("created_at", { ascending: false }).limit(50),
     admin.from("access_products").select("id, name, is_active").order("display_order"),
     admin.from("payment_orders").select("id, user_id, product_id, merchant_order_id, amount_paise, status, paid_at, created_at").order("created_at", { ascending: false }).limit(50),
     loadAllPaidOrders(),
     loadAllActiveEntitlements(new Date().toISOString()),
-    admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ]);
 
   const students = (studentsResult.data ?? []) as Student[];
@@ -75,11 +74,14 @@ export default async function AdminStudentsPage() {
   const paidOrders = paidOrdersResult.rows;
   const activeEntitlements = activeResult.rows;
   const visibleUserIds = [...new Set([...students.map((item) => item.id), ...recentOrders.map((item) => item.user_id)])];
-  const { data: visibleProfiles } = visibleUserIds.length
-    ? await admin.from("profiles").select("id, full_name").in("id", visibleUserIds)
-    : { data: [] as { id: string; full_name: string | null }[] };
+  const [{ data: visibleProfiles }, emailResult] = visibleUserIds.length
+    ? await Promise.all([
+        admin.from("profiles").select("id, full_name").in("id", visibleUserIds),
+        supabase.rpc("get_admin_user_emails", { requested_user_ids: visibleUserIds }),
+      ])
+    : [{ data: [] as { id: string; full_name: string | null }[] }, { data: [] as { user_id: string; email: string }[], error: null }];
   const names = new Map((visibleProfiles ?? []).map((item) => [item.id, item.full_name?.trim() || "Student"]));
-  const emails = new Map(authUsersResult.data.users.map((item) => [item.id, item.email ?? ""]));
+  const emails = new Map(((emailResult.data ?? []) as { user_id: string; email: string }[]).map((item) => [item.user_id, item.email ?? ""]));
   const productNames = new Map(products.map((item) => [item.id, item.name]));
   const paidStudentIds = new Set(paidOrders.map((item) => item.user_id));
   const totalRevenuePaise = paidOrders.reduce((total, item) => total + Number(item.amount_paise), 0);
@@ -97,7 +99,7 @@ export default async function AdminStudentsPage() {
       revenuePaise: orders.reduce((total, item) => total + Number(item.amount_paise), 0),
     };
   });
-  const hasError = Boolean(studentsResult.error || productsResult.error || recentOrdersResult.error || paidOrdersResult.error || activeResult.error || authUsersResult.error);
+  const hasError = Boolean(studentsResult.error || productsResult.error || recentOrdersResult.error || paidOrdersResult.error || activeResult.error || emailResult.error);
 
   return (
     <div>

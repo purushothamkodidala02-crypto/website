@@ -38,3 +38,24 @@ test("question reporting is private, rate-limited, and connected from students t
   assert.match(navigation, /Question reports/);
   assert.match(overview, /Student question reports are open/);
 });
+
+test("optional catalogue statistics cannot hide the public mock-test library", async () => {
+  const catalog = await read("lib/catalog-data.ts");
+  assert.match(catalog, /mock-test-catalog-v4/);
+  const coreError = catalog.slice(catalog.indexOf("hasError:"), catalog.indexOf("hasSupplementaryError:"));
+  assert.doesNotMatch(coreError, /statsResult\.error/);
+  assert.doesNotMatch(coreError, /specializationsResult\.error/);
+  assert.match(catalog, /hasSupplementaryError: Boolean\(specializationsResult\.error \|\| statsResult\.error\)/);
+});
+
+test("registrations fetch only visible student emails through an admin-only database function", async () => {
+  const [migration, page] = await Promise.all([
+    read("supabase/migrations/20260825223000_optimize_admin_registration_emails.sql"),
+    read("app/admin/students/page.tsx"),
+  ]);
+  assert.match(migration, /not public\.is_admin\(\)/);
+  assert.match(migration, /array_length\(requested_user_ids/);
+  assert.match(migration, /from auth\.users/);
+  assert.match(page, /get_admin_user_emails/);
+  assert.doesNotMatch(page, /admin\.auth\.admin\.listUsers/);
+});
