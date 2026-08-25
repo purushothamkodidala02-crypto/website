@@ -139,6 +139,7 @@ export default async function ExamPassesPage({
                       productId={product.id}
                       price={Number(product.price_inr)}
                       returnTo="/dashboard/passes"
+                      phone={typeof user.user_metadata?.phone === "string" ? user.user_metadata.phone : ""}
                       buttonLabel="Buy Exam Series"
                     />
                   </article>

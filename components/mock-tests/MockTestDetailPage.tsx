@@ -480,9 +480,11 @@ export async function MockTestDetailsPage({
             role="alert"
             className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-900"
           >
-            {query.payment_error === "cashfree"
-              ? "We could not open the secure payment page. Please try again shortly. If the problem continues, contact support."
-              : "We could not start this purchase. Please review the exam-series details and try again."}
+            {query.payment_error === "phone_required"
+              ? "Enter a valid 10-digit Indian mobile number before continuing to payment."
+              : query.payment_error === "cashfree"
+                ? "We could not open the secure payment page. Please try again shortly. If the problem continues, contact support."
+                : "We could not start this purchase. Please review the exam-series details and try again."}
           </p>
         )}
 
@@ -628,7 +630,7 @@ export async function MockTestDetailsPage({
               </p>
             </div>
 
-            {isUnlocked ? <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} /> : purchaseProduct ? <><p className="mt-6 text-sm font-bold text-teal-100">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p><p className="mt-2 text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p><ul className="mt-4 space-y-2 text-sm text-slate-300"><li>• Access every paid test under this exam</li><li>• Start immediately after payment</li><li>• Keep full answer review and result history</li></ul><BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} buttonLabel="Buy Exam Series" pendingLabel="Opening exam-series checkout..." /></> : <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-4 text-sm leading-6 text-slate-300">This paid mock test does not have a live exam-series purchase yet. Please contact support before trying again.</div>}
+            {isUnlocked ? <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} /> : purchaseProduct ? <><p className="mt-6 text-sm font-bold text-teal-100">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p><p className="mt-2 text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p><ul className="mt-4 space-y-2 text-sm text-slate-300"><li>• Access every paid test under this exam</li><li>• Start immediately after payment</li><li>• Keep full answer review and result history</li></ul><BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Buy Exam Series" pendingLabel="Opening exam-series checkout..." /></> : <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-4 text-sm leading-6 text-slate-300">This paid mock test does not have a live exam-series purchase yet. Please contact support before trying again.</div>}
 
             <p className="mt-4 text-center text-xs leading-5 text-slate-400">
               {!isUnlocked

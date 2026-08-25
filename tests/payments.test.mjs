@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("exam passes use verified payment-provider checks and preserve legacy test access", async () => {
-  const [migration, providerMigration, checkout, phonepe, cashfree, webhook, confirmOrder, detail, adminAccess, seriesForm, adminActions, checkoutPage, launcher, terms, refunds] = await Promise.all([
+  const [migration, providerMigration, checkout, phonepe, cashfree, webhook, confirmOrder, detail, adminAccess, seriesForm, adminActions, checkoutPage, launcher, terms, refunds, register, purchaseForm] = await Promise.all([
     read("supabase/migrations/20260824110000_add_phonepe_exam_passes.sql"),
     read("supabase/migrations/20260825121500_add_cashfree_provider_support.sql"),
     read("app/dashboard/passes/actions.ts"),
@@ -21,6 +21,8 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
     read("app/billing/cashfree/CashfreeCheckoutLauncher.tsx"),
     read("app/terms-and-conditions/page.tsx"),
     read("app/refunds-and-cancellations/page.tsx"),
+    read("app/register/RegisterForm.tsx"),
+    read("app/dashboard/passes/BuyExamPassForm.tsx"),
   ]);
   assert.match(migration, /create table public\.access_products/);
   assert.match(migration, /create table public\.student_entitlements/);
@@ -29,10 +31,13 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(migration, /Create an active Exam Pass/);
   assert.match(phonepe, /PhonePe payments are not configured yet/);
   assert.match(cashfree, /Cashfree payments are not configured yet/);
+  assert.doesNotMatch(cashfree, /9999999999/);
   assert.match(providerMigration, /provider in \('phonepe', 'cashfree'\)/);
   assert.match(checkout, /referral_redemptions/);
   assert.match(checkout, /provider: "cashfree"/);
   assert.match(checkout, /createCashfreeOrder/);
+  assert.match(checkout, /normaliseIndianMobile/);
+  assert.doesNotMatch(checkout, /9999999999/);
   assert.doesNotMatch(checkout, /session=\$\{encodeURIComponent\(readyCheckout\.paymentSessionId\)\}/);
   assert.match(webhook, /verifyCashfreeWebhookSignature/);
   assert.match(confirmOrder, /grant_payment_entitlement/);
@@ -60,4 +65,7 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(refunds, /Refund review/);
   assert.match(refunds, /support@varadhiprep\.in/);
   assert.match(detail, /We could not open the secure payment page/);
+  assert.match(register, /Mobile number/);
+  assert.match(register, /normaliseIndianMobile/);
+  assert.match(purchaseForm, /customer_phone/);
 });

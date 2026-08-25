@@ -5,6 +5,7 @@ import { createCashfreeOrder } from "@/lib/payments/cashfree";
 import { absoluteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { normaliseIndianMobile } from "@/lib/phone";
 
 function safeReturnPath(value: FormDataEntryValue | null) {
   const path = String(value ?? "/dashboard/passes");
@@ -27,7 +28,18 @@ export async function beginExamPassCheckout(formData: FormData) {
   } = await sessionClient.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
 
+  const customerPhone = normaliseIndianMobile(
+    String(formData.get("customer_phone") ?? user.user_metadata?.phone ?? ""),
+  );
+  if (!customerPhone) redirectWithPaymentError(returnTo, "phone_required");
+
   const admin = createAdminClient();
+  if (customerPhone !== user.user_metadata?.phone) {
+    const { error: phoneError } = await admin.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, phone: customerPhone },
+    });
+    if (phoneError) redirectWithPaymentError(returnTo, "phone_required");
+  }
   const [{ data: product }, { data: profile }] = await Promise.all([
     admin
       .from("access_products")
@@ -139,12 +151,7 @@ export async function beginExamPassCheckout(formData: FormData) {
         user.email?.split("@")[0] ||
         "Varadhi Prep Student",
       customerEmail: user.email ?? "support@varadhiprep.in",
-      customerPhone:
-        typeof user.phone === "string" && user.phone
-          ? user.phone
-          : typeof user.user_metadata?.phone === "string"
-            ? user.user_metadata.phone
-            : "9999999999",
+      customerPhone,
       returnUrl: absoluteUrl(
         `/billing/payment-result?order=${encodeURIComponent(createdOrder.id)}&return_to=${encodeURIComponent(returnTo)}`,
       ),

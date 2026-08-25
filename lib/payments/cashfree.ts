@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { normaliseIndianMobile } from "@/lib/phone";
 
 type CashfreeOrder = {
   merchantOrderId: string;
@@ -45,14 +46,10 @@ function cashfreeHeaders() {
   };
 }
 
-function toDigits(value: string | undefined | null) {
-  return (value ?? "").replace(/\D+/g, "");
-}
-
 function normalisePhone(phone: string) {
-  const digits = toDigits(phone);
-  if (digits.length >= 10) return digits.slice(-10);
-  return "9999999999";
+  const mobile = normaliseIndianMobile(phone);
+  if (!mobile) throw new Error("A valid mobile number is required for Cashfree payments.");
+  return mobile;
 }
 
 function payloadState(payload: CashfreeResponse) {

@@ -7,6 +7,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@/lib/auth/password-policy";
+import { normaliseIndianMobile } from "@/lib/phone";
 
 type Notice = {
   tone: "error" | "success" | "info";
@@ -22,6 +23,7 @@ const noticeStyles = {
 export function RegisterForm({ nextPath }: { nextPath: string }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -45,8 +47,14 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
 
     const supabase = createClient();
     const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = normaliseIndianMobile(phone);
+    if (!normalizedPhone) {
+      setNotice({ tone: "error", message: "Enter a valid 10-digit Indian mobile number." });
+      setLoading(false);
+      return;
+    }
     if (fullName.trim().length > 120 || normalizedEmail.length > 254 || password.length > MAX_PASSWORD_LENGTH) {
-      setNotice({ tone: "error", message: "Check your name, email, and password lengths, then try again." });
+      setNotice({ tone: "error", message: "Check your name, email, mobile number, and password lengths, then try again." });
       setLoading(false);
       return;
     }
@@ -55,7 +63,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
       password,
       options: {
         emailRedirectTo: confirmationRedirectUrl(),
-        data: { full_name: fullName.trim() },
+        data: { full_name: fullName.trim(), phone: normalizedPhone },
         captchaToken: captchaToken ?? undefined,
       },
     });
@@ -199,6 +207,11 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
           <label htmlFor="register_email" className="block text-sm font-bold text-slate-800">
             Email
             <input id="register_email" type="email" required maxLength={254} autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
+          </label>
+          <label htmlFor="register_phone" className="block text-sm font-bold text-slate-800">
+            Mobile number
+            <input id="register_phone" type="tel" required inputMode="numeric" autoComplete="tel-national" maxLength={13} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="10-digit Indian mobile number" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
+            <span className="mt-2 block text-xs font-normal text-slate-500">Used only for secure payment details. We do not send login codes by SMS.</span>
           </label>
           <label htmlFor="new_password" className="block text-sm font-bold text-slate-800">
             Password
