@@ -114,3 +114,21 @@ test("exam series are the only customer-facing paid product", async () => {
   assert.doesNotMatch(createMock, /Individual-test reference price/);
   assert.doesNotMatch(editMock, /Individual-test reference price/);
 });
+
+test("admins can review registrations and series-level sales", async () => {
+  const [page, navigation, access] = await Promise.all([
+    read("app/admin/students/page.tsx"),
+    read("components/admin/AdminNavigation.tsx"),
+    read("app/admin/access/page.tsx"),
+  ]);
+
+  assert.match(page, /Registered students/);
+  assert.match(page, /Paid students/);
+  assert.match(page, /Who paid for each Exam Series/);
+  assert.match(page, /Recent registrations/);
+  assert.match(page, /Recent payment activity/);
+  assert.match(page, /profile\?\.role !== "admin"/);
+  assert.match(page, /currentLevel !== "aal2"/);
+  assert.match(navigation, /Students & sales/);
+  assert.match(access, /View students and sales/);
+});
