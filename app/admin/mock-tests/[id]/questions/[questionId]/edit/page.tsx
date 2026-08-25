@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import type { Question } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 
-export default async function EditMockTestQuestionPage({ params }: { params: Promise<{ id: string; questionId: string }> }) {
+export default async function EditMockTestQuestionPage({ params, searchParams }: { params: Promise<{ id: string; questionId: string }>; searchParams: Promise<{ returnTo?: string | string[] }> }) {
   const { id: mockTestId, questionId } = await params;
+  const { returnTo } = await searchParams;
   const supabase = await createClient();
   const [mockTestResult, assignmentResult, questionResult, subjectsResult, papersResult, groupsResult, categoriesResult] = await Promise.all([
     supabase.from("mock_tests").select("id, title").eq("id", mockTestId).maybeSingle(),
@@ -27,7 +28,8 @@ export default async function EditMockTestQuestionPage({ params }: { params: Pro
     const category = group ? categories.get(group.exam_id) : undefined;
     return { id: subject.id, contentLanguageMode: subject.content_language_mode as SubjectContentLanguageMode, label: `${category?.name ?? "Unknown category"} → ${group?.name ?? "Unknown Exam"} → ${paper?.name ?? "Unknown Paper"} → ${subject.name}` };
   });
-  const questionsPath = `/admin/mock-tests/${mockTestId}/questions`;
+  const mockTestsPath = typeof returnTo === "string" && (returnTo === "/admin/mock-tests" || returnTo.startsWith("/admin/mock-tests?")) ? returnTo : "/admin/mock-tests";
+  const questionsPath = `/admin/mock-tests/${mockTestId}/questions?returnTo=${encodeURIComponent(mockTestsPath)}`;
   return <main>
     <Link href={questionsPath} className="text-sm font-semibold text-teal-700 hover:underline">← Back to {mockTestResult.data.title} Questions</Link>
     <h1 className="mt-5 text-3xl font-black">Edit question in this mock test</h1>

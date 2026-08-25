@@ -4,8 +4,9 @@ import { CreateQuestionForm } from "@/app/admin/questions/CreateQuestionForm";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function NewMockTestQuestionPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function NewMockTestQuestionPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ returnTo?: string | string[] }> }) {
   const { id } = await params;
+  const { returnTo } = await searchParams;
   const supabase = await createClient();
   const [mockTestResult, categoriesResult, examsResult, specializationsResult, papersResult, subjectsResult] = await Promise.all([
     supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, title").eq("id", id).maybeSingle(),
@@ -17,7 +18,8 @@ export default async function NewMockTestQuestionPage({ params }: { params: Prom
   ]);
   if (!mockTestResult.data) notFound();
   const mockTest = mockTestResult.data;
-  const questionsPath = `/admin/mock-tests/${id}/questions`;
+  const mockTestsPath = typeof returnTo === "string" && (returnTo === "/admin/mock-tests" || returnTo.startsWith("/admin/mock-tests?")) ? returnTo : "/admin/mock-tests";
+  const questionsPath = `/admin/mock-tests/${id}/questions?returnTo=${encodeURIComponent(mockTestsPath)}`;
   const papers = papersResult.data ?? [];
   const testPaper = papers.find((paper) => paper.id === mockTest.paper_id);
   const examGroup = testPaper ? (examsResult.data ?? []).find((group) => group.id === testPaper.exam_group_id) : null;

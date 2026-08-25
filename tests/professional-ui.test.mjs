@@ -71,3 +71,19 @@ test("mock-test question management fetches only questions assigned to that test
   assert.match(page, /from\("questions"\)[\s\S]*\.in\("id", questionIds\)/);
   assert.doesNotMatch(page, /supabase\.from\("questions"\)\.select\("id, question_text, is_active"\),/);
 });
+
+test("mock-test filters remain available after managing a test or its questions", async () => {
+  const [table, editPage, questionsPage, assignments] = await Promise.all([
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("app/admin/mock-tests/[id]/edit/page.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
+    read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
+  ]);
+
+  assert.match(table, /questions\?returnTo=\$\{encodeURIComponent\(mockTestAdminUrl\)\}/);
+  assert.match(editPage, /questions\?returnTo=\$\{encodeURIComponent\(backHref\)\}/);
+  assert.match(questionsPage, /const mockTestsPath = typeof returnTo === "string"/);
+  assert.match(questionsPage, /returnTo=\$\{encodeURIComponent\(mockTestsPath\)\}/);
+  assert.match(assignments, /const returnToQuery = returnTo \? `\?returnTo=\$\{encodeURIComponent\(returnTo\)\}` : ""/);
+  assert.match(assignments, /\$\{questionsPath\}\/new\$\{returnToQuery\}/);
+});

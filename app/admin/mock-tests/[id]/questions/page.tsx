@@ -6,8 +6,9 @@ import { DownloadQuestionsButton } from "../../DownloadQuestionsButton";
 import { MockTestCsvImport } from "../edit/MockTestCsvImport";
 import { QuestionAssignments } from "../edit/QuestionAssignments";
 
-export default async function MockTestQuestionsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MockTestQuestionsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ returnTo?: string | string[] }> }) {
   const { id } = await params;
+  const { returnTo } = await searchParams;
   const supabase = await createClient();
   const [testResult, papersResult, subjectsResult, assignmentsResult] = await Promise.all([
     supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, title, status, target_question_count").eq("id", id).maybeSingle(),
@@ -41,14 +42,16 @@ export default async function MockTestQuestionsPage({ params }: { params: Promis
     };
   });
   const subjectName = test.subject_id ? subjects.find((item) => item.id === test.subject_id)?.name ?? null : null;
+  const mockTestsPath = typeof returnTo === "string" && (returnTo === "/admin/mock-tests" || returnTo.startsWith("/admin/mock-tests?")) ? returnTo : "/admin/mock-tests";
   const questionsPath = `/admin/mock-tests/${test.id}/questions`;
+  const settingsPath = `/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestsPath)}`;
 
   return <main>
-    <div className="flex flex-wrap items-center justify-between gap-3"><Link href={`/admin/mock-tests/${test.id}/edit`} className="text-sm font-semibold text-teal-700 hover:underline">← Back to Mock Test Settings</Link>{assignments.length > 0 && <DownloadQuestionsButton mockTestId={test.id} />}</div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><Link href={settingsPath} className="text-sm font-semibold text-teal-700 hover:underline">← Back to Mock Test Settings</Link>{assignments.length > 0 && <DownloadQuestionsButton mockTestId={test.id} />}</div>
     <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">{paper?.name ?? "Mock test"}{subjectName ? ` · ${subjectName}` : ""}</p>
     <h1 className="mt-2 text-3xl font-black">{test.title}: Questions</h1>
     <p className="mt-2 max-w-3xl text-slate-600">Manage only this mock test&apos;s questions. Upload a file, add one question, edit a question, remove it, or replace the full draft.</p>
     <MockTestCsvImport mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestionCount={assignments.length} paperName={paper?.name ?? "this Paper"} subjectName={subjectName} />
-    <QuestionAssignments mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestions={assignments} questionsPath={questionsPath} />
+    <QuestionAssignments mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestions={assignments} questionsPath={questionsPath} returnTo={mockTestsPath} />
   </main>;
 }
