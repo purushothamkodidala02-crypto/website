@@ -53,6 +53,7 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(launcher, /nonce=\{nonce\}/);
   assert.match(launcher, /await checkout\.checkout/);
   assert.match(launcher, /Continue to Cashfree/);
+  assert.match(launcher, /Cashfree did not open/);
   assert.match(launcher, /taking too long to load/);
   assert.match(terms, /Payments and pricing/);
   assert.match(terms, /Indian Rupees \(INR\)/);

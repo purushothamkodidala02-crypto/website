@@ -32,21 +32,29 @@ export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo, non
   const [error, setError] = useState("");
   const [isOpening, setIsOpening] = useState(false);
   const launchedRef = useRef(false);
+  const launchTimeoutRef = useRef<number | null>(null);
 
   async function openCheckout() {
     if (!scriptReady || launchedRef.current || !window.Cashfree) return;
     launchedRef.current = true;
     setError("");
     setIsOpening(true);
+    launchTimeoutRef.current = window.setTimeout(() => {
+      setError("Cashfree did not open. Please try again, or return to the mock test and start a fresh purchase.");
+      launchedRef.current = false;
+      setIsOpening(false);
+    }, 8000);
     try {
       const checkout = window.Cashfree({ mode });
       const result = await checkout.checkout({ paymentSessionId, redirectTarget: "_self" });
       const providerMessage = checkoutErrorMessage(result);
       if (providerMessage) {
+        if (launchTimeoutRef.current) window.clearTimeout(launchTimeoutRef.current);
         setError(providerMessage);
         launchedRef.current = false;
       }
     } catch {
+      if (launchTimeoutRef.current) window.clearTimeout(launchTimeoutRef.current);
       setError("We could not open the secure payment page. Please try again.");
       launchedRef.current = false;
     } finally {
@@ -61,6 +69,10 @@ export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo, non
     }, 12000);
     return () => window.clearTimeout(timeout);
   }, [error, scriptReady]);
+
+  useEffect(() => () => {
+    if (launchTimeoutRef.current) window.clearTimeout(launchTimeoutRef.current);
+  }, []);
 
   return (
     <>
