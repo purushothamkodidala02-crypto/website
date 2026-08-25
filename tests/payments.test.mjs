@@ -142,7 +142,7 @@ test("admins can review registrations and series-level sales", async () => {
 });
 
 test("admins can globally hide paid sales without deleting purchase history", async () => {
-  const [migration, adminPage, adminActions, accountActions, purchases, checkout, detail] = await Promise.all([
+  const [migration, adminPage, adminActions, accountActions, purchases, checkout, detail, salesToggle] = await Promise.all([
     read("supabase/migrations/20260825190000_add_paid_sales_site_setting.sql"),
     read("app/admin/access/page.tsx"),
     read("app/admin/access/actions.ts"),
@@ -150,6 +150,7 @@ test("admins can globally hide paid sales without deleting purchase history", as
     read("app/dashboard/passes/page.tsx"),
     read("app/dashboard/passes/actions.ts"),
     read("components/mock-tests/MockTestDetailPage.tsx"),
+    read("app/admin/access/PaidSalesToggle.tsx"),
   ]);
 
   assert.match(migration, /'paid_sales', false/);
@@ -164,4 +165,7 @@ test("admins can globally hide paid sales without deleting purchase history", as
   assert.match(checkout, /sales_disabled/);
   assert.match(detail, /paidSalesEnabled && purchaseProduct/);
   assert.match(detail, /can_access_mock_test/);
+  assert.match(salesToggle, /role="switch"/);
+  assert.match(salesToggle, /aria-checked=\{enabled\}/);
+  assert.match(salesToggle, /disabled=\{pending\}/);
 });

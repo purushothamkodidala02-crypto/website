@@ -3,6 +3,7 @@ import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { createClient } from "@/lib/supabase/server";
 import { CreateExamSeriesForm } from "./CreateExamSeriesForm";
 import { RemoveExamSeriesButton } from "./RemoveExamSeriesButton";
+import { PaidSalesToggle } from "./PaidSalesToggle";
 import { createReferralCode, toggleAccessProduct, togglePaidSales } from "./actions";
 
 type Product = {
@@ -48,12 +49,7 @@ export default async function AdminAccessPage() {
               : "Purchases, prices, and Buy buttons are hidden from students. Existing payment and access records are preserved."}
           </p>
         </div>
-        <form action={togglePaidSales}>
-          <input type="hidden" name="enabled" value={String(paidSalesEnabled)} />
-          <PendingSubmitButton pendingLabel="Updating…" className={`min-w-40 rounded-xl px-5 py-3 text-sm font-black text-white disabled:opacity-60 ${paidSalesEnabled ? "bg-slate-800" : "bg-teal-700"}`}>
-            Turn paid sales {paidSalesEnabled ? "off" : "on"}
-          </PendingSubmitButton>
-        </form>
+        <PaidSalesToggle enabled={paidSalesEnabled} action={togglePaidSales} />
       </div>
     </section>
 
