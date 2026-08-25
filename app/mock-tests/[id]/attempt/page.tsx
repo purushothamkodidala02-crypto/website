@@ -60,5 +60,10 @@ export default async function TakeMockTestPage({ params, searchParams }: PagePro
   const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
   const questions = (data ?? []) as TestQuestion[];
   if (error || questions.length === 0) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test does not have active questions available yet. Please try again later." />;
-  return <StudentTestRunner mockTestId={id} publicTestPath={testPath} title={mockTest.title} sessionId={session.id} expiresAt={session.expires_at} questions={questions} />;
+  const { data: bookmarks } = await supabase
+    .from("student_question_bookmarks")
+    .select("question_id")
+    .eq("user_id", user.id)
+    .in("question_id", questions.map((question) => question.question_id));
+  return <StudentTestRunner mockTestId={id} publicTestPath={testPath} title={mockTest.title} sessionId={session.id} expiresAt={session.expires_at} questions={questions} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />;
 }

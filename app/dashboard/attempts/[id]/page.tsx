@@ -13,6 +13,7 @@ type AttemptSummary = {
   incorrect_answers: number;
   unanswered_questions: number;
   detailed_review_available: boolean;
+  session_id: string | null;
 };
 
 export default async function AttemptReviewPage({
@@ -26,7 +27,7 @@ export default async function AttemptReviewPage({
   const [attemptResult, reviewResult] = await Promise.all([
     supabase
       .from("test_attempts")
-      .select("mock_test_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions, detailed_review_available")
+      .select("mock_test_id, session_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions, detailed_review_available")
       .eq("id", id)
       .maybeSingle(),
     supabase.rpc("get_attempt_review", { requested_attempt_id: id }),
@@ -39,8 +40,14 @@ export default async function AttemptReviewPage({
   }
 
   const { data, error } = reviewResult;
-  const rows = (data ?? []) as ReviewRow[];
+  const rawRows = (data ?? []) as Omit<ReviewRow, "question_id">[];
+  const questionOrderResult = attempt.session_id
+    ? await supabase.from("test_attempt_session_questions").select("question_id").eq("session_id", attempt.session_id).order("question_order")
+    : await supabase.from("mock_test_questions").select("question_id").eq("mock_test_id", attempt.mock_test_id).order("question_order");
+  const questionIds = (questionOrderResult.data ?? []).map((item) => item.question_id);
+  const rows = rawRows.map((row, index) => ({ ...row, question_id: questionIds[index] })).filter((row): row is ReviewRow => Boolean(row.question_id));
   if (error || rows.length === 0) notFound();
+  const { data: bookmarks } = await supabase.from("student_question_bookmarks").select("question_id").eq("user_id", user.id).in("question_id", questionIds);
 
   const summary = rows[0];
   const percentage =
@@ -113,7 +120,7 @@ export default async function AttemptReviewPage({
           />
         </section>
 
-        <AttemptReviewNavigator rows={rows} />
+        <AttemptReviewNavigator rows={rows} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />
 
         <section className="mt-10 flex flex-wrap items-center justify-between gap-5 rounded-3xl bg-teal-50 p-6 sm:p-8">
           <div>

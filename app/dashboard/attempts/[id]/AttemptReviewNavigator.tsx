@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
+import { BookmarkButton } from "@/components/study/BookmarkButton";
 
 export type ReviewRow = {
+  question_id: string;
   mock_test_title: string;
   score: number;
   total_marks: number;
@@ -32,7 +34,7 @@ export type ReviewRow = {
   image_url: string | null;
 };
 
-export function AttemptReviewNavigator({ rows }: { rows: ReviewRow[] }) {
+export function AttemptReviewNavigator({ rows, bookmarkedQuestionIds }: { rows: ReviewRow[]; bookmarkedQuestionIds: string[] }) {
   const [index, setIndex] = useState(0);
   const [language, setLanguage] = useState<"english" | "telugu">(
     rows[0]?.content_language_mode === "telugu" ? "telugu" : "english",
@@ -157,7 +159,7 @@ export function AttemptReviewNavigator({ rows }: { rows: ReviewRow[] }) {
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-sm font-black text-white">{row.question_order}</span>
             <FormattedQuestionText text={questionText} className="pt-1 leading-7 text-slate-950 sm:text-lg" />
           </div>
-          <QuestionStatus row={row} />
+          <div className="flex flex-wrap items-center justify-end gap-2"><BookmarkButton key={row.question_id} questionId={row.question_id} initialBookmarked={bookmarkedQuestionIds.includes(row.question_id)} /><QuestionStatus row={row} /></div>
         </div>
 
         <div className="p-4 sm:p-6">

@@ -191,6 +191,21 @@ export default async function Dashboard({
           ))}
         </section>
 
+        <section className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Link href="/dashboard/study-book" className="group rounded-2xl border border-red-100 bg-white p-5 shadow-sm transition hover:border-red-200 hover:shadow-md">
+            <p className="text-xs font-black uppercase tracking-wide text-red-700">Automatic revision</p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Mistake Book</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Revisit incorrect answers and master weak questions.</p>
+            <span className="mt-4 inline-flex text-sm font-black text-red-700">Review mistakes →</span>
+          </Link>
+          <Link href="/dashboard/study-book?view=bookmarks" className="group rounded-2xl border border-teal-100 bg-white p-5 shadow-sm transition hover:border-teal-200 hover:shadow-md">
+            <p className="text-xs font-black uppercase tracking-wide text-teal-700">Saved questions</p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Bookmarks</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Keep important questions together for focused revision.</p>
+            <span className="mt-4 inline-flex text-sm font-black text-teal-700">Open bookmarks →</span>
+          </Link>
+        </section>
+
         <section className="mt-10">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
