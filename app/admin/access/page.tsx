@@ -47,7 +47,7 @@ export default async function AdminAccessPage() {
         <h2 className="mt-1 text-lg font-black text-slate-950">Create one paid series</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">One series can cover a single exam, such as Police Constable, or many exams, such as all Telangana Police exams. You set one price and access period.</p>
         <p className="mt-4 text-sm font-bold text-slate-900">{activeCount} active series · {products.length - activeCount} paused</p>
-        <Link href="/admin/students" className="mt-4 inline-flex text-sm font-black text-teal-700 hover:underline">View students and sales →</Link>
+        <Link href="/admin/students" className="mt-4 inline-flex text-sm font-black text-teal-700 hover:underline">View registrations →</Link>
       </div>
     </section>
 

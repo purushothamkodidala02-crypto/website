@@ -21,7 +21,7 @@ const sections = [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
       { href: "/admin/access", label: "Exam passes", icon: "passes" as const },
-      { href: "/admin/students", label: "Students & sales", icon: "students" as const },
+      { href: "/admin/students", label: "Registrations", icon: "students" as const },
       { href: "/admin/results", label: "Results", icon: "results" as const },
     ],
   },

@@ -129,6 +129,6 @@ test("admins can review registrations and series-level sales", async () => {
   assert.match(page, /Recent payment activity/);
   assert.match(page, /profile\?\.role !== "admin"/);
   assert.match(page, /currentLevel !== "aal2"/);
-  assert.match(navigation, /Students & sales/);
-  assert.match(access, /View students and sales/);
+  assert.match(navigation, /Registrations/);
+  assert.match(access, /View registrations/);
 });
