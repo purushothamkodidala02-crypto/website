@@ -137,7 +137,7 @@ export function EditMockTestForm({
               </select>
             </label>
             <label className="block text-sm font-semibold">
-              Price in ₹
+              Individual-test reference price
               <input
                 name="price_inr"
                 type="number"
@@ -146,13 +146,13 @@ export function EditMockTestForm({
                 value={accessType === "paid" ? priceInr : ""}
                 onChange={(event) => setPriceInr(event.target.value)}
                 disabled={accessType !== "paid"}
-                placeholder="Only for paid tests"
+                placeholder="Required for paid tests"
                 className="mt-2 w-full rounded-xl border border-emerald-200 px-4 py-3 font-normal text-slate-900 disabled:bg-slate-100"
               />
             </label>
           </div>
           <p className="mt-2 leading-5 text-emerald-900">
-            Free tests are open to everyone. Paid tests remain protected until payment is connected.
+            Free tests are open to everyone. Paid tests require an active Exam Series that includes this exam. Students pay the Exam Series price, not this individual-test reference price.
           </p>
         </div>
         <div className="md:col-span-2">

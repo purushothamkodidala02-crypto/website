@@ -93,7 +93,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
             </select>
           </label>
           <label className="block text-sm font-semibold">
-            Price in ₹
+            Individual-test reference price
             <input
               name="price_inr"
               type="number"
@@ -102,13 +102,13 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
               value={accessType === "paid" ? priceInr : ""}
               onChange={(event) => setPriceInr(event.target.value)}
               disabled={accessType !== "paid"}
-              placeholder="Only for paid tests"
+              placeholder="Required for paid tests"
               className="mt-2 w-full rounded-xl border border-emerald-200 px-4 py-3 font-normal text-slate-900 disabled:bg-slate-100"
             />
           </label>
         </div>
         <p className="mt-2 leading-5 text-emerald-900">
-          Free tests open to everyone. Paid tests stay visible in admin now, and the payment flow can be connected later.
+          Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Students pay the Exam Series price, not this individual-test reference price.
         </p>
       </div>
       <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId)} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(nextSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
