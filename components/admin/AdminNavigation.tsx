@@ -21,7 +21,7 @@ const sections = [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
       { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
-      { href: "/admin/access", label: "Exam passes", icon: "passes" as const },
+      { href: "/admin/access", label: "Exam series", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations", icon: "students" as const },
       { href: "/admin/results", label: "Results", icon: "results" as const },
     ],
@@ -191,7 +191,7 @@ export function AdminNavigation() {
             className="flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white"
           >
             <span>Student site</span>
-            <span className="text-[10px] tracking-wider text-teal-200">OPEN</span>
+            <span className="text-[10px] tracking-wider text-teal-200">Open</span>
           </Link>
         </div>
       </aside>
@@ -211,7 +211,7 @@ export function AdminNavigation() {
               className="mt-5 flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-3 text-sm font-bold text-slate-200"
             >
               <span>View student site</span>
-              <span className="text-[10px] tracking-wider text-teal-200">OPEN</span>
+              <span className="text-[10px] tracking-wider text-teal-200">Open</span>
             </Link>
           </div>
         </details>

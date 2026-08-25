@@ -667,7 +667,7 @@ export async function MockTestDetailsPage({
                 : !isLoggedIn
                 ? "Sign in or create an account, then return directly to this test."
                 : hasResumableSession
-                  ? "Resume keeps your progress. Start test begins again after confirmation."
+                  ? "Resume to keep your progress, or restart after confirming that your unfinished answers can be cleared."
                   : hasPreviousAttempt
                     ? "Start a new attempt; your earlier submitted result remains saved."
                     : "Select Start test when you are ready."}

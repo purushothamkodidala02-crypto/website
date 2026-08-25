@@ -52,7 +52,7 @@ export function TestStartActions({
         onSubmit={(event) => {
           if (
             !window.confirm(
-              "Start this test again? Your unfinished answers and saved time will be cleared.",
+              "Restart this test? Your unfinished answers and saved time will be cleared.",
             )
           ) {
             event.preventDefault();
@@ -60,7 +60,7 @@ export function TestStartActions({
         }}
       >
         <PendingSubmitButton pendingLabel="Restarting test…" className="block w-full rounded-xl border border-slate-600 px-5 py-3.5 text-center font-black text-white hover:border-white hover:bg-white/10 disabled:cursor-wait disabled:opacity-70">
-          Start test
+          Restart test
         </PendingSubmitButton>
       </form>
     </div>

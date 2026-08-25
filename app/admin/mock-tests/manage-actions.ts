@@ -72,15 +72,19 @@ export async function publishMockTest(mockTestId: string): Promise<MockTestManag
     requested_mock_test_id: mockTestId,
   });
   if (error) {
+    const needsExamSeries = error.message.includes(
+      "Create an active Exam Pass for this Exam before publishing a paid Mock Test.",
+    );
     const knownMessage = [
       "Add at least one Question before publishing.",
       "Every assigned Question and mark must be active and valid.",
       "The assigned Question count must exactly match the Mock Test target.",
-      "Create an active Exam Pass for this Exam before publishing a paid Mock Test.",
     ].find((message) => error.message.includes(message));
     return {
       success: false,
-      message: knownMessage ?? "This Mock Test could not be published. Verify its Questions, marks, and Paper setup.",
+      message: needsExamSeries
+        ? "Create an active exam series for this exam before publishing a paid mock test."
+        : knownMessage ?? "This Mock Test could not be published. Verify its Questions, marks, and Paper setup.",
     };
   }
   revalidateMockTestPages(mockTestId);

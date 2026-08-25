@@ -36,8 +36,8 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
   useEffect(() => {
     let active = true;
     const supabase = createClient();
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setHasUser(Boolean(data.user));
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setHasUser(Boolean(data.session?.user));
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (active) setHasUser(Boolean(session?.user));

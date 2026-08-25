@@ -172,7 +172,7 @@ export default async function Dashboard({
                 Keep your preparation moving.
               </h1>
               <p className="mt-3 max-w-2xl leading-7 text-slate-300">
-                Review your progress, understand weak Subjects, and choose the
+                Review your progress, understand weaker subjects, and choose the
                 next focused mock test.
               </p>
             </div>
@@ -333,7 +333,7 @@ export default async function Dashboard({
               >
                 {subjectAnalytics.length === 0 ? (
                   <p className="text-sm text-slate-600">
-                    Answer more questions to unlock Subject analytics.
+                    Answer more questions to unlock subject analytics.
                   </p>
                 ) : (
                   <div className="space-y-5">

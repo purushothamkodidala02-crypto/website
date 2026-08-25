@@ -1,0 +1,50 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("public account navigation avoids misleading signed-out actions while session state loads", async () => {
+  const [actions, menu] = await Promise.all([
+    read("components/site/PublicAccountActions.tsx"),
+    read("components/site/PublicNavigationMenu.tsx"),
+  ]);
+
+  assert.match(actions, /accountReady/);
+  assert.match(actions, /Loading account options/);
+  assert.match(actions, /auth\.getSession\(\)/);
+  assert.match(actions, /Create account/);
+  assert.doesNotMatch(actions, /Start free/);
+  assert.match(menu, /auth\.getSession\(\)/);
+});
+
+test("student test actions clearly distinguish starting, resuming, and restarting", async () => {
+  const [actions, details] = await Promise.all([
+    read("app/mock-tests/[id]/TestStartActions.tsx"),
+    read("components/mock-tests/MockTestDetailPage.tsx"),
+  ]);
+
+  assert.match(actions, />\s*Start test\s*</);
+  assert.match(actions, />\s*Resume test\s*</);
+  assert.match(actions, />\s*Restart test\s*</);
+  assert.match(actions, /Restart this test\?/);
+  assert.match(details, /Resume to keep your progress/);
+  assert.doesNotMatch(details, /Start test begins again/);
+});
+
+test("professional labels remain consistent across student and admin pages", async () => {
+  const [home, dashboard, adminNavigation, assignments] = await Promise.all([
+    read("app/page.tsx"),
+    read("app/dashboard/page.tsx"),
+    read("components/admin/AdminNavigation.tsx"),
+    read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
+  ]);
+
+  assert.match(home, />Sign in</);
+  assert.match(home, />Create account</);
+  assert.doesNotMatch(home, />Admin</);
+  assert.doesNotMatch(dashboard, /weak Subjects/);
+  assert.match(adminNavigation, /label: "Exam series"/);
+  assert.doesNotMatch(adminNavigation, /label: "Exam passes"/);
+  assert.match(assignments, /No negative marking/);
+});

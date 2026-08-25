@@ -81,9 +81,9 @@ export function CreateSubjectForm({
 
   return (
     <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-bold">Add Subjects</h2>
+      <h2 className="text-xl font-bold">Add subjects</h2>
       <p className="mt-1 text-sm text-slate-600">
-        First choose where the Subjects belong, including a Specialisation when this Exam has branches.
+        First choose where the subjects belong, including a specialisation when the exam has branches.
       </p>
 
       <form action={formAction} className="mt-6 space-y-5">
@@ -109,7 +109,7 @@ export function CreateSubjectForm({
         <SubjectListInput key={subjectResetKey} />
 
         <button disabled={pending || !paperId} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">
-          <PendingButtonContent pending={pending} pendingLabel="Adding subjects…">Add Subjects</PendingButtonContent>
+          <PendingButtonContent pending={pending} pendingLabel="Adding subjects…">Add subjects</PendingButtonContent>
         </button>
         {state.message && <p aria-live="polite" className={`text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}
       </form>
