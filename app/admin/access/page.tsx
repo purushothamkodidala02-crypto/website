@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { createClient } from "@/lib/supabase/server";
 import { CreateExamSeriesForm } from "./CreateExamSeriesForm";
+import { RemoveExamSeriesButton } from "./RemoveExamSeriesButton";
 import { createReferralCode, toggleAccessProduct } from "./actions";
 
 type Product = {
@@ -11,14 +12,14 @@ type Product = {
   price_inr: number;
   duration_days: number;
   is_active: boolean;
-  access_product_exam_groups: { exam_groups: { name: string } | null }[] | null;
+  access_product_exam_groups: { exam_groups: { id: string; name: string } | null }[] | null;
 };
 
 export default async function AdminAccessPage() {
   const supabase = await createClient();
   const [groupsResult, productsResult, referralResult] = await Promise.all([
     supabase.from("exam_groups").select("id, name, exams(id, name, state_id, exam_states(id, name))").order("display_order"),
-    supabase.from("access_products").select("id, name, slug, price_inr, duration_days, is_active, access_product_exam_groups(exam_groups(name))").order("display_order"),
+    supabase.from("access_products").select("id, name, slug, price_inr, duration_days, is_active, access_product_exam_groups(exam_groups(id, name))").order("display_order"),
     supabase.from("referral_codes").select("id, code, discount_type, discount_value, is_active, access_products(name)").order("created_at", { ascending: false }).limit(25),
   ]);
   const products = (productsResult.data ?? []) as unknown as Product[];
@@ -62,7 +63,7 @@ export default async function AdminAccessPage() {
                 <p className="mt-1 text-sm text-slate-600">₹{Number(product.price_inr).toFixed(0)} once · {product.duration_days} days</p>
                 <p className="mt-2 text-sm font-semibold text-slate-800">Includes: {product.access_product_exam_groups?.map((item) => item.exam_groups?.name).filter(Boolean).join(", ") || "No exams selected"}</p>
               </div>
-              <form action={toggleAccessProduct}><input type="hidden" name="id" value={product.id} /><input type="hidden" name="active" value={String(product.is_active)} /><PendingSubmitButton pendingLabel="Updating…" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900">{product.is_active ? "Pause sales" : "Start selling"}</PendingSubmitButton></form>
+              <div className="flex flex-wrap items-center justify-end gap-1"><Link href={`/admin/access/${product.id}/edit`} className="rounded-lg px-3 py-2 text-xs font-bold text-teal-700 hover:bg-teal-50">Edit</Link><form action={toggleAccessProduct}><input type="hidden" name="id" value={product.id} /><input type="hidden" name="active" value={String(product.is_active)} /><PendingSubmitButton pendingLabel="Updating…" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900">{product.is_active ? "Pause sales" : "Start selling"}</PendingSubmitButton></form><RemoveExamSeriesButton productId={product.id} productName={product.name} /></div>
             </div>
           </div>)}
           {!products.length && <p className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">No paid series yet. Create one on the left, then set its related Mock Tests to Paid.</p>}

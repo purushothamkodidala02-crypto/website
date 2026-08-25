@@ -61,6 +61,80 @@ export async function toggleAccessProduct(formData: FormData) {
   revalidatePath("/admin/access"); revalidatePath("/dashboard/passes"); revalidatePath("/mock-tests", "layout");
 }
 
+export async function updateAccessProduct(_previous: AccessProductState, formData: FormData): Promise<AccessProductState> {
+  const result = await adminClient();
+  if ("error" in result) return { success: false, message: result.error ?? "Administrator access is required." };
+  const id = String(formData.get("product_id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const requestedSlug = String(formData.get("slug") ?? "").trim();
+  const slug = slugify(requestedSlug || name);
+  const price = Number(formData.get("price_inr"));
+  const duration = Number(formData.get("duration_days"));
+  const examGroupIds = [...new Set(formData.getAll("exam_group_ids").map(String).filter((value) => /^[0-9a-f-]{36}$/i.test(value)))];
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { success: false, message: "Exam series not found." };
+  if (!name || !slug) return { success: false, message: "Enter a name for the exam series." };
+  if (!Number.isFinite(price) || price <= 0) return { success: false, message: "Enter a price greater than ₹0." };
+  if (!Number.isInteger(duration) || duration < 1) return { success: false, message: "Enter the number of access days." };
+  if (!examGroupIds.length) return { success: false, message: "Select at least one exam for this series." };
+
+  const [{ data: product }, { data: existingMappings }, { count: entitlementCount }] = await Promise.all([
+    result.supabase.from("access_products").select("id").eq("id", id).maybeSingle(),
+    result.supabase.from("access_product_exam_groups").select("exam_group_id").eq("product_id", id),
+    result.supabase.from("student_entitlements").select("id", { count: "exact", head: true }).eq("product_id", id),
+  ]);
+  if (!product) return { success: false, message: "Exam series not found." };
+  const existingIds = (existingMappings ?? []).map((item) => item.exam_group_id).sort();
+  const requestedIds = [...examGroupIds].sort();
+  const coverageChanged = existingIds.join(",") !== requestedIds.join(",");
+  if (coverageChanged && (entitlementCount ?? 0) > 0) {
+    return { success: false, message: "This series already has student purchases. Keep its included exams unchanged, or create a new series for different exam coverage." };
+  }
+
+  const { error: updateError } = await result.supabase
+    .from("access_products")
+    .update({ name, slug, description: String(formData.get("description") ?? "").trim() || null, price_inr: price, duration_days: duration })
+    .eq("id", id);
+  if (updateError) return { success: false, message: updateError.code === "23505" ? "That URL label is already used." : "The exam series could not be updated. Please try again." };
+  if (coverageChanged) {
+    const toAdd = requestedIds.filter((value) => !existingIds.includes(value));
+    const toRemove = existingIds.filter((value) => !requestedIds.includes(value));
+    if (toAdd.length) {
+      const { error } = await result.supabase.from("access_product_exam_groups").insert(toAdd.map((exam_group_id) => ({ product_id: id, exam_group_id })));
+      if (error) return { success: false, message: "Details saved, but the new exam coverage could not be added. Please try again." };
+    }
+    if (toRemove.length) {
+      const { error } = await result.supabase.from("access_product_exam_groups").delete().eq("product_id", id).in("exam_group_id", toRemove);
+      if (error) return { success: false, message: "Details saved, but the old exam coverage could not be removed. Please try again." };
+    }
+  }
+  revalidatePath("/admin/access"); revalidatePath(`/admin/access/${id}/edit`); revalidatePath("/dashboard/passes"); revalidatePath("/mock-tests", "layout");
+  return { success: true, message: "Exam series updated." };
+}
+
+export async function removeAccessProduct(id: string): Promise<AccessProductState> {
+  const result = await adminClient();
+  if ("error" in result) return { success: false, message: result.error ?? "Administrator access is required." };
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { success: false, message: "Exam series not found." };
+  const [{ data: product }, { count: orderCount }, { count: entitlementCount }, { count: referralCount }] = await Promise.all([
+    result.supabase.from("access_products").select("id, name").eq("id", id).maybeSingle(),
+    result.supabase.from("payment_orders").select("id", { count: "exact", head: true }).eq("product_id", id),
+    result.supabase.from("student_entitlements").select("id", { count: "exact", head: true }).eq("product_id", id),
+    result.supabase.from("referral_codes").select("id", { count: "exact", head: true }).eq("product_id", id),
+  ]);
+  if (!product) return { success: false, message: "Exam series not found." };
+  if ((orderCount ?? 0) > 0 || (entitlementCount ?? 0) > 0 || (referralCount ?? 0) > 0) {
+    await result.supabase.from("access_products").update({ is_active: false }).eq("id", id);
+    revalidatePath("/admin/access"); revalidatePath("/dashboard/passes"); revalidatePath("/mock-tests", "layout");
+    return { success: true, message: "This series has payment, access, or referral history, so it was paused instead of deleted." };
+  }
+  const { error: mappingError } = await result.supabase.from("access_product_exam_groups").delete().eq("product_id", id);
+  if (mappingError) return { success: false, message: "The exam series could not be removed. Please try again." };
+  const { error } = await result.supabase.from("access_products").delete().eq("id", id);
+  if (error) return { success: false, message: "The exam series could not be removed. Please try again." };
+  revalidatePath("/admin/access"); revalidatePath("/dashboard/passes"); revalidatePath("/mock-tests", "layout");
+  return { success: true, message: `“${product.name}” was removed.` };
+}
+
 export async function createReferralCode(formData: FormData) {
   const result = await adminClient(); if ("error" in result) return;
   const code = String(formData.get("code") ?? "").trim().toUpperCase(); const productId = String(formData.get("product_id") ?? ""); const type = String(formData.get("discount_type") ?? ""); const value = Number(formData.get("discount_value") ?? 0);

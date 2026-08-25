@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("exam passes use verified payment-provider checks and preserve legacy test access", async () => {
-  const [migration, providerMigration, checkout, phonepe, cashfree, webhook, confirmOrder, detail, adminAccess, seriesForm, adminActions, checkoutPage, launcher, terms, refunds, register, purchaseForm] = await Promise.all([
+  const [migration, providerMigration, checkout, phonepe, cashfree, webhook, confirmOrder, detail, adminAccess, seriesForm, adminActions, checkoutPage, launcher, terms, refunds, register, purchaseForm, removeButton] = await Promise.all([
     read("supabase/migrations/20260824110000_add_phonepe_exam_passes.sql"),
     read("supabase/migrations/20260825121500_add_cashfree_provider_support.sql"),
     read("app/dashboard/passes/actions.ts"),
@@ -23,6 +23,7 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
     read("app/refunds-and-cancellations/page.tsx"),
     read("app/register/RegisterForm.tsx"),
     read("app/dashboard/passes/BuyExamPassForm.tsx"),
+    read("app/admin/access/RemoveExamSeriesButton.tsx"),
   ]);
   assert.match(migration, /create table public\.access_products/);
   assert.match(migration, /create table public\.student_entitlements/);
@@ -52,6 +53,10 @@ test("exam passes use verified payment-provider checks and preserve legacy test 
   assert.match(adminActions, /Select at least one exam for this series/);
   assert.match(adminActions, /revalidatePath\("\/mock-tests", "layout"\)/);
   assert.match(adminActions, /slugify\(requestedSlug \|\| name\)/);
+  assert.match(adminActions, /updateAccessProduct/);
+  assert.match(adminActions, /removeAccessProduct/);
+  assert.match(adminAccess, /\/admin\/access\/\$\{product\.id\}\/edit/);
+  assert.match(removeButton, /paused safely instead of deleted/);
   assert.match(checkoutPage, /\(await headers\(\)\)\.get\("x-nonce"\)/);
   assert.match(checkoutPage, /provider_payload/);
   assert.match(checkoutPage, /payment_session_id/);

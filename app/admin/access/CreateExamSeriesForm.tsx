@@ -2,9 +2,9 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
-import { createAccessProduct, type AccessProductState } from "./actions";
+import { createAccessProduct, updateAccessProduct, type AccessProductState } from "./actions";
 
-type ExamGroup = {
+export type ExamGroup = {
   id: string;
   name: string;
   boardId: string;
@@ -13,14 +13,25 @@ type ExamGroup = {
   stateName: string;
 };
 
+export type ExamSeriesDraft = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  priceInr: number;
+  durationDays: number;
+  examGroupIds: string[];
+};
+
 const initialState: AccessProductState = { success: false, message: "" };
 
-export function CreateExamSeriesForm({ examGroups }: { examGroups: ExamGroup[] }) {
-  const [state, action] = useActionState(createAccessProduct, initialState);
+export function CreateExamSeriesForm({ examGroups, product }: { examGroups: ExamGroup[]; product?: ExamSeriesDraft }) {
+  const [state, action] = useActionState(product ? updateAccessProduct : createAccessProduct, initialState);
+  const editing = Boolean(product);
   const [stateId, setStateId] = useState("");
   const [boardId, setBoardId] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(product?.examGroupIds ?? []);
 
   const states = useMemo(() => [...new Map(examGroups.map((group) => [group.stateId, group.stateName])).entries()].map(([id, name]) => ({ id, name })), [examGroups]);
   const boards = useMemo(() => [...new Map(examGroups.filter((group) => group.stateId === stateId).map((group) => [group.boardId, group.boardName])).entries()].map(([id, name]) => ({ id, name })), [examGroups, stateId]);
@@ -37,33 +48,35 @@ export function CreateExamSeriesForm({ examGroups }: { examGroups: ExamGroup[] }
 
   return (
     <form action={action} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Step 2</p>
-      <h2 className="mt-1 text-xl font-black text-slate-950">Create a paid exam series</h2>
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">{editing ? "Edit exam series" : "Step 2"}</p>
+      <h2 className="mt-1 text-xl font-black text-slate-950">{editing ? "Update paid exam series" : "Create a paid exam series"}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">Students pay once and unlock every paid mock test under the selected exam or exams.</p>
+
+      {product && <input type="hidden" name="product_id" value={product.id} />}
 
       <div className="mt-5 grid gap-4">
         <label className="text-sm font-bold text-slate-900">Series name
-          <input required name="name" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="Telangana Police Complete Series" />
+          <input required name="name" defaultValue={product?.name} className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="Telangana Police Complete Series" />
         </label>
         <label className="text-sm font-bold text-slate-900">Price students pay (₹)
-          <input required min="1" step="1" type="number" name="price_inr" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="199" />
+          <input required min="1" step="1" type="number" name="price_inr" defaultValue={product?.priceInr} className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="199" />
           <span className="mt-1 block text-xs font-normal text-slate-500">This is the final checkout price for the complete series, not a price per mock test.</span>
         </label>
         <label className="text-sm font-bold text-slate-900">Access valid for
-          <select name="duration_days" defaultValue="90" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal"><option value="30">30 days</option><option value="60">60 days</option><option value="90">90 days</option><option value="180">180 days</option><option value="365">365 days</option></select>
+          <select name="duration_days" defaultValue={String(product?.durationDays ?? 90)} className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal"><option value="30">30 days</option><option value="60">60 days</option><option value="90">90 days</option><option value="180">180 days</option><option value="365">365 days</option></select>
         </label>
         <label className="text-sm font-bold text-slate-900">Description <span className="font-normal text-slate-500">(optional)</span>
-          <textarea name="description" className="mt-1.5 min-h-20 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="What students receive with this series" />
+          <textarea name="description" defaultValue={product?.description ?? ""} className="mt-1.5 min-h-20 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="What students receive with this series" />
         </label>
         <label className="text-sm font-bold text-slate-900">URL label <span className="font-normal text-slate-500">(optional)</span>
-          <input name="slug" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="Leave blank to create automatically" />
+          <input name="slug" defaultValue={product?.slug ?? ""} className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal" placeholder="Leave blank to create automatically" />
         </label>
       </div>
 
       {selectedIds.map((id) => <input key={id} type="hidden" name="exam_group_ids" value={id} />)}
       <fieldset className="mt-6">
         <legend className="text-sm font-bold text-slate-900">Exams included in this series</legend>
-        <p className="mt-1 text-xs leading-5 text-slate-500">First choose a State, then filter by board or search for the exact exam. Tick one or many matching exams.</p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">First choose a State, then filter by board or search for the exact exam. Tick one or many matching exams.{editing ? " Changing included exams is blocked after student purchases." : ""}</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-semibold text-slate-800">State
             <select value={stateId} onChange={(event) => { setStateId(event.target.value); setBoardId(""); }} className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal"><option value="">Choose a state</option>{states.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
@@ -86,7 +99,7 @@ export function CreateExamSeriesForm({ examGroups }: { examGroups: ExamGroup[] }
         {!examGroups.length && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">Create an exam first in the catalogue before creating a paid series.</p>}
       </fieldset>
 
-      <div className="mt-6"><PendingSubmitButton pendingLabel="Creating exam series…" className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-60">Create and activate series</PendingSubmitButton></div>
+      <div className="mt-6"><PendingSubmitButton pendingLabel={editing ? "Saving exam series…" : "Creating exam series…"} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-60">{editing ? "Save changes" : "Create and activate series"}</PendingSubmitButton></div>
       {state.message && <p role="status" aria-live="polite" className={`mt-4 rounded-xl px-4 py-3 text-sm font-semibold ${state.success ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>{state.message}</p>}
     </form>
   );
