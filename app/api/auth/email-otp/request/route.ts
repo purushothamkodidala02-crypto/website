@@ -18,7 +18,16 @@ export async function POST(request: Request) {
     const { data: userId } = await admin.rpc("find_auth_user_id_by_email", { requested_email: email });
     if (!userId) return Response.json({ ok: true });
     const { data: authUser, error: userError } = await admin.auth.admin.getUserById(userId);
-    if (userError || !authUser.user?.email_confirmed_at) return Response.json({ ok: true });
+    if (userError) return Response.json({ ok: true });
+    if (!authUser.user?.email_confirmed_at) {
+      return Response.json(
+        {
+          code: "email_not_confirmed",
+          message: "Your email address is not confirmed. Open the Varadhi Prep confirmation email, confirm your account, and then request a sign-in code.",
+        },
+        { status: 403 },
+      );
+    }
     const otp = createSixDigitOtp();
     const { error } = await admin.rpc("issue_custom_email_login_challenge", { requested_user_id: userId, requested_email: email, requested_code_hash: hashOtp(`${email}:${otp}`), requested_ip_hash: hashIp(ip) });
     if (error) return Response.json({ message: error.message.includes("wait") || error.message.includes("Too many") ? error.message : "We could not send a code right now. Please try again shortly." }, { status: error.message.includes("wait") || error.message.includes("Too many") ? 429 : 500 });

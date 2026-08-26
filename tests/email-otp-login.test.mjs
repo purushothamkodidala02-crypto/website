@@ -28,6 +28,8 @@ test("email OTP login keeps password login and protects OTP requests", async () 
   assert.match(migration, /service_role/);
   assert.match(requestRoute, /verifyTurnstile/);
   assert.match(requestRoute, /email_confirmed_at/);
+  assert.match(requestRoute, /email_not_confirmed/);
+  assert.match(requestRoute, /Open the Varadhi Prep confirmation email/);
   assert.match(requestRoute, /issue_custom_email_login_challenge/);
   assert.match(verifyRoute, /consume_custom_email_login_challenge/);
   assert.match(verifyRoute, /email_confirmed_at/);
