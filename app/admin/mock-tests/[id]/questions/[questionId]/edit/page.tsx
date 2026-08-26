@@ -4,6 +4,7 @@ import { EditQuestionForm } from "@/app/admin/questions/[id]/edit/EditQuestionFo
 import { createClient } from "@/lib/supabase/server";
 import type { Question } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
+import { isMockTestPreviewHref, listReturnToFromMockTestPreview, mockTestQuestionsHref, mockTestsListReturnTo } from "@/lib/admin/mock-test-navigation";
 
 export default async function EditMockTestQuestionPage({ params, searchParams }: { params: Promise<{ id: string; questionId: string }>; searchParams: Promise<{ returnTo?: string | string[] }> }) {
   const { id: mockTestId, questionId } = await params;
@@ -28,10 +29,12 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
     const category = group ? categories.get(group.exam_id) : undefined;
     return { id: subject.id, contentLanguageMode: subject.content_language_mode as SubjectContentLanguageMode, label: `${category?.name ?? "Unknown category"} → ${group?.name ?? "Unknown Exam"} → ${paper?.name ?? "Unknown Paper"} → ${subject.name}` };
   });
-  const mockTestsPath = typeof returnTo === "string" && (returnTo === "/admin/mock-tests" || returnTo.startsWith("/admin/mock-tests?")) ? returnTo : "/admin/mock-tests";
-  const questionsPath = `/admin/mock-tests/${mockTestId}/questions?returnTo=${encodeURIComponent(mockTestsPath)}`;
+  const returningToPreview = isMockTestPreviewHref(returnTo, mockTestId);
+  const mockTestsPath = returningToPreview ? listReturnToFromMockTestPreview(returnTo) : mockTestsListReturnTo(returnTo);
+  const questionsPath = mockTestQuestionsHref(mockTestId, mockTestsPath);
+  const backHref = returningToPreview && typeof returnTo === "string" ? returnTo : questionsPath;
   return <main>
-    <Link href={questionsPath} className="text-sm font-semibold text-teal-700 hover:underline">← Back to {mockTestResult.data.title} Questions</Link>
+    <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">← Back to {returningToPreview ? "Student Preview" : `${mockTestResult.data.title} Questions`}</Link>
     <h1 className="mt-5 text-3xl font-black">Edit question in this mock test</h1>
     <p className="mt-2 text-slate-600">This edit applies only to this mock test. Other mock tests keep their own question version.</p>
     <EditQuestionForm question={questionResult.data as Question} subjects={subjects} mockTestId={mockTestId} />

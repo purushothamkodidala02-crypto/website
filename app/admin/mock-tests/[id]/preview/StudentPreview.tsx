@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
+import { mockTestPreviewHref } from "@/lib/admin/mock-test-navigation";
 
 type Answer = "A" | "B" | "C" | "D";
 
@@ -28,11 +29,11 @@ export type PreviewQuestion = {
   languageMode: "bilingual" | "english" | "telugu";
 };
 
-export function StudentPreview({ mockTestId, questions, canEdit, backHref, initialQuestion }: { mockTestId: string; questions: PreviewQuestion[]; canEdit: boolean; backHref: string; initialQuestion: number }) {
+export function StudentPreview({ mockTestId, questions, canEdit, backHref, listReturnTo, initialQuestion }: { mockTestId: string; questions: PreviewQuestion[]; canEdit: boolean; backHref: string; listReturnTo: string; initialQuestion: number }) {
   const [index, setIndex] = useState(() => Math.min(Math.max(initialQuestion - 1, 0), Math.max(questions.length - 1, 0)));
   const [language, setLanguage] = useState<"en" | "te">("en");
   const current = questions[index];
-  const previewHref = `/admin/mock-tests/${mockTestId}/preview?question=${index + 1}`;
+  const previewHref = mockTestPreviewHref(mockTestId, listReturnTo, index + 1);
   const editHref = current ? `/admin/mock-tests/${mockTestId}/questions/${current.id}/edit?returnTo=${encodeURIComponent(previewHref)}` : backHref;
   const options = useMemo(() => {
     if (!current) return [] as Array<readonly [Answer, string]>;

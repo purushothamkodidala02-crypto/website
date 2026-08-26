@@ -114,7 +114,7 @@ test("mock-test management preserves filters while editing a test", async () => 
   assert.match(mockTestTable, /returnTo=\$\{encodeURIComponent\(mockTestAdminUrl\)\}/);
   assert.match(mockTestPage, /initialStateId=\{stateId\}/);
   assert.match(mockTestPage, /initialStatus=\{initialStatus\}/);
-  assert.match(editPage, /returnTo\.startsWith\("\/admin\/mock-tests\?"\)/);
+  assert.match(editPage, /mockTestsListReturnTo\(returnTo\)/);
   assert.match(editPage, /href=\{backHref\}/);
 });
 

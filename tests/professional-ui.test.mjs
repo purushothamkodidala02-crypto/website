@@ -74,18 +74,24 @@ test("mock-test question management fetches only questions assigned to that test
   assert.doesNotMatch(page, /supabase\.from\("questions"\)\.select\("id, question_text, is_active"\),/);
 });
 
-test("mock-test filters remain available after managing a test or its questions", async () => {
-  const [table, editPage, questionsPage, assignments] = await Promise.all([
+test("mock-test filters remain available through settings, questions, and previews", async () => {
+  const [table, navigation, editPage, questionsPage, previewPage, preview, assignments] = await Promise.all([
     read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("lib/admin/mock-test-navigation.ts"),
     read("app/admin/mock-tests/[id]/edit/page.tsx"),
     read("app/admin/mock-tests/[id]/questions/page.tsx"),
+    read("app/admin/mock-tests/[id]/preview/page.tsx"),
+    read("app/admin/mock-tests/[id]/preview/StudentPreview.tsx"),
     read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
   ]);
 
   assert.match(table, /questions\?returnTo=\$\{encodeURIComponent\(mockTestAdminUrl\)\}/);
-  assert.match(editPage, /questions\?returnTo=\$\{encodeURIComponent\(backHref\)\}/);
-  assert.match(questionsPage, /const mockTestsPath = typeof returnTo === "string"/);
-  assert.match(questionsPage, /returnTo=\$\{encodeURIComponent\(mockTestsPath\)\}/);
+  assert.match(navigation, /mockTestsListReturnTo/);
+  assert.match(navigation, /mockTestPreviewHref/);
+  assert.match(editPage, /mockTestQuestionsHref\(test\.id, backHref\)/);
+  assert.match(questionsPage, /mockTestPreviewHref\(test\.id, mockTestsPath\)/);
+  assert.match(previewPage, /mockTestQuestionsHref\(id, listReturnTo\)/);
+  assert.match(preview, /mockTestPreviewHref\(mockTestId, listReturnTo, index \+ 1\)/);
   assert.match(assignments, /const returnToQuery = returnTo \? `\?returnTo=\$\{encodeURIComponent\(returnTo\)\}` : ""/);
   assert.match(assignments, /\$\{questionsPath\}\/new\$\{returnToQuery\}/);
 });
