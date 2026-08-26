@@ -176,10 +176,10 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
 
 const navigationIconStyles = {
   home: "bg-slate-900 text-white",
-  tests: "bg-teal-200/70 text-teal-800",
-  progress: "bg-teal-300 text-slate-950",
-  admin: "bg-violet-200/70 text-violet-950",
-  support: "bg-cyan-200/70 text-cyan-900",
+  tests: "bg-slate-900 text-white",
+  progress: "bg-slate-900 text-white",
+  admin: "bg-slate-900 text-white",
+  support: "bg-slate-900 text-white",
 } as const;
 
 function NavigationIcon({ name }: { name: NavigationIconName }) {
