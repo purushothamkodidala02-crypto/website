@@ -218,10 +218,10 @@ test("question media imports, uploads, enlargement, and attempt reviews stay con
   assert.match(media, /aria-modal="true"/);
   assert.match(media, /Zoom in/);
   assert.match(media, /Zoom out/);
-  assert.match(media, /max-h-\[18rem\]/);
-  assert.match(media, /sm:max-h-\[28rem\]/);
+  assert.match(media, /max-h-\[14rem\]/);
+  assert.match(media, /sm:max-h-\[18rem\]/);
   assert.match(media, /zoom === 1/);
-  assert.match(media, /max-h-full/);
+  assert.match(media, /max-h-\[calc\(100dvh-8rem\)\]/);
   assert.match(media, /Fit image/);
   assert.match(media, /zoom \* 100/);
   assert.match(media, /motion-reduce:transition-none/);
@@ -240,6 +240,7 @@ test("mock-test student preview mirrors the question screen without exposing it 
   assert.match(preview, /Edit this question/);
   assert.match(preview, /Administrator answer key/);
   assert.match(preview, /Preview question list[\s\S]*overflow-y-auto/);
+  assert.match(preview, /grid-cols-\[repeat\(auto-fill,2\.5rem\)\]/);
   assert.match(preview, /<QuestionMedia src=\{current\.imageUrl\}/);
   assert.match(preview, /Students cannot see answer keys or explanations before submitting/);
   assert.match(questionsPage, /Student Preview/);

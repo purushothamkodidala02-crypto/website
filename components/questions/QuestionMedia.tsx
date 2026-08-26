@@ -50,7 +50,7 @@ export function QuestionMedia({
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
-            className="mx-auto h-auto max-h-[18rem] max-w-full w-auto object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:max-h-[28rem]"
+            className="mx-auto h-auto max-h-[14rem] max-w-full w-auto object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:max-h-[18rem]"
           />
         </button>
         <figcaption className="mt-2 flex items-center justify-center gap-2 text-center text-xs font-semibold text-slate-600">
@@ -82,13 +82,13 @@ export function QuestionMedia({
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-auto p-3 sm:p-6">
-            <div className="mx-auto flex min-h-full w-full items-center justify-center">
+            <div className={zoom === 1 ? "mx-auto flex h-full w-full items-center justify-center" : "mx-auto flex min-h-full w-full items-center justify-center"}>
               <img
                 src={src}
                 alt={alt}
                 decoding="async"
                 referrerPolicy="no-referrer"
-                className={zoom === 1 ? "h-auto max-h-full max-w-full object-contain motion-reduce:transition-none" : "h-auto max-w-none object-contain motion-reduce:transition-none"}
+                className={zoom === 1 ? "h-auto max-h-[calc(100dvh-8rem)] max-w-full w-auto object-contain motion-reduce:transition-none" : "h-auto max-w-none object-contain motion-reduce:transition-none"}
                 style={zoom === 1 ? undefined : { width: `${zoom * 100}%` }}
               />
             </div>
