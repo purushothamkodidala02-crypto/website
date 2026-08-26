@@ -267,10 +267,7 @@ export default async function Dashboard({
 
         {totalAttempts === 0 ? (
           <section className="mt-10 rounded-3xl border border-dashed border-teal-200 bg-gradient-to-br from-white to-teal-50 p-10 text-center shadow-sm">
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-teal-100 text-lg font-black text-teal-800">
-              01
-            </span>
-            <h2 className="mt-5 text-2xl font-black text-slate-950">
+            <h2 className="text-2xl font-black text-slate-950">
               Your progress will appear here
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-600">
