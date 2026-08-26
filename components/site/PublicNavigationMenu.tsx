@@ -175,11 +175,11 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
 }
 
 const navigationIconStyles = {
-  home: "bg-slate-900 text-white",
-  tests: "bg-slate-900 text-white",
-  progress: "bg-slate-900 text-white",
-  admin: "bg-slate-900 text-white",
-  support: "bg-slate-900 text-white",
+  home: "border border-slate-200 bg-slate-50 text-slate-950",
+  tests: "border border-slate-200 bg-slate-50 text-slate-950",
+  progress: "border border-slate-200 bg-slate-50 text-slate-950",
+  admin: "border border-slate-200 bg-slate-50 text-slate-950",
+  support: "border border-slate-200 bg-slate-50 text-slate-950",
 } as const;
 
 function NavigationIcon({ name }: { name: NavigationIconName }) {
