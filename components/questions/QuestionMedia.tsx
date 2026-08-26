@@ -50,7 +50,7 @@ export function QuestionMedia({
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
-            className="mx-auto min-h-48 max-h-[min(58dvh,42rem)] w-full object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:min-h-64"
+            className="mx-auto h-auto max-h-[18rem] max-w-full w-auto object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:max-h-[28rem]"
           />
         </button>
         <figcaption className="mt-2 flex items-center justify-center gap-2 text-center text-xs font-semibold text-slate-600">
@@ -88,8 +88,8 @@ export function QuestionMedia({
                 alt={alt}
                 decoding="async"
                 referrerPolicy="no-referrer"
-                className="h-auto max-w-none object-contain motion-reduce:transition-none"
-                style={{ width: `${zoom * 100}%` }}
+                className={zoom === 1 ? "h-auto max-h-full max-w-full object-contain motion-reduce:transition-none" : "h-auto max-w-none object-contain motion-reduce:transition-none"}
+                style={zoom === 1 ? undefined : { width: `${zoom * 100}%` }}
               />
             </div>
           </div>
