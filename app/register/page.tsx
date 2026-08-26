@@ -19,7 +19,7 @@ export default async function RegisterPage({
   const nextPath =
     requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
       ? requestedPath
-      : "/dashboard";
+      : "/";
   const supabase = await createClient();
   const {
     data: { user },

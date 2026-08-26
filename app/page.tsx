@@ -101,13 +101,12 @@ export default async function Home() {
               {states.map((state, index) => {
                 const stateCategoryIds = new Set(categories.filter((category) => category.state_id === state.id).map((category) => category.id));
                 const stateExams = activeExams.filter((exam) => stateCategoryIds.has(exam.exam_id));
-                const stateTests = stateExams.reduce((total, exam) => total + (testCountByExam.get(exam.id) ?? 0), 0);
                 const color = index === 0 ? "bg-teal-50 text-teal-800" : index === 1 ? "bg-amber-50 text-amber-800" : "bg-indigo-50 text-indigo-800";
                 return <Link key={state.id} href={stateUrl(state.slug)} className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
                   <div className="flex items-start justify-between"><span className={`grid h-12 w-12 place-items-center rounded-2xl ${color}`}><StateSymbol slug={state.slug} /></span><span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">{state.code}</span></div>
                   <h2 className="font-display mt-5 text-2xl">{state.name}</h2>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
-                  <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm"><span className="font-semibold text-slate-500">{stateExams.length} exams · {stateTests} tests</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Explore →</span></div>
+                  <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm"><span className="font-semibold text-slate-500">{stateExams.length} exam{stateExams.length === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Explore →</span></div>
                 </Link>;
               })}
             </div>
@@ -117,7 +116,7 @@ export default async function Home() {
             const category = categoryById.get(exam.exam_id);
             const state = states.find((item) => item.id === category?.state_id);
             const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
-            return state ? <Link key={exam.id} href={examUrl(state.slug, exam.slug)} className="group rounded-2xl border bg-white p-5 transition hover:border-teal-300 hover:shadow-lg"><div className="flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ExamSymbol name={exam.name} className="h-5 w-5" /></span><span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.code} · {category?.name}</span></div><h3 className="font-display mt-4 leading-6">{exam.name}</h3><p className="mt-2 text-xs font-semibold text-slate-500">{paperCount} papers · {testCountByExam.get(exam.id)} tests</p></Link> : null;
+            return state ? <Link key={exam.id} href={examUrl(state.slug, exam.slug)} className="group rounded-2xl border bg-white p-5 transition hover:border-teal-300 hover:shadow-lg"><div className="flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ExamSymbol name={exam.name} className="h-5 w-5" /></span><span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.code} · {category?.name}</span></div><h3 className="font-display mt-4 leading-6">{exam.name}</h3><p className="mt-2 text-xs font-semibold text-slate-500">{paperCount} paper{paperCount === 1 ? "" : "s"}</p></Link> : null;
           })}</div></div>}
         </div>
       </section>

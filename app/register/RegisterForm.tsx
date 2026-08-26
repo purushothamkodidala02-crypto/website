@@ -195,7 +195,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
             </li>
             <li className="flex gap-3 rounded-2xl bg-slate-50 p-4">
               <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-teal-700 text-xs font-black text-white">2</span>
-              Confirm the email, sign in, and you will return to the test you selected.
+              Confirm the email, sign in, and continue from the page you selected.
             </li>
           </ol>
           {notice && (

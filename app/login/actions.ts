@@ -20,7 +20,7 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
   const email = input.email.trim().toLowerCase();
   const nextPath = input.nextPath.startsWith("/") && !input.nextPath.startsWith("//")
     ? input.nextPath
-    : "/dashboard";
+    : "/";
   if (!email || email.length > 254 || !input.password || input.password.length > 72 || !input.captchaToken || input.captchaToken.length > 4096) {
     return { success: false, code: "validation_failed", message: "Complete the email, password, and security verification." };
   }

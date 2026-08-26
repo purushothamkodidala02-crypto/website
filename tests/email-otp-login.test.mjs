@@ -27,12 +27,47 @@ test("email OTP login keeps password login and protects OTP requests", async () 
   assert.match(migration, /attempts >= 5/);
   assert.match(migration, /service_role/);
   assert.match(requestRoute, /verifyTurnstile/);
+  assert.match(requestRoute, /email_confirmed_at/);
   assert.match(requestRoute, /issue_custom_email_login_challenge/);
   assert.match(verifyRoute, /consume_custom_email_login_challenge/);
+  assert.match(verifyRoute, /email_confirmed_at/);
   assert.match(verifyRoute, /generateLink/);
   assert.match(verifyRoute, /hashed_token/);
   assert.match(callbackRoute, /verifyOtp/);
   assert.match(callbackRoute, /type: "magiclink"/);
   assert.match(sender, /api\.brevo\.com\/v3\/smtp\/email/);
   assert.match(sender, /createSixDigitOtp/);
+});
+
+test("registration stores mobile numbers and default student sign-in returns home", async () => {
+  const [registration, phoneMigration, loginPage, registerPage, loginAction, verifyRoute, callbackRoute] = await Promise.all([
+    read("app/register/RegisterForm.tsx"),
+    read("supabase/migrations/20260826170000_store_student_phone_in_profiles.sql"),
+    read("app/login/page.tsx"),
+    read("app/register/page.tsx"),
+    read("app/login/actions.ts"),
+    read("app/api/auth/email-otp/verify/route.ts"),
+    read("app/auth/email-otp/callback/route.ts"),
+  ]);
+
+  assert.match(registration, /data: \{ full_name: fullName\.trim\(\), phone: normalizedPhone \}/);
+  assert.match(phoneMigration, /add column if not exists phone text/);
+  assert.match(phoneMigration, /raw_user_meta_data ->> 'phone'/);
+  for (const source of [loginPage, registerPage, loginAction, verifyRoute, callbackRoute]) {
+    assert.doesNotMatch(source, /: "\/dashboard"/);
+  }
+});
+
+test("state and exam catalogue cards show only the next useful content count", async () => {
+  const [home, catalogue] = await Promise.all([
+    read("app/page.tsx"),
+    read("app/mock-tests/page.tsx"),
+  ]);
+
+  assert.doesNotMatch(home, /\{stateTests\} tests/);
+  assert.doesNotMatch(home, /\{testCountByExam\.get\(exam\.id\)\} tests/);
+  assert.doesNotMatch(catalogue, /\{stats\.tests\} tests/);
+  assert.doesNotMatch(catalogue, /\{examTests\.length\} tests/);
+  assert.match(home, /paper\{paperCount === 1/);
+  assert.match(catalogue, /paper\{paperCount === 1/);
 });

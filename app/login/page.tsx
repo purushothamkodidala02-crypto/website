@@ -24,7 +24,7 @@ export default async function LoginPage({
   const nextPath =
     requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
       ? requestedPath
-      : "/dashboard";
+      : "/";
   const supabase = await createClient();
   const {
     data: { user },

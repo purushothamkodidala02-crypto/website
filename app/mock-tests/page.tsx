@@ -206,7 +206,6 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     const stateTests = tests.filter((test) => test.state.id === state.id);
     return [state.id, {
       exams: new Set(stateTests.map((test) => test.exam.id)).size,
-      tests: stateTests.length,
     }];
   }));
 
@@ -260,13 +259,13 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           <CatalogSection eyebrow="Step 1" title="Choose your exam location" description="TG and AP content stays completely separate. Central exams have their own space.">
             <div className="grid gap-4 md:grid-cols-3">
               {states.map((state, index) => {
-                const stats = stateStats.get(state.id) ?? { exams: 0, tests: 0 };
+                const stats = stateStats.get(state.id) ?? { exams: 0 };
                 const tones = ["from-teal-50 to-white border-teal-200", "from-amber-50 to-white border-amber-200", "from-indigo-50 to-white border-indigo-200"];
                 return <Link key={state.id} href={stateUrl(state.slug)} className={`group rounded-3xl border bg-gradient-to-br p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
                   <span className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} /></span><span className="rounded-full border bg-white/80 px-3 py-1 text-xs font-black tracking-wide text-slate-600">{state.code}</span></span>
                   <h2 className="font-display mt-6 text-2xl">{state.name}</h2>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
-                  <span className="mt-6 flex items-center justify-between border-t border-slate-200/70 pt-4 text-sm"><span className="font-semibold text-slate-500">{stats.exams} exams · {stats.tests} tests</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Choose →</span></span>
+                  <span className="mt-6 flex items-center justify-between border-t border-slate-200/70 pt-4 text-sm"><span className="font-semibold text-slate-500">{stats.exams} exam{stats.exams === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Choose →</span></span>
                 </Link>;
               })}
             </div>
@@ -281,7 +280,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                 <span className="flex items-center justify-between"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800"><ExamSymbol name={exam.name} /></span><span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">{category?.name}</span></span>
                 <h2 className="font-display mt-5 text-xl leading-7">{exam.name}</h2>
                 <p className="mt-2 text-sm text-slate-500">{selectedState.code} · {category?.name}</p>
-                <span className="mt-auto flex items-center justify-between border-t pt-4 text-sm"><span className="font-semibold text-slate-500">{paperCount} papers · {examTests.length} tests</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Open →</span></span>
+                <span className="mt-auto flex items-center justify-between border-t pt-4 text-sm"><span className="font-semibold text-slate-500">{paperCount} paper{paperCount === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Open →</span></span>
               </Link>;
             })}</div>}
           </CatalogSection>
