@@ -50,8 +50,9 @@ test("professional labels remain consistent across student and admin pages", asy
 });
 
 test("student navigation keeps account details separate from the admin workspace", async () => {
-  const [actions, publicMenu, adminNavigation] = await Promise.all([
+  const [actions, header, publicMenu, adminNavigation] = await Promise.all([
     read("components/site/PublicAccountActions.tsx"),
+    read("components/site/PublicHeader.tsx"),
     read("components/site/PublicNavigationMenu.tsx"),
     read("components/admin/AdminNavigation.tsx"),
   ]);
@@ -60,7 +61,9 @@ test("student navigation keeps account details separate from the admin workspace
   assert.match(actions, /profile\?\.role === "admin"/);
   assert.match(actions, /title=\{email\}/);
   assert.match(actions, /!isAdmin/);
+  assert.match(actions, /initialIsAdmin = false/);
   assert.doesNotMatch(actions, /Return to admin workspace/);
+  assert.match(header, /initialIsAdmin=\{profile\?\.role === "admin"\}/);
   assert.match(publicMenu, /label: "Admin workspace"/);
   assert.match(publicMenu, /hasAdminRole/);
   assert.match(adminNavigation, /target="_blank"/);

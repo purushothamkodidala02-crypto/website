@@ -13,6 +13,9 @@ export async function PublicHeader({ compact = false }: PublicHeaderProps) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
   const navigation = [
     { href: "/", label: "Home", icon: "home" as const },
     { href: "/mock-tests", label: "Mock tests", icon: "tests" as const },
@@ -33,7 +36,7 @@ export async function PublicHeader({ compact = false }: PublicHeaderProps) {
           </Link>
         </div>
 
-        <PublicAccountActions initialEmail={user?.email ?? null} />
+        <PublicAccountActions initialEmail={user?.email ?? null} initialIsAdmin={profile?.role === "admin"} />
       </div>
     </header>
   );
