@@ -218,8 +218,10 @@ test("question media imports, uploads, enlargement, and attempt reviews stay con
   assert.match(media, /aria-modal="true"/);
   assert.match(media, /Zoom in/);
   assert.match(media, /Zoom out/);
-  assert.match(media, /max-h-\[24rem\]/);
-  assert.match(media, /sm:max-h-\[34rem\]/);
+  assert.match(media, /max-h-\[min\(58dvh,42rem\)\]/);
+  assert.match(media, /min-h-48/);
+  assert.match(media, /Fit image/);
+  assert.match(media, /zoom \* 100/);
   assert.match(media, /motion-reduce:transition-none/);
 });
 

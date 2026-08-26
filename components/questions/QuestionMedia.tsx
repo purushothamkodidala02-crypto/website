@@ -50,12 +50,12 @@ export function QuestionMedia({
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
-            className="mx-auto min-h-40 max-h-[24rem] w-full object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:min-h-56 sm:max-h-[34rem]"
+            className="mx-auto min-h-48 max-h-[min(58dvh,42rem)] w-full object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:min-h-64"
           />
         </button>
-        <figcaption className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-slate-600">
-          <span aria-hidden="true">⌕</span>
-          Select the image to enlarge it
+        <figcaption className="mt-2 flex items-center justify-center gap-2 text-center text-xs font-semibold text-slate-600">
+          <span aria-hidden="true">View larger</span>
+          <span>Open the image for full-screen zoom controls.</span>
         </figcaption>
       </figure>
 
@@ -64,30 +64,36 @@ export function QuestionMedia({
           role="dialog"
           aria-modal="true"
           aria-label="Enlarged Question image"
+          aria-describedby="question-image-help"
           className="fixed inset-0 z-[100] flex flex-col bg-slate-950/95 text-white"
         >
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/15 px-3 py-3 sm:px-5">
             <p className="text-sm font-bold">Question image</p>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setZoom((value) => Math.max(1, value - 0.5))} disabled={zoom <= 1} aria-label="Zoom out" className="grid h-10 min-w-10 place-items-center rounded-lg border border-white/30 px-3 text-lg font-black disabled:opacity-35">−</button>
-              <span className="min-w-14 text-center text-xs font-bold" aria-live="polite">{Math.round(zoom * 100)}%</span>
-              <button type="button" onClick={() => setZoom((value) => Math.min(3, value + 0.5))} disabled={zoom >= 3} aria-label="Zoom in" className="grid h-10 min-w-10 place-items-center rounded-lg border border-white/30 px-3 text-lg font-black disabled:opacity-35">+</button>
-              <button type="button" autoFocus onClick={() => setOpen(false)} className="ml-1 rounded-lg bg-white px-4 py-2.5 text-sm font-black text-slate-950">Close</button>
+              <button type="button" onClick={() => setZoom((value) => Math.max(1, value - 0.5))} disabled={zoom <= 1} aria-label="Zoom out" className="grid h-10 min-w-10 place-items-center rounded-lg border border-white/30 px-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-35">
+                <span aria-hidden="true">-</span><span className="sr-only">Zoom out</span>
+              </button>
+              <span className="min-w-14 text-center text-xs font-bold" aria-live="polite" role="status">{Math.round(zoom * 100)}%</span>
+              <button type="button" onClick={() => setZoom((value) => Math.min(4, value + 0.5))} disabled={zoom >= 4} aria-label="Zoom in" className="grid h-10 min-w-10 place-items-center rounded-lg border border-white/30 px-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-35">
+                <span aria-hidden="true">+</span><span className="sr-only">Zoom in</span>
+              </button>
+              <button type="button" onClick={() => setZoom(1)} disabled={zoom === 1} className="hidden h-10 rounded-lg border border-white/30 px-3 text-xs font-bold disabled:opacity-35 sm:inline-flex">Fit image</button>
+              <button type="button" autoFocus onClick={() => setOpen(false)} className="ml-1 h-10 rounded-lg bg-white px-4 text-sm font-black text-slate-950">Close</button>
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-auto p-3 sm:p-6">
-            <div className="mx-auto flex min-h-full w-full items-center justify-center" style={{ minWidth: `${zoom * 100}%` }}>
+            <div className="mx-auto flex min-h-full w-full items-center justify-center">
               <img
                 src={src}
                 alt={alt}
                 decoding="async"
                 referrerPolicy="no-referrer"
-                className="h-auto max-h-none w-full object-contain"
-                style={{ maxWidth: `${90 * zoom}rem` }}
+                className="h-auto max-w-none object-contain motion-reduce:transition-none"
+                style={{ width: `${zoom * 100}%` }}
               />
             </div>
           </div>
-          <p className="shrink-0 border-t border-white/15 px-4 py-2 text-center text-xs text-slate-300">Use + and − to zoom. Scroll to inspect the complete image.</p>
+          <p id="question-image-help" className="shrink-0 border-t border-white/15 px-4 py-2 text-center text-xs text-slate-300">Use zoom controls, then scroll to inspect the complete image. Press Escape to close.</p>
         </div>
       )}
     </>
