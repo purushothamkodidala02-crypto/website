@@ -49,7 +49,7 @@ test("professional labels remain consistent across student and admin pages", asy
   assert.match(assignments, /No negative marking/);
 });
 
-test("only administrators receive a direct switch between student and admin workspaces", async () => {
+test("student navigation keeps account details separate from the admin workspace", async () => {
   const [actions, publicMenu, adminNavigation] = await Promise.all([
     read("components/site/PublicAccountActions.tsx"),
     read("components/site/PublicNavigationMenu.tsx"),
@@ -58,7 +58,9 @@ test("only administrators receive a direct switch between student and admin work
 
   assert.match(actions, /from\("profiles"\)\.select\("role"\)/);
   assert.match(actions, /profile\?\.role === "admin"/);
-  assert.match(actions, /Return to admin workspace/);
+  assert.match(actions, /title=\{email\}/);
+  assert.match(actions, /!isAdmin/);
+  assert.doesNotMatch(actions, /Return to admin workspace/);
   assert.match(publicMenu, /label: "Admin workspace"/);
   assert.match(publicMenu, /hasAdminRole/);
   assert.match(adminNavigation, /target="_blank"/);

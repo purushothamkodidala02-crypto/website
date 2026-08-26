@@ -71,19 +71,6 @@ export function PublicAccountActions({ initialEmail }: { initialEmail?: string |
         />
       ) : email ? (
         <>
-          {isAdmin && (
-            <Link
-              href="/admin"
-              aria-label="Return to admin workspace"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm font-bold text-white transition hover:border-teal-700 hover:bg-teal-800"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
-                <path d="M4 20V8l8-4 8 4v12" />
-                <path d="M8 20v-6h8v6M9 9h.01M15 9h.01" />
-              </svg>
-              <span className="hidden sm:inline">Admin workspace</span>
-            </Link>
-          )}
           {paidSalesEnabled && (
             <Link
               href="/dashboard/passes"
@@ -101,6 +88,14 @@ export function PublicAccountActions({ initialEmail }: { initialEmail?: string |
                 </span>
               )}
             </Link>
+          )}
+          {!isAdmin && (
+            <span
+              title={email}
+              className="hidden max-w-48 truncate text-sm font-semibold text-slate-600 lg:inline"
+            >
+              {email}
+            </span>
           )}
           <LogoutButton />
         </>
