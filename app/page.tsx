@@ -59,8 +59,8 @@ export default async function Home() {
     url: absoluteUrl("/"),
     logo: {
       "@type": "ImageObject",
-      url: absoluteUrl("/varadhi-logo-512.png"),
-      contentUrl: absoluteUrl("/varadhi-logo-512.png"),
+      url: absoluteUrl("/varadhi-v-logo.png"),
+      contentUrl: absoluteUrl("/varadhi-v-logo.png"),
       width: 512,
       height: 512,
     },

@@ -18,11 +18,10 @@ export const metadata: Metadata = {
 
   icons: {
     icon: [
-      { url: "/varadhi-icon-96.png", type: "image/png", sizes: "96x96" },
-      { url: "/varadhi-logo-512.png", type: "image/png", sizes: "512x512" },
+      { url: "/varadhi-v-logo.png", type: "image/png", sizes: "260x260" },
     ],
-    shortcut: "/varadhi-icon-96.png",
-    apple: [{ url: "/varadhi-icon-192.png", type: "image/png", sizes: "192x192" }],
+    shortcut: "/varadhi-v-logo.png",
+    apple: [{ url: "/varadhi-v-logo.png", type: "image/png", sizes: "260x260" }],
   },
 
   manifest: "/manifest.webmanifest",
