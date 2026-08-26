@@ -50,7 +50,7 @@ export function QuestionMedia({
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
-            className="mx-auto max-h-[42rem] min-h-40 w-full object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:min-h-56"
+            className="mx-auto min-h-40 max-h-[24rem] w-full object-contain transition group-hover:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:min-h-56 sm:max-h-[34rem]"
           />
         </button>
         <figcaption className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-slate-600">

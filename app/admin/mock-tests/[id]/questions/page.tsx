@@ -47,6 +47,7 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
   const settingsPath = `/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestsPath)}`;
 
   return <main>
+    {assignments.length > 0 && <div className="mb-4 flex justify-end"><Link href={`/admin/mock-tests/${test.id}/preview`} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 hover:bg-teal-100">Student Preview</Link></div>}
     <div className="flex flex-wrap items-center justify-between gap-3"><Link href={settingsPath} className="text-sm font-semibold text-teal-700 hover:underline">← Back to Mock Test Settings</Link>{assignments.length > 0 && <DownloadQuestionsButton mockTestId={test.id} />}</div>
     <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">{paper?.name ?? "Mock test"}{subjectName ? ` · ${subjectName}` : ""}</p>
     <h1 className="mt-2 text-3xl font-black">{test.title}: Questions</h1>

@@ -195,6 +195,7 @@ export async function updateQuestion(
   revalidatePath("/admin/mock-tests");
   if (mockTestId) {
     revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
+    revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
     return { success: true, message: copiedForThisMock ? "Question updated only in this Mock Test. A separate copy was kept for its other use." : "Question updated only in this Mock Test." };
   }
   return { success: true, message: "Question updated in English and Telugu." };

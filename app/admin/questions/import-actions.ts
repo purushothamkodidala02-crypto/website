@@ -411,6 +411,7 @@ async function importQuestions(
   if (mockTest) {
     revalidatePath(`/admin/mock-tests/${mockTest.id}/edit`);
     revalidatePath(`/admin/mock-tests/${mockTest.id}/questions`);
+    revalidatePath(`/admin/mock-tests/${mockTest.id}/preview`);
     if (mode === "replace") return { success: true, message: `Replacement completed safely: ${assigned} Questions assigned, ${added} added to the Question Bank, ${updated} updated, and ${Number(summary.deleted_orphans ?? 0)} unused old Question${Number(summary.deleted_orphans ?? 0) === 1 ? "" : "s"} removed.` };
     return { success: true, message: `${added} Question${added === 1 ? "" : "s"} added, ${updated} updated, and ${assigned} assigned to this Mock Test from ${file.name}.${alreadyAssigned ? ` ${alreadyAssigned} already assigned Question${alreadyAssigned === 1 ? " was" : "s were"} kept.` : ""}` };
   }

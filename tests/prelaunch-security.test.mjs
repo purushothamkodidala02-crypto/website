@@ -218,8 +218,27 @@ test("question media imports, uploads, enlargement, and attempt reviews stay con
   assert.match(media, /aria-modal="true"/);
   assert.match(media, /Zoom in/);
   assert.match(media, /Zoom out/);
-  assert.match(media, /max-h-\[42rem\]/);
+  assert.match(media, /max-h-\[24rem\]/);
+  assert.match(media, /sm:max-h-\[34rem\]/);
   assert.match(media, /motion-reduce:transition-none/);
+});
+
+test("mock-test student preview mirrors the question screen without exposing it publicly", async () => {
+  const [previewPage, preview, questionsPage, questionActions] = await Promise.all([
+    read("app/admin/mock-tests/[id]/preview/page.tsx"),
+    read("app/admin/mock-tests/[id]/preview/StudentPreview.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
+    read("app/admin/mock-tests/[id]/edit/question-actions.ts"),
+  ]);
+
+  assert.match(previewPage, /Student Preview/);
+  assert.match(previewPage, /from\("test_attempts"\)/);
+  assert.match(preview, /Edit this question/);
+  assert.match(preview, /Administrator answer key/);
+  assert.match(preview, /<QuestionMedia src=\{current\.imageUrl\}/);
+  assert.match(preview, /Students cannot see answer keys or explanations before submitting/);
+  assert.match(questionsPage, /Student Preview/);
+  assert.match(questionActions, /\/preview/);
 });
 
 test("assertion-reason questions accept short labels and render standard labels", async () => {

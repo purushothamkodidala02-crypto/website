@@ -26,6 +26,7 @@ export default async function EditMockTestPage({ params, searchParams }: { param
   const specializations = new Map((specializationsResult.data ?? []).map((item) => [item.id, item.name]));
 
   return <main>
+    <div className="mb-4 flex justify-end"><Link href={`/admin/mock-tests/${test.id}/preview`} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 hover:bg-teal-100">Student Preview</Link></div>
     <div className="flex flex-wrap items-center justify-between gap-3"><Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">← Back to Mock Tests</Link><Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(backHref)}`} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800">Manage Questions</Link></div>
     <h1 className="mt-5 text-3xl font-black">Mock Test Settings</h1>
     <p className="mt-2 text-slate-600">Edit the mock test details here. Use Manage Questions for this test&apos;s Excel upload, individual questions, editing, and removal.</p>
