@@ -138,6 +138,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
 
           <nav className="font-brand flex-1 space-y-2 overflow-y-auto p-4" aria-label="Sidebar navigation">
             {visibleItems.map((item) => {
+              const tone = navigationIconStyles[item.icon];
               const isCurrentPage = item.href === "/"
                 ? pathname === "/"
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -149,13 +150,11 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
                   aria-current={isCurrentPage ? "page" : undefined}
                   className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-black transition hover:translate-x-0.5 ${
                     isCurrentPage
-                      ? "border-slate-950 bg-slate-950 text-white shadow-sm"
+                      ? "border-slate-950 bg-white text-slate-950 shadow-sm"
                       : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${
-                    isCurrentPage ? "bg-white text-slate-950" : "bg-slate-100 text-slate-950"
-                  }`}>
+                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${tone}`}>
                     <NavigationIcon name={item.icon} />
                   </span>
                   <span>{item.label}</span>
@@ -173,6 +172,14 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
     </>
   );
 }
+
+const navigationIconStyles = {
+  home: "bg-slate-900 text-white",
+  tests: "bg-teal-200/70 text-teal-800",
+  progress: "bg-teal-300 text-slate-950",
+  admin: "bg-violet-200/70 text-violet-950",
+  support: "bg-cyan-200/70 text-cyan-900",
+} as const;
 
 function NavigationIcon({ name }: { name: NavigationIconName }) {
   if (name === "home") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="m4 10 8-6 8 6v9.5h-6v-6h-4v6H4z" strokeLinejoin="round" /></svg>;
