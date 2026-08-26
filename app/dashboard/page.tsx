@@ -229,14 +229,14 @@ export default async function Dashboard({
             </div>
           ) : (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {availableTests.slice(0, 4).map((test, index) => (
+              {availableTests.slice(0, 4).map((test) => (
                 <article
                   key={test.id}
                   className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg hover:shadow-slate-950/5"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50 text-xs font-black text-teal-800">
-                      {String(index + 1).padStart(2, "0")}
+                    <span className="rounded-lg bg-teal-50 px-3 py-2 text-xs font-black text-teal-800">
+                      Practice test
                     </span>
                     <span className={`rounded-full px-3 py-1 text-xs font-bold ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
                       {test.access_type === "free" ? "Free" : "Paid series"}
@@ -290,9 +290,9 @@ export default async function Dashboard({
               <AnalyticsCard
                 eyebrow="Performance"
                 title="Score trend"
-                detail="Your five latest attempts."
+                detail="Your five latest attempts. Scroll within this card when needed."
               >
-                <div className="space-y-5">
+                <div className="max-h-80 space-y-5 overflow-y-auto pr-2">
                   {latestAttempts.map((attempt) => {
                     const percentage =
                       attempt.total_marks === 0
@@ -329,14 +329,14 @@ export default async function Dashboard({
               <AnalyticsCard
                 eyebrow="Study guidance"
                 title="Subject accuracy"
-                detail="Based on questions you answered."
+                detail="Based on questions you answered. Scroll within this card when needed."
               >
                 {subjectAnalytics.length === 0 ? (
                   <p className="text-sm text-slate-600">
                     Answer more questions to unlock subject analytics.
                   </p>
                 ) : (
-                  <div className="space-y-5">
+                  <div className="max-h-80 space-y-5 overflow-y-auto pr-2">
                     {subjectAnalytics.map((subject) => {
                       const accuracy = Math.max(
                         0,
