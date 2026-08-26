@@ -7,7 +7,7 @@ type PaidOrder = { id: string; user_id: string; product_id: string; amount_paise
 type ActiveEntitlement = { user_id: string; product_id: string };
 type RecentOrder = PaidOrder & { merchant_order_id: string; status: string; paid_at: string | null };
 type Product = { id: string; name: string; is_active: boolean };
-type Student = { id: string; full_name: string | null; created_at: string };
+type Student = { id: string; full_name: string | null; phone: string | null; created_at: string };
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
@@ -61,7 +61,7 @@ export default async function AdminStudentsPage() {
 
   const admin = createAdminClient();
   const [studentsResult, productsResult, recentOrdersResult, paidOrdersResult, activeResult] = await Promise.all([
-    admin.from("profiles").select("id, full_name, created_at", { count: "exact" }).eq("role", "student").order("created_at", { ascending: false }).limit(50),
+    admin.from("profiles").select("id, full_name, phone, created_at", { count: "exact" }).eq("role", "student").order("created_at", { ascending: false }).limit(50),
     admin.from("access_products").select("id, name, is_active").order("display_order"),
     admin.from("payment_orders").select("id, user_id, product_id, merchant_order_id, amount_paise, status, paid_at, created_at").order("created_at", { ascending: false }).limit(50),
     loadAllPaidOrders(),
@@ -135,7 +135,7 @@ export default async function AdminStudentsPage() {
       <section className="mt-8 grid gap-8 xl:grid-cols-2">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-black text-slate-950">Recent registrations</h2><p className="mt-1 text-sm text-slate-600">Latest student accounts and their successful purchase count.</p>
-          <div className="mt-5 divide-y divide-slate-100">{students.slice(0, 20).map((student) => <div key={student.id} className="flex items-center justify-between gap-4 py-4 first:pt-0"><div className="min-w-0"><p className="truncate font-bold text-slate-950">{student.full_name?.trim() || "Student"}</p><p className="mt-1 truncate text-xs text-slate-500">{emails.get(student.id) || "Email unavailable"}</p><p className="mt-1 text-xs text-slate-500">Joined {dateFormatter.format(new Date(student.created_at))}</p></div><span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{paymentsByStudent.get(student.id) ?? 0} paid</span></div>)}{!students.length && <p className="py-8 text-center text-sm text-slate-500">No students have registered yet.</p>}</div>
+          <div className="mt-5 divide-y divide-slate-100">{students.slice(0, 20).map((student) => <div key={student.id} className="flex items-center justify-between gap-4 py-4 first:pt-0"><div className="min-w-0"><p className="truncate font-bold text-slate-950">{student.full_name?.trim() || "Student"}</p><p className="mt-1 truncate text-xs text-slate-500">{emails.get(student.id) || "Email unavailable"}</p><p className="mt-1 text-xs font-semibold text-slate-600">{student.phone ? `+91 ${student.phone}` : "Mobile number unavailable"}</p><p className="mt-1 text-xs text-slate-500">Joined {dateFormatter.format(new Date(student.created_at))}</p></div><span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{paymentsByStudent.get(student.id) ?? 0} paid</span></div>)}{!students.length && <p className="py-8 text-center text-sm text-slate-500">No students have registered yet.</p>}</div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

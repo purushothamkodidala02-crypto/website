@@ -134,6 +134,8 @@ test("admins can review registrations and series-level sales", async () => {
   assert.match(page, /Paid students/);
   assert.match(page, /Who paid for each Exam Series/);
   assert.match(page, /Recent registrations/);
+  assert.match(page, /id, full_name, phone, created_at/);
+  assert.match(page, /\+91 \$\{student\.phone\}/);
   assert.match(page, /Recent payment activity/);
   assert.match(page, /profile\?\.role !== "admin"/);
   assert.match(page, /currentLevel !== "aal2"/);
