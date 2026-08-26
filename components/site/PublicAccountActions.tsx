@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import LogoutButton from "@/components/admin/LogoutButton";
 import { createClient } from "@/lib/supabase/client";
 
-export function PublicAccountActions() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [accountReady, setAccountReady] = useState(false);
+export function PublicAccountActions({ initialEmail }: { initialEmail?: string | null }) {
+  const [email, setEmail] = useState<string | null>(initialEmail ?? null);
+  const [accountReady, setAccountReady] = useState(initialEmail !== undefined);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activePurchases, setActivePurchases] = useState(0);
   const [paidSalesEnabled, setPaidSalesEnabled] = useState(false);

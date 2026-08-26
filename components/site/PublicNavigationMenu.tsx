@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
@@ -18,6 +19,7 @@ const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
 
 export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
   const [hasUser, setHasUser] = useState(false);
@@ -136,15 +138,24 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
 
           <nav className="font-brand flex-1 space-y-2 overflow-y-auto p-4" aria-label="Sidebar navigation">
             {visibleItems.map((item) => {
-              const tone = navigationToneStyles[item.icon];
+              const isCurrentPage = item.href === "/"
+                ? pathname === "/"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-black transition hover:translate-x-0.5 ${tone.link}`}
+                  aria-current={isCurrentPage ? "page" : undefined}
+                  className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-black transition hover:translate-x-0.5 ${
+                    isCurrentPage
+                      ? "border-slate-950 bg-slate-950 text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
                 >
-                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${tone.icon}`}>
+                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${
+                    isCurrentPage ? "bg-white text-slate-950" : "bg-slate-100 text-slate-950"
+                  }`}>
                     <NavigationIcon name={item.icon} />
                   </span>
                   <span>{item.label}</span>
@@ -162,29 +173,6 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
     </>
   );
 }
-
-const navigationToneStyles = {
-  home: {
-    link: "border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50",
-    icon: "bg-slate-900 text-white",
-  },
-  tests: {
-    link: "border-teal-100 bg-teal-50 text-teal-900 hover:border-teal-200 hover:bg-teal-100",
-    icon: "bg-teal-200/70 text-teal-800",
-  },
-  progress: {
-    link: "border-slate-900 bg-slate-950 text-white hover:border-teal-400 hover:bg-slate-800",
-    icon: "bg-teal-300 text-slate-950",
-  },
-  admin: {
-    link: "border-violet-100 bg-violet-50 text-violet-950 hover:border-violet-200 hover:bg-violet-100",
-    icon: "bg-violet-200/70 text-violet-950",
-  },
-  support: {
-    link: "border-cyan-100 bg-cyan-50 text-cyan-900 hover:border-cyan-200 hover:bg-cyan-100",
-    icon: "bg-cyan-200/70 text-cyan-900",
-  },
-} as const;
 
 function NavigationIcon({ name }: { name: NavigationIconName }) {
   if (name === "home") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="m4 10 8-6 8 6v9.5h-6v-6h-4v6H4z" strokeLinejoin="round" /></svg>;

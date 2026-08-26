@@ -7,6 +7,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { getHomeCatalogData } from "@/lib/catalog-data";
 import { examUrl, stateUrl } from "@/lib/public-urls";
 import { absoluteUrl, SITE_DESCRIPTION } from "@/lib/site";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "TG & AP State Exam Mock Tests | Varadhi Prep",
@@ -30,6 +31,10 @@ const benefits = [
 export default async function Home() {
   const { states, categories, exams, papers, tests, hasStateError } =
     await getHomeCatalogData();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const categoryById = new Map(categories.map((item) => [item.id, item]));
   const paperById = new Map(papers.map((item) => [item.id, item]));
   const testCountByExam = new Map<string, number>();
@@ -124,7 +129,7 @@ export default async function Home() {
             <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-teal-200"><MockSymbol className="h-4 w-4" /> English + Telugu practice</p>
             <h2 className="font-display mt-6 text-4xl leading-[1.08] tracking-tight sm:text-6xl">Practise with purpose. Improve with every mock test.</h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Take focused tests in a clean exam workspace, pause when needed, and turn every result into a better study plan.</p>
-            <div className="mt-9 flex flex-wrap gap-3"><Link href="/mock-tests" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Start a mock test</Link><Link href="/register" className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">Create free account</Link></div>
+            <div className="mt-9 flex flex-wrap gap-3"><Link href="/mock-tests" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Start a mock test</Link><Link href={user ? "/dashboard" : "/register"} className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">{user ? "My progress" : "Create free account"}</Link></div>
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-slate-300">{["Clear test series", "Saved progress", "Detailed review"].map((item) => <span key={item} className="flex items-center gap-2"><span className="grid h-5 w-5 place-items-center rounded-full bg-teal-300 text-[10px] font-black text-slate-950">✓</span>{item}</span>)}</div>
           </div>
           <TestPreview />

@@ -2,12 +2,17 @@ import Link from "next/link";
 import { BrandLockup } from "@/components/brand/VaradhiBrand";
 import { PublicAccountActions } from "@/components/site/PublicAccountActions";
 import { PublicNavigationMenu } from "@/components/site/PublicNavigationMenu";
+import { createClient } from "@/lib/supabase/server";
 
 type PublicHeaderProps = {
   compact?: boolean;
 };
 
-export function PublicHeader({ compact = false }: PublicHeaderProps) {
+export async function PublicHeader({ compact = false }: PublicHeaderProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const navigation = [
     { href: "/", label: "Home", icon: "home" as const },
     { href: "/mock-tests", label: "Mock tests", icon: "tests" as const },
@@ -28,7 +33,7 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
           </Link>
         </div>
 
-        <PublicAccountActions />
+        <PublicAccountActions initialEmail={user?.email ?? null} />
       </div>
     </header>
   );
