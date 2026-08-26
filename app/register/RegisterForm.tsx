@@ -14,6 +14,30 @@ type Notice = {
   message: string;
 };
 
+function registrationErrorMessage(error: { code?: string; message?: string }) {
+  const code = (error.code ?? "").toLowerCase();
+  const message = (error.message ?? "").toLowerCase();
+  if (code === "captcha_failed" || message.includes("captcha") || message.includes("turnstile")) {
+    return "Security verification was rejected. Refresh this page, complete the verification again, and retry.";
+  }
+  if (code === "over_email_send_rate_limit" || message.includes("rate limit") || message.includes("too many")) {
+    return "Too many confirmation emails were requested. Wait a few minutes, then try again.";
+  }
+  if (code === "signup_disabled" || message.includes("signups are disabled")) {
+    return "New registrations are temporarily unavailable. Please try again later.";
+  }
+  if (message.includes("redirect") && (message.includes("allow") || message.includes("url"))) {
+    return "The confirmation link settings need attention. Please contact support before trying again.";
+  }
+  if (message.includes("email") && (message.includes("send") || message.includes("smtp") || message.includes("provider"))) {
+    return "Your details were not sent because the confirmation email service is unavailable. Please try again shortly.";
+  }
+  if (message.includes("database error") || message.includes("unexpected failure")) {
+    return "Your account service could not finish setting up the profile. Please try again shortly; no password was saved.";
+  }
+  return "We could not create the account right now. Check the details and try again.";
+}
+
 const noticeStyles = {
   error: "border-red-200 bg-red-50 text-red-700",
   success: "border-emerald-200 bg-emerald-50 text-emerald-800",
@@ -79,9 +103,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
         tone: "error",
         message: mayAlreadyExist
           ? "This email may already have a Varadhi Prep account. Please sign in with your existing credentials."
-          : error.code === "over_email_send_rate_limit"
-            ? "Too many confirmation emails were requested. Wait a few minutes, then try again."
-            : "We could not create the account right now. Check the details and try again.",
+          : registrationErrorMessage(error),
       });
       setLoading(false);
       return;
