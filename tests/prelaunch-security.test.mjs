@@ -377,6 +377,8 @@ test("mock-test question targets and isolated test operations are database prote
   assert.match(migration, /actual_question_count <> test_record\.target_question_count/);
   assert.match(createAction, /paper\.question_count \?\? requestedTarget/);
   assert.match(editAction, /const resultAffectingChange =/);
+  assert.match(editAction, /const currentSubjectId = current\.test_scope === "subject" \? current\.subject_id : null/);
+  assert.match(editAction, /submittedSubjectId !== currentSubjectId/);
   assert.match(editAction, /duration !== current\.duration_minutes/);
   assert.match(editAction, /targetQuestionCount !== current\.target_question_count/);
   assert.match(editAction, /You can still update its description, instructions and URL slug/);

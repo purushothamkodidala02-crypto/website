@@ -34,7 +34,16 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   if ((scope !== "paper" && scope !== "subject") || (scope === "subject" && !subjectId) || status !== "draft") return { success: false, message: "Check the mock type and draft status." };
   if (!PUBLIC_SLUG_PATTERN.test(slug) || ["attempt", "subject", "specialization", "opengraph-image"].includes(slug)) return { success: false, message: "Enter a URL slug using lowercase letters, numbers and single hyphens." };
   if (pricing.error) return { success: false, message: pricing.error };
-  const structureChanged = paperId !== current.paper_id || scope !== current.test_scope || (scope === "subject" ? subjectId : null) !== current.subject_id;
+  // Some older paper-wise mock tests retained a subject_id even though the
+  // subject is not part of their test structure. Treat that legacy value as
+  // unused so saving a description or slug does not look like a protected
+  // structural change after students have attempted the test.
+  const currentSubjectId = current.test_scope === "subject" ? current.subject_id : null;
+  const submittedSubjectId = scope === "subject" ? subjectId : null;
+  const structureChanged =
+    paperId !== current.paper_id ||
+    scope !== current.test_scope ||
+    submittedSubjectId !== currentSubjectId;
   const resultAffectingChange =
     structureChanged ||
     duration !== current.duration_minutes ||
@@ -69,7 +78,7 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const { error } = await supabase.from("mock_tests").update({
     paper_id: paperId,
     test_scope: scope,
-    subject_id: scope === "subject" ? subjectId : null,
+    subject_id: submittedSubjectId,
     title,
     slug,
     description: String(formData.get("description") ?? "").trim() || null,
