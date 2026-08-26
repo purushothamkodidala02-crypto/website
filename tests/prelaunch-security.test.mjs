@@ -235,6 +235,7 @@ test("mock-test student preview mirrors the question screen without exposing it 
   assert.match(previewPage, /from\("test_attempts"\)/);
   assert.match(preview, /Edit this question/);
   assert.match(preview, /Administrator answer key/);
+  assert.match(preview, /Preview question list[\s\S]*overflow-y-auto/);
   assert.match(preview, /<QuestionMedia src=\{current\.imageUrl\}/);
   assert.match(preview, /Students cannot see answer keys or explanations before submitting/);
   assert.match(questionsPage, /Student Preview/);
