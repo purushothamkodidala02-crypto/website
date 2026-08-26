@@ -142,6 +142,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
               const isCurrentPage = item.href === "/"
                 ? pathname === "/"
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const iconClass = isCurrentPage ? "bg-white text-slate-950" : tone;
               return (
                 <Link
                   key={item.href}
@@ -150,11 +151,11 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
                   aria-current={isCurrentPage ? "page" : undefined}
                   className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-black transition hover:translate-x-0.5 ${
                     isCurrentPage
-                      ? "border-slate-950 bg-white text-slate-950 shadow-sm"
+                      ? "border-slate-950 bg-slate-950 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${tone}`}>
+                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${iconClass}`}>
                     <NavigationIcon name={item.icon} />
                   </span>
                   <span>{item.label}</span>
