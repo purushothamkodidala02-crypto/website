@@ -179,7 +179,6 @@ const navigationIconStyles = {
   tests: "border border-teal-100 bg-teal-50 text-teal-800",
   progress: "border border-teal-100 bg-teal-50 text-teal-800",
   admin: "border border-teal-100 bg-teal-50 text-teal-800",
-  admin: "border border-teal-100 bg-teal-50 text-teal-800",
   support: "border border-teal-100 bg-teal-50 text-teal-800",
 } as const;
 
