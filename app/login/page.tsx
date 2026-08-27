@@ -17,6 +17,7 @@ export default async function LoginPage({
     next?: string | string[];
     confirmed?: string | string[];
     reset?: string | string[];
+    oauth_error?: string | string[];
   }>;
 }) {
   const params = await searchParams;
@@ -48,6 +49,9 @@ export default async function LoginPage({
       : params.confirmed === "1"
       ? "Email confirmed. Sign in to continue to your mock test."
       : undefined;
+  const initialError = params.oauth_error === "1"
+    ? "Google sign-in could not be completed. Please try again or use email sign-in."
+    : undefined;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -71,7 +75,7 @@ export default async function LoginPage({
             Browse available tests →
           </Link>
         </aside>
-        <LoginForm nextPath={nextPath} initialMessage={initialMessage} />
+        <LoginForm nextPath={nextPath} initialMessage={initialMessage} initialError={initialError} />
       </div>
     </main>
   );

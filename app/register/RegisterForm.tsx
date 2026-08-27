@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
@@ -221,7 +222,16 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
           <LongPendingNotice pending={loading} />
         </div>
       ) : (
-        <form onSubmit={handleRegister} className="mt-7 space-y-5">
+        <>
+          <div className="mt-7">
+            <GoogleSignInButton nextPath={nextPath} />
+          </div>
+          <div className="my-6 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">or register with email</span>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+          <form onSubmit={handleRegister} className="space-y-5">
           <label htmlFor="full_name" className="block text-sm font-bold text-slate-800">
             Full name
             <input id="full_name" type="text" required maxLength={120} autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your name" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
@@ -250,7 +260,8 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
               {notice.message}
             </p>
           )}
-        </form>
+          </form>
+        </>
       )}
 
       {!awaitingConfirmation && (

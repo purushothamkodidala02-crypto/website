@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/auth/PasswordInput";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { loginWithPassword, type LoginResult } from "./actions";
@@ -23,14 +24,20 @@ const noticeStyles = {
 export function LoginForm({
   nextPath,
   initialMessage,
+  initialError,
 }: {
   nextPath: string;
   initialMessage?: string;
+  initialError?: string;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice | null>(
-    initialMessage ? { tone: "success", message: initialMessage } : null,
+    initialError
+      ? { tone: "error", message: initialError }
+      : initialMessage
+        ? { tone: "success", message: initialMessage }
+        : null,
   );
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -136,9 +143,17 @@ export function LoginForm({
         Sign in to continue
       </h2>
       <p className="mt-3 text-sm leading-6 text-slate-600">
-        Use the same email and password you entered during registration.
+        Continue with Google, or use your registered email credentials.
       </p>
-      <button type="button" onClick={() => setLoginMethod("otp")} className="mt-4 w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in using a six-digit email code</button>
+      <div className="mt-6">
+        <GoogleSignInButton nextPath={nextPath} />
+      </div>
+      <div className="my-6 flex items-center gap-3" aria-hidden="true">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">or use email</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
+      <button type="button" onClick={() => setLoginMethod("otp")} className="w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in using a six-digit email code</button>
       <form onSubmit={handleLogin} className="mt-7 space-y-5">
         <label htmlFor="login_email" className="block text-sm font-bold text-slate-800">
           Email

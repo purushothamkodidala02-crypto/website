@@ -45,7 +45,7 @@ export function MockTestCsvImport({
           This draft already belongs to <strong>{paperName}</strong>
           {subjectName ? <> and <strong>{subjectName}</strong></> : ""}. The upload saves every
           valid Question for this mock test and adds it here at the same time. The same
-          import key in another mock test does not update this test's Questions.
+          import key in another mock test does not update this test&apos;s Questions.
         </p>
       </div>
 
