@@ -1,56 +1,98 @@
 "use client";
 
-import { useState } from "react";
-import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import Script from "next/script";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LongPendingNotice } from "@/components/feedback/LoadingSpinner";
 import { createClient } from "@/lib/supabase/client";
+
+// OAuth client IDs are designed to be public. The secret remains only in Supabase.
+const GOOGLE_CLIENT_ID = "331636610025-hrkt50q6bro9qrsdgkvpusr62s9h26q1.apps.googleusercontent.com";
+
+type GoogleCredentialResponse = { credential?: string };
+
+type GoogleIdentityApi = {
+  accounts: {
+    id: {
+      initialize: (options: {
+        client_id: string;
+        callback: (response: GoogleCredentialResponse) => void;
+        ux_mode: "popup";
+      }) => void;
+      renderButton: (
+        parent: HTMLElement,
+        options: { theme: "outline"; size: "large"; width: number; text: "continue_with" },
+      ) => void;
+    };
+  };
+};
+
+declare global {
+  interface Window {
+    google?: GoogleIdentityApi;
+  }
+}
 
 export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [scriptReady, setScriptReady] = useState(false);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
-  async function continueWithGoogle() {
+  const completeGoogleSignIn = useCallback(async (response: GoogleCredentialResponse) => {
+    if (!response.credential) {
+      setError("Google did not return a sign-in credential. Please try again.");
+      return;
+    }
+
     setPending(true);
     setError(null);
 
-    const callbackUrl = new URL("/auth/oauth/callback", window.location.origin);
-    callbackUrl.searchParams.set("next", nextPath);
-
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithOAuth({
+      const { error: signInError } = await supabase.auth.signInWithIdToken({
         provider: "google",
-        options: {
-          redirectTo: callbackUrl.toString(),
-          skipBrowserRedirect: false,
-        },
+        token: response.credential,
       });
 
       if (signInError) {
         setError("Google sign-in is temporarily unavailable. Use email sign-in or try again shortly.");
         setPending(false);
+        return;
       }
+
+      window.location.assign(`/auth/session/complete?next=${encodeURIComponent(nextPath)}`);
     } catch {
-      setError("Google sign-in could not be started. Check your connection and try again.");
+      setError("Google sign-in could not be completed. Check your connection and try again.");
       setPending(false);
     }
-  }
+  }, [nextPath]);
+
+  useEffect(() => {
+    if (!scriptReady || !buttonRef.current || !window.google) return;
+
+    buttonRef.current.replaceChildren();
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: completeGoogleSignIn,
+      ux_mode: "popup",
+    });
+    window.google.accounts.id.renderButton(buttonRef.current, {
+      theme: "outline",
+      size: "large",
+      width: Math.max(280, Math.floor(buttonRef.current.getBoundingClientRect().width)),
+      text: "continue_with",
+    });
+  }, [completeGoogleSignIn, scriptReady]);
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={continueWithGoogle}
-        disabled={pending}
-        aria-busy={pending}
-        className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <PendingButtonContent pending={pending} pendingLabel="Connecting to Google…">
-          <span className="flex items-center justify-center gap-3">
-            <GoogleMark />
-            Continue with Google
-          </span>
-        </PendingButtonContent>
-      </button>
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+        onReady={() => setScriptReady(true)}
+        onError={() => setError("Google sign-in could not load. Please use email sign-in or try again shortly.")}
+      />
+      <div ref={buttonRef} className="min-h-11" aria-busy={pending} aria-live="polite" />
       <LongPendingNotice pending={pending} />
       {error && (
         <p role="alert" aria-live="polite" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -58,16 +100,5 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         </p>
       )}
     </div>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0">
-      <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z" />
-      <path fill="#34A853" d="M12 22c2.7 0 4.98-.9 6.63-2.43l-3.24-2.54c-.9.6-2.05.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.05v2.62A10 10 0 0 0 12 22Z" />
-      <path fill="#FBBC05" d="M6.39 13.86A6.02 6.02 0 0 1 6.08 12c0-.65.11-1.28.31-1.86V7.52H3.05A10 10 0 0 0 2 12c0 1.61.38 3.14 1.05 4.48l3.34-2.62Z" />
-      <path fill="#EA4335" d="M12 6.01c1.47 0 2.79.5 3.83 1.5l2.87-2.88A9.64 9.64 0 0 0 12 2a10 10 0 0 0-8.95 5.52l3.34 2.62C7.18 7.77 9.39 6.01 12 6.01Z" />
-    </svg>
   );
 }

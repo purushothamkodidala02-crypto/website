@@ -4,34 +4,37 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Google login uses a secure OAuth callback and preserves the requested destination", async () => {
-  const [button, callback, login, register] = await Promise.all([
+test("Google login uses the branded Google button and preserves the requested destination", async () => {
+  const [button, callback, completion, login, register] = await Promise.all([
     read("components/auth/GoogleSignInButton.tsx"),
     read("app/auth/oauth/callback/route.ts"),
+    read("app/auth/session/complete/route.ts"),
     read("app/login/LoginForm.tsx"),
     read("app/register/RegisterForm.tsx"),
   ]);
 
-  assert.match(button, /provider: "google"/);
-  assert.match(button, /\/auth\/oauth\/callback/);
-  assert.match(button, /Continue with Google/);
+  assert.match(button, /accounts\.google\.com\/gsi\/client/);
+  assert.match(button, /signInWithIdToken/);
+  assert.match(button, /\/auth\/session\/complete/);
+  assert.match(button, /text: "continue_with"/);
   assert.match(callback, /exchangeCodeForSession/);
   assert.match(callback, /value\?\.startsWith\("\/"\) && !value\.startsWith\("\/\/"\)/);
-  assert.match(callback, /profile\.role === "admin"/);
+  assert.match(completion, /profile\.role === "admin"/);
+  assert.match(completion, /if \(!profile\.phone\)/);
   assert.match(login, /GoogleSignInButton/);
   assert.match(register, /GoogleSignInButton/);
 });
 
 test("new social-login students complete a verified mobile profile before continuing", async () => {
-  const [callback, page, form, action] = await Promise.all([
-    read("app/auth/oauth/callback/route.ts"),
+  const [completion, page, form, action] = await Promise.all([
+    read("app/auth/session/complete/route.ts"),
     read("app/complete-profile/page.tsx"),
     read("app/complete-profile/CompleteProfileForm.tsx"),
     read("app/complete-profile/actions.ts"),
   ]);
 
-  assert.match(callback, /if \(!profile\.phone\)/);
-  assert.match(callback, /\/complete-profile/);
+  assert.match(completion, /if \(!profile\.phone\)/);
+  assert.match(completion, /\/complete-profile/);
   assert.match(page, /Google securely confirmed your name and email/);
   assert.match(form, /autoComplete="tel-national"/);
   assert.match(action, /normaliseIndianMobile/);

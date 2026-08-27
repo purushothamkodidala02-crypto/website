@@ -15,17 +15,17 @@ function buildContentSecurityPolicy(nonce: string) {
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${supabaseOrigin}`,
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com`,
+    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",
     "frame-ancestors 'none'",
     "worker-src 'self' blob:",
-    "frame-src https://challenges.cloudflare.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",
+    "frame-src https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",
     ...(!isDevelopment ? ["upgrade-insecure-requests"] : []),
   ].join("; ");
 }
