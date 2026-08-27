@@ -1,22 +1,6 @@
--- Create editable corrected versions without changing historical attempts.
-alter table public.mock_tests
-  add column if not exists replaces_mock_test_id uuid references public.mock_tests(id) on delete restrict,
-  add column if not exists superseded_by_mock_test_id uuid references public.mock_tests(id) on delete restrict;
-
-create unique index if not exists uq_mock_tests_replaces_one_version
-  on public.mock_tests(replaces_mock_test_id) where replaces_mock_test_id is not null;
-
-drop index if exists public.uq_mock_tests_paper_series;
-drop index if exists public.uq_mock_tests_subject_series;
-create unique index uq_mock_tests_paper_series on public.mock_tests(paper_id, series_number)
-  where test_scope = 'paper' and superseded_by_mock_test_id is null;
-create unique index uq_mock_tests_subject_series on public.mock_tests(subject_id, series_number)
-  where test_scope = 'subject' and superseded_by_mock_test_id is null;
-
-alter table public.mock_tests drop constraint if exists mock_tests_paper_id_slug_key;
-create unique index if not exists uq_mock_tests_current_paper_slug on public.mock_tests(paper_id, slug)
-  where superseded_by_mock_test_id is null;
-
+-- Mock Test specialisation is inherited through its Paper. The initial
+-- corrected-version function incorrectly referenced a non-existent mock-test
+-- column. Replace it with the exact live mock_tests column set.
 create or replace function public.create_corrected_mock_test_version(requested_mock_test_id uuid)
 returns uuid language plpgsql security definer set search_path = public as $$
 declare
@@ -35,28 +19,30 @@ begin
     raise exception 'This Mock Test has no student attempts. Edit the existing draft instead.';
   end if;
 
-  update public.mock_tests set status = 'archived', superseded_by_mock_test_id = corrected_test_id, updated_at = now()
+  update public.mock_tests
+  set status = 'archived', superseded_by_mock_test_id = corrected_test_id, updated_at = now()
   where id = source_test.id;
 
   insert into public.mock_tests (
     id, paper_id, subject_id, title, slug, description, instructions, duration_minutes,
     difficulty, status, version, display_order, published_at, access_type, price_inr,
-    test_scope, series_number, seo_title, seo_description,
-    target_question_count, replaces_mock_test_id
+    test_scope, series_number, seo_title, seo_description, target_question_count,
+    replaces_mock_test_id
   ) values (
     corrected_test_id, source_test.paper_id, source_test.subject_id, source_test.title,
     source_test.slug, source_test.description, source_test.instructions, source_test.duration_minutes,
     source_test.difficulty, 'draft', source_test.version + 1, source_test.display_order, null,
     source_test.access_type, source_test.price_inr, source_test.test_scope,
-    source_test.series_number, source_test.seo_title,
-    source_test.seo_description, source_test.target_question_count, source_test.id
+    source_test.series_number, source_test.seo_title, source_test.seo_description,
+    source_test.target_question_count, source_test.id
   );
 
   for source_assignment in
     select assignment.question_order, assignment.marks, assignment.negative_marks, question.*
     from public.mock_test_questions assignment
     join public.questions question on question.id = assignment.question_id
-    where assignment.mock_test_id = source_test.id order by assignment.question_order
+    where assignment.mock_test_id = source_test.id
+    order by assignment.question_order
   loop
     insert into public.questions (
       subject_id, question_text, question_type, option_a, option_b, option_c, option_d,

@@ -426,8 +426,9 @@ test("mock-test question targets and isolated test operations are database prote
 });
 
 test("attempted mock tests can receive an isolated corrected version", async () => {
-  const [migration, actions, buttons] = await Promise.all([
+  const [migration, columnFix, actions, buttons] = await Promise.all([
     read("supabase/migrations/20260827153000_add_corrected_mock_test_versions.sql"),
+    read("supabase/migrations/20260827223000_fix_corrected_version_mock_columns.sql"),
     read("app/admin/mock-tests/manage-actions.ts"),
     read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
   ]);
@@ -439,6 +440,8 @@ test("attempted mock tests can receive an isolated corrected version", async () 
   assert.match(migration, /source_assignment\.image_url/);
   assert.match(migration, /source_assignment\.question_order/);
   assert.match(migration, /source_test\.series_number/);
+  assert.doesNotMatch(columnFix, /source_test\.specialization_id/);
+  assert.doesNotMatch(columnFix, /test_scope, specialization_id/);
   assert.match(actions, /createCorrectedMockTestVersion/);
   assert.match(actions, /cannot be restored/);
   assert.match(buttons, /Create corrected version/);
