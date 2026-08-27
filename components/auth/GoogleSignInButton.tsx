@@ -17,6 +17,7 @@ type GoogleIdentityApi = {
         client_id: string;
         callback: (response: GoogleCredentialResponse) => void;
         ux_mode: "popup";
+        nonce: string;
       }) => void;
       renderButton: (
         parent: HTMLElement,
@@ -25,6 +26,16 @@ type GoogleIdentityApi = {
     };
   };
 };
+
+async function createGoogleNonce() {
+  const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(nonce));
+  const hashedNonce = Array.from(new Uint8Array(digest))
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("");
+
+  return { nonce, hashedNonce };
+}
 
 declare global {
   interface Window {
@@ -37,6 +48,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
   const [error, setError] = useState<string | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const nonceRef = useRef<string | null>(null);
 
   const completeGoogleSignIn = useCallback(async (response: GoogleCredentialResponse) => {
     if (!response.credential) {
@@ -52,6 +64,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
       const { error: signInError } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: response.credential,
+        nonce: nonceRef.current ?? undefined,
       });
 
       if (signInError) {
@@ -70,18 +83,32 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
   useEffect(() => {
     if (!scriptReady || !buttonRef.current || !window.google) return;
 
-    buttonRef.current.replaceChildren();
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: completeGoogleSignIn,
-      ux_mode: "popup",
+    let cancelled = false;
+
+    void createGoogleNonce().then(({ nonce, hashedNonce }) => {
+      if (cancelled || !buttonRef.current || !window.google) return;
+
+      nonceRef.current = nonce;
+      buttonRef.current.replaceChildren();
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: completeGoogleSignIn,
+        ux_mode: "popup",
+        nonce: hashedNonce,
+      });
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        theme: "outline",
+        size: "large",
+        width: Math.max(280, Math.floor(buttonRef.current.getBoundingClientRect().width)),
+        text: "continue_with",
+      });
+    }).catch(() => {
+      setError("Google sign-in could not be prepared. Please use email sign-in or try again shortly.");
     });
-    window.google.accounts.id.renderButton(buttonRef.current, {
-      theme: "outline",
-      size: "large",
-      width: Math.max(280, Math.floor(buttonRef.current.getBoundingClientRect().width)),
-      text: "continue_with",
-    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [completeGoogleSignIn, scriptReady]);
 
   return (

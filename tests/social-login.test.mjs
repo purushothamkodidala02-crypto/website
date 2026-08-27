@@ -15,6 +15,8 @@ test("Google login uses the branded Google button and preserves the requested de
 
   assert.match(button, /accounts\.google\.com\/gsi\/client/);
   assert.match(button, /signInWithIdToken/);
+  assert.match(button, /createGoogleNonce/);
+  assert.match(button, /nonce: nonceRef\.current/);
   assert.match(button, /\/auth\/session\/complete/);
   assert.match(button, /text: "continue_with"/);
   assert.match(callback, /exchangeCodeForSession/);
