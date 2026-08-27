@@ -32,7 +32,7 @@ export default async function MockTestsPage({
   const supabase = await createClient();
   const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, summariesResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").order("display_order"),
-    supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at").order("series_number"),
+    supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at, replaces_mock_test_id, superseded_by_mock_test_id").order("series_number"),
     supabase.from("subjects").select("id, paper_id, name"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, duration_minutes, question_count, display_order").order("display_order"),
     supabase.from("exam_groups").select("id, exam_id, name, slug").order("display_order"),
@@ -102,6 +102,8 @@ export default async function MockTestsPage({
       usableQuestionCount: Number(summary?.usable_question_count ?? 0),
       totalMarks: Number(summary?.total_marks ?? 0),
       attemptCount: Number(summary?.attempt_count ?? 0),
+      replacesMockTestId: test.replaces_mock_test_id,
+      supersededByMockTestId: test.superseded_by_mock_test_id,
     };
   });
 

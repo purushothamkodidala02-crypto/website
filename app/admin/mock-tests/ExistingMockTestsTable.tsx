@@ -43,6 +43,8 @@ type ExistingMockTest = {
   usableQuestionCount: number;
   totalMarks: number;
   attemptCount: number;
+  replacesMockTestId: string | null;
+  supersededByMockTestId: string | null;
 };
 
 const emptyLocation: LocationFilterValue = { categoryId: "", examId: "", specializationId: "", paperId: "", subjectId: "" };
@@ -169,6 +171,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusDetail.className}`}>{statusDetail.label}</span>
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{test.scope === "paper" ? "Paper-wise" : "Subject-wise"}</span>
+                      {test.supersededByMockTestId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Correction in progress</span>}
+                      {test.replacesMockTestId && <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Corrected version</span>}
                     </div>
                     <div className="mt-3 flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200"><MockSymbol className="h-5 w-5" /></span><div><h3 className="font-display text-xl text-slate-950">{mockTestLabel(test.seriesNumber)}</h3><p className="mt-1 text-sm font-semibold text-slate-700">{test.stateCode} · {test.examName} · {test.paperName}{test.subjectName ? ` · ${test.subjectName}` : ""}</p><p className="mt-1 text-xs text-slate-400">Stored title: {test.title}</p></div></div>
                   </div>
@@ -177,7 +181,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     {test.questionCount > 0 ? <DownloadQuestionsButton mockTestId={test.id} /> : <span title="Add Questions before downloading" className="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-400">No questions to download</span>}
                     <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
                     <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
-                    <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} hasAttempts={test.attemptCount > 0} />
+                    <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} hasAttempts={test.attemptCount > 0} hasCorrectedVersion={Boolean(test.supersededByMockTestId)} />
                   </div>
                 </div>
 

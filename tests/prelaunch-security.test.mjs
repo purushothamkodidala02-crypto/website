@@ -461,6 +461,24 @@ test("admins can deliberately erase a hidden attempted mock test", async () => {
   assert.match(buttons, /Delete permanently/);
 });
 
+test("corrected drafts replace live versions without student downtime", async () => {
+  const [migration, page, table] = await Promise.all([
+    read("supabase/migrations/20260827190000_switch_corrected_versions_on_publish.sql"),
+    read("app/admin/mock-tests/page.tsx"),
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+  ]);
+
+  assert.match(migration, /keep_published_mock_test_live_during_correction/);
+  assert.match(migration, /switch_corrected_mock_test_on_publish/);
+  assert.match(migration, /new\.replaces_mock_test_id/);
+  assert.match(migration, /set status = 'archived'/);
+  assert.match(migration, /correction\.status = 'draft'/);
+  assert.match(page, /superseded_by_mock_test_id/);
+  assert.match(table, /Correction in progress/);
+  assert.match(table, /Corrected version/);
+  assert.match(table, /hasCorrectedVersion/);
+});
+
 test("admin mock-test totals are aggregated in the database without row-limit truncation", async () => {
   const [migration, page] = await Promise.all([
     read("supabase/migrations/20260824100000_add_admin_mock_test_summaries.sql"),

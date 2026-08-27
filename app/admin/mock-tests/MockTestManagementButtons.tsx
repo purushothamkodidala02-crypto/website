@@ -6,7 +6,7 @@ import type { MockTestStatus } from "@/types/mock-test";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { archiveMockTest, createCorrectedMockTestVersion, deleteDraftMockTest, permanentlyDeleteMockTest, publishMockTest, restoreMockTestAsDraft } from "./manage-actions";
 
-export function MockTestManagementButtons({ mockTestId, mockTestTitle, status, ready, hasAttempts }: { mockTestId: string; mockTestTitle: string; status: MockTestStatus; ready: boolean; hasAttempts: boolean }) {
+export function MockTestManagementButtons({ mockTestId, mockTestTitle, status, ready, hasAttempts, hasCorrectedVersion }: { mockTestId: string; mockTestTitle: string; status: MockTestStatus; ready: boolean; hasAttempts: boolean; hasCorrectedVersion: boolean }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
@@ -31,7 +31,7 @@ export function MockTestManagementButtons({ mockTestId, mockTestTitle, status, r
     router.refresh();
   }
 
-  const correct = hasAttempts ? <ActionButton pending={pending} onClick={() => run("correct")} label="Create corrected version" className="text-teal-800 hover:bg-teal-50" message={message} /> : null;
+  const correct = hasAttempts && !hasCorrectedVersion ? <ActionButton pending={pending} onClick={() => run("correct")} label="Create corrected version" className="text-teal-800 hover:bg-teal-50" message={message} /> : null;
   if (status === "published") return <div className="flex flex-wrap items-center gap-2"><ActionButton pending={pending} onClick={() => run("hide")} label="Hide" className="text-amber-800 hover:bg-amber-50" message={message} />{correct}</div>;
   const permanentDelete = hasAttempts ? <ActionButton pending={pending} onClick={() => run("permanent-delete")} label="Delete permanently" className="text-red-700 hover:bg-red-50" message={message} /> : null;
   if (status === "archived") return <div className="flex flex-wrap items-center gap-2">{!hasAttempts && <ActionButton pending={pending} onClick={() => run("restore")} label="Restore as draft" className="text-teal-700 hover:bg-teal-50" message={message} />}{correct}{permanentDelete}</div>;
