@@ -18,6 +18,7 @@ type GoogleIdentityApi = {
         callback: (response: GoogleCredentialResponse) => void;
         ux_mode: "popup";
         nonce: string;
+        use_fedcm_for_button: true;
       }) => void;
       renderButton: (
         parent: HTMLElement,
@@ -95,6 +96,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         callback: completeGoogleSignIn,
         ux_mode: "popup",
         nonce: hashedNonce,
+        use_fedcm_for_button: true,
       });
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",

@@ -17,6 +17,7 @@ test("Google login uses the branded Google button and preserves the requested de
   assert.match(button, /signInWithIdToken/);
   assert.match(button, /createGoogleNonce/);
   assert.match(button, /nonce: nonceRef\.current/);
+  assert.match(button, /use_fedcm_for_button: true/);
   assert.match(button, /\/auth\/session\/complete/);
   assert.match(button, /text: "continue_with"/);
   assert.match(callback, /exchangeCodeForSession/);
