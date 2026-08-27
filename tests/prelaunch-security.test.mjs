@@ -267,11 +267,12 @@ test("match questions clean imported markdown and support A-D with I-IV lists", 
 });
 
 test("admins can export mock-test questions in the accepted import format", async () => {
-  const [importer, format, exportRoute, testList] = await Promise.all([
+  const [importer, format, exportRoute, testList, questionsPage] = await Promise.all([
     read("app/admin/questions/import-actions.ts"),
     read("lib/questions/import-format.ts"),
     read("app/admin/mock-tests/[id]/questions-export/route.ts"),
     read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
   ]);
 
   assert.match(importer, /QUESTION_IMPORT_REQUIRED_HEADERS/);
@@ -283,7 +284,8 @@ test("admins can export mock-test questions in the accepted import format", asyn
   assert.match(exportRoute, /profile\?\.role !== "admin"/);
   assert.match(exportRoute, /\.order\("question_order"\)/);
   assert.match(exportRoute, /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/);
-  assert.match(testList, /DownloadQuestionsButton/);
+  assert.doesNotMatch(testList, /DownloadQuestionsButton/);
+  assert.match(questionsPage, /DownloadQuestionsButton/);
 });
 
 test("loading feedback is accessible and prevents duplicate operations", async () => {
