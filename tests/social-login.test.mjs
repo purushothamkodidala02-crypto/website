@@ -24,6 +24,7 @@ test("Google login uses the branded Google button and preserves the requested de
   assert.match(callback, /value\?\.startsWith\("\/"\) && !value\.startsWith\("\/\/"\)/);
   assert.match(completion, /profile\.role === "admin"/);
   assert.match(completion, /if \(!profile\.phone\)/);
+  assert.match(completion, /signOut\(\{ scope: "others" \}\)/);
   assert.match(login, /GoogleSignInButton/);
   assert.match(register, /GoogleSignInButton/);
 });
@@ -45,4 +46,18 @@ test("new social-login students complete a verified mobile profile before contin
   assert.match(action, /profile\.role !== "student"/);
   assert.match(action, /updateUserById/);
   assert.match(action, /\.update\(\{ full_name: fullName, phone \}\)/);
+});
+
+test("student sign-ins close sessions on other devices while administrators keep MFA sessions", async () => {
+  const [passwordLogin, emailCodeCallback, oauthCallback] = await Promise.all([
+    read("app/login/actions.ts"),
+    read("app/auth/email-otp/callback/route.ts"),
+    read("app/auth/oauth/callback/route.ts"),
+  ]);
+
+  assert.match(passwordLogin, /profile\.role !== "admin"/);
+  assert.match(passwordLogin, /signOut\(\{ scope: "others" \}\)/);
+  assert.match(emailCodeCallback, /profile\?\.role === "student"/);
+  assert.match(emailCodeCallback, /signOut\(\{ scope: "others" \}\)/);
+  assert.match(oauthCallback, /signOut\(\{ scope: "others" \}\)/);
 });

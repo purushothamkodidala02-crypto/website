@@ -49,6 +49,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa", requestUrl.origin));
   }
 
+  const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
+  if (sessionError) {
+    return NextResponse.redirect(loginErrorUrl(requestUrl.origin, nextPath));
+  }
+
   if (!profile.phone) {
     const completeProfileUrl = new URL("/complete-profile", requestUrl.origin);
     completeProfileUrl.searchParams.set("next", nextPath);

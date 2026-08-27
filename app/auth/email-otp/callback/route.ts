@@ -35,5 +35,18 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
   if (error) return NextResponse.redirect(loginUrl);
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile?.role === "student") {
+      const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
+      if (sessionError) return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return response;
 }
