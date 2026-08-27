@@ -69,6 +69,7 @@ export default async function MockTestsPage({
   const summaryByTestId = new Map(
     ((summariesResult.data ?? []) as MockTestSummary[]).map((summary) => [summary.mock_test_id, summary]),
   );
+  const mockTestStatusById = new Map(tests.map((test) => [test.id, test.status]));
   const mappedTests = tests.map((test) => {
     const paper = paperById.get(test.paper_id);
     const exam = paper ? examById.get(paper.exam_group_id) : undefined;
@@ -104,6 +105,7 @@ export default async function MockTestsPage({
       attemptCount: Number(summary?.attempt_count ?? 0),
       replacesMockTestId: test.replaces_mock_test_id,
       supersededByMockTestId: test.superseded_by_mock_test_id,
+      correctedVersionStatus: test.superseded_by_mock_test_id ? mockTestStatusById.get(test.superseded_by_mock_test_id) ?? null : null,
     };
   });
 

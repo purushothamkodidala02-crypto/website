@@ -92,6 +92,26 @@ export async function publishMockTest(mockTestId: string): Promise<MockTestManag
   return { success: true, message: `“${result.mockTest.title}” is published.` };
 }
 
+export async function republishArchivedMockTest(mockTestId: string): Promise<MockTestManagementResult> {
+  const result = await getManagedMockTest(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to publish the Mock Test again." };
+  if (result.mockTest.status !== "archived") return { success: false, message: "Only hidden Mock Tests can be published again." };
+
+  const { error } = await result.supabase.rpc("republish_archived_mock_test_safely", { requested_mock_test_id: mockTestId });
+  if (error) {
+    const knownMessage = [
+      "The corrected version of this Mock Test is already published.",
+      "Add at least one Question before publishing.",
+      "Every assigned Question and mark must be active and valid.",
+      "The assigned Question count must match the Paper Question count.",
+    ].find((message) => error.message.includes(message));
+    return { success: false, message: knownMessage ?? "This Mock Test could not be published again. Verify its Questions and publishing setup." };
+  }
+
+  revalidateMockTestPages(mockTestId);
+  return { success: true, message: `“${result.mockTest.title}” is live again.` };
+}
+
 export async function restoreMockTestAsDraft(mockTestId: string): Promise<MockTestManagementResult> {
   const result = await getManagedMockTest(mockTestId);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to restore the Mock Test." };

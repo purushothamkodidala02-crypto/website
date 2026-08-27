@@ -482,6 +482,20 @@ test("corrected drafts replace live versions without student downtime", async ()
   assert.match(table, /hasCorrectedVersion/);
 });
 
+test("hidden attempted mock tests can be safely published again", async () => {
+  const [migration, actions, buttons] = await Promise.all([
+    read("supabase/migrations/20260827213000_add_safe_mock_test_republish.sql"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+  assert.match(migration, /republish_archived_mock_test_safely/);
+  assert.match(migration, /publish_mock_test_safely/);
+  assert.match(migration, /corrected version of this Mock Test is already published/);
+  assert.match(actions, /republishArchivedMockTest/);
+  assert.match(buttons, /Publish again/);
+  assert.match(buttons, /canRepublish/);
+});
+
 test("admin mock-test totals are aggregated in the database without row-limit truncation", async () => {
   const [migration, page] = await Promise.all([
     read("supabase/migrations/20260824100000_add_admin_mock_test_summaries.sql"),
