@@ -4,14 +4,11 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("production CSS is optimized with Critters", async () => {
-  const [config, packageJson] = await Promise.all([
-    read("next.config.ts"),
-    read("package.json"),
-  ]);
+test("production CSS uses the Next.js 16 App Router inliner", async () => {
+  const config = await read("next.config.ts");
 
-  assert.match(config, /optimizeCss:\s*true/);
-  assert.match(packageJson, /"critters":\s*"\^0\.0\.25"/);
+  assert.match(config, /inlineCss:\s*true/);
+  assert.doesNotMatch(config, /optimizeCss:\s*true/);
 });
 
 test("the root layout self-hosts a swap font", async () => {

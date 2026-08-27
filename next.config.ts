@@ -11,9 +11,9 @@ const productionOrigins = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
-    // Inline above-the-fold rules and load the remaining stylesheet without
-    // blocking the first paint. Next.js uses Critters for this production pass.
-    optimizeCss: true,
+    // Next.js 16's App Router-native CSS inlining removes the initial
+    // render-blocking stylesheet request on first visits.
+    inlineCss: true,
     sri: {
       algorithm: "sha256",
     },
