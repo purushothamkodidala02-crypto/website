@@ -32,6 +32,7 @@ export type Filters = {
   q?: string;
   type?: string;
   page?: string;
+  view?: string;
 };
 
 export type MockTestsPageProps = {
@@ -73,7 +74,7 @@ export async function generateMetadata({ searchParams }: MockTestsPageProps): Pr
   const description =
     "Choose your state, exam and paper to find the right mock-test series. Practise Telangana and Andhra Pradesh exams in English and Telugu.";
   const isFiltered = Boolean(
-    filters.state || filters.exam || filters.paper || filters.q || filters.type ||
+    filters.state || filters.exam || filters.paper || filters.q || filters.type || filters.view ||
       (filters.page && filters.page !== "1"),
   );
 
@@ -101,7 +102,7 @@ export async function generateMetadata({ searchParams }: MockTestsPageProps): Pr
 
 function withQuery(path: string, filters: Filters = {}) {
   const params = new URLSearchParams();
-  for (const key of ["q", "type", "page"] as const) {
+  for (const key of ["q", "type", "page", "view"] as const) {
     const value = filters[key];
     if (value && value !== "all") params.set(key, value);
   }

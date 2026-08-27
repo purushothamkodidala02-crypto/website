@@ -24,6 +24,26 @@ test("all public catalogue levels support optional custom search metadata", asyn
   assert.match(fields, /fallback\.description/);
 });
 
+test("every active exam automatically receives a complete public landing page", async () => {
+  const [examRoute, catalog, sitemap, createAction] = await Promise.all([
+    read("app/mock-tests/[id]/[exam]/page.tsx"),
+    read("lib/catalog-data.ts"),
+    read("app/sitemap.ts"),
+    read("app/admin/groups/actions.ts"),
+  ]);
+
+  assert.match(examRoute, /Papers and available practice/);
+  assert.match(examRoute, /Latest mock tests/);
+  assert.match(examRoute, /"@type": "FAQPage"/);
+  assert.match(examRoute, /"@type": "ItemList"/);
+  assert.match(examRoute, /context\.exam\.description/);
+  assert.match(examRoute, /Mock tests are coming soon/);
+  assert.match(catalog, /exam_groups"\)\.select\("id, exam_id, name, slug, description, seo_title, seo_description"/);
+  assert.match(sitemap, /for \(const exam of catalog\.exams\)/);
+  assert.match(sitemap, /add\(examUrl\(state\.slug, exam\.slug\)/);
+  assert.match(createAction, /public landing page is now available automatically/);
+});
+
 test("admin SEO fields are validated, optional, and independent from slugs", async () => {
   const [fields, form, action, stateManager, migration] = await Promise.all([
     read("lib/seo-fields.ts"),

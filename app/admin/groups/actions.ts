@@ -223,6 +223,6 @@ export async function createGroup(
 
   return {
     success: true,
-    message: `Exam created with ${specializationInput.specializations.length ? `${specializationInput.specializations.length} ${specializationInput.specializations.length === 1 ? "Specialisation" : "Specialisations"}` : "no Specialisations"} and ${allPaperCount} ${allPaperCount === 1 ? "Paper" : "Papers"}.`,
+    message: `Exam created with ${specializationInput.specializations.length ? `${specializationInput.specializations.length} ${specializationInput.specializations.length === 1 ? "Specialisation" : "Specialisations"}` : "no Specialisations"} and ${allPaperCount} ${allPaperCount === 1 ? "Paper" : "Papers"}. ${isActive ? "Its public landing page is now available automatically." : "Its public landing page will become available when the Exam is activated."}`,
   };
 }

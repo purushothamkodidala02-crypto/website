@@ -34,7 +34,7 @@ export const getMockTestCatalogData = unstable_cache(
     const [statesResult, categoriesResult, examsResult, specializationsResult, papersResult, subjectsResult, testsResult, statsResult] = await Promise.all([
       supabase.from("exam_states").select("id, name, code, slug, description, seo_title, seo_description, display_order").eq("is_active", true).order("display_order"),
       supabase.from("exams").select("id, state_id, name, slug, seo_title, seo_description").eq("is_active", true).order("display_order"),
-      supabase.from("exam_groups").select("id, exam_id, name, slug, seo_title, seo_description").eq("is_active", true).order("display_order"),
+      supabase.from("exam_groups").select("id, exam_id, name, slug, description, seo_title, seo_description").eq("is_active", true).order("display_order"),
       supabase.from("exam_specializations").select("id, exam_group_id, name, slug, description, seo_title, seo_description").eq("is_active", true).order("display_order"),
       supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, description, seo_title, seo_description, display_order, question_count, default_correct_marks").eq("is_active", true).order("display_order"),
       supabase.from("subjects").select("id, paper_id, name, slug, description, seo_title, seo_description").eq("is_active", true).order("display_order"),

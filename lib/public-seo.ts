@@ -22,8 +22,8 @@ export function publicCollectionMetadata({
   };
 }
 
-export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string }) {
-  return !filters.q && !filters.type && (!filters.page || filters.page === "1");
+export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string; view?: string }) {
+  return !filters.q && !filters.type && !filters.view && (!filters.page || filters.page === "1");
 }
 
 export function collectionStructuredData(

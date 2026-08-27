@@ -25,13 +25,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   entries.set("/terms-and-conditions", { url: absoluteUrl("/terms-and-conditions"), priority: 0.3, changeFrequency: "yearly" });
   entries.set("/privacy-policy", { url: absoluteUrl("/privacy-policy"), priority: 0.3, changeFrequency: "yearly" });
   entries.set("/refunds-and-cancellations", { url: absoluteUrl("/refunds-and-cancellations"), priority: 0.3, changeFrequency: "yearly" });
-  for (const { test, paper, exam, category, state } of contexts) {
-    add(stateUrl(state.slug), 0.85, "daily");
-    add(categoryUrl(state.slug, category.slug), 0.75, "weekly");
-    add(examUrl(state.slug, exam.slug), 0.9, "daily");
-    if (paper.specialization_id) { const specialization = catalog.specializations.find((item) => item.id === paper.specialization_id); if (specialization) add(specializationUrl(state.slug, exam.slug, specialization.slug), 0.72, "weekly"); }
-    add(paperUrl(state.slug, exam.slug, paper.slug), 0.85, "daily");
-    for (const subject of catalog.subjects.filter((item) => item.paper_id === paper.id)) add(subjectUrl(state.slug, exam.slug, paper.slug, subject.slug), 0.7, "weekly");
+
+  // Active catalogue entities have useful landing pages even before their
+  // first mock test is published, so newly created exams are discoverable.
+  for (const state of catalog.states) add(stateUrl(state.slug), 0.85, "daily");
+  for (const category of catalog.categories) {
+    const state = stateById.get(category.state_id);
+    if (state) add(categoryUrl(state.slug, category.slug), 0.75, "weekly");
+  }
+  for (const exam of catalog.exams) {
+    const category = categoryById.get(exam.exam_id);
+    const state = category ? stateById.get(category.state_id) : undefined;
+    if (state) add(examUrl(state.slug, exam.slug), 0.9, "daily");
+  }
+  for (const specialization of catalog.specializations) {
+    const exam = examById.get(specialization.exam_group_id);
+    const category = exam ? categoryById.get(exam.exam_id) : undefined;
+    const state = category ? stateById.get(category.state_id) : undefined;
+    if (exam && state) add(specializationUrl(state.slug, exam.slug, specialization.slug), 0.72, "weekly");
+  }
+  for (const paper of catalog.papers) {
+    const exam = examById.get(paper.exam_group_id);
+    const category = exam ? categoryById.get(exam.exam_id) : undefined;
+    const state = category ? stateById.get(category.state_id) : undefined;
+    if (exam && state) add(paperUrl(state.slug, exam.slug, paper.slug), 0.85, "daily");
+  }
+  for (const subject of catalog.subjects) {
+    const paper = paperById.get(subject.paper_id);
+    const exam = paper ? examById.get(paper.exam_group_id) : undefined;
+    const category = exam ? categoryById.get(exam.exam_id) : undefined;
+    const state = category ? stateById.get(category.state_id) : undefined;
+    if (paper && exam && state) add(subjectUrl(state.slug, exam.slug, paper.slug, subject.slug), 0.7, "weekly");
+  }
+
+  for (const { test, paper, exam, state } of contexts) {
     add(mockTestUrl(state.slug, exam.slug, paper.slug, test.slug), 0.8, "weekly", test.updated_at);
   }
   return [...entries.values()];
