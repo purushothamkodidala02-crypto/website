@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { connection } from "next/server";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  variable: "--font-varadhi-ui",
+  fallback: ["Segoe UI", "Arial", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -67,7 +76,7 @@ export default async function RootLayout({
   await connection();
 
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-white text-gray-900">
         <NavigationProgress />
         {children}

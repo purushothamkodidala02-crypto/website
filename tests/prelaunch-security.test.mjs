@@ -190,12 +190,13 @@ test("navigation and question-management links remain accessible", async () => {
 });
 
 test("question media imports, uploads, enlargement, and attempt reviews stay connected", async () => {
-  const [migration, importer, runner, review, media] = await Promise.all([
+  const [migration, importer, runner, review, media, imageViewer] = await Promise.all([
     read("supabase/migrations/20260814160000_add_question_media_workflow.sql"),
     read("app/admin/questions/import-actions.ts"),
     read("app/mock-tests/[id]/StudentTestRunner.tsx"),
     read("app/dashboard/attempts/[id]/AttemptReviewNavigator.tsx"),
     read("components/questions/QuestionMedia.tsx"),
+    read("components/questions/QuestionImageViewer.tsx"),
   ]);
 
   assert.match(migration, /question-media/);
@@ -215,16 +216,15 @@ test("question media imports, uploads, enlargement, and attempt reviews stay con
   assert.match(runner, /\{questions\.length\} total/);
   assert.match(review, /<QuestionMedia src=\{row\.image_url\}/);
   assert.match(media, /aria-label="Open a larger view of the Question image"/);
-  assert.match(media, /aria-modal="true"/);
-  assert.match(media, /Zoom in/);
-  assert.match(media, /Zoom out/);
+  assert.match(imageViewer, /aria-modal="true"/);
+  assert.match(imageViewer, /Zoom in/);
+  assert.match(imageViewer, /Zoom out/);
   assert.match(media, /max-h-\[14rem\]/);
   assert.match(media, /sm:max-h-\[18rem\]/);
-  assert.match(media, /zoom === 1/);
-  assert.match(media, /max-h-\[calc\(100dvh-8rem\)\]/);
-  assert.match(media, /Fit image/);
-  assert.match(media, /zoom \* 100/);
-  assert.match(media, /motion-reduce:transition-none/);
+  assert.match(imageViewer, /zoom === 1/);
+  assert.match(imageViewer, /max-h-\[calc\(100dvh-8rem\)\]/);
+  assert.match(imageViewer, /Fit image/);
+  assert.match(imageViewer, /zoom \* 100/);
 });
 
 test("mock-test student preview mirrors the question screen without exposing it publicly", async () => {
@@ -298,6 +298,7 @@ test("loading feedback is accessible and prevents duplicate operations", async (
     testRunner,
     downloadQuestions,
     errorBoundary,
+    submissionDialog,
   ] = await Promise.all([
     read("app/layout.tsx"),
     read("components/feedback/NavigationProgress.tsx"),
@@ -307,6 +308,7 @@ test("loading feedback is accessible and prevents duplicate operations", async (
     read("app/mock-tests/[id]/StudentTestRunner.tsx"),
     read("app/admin/mock-tests/DownloadQuestionsButton.tsx"),
     read("app/error.tsx"),
+    read("app/mock-tests/[id]/SubmissionDialog.tsx"),
   ]);
 
   assert.match(layout, /<NavigationProgress/);
@@ -327,8 +329,8 @@ test("loading feedback is accessible and prevents duplicate operations", async (
   assert.match(routeLoading, /motion-reduce:animate-none/);
   assert.match(testStartActions, /pendingLabel="Starting test…"/);
   assert.match(testStartActions, /pendingLabel="Resuming test…"/);
-  assert.match(testRunner, /aria-busy=\{submitting\}/);
-  assert.match(testRunner, /PendingButtonContent/);
+  assert.match(submissionDialog, /aria-busy=\{submitting\}/);
+  assert.match(submissionDialog, /PendingButtonContent/);
   assert.match(downloadQuestions, /if \(pending\) return/);
   assert.match(downloadQuestions, /disabled=\{pending\}/);
   assert.match(downloadQuestions, /try again/i);

@@ -5,10 +5,11 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("question reporting is private, rate-limited, and connected from students to admins", async () => {
-  const [migration, studentAction, studentButton, runner, studyBook, review, adminPage, adminAction, adminForm, navigation, overview] = await Promise.all([
+  const [migration, studentAction, studentButton, studentDialog, runner, studyBook, review, adminPage, adminAction, adminForm, navigation, overview] = await Promise.all([
     read("supabase/migrations/20260825220000_add_question_reporting.sql"),
     read("lib/actions/question-reports.ts"),
     read("components/questions/ReportQuestionButton.tsx"),
+    read("components/questions/ReportQuestionDialog.tsx"),
     read("app/mock-tests/[id]/StudentTestRunner.tsx"),
     read("app/dashboard/study-book/page.tsx"),
     read("app/dashboard/attempts/[id]/AttemptReviewNavigator.tsx"),
@@ -26,8 +27,8 @@ test("question reporting is private, rate-limited, and connected from students t
   assert.match(studentAction, /auth\.getUser\(\)/);
   assert.match(studentAction, /\(count \?\? 0\) >= 10/);
   assert.match(studentAction, /error\?\.code === "23505"/);
-  assert.match(studentButton, /role="dialog"/);
-  assert.match(studentButton, /aria-busy=\{pending\}/);
+  assert.match(studentDialog, /role="dialog"/);
+  assert.match(studentDialog, /aria-busy=\{pending\}/);
   assert.match(runner, /ReportQuestionButton/);
   assert.match(studyBook, /ReportQuestionButton/);
   assert.match(review, /attemptId=\{attemptId\}/);

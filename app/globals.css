@@ -3,8 +3,8 @@
 :root {
   --background: #f6f8fb;
   --foreground: #0f172a;
-  --font-ui: "Segoe UI Variable Text", "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Aptos Display", "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: var(--font-varadhi-ui), "Segoe UI Variable Text", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-varadhi-ui), "Aptos Display", "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-brand: Georgia, "Times New Roman", serif;
 }
 

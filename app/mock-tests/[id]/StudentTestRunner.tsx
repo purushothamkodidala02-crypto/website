@@ -1,13 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
-import { LoadingSpinner, LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
 import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, submitAttempt, syncAttemptTimer, type SubmitAttemptResult } from "./attempt-actions";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
+
+const SubmissionDialog = dynamic(
+  () => import("./SubmissionDialog").then((module) => module.SubmissionDialog),
+  {
+    ssr: false,
+    loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-5"><p role="status" className="rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-xl">Preparing final review…</p></div>,
+  },
+);
 
 type Answer = "A" | "B" | "C" | "D";
 type TestQuestion = {
@@ -273,10 +282,6 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
       </div>
     </div>
   );
-}
-
-function SubmissionDialog({ answered, review, unanswered, submitting, onCancel, onSubmit }: { answered: number; review: number; unanswered: number; submitting: boolean; onCancel: () => void; onSubmit: () => void }) {
-  return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-5" role="dialog" aria-modal="true" aria-busy={submitting}><section className="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl"><p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Final submission</p><h2 className="mt-2 text-2xl font-black">Finish this mock test?</h2><p className="mt-3 text-sm text-slate-600">You cannot change your answers after submission.</p><div className="mt-6 grid grid-cols-3 gap-3"><Metric value={answered} label="Answered" tone="text-emerald-800" /><Metric value={review} label="Review" tone="text-amber-800" /><Metric value={unanswered} label="Unanswered" tone="text-slate-700" /></div>{unanswered > 0 && <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm font-semibold text-amber-900">You still have {unanswered} unanswered question{unanswered === 1 ? "" : "s"}.</p>}<div className="mt-7 flex justify-end gap-3"><button type="button" onClick={onCancel} disabled={submitting} className="rounded-xl border px-4 py-3 text-sm font-bold disabled:opacity-50">Continue test</button><button type="button" onClick={onSubmit} disabled={submitting} aria-busy={submitting} className="min-w-36 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><PendingButtonContent pending={submitting} pendingLabel="Submitting…">Submit test</PendingButtonContent></button></div><LongPendingNotice pending={submitting} /></section></div>;
 }
 
 function SubmissionResult({ publicTestPath, title, result, onRetry }: { publicTestPath: string; title: string; result: SubmitAttemptResult; onRetry: () => void }) {
