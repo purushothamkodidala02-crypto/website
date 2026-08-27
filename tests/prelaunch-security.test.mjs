@@ -462,8 +462,9 @@ test("admins can deliberately erase a hidden attempted mock test", async () => {
 });
 
 test("corrected drafts replace live versions without student downtime", async () => {
-  const [migration, page, table] = await Promise.all([
+  const [migration, creationFix, page, table] = await Promise.all([
     read("supabase/migrations/20260827190000_switch_corrected_versions_on_publish.sql"),
+    read("supabase/migrations/20260827203000_fix_corrected_version_creation.sql"),
     read("app/admin/mock-tests/page.tsx"),
     read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
   ]);
@@ -473,6 +474,8 @@ test("corrected drafts replace live versions without student downtime", async ()
   assert.match(migration, /new\.replaces_mock_test_id/);
   assert.match(migration, /set status = 'archived'/);
   assert.match(migration, /correction\.status = 'draft'/);
+  assert.match(creationFix, /deferrable initially deferred/);
+  assert.match(creationFix, /mock_tests_superseded_by_mock_test_id_fkey/);
   assert.match(page, /superseded_by_mock_test_id/);
   assert.match(table, /Correction in progress/);
   assert.match(table, /Corrected version/);
