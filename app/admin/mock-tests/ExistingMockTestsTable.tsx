@@ -177,7 +177,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     {test.questionCount > 0 ? <DownloadQuestionsButton mockTestId={test.id} /> : <span title="Add Questions before downloading" className="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-400">No questions to download</span>}
                     <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
                     <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
-                    <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} />
+                    <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} hasAttempts={test.attemptCount > 0} />
                   </div>
                 </div>
 

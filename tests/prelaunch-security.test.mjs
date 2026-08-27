@@ -423,6 +423,26 @@ test("mock-test question targets and isolated test operations are database prote
   assert.match(deleteAction, /makeQuestionUnavailable/);
 });
 
+test("attempted mock tests can receive an isolated corrected version", async () => {
+  const [migration, actions, buttons] = await Promise.all([
+    read("supabase/migrations/20260827153000_add_corrected_mock_test_versions.sql"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+
+  assert.match(migration, /create_corrected_mock_test_version/);
+  assert.match(migration, /superseded_by_mock_test_id/);
+  assert.match(migration, /replaces_mock_test_id/);
+  assert.match(migration, /insert into public\.questions/);
+  assert.match(migration, /source_assignment\.image_url/);
+  assert.match(migration, /source_assignment\.question_order/);
+  assert.match(migration, /source_test\.series_number/);
+  assert.match(actions, /createCorrectedMockTestVersion/);
+  assert.match(actions, /cannot be restored/);
+  assert.match(buttons, /Create corrected version/);
+  assert.match(buttons, /hasAttempts/);
+});
+
 test("admin mock-test totals are aggregated in the database without row-limit truncation", async () => {
   const [migration, page] = await Promise.all([
     read("supabase/migrations/20260824100000_add_admin_mock_test_summaries.sql"),

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 export type MockTestManagementResult = {
   success: boolean;
   message: string;
+  replacementId?: string;
 };
 
 async function getManagedMockTest(mockTestId: string) {
@@ -27,7 +28,7 @@ async function getManagedMockTest(mockTestId: string) {
 
   const { data: mockTest, error: mockTestError } = await supabase
     .from("mock_tests")
-    .select("id, title, status")
+    .select("id, title, status, superseded_by_mock_test_id")
     .eq("id", mockTestId)
     .single();
 
@@ -134,4 +135,31 @@ export async function deleteDraftMockTest(mockTestId: string): Promise<MockTestM
 
   revalidateMockTestPages(mockTestId);
   return { success: true, message: `“${result.mockTest.title}” was deleted.` };
+}
+
+export async function createCorrectedMockTestVersion(mockTestId: string): Promise<MockTestManagementResult> {
+  const result = await getManagedMockTest(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to create a corrected version." };
+
+  const { data, error } = await result.supabase.rpc("create_corrected_mock_test_version", {
+    requested_mock_test_id: mockTestId,
+  });
+  if (error || typeof data !== "string") {
+    const knownMessage = [
+      "A corrected version already exists for this Mock Test.",
+      "This Mock Test has no student attempts. Edit the existing draft instead.",
+    ].find((message) => error?.message.includes(message));
+    return { success: false, message: knownMessage ?? "The corrected version could not be created. Please try again." };
+  }
+  if (result.mockTest.superseded_by_mock_test_id) {
+    return { success: false, message: "This is a previous version kept for student result history and cannot be restored." };
+  }
+
+  revalidateMockTestPages(mockTestId);
+  revalidateMockTestPages(data);
+  return {
+    success: true,
+    message: "The historical version was retained and an editable corrected draft was created.",
+    replacementId: data,
+  };
 }
