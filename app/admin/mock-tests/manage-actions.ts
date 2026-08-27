@@ -163,3 +163,23 @@ export async function createCorrectedMockTestVersion(mockTestId: string): Promis
     replacementId: data,
   };
 }
+
+export async function permanentlyDeleteMockTest(mockTestId: string, confirmation: string): Promise<MockTestManagementResult> {
+  const result = await getManagedMockTest(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to delete the Mock Test permanently." };
+
+  const { error } = await result.supabase.rpc("permanently_delete_mock_test", {
+    requested_mock_test_id: mockTestId,
+    requested_confirmation: confirmation,
+  });
+  if (error) {
+    const knownMessage = [
+      "Type DELETE to confirm permanent deletion.",
+      "Hide the Mock Test before deleting it permanently.",
+    ].find((message) => error.message.includes(message));
+    return { success: false, message: knownMessage ?? "The Mock Test could not be deleted permanently." };
+  }
+
+  revalidateMockTestPages(mockTestId);
+  return { success: true, message: `“${result.mockTest.title}” and its complete attempt history were permanently deleted.` };
+}

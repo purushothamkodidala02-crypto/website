@@ -443,6 +443,24 @@ test("attempted mock tests can receive an isolated corrected version", async () 
   assert.match(buttons, /hasAttempts/);
 });
 
+test("admins can deliberately erase a hidden attempted mock test", async () => {
+  const [migration, actions, buttons] = await Promise.all([
+    read("supabase/migrations/20260827173000_add_permanent_mock_test_deletion.sql"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+
+  assert.match(migration, /permanently_delete_mock_test/);
+  assert.match(migration, /requested_confirmation is distinct from 'DELETE'/);
+  assert.match(migration, /status = 'published'/);
+  assert.match(migration, /delete from public\.test_attempts/);
+  assert.match(migration, /delete from public\.test_attempt_sessions/);
+  assert.match(migration, /Question-bank records themselves are deliberately retained/);
+  assert.match(actions, /permanentlyDeleteMockTest/);
+  assert.match(buttons, /Type DELETE to permanently erase/);
+  assert.match(buttons, /Delete permanently/);
+});
+
 test("admin mock-test totals are aggregated in the database without row-limit truncation", async () => {
   const [migration, page] = await Promise.all([
     read("supabase/migrations/20260824100000_add_admin_mock_test_summaries.sql"),
