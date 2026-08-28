@@ -10,6 +10,7 @@ import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionM
 import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
+import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
 
@@ -48,6 +49,18 @@ export default async function ExamPage({ params, searchParams }: Props) {
     title: `${context.exam.name} Mock Tests in ${context.state.name}`,
     description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
   });
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const accountAction = user
+    ? profile?.role === "admin"
+      ? { href: "/admin", label: "Admin workspace" }
+      : { href: "/dashboard", label: "Go to my progress" }
+    : { href: `/login?next=${encodeURIComponent(canonical)}`, label: "Student sign in" };
   const introduction = context.exam.description?.trim() || seo.description;
   const freeTests = tests.filter((test) => test.access_type === "free").length;
   const questions = [
@@ -79,7 +92,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
               <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {context.state.code} exam preparation</p>
               <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{context.exam.name} Mock Tests</h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{introduction}</p>
-              <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><Link href="/login" className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">Student sign in</Link></div>
+              <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><Link href={accountAction.href} className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">{accountAction.label}</Link></div>
             </div>
             <dl className="grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur sm:gap-3"><Stat value={papers.length} label="Papers" /><Stat value={tests.length} label="Tests" /><Stat value={freeTests} label="Free" /></dl>
           </div>
