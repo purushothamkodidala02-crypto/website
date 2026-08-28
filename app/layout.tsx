@@ -27,10 +27,10 @@ export const metadata: Metadata = {
 
   icons: {
     icon: [
-      { url: "/varadhi-v-logo.png", type: "image/png", sizes: "260x260" },
+      { url: "/varadhi-v-logo.png", type: "image/png", sizes: "512x512" },
     ],
     shortcut: "/varadhi-v-logo.png",
-    apple: [{ url: "/varadhi-v-logo.png", type: "image/png", sizes: "260x260" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
   },
 
   manifest: "/manifest.webmanifest",
