@@ -92,12 +92,15 @@ test("first-time mock-test screen does not claim progress is already saved", asy
 });
 
 test("question bank preserves filters while editing an existing question", async () => {
-  const [questionBank, editPage] = await Promise.all([
+  const [questionBank, questionsPage, editPage] = await Promise.all([
     read("app/admin/questions/QuestionBankTable.tsx"),
+    read("app/admin/questions/page.tsx"),
     read("app/admin/questions/[id]/edit/page.tsx"),
   ]);
 
   assert.match(questionBank, /window\.history\.replaceState/);
+  assert.match(questionsPage, /const tableStateKey = \[categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialPage\]\.join\(":"\)/);
+  assert.match(questionsPage, /<QuestionBankTable key=\{tableStateKey\}/);
   assert.match(questionBank, /returnTo=\$\{encodeURIComponent\(questionBankUrl\)\}/);
   assert.match(editPage, /returnTo\.startsWith\("\/admin\/questions\?"\)/);
   assert.match(editPage, /href=\{backHref\}/);
