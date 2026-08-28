@@ -1,19 +1,3 @@
-Here is the step-by-step guide and the complete code for **`proxy.ts`**.
-
----
-
-### 📝 Step-by-Step Instructions:
-
-1. Click this link: **[Edit `proxy.ts` on GitHub](https://github.com/purushothamkodidala02-crypto/website/edit/main/proxy.ts)**.
-2. Select all existing text in the editor (**Ctrl + A** / **Cmd + A**) and press **Delete**.
-3. **Copy and paste** the full code below into the GitHub editor.
-4. Scroll to the bottom, click the green button **"Commit changes..."**, and then click **"Commit changes"**.
-
----
-
-### 📄 Full Code for `proxy.ts`:
-
-```typescript
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { resolvePublicPermanentRedirect } from "@/lib/public-redirect";
@@ -117,4 +101,3 @@ export const config = {
     },
   ],
 };
-```
