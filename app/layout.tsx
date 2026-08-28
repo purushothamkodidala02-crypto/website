@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { connection } from "next/server";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -15,16 +14,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-
   title: {
     default: "Varadhi Prep: Smart Mock Tests for Career Growth",
     template: "%s | Varadhi Prep",
   },
-
   description: SITE_DESCRIPTION,
-
   applicationName: SITE_NAME,
-
   icons: {
     icon: [
       { url: "/varadhi-v-logo.png", type: "image/png", sizes: "512x512" },
@@ -32,11 +27,8 @@ export const metadata: Metadata = {
     shortcut: "/varadhi-v-logo.png",
     apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
   },
-
   manifest: "/manifest.webmanifest",
-
   category: "education",
-
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -45,17 +37,14 @@ export const metadata: Metadata = {
     title: "Varadhi Prep: Smart Mock Tests for Career Growth",
     description: SITE_DESCRIPTION,
   },
-
   twitter: {
     card: "summary_large_image",
     title: "Varadhi Prep: Smart Mock Tests for Career Growth",
     description: SITE_DESCRIPTION,
   },
-
   robots: {
     index: true,
     follow: true,
-
     googleBot: {
       index: true,
       follow: true,
@@ -66,15 +55,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // A nonce-based CSP requires request-time rendering so Next.js can attach
-  // the request nonce to its framework and hydration scripts.
-  await connection();
-
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-white text-gray-900">
