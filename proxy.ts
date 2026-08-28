@@ -1,8 +1,24 @@
+Here is the step-by-step guide and the complete code for **`proxy.ts`**.
+
+---
+
+### 📝 Step-by-Step Instructions:
+
+1. Click this link: **[Edit `proxy.ts` on GitHub](https://github.com/purushothamkodidala02-crypto/website/edit/main/proxy.ts)**.
+2. Select all existing text in the editor (**Ctrl + A** / **Cmd + A**) and press **Delete**.
+3. **Copy and paste** the full code below into the GitHub editor.
+4. Scroll to the bottom, click the green button **"Commit changes..."**, and then click **"Commit changes"**.
+
+---
+
+### 📄 Full Code for `proxy.ts`:
+
+```typescript
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { resolvePublicPermanentRedirect } from "@/lib/public-redirect";
 
-function buildContentSecurityPolicy(nonce: string) {
+function buildContentSecurityPolicy() {
   const isDevelopment = process.env.NODE_ENV === "development";
   let supabaseOrigin = "https://*.supabase.co";
   try {
@@ -10,12 +26,12 @@ function buildContentSecurityPolicy(nonce: string) {
       supabaseOrigin = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin;
     }
   } catch {
-    // Keep the restrictive Supabase fallback when an environment value is invalid.
+    // Keep fallback
   }
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${supabaseOrigin}`,
     "font-src 'self' data:",
@@ -33,15 +49,14 @@ function buildContentSecurityPolicy(nonce: string) {
 export async function proxy(request: NextRequest) {
   const permanentDestination = await resolvePublicPermanentRedirect(request);
   if (permanentDestination === "not-found") {
-    return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+    return NextResponse.rewrite(new URL("/_not_found", request.url), { status: 404 });
   }
   if (permanentDestination && permanentDestination.href !== request.nextUrl.href) {
     return NextResponse.redirect(permanentDestination, 308);
   }
-  const nonce = btoa(crypto.randomUUID());
-  const contentSecurityPolicy = buildContentSecurityPolicy(nonce);
+
+  const contentSecurityPolicy = buildContentSecurityPolicy();
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
 
   let response = NextResponse.next({
@@ -49,9 +64,15 @@ export async function proxy(request: NextRequest) {
   });
   response.headers.set("Content-Security-Policy", contentSecurityPolicy);
 
-  // Anonymous catalogue traffic does not need an Auth round trip. These pages
-  // contain no user-specific content and can be served from the public cache.
-  if (request.nextUrl.pathname === "/" || request.nextUrl.pathname === "/mock-tests") {
+  // Anonymous public catalogue traffic does not need Supabase Auth round-trip
+  if (
+    request.nextUrl.pathname === "/" ||
+    request.nextUrl.pathname.startsWith("/mock-tests") ||
+    request.nextUrl.pathname.startsWith("/terms-and-conditions") ||
+    request.nextUrl.pathname.startsWith("/privacy-policy") ||
+    request.nextUrl.pathname.startsWith("/refunds-and-cancellations") ||
+    request.nextUrl.pathname.startsWith("/support")
+  ) {
     return response;
   }
 
@@ -63,18 +84,15 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
           requestHeaders.set("cookie", request.headers.get("cookie") ?? "");
-
           response = NextResponse.next({
             request: { headers: requestHeaders },
           });
           response.headers.set("Content-Security-Policy", contentSecurityPolicy);
-
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);
           });
@@ -99,3 +117,4 @@ export const config = {
     },
   ],
 };
+```
