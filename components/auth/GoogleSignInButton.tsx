@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LongPendingNotice } from "@/components/feedback/LoadingSpinner";
 import { createClient } from "@/lib/supabase/client";
@@ -45,6 +46,7 @@ declare global {
 }
 
 export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
+  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
@@ -74,12 +76,12 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         return;
       }
 
-      window.location.assign(`/auth/session/complete?next=${encodeURIComponent(nextPath)}`);
+      router.replace(`/auth/session/complete?next=${encodeURIComponent(nextPath)}`);
     } catch {
       setError("Google sign-in could not be completed. Check your connection and try again.");
       setPending(false);
     }
-  }, [nextPath]);
+  }, [nextPath, router]);
 
   useEffect(() => {
     if (!scriptReady || !buttonRef.current || !window.google) return;
