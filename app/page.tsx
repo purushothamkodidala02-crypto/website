@@ -79,7 +79,7 @@ export default async function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="student-page min-h-screen bg-white text-slate-950">
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
 
@@ -97,12 +97,12 @@ export default async function Home() {
           {hasStateError ? (
             <div className="mt-8 rounded-3xl border border-dashed bg-white p-8 text-center text-sm text-slate-600">The new state catalogue will appear after its database update is applied.</div>
           ) : (
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="student-stagger mt-8 grid gap-4 md:grid-cols-3">
               {states.map((state, index) => {
                 const stateCategoryIds = new Set(categories.filter((category) => category.state_id === state.id).map((category) => category.id));
                 const stateExams = activeExams.filter((exam) => stateCategoryIds.has(exam.exam_id));
                 const color = index === 0 ? "bg-teal-50 text-teal-800" : index === 1 ? "bg-amber-50 text-amber-800" : "bg-indigo-50 text-indigo-800";
-                return <Link key={state.id} href={stateUrl(state.slug)} className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
+                return <Link key={state.id} href={stateUrl(state.slug)} className="student-card group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
                   <div className="flex items-start justify-between"><span className={`grid h-12 w-12 place-items-center rounded-2xl ${color}`}><StateSymbol slug={state.slug} /></span><span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">{state.code}</span></div>
                   <h2 className="font-display mt-5 text-2xl">{state.name}</h2>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
@@ -112,11 +112,11 @@ export default async function Home() {
             </div>
           )}
 
-          {states.length > 0 && activeExams.length > 0 && <div className="mt-12"><div className="flex items-center justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Popular exam collections</p><h2 className="font-display mt-2 text-2xl">Continue directly to an exam</h2></div></div><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{activeExams.slice(0, 8).map((exam) => {
+          {states.length > 0 && activeExams.length > 0 && <div className="mt-12"><div className="flex items-center justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Popular exam collections</p><h2 className="font-display mt-2 text-2xl">Continue directly to an exam</h2></div></div><div className="student-stagger mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{activeExams.slice(0, 8).map((exam) => {
             const category = categoryById.get(exam.exam_id);
             const state = states.find((item) => item.id === category?.state_id);
             const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
-            return state ? <Link key={exam.id} href={examUrl(state.slug, exam.slug)} className="group rounded-2xl border bg-white p-5 transition hover:border-teal-300 hover:shadow-lg"><div className="flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ExamSymbol name={exam.name} className="h-5 w-5" /></span><span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.code} · {category?.name}</span></div><h3 className="font-display mt-4 leading-6">{exam.name}</h3><p className="mt-2 text-xs font-semibold text-slate-500">{paperCount} paper{paperCount === 1 ? "" : "s"}</p></Link> : null;
+            return state ? <Link key={exam.id} href={examUrl(state.slug, exam.slug)} className="student-card group rounded-2xl border bg-white p-5 hover:border-teal-300 hover:shadow-lg"><div className="flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ExamSymbol name={exam.name} className="h-5 w-5" /></span><span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.code} · {category?.name}</span></div><h3 className="font-display mt-4 leading-6">{exam.name}</h3><p className="mt-2 text-xs font-semibold text-slate-500">{paperCount} paper{paperCount === 1 ? "" : "s"}</p></Link> : null;
           })}</div></div>}
         </div>
       </section>
@@ -137,7 +137,7 @@ export default async function Home() {
 
       <section id="how-it-works" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
         <div className="max-w-2xl"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">A focused workflow</p><h2 className="font-display mt-3 text-3xl tracking-tight sm:text-4xl">Everything needed for serious practice. Nothing extra.</h2></div>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">{benefits.map((benefit, index) => <article key={benefit.title} className="rounded-3xl border border-slate-200 p-6 transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-sm font-black text-teal-800">0{index + 1}</span><h3 className="font-display mt-6 text-xl">{benefit.title}</h3><p className="mt-3 text-sm leading-6 text-slate-600">{benefit.description}</p></article>)}</div>
+        <div className="student-stagger mt-10 grid gap-5 md:grid-cols-3">{benefits.map((benefit, index) => <article key={benefit.title} className="student-card rounded-3xl border border-slate-200 p-6 hover:border-teal-200 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-sm font-black text-teal-800">0{index + 1}</span><h3 className="font-display mt-6 text-xl">{benefit.title}</h3><p className="mt-3 text-sm leading-6 text-slate-600">{benefit.description}</p></article>)}</div>
       </section>
 
       <footer className="border-t bg-slate-950 text-slate-300"><div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-9 sm:flex-row sm:items-center sm:justify-between sm:px-8"><div className="flex items-center gap-3"><BrandMark className="h-10 w-10" /><div><p className="font-display text-white">Varadhi Prep</p><p className="text-xs">Smart mock tests for career growth</p></div></div><div className="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold"><Link href="/mock-tests" className="hover:text-white">Mock tests</Link><Link href="/support" className="hover:text-white">Support</Link><Link href="/login" className="hover:text-white">Sign in</Link><Link href="/register" className="hover:text-white">Create account</Link></div></div></footer>

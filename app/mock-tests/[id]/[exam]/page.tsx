@@ -67,7 +67,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
   ];
 
   return (
-    <main className="min-h-screen bg-[#f4f7f8] text-slate-950">
+    <main className="student-page min-h-screen bg-[#f4f7f8] text-slate-950">
       <JsonLd data={structuredData} />
       <PublicHeader />
       <section className="relative overflow-hidden bg-slate-950 text-white">

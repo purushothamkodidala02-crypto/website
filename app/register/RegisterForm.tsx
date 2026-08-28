@@ -174,7 +174,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
   }
 
   return (
-    <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+    <section className="min-w-0 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
       <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">
         Student registration
       </p>

@@ -49,7 +49,7 @@ export default async function PaymentResultPage({
 
   const success = status === "paid";
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-5">
+    <main className="student-page grid min-h-screen place-items-center bg-slate-50 px-5">
       <section className="w-full max-w-lg rounded-3xl border bg-white p-8 text-center shadow-sm">
         <p
           className={`text-xs font-black uppercase tracking-[0.14em] ${

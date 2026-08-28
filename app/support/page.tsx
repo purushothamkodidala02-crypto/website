@@ -62,7 +62,7 @@ export default function SupportPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="student-page min-h-screen bg-slate-50 text-slate-950">
       <JsonLd data={jsonLd} />
       <PublicHeader compact />
       <section className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20">

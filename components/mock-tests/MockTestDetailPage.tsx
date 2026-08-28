@@ -466,7 +466,7 @@ export async function MockTestDetailsPage({
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50">
       <JsonLd data={jsonLd} />
       <PublicHeader />
 
@@ -553,7 +553,7 @@ export async function MockTestDetailsPage({
               )}
             </div>
 
-            <section className="mt-10 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+            <section className="student-card mt-10 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-2xl font-black">Before you begin</h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -561,7 +561,7 @@ export async function MockTestDetailsPage({
                 select the start button.
               </p>
 
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
+              <div className="student-stagger mt-7 grid gap-4 sm:grid-cols-2">
                 {testSummaryMetrics.map(([label, value]) => (
                   <div key={label} className="rounded-2xl bg-slate-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -573,7 +573,7 @@ export async function MockTestDetailsPage({
               </div>
             </section>
 
-            <section className="mt-6 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+            <section className="student-card mt-6 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-2xl font-black">Instructions</h2>
 
               {test.instructions ? (
@@ -609,7 +609,7 @@ export async function MockTestDetailsPage({
             </section>
           </section>
 
-          <aside className="rounded-3xl bg-slate-950 p-6 text-white shadow-xl lg:sticky lg:top-6">
+          <aside className="student-card rounded-3xl bg-slate-950 p-6 text-white shadow-xl lg:sticky lg:top-24">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
               Ready to begin?
             </p>

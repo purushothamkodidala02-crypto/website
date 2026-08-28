@@ -35,7 +35,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   const rows = (data ?? []) as StudyRow[];
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader />
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
         <Link href="/dashboard" className="text-sm font-bold text-teal-700 hover:underline">← Back to dashboard</Link>
@@ -59,7 +59,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
             <Link href="/mock-tests" className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse mock tests</Link>
           </section>
         ) : (
-          <section className="mt-6 grid gap-5">
+          <section className="student-stagger mt-6 grid gap-5">
             {rows.map((row, index) => <StudyQuestionCard key={row.question_id} row={row} index={index} />)}
           </section>
         )}
@@ -75,7 +75,7 @@ function StudyTab({ href, active, children }: { href: string; active: boolean; c
 function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
   const options = [["A", row.option_a], ["B", row.option_b], ["C", row.option_c], ["D", row.option_d]];
   return (
-    <article className="overflow-hidden rounded-3xl border bg-white shadow-sm">
+    <article className="student-card overflow-hidden rounded-3xl border bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50 px-5 py-4 sm:px-6">
         <div><p className="text-xs font-black uppercase tracking-wide text-teal-700">{row.subject_name}</p><p className="mt-1 text-xs font-semibold text-slate-500">Question {index + 1}{row.mistake_count > 0 ? ` · Incorrect ${row.mistake_count} time${row.mistake_count === 1 ? "" : "s"}` : ""}</p></div>
         <div className="flex flex-wrap gap-2"><ReportQuestionButton questionId={row.question_id} /><BookmarkButton questionId={row.question_id} initialBookmarked={row.bookmarked} /></div>

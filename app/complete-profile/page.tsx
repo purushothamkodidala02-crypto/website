@@ -45,7 +45,7 @@ export default async function CompleteProfilePage({
       : "";
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader compact />
       <div className="mx-auto max-w-xl px-5 py-12 sm:px-8 sm:py-16">
         <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">

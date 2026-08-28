@@ -10,7 +10,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   }, [error]);
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-950">
+    <main className="student-page grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-950">
       <section className="w-full max-w-xl rounded-3xl border bg-white p-8 text-center shadow-sm sm:p-10">
         <p className="text-sm font-black uppercase tracking-[0.16em] text-red-700">Temporary problem</p>
         <h1 className="font-display mt-3 text-3xl">Varadhi could not load this page.</h1>

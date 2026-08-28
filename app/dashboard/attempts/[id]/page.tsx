@@ -56,7 +56,7 @@ export default async function AttemptReviewPage({
       : (summary.score / summary.total_marks) * 100;
 
   return (
-    <main className="min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
         <Link
@@ -145,7 +145,7 @@ export default async function AttemptReviewPage({
 
 function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; title: string }) {
   return (
-    <main className="min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800">Back to dashboard</Link>

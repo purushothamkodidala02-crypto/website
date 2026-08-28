@@ -199,7 +199,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
 
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
-  return <main className="min-h-screen bg-slate-100 pb-8">
+  return <main className="student-page min-h-screen bg-slate-100 pb-8">
     <header className="sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2.5 text-white shadow-lg sm:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

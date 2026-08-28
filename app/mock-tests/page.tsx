@@ -213,7 +213,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   const dataError = catalog.hasError;
 
   return (
-    <main className="min-h-screen bg-[#f4f7f8] text-slate-950">
+    <main className="student-page min-h-screen bg-[#f4f7f8] text-slate-950">
       <PublicHeader />
       <section className="relative overflow-hidden border-b bg-slate-950 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(45,212,191,0.16),transparent_30%)]" />
@@ -258,11 +258,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         ) : !selectedState ? (
           <CatalogSection eyebrow="Step 1" title="Choose your exam location" description="TG and AP content stays completely separate. Central exams have their own space.">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="student-stagger grid gap-4 md:grid-cols-3">
               {states.map((state, index) => {
                 const stats = stateStats.get(state.id) ?? { exams: 0 };
                 const tones = ["from-teal-50 to-white border-teal-200", "from-amber-50 to-white border-amber-200", "from-indigo-50 to-white border-indigo-200"];
-                return <Link key={state.id} href={stateUrl(state.slug)} className={`group rounded-3xl border bg-gradient-to-br p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
+                return <Link key={state.id} href={stateUrl(state.slug)} className={`student-card group rounded-3xl border bg-gradient-to-br p-6 shadow-sm hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
                   <span className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} /></span><span className="rounded-full border bg-white/80 px-3 py-1 text-xs font-black tracking-wide text-slate-600">{state.code}</span></span>
                   <h2 className="font-display mt-6 text-2xl">{state.name}</h2>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
@@ -273,11 +273,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         ) : !selectedExam ? (
           <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
-            {stateExams.length === 0 ? <EmptyCatalog title="No exams are published for this state yet" detail="New exams will appear here as soon as their first mock test is published." /> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{stateExams.map((exam) => {
+            {stateExams.length === 0 ? <EmptyCatalog title="No exams are published for this state yet" detail="New exams will appear here as soon as their first mock test is published." /> : <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{stateExams.map((exam) => {
               const category = categoryById.get(exam.exam_id);
               const examTests = tests.filter((test) => test.exam.id === exam.id);
               const paperCount = new Set(examTests.map((test) => test.paper.id)).size;
-              return <Link key={exam.id} href={examUrl(selectedState.slug, exam.slug)} className="group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
+              return <Link key={exam.id} href={examUrl(selectedState.slug, exam.slug)} className="student-card group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
                 <span className="flex items-center justify-between"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800"><ExamSymbol name={exam.name} /></span><span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">{category?.name}</span></span>
                 <h2 className="font-display mt-5 text-xl leading-7">{exam.name}</h2>
                 <p className="mt-2 text-sm text-slate-500">{selectedState.code} · {category?.name}</p>
@@ -287,11 +287,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         ) : !selectedPaper ? (
           <CatalogSection eyebrow={`${selectedState.code} · ${resolvedCategory?.name} · Step 3`} title={`Choose a paper for ${selectedExam.name}`} description="Paper numbers are generated consistently from the exam structure." action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">Change exam</Link>}>
-            {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="grid gap-4 md:grid-cols-2">{examPapers.map((paper) => {
+            {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="student-stagger grid gap-4 md:grid-cols-2">{examPapers.map((paper) => {
               const display = paperDisplayById.get(paper.id);
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
-              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} className="group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-lg">
+              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} className="student-card group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
                 <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-slate-950 text-teal-200"><PaperSymbol /></span>
                 <span className="min-w-0 flex-1"><span className="text-xs font-black uppercase tracking-[0.12em] text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-1 block text-lg leading-6">{paper.name}</strong><span className="mt-2 block text-sm font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
                 <span className="text-xl font-black text-teal-800 transition group-hover:translate-x-1">→</span>

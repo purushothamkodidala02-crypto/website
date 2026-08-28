@@ -157,7 +157,7 @@ export default async function Dashboard({
   ] as const;
 
   return (
-    <main className="min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
         <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
@@ -185,20 +185,20 @@ export default async function Dashboard({
           </div>
         </section>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-3">
+        <section className="student-stagger mt-6 grid gap-4 md:grid-cols-3">
           {metrics.map((metric) => (
             <DashboardMetric key={metric.label} {...metric} />
           ))}
         </section>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Link href="/dashboard/study-book" className="group rounded-2xl border border-red-100 bg-white p-5 shadow-sm transition hover:border-red-200 hover:shadow-md">
+        <section className="student-stagger mt-6 grid gap-4 sm:grid-cols-2">
+          <Link href="/dashboard/study-book" className="student-card group rounded-2xl border border-red-100 bg-white p-5 shadow-sm hover:border-red-200 hover:shadow-md">
             <p className="text-xs font-black uppercase tracking-wide text-red-700">Automatic revision</p>
             <h2 className="mt-2 text-xl font-black text-slate-950">Mistake Book</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">Revisit incorrect answers and master weak questions.</p>
             <span className="mt-4 inline-flex text-sm font-black text-red-700">Review mistakes →</span>
           </Link>
-          <Link href="/dashboard/study-book?view=bookmarks" className="group rounded-2xl border border-teal-100 bg-white p-5 shadow-sm transition hover:border-teal-200 hover:shadow-md">
+          <Link href="/dashboard/study-book?view=bookmarks" className="student-card group rounded-2xl border border-teal-100 bg-white p-5 shadow-sm hover:border-teal-200 hover:shadow-md">
             <p className="text-xs font-black uppercase tracking-wide text-teal-700">Saved questions</p>
             <h2 className="mt-2 text-xl font-black text-slate-950">Bookmarks</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">Keep important questions together for focused revision.</p>
@@ -228,11 +228,11 @@ export default async function Dashboard({
               No mock tests are available right now.
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="student-stagger mt-5 grid gap-4 md:grid-cols-2">
               {availableTests.slice(0, 4).map((test) => (
                 <article
                   key={test.id}
-                  className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg hover:shadow-slate-950/5"
+                  className="student-card group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-200 hover:shadow-lg hover:shadow-slate-950/5"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <span className="rounded-lg bg-teal-50 px-3 py-2 text-xs font-black text-teal-800">
@@ -313,7 +313,7 @@ export default async function Dashboard({
                         </div>
                         <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-teal-600"
+                            className="student-progress-fill h-full rounded-full bg-teal-600"
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -351,7 +351,7 @@ export default async function Dashboard({
                           </div>
                           <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className="h-full rounded-full bg-emerald-500"
+                              className="student-progress-fill h-full rounded-full bg-emerald-500"
                               style={{ width: `${accuracy}%` }}
                             />
                           </div>
@@ -377,11 +377,11 @@ export default async function Dashboard({
                 </h2>
                 <p className="mt-2 text-sm text-slate-600">Showing {((page - 1) * attemptsPerPage) + 1} to {Math.min(page * attemptsPerPage, totalAttempts)} of {totalAttempts} completed exams.</p>
               </div>
-              <div className="mt-5 grid gap-4">
+              <div className="student-stagger mt-5 grid gap-4">
                 {attempts.map((attempt) => (
                   <article
                     key={attempt.id}
-                    className="rounded-2xl border bg-white p-5 shadow-sm sm:p-6"
+                    className="student-card rounded-2xl border bg-white p-5 shadow-sm sm:p-6"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-5">
                       <div className="min-w-0">
@@ -472,7 +472,7 @@ function DashboardMetric({
 }) {
   return (
     <article
-      className={`rounded-2xl border p-6 shadow-sm ${metricStyles[tone]}`}
+      className={`student-card rounded-2xl border p-6 shadow-sm ${metricStyles[tone]}`}
     >
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-bold text-slate-600">{label}</p>
