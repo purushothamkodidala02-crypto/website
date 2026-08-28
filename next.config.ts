@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 
-const isDevelopment = process.env.NODE_ENV === "development";
 const productionOrigins = [
   "varadhiprep.in",
   "www.varadhiprep.in",
@@ -10,49 +9,27 @@ const productionOrigins = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  compress: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+  },
   experimental: {
-    // Next.js 16's App Router-native CSS inlining removes the initial
-    // render-blocking stylesheet request on first visits.
-    inlineCss: true,
-    sri: {
-      algorithm: "sha256",
-    },
+    optimizePackageImports: ["@supabase/supabase-js", "lucide-react", "clsx", "tailwind-merge"],
     serverActions: {
       bodySizeLimit: "3mb",
       allowedOrigins: productionOrigins,
     },
   },
-  turbopack: {
-    root: __dirname,
-  },
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: process.env.NEXT_PUBLIC_SUPABASE_URL
       ? [
           {
             protocol: "https",
             hostname: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname,
-            pathname: "/storage/v1/object/public/**",
           },
         ]
       : [],
-  },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
-          ...(!isDevelopment
-            ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }]
-            : []),
-        ],
-      },
-    ];
   },
 };
 
