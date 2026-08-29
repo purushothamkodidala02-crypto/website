@@ -5,6 +5,7 @@ import { ExamSymbol, MockSymbol, StateSymbol } from "@/components/exams/CatalogS
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { getHomeCatalogData } from "@/lib/catalog-data";
+import { createClient } from "@/lib/supabase/server";
 import { examUrl, stateUrl } from "@/lib/public-urls";
 import { absoluteUrl, SITE_DESCRIPTION } from "@/lib/site";
 
@@ -30,9 +31,13 @@ const benefits = [
 ];
 
 export default async function Home() {
-  const { states, categories, exams, papers, tests, hasStateError } =
-    await getHomeCatalogData();
-
+  const [
+    { states, categories, exams, papers, tests, hasStateError },
+    supabase,
+  ] = await Promise.all([getHomeCatalogData(), createClient()]);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const categoryById = new Map(categories.map((item) => [item.id, item]));
   const paperById = new Map(papers.map((item) => [item.id, item]));
   const testCountByExam = new Map<string, number>();
