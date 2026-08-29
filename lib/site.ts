@@ -1,6 +1,6 @@
 export const SITE_NAME = "Varadhi Prep";
 export const SITE_DESCRIPTION =
-  "Smart mock tests for career growth, with English and Telugu practice, flexible timed attempts, and detailed answer review.";
+  "Prepare for Telangana and Andhra Pradesh state exams with online mock tests, Telugu and English practice, timed attempts, answer review, and progress tracking.";
 
 const configuredSiteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://varadhiprep.in";
