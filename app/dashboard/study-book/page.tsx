@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 
 type StudyRow = {
   question_id: string;
+  exam_name: string;
+  paper_name: string;
   subject_name: string;
   question_text: string;
   option_a: string;
@@ -24,7 +26,11 @@ type StudyRow = {
   bookmarked: boolean;
 };
 
-export default async function StudyBookPage({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
+function unique(values: string[]) {
+  return [...new Set(values.filter(Boolean))].sort((left, right) => left.localeCompare(right));
+}
+
+export default async function StudyBookPage({ searchParams }: { searchParams: Promise<{ view?: string; exam?: string; paper?: string; subject?: string }> }) {
   const query = await searchParams;
   const view = query.view === "bookmarks" ? "bookmarks" : "mistakes";
   const supabase = await createClient();
@@ -33,6 +39,13 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
 
   const { data, error } = await supabase.rpc("get_student_study_book", { requested_kind: view });
   const rows = (data ?? []) as StudyRow[];
+  const exam = String(query.exam ?? "");
+  const paper = String(query.paper ?? "");
+  const subject = String(query.subject ?? "");
+  const examOptions = unique(rows.map((row) => row.exam_name));
+  const paperOptions = unique(rows.filter((row) => !exam || row.exam_name === exam).map((row) => row.paper_name));
+  const subjectOptions = unique(rows.filter((row) => (!exam || row.exam_name === exam) && (!paper || row.paper_name === paper)).map((row) => row.subject_name));
+  const filteredRows = rows.filter((row) => (!exam || row.exam_name === exam) && (!paper || row.paper_name === paper) && (!subject || row.subject_name === subject));
 
   return (
     <main className="student-page min-h-screen bg-slate-50">
@@ -50,9 +63,17 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
           <StudyTab href="/dashboard/study-book?view=bookmarks" active={view === "bookmarks"}>Bookmarks</StudyTab>
         </nav>
 
+        <form action="/dashboard/study-book" className="mt-6 grid gap-3 rounded-2xl border bg-white p-4 sm:grid-cols-4 sm:items-end">
+          {view === "bookmarks" && <input type="hidden" name="view" value="bookmarks" />}
+          <label className="block text-sm font-bold">Exam<select name="exam" defaultValue={exam} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All exams</option>{examOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="block text-sm font-bold">Paper<select name="paper" defaultValue={paper} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All papers</option>{paperOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="block text-sm font-bold">Subject<select name="subject" defaultValue={subject} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All subjects</option>{subjectOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+          <button type="submit" className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Apply filters</button>
+        </form>
+
         {error ? (
           <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-800">Your study questions could not be loaded. Please refresh and try again.</p>
-        ) : rows.length === 0 ? (
+        ) : filteredRows.length === 0 ? (
           <section className="mt-6 rounded-3xl border border-dashed bg-white p-10 text-center">
             <h2 className="text-xl font-black text-slate-950">{view === "mistakes" ? "No active mistakes" : "No bookmarked questions"}</h2>
             <p className="mt-2 text-sm text-slate-600">{view === "mistakes" ? "Incorrect answers will appear here automatically after you submit a test." : "Use the Bookmark button during a test or answer review."}</p>
@@ -60,7 +81,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
           </section>
         ) : (
           <section className="student-stagger mt-6 grid gap-5">
-            {rows.map((row, index) => <StudyQuestionCard key={row.question_id} row={row} index={index} />)}
+            {filteredRows.map((row, index) => <StudyQuestionCard key={row.question_id} row={row} index={index} />)}
           </section>
         )}
       </div>
