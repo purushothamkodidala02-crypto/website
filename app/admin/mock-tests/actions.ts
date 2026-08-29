@@ -5,7 +5,6 @@ import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { readMockTestAccess } from "@/lib/mock-test-access";
 import { mockTestSlug } from "@/lib/public-urls";
-import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { createClient } from "@/lib/supabase/server";
 import type { MockTestScope } from "@/types/mock-test";
 
@@ -34,12 +33,11 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   if (scope === "subject" && !subjectId) return { success: false, message: "Choose a subject for a subject-only mock." };
   if (pricing.error) return { success: false, message: pricing.error };
 
-  const [stateResult, categoryResult, groupResult, paperResult, papersResult, subjectResult] = await Promise.all([
+  const [stateResult, categoryResult, groupResult, paperResult, subjectResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").eq("id", stateId).maybeSingle(),
     supabase.from("exams").select("id, state_id, name").eq("id", categoryId).maybeSingle(),
     supabase.from("exam_groups").select("id, exam_id, name, slug").eq("id", examId).maybeSingle(),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order, question_count").eq("id", paperId).maybeSingle(),
-    supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order").eq("exam_group_id", examId),
     subjectId ? supabase.from("subjects").select("id, paper_id, name, slug").eq("id", subjectId).maybeSingle() : Promise.resolve({ data: null, error: null }),
   ]);
   const state = stateResult.data;
@@ -50,13 +48,15 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   if (!state || !category || !group || !paper || category.state_id !== state.id || group.exam_id !== category.id || paper.exam_group_id !== group.id || (scope === "subject" && (!subject || subject.paper_id !== paper.id))) {
     return { success: false, message: "The selected state, board, exam, paper and subject do not belong together." };
   }
-  const paperNumber = buildPaperDisplayMap((papersResult.data ?? []) as OrderedPaper[]).get(paper.id)?.number ?? Math.max(1, Number(paper.display_order));
   let existingSeriesQuery = supabase.from("mock_tests").select("series_number").eq("paper_id", paperId).eq("test_scope", scope).order("series_number", { ascending: false }).limit(1);
   existingSeriesQuery = scope === "subject" ? existingSeriesQuery.eq("subject_id", subjectId) : existingSeriesQuery.is("subject_id", null);
   const { data: existingSeries, error: seriesError } = await existingSeriesQuery;
   if (seriesError) return { success: false, message: seriesError.message };
   const seriesNumber = Number(existingSeries?.[0]?.series_number ?? 0) + 1;
-  const title = buildMockTestTitle({ stateCode: state.code, examName: group.name, paperNumber, subjectName: subject?.name, seriesNumber });
+  const { data: specialization } = paper.specialization_id
+    ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
+    : { data: null };
+  const title = buildMockTestTitle({ stateCode: state.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, seriesNumber });
   const slug = mockTestSlug(seriesNumber, subject?.slug);
   const targetQuestionCount = scope === "paper" ? Number(paper.question_count ?? requestedTarget) : requestedTarget;
   const { error } = await supabase.from("mock_tests").insert({

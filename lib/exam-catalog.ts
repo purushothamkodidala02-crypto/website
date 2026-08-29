@@ -9,17 +9,17 @@ export function mockTestLabel(seriesNumber: number) {
 export function buildMockTestTitle({
   stateCode,
   examName,
-  paperNumber,
+  paperName,
   subjectName,
   seriesNumber,
 }: {
   stateCode: string;
   examName: string;
-  paperNumber: number;
+  paperName: string;
   subjectName?: string | null;
   seriesNumber: number;
 }) {
-  const location = `${stateCode} ${examName} · Paper ${paperNumber}`;
+  const location = `${stateCode} ${examName} · ${paperName}`;
   return `${location}${subjectName ? ` · ${subjectName}` : ""} · ${mockTestLabel(seriesNumber)}`;
 }
 

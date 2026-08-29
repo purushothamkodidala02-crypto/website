@@ -5,7 +5,6 @@ import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { readMockTestAccess } from "@/lib/mock-test-access";
 import { PUBLIC_SLUG_PATTERN } from "@/lib/public-urls";
-import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { createClient } from "@/lib/supabase/server";
 import type { MockTestScope, MockTestStatus } from "@/types/mock-test";
 
@@ -61,9 +60,8 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const paperResult = await supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order").eq("id", paperId).maybeSingle();
   const paper = paperResult.data;
   if (!paper) return { success: false, message: "The selected paper no longer exists." };
-  const [groupResult, siblingPapersResult, subjectResult] = await Promise.all([
+  const [groupResult, subjectResult] = await Promise.all([
     supabase.from("exam_groups").select("id, exam_id, name").eq("id", paper.exam_group_id).maybeSingle(),
-    supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order").eq("exam_group_id", paper.exam_group_id),
     subjectId ? supabase.from("subjects").select("id, paper_id, name").eq("id", subjectId).maybeSingle() : Promise.resolve({ data: null, error: null }),
   ]);
   const group = groupResult.data;
@@ -72,9 +70,11 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const categoryResult = await supabase.from("exams").select("id, state_id").eq("id", group.exam_id).maybeSingle();
   const stateResult = categoryResult.data ? await supabase.from("exam_states").select("id, code").eq("id", categoryResult.data.state_id).maybeSingle() : { data: null };
   if (!categoryResult.data || !stateResult.data) return { success: false, message: "The exam location is incomplete. Fix it in Exam Structure first." };
-  const paperNumber = buildPaperDisplayMap((siblingPapersResult.data ?? []) as OrderedPaper[]).get(paper.id)?.number ?? 1;
   const seriesNumber = Number(current.series_number ?? 1);
-  const title = buildMockTestTitle({ stateCode: stateResult.data.code, examName: group.name, paperNumber, subjectName: subject?.name, seriesNumber });
+  const { data: specialization } = paper.specialization_id
+    ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
+    : { data: null };
+  const title = buildMockTestTitle({ stateCode: stateResult.data.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, seriesNumber });
   const { error } = await supabase.from("mock_tests").update({
     paper_id: paperId,
     test_scope: scope,

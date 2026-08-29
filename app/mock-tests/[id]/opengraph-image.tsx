@@ -47,7 +47,7 @@ async function getShareDetails(id: string): Promise<ShareDetails> {
       .maybeSingle();
     if (!paper) return { ...details, examName: test.title };
 
-    details.paperLabel = `Paper ${Math.max(1, Number(paper.display_order ?? 1))} · ${paper.name}`;
+    details.paperLabel = paper.name;
     const { data: exam } = await supabase
       .from("exam_groups")
       .select("exam_id, name")

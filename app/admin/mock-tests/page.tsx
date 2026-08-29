@@ -1,5 +1,4 @@
 import { MockSymbol } from "@/components/exams/CatalogSymbols";
-import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { createClient } from "@/lib/supabase/server";
 import { CreateMockTestForm } from "./CreateMockTestForm";
 import { ExistingMockTestsTable } from "./ExistingMockTestsTable";
@@ -47,7 +46,6 @@ export default async function MockTestsPage({
   const subjects = subjectsResult.data ?? [];
   const tests = testsResult.data ?? [];
   const specializations = specializationsResult.data ?? [];
-  const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const stateById = new Map(states.map((item) => [item.id, item]));
   const categoryById = new Map(categories.map((item) => [item.id, item]));
   const specializationById = new Map(specializations.map((item) => [item.id, item.name]));
@@ -57,7 +55,7 @@ export default async function MockTestsPage({
   const categoryOptions = categories.map((item) => ({ id: item.id, stateId: item.state_id, name: item.name }));
   const examOptions = exams.map((item) => ({ id: item.id, categoryId: item.exam_id, name: item.name }));
   const specializationOptions = specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }));
-  const paperOptions = papers.map((item) => ({ id: item.id, examId: item.exam_group_id, specializationId: item.specialization_id, name: item.name, duration: item.duration_minutes, questionCount: item.question_count, number: paperDisplayById.get(item.id)?.number ?? 1 }));
+  const paperOptions = papers.map((item) => ({ id: item.id, examId: item.exam_group_id, specializationId: item.specialization_id, name: item.name, duration: item.duration_minutes, questionCount: item.question_count }));
   const stateId = states.some((item) => item.id === query.state) ? query.state ?? "" : "";
   const categoryId = categoryOptions.some((item) => item.id === query.category && item.stateId === stateId) ? query.category ?? "" : "";
   const examId = examOptions.some((item) => item.id === query.exam && item.categoryId === categoryId) ? query.exam ?? "" : "";
