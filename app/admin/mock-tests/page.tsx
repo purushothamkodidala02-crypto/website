@@ -1,4 +1,5 @@
 import { MockSymbol } from "@/components/exams/CatalogSymbols";
+import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { createClient } from "@/lib/supabase/server";
 import { CreateMockTestForm } from "./CreateMockTestForm";
 import { ExistingMockTestsTable } from "./ExistingMockTestsTable";
@@ -46,6 +47,7 @@ export default async function MockTestsPage({
   const subjects = subjectsResult.data ?? [];
   const tests = testsResult.data ?? [];
   const specializations = specializationsResult.data ?? [];
+  const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const stateById = new Map(states.map((item) => [item.id, item]));
   const categoryById = new Map(categories.map((item) => [item.id, item]));
   const specializationById = new Map(specializations.map((item) => [item.id, item.name]));
