@@ -67,11 +67,16 @@ export default async function ExamPage({ params, searchParams }: Props) {
     .select("id, question, answer, display_order")
     .eq("exam_group_id", context.exam.id)
     .order("display_order");
-  const questions = (savedQuestions?.length ? savedQuestions : [
-    { question: `Where can I take ${context.exam.name} mock tests?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.` },
-    { question: `How many ${context.exam.name} mock tests are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication." },
-    { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard." },
-  ]).map((item) => ({ question: item.question, answer: item.answer }));
+  const standardQuestions = [
+    { question: `Where can I take ${context.exam.name} mock tests?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: 0 },
+    { question: `How many ${context.exam.name} mock tests are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: 1 },
+    { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard.", displayOrder: 2 },
+  ];
+  const savedByOrder = new Map((savedQuestions ?? []).map((item) => [item.display_order, item]));
+  const questions = [
+    ...standardQuestions.map((item) => savedByOrder.get(item.displayOrder) ?? item),
+    ...(savedQuestions ?? []).filter((item) => item.display_order >= standardQuestions.length),
+  ].map((item) => ({ question: item.question, answer: item.answer }));
   const structuredData = [
     ...collectionStructuredData(seo.title, seo.description, canonical, [
       { name: "Home", path: "/" },
