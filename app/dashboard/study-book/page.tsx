@@ -38,7 +38,39 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   if (!user) redirect("/login?next=/dashboard/study-book");
 
   const { data, error } = await supabase.rpc("get_student_study_book", { requested_kind: view });
-  const rows = (data ?? []) as StudyRow[];
+  const rawRows = (data ?? []) as StudyRow[];
+  const questionIds = rawRows.map((row) => row.question_id);
+  const questionResult = questionIds.length
+    ? await supabase.from("questions").select("id, subject_id").in("id", questionIds)
+    : { data: [] };
+  const subjectIds = [...new Set((questionResult.data ?? []).map((item) => item.subject_id))];
+  const subjectResult = subjectIds.length
+    ? await supabase.from("subjects").select("id, paper_id, name").in("id", subjectIds)
+    : { data: [] };
+  const paperIds = [...new Set((subjectResult.data ?? []).map((item) => item.paper_id))];
+  const paperResult = paperIds.length
+    ? await supabase.from("papers").select("id, exam_group_id, name").in("id", paperIds)
+    : { data: [] };
+  const examIds = [...new Set((paperResult.data ?? []).map((item) => item.exam_group_id))];
+  const examResult = examIds.length
+    ? await supabase.from("exam_groups").select("id, name").in("id", examIds)
+    : { data: [] };
+  const questionById = new Map((questionResult.data ?? []).map((item) => [item.id, item]));
+  const subjectById = new Map((subjectResult.data ?? []).map((item) => [item.id, item]));
+  const paperById = new Map((paperResult.data ?? []).map((item) => [item.id, item]));
+  const examById = new Map((examResult.data ?? []).map((item) => [item.id, item]));
+  const rows = rawRows.map((row) => {
+    const question = questionById.get(row.question_id);
+    const subjectLocation = question ? subjectById.get(question.subject_id) : undefined;
+    const paperLocation = subjectLocation ? paperById.get(subjectLocation.paper_id) : undefined;
+    const examLocation = paperLocation ? examById.get(paperLocation.exam_group_id) : undefined;
+    return {
+      ...row,
+      exam_name: row.exam_name || examLocation?.name || "Other exam",
+      paper_name: row.paper_name || paperLocation?.name || "Other paper",
+      subject_name: row.subject_name || subjectLocation?.name || "Other subject",
+    };
+  });
   const exam = String(query.exam ?? "");
   const paper = String(query.paper ?? "");
   const subject = String(query.subject ?? "");
@@ -80,8 +112,14 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
             <Link href="/mock-tests" className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse mock tests</Link>
           </section>
         ) : (
-          <section className="student-stagger mt-6 grid max-h-[72vh] gap-5 overflow-y-auto rounded-3xl border border-slate-200 bg-slate-100 p-3 pr-2 sm:p-5">
-            {filteredRows.map((row, index) => <StudyQuestionCard key={row.question_id} row={row} index={index} />)}
+          <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-5">
+              <p className="text-sm font-bold text-slate-700"><span className="mr-2 inline-flex min-w-10 justify-center rounded-lg bg-teal-100 px-2.5 py-1 text-teal-900">{filteredRows.length}</span>{filteredRows.length === 1 ? "question" : "questions"}</p>
+              <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:border-teal-300 hover:text-teal-800">Clear filters</Link>
+            </div>
+            <div className="student-stagger grid max-h-[64vh] gap-4 overflow-y-auto overscroll-contain p-3 sm:max-h-[72vh] sm:gap-5 sm:p-5">
+              {filteredRows.map((row, index) => <StudyQuestionCard key={row.question_id} row={row} index={index} />)}
+            </div>
           </section>
         )}
       </div>
@@ -98,8 +136,8 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
   return (
     <article className="student-card overflow-hidden rounded-3xl border bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50 px-5 py-4 sm:px-6">
-        <div><p className="text-xs font-black uppercase tracking-wide text-teal-700">{row.subject_name}</p><p className="mt-1 text-xs font-semibold text-slate-500">Question {index + 1}{row.mistake_count > 0 ? ` · Incorrect ${row.mistake_count} time${row.mistake_count === 1 ? "" : "s"}` : ""}</p></div>
-        <div className="flex flex-wrap gap-2"><ReportQuestionButton questionId={row.question_id} /><BookmarkButton questionId={row.question_id} initialBookmarked={row.bookmarked} /></div>
+        <div className="min-w-0"><p className="break-words text-xs font-black uppercase tracking-wide text-teal-700">{row.exam_name} · {row.paper_name} · {row.subject_name}</p><p className="mt-1 text-xs font-semibold text-slate-500">Question {index + 1}{row.mistake_count > 0 ? ` · Incorrect ${row.mistake_count} time${row.mistake_count === 1 ? "" : "s"}` : ""}</p></div>
+        <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto"><ReportQuestionButton questionId={row.question_id} /><BookmarkButton questionId={row.question_id} initialBookmarked={row.bookmarked} /></div>
       </div>
       <div className="p-5 sm:p-6">
         <FormattedQuestionText text={row.question_text} className="text-lg leading-8 text-slate-950" />
