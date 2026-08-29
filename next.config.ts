@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
   },
   experimental: {
+    inlineCss: true,
     optimizePackageImports: ["@supabase/supabase-js", "lucide-react", "clsx", "tailwind-merge"],
     serverActions: {
       bodySizeLimit: "3mb",
