@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BrandLockup } from "@/components/brand/VaradhiBrand";
+import { BrandLockup, BrandMark } from "@/components/brand/VaradhiBrand";
 import { usePathname } from "next/navigation";
 
 const sections = [
@@ -121,16 +121,14 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === href : pathname.startsWith(href);
 }
 
-function NavigationLinks() {
+function NavigationLinks({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
 
   return (
     <nav className="grid gap-6">
       {sections.map((section) => (
         <section key={section.label}>
-          <p className="px-3 text-[10px] font-black uppercase tracking-[0.17em] text-slate-500">
-            {section.label}
-          </p>
+          {!collapsed && <p className="px-3 text-[10px] font-black uppercase tracking-[0.17em] text-slate-500">{section.label}</p>}
           <div className="mt-2 grid gap-1">
             {section.links.map((link) => {
               const active = isActive(pathname, link.href);
@@ -139,7 +137,8 @@ function NavigationLinks() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${
+                  title={collapsed ? link.label : undefined}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
                     active
                       ? "bg-teal-300 text-slate-950 shadow-lg shadow-teal-950/20"
                       : "text-slate-300 hover:bg-white/10 hover:text-white"
@@ -154,7 +153,7 @@ function NavigationLinks() {
                   >
                     <NavIcon name={link.icon} />
                   </span>
-                  {link.label}
+                  {!collapsed && link.label}
                 </Link>
               );
             })}
@@ -165,8 +164,10 @@ function NavigationLinks() {
   );
 }
 
-function Brand({ linked = true }: { linked?: boolean }) {
-  const content = <BrandLockup context="admin" markClassName="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />;
+function Brand({ linked = true, collapsed = false }: { linked?: boolean; collapsed?: boolean }) {
+  const content = collapsed
+    ? <BrandMark preload className="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />
+    : <BrandLockup context="admin" markClassName="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />;
 
   if (!linked) return <div className="flex items-center gap-3">{content}</div>;
 
@@ -177,23 +178,29 @@ function Brand({ linked = true }: { linked?: boolean }) {
   );
 }
 
-export function AdminNavigation() {
+export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-800 bg-slate-950 px-5 py-6 text-white md:flex">
-        <Brand />
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-5"}`}>
+        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
+          <Brand collapsed={collapsed} />
+          {!collapsed && <button type="button" onClick={onToggle} aria-label="Collapse sidebar" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
+        </div>
+        {collapsed && <button type="button" onClick={onToggle} aria-label="Expand sidebar" className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
         <div className="mt-8">
-          <NavigationLinks />
+          <NavigationLinks collapsed={collapsed} />
         </div>
         <div className="mt-auto border-t border-slate-800 pt-5">
           <Link
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white"
+            aria-label="Student"
+            title={collapsed ? "Student" : undefined}
+            className={`flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : ""}`}
           >
-            <span>Student site</span>
-            <span className="text-[10px] tracking-wider text-teal-200">Open</span>
+            <span>{collapsed ? "S" : "Student"}</span>
+            {!collapsed && <span className="text-[10px] tracking-wider text-teal-200">Open</span>}
           </Link>
         </div>
       </aside>
@@ -214,7 +221,7 @@ export function AdminNavigation() {
               rel="noreferrer"
               className="mt-5 flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-3 text-sm font-bold text-slate-200"
             >
-              <span>View student site</span>
+              <span>Student</span>
               <span className="text-[10px] tracking-wider text-teal-200">Open</span>
             </Link>
           </div>
@@ -222,4 +229,8 @@ export function AdminNavigation() {
       </div>
     </>
   );
+}
+
+function MenuIcon() {
+  return <span className="space-y-1" aria-hidden="true"><span className="block h-0.5 w-4 rounded-full bg-current" /><span className="block h-0.5 w-4 rounded-full bg-current" /><span className="block h-0.5 w-4 rounded-full bg-current" /></span>;
 }
