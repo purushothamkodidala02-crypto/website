@@ -166,7 +166,7 @@ export default async function Home() {
           <div className="relative">
             <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-teal-200"><MockSymbol className="h-4 w-4" /> English + Telugu practice</p>
             <h2 className="font-display mt-6 text-4xl leading-[1.08] tracking-tight sm:text-6xl">Practise with purpose. Improve with every mock test.</h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Take focused tests in a clean exam workspace, pause when needed, and turn every result into a better study plan.</p>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Take focused tests in a clean exam workspace, pause when needed, and turn every result into a better study plan. Practise state-wise papers, review every answer after submission, track weak areas, and come back with a clearer plan for your next mock test.</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href="/mock-tests" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Start a mock test</Link>
               <Link href="/register" className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">Create free account</Link>
@@ -194,26 +194,17 @@ export default async function Home() {
       </section>
 
       <footer className="border-t bg-slate-950 text-slate-300">
-        <div className="mx-auto grid max-w-6xl gap-7 px-5 py-9 sm:px-8 lg:grid-cols-[1.1fr_1.4fr] lg:items-start">
-          <div className="flex items-center gap-3">
-            <BrandMark className="h-10 w-10" />
-            <div>
-              <p className="font-display text-white">Varadhi Prep</p>
-              <p className="text-xs">TG and AP state exam mock tests</p>
-            </div>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Popular mock tests</p>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
-                {activeExams.slice(0, 4).map((exam) => {
-                  const category = categoryById.get(exam.exam_id);
-                  const state = states.find((item) => item.id === category?.state_id);
-                  return state ? <Link key={exam.id} href={examUrl(state.slug, exam.slug)} className="hover:text-white">{exam.name}</Link> : null;
-                })}
-                <Link href="/mock-tests" className="hover:text-white">All mock tests</Link>
+        <div className="mx-auto grid max-w-6xl gap-7 px-5 py-9 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-3">
+              <BrandMark className="h-10 w-10" />
+              <div>
+                <p className="font-display text-white">Varadhi Prep</p>
+                <p className="text-xs">TG and AP state exam mock tests</p>
               </div>
             </div>
+          </div>
+          <div className="grid gap-5">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Student help</p>
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
