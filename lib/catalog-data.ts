@@ -3,8 +3,23 @@ import { createPublicClient } from "@/lib/supabase/public";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
 
+function hasPublicSupabaseEnv() {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
 export const getHomeCatalogData = unstable_cache(
   async () => {
+    if (!hasPublicSupabaseEnv()) {
+      return {
+        states: [],
+        categories: [],
+        exams: [],
+        papers: [],
+        tests: [],
+        hasStateError: true,
+      };
+    }
+
     const supabase = createPublicClient();
     const [statesResult, categoriesResult, examsResult, papersResult, testsResult] =
       await Promise.all([
@@ -30,6 +45,21 @@ export const getHomeCatalogData = unstable_cache(
 
 export const getMockTestCatalogData = unstable_cache(
   async () => {
+    if (!hasPublicSupabaseEnv()) {
+      return {
+        states: [],
+        categories: [],
+        exams: [],
+        specializations: [],
+        papers: [],
+        subjects: [],
+        tests: [],
+        stats: [],
+        hasError: true,
+        hasSupplementaryError: true,
+      };
+    }
+
     const supabase = createPublicClient();
     const [statesResult, categoriesResult, examsResult, specializationsResult, papersResult, subjectsResult, testsResult, statsResult] = await Promise.all([
       supabase.from("exam_states").select("id, name, code, slug, description, seo_title, seo_description, display_order").eq("is_active", true).order("display_order"),

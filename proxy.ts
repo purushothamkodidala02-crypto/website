@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { resolvePublicPermanentRedirect } from "@/lib/public-redirect";
 
-function buildContentSecurityPolicy(nonce: string) {
+function buildContentSecurityPolicy(nonce?: string) {
   const isDevelopment = process.env.NODE_ENV === "development";
   let supabaseOrigin = "https://*.supabase.co";
   try {
@@ -13,9 +13,13 @@ function buildContentSecurityPolicy(nonce: string) {
     // Keep fallback
   }
 
+  const scriptPolicy = nonce
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com${isDevelopment ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com${isDevelopment ? " 'unsafe-eval'" : ""}`;
+
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
+    scriptPolicy,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${supabaseOrigin}`,
     "font-src 'self' data:",
@@ -39,10 +43,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(permanentDestination, 308);
   }
 
-  const nonce = btoa(crypto.randomUUID());
+  const needsNonce = request.nextUrl.pathname.startsWith("/billing/cashfree");
+  const nonce = needsNonce ? btoa(crypto.randomUUID()) : undefined;
   const contentSecurityPolicy = buildContentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
+  if (nonce) requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
 
   let response = NextResponse.next({

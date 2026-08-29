@@ -2,20 +2,12 @@ import Link from "next/link";
 import { BrandLockup } from "@/components/brand/VaradhiBrand";
 import { PublicAccountActions } from "@/components/site/PublicAccountActions";
 import { PublicNavigationMenu } from "@/components/site/PublicNavigationMenu";
-import { createClient } from "@/lib/supabase/server";
 
 type PublicHeaderProps = {
   compact?: boolean;
 };
 
-export async function PublicHeader({ compact = false }: PublicHeaderProps) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
-    : { data: null };
+export function PublicHeader({ compact = false }: PublicHeaderProps) {
   const navigation = [
     { href: "/", label: "Home", icon: "home" as const },
     { href: "/mock-tests", label: "Mock Tests", icon: "tests" as const },
@@ -49,7 +41,7 @@ export async function PublicHeader({ compact = false }: PublicHeaderProps) {
           ))}
         </nav>
 
-        <PublicAccountActions initialEmail={user?.email ?? null} initialIsAdmin={profile?.role === "admin"} />
+        <PublicAccountActions />
       </div>
     </header>
   );

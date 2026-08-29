@@ -63,7 +63,8 @@ test("student navigation keeps account details separate from the admin workspace
   assert.match(actions, /!isAdmin/);
   assert.match(actions, /initialIsAdmin = false/);
   assert.doesNotMatch(actions, /Return to admin workspace/);
-  assert.match(header, /initialIsAdmin=\{profile\?\.role === "admin"\}/);
+  assert.doesNotMatch(header, /createClient/);
+  assert.match(header, /<PublicAccountActions \/>/);
   assert.match(publicMenu, /label: "Admin workspace"/);
   assert.match(publicMenu, /hasAdminRole/);
   assert.match(adminNavigation, /target="_blank"/);

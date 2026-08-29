@@ -34,16 +34,17 @@ test("database migration locks sessions and makes submission idempotent", async 
   assert.match(migration, /create_exam_structure_atomic/);
 });
 
-test("production CSP uses per-request nonces and no production unsafe-inline scripts", async () => {
+test("production CSP keeps public pages cacheable and payment pages nonce-protected", async () => {
   const [proxy, config, layout] = await Promise.all([read("proxy.ts"), read("next.config.ts"), read("app/layout.tsx")]);
 
+  assert.match(proxy, /needsNonce = request\.nextUrl\.pathname\.startsWith\("\/billing\/cashfree"\)/);
   assert.match(proxy, /'nonce-\$\{nonce\}'/);
   assert.match(proxy, /'strict-dynamic'/);
   assert.match(proxy, /https:\/\/sdk\.cashfree\.com/);
-  assert.match(proxy, /requestHeaders\.set\("x-nonce", nonce\)/);
-  assert.match(layout, /await connection\(\)/);
+  assert.match(proxy, /if \(nonce\) requestHeaders\.set\("x-nonce", nonce\)/);
+  assert.doesNotMatch(layout, /await connection\(\)/);
   assert.doesNotMatch(config, /Content-Security-Policy/);
-  assert.doesNotMatch(proxy, /script-src[^\n]*unsafe-inline/);
+  assert.match(proxy, /script-src 'self' 'unsafe-inline'/);
 });
 
 test("launch policy enforces strong passwords and disables unverified paid tests", async () => {
