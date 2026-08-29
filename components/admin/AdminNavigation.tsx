@@ -13,6 +13,7 @@ const sections = [
     label: "Exam structure",
     links: [
       { href: "/admin/exams", label: "Manage structure", icon: "categories" as const },
+      { href: "/admin/exam-pages", label: "Exam pages", icon: "exams" as const },
     ],
   },
   {
