@@ -35,7 +35,7 @@ function refresh() {
 
 export async function createExamPageFaq(_previous: FaqActionState, formData: FormData): Promise<FaqActionState> {
   const values = readFaq(formData);
-  if ("error" in values) return { success: false, message: values.error };
+  if (typeof values.error === "string") return { success: false, message: values.error };
   const { supabase, error } = await requireAdmin();
   if (error) return { success: false, message: error };
   const { error: insertError } = await supabase.from("exam_page_faqs").insert({ exam_group_id: values.examGroupId, question: values.question, answer: values.answer, display_order: values.displayOrder });
@@ -48,7 +48,7 @@ export async function updateExamPageFaq(_previous: FaqActionState, formData: For
   const faqId = String(formData.get("faq_id") ?? "").trim();
   const values = readFaq(formData);
   if (!/^[0-9a-f-]{36}$/i.test(faqId)) return { success: false, message: "That question could not be found." };
-  if ("error" in values) return { success: false, message: values.error };
+  if (typeof values.error === "string") return { success: false, message: values.error };
   const { supabase, error } = await requireAdmin();
   if (error) return { success: false, message: error };
   const { error: updateError } = await supabase.from("exam_page_faqs").update({ question: values.question, answer: values.answer, display_order: values.displayOrder }).eq("id", faqId).eq("exam_group_id", values.examGroupId);
