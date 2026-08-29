@@ -80,7 +80,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
             <Link href="/mock-tests" className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse mock tests</Link>
           </section>
         ) : (
-          <section className="student-stagger mt-6 grid gap-5">
+          <section className="student-stagger mt-6 grid max-h-[72vh] gap-5 overflow-y-auto rounded-3xl border border-slate-200 bg-slate-100 p-3 pr-2 sm:p-5">
             {filteredRows.map((row, index) => <StudyQuestionCard key={row.question_id} row={row} index={index} />)}
           </section>
         )}
