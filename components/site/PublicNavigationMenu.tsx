@@ -118,18 +118,18 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
           aria-modal="true"
           aria-label="Site navigation"
           inert={!open}
-          className={`absolute left-0 top-0 flex h-dvh w-[min(21rem,88vw)] flex-col border-r border-teal-100 bg-gradient-to-b from-white via-white to-teal-50/60 shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "-translate-x-full"}`}
+          className={`absolute left-0 top-0 flex h-dvh w-[min(21rem,88vw)] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="flex items-center justify-between border-b border-teal-100 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
             <div>
-              <p className="font-display text-lg text-slate-950">Varadhi <span className="text-teal-700">Prep</span></p>
+              <p className="font-display text-lg text-slate-950">Varadhi Prep</p>
             </div>
             <button
               ref={closeButtonRef}
               type="button"
               onClick={closeMenu}
               aria-label="Close navigation menu"
-              className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-xl font-semibold text-teal-900 transition hover:bg-teal-100"
+              className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-xl font-semibold text-transparent before:content-['×'] before:text-slate-700 hover:bg-slate-200"
             >
               ×
             </button>
@@ -141,7 +141,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
               const isCurrentPage = item.href === "/"
                 ? pathname === "/"
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const iconClass = isCurrentPage ? "bg-white text-teal-800" : tone;
+              const iconClass = isCurrentPage ? "bg-white text-slate-950" : tone;
               return (
                 <Link
                   key={item.href}
@@ -150,8 +150,8 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
                   aria-current={isCurrentPage ? "page" : undefined}
                   className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-black transition hover:translate-x-0.5 ${
                     isCurrentPage
-                      ? "border-teal-600 bg-teal-700 text-white shadow-lg shadow-teal-900/15"
-                      : "border-teal-100 bg-white/90 text-slate-950 hover:border-teal-200 hover:bg-teal-50"
+                      ? "border-slate-950 bg-slate-950 text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   <span className={`grid h-10 w-10 place-items-center rounded-xl ${iconClass}`}>
@@ -164,7 +164,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
             })}
           </nav>
 
-          <div className="border-t border-teal-100 bg-white/60 p-5 text-xs leading-5 text-slate-500">
+          <div className="border-t border-slate-200 p-5 text-xs leading-5 text-slate-500">
             Need help? Email <a href="mailto:support@varadhiprep.in" className="font-bold text-teal-700">support@varadhiprep.in</a>
           </div>
         </aside>
