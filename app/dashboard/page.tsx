@@ -88,7 +88,8 @@ export default async function Dashboard({
       .from("mock_tests")
       .select("id, paper_id, title, duration_minutes, slug, access_type")
       .eq("status", "published")
-      .order("display_order", { ascending: true }),
+      .order("display_order", { ascending: true })
+      .limit(4),
     supabase.from("mock_tests").select("id, title"),
     supabase
       .from("papers")
