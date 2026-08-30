@@ -275,8 +275,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
             {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{stateExams.map((exam) => {
               const category = categoryById.get(exam.exam_id);
-              const examTests = tests.filter((test) => test.exam.id === exam.id);
-              const paperCount = new Set(examTests.map((test) => test.paper.id)).size;
+              const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
               return <Link key={exam.id} href={examUrl(selectedState.slug, exam.slug)} className="student-card group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
                 <span className="flex items-center justify-between"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800"><ExamSymbol name={exam.name} /></span><span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">{category?.name}</span></span>
                 <h2 className="font-display mt-5 text-xl leading-7">{exam.name}</h2>
