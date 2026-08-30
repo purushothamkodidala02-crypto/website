@@ -42,7 +42,7 @@ test("question reporting is private, rate-limited, and connected from students t
 
 test("optional catalogue statistics cannot hide the public mock-test library", async () => {
   const catalog = await read("lib/catalog-data.ts");
-  assert.match(catalog, /mock-test-catalog-v4/);
+  assert.match(catalog, /mock-test-catalog-v5/);
   const coreError = catalog.slice(catalog.indexOf("hasError:"), catalog.indexOf("hasSupplementaryError:"));
   assert.doesNotMatch(coreError, /statsResult\.error/);
   assert.doesNotMatch(coreError, /specializationsResult\.error/);
