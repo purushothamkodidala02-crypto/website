@@ -8,7 +8,6 @@ export const MAX_QUESTION_IMAGE_BYTES = 2_000_000;
 
 const allowedImageTypes = new Map([
   ["image/jpeg", "jpg"],
-  ["image/jpg", "jpg"],
   ["image/png", "png"],
   ["image/webp", "webp"],
 ]);
@@ -43,22 +42,12 @@ export async function uploadQuestionImage(
 
   const path = `${userId}/${randomUUID()}.${extension}`;
   const bytes = Buffer.from(await file.arrayBuffer());
-  const contentType = file.type === "image/jpg" ? "image/jpeg" : file.type;
   const { error } = await supabase.storage.from(QUESTION_MEDIA_BUCKET).upload(path, bytes, {
     cacheControl: "31536000",
-    contentType,
+    contentType: file.type,
     upsert: false,
   });
-  if (error) {
-    const message = error.message.toLowerCase();
-    if (message.includes("bucket") && message.includes("not found")) {
-      return { url: null, path: null, error: "Question image storage is not configured yet. Apply the question-media Supabase migration, then try again." };
-    }
-    if (message.includes("row-level security") || message.includes("unauthorized")) {
-      return { url: null, path: null, error: "Your secure Admin verification has expired. Refresh the page, complete Admin verification, and upload again." };
-    }
-    return { url: null, path: null, error: `Image upload failed: ${error.message}` };
-  }
+  if (error) return { url: null, path: null, error: `Image upload failed: ${error.message}` };
 
   const { data } = supabase.storage.from(QUESTION_MEDIA_BUCKET).getPublicUrl(path);
   return { url: data.publicUrl, path, error: null };
