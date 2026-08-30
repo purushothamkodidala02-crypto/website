@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createClient } from "@supabase/supabase-js";
 
 /** Server-only client for privileged, verified workflows. Never import in client UI. */
