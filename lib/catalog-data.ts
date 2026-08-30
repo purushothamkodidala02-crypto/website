@@ -1,15 +1,17 @@
+import "server-only";
+
 import { unstable_cache } from "next/cache";
-import { createPublicClient } from "@/lib/supabase/public";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
 
-function hasPublicSupabaseEnv() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+function hasCatalogSupabaseEnv() {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export const getHomeCatalogData = unstable_cache(
   async () => {
-    if (!hasPublicSupabaseEnv()) {
+    if (!hasCatalogSupabaseEnv()) {
       return {
         states: [],
         categories: [],
@@ -20,7 +22,7 @@ export const getHomeCatalogData = unstable_cache(
       };
     }
 
-    const supabase = createPublicClient();
+    const supabase = createAdminClient();
     const [statesResult, categoriesResult, examsResult, papersResult, testsResult] =
       await Promise.all([
         supabase.from("exam_states").select("id, name, code, slug, description, seo_title, seo_description, display_order, is_active").order("display_order"),
@@ -55,7 +57,7 @@ export const getHomeCatalogData = unstable_cache(
 
 export const getMockTestCatalogData = unstable_cache(
   async () => {
-    if (!hasPublicSupabaseEnv()) {
+    if (!hasCatalogSupabaseEnv()) {
       return {
         states: [],
         categories: [],
@@ -70,7 +72,7 @@ export const getMockTestCatalogData = unstable_cache(
       };
     }
 
-    const supabase = createPublicClient();
+    const supabase = createAdminClient();
     const [statesResult, categoriesResult, examsResult, specializationsResult, papersResult, subjectsResult, testsResult, statsResult] = await Promise.all([
       supabase.from("exam_states").select("id, name, code, slug, description, seo_title, seo_description, display_order, is_active").order("display_order"),
       supabase.from("exams").select("id, state_id, name, slug, seo_title, seo_description, is_active").order("display_order"),
