@@ -30,17 +30,10 @@ const benefits = [
 ];
 
 export default async function Home() {
-  const { states, categories, exams, papers, tests, hasStateError } = await getHomeCatalogData();
+  const { states, categories, exams, papers, hasStateError } = await getHomeCatalogData();
   const categoryById = new Map(categories.map((item) => [item.id, item]));
-  const paperById = new Map(papers.map((item) => [item.id, item]));
-  const testCountByExam = new Map<string, number>();
 
-  for (const test of tests) {
-    const examId = paperById.get(test.paper_id)?.exam_group_id;
-    if (examId) testCountByExam.set(examId, (testCountByExam.get(examId) ?? 0) + 1);
-  }
-
-  const activeExams = exams.filter((exam) => (testCountByExam.get(exam.id) ?? 0) > 0);
+  const activeExams = exams;
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",

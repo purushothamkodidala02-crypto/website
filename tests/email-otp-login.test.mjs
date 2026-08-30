@@ -70,6 +70,8 @@ test("state and exam catalogue cards show only the next useful content count", a
   assert.doesNotMatch(home, /\{testCountByExam\.get\(exam\.id\)\} tests/);
   assert.doesNotMatch(catalogue, /\{stats\.tests\} tests/);
   assert.doesNotMatch(catalogue, /\{examTests\.length\} tests/);
+  assert.doesNotMatch(home, /const activeExams = exams\.filter/);
+  assert.doesNotMatch(catalogue, /tests\.some/);
   assert.match(home, /paper\{paperCount === 1/);
   assert.match(catalogue, /paper\{paperCount === 1/);
 });

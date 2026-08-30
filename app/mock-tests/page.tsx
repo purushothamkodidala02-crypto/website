@@ -147,7 +147,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     : undefined;
   if (!selectedCategory && selectedState && filters.category) selectedCategory = (await resolvePublicRoute({ stateSlug: selectedState.slug, categorySlug: filters.category }))?.category;
   const stateExams = selectedState
-    ? exams.filter((exam) => categoryById.get(exam.exam_id)?.state_id === selectedState.id && (!selectedCategory || exam.exam_id === selectedCategory.id) && tests.some((test) => test.exam.id === exam.id))
+    ? exams.filter((exam) => categoryById.get(exam.exam_id)?.state_id === selectedState.id && (!selectedCategory || exam.exam_id === selectedCategory.id))
     : [];
   let selectedExam = stateExams.find((exam) => exam.id === filters.exam || exam.slug === filters.exam);
   if (!selectedExam && selectedState && filters.exam) selectedExam = (await resolvePublicRoute({ stateSlug: selectedState.slug, examSlug: filters.exam }))?.exam;
@@ -155,7 +155,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     ? specializations.find((item) => item.exam_group_id === selectedExam.id && (item.id === filters.specialization || item.slug === filters.specialization))
     : undefined;
   if (!selectedSpecialization && selectedState && selectedExam && filters.specialization) selectedSpecialization = (await resolvePublicRoute({ stateSlug: selectedState.slug, examSlug: selectedExam.slug, specializationSlug: filters.specialization }))?.specialization;
-  const examPapers = selectedExam ? papers.filter((paper) => paper.exam_group_id === selectedExam.id && (!selectedSpecialization || paper.specialization_id === selectedSpecialization.id) && tests.some((test) => test.paper.id === paper.id)) : [];
+  const examPapers = selectedExam ? papers.filter((paper) => paper.exam_group_id === selectedExam.id && (!selectedSpecialization || paper.specialization_id === selectedSpecialization.id)) : [];
   let selectedPaper = examPapers.find((paper) => paper.id === filters.paper || paper.slug === filters.paper);
   if (!selectedPaper && selectedState && selectedExam && filters.paper) selectedPaper = (await resolvePublicRoute({ stateSlug: selectedState.slug, examSlug: selectedExam.slug, paperSlug: filters.paper }))?.paper;
   let selectedSubject = selectedPaper
@@ -204,9 +204,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   );
 
   const stateStats = new Map(states.map((state) => {
-    const stateTests = tests.filter((test) => test.state.id === state.id);
+    const stateCategoryIds = new Set(categories.filter((category) => category.state_id === state.id).map((category) => category.id));
     return [state.id, {
-      exams: new Set(stateTests.map((test) => test.exam.id)).size,
+      exams: exams.filter((exam) => stateCategoryIds.has(exam.exam_id)).length,
     }];
   }));
 
@@ -273,7 +273,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         ) : !selectedExam ? (
           <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
-            {stateExams.length === 0 ? <EmptyCatalog title="No exams are published for this state yet" detail="New exams will appear here as soon as their first mock test is published." /> : <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{stateExams.map((exam) => {
+            {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{stateExams.map((exam) => {
               const category = categoryById.get(exam.exam_id);
               const examTests = tests.filter((test) => test.exam.id === exam.id);
               const paperCount = new Set(examTests.map((test) => test.paper.id)).size;
