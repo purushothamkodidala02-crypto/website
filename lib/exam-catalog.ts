@@ -42,7 +42,7 @@ export function studentFacingMockTestTitle({
   seriesNumber: number;
   subjectName?: string | null;
 }) {
-  return `${examName} Â· ${paperLabel}${subjectName ? ` Â· ${subjectName}` : ""} Â· ${mockTestLabel(seriesNumber)}`;
+  return `${examName} · ${paperLabel}${subjectName ? ` · ${subjectName}` : ""} · ${mockTestLabel(seriesNumber)}`;
 }
 
 export function inferExamKind(name: string) {

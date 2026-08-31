@@ -55,8 +55,8 @@ export function buildPaperDisplayMap(papers: OrderedPaper[]) {
 
       displayById.set(paper.id, {
         number,
-        shortLabel: paper.name,
-        label: paper.name,
+        shortLabel: `Paper ${number}`,
+        label: `Paper ${number}`,
       });
     });
   }
