@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -65,6 +66,7 @@ export default async function RootLayout({
       <body className="min-h-full bg-white text-gray-900">
         <NavigationProgress />
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
   );
