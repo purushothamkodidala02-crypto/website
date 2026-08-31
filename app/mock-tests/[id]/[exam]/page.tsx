@@ -5,8 +5,6 @@ import MockTestsPage, { type Filters } from "@/app/mock-tests/page";
 import { ExamSymbol, MockSymbol, PaperSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
-import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
-import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl } from "@/lib/public-urls";
@@ -44,7 +42,6 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
   const { catalog } = context;
   const papers = catalog.papers.filter((paper) => paper.exam_group_id === context.exam!.id);
-  const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const paperIds = new Set(papers.map((paper) => paper.id));
   const tests = catalog.tests.filter((test) => paperIds.has(test.paper_id));
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
@@ -88,7 +85,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
       { name: context.exam.name, path: canonical },
     ]),
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
-    { "@context": "https://schema.org", "@type": "ItemList", name: `${context.exam.name} mock tests`, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
+    { "@context": "https://schema.org", "@type": "ItemList", name: `${context.exam.name} mock tests`, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test.title, context.exam!.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
   ];
 
   return (
@@ -118,7 +115,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           {papers.length === 0 ? <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." /> : <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full table-auto text-left"><thead className="bg-slate-950 text-white"><tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Paper name</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr></thead><tbody className="divide-y divide-slate-200">{papers.map((paper) => <tr key={paper.id} className="transition hover:bg-teal-50/60"><td className="px-4 py-5 sm:px-6"><span className="font-display block break-words text-base text-slate-950 sm:text-lg">{paper.name}</span></td><td className="px-4 py-5 text-right sm:px-6"><Link href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)} className="inline-flex whitespace-nowrap rounded-lg bg-teal-100 px-3 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">Open paper →</Link></td></tr>)}</tbody></table></div>}
         </section>
 
-        <section aria-labelledby="tests-title"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Timed practice</p><h2 id="tests-title" className="font-display mt-2 text-3xl">Latest mock tests</h2></div>{tests.length > 6 && <Link href={`${canonical}?view=all`} className="text-sm font-black text-teal-800">View complete test list →</Link>}</div>{tests.length === 0 ? <EmptyState title="Mock tests are coming soon" detail="The exam page is active. Published mock tests will automatically appear here." /> : <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full table-auto text-left"><thead className="bg-slate-950 text-white"><tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Mock test name</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] md:table-cell">Paper</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] sm:table-cell">Duration</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] lg:table-cell">Access</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr></thead><tbody className="divide-y divide-slate-200">{tests.slice(0, 6).map((test) => { const paper = papers.find((item) => item.id === test.paper_id)!; return <tr key={test.id} className="transition hover:bg-teal-50/60"><td className="px-4 py-5 sm:px-6"><Link href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)} className="font-display block break-words text-base text-slate-950 hover:text-teal-800 sm:text-lg">{studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name)}</Link><p className="mt-1 text-xs text-slate-500 sm:hidden">{test.duration_minutes} minutes</p><p className="mt-1 text-xs text-slate-500 md:hidden">{paper.name}</p></td><td className="hidden px-4 py-5 text-sm font-semibold text-slate-700 md:table-cell">{paper.name}</td><td className="hidden px-4 py-5 text-sm text-slate-600 sm:table-cell">{test.duration_minutes} minutes</td><td className="hidden px-4 py-5 lg:table-cell"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>{test.access_type === "free" ? "Free" : "Included"}</span></td><td className="px-4 py-5 text-right sm:px-6"><Link href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)} className="inline-flex whitespace-nowrap rounded-lg bg-teal-100 px-3 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">Start →</Link></td></tr>; })}</tbody></table></div>}</section>
+        <section aria-labelledby="tests-title"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Timed practice</p><h2 id="tests-title" className="font-display mt-2 text-3xl">Latest mock tests</h2></div>{tests.length > 6 && <Link href={`${canonical}?view=all`} className="text-sm font-black text-teal-800">View complete test list →</Link>}</div>{tests.length === 0 ? <EmptyState title="Mock tests are coming soon" detail="The exam page is active. Published mock tests will automatically appear here." /> : <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full table-auto text-left"><thead className="bg-slate-950 text-white"><tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Mock test name</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] md:table-cell">Paper</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] sm:table-cell">Duration</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] lg:table-cell">Access</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr></thead><tbody className="divide-y divide-slate-200">{tests.slice(0, 6).map((test) => { const paper = papers.find((item) => item.id === test.paper_id)!; return <tr key={test.id} className="transition hover:bg-teal-50/60"><td className="px-4 py-5 sm:px-6"><Link href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)} className="font-display block break-words text-base text-slate-950 hover:text-teal-800 sm:text-lg">{studentTestTitle(test.title, context.exam!.name)}</Link><p className="mt-1 text-xs text-slate-500 sm:hidden">{test.duration_minutes} minutes</p><p className="mt-1 text-xs text-slate-500 md:hidden">{paper.name}</p></td><td className="hidden px-4 py-5 text-sm font-semibold text-slate-700 md:table-cell">{paper.name}</td><td className="hidden px-4 py-5 text-sm text-slate-600 sm:table-cell">{test.duration_minutes} minutes</td><td className="hidden px-4 py-5 lg:table-cell"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>{test.access_type === "free" ? "Free" : "Included"}</span></td><td className="px-4 py-5 text-right sm:px-6"><Link href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)} className="inline-flex whitespace-nowrap rounded-lg bg-teal-100 px-3 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">Start →</Link></td></tr>; })}</tbody></table></div>}</section>
 
         <section aria-labelledby="faq-title" className="rounded-[2rem] bg-slate-950 p-6 text-white sm:p-9"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Common questions</p><h2 id="faq-title" className="font-display mt-2 text-3xl">About {context.exam.name} mock tests</h2><div className="mt-6 divide-y divide-slate-700">{questions.map((item) => <details key={item.question} className="group py-5"><summary className="cursor-pointer list-none font-bold marker:hidden">{item.question}<span className="float-right text-teal-200 transition group-open:rotate-45" aria-hidden="true">+</span></summary><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{item.answer}</p></details>)}</div></section>
       </div>
@@ -126,16 +123,10 @@ export default async function ExamPage({ params, searchParams }: Props) {
   );
 }
 
-function studentTestTitle(
-  test: { series_number: number | null },
-  examName: string,
-  paperLabel: string,
-) {
-  return studentFacingMockTestTitle({
-    examName,
-    paperLabel,
-    seriesNumber: Number(test.series_number ?? 1),
-  });
+function studentTestTitle(title: string, examName: string) {
+  return title
+    .replace(/TG\s+Executive Officer\s*\(EO\)/gi, examName)
+    .replace(/Executive Officer/gi, examName);
 }
 
 function EmptyState({ title, detail }: { title: string; detail: string }) {
