@@ -80,9 +80,12 @@ test("state and exam catalogue cards show only the next useful content count", a
 
 test("catalogue progress steps return students to each selection level", async () => {
   const catalogue = await read("app/mock-tests/page.tsx");
+  const catalogueSteps = await read("components/exams/CatalogSteps.tsx");
+  const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
 
   assert.match(catalogue, /state=\{selectedState \? \{ value: selectedState\.name, href: "\/mock-tests" \}/);
   assert.match(catalogue, /href: stateUrl\(selectedState\.slug\)/);
   assert.match(catalogue, /href: examUrl\(selectedState\.slug, selectedExam\.slug\)/);
-  assert.match(catalogue, /aria-label=\{`Change \$\{step\.label\.toLowerCase\(\)\}`\}/);
+  assert.match(catalogueSteps, /aria-label=\{`Change \$\{step\.label\.toLowerCase\(\)\}`\}/);
+  assert.match(examPage, /<CatalogSteps[\s\S]*state=\{\{ value: context\.state\.name, href: "\/mock-tests" \}\}[\s\S]*exam=\{\{ value: context\.exam\.name, href: stateUrl\(context\.state\.slug\) \}\}/);
 });

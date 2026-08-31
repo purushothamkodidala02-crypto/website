@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import MockTestsPage, { type Filters } from "@/app/mock-tests/page";
+import { CatalogSteps } from "@/components/exams/CatalogSteps";
 import { ExamSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
@@ -111,6 +112,10 @@ export default async function ExamPage({ params, searchParams }: Props) {
       </section>
 
       <div className="mx-auto max-w-6xl space-y-12 px-5 py-10 sm:px-8 sm:py-14">
+        <CatalogSteps
+          state={{ value: context.state.name, href: "/mock-tests" }}
+          exam={{ value: context.exam.name, href: stateUrl(context.state.slug) }}
+        />
         {specializations.length > 0 && <section aria-labelledby="specialisations-title"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Exam paths</p><h2 id="specialisations-title" className="font-display mt-2 text-3xl">Choose a specialisation</h2><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{specializations.map((item) => { const count = papers.filter((paper) => paper.specialization_id === item.id).length; return <Link key={item.id} href={specializationUrl(context.state.slug, context.exam!.slug, item.slug)} className="group rounded-3xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-lg"><span className="text-xs font-black uppercase tracking-wide text-teal-700">{count} paper{count === 1 ? "" : "s"}</span><h3 className="font-display mt-3 text-xl">{item.name}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{item.description || `View papers and mock tests for ${item.name}.`}</p><span className="mt-5 inline-block text-sm font-black text-teal-800">Explore specialisation →</span></Link>; })}</div></section>}
 
         <section id="papers" aria-labelledby="papers-title" className="scroll-mt-24">
