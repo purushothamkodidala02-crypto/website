@@ -56,6 +56,7 @@ type CatalogTest = {
   title: string;
   description: string | null;
   duration_minutes: number;
+  target_question_count: number | null;
   access_type: string;
   slug: string;
   paper: { id: string; name: string; slug: string };
@@ -110,6 +111,19 @@ function withQuery(path: string, filters: Filters = {}) {
   return `${path}${query ? `?${query}` : ""}`;
 }
 
+function testTypeUrl(
+  type: "all" | "paper" | "subject",
+  stateSlug: string,
+  examSlug: string,
+  paperSlug: string,
+  subjectSlug?: string,
+) {
+  const path = type === "subject" && subjectSlug
+    ? subjectUrl(stateSlug, examSlug, paperSlug, subjectSlug)
+    : paperUrl(stateSlug, examSlug, paperSlug);
+  return withQuery(path, { type });
+}
+
 export default async function MockTestsPage({ searchParams, canonicalPath }: MockTestsPageProps) {
   const filters = await searchParams;
   const catalog = await getMockTestCatalogData();
@@ -135,8 +149,18 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
     const paperDisplay = paperDisplayById.get(paper.id);
     const stats = statsByTestId.get(test.id);
-    const questions = stats ? Number(stats.question_count) : null;
-    const marks = stats ? Number(stats.total_marks) : null;
+    const configuredQuestionCount = Number(test.target_question_count ?? paper.question_count ?? 0);
+    const questions = stats
+      ? Number(stats.question_count)
+      : configuredQuestionCount > 0
+        ? configuredQuestionCount
+        : null;
+    const defaultCorrectMarks = Number(paper.default_correct_marks ?? 0);
+    const marks = stats
+      ? Number(stats.total_marks)
+      : questions !== null && defaultCorrectMarks > 0
+        ? questions * defaultCorrectMarks
+        : null;
     return [{ ...test, paper, exam, category, state, subject, specialization, paperDisplay, questions, marks }];
   });
 
@@ -179,6 +203,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   const resolvedCategory = selectedExam ? categoryById.get(selectedExam.exam_id) : selectedCategory;
   const query = filters.q?.trim().toLowerCase() ?? "";
   const isSearching = Boolean(query);
+  const selectedType = filters.type === "paper" || filters.type === "subject"
+    ? filters.type
+    : "all";
   const matchingTests = tests.filter((test) => {
     const searchable = `${test.state.name} ${test.state.code} ${test.category.name} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.title}`.toLowerCase();
     return (
@@ -187,8 +214,8 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       (!selectedExam || test.exam.id === selectedExam.id) &&
       (!selectedSpecialization || test.specialization?.id === selectedSpecialization.id) &&
       (!selectedPaper || test.paper.id === selectedPaper.id) &&
-      (!selectedSubject || test.subject?.id === selectedSubject.id) &&
-      (!filters.type || filters.type === "all" || test.test_scope === filters.type) &&
+      (selectedType !== "subject" || !selectedSubject || test.subject?.id === selectedSubject.id) &&
+      (selectedType === "all" || test.test_scope === selectedType) &&
       (!query || searchable.includes(query))
     );
   });
@@ -300,10 +327,10 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
         ) : (
           <CatalogSection eyebrow={`${selectedState.code} · ${selectedExam.name} · ${paperDisplayById.get(selectedPaper.id)?.shortLabel}`} title="Choose a mock test" description="Tests use one predictable series: Mock Test 01, Mock Test 02, Mock Test 03…" action={<Link href={examUrl(selectedState.slug, selectedExam.slug)} className="text-sm font-bold text-teal-800">Change paper</Link>}>
             <div className="mb-5 flex flex-wrap gap-2">
-              {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={withQuery(paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug), { type: value })} className={`rounded-full px-4 py-2 text-xs font-black ${(!filters.type && value === 'all') || filters.type === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
+              {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
             </div>
             <TestGrid tests={paginatedTests} />
-            <CatalogPagination filters={filters} page={currentPage} totalPages={totalPages} basePath={paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug)} />
+            <CatalogPagination filters={filters} page={currentPage} totalPages={totalPages} basePath={selectedType === "subject" && selectedSubject ? subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject.slug) : paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug)} />
           </CatalogSection>
         )}
       </div>

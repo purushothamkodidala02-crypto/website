@@ -80,7 +80,7 @@ export const getMockTestCatalogData = unstable_cache(
       supabase.from("exam_specializations").select("id, exam_group_id, name, slug, description, seo_title, seo_description, is_active").order("display_order"),
       supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, description, seo_title, seo_description, display_order, question_count, default_correct_marks, is_active").order("display_order"),
       supabase.from("subjects").select("id, paper_id, name, slug, description, seo_title, seo_description, is_active").order("display_order"),
-      supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, description, seo_title, seo_description, duration_minutes, access_type, updated_at").eq("status", "published").order("series_number"),
+      supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, description, seo_title, seo_description, duration_minutes, target_question_count, access_type, updated_at").eq("status", "published").order("series_number"),
       supabase.rpc("get_published_mock_test_stats"),
     ]);
 
@@ -119,6 +119,6 @@ export const getMockTestCatalogData = unstable_cache(
       hasSupplementaryError: Boolean(specializationsResult.error || statsResult.error),
     };
   },
-  ["mock-test-catalog-v5"],
+  ["mock-test-catalog-v6"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );

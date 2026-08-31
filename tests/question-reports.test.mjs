@@ -41,12 +41,26 @@ test("question reporting is private, rate-limited, and connected from students t
 });
 
 test("optional catalogue statistics cannot hide the public mock-test library", async () => {
-  const catalog = await read("lib/catalog-data.ts");
-  assert.match(catalog, /mock-test-catalog-v5/);
+  const [catalog, cataloguePage] = await Promise.all([
+    read("lib/catalog-data.ts"),
+    read("app/mock-tests/page.tsx"),
+  ]);
+  assert.match(catalog, /mock-test-catalog-v6/);
+  assert.match(catalog, /duration_minutes, target_question_count, access_type/);
   const coreError = catalog.slice(catalog.indexOf("hasError:"), catalog.indexOf("hasSupplementaryError:"));
   assert.doesNotMatch(coreError, /statsResult\.error/);
   assert.doesNotMatch(coreError, /specializationsResult\.error/);
   assert.match(catalog, /hasSupplementaryError: Boolean\(specializationsResult\.error \|\| statsResult\.error\)/);
+  assert.match(cataloguePage, /test\.target_question_count \?\? paper\.question_count/);
+  assert.match(cataloguePage, /questions \* defaultCorrectMarks/);
+});
+
+test("paper test filters remain consistent on subject landing pages", async () => {
+  const cataloguePage = await read("app/mock-tests/page.tsx");
+  assert.match(cataloguePage, /const selectedType = filters\.type === "paper" \|\| filters\.type === "subject"/);
+  assert.match(cataloguePage, /selectedType !== "subject" \|\| !selectedSubject \|\| test\.subject\?\.id === selectedSubject\.id/);
+  assert.match(cataloguePage, /type === "subject" && subjectSlug/);
+  assert.match(cataloguePage, /selectedType === value/);
 });
 
 test("registrations fetch only visible student emails through an admin-only database function", async () => {
