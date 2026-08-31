@@ -92,6 +92,44 @@ a {
   text-wrap: pretty;
 }
 
+/* Collection tables use distinct, calm colors so paper choices and mock tests
+ * are easy to scan without adding another navigation strip. */
+.student-page #papers table tbody tr {
+  background: linear-gradient(90deg, rgb(240 253 250 / 0.8), #ffffff 42%);
+}
+
+.student-page #papers table tbody tr:hover {
+  background: rgb(204 251 241 / 0.65);
+}
+
+.student-page #papers table tbody td:first-child > span {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  border: 1px solid rgb(153 246 228 / 0.8);
+  border-radius: 0.75rem;
+  background: rgb(240 253 250 / 0.9);
+  padding: 0.5rem 0.75rem;
+}
+
+.student-page section[aria-labelledby="tests-title"] table tbody tr {
+  background: linear-gradient(90deg, rgb(238 242 255 / 0.75), #ffffff 42%);
+}
+
+.student-page section[aria-labelledby="tests-title"] table tbody tr:hover {
+  background: rgb(224 231 255 / 0.65);
+}
+
+.student-page section[aria-labelledby="tests-title"] table tbody td:first-child a {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  border: 1px solid rgb(199 210 254 / 0.9);
+  border-radius: 0.75rem;
+  background: rgb(238 242 255 / 0.9);
+  padding: 0.5rem 0.75rem;
+}
+
 .student-page :where(a, button) {
   transition-property: color, background-color, border-color, box-shadow, opacity, transform;
   transition-duration: 180ms;
