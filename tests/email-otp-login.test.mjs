@@ -78,10 +78,11 @@ test("state and exam catalogue cards show only the next useful content count", a
   assert.match(examSelectionGrid, /exam\.paperCount\} paper\{exam\.paperCount === 1/);
 });
 
-test("catalogue selection pages keep direct change links without a progress strip", async () => {
+test("catalogue progress steps return students to each selection level", async () => {
   const catalogue = await read("app/mock-tests/page.tsx");
 
-  assert.match(catalogue, /href=\{stateUrl\(selectedState\.slug\)\}/);
-  assert.match(catalogue, /href=\{examUrl\(selectedState\.slug, selectedExam\.slug\)\}/);
-  assert.doesNotMatch(catalogue, /<CatalogSteps/);
+  assert.match(catalogue, /state=\{selectedState \? \{ value: selectedState\.name, href: "\/mock-tests" \}/);
+  assert.match(catalogue, /href: stateUrl\(selectedState\.slug\)/);
+  assert.match(catalogue, /href: examUrl\(selectedState\.slug, selectedExam\.slug\)/);
+  assert.match(catalogue, /aria-label=\{`Change \$\{step\.label\.toLowerCase\(\)\}`\}/);
 });

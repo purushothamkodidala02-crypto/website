@@ -285,6 +285,12 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       </section>
 
       <div className="mx-auto max-w-6xl px-5 py-9 sm:px-8 sm:py-12">
+        <CatalogSteps
+          state={selectedState ? { value: selectedState.name, href: "/mock-tests" } : undefined}
+          exam={selectedState && selectedExam ? { value: selectedExam.name, href: stateUrl(selectedState.slug) } : undefined}
+          paper={selectedState && selectedExam && selectedPaper ? { value: paperDisplayById.get(selectedPaper.id)?.shortLabel ?? selectedPaper.name, href: examUrl(selectedState.slug, selectedExam.slug) } : undefined}
+        />
+
         {dataError ? (
           <section className="mt-7 rounded-3xl border border-red-200 bg-red-50 p-7 text-red-800">
             <h2 className="font-display text-xl">The mock-test catalogue could not be loaded.</h2>
@@ -320,7 +326,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               const display = paperDisplayById.get(paper.id);
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
-              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} className="student-card group flex items-center gap-5 rounded-3xl border border-teal-100 bg-gradient-to-r from-teal-50/80 via-white to-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
+              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} className="student-card group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
                 <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-slate-950 text-teal-200"><PaperSymbol /></span>
                 <span className="min-w-0 flex-1"><span className="text-xs font-black uppercase tracking-[0.12em] text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-1 block text-lg leading-6">{paper.name}</strong><span className="mt-2 block text-sm font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
                 <span className="text-xl font-black text-teal-800 transition group-hover:translate-x-1">→</span>
@@ -377,8 +383,6 @@ function CatalogSteps({ state, exam, paper }: { state?: CatalogStepSelection; ex
     </ol>
   );
 }
-
-void CatalogSteps;
 
 function CatalogSection({ eyebrow, title, description, action, children }: { eyebrow: string; title: string; description?: string; action?: React.ReactNode; children: React.ReactNode }) {
   return <section className="mt-8"><div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.15em] text-teal-700">{eyebrow}</p><h2 className="font-display mt-2 text-2xl tracking-tight sm:text-3xl">{title}</h2>{description && <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>}</div>{action}</div>{children}</section>;
