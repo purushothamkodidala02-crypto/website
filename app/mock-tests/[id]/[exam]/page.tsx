@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import MockTestsPage, { type Filters } from "@/app/mock-tests/page";
-import { ExamSymbol, MockSymbol, PaperSymbol } from "@/components/exams/CatalogSymbols";
+import { ExamSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
@@ -126,20 +126,6 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </div>
           </div>
           {tests.length === 0 ? <EmptyState title="Mock tests are coming soon" detail="The exam page is active. Published mock tests will automatically appear here." /> : <>
-            <form action={canonical} method="get" className="mt-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[1fr_220px_auto]">
-              <input type="hidden" name="view" value="all" />
-              <label className="text-sm font-bold text-slate-800">Search mock tests
-                <input name="q" type="search" placeholder={`Search ${context.exam.name} mock tests`} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal text-slate-900 outline-none focus:ring-2 focus:ring-teal-300" />
-              </label>
-              <label className="text-sm font-bold text-slate-800">Filter
-                <select name="type" defaultValue="all" className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal text-slate-900 outline-none focus:ring-2 focus:ring-teal-300">
-                  <option value="all">All tests</option>
-                  <option value="paper">Full paper</option>
-                  <option value="subject">Subject practice</option>
-                </select>
-              </label>
-              <button className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700 sm:self-end">Search</button>
-            </form>
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="max-h-[30rem] overflow-auto">
                 <table className="w-full table-auto text-left">
