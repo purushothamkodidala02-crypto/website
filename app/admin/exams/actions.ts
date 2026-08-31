@@ -87,7 +87,7 @@ export async function createExam(
   ) {
     return {
       success: false,
-      message: `An exam category named "${name}" already exists. Names are not case-sensitive.`,
+      message: `A Recruiting Board named "${name}" already exists. Names are not case-sensitive.`,
     };
   }
 
@@ -118,7 +118,7 @@ export async function createExam(
   if (insertError?.code === "23505") {
     return {
       success: false,
-      message: `An exam category with the slug "${slug}" already exists.`,
+      message: `A Recruiting Board with the slug "${slug}" already exists.`,
     };
   }
 
@@ -135,6 +135,6 @@ export async function createExam(
 
   return {
     success: true,
-    message: "Exam category created successfully.",
+    message: "Recruiting Board created successfully.",
   };
 }

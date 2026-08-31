@@ -37,11 +37,11 @@ export default async function EditExamPage({
         href="/admin/exams"
         className="text-sm font-medium text-gray-600 hover:text-black"
       >
-        ← Back to Exam Categories
+        ← Back to Recruiting Boards
       </Link>
 
       <div className="mt-6">
-        <h1 className="text-3xl font-bold">Edit Exam Category</h1>
+        <h1 className="text-3xl font-bold">Edit Recruiting Board</h1>
 
         <p className="mt-2 text-gray-600">
           Update the selected exam’s details and status.

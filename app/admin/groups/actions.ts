@@ -67,7 +67,7 @@ export async function createGroup(
   if (!examId) {
     return {
       success: false,
-      message: "Please select an exam category.",
+      message: "Please select a Recruiting Board.",
     };
   }
 
@@ -123,7 +123,7 @@ export async function createGroup(
   if (examError || !exam) {
     return {
       success: false,
-      message: "The selected exam category could not be found.",
+      message: "The selected Recruiting Board could not be found.",
     };
   }
 
@@ -147,7 +147,7 @@ export async function createGroup(
   ) {
     return {
       success: false,
-      message: `An Exam named "${name}" already exists in this Exam Category. Names are not case-sensitive.`,
+      message: `An Exam named "${name}" already exists under this Recruiting Board. Names are not case-sensitive.`,
     };
   }
 
@@ -188,7 +188,7 @@ export async function createGroup(
   if (insertError?.code === "23505") {
     return {
       success: false,
-      message: `An Exam with the slug "${slug}" already exists under this exam category.`,
+      message: `An Exam with the slug "${slug}" already exists under this Recruiting Board.`,
     };
   }
 

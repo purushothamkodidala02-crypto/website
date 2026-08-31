@@ -85,7 +85,7 @@ export function ExistingSubjectsTable({
 
       {!paperId ? (
         <p className="p-6 text-sm text-slate-600">
-          Choose an exam category, exam, and paper above to see existing subjects.
+          Choose a Recruiting Board, Exam, and Paper above to see existing Subjects.
         </p>
       ) : filtered.length === 0 ? (
         <p className="p-6 text-sm text-slate-600">

@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { indiaDateKey } from "@/lib/date";
+import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
+import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
-  const [testsResult, assignmentsResult, questionsResult, attemptsResult, reportsResult] =
+  const [testsResult, assignmentsResult, questionsResult, attemptsResult, reportsResult, papersResult, groupsResult, subjectsResult] =
     await Promise.all([
       supabase
         .from("mock_tests")
-        .select("id, title, status, updated_at")
+        .select("id, title, status, updated_at, paper_id, subject_id, series_number")
         .order("updated_at", { ascending: false }),
       supabase
         .from("mock_test_questions")
@@ -16,9 +18,29 @@ export default async function AdminDashboard() {
       supabase.from("questions").select("id, is_active, expires_on"),
       supabase.from("test_attempts").select("id", { count: "exact", head: true }),
       supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+      supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
+      supabase.from("exam_groups").select("id, name"),
+      supabase.from("subjects").select("id, name"),
     ]);
 
   const tests = testsResult.data ?? [];
+  const papers = papersResult.data ?? [];
+  const paperById = new Map(papers.map((paper) => [paper.id, paper]));
+  const groupById = new Map((groupsResult.data ?? []).map((group) => [group.id, group]));
+  const subjectById = new Map((subjectsResult.data ?? []).map((subject) => [subject.id, subject]));
+  const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
+  const visibleTestTitle = (test: (typeof tests)[number]) => {
+    const paper = paperById.get(test.paper_id);
+    const exam = paper ? groupById.get(paper.exam_group_id) : undefined;
+    const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
+    if (!paper || !exam) return test.title;
+    return studentFacingMockTestTitle({
+      examName: exam.name,
+      paperLabel: paperDisplayById.get(paper.id)?.shortLabel ?? paper.name,
+      seriesNumber: Number(test.series_number ?? 1),
+      subjectName: subject?.name ?? null,
+    });
+  };
   const questions = questionsResult.data ?? [];
   const today = indiaDateKey();
   const usableIds = new Set(
@@ -194,7 +216,7 @@ export default async function AdminDashboard() {
                   className="flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-teal-50/50"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{test.title}</p>
+                    <p className="truncate text-sm font-bold">{visibleTestTitle(test)}</p>
                     <p className="mt-1 text-xs text-slate-500">
                       Updated{" "}
                       {new Intl.DateTimeFormat("en-IN", {
@@ -226,8 +248,8 @@ export default async function AdminDashboard() {
           <div className="mt-6 grid gap-3 md:grid-cols-3">
             <WorkflowLink
               number="01"
-              title="Exam structure"
-              detail="Categories, Exams, Papers, and Subjects"
+              title="Exam catalogue"
+              detail="States, Recruiting Boards, Exams, Papers, and Subjects"
               href="/admin/exams"
             />
             <WorkflowLink

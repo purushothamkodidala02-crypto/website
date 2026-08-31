@@ -63,7 +63,7 @@ export async function createQuestion(
   const expiresOn = String(formData.get("expires_on") ?? "").trim();
 
   if ((!mockTestId && (!categoryId || !examId || !requestedPaperId)) || !subjectId) {
-    return { success: false, message: "Choose an Exam Category, Exam, Paper, and Subject." };
+    return { success: false, message: "Choose a Recruiting Board, Exam, Paper, and Subject." };
   }
   if (!answers.includes(correctAnswer)) {
     return { success: false, message: "Choose the correct option." };

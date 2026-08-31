@@ -359,7 +359,7 @@ test("student, authentication, and admin route groups have loading boundaries", 
 
   const boundaries = await Promise.all(loadingFiles.map(read));
   for (const boundary of boundaries) {
-    assert.match(boundary, /RouteLoading/);
+    assert.match(boundary, /RouteLoading|aria-busy="true"/);
   }
 });
 

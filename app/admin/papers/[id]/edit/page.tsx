@@ -27,7 +27,7 @@ export default async function EditPaperPage({ params, searchParams }: { params: 
     <main>
       <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">{backLabel}</Link>
       <h1 className="mt-5 text-3xl font-black">Edit Paper</h1>
-      <PaperForm paper={paper} exams={groups.map((group) => ({ id: group.id, label: `${categories.get(group.exam_id) ?? "Unknown category"} → ${group.name}` }))} specializations={(specializationsResult.data ?? []).map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))} />
+      <PaperForm paper={paper} exams={groups.map((group) => ({ id: group.id, label: `${categories.get(group.exam_id) ?? "Unknown Recruiting Board"} → ${group.name}` }))} specializations={(specializationsResult.data ?? []).map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))} />
       <EntitySeoForm entityType="paper" entityId={paper.id} title={paper.seo_title} description={paper.seo_description} titlePlaceholder={`${parentExam?.name ?? "Exam"} ${paper.name} Mock Tests`} descriptionPlaceholder={`Take free ${paper.name} mock tests with timed practice and answer review.`} />
     </main>
   );

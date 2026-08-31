@@ -40,7 +40,7 @@ export async function createSubjects(_previous: CreateSubjectState, formData: Fo
   const examGroupId = String(formData.get("exam_group_id") ?? "").trim();
   const paperId = String(formData.get("paper_id") ?? "").trim();
   const subjectInput = readSubjects(formData.get("subjects_json"));
-  if (!categoryId || !examGroupId || !paperId) return { success: false, message: "Choose an Exam Category, Exam, and Paper." };
+  if (!categoryId || !examGroupId || !paperId) return { success: false, message: "Choose a Recruiting Board, Exam, and Paper." };
   if (subjectInput.error || !subjectInput.subjects) return { success: false, message: subjectInput.error ?? "Add Subjects." };
 
   const [{ data: paper }, { data: exam }] = await Promise.all([supabase.from("papers").select("id, exam_group_id").eq("id", paperId).maybeSingle(), supabase.from("exam_groups").select("id, exam_id").eq("id", examGroupId).maybeSingle()]);

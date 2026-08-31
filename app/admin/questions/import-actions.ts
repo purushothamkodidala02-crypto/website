@@ -222,7 +222,7 @@ async function importQuestions(
     if ((attemptCount ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
     paperId = mockTest.paper_id;
   } else if (!categoryId || !examId || !paperId) {
-    return { success: false, message: "Choose an Exam Category, Exam, and Paper before importing." };
+    return { success: false, message: "Choose a Recruiting Board, Exam, and Paper before importing." };
   }
   if (!(file instanceof File) || !file.size) return { success: false, message: "Choose an Excel or CSV file to import." };
   if (file.size > 2_500_000) return { success: false, message: "This file is too large. Import up to 2.5 MB at a time." };
@@ -234,7 +234,7 @@ async function importQuestions(
       : supabase.from("exam_groups").select("id, exam_id").eq("id", examId).maybeSingle(),
   ]);
   if (!paper || (!mockTest && (!exam || paper.exam_group_id !== exam.id || exam.exam_id !== categoryId))) {
-    return { success: false, message: "The selected Exam Category, Exam, and Paper do not belong together." };
+    return { success: false, message: "The selected Recruiting Board, Exam, and Paper do not belong together." };
   }
 
   let parsedFile: ParsedQuestionFile;

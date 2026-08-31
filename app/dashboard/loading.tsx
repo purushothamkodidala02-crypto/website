@@ -3,7 +3,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 
 export default function DashboardLoading() {
   return (
-    <main className="student-page min-h-screen bg-[#f5f8f8]">
+    <main aria-busy="true" aria-label="Loading your dashboard" className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
         <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">

@@ -223,7 +223,7 @@ export function QuestionBankTable({
 
       {!location.categoryId ? (
         <p className="p-6 text-sm text-slate-600">
-          Select an Exam Category above to see its questions.
+          Select a Recruiting Board above to see its questions.
         </p>
       ) : loading ? (
         <p className="p-6 text-sm text-slate-600">Loading questionsâ€¦</p>

@@ -48,7 +48,7 @@ export default async function EditQuestionPage({
       id: subject.id,
       contentLanguageMode:
         subject.content_language_mode as SubjectContentLanguageMode,
-      label: `${category?.name ?? "Unknown category"} → ${group?.name ?? "Unknown Exam"} → ${paper?.name ?? "Unknown Paper"} → ${subject.name}`,
+      label: `${category?.name ?? "Unknown Recruiting Board"} → ${group?.name ?? "Unknown Exam"} → ${paper?.name ?? "Unknown Paper"} → ${subject.name}`,
     };
   });
 

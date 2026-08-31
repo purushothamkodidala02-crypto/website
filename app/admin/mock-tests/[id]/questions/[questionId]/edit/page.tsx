@@ -27,7 +27,7 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
     const paper = papers.get(subject.paper_id);
     const group = paper ? groups.get(paper.exam_group_id) : undefined;
     const category = group ? categories.get(group.exam_id) : undefined;
-    return { id: subject.id, contentLanguageMode: subject.content_language_mode as SubjectContentLanguageMode, label: `${category?.name ?? "Unknown category"} → ${group?.name ?? "Unknown Exam"} → ${paper?.name ?? "Unknown Paper"} → ${subject.name}` };
+    return { id: subject.id, contentLanguageMode: subject.content_language_mode as SubjectContentLanguageMode, label: `${category?.name ?? "Unknown Recruiting Board"} → ${group?.name ?? "Unknown Exam"} → ${paper?.name ?? "Unknown Paper"} → ${subject.name}` };
   });
   const returningToPreview = isMockTestPreviewHref(returnTo, mockTestId);
   const mockTestsPath = returningToPreview ? listReturnToFromMockTestPreview(returnTo) : mockTestsListReturnTo(returnTo);

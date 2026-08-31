@@ -26,7 +26,7 @@ export default async function AdminGroupsPage() {
       <div>
         <h1 className="text-3xl font-bold">Exams</h1>
         <p className="mt-2 text-gray-600">
-          Create an Exam under a category, then open it to add optional Specialisations and their Papers in one place.
+          Create an Exam under a Recruiting Board, then open it to add optional Specialisations and their Papers in one place.
         </p>
       </div>
 

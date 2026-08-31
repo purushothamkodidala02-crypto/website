@@ -32,13 +32,13 @@ test("every active exam automatically receives a complete public landing page", 
     read("app/admin/groups/actions.ts"),
   ]);
 
-  assert.match(examRoute, /Papers and available practice/);
+  assert.match(examRoute, /mock test papers/);
   assert.match(examRoute, /Latest mock tests/);
   assert.match(examRoute, /"@type": "FAQPage"/);
   assert.match(examRoute, /"@type": "ItemList"/);
   assert.match(examRoute, /context\.exam\.description/);
   assert.match(examRoute, /Mock tests are coming soon/);
-  assert.match(catalog, /exam_groups"\)\.select\("id, exam_id, name, slug, description, seo_title, seo_description"/);
+  assert.match(catalog, /exam_groups[^\n]*description, seo_title, seo_description/);
   assert.match(sitemap, /for \(const exam of catalog\.exams\)/);
   assert.match(sitemap, /add\(examUrl\(state\.slug, exam\.slug\)/);
   assert.match(createAction, /public landing page is now available automatically/);

@@ -91,6 +91,7 @@ export default async function MockTestsPage({
       examSlug: exam?.slug ?? "",
       paperSlug: paper?.slug ?? "",
       paperName: paper ? `${paper.specialization_id ? `${specializationById.get(paper.specialization_id) ?? "Unknown Specialisation"} / ` : ""}${paperDisplayById.get(paper.id)?.label ?? paper.name}` : "Unknown Paper",
+      paperLabel: paper ? paperDisplayById.get(paper.id)?.shortLabel ?? paper.name : "Unknown Paper",
       seriesNumber: Number(test.series_number ?? 1),
       title: test.title,
       slug: test.slug,
@@ -111,6 +112,13 @@ export default async function MockTestsPage({
 
   return <main>
     <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-teal-900 via-teal-950 to-slate-950 p-7 text-white shadow-xl shadow-teal-950/15 sm:p-9"><div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-teal-300/15 blur-3xl" /><div className="relative flex flex-wrap items-end justify-between gap-6"><div><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><MockSymbol className="h-4 w-4" /> Publishing workspace</p><h1 className="font-display mt-3 text-4xl">Mock-test control centre</h1><p className="mt-3 max-w-2xl leading-7 text-slate-300">Manage every TG, AP and Central test in one place. Names and series numbers stay consistent automatically.</p></div><div className="grid grid-cols-3 gap-2 text-center text-xs"><Summary value={states.length} label="States" /><Summary value={tests.length} label="Tests" /><Summary value={mappedTests.filter((test) => test.status === "published").length} label="Live" /></div></div></section>
+    <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5" aria-label="Mock-test publishing workflow">
+      <WorkflowStep number="1" title="Create draft" detail="Choose the exact State, Board, Exam and Paper." />
+      <WorkflowStep number="2" title="Add questions" detail="Reach the exact target with active questions." />
+      <WorkflowStep number="3" title="Preview" detail="Check wording, images, answers and mobile layout." />
+      <WorkflowStep number="4" title="Choose access" detail="Set the test to Free or Paid series." />
+      <WorkflowStep number="5" title="Publish" detail="Publishing is the final student visibility control." />
+    </section>
     {testsResult.error || statesResult.error || summariesResult.error ? <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{testsResult.error?.message ?? statesResult.error?.message ?? summariesResult.error?.message}</p> : <ExistingMockTestsTable states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} tests={mappedTests} initialStateId={stateId} initialLocation={initialLocation} initialSearch={initialSearch} initialStatus={initialStatus} />}
     <details className="mt-8 overflow-hidden rounded-3xl border border-teal-200 bg-gradient-to-br from-white to-teal-50 shadow-sm"><summary className="cursor-pointer list-none px-7 py-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Create</p><h2 className="font-display mt-2 text-xl">+ Create the next mock test</h2><p className="mt-1 text-sm text-slate-600">A guided workflow keeps the state, exam, paper and test series correct.</p></summary><div className="border-t border-teal-100 px-4 pb-7 sm:px-7"><CreateMockTestForm states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))} existingSeries={tests.map((test) => ({ paperId: test.paper_id, subjectId: test.subject_id, scope: test.test_scope as "paper" | "subject", seriesNumber: Number(test.series_number ?? 1) }))} /></div></details>
   </main>;
@@ -118,4 +126,8 @@ export default async function MockTestsPage({
 
 function Summary({ value, label }: { value: number; label: string }) {
   return <span className="min-w-20 rounded-xl bg-white/10 px-3 py-3"><strong className="block text-lg text-white">{value}</strong><span className="text-slate-300">{label}</span></span>;
+}
+
+function WorkflowStep({ number, title, detail }: { number: string; title: string; detail: string }) {
+  return <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><span className="grid h-7 w-7 place-items-center rounded-lg bg-teal-100 text-xs font-black text-teal-900">{number}</span><h2 className="mt-3 text-sm font-black text-slate-950">{title}</h2><p className="mt-1 text-xs leading-5 text-slate-600">{detail}</p></div>;
 }

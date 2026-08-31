@@ -12,7 +12,7 @@ import {
 } from "@/components/admin/LocationFilters";
 import type { MockTestStatus } from "@/types/mock-test";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
-import { mockTestLabel } from "@/lib/exam-catalog";
+import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { mockTestUrl } from "@/lib/public-urls";
 import { MockTestManagementButtons } from "./MockTestManagementButtons";
 
@@ -30,6 +30,7 @@ type ExistingMockTest = {
   examSlug: string;
   paperSlug: string;
   paperName: string;
+  paperLabel: string;
   seriesNumber: number;
   title: string;
   slug: string;
@@ -174,7 +175,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       {test.supersededByMockTestId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Correction in progress</span>}
                       {test.replacesMockTestId && <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Corrected version</span>}
                     </div>
-                    <div className="mt-3 flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200"><MockSymbol className="h-5 w-5" /></span><div><h3 className="font-display text-xl text-slate-950">{mockTestLabel(test.seriesNumber)}</h3><p className="mt-1 text-sm font-semibold text-slate-700">{test.stateCode} · {test.examName} · {test.paperName}{test.subjectName ? ` · ${test.subjectName}` : ""}</p><p className="mt-1 text-xs text-slate-400">Stored title: {test.title}</p></div></div>
+                    <div className="mt-3 flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200"><MockSymbol className="h-5 w-5" /></span><div><p className="text-[10px] font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p><h3 className="font-display mt-1 text-xl text-slate-950">{studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}</h3><p className="mt-1 text-xs text-slate-500">{test.stateCode} · {test.paperName}</p></div></div>
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     {test.status === "published" && <Link href={mockTestUrl(test.stateSlug, test.examSlug, test.paperSlug, test.slug)} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}

@@ -61,9 +61,10 @@ test("registration stores mobile numbers and default student sign-in returns hom
 });
 
 test("state and exam catalogue cards show only the next useful content count", async () => {
-  const [home, catalogue] = await Promise.all([
+  const [home, catalogue, examSelectionGrid] = await Promise.all([
     read("app/page.tsx"),
     read("app/mock-tests/page.tsx"),
+    read("components/exams/ExamSelectionGrid.tsx"),
   ]);
 
   assert.doesNotMatch(home, /\{stateTests\} tests/);
@@ -73,7 +74,8 @@ test("state and exam catalogue cards show only the next useful content count", a
   assert.doesNotMatch(home, /const activeExams = exams\.filter/);
   assert.doesNotMatch(catalogue, /tests\.some/);
   assert.match(home, /paper\{paperCount === 1/);
-  assert.match(catalogue, /paper\{paperCount === 1/);
+  assert.match(catalogue, /paperCount: papers\.filter/);
+  assert.match(examSelectionGrid, /exam\.paperCount\} paper\{exam\.paperCount === 1/);
 });
 
 test("catalogue progress steps return students to each selection level", async () => {

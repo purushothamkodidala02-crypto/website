@@ -47,8 +47,8 @@ export function CreateGroupForm({ categories, existingExams, initialCategoryId =
       <p className="mt-1 text-sm text-slate-600">Create the Exam, then add optional Specialisations and the Papers under each one. Nothing is pre-defined.</p>
       <form action={formAction} className="mt-6 space-y-5">
         <label className="block text-sm font-bold">
-          Exam Category
-          <SearchableSelect name="exam_id" value={examId} onChange={chooseExamCategory} options={categories.map((category) => ({ value: category.id, label: category.name }))} placeholder="Search and choose an Exam Category" />
+          Recruiting Board
+          <SearchableSelect name="exam_id" value={examId} onChange={chooseExamCategory} options={categories.map((category) => ({ value: category.id, label: category.name }))} placeholder="Search and choose a Recruiting Board" />
         </label>
 
         <div className="grid gap-5 md:grid-cols-2">
@@ -60,7 +60,7 @@ export function CreateGroupForm({ categories, existingExams, initialCategoryId =
             {categoryName && showExistingNames && (
               <div className="mt-3 overflow-hidden rounded-xl border">
                 {matchingExams.length === 0 ? (
-                  <p className="bg-slate-50 px-3 py-3 text-sm text-slate-600">{categoryExams.length === 0 ? "No Exams in this category yet. Enter a new Exam name." : "No matching Exam names. You can create this new name."}</p>
+                  <p className="bg-slate-50 px-3 py-3 text-sm text-slate-600">{categoryExams.length === 0 ? "No Exams under this Recruiting Board yet. Enter a new Exam name." : "No matching Exam names. You can create this new name."}</p>
                 ) : (
                   <div className="max-h-[12.5rem] divide-y overflow-y-auto bg-white">
                     {matchingExams.map((exam) => <p key={exam.id} className="px-3 py-2.5 text-sm font-semibold text-slate-800">{exam.name}</p>)}

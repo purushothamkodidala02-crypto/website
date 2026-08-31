@@ -2,9 +2,11 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
 export type FaqActionState = { success: boolean; message: string };
+export type ExamPageContentActionState = { success: boolean; message: string };
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -29,8 +31,29 @@ function readFaq(formData: FormData) {
 
 function refresh() {
   revalidatePath("/admin/exam-pages");
-  revalidatePath("/mock-tests");
+  revalidatePath("/mock-tests", "layout");
   revalidateTag(PUBLIC_CATALOG_TAG, "max");
+}
+
+export async function updateExamPageContent(
+  _previous: ExamPageContentActionState,
+  formData: FormData,
+): Promise<ExamPageContentActionState> {
+  const examGroupId = String(formData.get("exam_group_id") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  if (!/^[0-9a-f-]{36}$/i.test(examGroupId)) return { success: false, message: "Choose an exam first." };
+  if (description.length > 3000) return { success: false, message: "Student introduction must be 3,000 characters or fewer." };
+  const seo = readSeoFields(formData);
+  if (seo.error) return { success: false, message: seo.error };
+  const { supabase, error } = await requireAdmin();
+  if (error) return { success: false, message: error };
+  const { error: updateError } = await supabase
+    .from("exam_groups")
+    .update({ description: description || null, ...seo.value })
+    .eq("id", examGroupId);
+  if (updateError) return { success: false, message: updateError.message };
+  refresh();
+  return { success: true, message: "Public exam page content updated." };
 }
 
 export async function createExamPageFaq(_previous: FaqActionState, formData: FormData): Promise<FaqActionState> {

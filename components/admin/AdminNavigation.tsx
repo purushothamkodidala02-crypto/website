@@ -12,12 +12,12 @@ const sections = [
   {
     label: "Exam structure",
     links: [
-      { href: "/admin/exams", label: "Manage structure", icon: "categories" as const },
-      { href: "/admin/exam-pages", label: "Exam pages", icon: "exams" as const },
+      { href: "/admin/exams", label: "Exam catalogue", icon: "categories" as const },
+      { href: "/admin/exam-pages", label: "Public exam pages", icon: "exams" as const },
     ],
   },
   {
-    label: "Assessment",
+    label: "Content and publishing",
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
       { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
