@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import {
-  ExamSymbol,
   MockSymbol,
   PaperSymbol,
   StateSymbol,
 } from "@/components/exams/CatalogSymbols";
+import { ExamSelectionGrid, type ExamSelectionItem } from "@/components/exams/ExamSelectionGrid";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { mockTestLabel } from "@/lib/exam-catalog";
@@ -238,6 +238,20 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   }));
 
   const dataError = catalog.hasError;
+  const examSelectionItems: ExamSelectionItem[] = selectedState
+    ? stateExams.map((exam) => {
+      const category = categoryById.get(exam.exam_id);
+      return {
+        id: exam.id,
+        name: exam.name,
+        slug: exam.slug,
+        boardName: category?.name ?? "Exam board",
+        contextLabel: `${selectedState.code} · ${category?.name ?? "Exam board"}`,
+        paperCount: papers.filter((paper) => paper.exam_group_id === exam.id).length,
+        href: examUrl(selectedState.slug, exam.slug),
+      };
+    })
+    : [];
 
   return (
     <main className="student-page min-h-screen bg-[#f4f7f8] text-slate-950">
@@ -304,16 +318,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         ) : !selectedExam ? (
           <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
-            {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{stateExams.map((exam) => {
-              const category = categoryById.get(exam.exam_id);
-              const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
-              return <Link key={exam.id} href={examUrl(selectedState.slug, exam.slug)} className="student-card group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
-                <span className="flex items-center justify-between"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800"><ExamSymbol name={exam.name} /></span><span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">{category?.name}</span></span>
-                <h2 className="font-display mt-5 text-xl leading-7">{exam.name}</h2>
-                <p className="mt-2 text-sm text-slate-500">{selectedState.code} · {category?.name}</p>
-                <span className="mt-auto flex items-center justify-between border-t pt-4 text-sm"><span className="font-semibold text-slate-500">{paperCount} paper{paperCount === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Open →</span></span>
-              </Link>;
-            })}</div>}
+            {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <ExamSelectionGrid exams={examSelectionItems} />}
           </CatalogSection>
         ) : !selectedPaper ? (
           <CatalogSection eyebrow={`${selectedState.code} · ${resolvedCategory?.name} · Step 3`} title={`Choose a paper for ${selectedExam.name}`} description="Paper numbers are generated consistently from the exam structure." action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">Change exam</Link>}>
