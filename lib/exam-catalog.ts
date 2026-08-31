@@ -31,6 +31,20 @@ export function toCatalogSlug(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+export function studentFacingMockTestTitle({
+  examName,
+  paperLabel,
+  seriesNumber,
+  subjectName,
+}: {
+  examName: string;
+  paperLabel: string;
+  seriesNumber: number;
+  subjectName?: string | null;
+}) {
+  return `${examName} Â· ${paperLabel}${subjectName ? ` Â· ${subjectName}` : ""} Â· ${mockTestLabel(seriesNumber)}`;
+}
+
 export function inferExamKind(name: string) {
   const normalized = name.toLowerCase();
   if (/police|constable|\bsi\b|sub[- ]?inspector/.test(normalized)) return "police" as const;
