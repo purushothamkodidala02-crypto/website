@@ -25,6 +25,7 @@ function questionLines(text: string) {
   const lines = text
     .replace(/\u00a0/g, " ")
     .replace(/\*\*/g, "")
+    .replace(/;\s*(?=(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s)/g, "\n")
     .replace(/\r\n?/g, "\n")
     .replace(
       /((?:Statements?|ప్రకటనలు?)\s*:)[ \t]*(.*?)(?=[ \t]+(?:Conclusions?|తీర్మానాలు?)\s*:|$)/gim,
@@ -110,11 +111,13 @@ function normalizedSectionLabel(label: string) {
 const matchQuestion = /^(?:Match\b|.*\bmatch\b|జతపరచండి|.*జతపరచండి)/i;
 const numericListItem = /^(?:[1-9]|[౧-౯])[.)]\s+/;
 const alphabeticListItem = /^[a-h][.)]\s+/i;
+const teluguAlphabeticListItem = /^(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s+/;
 const romanListItem = /^(?:I|II|III|IV|V)[.)]\s+/i;
 
 function matchingListLayout(lines: string[]) {
   const schemes = [
     { left: numericListItem, right: alphabeticListItem },
+    { left: numericListItem, right: teluguAlphabeticListItem },
     { left: alphabeticListItem, right: romanListItem },
   ];
 

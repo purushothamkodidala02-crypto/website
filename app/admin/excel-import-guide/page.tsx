@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyExampleButton } from "@/components/admin/CopyExampleButton";
 import { QUESTION_IMPORT_EXPORT_HEADERS, QUESTION_IMPORT_REQUIRED_HEADERS } from "@/lib/questions/import-format";
 
 const optionalColumns = [
@@ -28,6 +29,24 @@ const bilingualExample = [
   "రజియా సుల్తానా",
   "A",
 ];
+
+const matchExample = [
+  "tg-eo-match-001", "General Studies & General Abilities",
+  "Match the following:\n1. Slave Dynasty; 2. Khilji Dynasty; 3. Tughlaq Dynasty; A. Jalaluddin Firuz Khilji; B. Ghiyasuddin Tughlaq; C. Qutbuddin Aibak",
+  "1–C, 2–A, 3–B", "1–A, 2–B, 3–C", "1–B, 2–C, 3–A", "1–C, 2–B, 3–A",
+  "జతపరచండి:\n1. బానిస వంశం; 2. ఖిల్జీ వంశం; 3. తుగ్లక్ వంశం; ఎ. జలాలుద్దీన్ ఫిరోజ్ ఖిల్జీ; బి. ఘియాసుద్దీన్ తుగ్లక్; సి. కుతుబుద్దీన్ ఐబక్",
+  "1–సి, 2–ఎ, 3–బ", "1–ఎ, 2–బి, 3–సి", "1–బి, 2–సి, 3–ఎ", "1–సి, 2–బి, 3–ఎ", "A",
+];
+
+const statementReasonExample = [
+  "tg-eo-ar-001", "General Studies & General Abilities",
+  "Statement: India has a parliamentary form of government.\nReason: The Council of Ministers is collectively responsible to the Lok Sabha.",
+  "Both are true, and Reason correctly explains Statement.", "Both are true, but Reason does not explain Statement.", "Statement is true, but Reason is false.", "Statement is false, but Reason is true.",
+  "ప్రకటన: భారతదేశంలో పార్లమెంటరీ ప్రభుత్వ విధానం ఉంది.\nకారణం: మంత్రిమండలి లోక్‌సభకు సమష్టిగా బాధ్యత వహిస్తుంది.",
+  "రెండూ నిజం, మరియు కారణం ప్రకటనను సరిగ్గా వివరిస్తుంది.", "రెండూ నిజం, కానీ కారణం ప్రకటనను వివరించదు.", "ప్రకటన నిజం, కానీ కారణం తప్పు.", "ప్రకటన తప్పు, కానీ కారణం నిజం.", "A",
+];
+
+const copyRequiredFields = (row: string[]) => QUESTION_IMPORT_REQUIRED_HEADERS.map((heading, index) => `${heading}: ${row[index]}`).join("\n");
 
 export default function ExcelImportGuidePage() {
   return (
@@ -61,7 +80,7 @@ export default function ExcelImportGuidePage() {
 
       <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Step 2</p>
-        <h2 className="mt-2 text-2xl font-black">Ready-to-copy bilingual example</h2>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-3"><h2 className="text-2xl font-black">Ready-to-copy bilingual examples</h2><CopyExampleButton text={copyRequiredFields(bilingualExample)} label="Copy standard MCQ required fields" /></div>
         <p className="mt-2 text-sm leading-6 text-slate-600">Use one row per Question. The Subject name must already exist in the selected Paper. Correct answer must be A, B, C, or D.</p>
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
           <table className="min-w-[104rem] text-left text-xs">
@@ -70,16 +89,24 @@ export default function ExcelImportGuidePage() {
           </table>
         </div>
         <p className="mt-4 text-xs leading-5 text-slate-500">For a bilingual subject, fill all English and Telugu fields. For an English-only or Telugu-only subject, fill only that subject’s language columns; keep the other required-language columns blank.</p>
-      </section>
-
-      <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Question Bank editor examples</p>
+        <div className="mt-8 border-t border-slate-200 pt-7">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">More required-field examples</p>
         <h2 className="mt-2 text-2xl font-black">Match the Following and Statement–Reason</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Use the same Excel columns as a standard MCQ. Put the matching lists or the statement and reason in the Question field, then put four answer combinations in options A–D. The student sees four answer choices, not a drag-and-match grid.</p>
         <div className="mt-6 grid gap-5 xl:grid-cols-2">
           <article className="rounded-2xl border border-teal-100 bg-teal-50 p-5">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Match the Following</p>
+            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Match the Following</p><CopyExampleButton text={copyRequiredFields(matchExample)} label="Copy Match the Following required fields" /></div>
             <h3 className="mt-2 font-black text-teal-950">Delhi Sultanate dynasties and founders</h3>
+            <p className="mt-2 text-xs leading-5 text-teal-800">The copy button includes every required field: import key, subject, English Question and options, Telugu Question and options, and correct answer.</p>
+            <div className="mt-4 rounded-xl border border-teal-200 bg-white p-4 text-sm leading-6 text-teal-950">
+              <p className="font-black">Copy this into the <code className="rounded bg-teal-50 px-1">question_en</code> cell</p>
+              <pre className="mt-3 whitespace-pre-wrap font-sans text-sm">{`Match the following:
+1. Slave Dynasty; 2. Khilji Dynasty; 3. Tughlaq Dynasty; A. Jalaluddin Firuz Khilji; B. Ghiyasuddin Tughlaq; C. Qutbuddin Aibak`}</pre>
+              <p className="mt-3 font-black">Copy this into the <code className="rounded bg-teal-50 px-1">question_te</code> cell</p>
+              <pre className="mt-3 whitespace-pre-wrap font-sans text-sm">{`జతపరచండి:
+1. బానిస వంశం; 2. ఖిల్జీ వంశం; 3. తుగ్లక్ వంశం; ఎ. జలాలుద్దీన్ ఫిరోజ్ ఖిల్జీ; బి. ఘియాసుద్దీన్ తుగ్లక్; సి. కుతుబుద్దీన్ ఐబక్`}</pre>
+              <p className="mt-3 text-xs text-teal-800">Start exactly with <strong>Match the following:</strong> in English and <strong>జతపరచండి:</strong> in Telugu. Semicolons separate every item; do not use commas. You may use <strong>Alt + Enter</strong> instead of a semicolon if you prefer separate Excel lines.</p>
+            </div>
             <div className="mt-4 grid gap-4 text-sm leading-6 text-teal-950 sm:grid-cols-2">
               <div><p className="font-bold">English</p><p className="mt-1">Match the Delhi Sultanate dynasties with their founders.</p><p className="mt-2">1. Slave Dynasty<br />2. Khilji Dynasty<br />3. Tughlaq Dynasty</p><p className="mt-2">A. Jalaluddin Firuz Khilji<br />B. Ghiyasuddin Tughlaq<br />C. Qutbuddin Aibak</p></div>
               <div><p className="font-bold">Telugu</p><p className="mt-1">ఢిల్లీ సుల్తానేట్ వంశాలను వాటి స్థాపకులతో జతపరచండి.</p><p className="mt-2">1. బానిస వంశం<br />2. ఖిల్జీ వంశం<br />3. తుగ్లక్ వంశం</p><p className="mt-2">ఎ. జలాలుద్దీన్ ఫిరోజ్ ఖిల్జీ<br />బి. ఘియాసుద్దీన్ తుగ్లక్<br />సి. కుతుబుద్దీన్ ఐబక్</p></div>
@@ -87,14 +114,16 @@ export default function ExcelImportGuidePage() {
             <div className="mt-4 rounded-xl bg-white p-3 text-sm text-teal-900"><p className="font-bold">Put these in the Excel option columns:</p><p className="mt-1">A: 1–C, 2–A, 3–B &nbsp; <strong>(correct_answer: A)</strong><br />B: 1–A, 2–B, 3–C<br />C: 1–B, 2–C, 3–A<br />D: 1–C, 2–B, 3–A</p></div>
           </article>
           <article className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-indigo-700">Statement–Reason</p>
+            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-[0.14em] text-indigo-700">Statement–Reason</p><CopyExampleButton text={copyRequiredFields(statementReasonExample)} label="Copy Statement Reason required fields" /></div>
             <h3 className="mt-2 font-black text-indigo-950">Parliamentary government in India</h3>
+            <p className="mt-2 text-xs leading-5 text-indigo-800">The copy button includes every required field: import key, subject, English Question and options, Telugu Question and options, and correct answer.</p>
             <div className="mt-4 grid gap-4 text-sm leading-6 text-indigo-950 sm:grid-cols-2">
               <div><p className="font-bold">English</p><p className="mt-1"><strong>Statement:</strong> India has a parliamentary form of government.</p><p className="mt-2"><strong>Reason:</strong> The Council of Ministers is collectively responsible to the Lok Sabha.</p></div>
               <div><p className="font-bold">Telugu</p><p className="mt-1"><strong>ప్రకటన:</strong> భారతదేశంలో పార్లమెంటరీ ప్రభుత్వ విధానం ఉంది.</p><p className="mt-2"><strong>కారణం:</strong> మంత్రిమండలి లోక్‌సభకు సమష్టిగా బాధ్యత వహిస్తుంది.</p></div>
             </div>
             <div className="mt-4 rounded-xl bg-white p-3 text-sm text-indigo-900"><p className="font-bold">Put these in the Excel option columns:</p><p className="mt-1">A: Both are true, and Reason correctly explains Statement. <strong>(correct_answer: A)</strong><br />B: Both are true, but Reason does not explain Statement.<br />C: Statement is true, but Reason is false.<br />D: Statement is false, but Reason is true.</p></div>
           </article>
+        </div>
         </div>
       </section>
 
