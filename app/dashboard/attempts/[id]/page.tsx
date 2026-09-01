@@ -18,7 +18,9 @@ type AttemptSummary = {
 
 export default async function AttemptReviewPage({
   params,
-}: PageProps<"/dashboard/attempts/[id]">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
