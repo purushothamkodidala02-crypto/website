@@ -20,7 +20,7 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
   const email = input.email.trim().toLowerCase();
   const nextPath = input.nextPath.startsWith("/") && !input.nextPath.startsWith("//")
     ? input.nextPath
-    : "/dashboard";
+    : "/";
   if (!email || email.length > 254 || !input.password || input.password.length > 72 || !input.captchaToken || input.captchaToken.length > 4096) {
     return { success: false, code: "validation_failed", message: "Complete the email, password, and security verification." };
   }
@@ -51,7 +51,13 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
   if (profileError || !profile) {
     return { success: false, code: "profile_unavailable", message: "Your password was accepted, but the account profile could not be loaded." };
   }
-  if (profile.role !== "admin") return { success: true, redirectTo: nextPath };
+  if (profile.role !== "admin") {
+    const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
+    if (sessionError) {
+      return { success: false, code: "session_security_unavailable", message: "We could not secure this sign-in session. Please try again." };
+    }
+    return { success: true, redirectTo: nextPath };
+  }
 
   const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assuranceError) {

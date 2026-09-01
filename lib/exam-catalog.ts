@@ -9,17 +9,17 @@ export function mockTestLabel(seriesNumber: number) {
 export function buildMockTestTitle({
   stateCode,
   examName,
-  paperNumber,
+  paperName,
   subjectName,
   seriesNumber,
 }: {
   stateCode: string;
   examName: string;
-  paperNumber: number;
+  paperName: string;
   subjectName?: string | null;
   seriesNumber: number;
 }) {
-  const location = `${stateCode} ${examName} · Paper ${paperNumber}`;
+  const location = `${stateCode} ${examName} · ${paperName}`;
   return `${location}${subjectName ? ` · ${subjectName}` : ""} · ${mockTestLabel(seriesNumber)}`;
 }
 
@@ -29,6 +29,20 @@ export function toCatalogSlug(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+export function studentFacingMockTestTitle({
+  examName,
+  paperLabel,
+  seriesNumber,
+  subjectName,
+}: {
+  examName: string;
+  paperLabel: string;
+  seriesNumber: number;
+  subjectName?: string | null;
+}) {
+  return `${examName} · ${paperLabel}${subjectName ? ` · ${subjectName}` : ""} · ${mockTestLabel(seriesNumber)}`;
 }
 
 export function inferExamKind(name: string) {

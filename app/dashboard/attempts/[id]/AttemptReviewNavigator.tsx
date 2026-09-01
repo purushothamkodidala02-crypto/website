@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
+import { QuestionMedia } from "@/components/questions/QuestionMedia";
+import { BookmarkButton } from "@/components/study/BookmarkButton";
+import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 
 export type ReviewRow = {
+  question_id: string;
   mock_test_title: string;
   score: number;
   total_marks: number;
@@ -16,18 +20,38 @@ export type ReviewRow = {
   option_b: string;
   option_c: string;
   option_d: string;
+  content_language_mode: "bilingual" | "english" | "telugu";
+  question_text_te: string | null;
+  option_a_te: string | null;
+  option_b_te: string | null;
+  option_c_te: string | null;
+  option_d_te: string | null;
   selected_answer: string | null;
   correct_answer: string;
   is_correct: boolean;
   marks_awarded: number;
   explanation: string | null;
+  explanation_te: string | null;
+  image_url: string | null;
 };
 
-export function AttemptReviewNavigator({ rows }: { rows: ReviewRow[] }) {
+export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds }: { attemptId: string; rows: ReviewRow[]; bookmarkedQuestionIds: string[] }) {
   const [index, setIndex] = useState(0);
+  const [language, setLanguage] = useState<"english" | "telugu">(
+    rows[0]?.content_language_mode === "telugu" ? "telugu" : "english",
+  );
   const questionRef = useRef<HTMLElement>(null);
   const activeNumberRef = useRef<HTMLButtonElement>(null);
   const row = rows[index];
+  const hasTelugu = Boolean(row.question_text_te);
+  const effectiveLanguage =
+    row.content_language_mode === "telugu"
+      ? "telugu"
+      : row.content_language_mode === "english"
+        ? "english"
+        : language;
+  const showTelugu = effectiveLanguage === "telugu" && hasTelugu;
+  const questionText = showTelugu ? row.question_text_te ?? row.question_text : row.question_text;
 
   function showQuestion(nextIndex: number, scrollToCard = true) {
     const safeIndex = Math.max(0, Math.min(rows.length - 1, nextIndex));
@@ -63,11 +87,14 @@ export function AttemptReviewNavigator({ rows }: { rows: ReviewRow[] }) {
   }, [index, rows.length]);
 
   const options = [
-    ["A", row.option_a],
-    ["B", row.option_b],
-    ["C", row.option_c],
-    ["D", row.option_d],
+    ["A", showTelugu ? row.option_a_te ?? row.option_a : row.option_a],
+    ["B", showTelugu ? row.option_b_te ?? row.option_b : row.option_b],
+    ["C", showTelugu ? row.option_c_te ?? row.option_c : row.option_c],
+    ["D", showTelugu ? row.option_d_te ?? row.option_d : row.option_d],
   ] as const;
+  const explanation = showTelugu
+    ? row.explanation_te ?? row.explanation
+    : row.explanation;
 
   return (
     <section className="mt-8 sm:mt-10">
@@ -109,25 +136,35 @@ export function AttemptReviewNavigator({ rows }: { rows: ReviewRow[] }) {
         </div>
       </div>
 
+      {hasTelugu && row.content_language_mode === "bilingual" && (
+        <div className="mt-4 flex justify-end">
+          <div className="inline-flex rounded-xl bg-slate-200 p-1" role="group" aria-label="Review language">
+            <LanguageButton active={language === "english"} onClick={() => setLanguage("english")}>English</LanguageButton>
+            <LanguageButton active={language === "telugu"} onClick={() => setLanguage("telugu")} lang="te">తెలుగు</LanguageButton>
+          </div>
+        </div>
+      )}
+
       <div className="relative mt-4 sm:px-14">
         <div className="mb-3 flex items-center justify-between sm:hidden">
           <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} />
           <p className="text-sm font-bold text-slate-600">Question {index + 1} of {rows.length}</p>
           <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} />
         </div>
-        <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="absolute left-0 top-1/2 hidden -translate-y-1/2 sm:grid" />
-        <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="absolute right-0 top-1/2 hidden -translate-y-1/2 sm:grid" />
+        <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="absolute left-0 top-6 hidden sm:grid" />
+        <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="absolute right-0 top-6 hidden sm:grid" />
 
         <article ref={questionRef} className="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:rounded-3xl" aria-live="polite">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 p-4 sm:px-6 sm:py-5">
           <div className="flex min-w-0 flex-1 gap-3 sm:gap-4">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-sm font-black text-white">{row.question_order}</span>
-            <FormattedQuestionText text={row.question_text} className="pt-1 leading-7 text-slate-950 sm:text-lg" />
+            <FormattedQuestionText text={questionText} className="pt-1 leading-7 text-slate-950 sm:text-lg" />
           </div>
-          <QuestionStatus row={row} />
+          <div className="flex flex-wrap items-center justify-end gap-2"><ReportQuestionButton key={`report-${row.question_id}`} questionId={row.question_id} attemptId={attemptId} /><BookmarkButton key={row.question_id} questionId={row.question_id} initialBookmarked={bookmarkedQuestionIds.includes(row.question_id)} /><QuestionStatus row={row} /></div>
         </div>
 
         <div className="p-4 sm:p-6">
+          {row.image_url && <QuestionMedia src={row.image_url} className="mb-5" />}
           <div className="grid gap-3">
             {options.map(([key, label]) => <OptionRow key={key} optionKey={key} label={label} correct={key === row.correct_answer} selected={key === row.selected_answer} />)}
           </div>
@@ -135,12 +172,16 @@ export function AttemptReviewNavigator({ rows }: { rows: ReviewRow[] }) {
             <p className="text-sm font-bold text-slate-700">Marks awarded: {row.marks_awarded}</p>
             {!row.selected_answer && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Not attempted</span>}
           </div>
-          {row.explanation && <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-5 text-sm leading-7 text-teal-950"><p className="text-xs font-black uppercase tracking-wide text-teal-700">Explanation</p><p className="mt-2">{row.explanation}</p></div>}
+          {explanation && <div lang={showTelugu ? "te" : "en"} className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-5 text-sm leading-7 text-teal-950"><p className="text-xs font-black uppercase tracking-wide text-teal-700">{showTelugu ? "వివరణ" : "Explanation"}</p><FormattedQuestionText text={explanation} className="mt-2" /></div>}
         </div>
         </article>
       </div>
     </section>
   );
+}
+
+function LanguageButton({ active, onClick, children, lang }: { active: boolean; onClick: () => void; children: React.ReactNode; lang?: string }) {
+  return <button type="button" lang={lang} onClick={onClick} aria-pressed={active} className={`rounded-lg px-4 py-2 text-sm font-black transition ${active ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:text-slate-950"}`}>{children}</button>;
 }
 
 function QuestionStatus({ row }: { row: ReviewRow }) {
@@ -155,7 +196,7 @@ function OptionRow({ optionKey, label, correct, selected }: { optionKey: string;
 
 function ReviewArrow({ direction, disabled, onClick, className = "" }: { direction: "previous" | "next"; disabled: boolean; onClick: () => void; className?: string }) {
   const previous = direction === "previous";
-  return <button type="button" onClick={onClick} disabled={disabled} aria-label={previous ? "Previous question" : "Next question"} title={previous ? "Previous question" : "Next question"} className={`grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-950 shadow-lg transition hover:-translate-y-0.5 hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 ${className}`}><svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 fill-none stroke-current stroke-2 ${previous ? "" : "rotate-180"}`}><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>;
+  return <button type="button" onClick={onClick} disabled={disabled} aria-label={previous ? "Previous question" : "Next question"} title={previous ? "Previous question" : "Next question"} className={`grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-950 shadow-lg transition-colors hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-30 ${className}`}><svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 fill-none stroke-current stroke-2 ${previous ? "" : "rotate-180"}`}><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>;
 }
 
 function Legend({ tone, label }: { tone: "emerald" | "red"; label: string }) {

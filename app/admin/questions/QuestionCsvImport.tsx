@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { importQuestionsFromCsv, type ImportQuestionsState } from "./import-actions";
 
@@ -34,7 +35,7 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
       </div>
       <form action={action} className="p-6 sm:p-7">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <label className="block text-sm font-bold">Exam Category<SearchableSelect name="import_exam_id" value={categoryId} onChange={(value) => { setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); }} options={categories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a category" /></label>
+          <label className="block text-sm font-bold">Recruiting Board<SearchableSelect name="import_exam_id" value={categoryId} onChange={(value) => { setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); }} options={categories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a Recruiting Board" /></label>
           <label className="block text-sm font-bold">Exam<SearchableSelect name="import_exam_group_id" value={examId} onChange={(value) => { setExamId(value); setSpecializationId(""); setPaperId(""); }} options={visibleExams.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose an Exam" disabled={!categoryId} /></label>
           <label className="block text-sm font-bold">Specialisation <span className="font-normal text-slate-500">(optional)</span><SearchableSelect value={specializationId} onChange={(value) => { setSpecializationId(value); setPaperId(""); }} options={[{ value: "", label: visibleSpecializations.length ? "No specialisation — direct Papers" : "No specialisation" }, ...visibleSpecializations.map((item) => ({ value: item.id, label: item.name }))]} placeholder="Choose a Specialisation" disabled={!examId} emptyMessage="No Specialisations in this Exam." /></label>
           <label className="block text-sm font-bold">Paper<SearchableSelect name="import_paper_id" value={paperId} onChange={setPaperId} options={visiblePapers.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose a Paper" disabled={!examId} emptyMessage="No Papers in this selection." /></label>
@@ -48,6 +49,7 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
           <summary className="cursor-pointer text-sm font-bold">Excel headings and language rules</summary>
           <p className="mt-3 text-sm leading-6 text-slate-700">Keep the headings in row 1. The system reads the <strong>Varadhi Import</strong> sheet when available, otherwise the first sheet.</p>
           <p className="mt-3 text-sm leading-6 text-slate-700">Required headings: <code className="rounded bg-white px-1.5 py-1 text-xs">import_key, subject, question_en, option_a_en, option_b_en, option_c_en, option_d_en, question_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer</code></p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">For Excel, paste one PNG or JPG image into the same Question row; the system uploads it automatically. Alternatively, use the optional <code className="rounded bg-white px-1.5 py-1 text-xs">image_url</code> heading with a public HTTPS PNG, JPG, or WebP link. CSV files must use <code className="rounded bg-white px-1.5 py-1 text-xs">image_url</code>.</p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700">
             <li>Extra spaces at the start or end of cells are removed automatically.</li>
             <li><strong>General subjects:</strong> fill both English and Telugu fields.</li>
@@ -55,7 +57,8 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
             <li>The Subject name must already exist under the selected Paper.</li>
           </ul>
         </details>
-        <button disabled={pending || !paperId} className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50">{pending ? "Checking and importing..." : "Import Excel or CSV"}</button>
+        <button disabled={pending || !paperId} aria-busy={pending} className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Checking and importing…">Import Excel or CSV</PendingButtonContent></button>
+        <LongPendingNotice pending={pending} />
         {state.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}
       </form>
     </section>

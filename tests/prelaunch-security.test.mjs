@@ -34,26 +34,490 @@ test("database migration locks sessions and makes submission idempotent", async 
   assert.match(migration, /create_exam_structure_atomic/);
 });
 
-test("production CSP uses per-request nonces and no production unsafe-inline scripts", async () => {
-  const [proxy, config] = await Promise.all([read("proxy.ts"), read("next.config.ts")]);
+test("production CSP keeps public pages cacheable and payment pages nonce-protected", async () => {
+  const [proxy, config, layout] = await Promise.all([read("proxy.ts"), read("next.config.ts"), read("app/layout.tsx")]);
 
+  assert.match(proxy, /needsNonce = request\.nextUrl\.pathname\.startsWith\("\/billing\/cashfree"\)/);
   assert.match(proxy, /'nonce-\$\{nonce\}'/);
   assert.match(proxy, /'strict-dynamic'/);
-  assert.match(proxy, /requestHeaders\.set\("x-nonce", nonce\)/);
+  assert.match(proxy, /https:\/\/sdk\.cashfree\.com/);
+  assert.match(proxy, /if \(nonce\) requestHeaders\.set\("x-nonce", nonce\)/);
+  assert.doesNotMatch(layout, /await connection\(\)/);
   assert.doesNotMatch(config, /Content-Security-Policy/);
-  assert.doesNotMatch(proxy, /script-src[^\n]*unsafe-inline/);
+  assert.match(proxy, /script-src 'self' 'unsafe-inline'/);
 });
 
 test("launch policy enforces strong passwords and disables unverified paid tests", async () => {
-  const [policy, createAction, updateAction, createForm] = await Promise.all([
+  const [policy, createAction, updateAction, createForm, editForm] = await Promise.all([
     read("lib/auth/password-policy.ts"),
     read("app/admin/mock-tests/actions.ts"),
     read("app/admin/mock-tests/[id]/edit/actions.ts"),
     read("app/admin/mock-tests/CreateMockTestForm.tsx"),
+    read("app/admin/mock-tests/[id]/edit/EditMockTestForm.tsx"),
   ]);
 
   assert.match(policy, /MIN_PASSWORD_LENGTH = 10/);
-  assert.match(createAction, /access_type: "free"/);
-  assert.match(updateAction, /access_type: "free"/);
-  assert.doesNotMatch(createForm, /value="paid"/);
+  assert.match(createAction, /readMockTestAccess\(formData\)/);
+  assert.match(updateAction, /readMockTestAccess\(formData\)/);
+  assert.match(createForm, /<option value="paid">Paid<\/option>/);
+  assert.match(editForm, /<option value="paid">Paid<\/option>/);
+});
+
+test("password recovery works across devices without consuming tokens on email prefetch", async () => {
+  const [recoveryRoute, confirmationPage, forgotPasswordForm] = await Promise.all([
+    read("app/auth/recovery/route.ts"),
+    read("app/recover-account/page.tsx"),
+    read("app/forgot-password/ForgotPasswordForm.tsx"),
+  ]);
+
+  assert.match(recoveryRoute, /token_hash/);
+  assert.match(recoveryRoute, /type:\s*"recovery"/);
+  assert.match(recoveryRoute, /verifyOtp/);
+  assert.match(recoveryRoute, /export async function POST/);
+  assert.match(recoveryRoute, /mail security scanners frequently prefetch links/);
+  assert.doesNotMatch(
+    recoveryRoute.match(/export async function GET[\s\S]*?export async function POST/)?.[0] ?? "",
+    /verifyOtp/,
+  );
+  assert.match(confirmationPage, /method="post"/);
+  assert.match(confirmationPage, /action="\/auth\/recovery"/);
+  assert.match(forgotPasswordForm, /opened on any phone, tablet, or computer/);
+});
+
+test("first-time mock-test screen does not claim progress is already saved", async () => {
+  const testPage = await read("components/mock-tests/MockTestDetailPage.tsx");
+
+  assert.doesNotMatch(testPage, /Saved during the attempt/);
+  assert.match(testPage, /hasResumableSession[\s\S]*Saved — ready to resume/);
+  assert.match(testPage, /Select Start test when you are ready/);
+});
+
+test("question bank preserves filters while editing an existing question", async () => {
+  const [questionBank, questionsPage, editPage] = await Promise.all([
+    read("app/admin/questions/QuestionBankTable.tsx"),
+    read("app/admin/questions/page.tsx"),
+    read("app/admin/questions/[id]/edit/page.tsx"),
+  ]);
+
+  assert.match(questionBank, /window\.history\.replaceState/);
+  assert.match(questionsPage, /const tableStateKey = \[categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialPage\]\.join\(":"\)/);
+  assert.match(questionsPage, /<QuestionBankTable key=\{tableStateKey\}/);
+  assert.match(questionBank, /returnTo=\$\{encodeURIComponent\(questionBankUrl\)\}/);
+  assert.match(editPage, /returnTo\.startsWith\("\/admin\/questions\?"\)/);
+  assert.match(editPage, /href=\{backHref\}/);
+});
+
+test("mock-test management preserves filters while editing a test", async () => {
+  const [mockTestTable, mockTestPage, editPage] = await Promise.all([
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("app/admin/mock-tests/page.tsx"),
+    read("app/admin/mock-tests/[id]/edit/page.tsx"),
+  ]);
+
+  assert.match(mockTestTable, /window\.history\.replaceState/);
+  assert.match(mockTestTable, /returnTo=\$\{encodeURIComponent\(mockTestAdminUrl\)\}/);
+  assert.match(mockTestPage, /initialStateId=\{stateId\}/);
+  assert.match(mockTestPage, /initialStatus=\{initialStatus\}/);
+  assert.match(editPage, /mockTestsListReturnTo\(returnTo\)/);
+  assert.match(editPage, /href=\{backHref\}/);
+});
+
+test("public pages expose route-specific SEO metadata and crawl targets", async () => {
+  const [layout, catalog, support, sitemap, robots] = await Promise.all([
+    read("app/layout.tsx"),
+    read("app/mock-tests/page.tsx"),
+    read("app/support/page.tsx"),
+    read("app/sitemap.ts"),
+    read("app/robots.ts"),
+  ]);
+
+  assert.doesNotMatch(layout, /alternates:\s*\{\s*canonical:\s*"\/"/);
+  assert.match(catalog, /openGraph:[\s\S]*url:\s*"\/mock-tests"/);
+  assert.match(support, /title:\s*"Contact Support"/);
+  assert.match(support, /"@type":\s*"ContactPage"/);
+  assert.match(sitemap, /absoluteUrl\("\/support"\)/);
+  assert.match(robots, /host:\s*absoluteUrl\("\/"\)/);
+});
+
+test("permanent public slugs cover every catalogue level and legacy URLs redirect", async () => {
+  const [home, catalog, examRoute, testRoute, helpers, resolver, requestRedirect, proxy, sitemap, migration] = await Promise.all([
+    read("app/page.tsx"),
+    read("app/mock-tests/page.tsx"),
+    read("app/mock-tests/[id]/[exam]/page.tsx"),
+    read("app/mock-tests/[id]/[exam]/[paper]/[test]/page.tsx"),
+    read("lib/public-urls.ts"),
+    read("lib/public-route-data.ts"),
+    read("lib/public-redirect.ts"),
+    read("proxy.ts"),
+    read("app/sitemap.ts"),
+    read("supabase/migrations/20260821193000_add_permanent_public_slug_history.sql"),
+  ]);
+
+  assert.match(helpers, /stateUrl/);
+  assert.match(helpers, /categoryUrl/);
+  assert.match(helpers, /specializationUrl/);
+  assert.match(helpers, /subjectUrl/);
+  assert.match(helpers, /mockTestUrl/);
+  assert.match(home, /href=\{examUrl\(state\.slug, exam\.slug\)\}/);
+  assert.doesNotMatch(home, /exam=\$\{exam\.id\}/);
+  assert.match(catalog, /permanentRedirect\(withQuery\(destination, filters\)\)/);
+  assert.match(examRoute, /permanentRedirect\(canonical\)/);
+  assert.match(testRoute, /generateMockTestMetadata/);
+  assert.match(resolver, /public_slug_aliases/);
+  assert.match(resolver, /getMockTestPublicContextById/);
+  assert.match(requestRedirect, /public_slug_aliases/);
+  assert.match(requestRedirect, /UUID_PATTERN/);
+  assert.match(proxy, /NextResponse\.redirect\(permanentDestination, 308\)/);
+  assert.match(proxy, /NextResponse\.rewrite[\s\S]*status:\s*404/);
+  assert.match(sitemap, /categoryUrl/);
+  assert.match(sitemap, /subjectUrl/);
+  assert.match(sitemap, /mockTestUrl/);
+  assert.match(migration, /create table if not exists public\.public_slug_aliases/);
+  assert.match(migration, /remember_previous_public_slug/);
+  assert.match(migration, /unique index if not exists public_slug_aliases_scope_unique/);
+  assert.match(migration, /mock_tests_slug_format/);
+});
+
+test("navigation and question-management links remain accessible", async () => {
+  const [navigation, createQuestion, packageJson] = await Promise.all([
+    read("components/site/PublicNavigationMenu.tsx"),
+    read("app/admin/questions/CreateQuestionForm.tsx"),
+    read("package.json"),
+  ]);
+
+  assert.match(navigation, /inert=\{!open\}/);
+  assert.match(navigation, /aria-modal="true"/);
+  assert.match(navigation, /createPortal/);
+  assert.match(navigation, /document\.body/);
+  assert.match(createQuestion, /id="add-question"/);
+  assert.match(packageJson, /"nanoid":\s*"3\.3\.18"/);
+});
+
+test("question media imports, uploads, enlargement, and attempt reviews stay connected", async () => {
+  const [migration, importer, runner, review, media, imageViewer] = await Promise.all([
+    read("supabase/migrations/20260814160000_add_question_media_workflow.sql"),
+    read("app/admin/questions/import-actions.ts"),
+    read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+    read("app/dashboard/attempts/[id]/AttemptReviewNavigator.tsx"),
+    read("components/questions/QuestionMedia.tsx"),
+    read("components/questions/QuestionImageViewer.tsx"),
+  ]);
+
+  assert.match(migration, /question-media/);
+  assert.match(migration, /file_size_limit/);
+  assert.match(migration, /image_url = excluded\.image_url/);
+  assert.match(migration, /snapshot\.image_url/);
+  assert.match(importer, /normalizeQuestionImageUrl/);
+  assert.match(importer, /worksheet\.getImages\(\)/);
+  assert.match(importer, /placement\.range\.tl\.nativeRow \+ 1/);
+  assert.match(importer, /uploadQuestionImage/);
+  assert.match(importer, /use either the embedded image or image_url/);
+  assert.match(importer, /uploadedImagePaths\.map\(\(path\) => removeQuestionImage/);
+  assert.match(importer, /image_url: image\.url/);
+  assert.match(runner, /<QuestionMedia src=\{current\.image_url\}/);
+  assert.match(runner, /Question \{index \+ 1\}[^]*of \{questions\.length\}/);
+  assert.match(runner, /Questions <span[^]*\{index \+ 1\}\/\{questions\.length\}/);
+  assert.match(runner, /\{questions\.length\} total/);
+  assert.match(review, /<QuestionMedia src=\{row\.image_url\}/);
+  assert.match(media, /aria-label="Open a larger view of the Question image"/);
+  assert.match(imageViewer, /aria-modal="true"/);
+  assert.match(imageViewer, /Zoom in/);
+  assert.match(imageViewer, /Zoom out/);
+  assert.match(media, /max-h-\[14rem\]/);
+  assert.match(media, /sm:max-h-\[18rem\]/);
+  assert.match(imageViewer, /zoom === 1/);
+  assert.match(imageViewer, /max-h-\[calc\(100dvh-8rem\)\]/);
+  assert.match(imageViewer, /Fit image/);
+  assert.match(imageViewer, /zoom \* 100/);
+});
+
+test("mock-test student preview mirrors the question screen without exposing it publicly", async () => {
+  const [previewPage, preview, questionsPage, questionActions] = await Promise.all([
+    read("app/admin/mock-tests/[id]/preview/page.tsx"),
+    read("app/admin/mock-tests/[id]/preview/StudentPreview.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
+    read("app/admin/mock-tests/[id]/edit/question-actions.ts"),
+  ]);
+
+  assert.match(previewPage, /Student Preview/);
+  assert.match(previewPage, /from\("test_attempts"\)/);
+  assert.match(preview, /Edit this question/);
+  assert.match(preview, /Administrator answer key/);
+  assert.match(preview, /Preview question list[\s\S]*overflow-y-auto/);
+  assert.match(preview, /grid-cols-\[repeat\(auto-fill,2\.5rem\)\]/);
+  assert.match(preview, /<QuestionMedia src=\{current\.imageUrl\}/);
+  assert.match(preview, /Students cannot see answer keys or explanations before submitting/);
+  assert.match(questionsPage, /Student Preview/);
+  assert.match(questionActions, /\/preview/);
+});
+
+test("assertion-reason questions accept short labels and render standard labels", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /Assertion\(\?:\\s\*\\\(\[A\]\\\)\)\?/);
+  assert.match(formatter, /Reason\(\?:\\s\*\\\(\[R\]\\\)\)\?/);
+  assert.match(formatter, /return "Assertion \(A\)"/);
+  assert.match(formatter, /return "Reason \(R\)"/);
+});
+
+test("match questions clean imported markdown and support A-D with I-IV lists", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /replace\(\/\\u00a0\/g, " "\)/);
+  assert.match(formatter, /replace\(\/\\\*\\\*\/g, ""\)/);
+  assert.match(formatter, /romanListItem/);
+  assert.match(formatter, /\{ left: alphabeticListItem, right: romanListItem \}/);
+  assert.match(formatter, /replace\(\/;\\s\*\$\/, ""\)/);
+});
+
+test("admins can export mock-test questions in the accepted import format", async () => {
+  const [importer, format, exportRoute, testList, questionsPage] = await Promise.all([
+    read("app/admin/questions/import-actions.ts"),
+    read("lib/questions/import-format.ts"),
+    read("app/admin/mock-tests/[id]/questions-export/route.ts"),
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
+  ]);
+
+  assert.match(importer, /QUESTION_IMPORT_REQUIRED_HEADERS/);
+  assert.match(format, /QUESTION_IMPORT_EXPORT_HEADERS/);
+  assert.match(format, /"question_order"/);
+  assert.match(format, /"negative_marks"/);
+  assert.match(format, /"image_url"/);
+  assert.match(exportRoute, /getWorksheet|addWorksheet\("Varadhi Import"/);
+  assert.match(exportRoute, /profile\?\.role !== "admin"/);
+  assert.match(exportRoute, /\.order\("question_order"\)/);
+  assert.match(exportRoute, /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/);
+  assert.doesNotMatch(testList, /DownloadQuestionsButton/);
+  assert.match(questionsPage, /DownloadQuestionsButton/);
+});
+
+test("loading feedback is accessible and prevents duplicate operations", async () => {
+  const [
+    layout,
+    navigationProgress,
+    pendingSubmitButton,
+    routeLoading,
+    testStartActions,
+    testRunner,
+    downloadQuestions,
+    errorBoundary,
+    submissionDialog,
+  ] = await Promise.all([
+    read("app/layout.tsx"),
+    read("components/feedback/NavigationProgress.tsx"),
+    read("components/feedback/PendingSubmitButton.tsx"),
+    read("components/feedback/RouteLoading.tsx"),
+    read("app/mock-tests/[id]/TestStartActions.tsx"),
+    read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+    read("app/admin/mock-tests/DownloadQuestionsButton.tsx"),
+    read("app/error.tsx"),
+    read("app/mock-tests/[id]/SubmissionDialog.tsx"),
+  ]);
+
+  assert.match(layout, /<NavigationProgress/);
+  assert.match(navigationProgress, /role="status"/);
+  assert.match(navigationProgress, /aria-live="polite"/);
+  assert.match(navigationProgress, /motion-reduce:animate-none/);
+  assert.match(navigationProgress, /This is taking longer than expected/);
+  assert.match(navigationProgress, /sourceHref: window\.location\.href/);
+  assert.match(navigationProgress, /window\.location\.href === activeNavigation\.sourceHref/);
+  assert.match(navigationProgress, /window\.setInterval\(clearIfUrlChanged, 100\)/);
+  assert.match(navigationProgress, /new FormData\(form\)/);
+  assert.match(navigationProgress, /form\.getAttribute\("method"\)/);
+  assert.match(navigationProgress, /declaredMethod !== "get"/);
+  assert.match(pendingSubmitButton, /useFormStatus/);
+  assert.match(pendingSubmitButton, /disabled=\{disabled \|\| pending\}/);
+  assert.match(pendingSubmitButton, /aria-busy=\{pending\}/);
+  assert.match(routeLoading, /aria-busy="true"/);
+  assert.match(routeLoading, /motion-reduce:animate-none/);
+  assert.match(testStartActions, /pendingLabel="Starting test…"/);
+  assert.match(testStartActions, /pendingLabel="Resuming test…"/);
+  assert.match(submissionDialog, /aria-busy=\{submitting\}/);
+  assert.match(submissionDialog, /PendingButtonContent/);
+  assert.match(downloadQuestions, /if \(pending\) return/);
+  assert.match(downloadQuestions, /disabled=\{pending\}/);
+  assert.match(downloadQuestions, /try again/i);
+  assert.match(errorBoundary, /<RetryButton/);
+});
+
+test("student, authentication, and admin route groups have loading boundaries", async () => {
+  const loadingFiles = [
+    "app/loading.tsx",
+    "app/mock-tests/loading.tsx",
+    "app/mock-tests/[id]/loading.tsx",
+    "app/mock-tests/[id]/attempt/loading.tsx",
+    "app/dashboard/loading.tsx",
+    "app/login/loading.tsx",
+    "app/register/loading.tsx",
+    "app/forgot-password/loading.tsx",
+    "app/reset-password/loading.tsx",
+    "app/recover-account/loading.tsx",
+    "app/admin-mfa/loading.tsx",
+    "app/admin/loading.tsx",
+  ];
+
+  const boundaries = await Promise.all(loadingFiles.map(read));
+  for (const boundary of boundaries) {
+    assert.match(boundary, /RouteLoading|aria-busy="true"/);
+  }
+});
+
+test("student attempt history keeps lifetime summaries and limits detailed snapshots", async () => {
+  const [migration, dashboard, reviewPage] = await Promise.all([
+    read("supabase/migrations/20260821220000_add_attempt_history_retention.sql"),
+    read("app/dashboard/page.tsx"),
+    read("app/dashboard/attempts/[id]/page.tsx"),
+  ]);
+
+  assert.match(migration, /detailed_review_available boolean not null default true/);
+  assert.match(migration, /get_student_attempt_history_summary/);
+  assert.match(migration, /attempt_rank > 100/);
+  assert.match(migration, /interval '365 days'/);
+  assert.match(migration, /interval '30 days'/);
+  assert.match(migration, /cron\.schedule/);
+  assert.match(dashboard, /const attemptsPerPage = 20/);
+  assert.match(dashboard, /\.range\(\(page - 1\) \* attemptsPerPage/);
+  assert.match(dashboard, /attempt\.detailed_review_available/);
+  assert.match(dashboard, /Summary only/);
+  assert.match(reviewPage, /Detailed answer review is no longer stored/);
+  assert.match(reviewPage, /latest 100 attempts/);
+});
+
+test("mock-test question targets and isolated test operations are database protected", async () => {
+  const [migration, createAction, editAction, editPage, questionsPage, importer, assignments, deleteAction] = await Promise.all([
+    read("supabase/migrations/20260821230000_add_safe_mock_question_management.sql"),
+    read("app/admin/mock-tests/actions.ts"),
+    read("app/admin/mock-tests/[id]/edit/actions.ts"),
+    read("app/admin/mock-tests/[id]/edit/page.tsx"),
+    read("app/admin/mock-tests/[id]/questions/page.tsx"),
+    read("app/admin/questions/import-actions.ts"),
+    read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
+    read("app/admin/questions/deleteAction.ts"),
+  ]);
+
+  assert.match(migration, /target_question_count integer/);
+  assert.match(migration, /mock_tests_target_question_count_positive/);
+  assert.match(migration, /guard_mock_test_question_mutation/);
+  assert.match(migration, /has student attempts and its Questions are locked/);
+  assert.match(migration, /already has its target number of Questions/);
+  assert.match(migration, /fill_mock_test_with_latest_questions/);
+  assert.match(migration, /replace_mock_test_questions_atomic/);
+  assert.match(migration, /must contain exactly % valid Questions/);
+  assert.match(migration, /delete from public\.questions as question/);
+  assert.match(migration, /test_attempt_session_questions where question_id/);
+  assert.match(migration, /attempt_responses where question_id/);
+  assert.match(migration, /actual_question_count <> test_record\.target_question_count/);
+  assert.match(createAction, /paper\.question_count \?\? requestedTarget/);
+  assert.match(editAction, /const resultAffectingChange =/);
+  assert.match(editAction, /const currentSubjectId = current\.test_scope === "subject" \? current\.subject_id : null/);
+  assert.match(editAction, /submittedSubjectId !== currentSubjectId/);
+  assert.match(editAction, /duration !== current\.duration_minutes/);
+  assert.match(editAction, /targetQuestionCount !== current\.target_question_count/);
+  assert.match(editAction, /You can still update its description, instructions and URL slug/);
+  assert.match(editPage, /Manage Questions/);
+  assert.match(questionsPage, /targetQuestionCount=\{test\.target_question_count\}/);
+  assert.match(importer, /mode === "replace"/);
+  assert.match(importer, /replace_mock_test_questions_atomic/);
+  assert.match(importer, /questionMediaPath/);
+  assert.match(importer, /storedImportKey = mockTest/);
+  assert.match(assignments, /moveAssignedQuestion/);
+  assert.match(assignments, /Adding, editing, or removing them here does not change another mock test/);
+  assert.match(assignments, /Add question to this mock test/);
+  assert.match(assignments, /Search questions in this mock test/);
+  assert.match(assignments, /No questions match your search/);
+  assert.doesNotMatch(assignments, /Search the question bank/);
+  assert.match(deleteAction, /delete_question_safely/);
+  assert.match(deleteAction, /makeQuestionUnavailable/);
+});
+
+test("attempted mock tests can receive an isolated corrected version", async () => {
+  const [migration, columnFix, actions, buttons] = await Promise.all([
+    read("supabase/migrations/20260827153000_add_corrected_mock_test_versions.sql"),
+    read("supabase/migrations/20260827223000_fix_corrected_version_mock_columns.sql"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+
+  assert.match(migration, /create_corrected_mock_test_version/);
+  assert.match(migration, /superseded_by_mock_test_id/);
+  assert.match(migration, /replaces_mock_test_id/);
+  assert.match(migration, /insert into public\.questions/);
+  assert.match(migration, /source_assignment\.image_url/);
+  assert.match(migration, /source_assignment\.question_order/);
+  assert.match(migration, /source_test\.series_number/);
+  assert.doesNotMatch(columnFix, /source_test\.specialization_id/);
+  assert.doesNotMatch(columnFix, /test_scope, specialization_id/);
+  assert.match(actions, /createCorrectedMockTestVersion/);
+  assert.match(actions, /cannot be restored/);
+  assert.match(buttons, /Create corrected version/);
+  assert.match(buttons, /hasAttempts/);
+});
+
+test("admins can deliberately erase a hidden attempted mock test", async () => {
+  const [migration, actions, buttons] = await Promise.all([
+    read("supabase/migrations/20260827173000_add_permanent_mock_test_deletion.sql"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+
+  assert.match(migration, /permanently_delete_mock_test/);
+  assert.match(migration, /requested_confirmation is distinct from 'DELETE'/);
+  assert.match(migration, /status = 'published'/);
+  assert.match(migration, /delete from public\.test_attempts/);
+  assert.match(migration, /delete from public\.test_attempt_sessions/);
+  assert.match(migration, /Question-bank records themselves are deliberately retained/);
+  assert.match(actions, /permanentlyDeleteMockTest/);
+  assert.match(buttons, /Type DELETE to permanently erase/);
+  assert.match(buttons, /Delete permanently/);
+});
+
+test("corrected drafts replace live versions without student downtime", async () => {
+  const [migration, creationFix, page, table] = await Promise.all([
+    read("supabase/migrations/20260827190000_switch_corrected_versions_on_publish.sql"),
+    read("supabase/migrations/20260827203000_fix_corrected_version_creation.sql"),
+    read("app/admin/mock-tests/page.tsx"),
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+  ]);
+
+  assert.match(migration, /keep_published_mock_test_live_during_correction/);
+  assert.match(migration, /switch_corrected_mock_test_on_publish/);
+  assert.match(migration, /new\.replaces_mock_test_id/);
+  assert.match(migration, /set status = 'archived'/);
+  assert.match(migration, /correction\.status = 'draft'/);
+  assert.match(creationFix, /deferrable initially deferred/);
+  assert.match(creationFix, /mock_tests_superseded_by_mock_test_id_fkey/);
+  assert.match(page, /superseded_by_mock_test_id/);
+  assert.match(table, /Correction in progress/);
+  assert.match(table, /Corrected version/);
+  assert.match(table, /hasCorrectedVersion/);
+});
+
+test("hidden attempted mock tests can be safely published again", async () => {
+  const [migration, actions, buttons] = await Promise.all([
+    read("supabase/migrations/20260827213000_add_safe_mock_test_republish.sql"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+  assert.match(migration, /republish_archived_mock_test_safely/);
+  assert.match(migration, /publish_mock_test_safely/);
+  assert.match(migration, /corrected version of this Mock Test is already published/);
+  assert.match(actions, /republishArchivedMockTest/);
+  assert.match(buttons, /Publish again/);
+  assert.match(buttons, /canRepublish/);
+});
+
+test("admin mock-test totals are aggregated in the database without row-limit truncation", async () => {
+  const [migration, page] = await Promise.all([
+    read("supabase/migrations/20260824100000_add_admin_mock_test_summaries.sql"),
+    read("app/admin/mock-tests/page.tsx"),
+  ]);
+
+  assert.match(migration, /get_admin_mock_test_summaries/);
+  assert.match(migration, /count\(assignment\.id\) as question_count/);
+  assert.match(migration, /usable_question_count/);
+  assert.match(migration, /Administrator MFA verification is required/);
+  assert.match(page, /supabase\.rpc\("get_admin_mock_test_summaries"\)/);
+  assert.doesNotMatch(page, /from\("mock_test_questions"\)/);
+  assert.doesNotMatch(page, /from\("test_attempts"\)/);
 });

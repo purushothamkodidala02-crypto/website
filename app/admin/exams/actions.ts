@@ -1,6 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
 export type CreateExamState = {
@@ -55,6 +57,9 @@ export async function createExam(
   );
 
   const isActive = formData.get("is_active") === "on";
+  const seo = readSeoFields(formData);
+
+  if (seo.error) return { success: false, message: seo.error };
 
   if (!name || !stateId) {
     return {
@@ -82,7 +87,7 @@ export async function createExam(
   ) {
     return {
       success: false,
-      message: `An exam category named "${name}" already exists. Names are not case-sensitive.`,
+      message: `A Recruiting Board named "${name}" already exists. Names are not case-sensitive.`,
     };
   }
 
@@ -105,6 +110,7 @@ export async function createExam(
       name,
       slug,
       description: description || null,
+      ...seo.value,
       is_active: isActive,
       display_order: displayOrder,
     });
@@ -112,7 +118,7 @@ export async function createExam(
   if (insertError?.code === "23505") {
     return {
       success: false,
-      message: `An exam category with the slug "${slug}" already exists.`,
+      message: `A Recruiting Board with the slug "${slug}" already exists.`,
     };
   }
 
@@ -125,9 +131,10 @@ export async function createExam(
 
   revalidatePath("/admin");
   revalidatePath("/admin/exams");
+  revalidateTag(PUBLIC_CATALOG_TAG, "max");
 
   return {
     success: true,
-    message: "Exam category created successfully.",
+    message: "Recruiting Board created successfully.",
   };
 }

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
+import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
+import { mockTestUrl } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
 
 type Attempt = {
   id: string;
   mock_test_id: string;
+  detailed_review_available: boolean;
   submitted_at: string;
   score: number;
   total_marks: number;
@@ -15,11 +18,21 @@ type Attempt = {
   unanswered_questions: number;
 };
 
+type AttemptHistorySummary = {
+  completed_attempts: number;
+  average_score: number;
+  latest_score: number | null;
+  latest_total_marks: number | null;
+  latest_mock_test_id: string | null;
+};
+
 type AvailableMockTest = {
   id: string;
   paper_id: string;
   title: string;
   duration_minutes: number;
+  slug: string;
+  access_type: "free" | "paid";
 };
 
 type SubjectAnalytics = {
@@ -30,39 +43,73 @@ type SubjectAnalytics = {
   net_marks: number;
 };
 
-export default async function Dashboard() {
+const attemptsPerPage = 20;
+
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const query = await searchParams;
+  const requestedPage = Number(query.page ?? "1");
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/dashboard");
 
   const [
     attemptsResult,
+    attemptSummaryResult,
+    latestAttemptsResult,
     subjectAnalyticsResult,
     availableTestsResult,
     allTestsResult,
     papersResult,
+    catalog,
   ] = await Promise.all([
     supabase
       .from("test_attempts")
       .select(
-        "id, mock_test_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
+        "id, mock_test_id, detailed_review_available, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
+        { count: "exact" },
       )
-      .order("submitted_at", { ascending: false }),
+      .order("submitted_at", { ascending: false })
+      .range((page - 1) * attemptsPerPage, page * attemptsPerPage - 1),
+    supabase.rpc("get_student_attempt_history_summary"),
+    supabase
+      .from("test_attempts")
+      .select(
+        "id, mock_test_id, detailed_review_available, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
+      )
+      .order("submitted_at", { ascending: false })
+      .limit(5),
     supabase.rpc("get_student_subject_analytics"),
     supabase
       .from("mock_tests")
-      .select("id, paper_id, title, duration_minutes")
+      .select("id, paper_id, title, duration_minutes, slug, access_type")
       .eq("status", "published")
-      .eq("access_type", "free")
-      .order("display_order", { ascending: true }),
+      .order("display_order", { ascending: true })
+      .limit(4),
     supabase.from("mock_tests").select("id, title"),
     supabase
       .from("papers")
       .select("id, exam_group_id, specialization_id, name, display_order")
       .eq("is_active", true),
+    getMockTestCatalogData(),
   ]);
 
   const attempts = (attemptsResult.data ?? []) as Attempt[];
+  const latestAttempts = (latestAttemptsResult.data ?? []) as Attempt[];
+  const attemptSummary = (attemptSummaryResult.data?.[0] ?? {
+    completed_attempts: attemptsResult.count ?? 0,
+    average_score: 0,
+    latest_score: null,
+    latest_total_marks: null,
+    latest_mock_test_id: null,
+  }) as AttemptHistorySummary;
+  const totalAttempts = Number(attemptSummary.completed_attempts ?? attemptsResult.count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalAttempts / attemptsPerPage));
+  if (totalAttempts > 0 && page > totalPages) redirect(`/dashboard?page=${totalPages}`);
   const subjectAnalytics = (subjectAnalyticsResult.data ?? []) as SubjectAnalytics[];
   const availableTests = (availableTestsResult.data ?? []) as AvailableMockTest[];
   const paperDisplayById = buildPaperDisplayMap(
@@ -71,39 +118,39 @@ export default async function Dashboard() {
   const testTitles = new Map(
     (allTestsResult.data ?? []).map((test) => [test.id, test.title]),
   );
-  const averageScore =
-    attempts.length === 0
-      ? 0
-      : attempts.reduce(
-          (total, attempt) =>
-            total +
-            (attempt.total_marks === 0
-              ? 0
-              : (attempt.score / attempt.total_marks) * 100),
-          0,
-        ) / attempts.length;
+  const catalogPaperById = new Map(catalog.papers.map((item) => [item.id, item]));
+  const catalogExamById = new Map(catalog.exams.map((item) => [item.id, item]));
+  const catalogCategoryById = new Map(catalog.categories.map((item) => [item.id, item]));
+  const catalogStateById = new Map(catalog.states.map((item) => [item.id, item]));
+  const publicTestPath = (test: AvailableMockTest) => {
+    const paper = catalogPaperById.get(test.paper_id);
+    const exam = paper ? catalogExamById.get(paper.exam_group_id) : undefined;
+    const category = exam ? catalogCategoryById.get(exam.exam_id) : undefined;
+    const state = category ? catalogStateById.get(category.state_id) : undefined;
+    return paper && exam && state ? mockTestUrl(state.slug, exam.slug, paper.slug, test.slug) : "/mock-tests";
+  };
   const metrics = [
     {
       label: "Completed attempts",
-      value: String(attempts.length),
+      value: String(totalAttempts),
       detail: "All submitted tests",
       tone: "teal",
       short: "DONE",
     },
     {
       label: "Average score",
-      value: `${averageScore.toFixed(1)}%`,
+      value: `${Number(attemptSummary.average_score).toFixed(1)}%`,
       detail: "Across all attempts",
       tone: "emerald",
       short: "AVG",
     },
     {
       label: "Latest score",
-      value: attempts[0]
-        ? `${attempts[0].score} / ${attempts[0].total_marks}`
+      value: attemptSummary.latest_score !== null && attemptSummary.latest_total_marks !== null
+        ? `${attemptSummary.latest_score} / ${attemptSummary.latest_total_marks}`
         : "—",
-      detail: attempts[0]
-        ? (testTitles.get(attempts[0].mock_test_id) ?? "Mock test")
+      detail: attemptSummary.latest_mock_test_id
+        ? (testTitles.get(attemptSummary.latest_mock_test_id) ?? "Mock test")
         : "No attempts yet",
       tone: "amber",
       short: "NEW",
@@ -111,7 +158,7 @@ export default async function Dashboard() {
   ] as const;
 
   return (
-    <main className="min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
         <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
@@ -126,7 +173,7 @@ export default async function Dashboard() {
                 Keep your preparation moving.
               </h1>
               <p className="mt-3 max-w-2xl leading-7 text-slate-300">
-                Review your progress, understand weak Subjects, and choose the
+                Review your progress, understand weaker subjects, and choose the
                 next focused mock test.
               </p>
             </div>
@@ -139,10 +186,25 @@ export default async function Dashboard() {
           </div>
         </section>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-3">
+        <section className="student-stagger mt-6 grid gap-4 md:grid-cols-3">
           {metrics.map((metric) => (
             <DashboardMetric key={metric.label} {...metric} />
           ))}
+        </section>
+
+        <section className="student-stagger mt-6 grid gap-4 sm:grid-cols-2">
+          <Link href="/dashboard/study-book" className="student-card group rounded-2xl border border-red-100 bg-white p-5 shadow-sm hover:border-red-200 hover:shadow-md">
+            <p className="text-xs font-black uppercase tracking-wide text-red-700">Automatic revision</p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Mistake Book</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Revisit incorrect answers and master weak questions.</p>
+            <span className="mt-4 inline-flex text-sm font-black text-red-700">Review mistakes →</span>
+          </Link>
+          <Link href="/dashboard/study-book?view=bookmarks" className="student-card group rounded-2xl border border-teal-100 bg-white p-5 shadow-sm hover:border-teal-200 hover:shadow-md">
+            <p className="text-xs font-black uppercase tracking-wide text-teal-700">Saved questions</p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Bookmarks</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Keep important questions together for focused revision.</p>
+            <span className="mt-4 inline-flex text-sm font-black text-teal-700">Open bookmarks →</span>
+          </Link>
         </section>
 
         <section className="mt-10">
@@ -167,18 +229,18 @@ export default async function Dashboard() {
               No mock tests are available right now.
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {availableTests.slice(0, 4).map((test, index) => (
+            <div className="student-stagger mt-5 grid gap-4 md:grid-cols-2">
+              {availableTests.slice(0, 4).map((test) => (
                 <article
                   key={test.id}
-                  className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg hover:shadow-slate-950/5"
+                  className="student-card group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-200 hover:shadow-lg hover:shadow-slate-950/5"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50 text-xs font-black text-teal-800">
-                      {String(index + 1).padStart(2, "0")}
+                    <span className="rounded-lg bg-teal-50 px-3 py-2 text-xs font-black text-teal-800">
+                      Practice test
                     </span>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                      Free
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
+                      {test.access_type === "free" ? "Free" : "Paid series"}
                     </span>
                   </div>
                   <h3 className="mt-5 text-lg font-black leading-7 text-slate-950">
@@ -192,7 +254,7 @@ export default async function Dashboard() {
                       {test.duration_minutes} minutes
                     </span>
                     <Link
-                      href={`/mock-tests/${test.id}`}
+                      href={publicTestPath(test)}
                       className="rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-teal-700"
                     >
                       View test
@@ -204,12 +266,9 @@ export default async function Dashboard() {
           )}
         </section>
 
-        {attempts.length === 0 ? (
+        {totalAttempts === 0 ? (
           <section className="mt-10 rounded-3xl border border-dashed border-teal-200 bg-gradient-to-br from-white to-teal-50 p-10 text-center shadow-sm">
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-teal-100 text-lg font-black text-teal-800">
-              01
-            </span>
-            <h2 className="mt-5 text-2xl font-black text-slate-950">
+            <h2 className="text-2xl font-black text-slate-950">
               Your progress will appear here
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-600">
@@ -229,10 +288,10 @@ export default async function Dashboard() {
               <AnalyticsCard
                 eyebrow="Performance"
                 title="Score trend"
-                detail="Your five latest attempts."
+                detail="Your five latest attempts. Scroll within this card when needed."
               >
-                <div className="space-y-5">
-                  {attempts.slice(0, 5).map((attempt) => {
+                <div className="max-h-80 space-y-5 overflow-y-auto pr-2">
+                  {latestAttempts.map((attempt) => {
                     const percentage =
                       attempt.total_marks === 0
                         ? 0
@@ -255,7 +314,7 @@ export default async function Dashboard() {
                         </div>
                         <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-teal-600"
+                            className="student-progress-fill h-full rounded-full bg-teal-600"
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -268,14 +327,14 @@ export default async function Dashboard() {
               <AnalyticsCard
                 eyebrow="Study guidance"
                 title="Subject accuracy"
-                detail="Based on questions you answered."
+                detail="Based on questions you answered. Scroll within this card when needed."
               >
                 {subjectAnalytics.length === 0 ? (
                   <p className="text-sm text-slate-600">
-                    Answer more questions to unlock Subject analytics.
+                    Answer more questions to unlock subject analytics.
                   </p>
                 ) : (
-                  <div className="space-y-5">
+                  <div className="max-h-80 space-y-5 overflow-y-auto pr-2">
                     {subjectAnalytics.map((subject) => {
                       const accuracy = Math.max(
                         0,
@@ -293,7 +352,7 @@ export default async function Dashboard() {
                           </div>
                           <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className="h-full rounded-full bg-emerald-500"
+                              className="student-progress-fill h-full rounded-full bg-emerald-500"
                               style={{ width: `${accuracy}%` }}
                             />
                           </div>
@@ -315,14 +374,15 @@ export default async function Dashboard() {
                   History
                 </p>
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  Recent attempts
+                  Exam history
                 </h2>
+                <p className="mt-2 text-sm text-slate-600">Showing {((page - 1) * attemptsPerPage) + 1} to {Math.min(page * attemptsPerPage, totalAttempts)} of {totalAttempts} completed exams.</p>
               </div>
-              <div className="mt-5 grid gap-4">
+              <div className="student-stagger mt-5 grid gap-4">
                 {attempts.map((attempt) => (
                   <article
                     key={attempt.id}
-                    className="rounded-2xl border bg-white p-5 shadow-sm sm:p-6"
+                    className="student-card rounded-2xl border bg-white p-5 shadow-sm sm:p-6"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-5">
                       <div className="min-w-0">
@@ -360,17 +420,28 @@ export default async function Dashboard() {
                             {attempt.score} / {attempt.total_marks}
                           </p>
                         </div>
-                        <Link
-                          href={`/dashboard/attempts/${attempt.id}`}
-                          className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-teal-700"
-                        >
-                          Review
-                        </Link>
+                        {attempt.detailed_review_available ? (
+                          <Link
+                            href={`/dashboard/attempts/${attempt.id}`}
+                            className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-teal-700"
+                          >
+                            Review
+                          </Link>
+                        ) : (
+                          <span title="Detailed answers are retained for 365 days or the latest 100 attempts." className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">Summary only</span>
+                        )}
                       </div>
                     </div>
                   </article>
                 ))}
               </div>
+              {totalPages > 1 && (
+                <nav aria-label="Exam history pages" className="mt-6 flex items-center justify-center gap-3">
+                  {page > 1 ? <Link href={page === 2 ? "/dashboard" : `/dashboard?page=${page - 1}`} className="rounded-xl border bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-teal-300">Previous</Link> : <span className="rounded-xl border bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400">Previous</span>}
+                  <span className="text-sm font-semibold text-slate-600">Page {page} of {totalPages}</span>
+                  {page < totalPages ? <Link href={`/dashboard?page=${page + 1}`} className="rounded-xl border bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-teal-300">Next</Link> : <span className="rounded-xl border bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400">Next</span>}
+                </nav>
+              )}
             </section>
           </>
         )}
@@ -402,7 +473,7 @@ function DashboardMetric({
 }) {
   return (
     <article
-      className={`rounded-2xl border p-6 shadow-sm ${metricStyles[tone]}`}
+      className={`student-card rounded-2xl border p-6 shadow-sm ${metricStyles[tone]}`}
     >
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-bold text-slate-600">{label}</p>

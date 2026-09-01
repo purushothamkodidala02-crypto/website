@@ -1,6 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
 export type UpdateGroupState = {
@@ -57,11 +59,14 @@ export async function updateGroup(
   );
 
   const isActive = formData.get("is_active") === "on";
+  const seo = readSeoFields(formData);
+
+  if (seo.error) return { success: false, message: seo.error };
 
   if (!examId) {
     return {
       success: false,
-      message: "Please select an exam category.",
+      message: "Please select a Recruiting Board.",
     };
   }
 
@@ -96,7 +101,7 @@ export async function updateGroup(
   if (examError || !exam) {
     return {
       success: false,
-      message: "The selected exam category could not be found.",
+      message: "The selected Recruiting Board could not be found.",
     };
   }
 
@@ -121,7 +126,7 @@ export async function updateGroup(
   ) {
     return {
       success: false,
-      message: `An Exam named "${name}" already exists in this Exam Category. Names are not case-sensitive.`,
+      message: `An Exam named "${name}" already exists under this Recruiting Board. Names are not case-sensitive.`,
     };
   }
 
@@ -132,6 +137,7 @@ export async function updateGroup(
       name,
       slug,
       description: description || null,
+      ...seo.value,
       is_active: isActive,
       display_order: displayOrder,
     })
@@ -142,7 +148,7 @@ export async function updateGroup(
   if (updateError?.code === "23505") {
     return {
       success: false,
-      message: `An Exam with the slug "${slug}" already exists under this exam category.`,
+      message: `An Exam with the slug "${slug}" already exists under this Recruiting Board.`,
     };
   }
 
@@ -160,6 +166,7 @@ export async function updateGroup(
   revalidatePath("/admin/mock-tests");
   revalidatePath("/admin/questions");
   revalidatePath("/mock-tests");
+  revalidateTag(PUBLIC_CATALOG_TAG, "max");
   revalidatePath(`/admin/groups/${groupId}/edit`);
 
   return {

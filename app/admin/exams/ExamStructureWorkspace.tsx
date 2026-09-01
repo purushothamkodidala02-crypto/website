@@ -18,6 +18,8 @@ type ExamState = {
   code: string;
   slug: string;
   description: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
   isActive: boolean;
   displayOrder: number;
 };
@@ -137,13 +139,13 @@ export function ExamStructureWorkspace({
           </p>
           <h2 className="font-display mt-2 text-xl">Boards in {selectedState?.name ?? "this state"}</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Select a category to manage only the Exams and content that belong to it.
+            Select a Recruiting Board to manage only the Exams and content that belong to it.
           </p>
         </div>
 
         {stateCategories.length === 0 ? (
           <div className="p-7 text-sm text-slate-600">
-            Add your first Exam Category below to begin.
+            Add your first Recruiting Board below to begin.
           </div>
         ) : (
           <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:p-7">
@@ -191,7 +193,7 @@ export function ExamStructureWorkspace({
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
               New top-level item
             </p>
-            <h2 className="mt-2 font-black text-slate-950">+ Add Exam Category</h2>
+            <h2 className="mt-2 font-black text-slate-950">+ Add Recruiting Board</h2>
             <p className="mt-1 text-sm text-slate-600">
               Add another board such as TGPSC, DSC, TET, or Police Recruitment.
             </p>
@@ -251,7 +253,7 @@ export function ExamStructureWorkspace({
           <div className="flex flex-wrap items-start justify-between gap-5 border-b border-teal-100 bg-gradient-to-r from-slate-950 to-teal-950 px-6 py-6 text-white sm:px-7">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
-                Selected category
+                Selected Recruiting Board
               </p>
               <h2 className="mt-2 text-2xl font-black">{selectedCategory.name}</h2>
               <p className="mt-1 text-sm text-slate-300">
@@ -263,7 +265,7 @@ export function ExamStructureWorkspace({
                 href={`/admin/exams/${selectedCategory.id}/edit`}
                 className="rounded-lg bg-teal-300 px-3 py-2 text-sm font-black text-slate-950 hover:bg-teal-200"
               >
-                Edit category
+                Edit recruiting board
               </Link>
               <div className="rounded-lg bg-white px-3 py-2">
                 <DeleteExamButton

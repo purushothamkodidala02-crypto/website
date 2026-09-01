@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { SeoFields } from "@/components/admin/SeoFields";
 import type { Exam } from "@/types/exam";
 import {
   updateExam,
@@ -42,7 +44,7 @@ export function EditExamForm({
             htmlFor="name"
             className="mb-2 block text-sm font-medium"
           >
-            Exam category name
+            Recruiting Board name
           </label>
 
           <input
@@ -54,6 +56,13 @@ export function EditExamForm({
             className="w-full rounded-lg border px-4 py-3"
           />
         </div>
+
+        <SeoFields
+          title={exam.seo_title}
+          description={exam.seo_description}
+          titlePlaceholder={`${exam.name} Mock Tests`}
+          descriptionPlaceholder={`Browse ${exam.name} exams and free mock tests.`}
+        />
 
         <div>
           <label
@@ -133,7 +142,7 @@ export function EditExamForm({
           disabled={pending}
           className="rounded-lg bg-black px-5 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Saving..." : "Save Changes"}
+          <PendingButtonContent pending={pending} pendingLabel="Saving changes…">Save Changes</PendingButtonContent>
         </button>
 
         {state.message && (

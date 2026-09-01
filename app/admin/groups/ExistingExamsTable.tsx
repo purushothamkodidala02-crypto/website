@@ -52,7 +52,7 @@ export function ExistingExamsTable({
           )}
         </div>
         <p className="mt-1 text-sm text-slate-600">
-          This list follows the Exam Category selected above in Add Exam.
+          This list follows the Recruiting Board selected above in Add Exam.
         </p>
       </div>
 
@@ -75,11 +75,11 @@ export function ExistingExamsTable({
 
       {!categoryId ? (
         <p className="p-6 text-sm text-slate-600">
-          Choose an Exam Category in Add Exam to see its existing Exams.
+          Choose a Recruiting Board in Add Exam to see its existing Exams.
         </p>
       ) : filtered.length === 0 ? (
         <p className="p-6 text-sm text-slate-600">
-          No Exams match this category and search.
+          No Exams match this Recruiting Board and search.
         </p>
       ) : (
         <>

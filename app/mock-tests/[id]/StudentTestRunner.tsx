@@ -1,10 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
+import { QuestionMedia } from "@/components/questions/QuestionMedia";
+import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
 import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, submitAttempt, syncAttemptTimer, type SubmitAttemptResult } from "./attempt-actions";
+import { BookmarkButton } from "@/components/study/BookmarkButton";
+import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
+
+const SubmissionDialog = dynamic(
+  () => import("./SubmissionDialog").then((module) => module.SubmissionDialog),
+  {
+    ssr: false,
+    loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-5"><p role="status" className="rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-xl">Preparing final review…</p></div>,
+  },
+);
 
 type Answer = "A" | "B" | "C" | "D";
 type TestQuestion = {
@@ -15,7 +27,7 @@ type TestQuestion = {
   question_text_te: string | null; option_a_te: string | null; option_b_te: string | null;
   option_c_te: string | null; option_d_te: string | null;
 };
-type Props = { mockTestId: string; title: string; sessionId: string; expiresAt: string; questions: TestQuestion[] };
+type Props = { mockTestId: string; publicTestPath: string; title: string; sessionId: string; expiresAt: string; questions: TestQuestion[]; bookmarkedQuestionIds: string[] };
 
 function secondsLeft(expiresAt: string) { return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)); }
 function displayTime(total: number) {
@@ -25,7 +37,7 @@ function displayTime(total: number) {
   return hours ? `${String(hours).padStart(2, "0")}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 }
 
-export function StudentTestRunner({ mockTestId, title, sessionId, expiresAt, questions }: Props) {
+export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId, expiresAt, questions, bookmarkedQuestionIds }: Props) {
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
     const lastAnsweredIndex = questions.reduce((last, question, questionIndex) => question.selected_answer ? questionIndex : last, -1);
@@ -127,7 +139,7 @@ export function StudentTestRunner({ mockTestId, title, sessionId, expiresAt, que
     return () => window.removeEventListener("keydown", navigateWithKeyboard);
   }, [confirming, locked, questions.length]);
 
-  if (submission) return <SubmissionResult mockTestId={mockTestId} title={title} result={submission} onRetry={() => setSubmission(null)} />;
+  if (submission) return <SubmissionResult publicTestPath={publicTestPath} title={title} result={submission} onRetry={() => setSubmission(null)} />;
 
   const bilingual = current.content_language_mode === "bilingual" && Boolean(current.question_text_te);
   const telugu = bilingual && language === "te";
@@ -187,12 +199,12 @@ export function StudentTestRunner({ mockTestId, title, sessionId, expiresAt, que
 
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
-  return <main className="min-h-screen bg-slate-100 pb-8">
+  return <main className="student-page min-h-screen bg-slate-100 pb-8">
     <header className="sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2.5 text-white shadow-lg sm:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-400 sm:text-sm">{title}</p><h1 className="mt-0.5 text-base font-black sm:text-lg">Question {index + 1} <span className="text-slate-400">of {questions.length}</span></h1></div>
-          <div className="flex items-center gap-2"><button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-slate-700 px-3 py-2.5 text-xs font-bold lg:hidden">Questions</button><PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} /></div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-400 sm:text-sm">{title}</p><h1 className="mt-0.5 whitespace-nowrap text-base font-black sm:text-lg">Question {index + 1} <span className="text-slate-400">of {questions.length}</span></h1></div>
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end"><button type="button" onClick={() => setNavigatorOpen(true)} aria-label={`Open Question navigator, Question ${index + 1} of ${questions.length}`} className="whitespace-nowrap rounded-xl border border-slate-700 px-3 py-2.5 text-xs font-bold lg:hidden">Questions <span className="text-teal-200">{index + 1}/{questions.length}</span></button><PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} /></div>
         </div>
         <div className="mt-2 flex items-center gap-3"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-700"><div className="h-full rounded-full bg-teal-300 transition-all" style={{ width: `${Math.round((answered / questions.length) * 100)}%` }} /></div><span className={`text-[11px] font-bold ${saveState === "error" ? "text-red-300" : "text-teal-100"}`}>{saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Answers saved"}</span></div>
       </div>
@@ -206,9 +218,9 @@ export function StudentTestRunner({ mockTestId, title, sessionId, expiresAt, que
         <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">Multiple choice question</p><p className="mt-1 text-xs font-semibold text-slate-500">{current.marks} mark{Number(current.marks) === 1 ? "" : "s"}{Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}</p></div>{bilingual && <div className="rounded-lg bg-slate-100 p-1 text-xs font-bold"><button type="button" onClick={() => setLanguage("en")} className={`rounded-md px-3 py-1.5 ${language === "en" ? "bg-white shadow-sm" : "text-slate-600"}`}>English</button><button type="button" onClick={() => setLanguage("te")} className={`rounded-md px-3 py-1.5 ${language === "te" ? "bg-white shadow-sm" : "text-slate-600"}`}>తెలుగు</button></div>}</div>
           <FormattedQuestionText text={questionText} className="mt-6 text-lg leading-8" />
-          {current.image_url && <Image src={current.image_url} alt="Question reference" width={1200} height={800} sizes="(max-width: 1024px) 100vw, 800px" className="mt-6 h-auto max-h-80 w-auto max-w-full rounded-xl border object-contain" />}
+          {current.image_url && <QuestionMedia src={current.image_url} className="mt-6" />}
           <div className="mt-7 grid gap-3">{options.map(([key, text]) => { const selected = answers[current.question_id] === key; const teluguOption = containsTeluguText(text); return <label key={key} className={`flex cursor-pointer gap-4 rounded-2xl border p-4 transition hover:border-teal-300 ${selected ? "border-teal-600 bg-teal-50" : "bg-white"} ${locked ? "pointer-events-none opacity-60" : ""}`}><input className="sr-only" type="radio" name={current.question_id} value={key} checked={selected} disabled={locked} onChange={() => { setSaveState("saving"); setAnswers((value) => ({ ...value, [current.question_id]: key })); queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key)); }} /><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black ${selected ? "bg-teal-700 text-white" : "bg-slate-100 text-slate-600"}`}>{key}</span><span lang={teluguOption ? "te" : undefined} className={`whitespace-pre-line pt-1 text-sm font-medium leading-6 text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>{text}</span></label>; })}</div>
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><button type="button" onClick={clearAnswer} disabled={!answers[current.question_id] || locked} className="text-sm font-bold text-slate-500 hover:text-red-700 disabled:opacity-40">Clear answer</button><button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900" : "border text-slate-700"}`}>{reviewIds.has(current.question_id) ? "Marked for review" : "Mark for review"}</button></div>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><button type="button" onClick={clearAnswer} disabled={!answers[current.question_id] || locked} className="text-sm font-bold text-slate-500 hover:text-red-700 disabled:opacity-40">Clear answer</button><div className="flex flex-wrap gap-2"><ReportQuestionButton key={`report-${current.question_id}`} questionId={current.question_id} /><BookmarkButton key={current.question_id} questionId={current.question_id} initialBookmarked={bookmarkedQuestionIds.includes(current.question_id)} /><button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900" : "border text-slate-700"}`}>{reviewIds.has(current.question_id) ? "Marked for review" : "Mark for review"}</button></div></div>
         </section>
         <aside className="hidden h-[calc(100vh-7rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:block">{navigator}</aside>
       </div>
@@ -227,9 +239,10 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
   return (
     <div className="flex min-h-0 flex-col lg:h-full">
       <div className="shrink-0 bg-white">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-          Question navigator
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Question navigator</p>
+          <p className="whitespace-nowrap text-xs font-black text-slate-700">{questions.length} total</p>
+        </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
           <NavigatorMetric value={answeredCount} label="Answered" tone="text-emerald-800" />
           <NavigatorMetric value={reviewIds.size} label="Review" tone="text-amber-800" />
@@ -271,12 +284,8 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
   );
 }
 
-function SubmissionDialog({ answered, review, unanswered, submitting, onCancel, onSubmit }: { answered: number; review: number; unanswered: number; submitting: boolean; onCancel: () => void; onSubmit: () => void }) {
-  return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-5" role="dialog" aria-modal="true"><section className="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl"><p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Final submission</p><h2 className="mt-2 text-2xl font-black">Finish this mock test?</h2><p className="mt-3 text-sm text-slate-600">You cannot change your answers after submission.</p><div className="mt-6 grid grid-cols-3 gap-3"><Metric value={answered} label="Answered" tone="text-emerald-800" /><Metric value={review} label="Review" tone="text-amber-800" /><Metric value={unanswered} label="Unanswered" tone="text-slate-700" /></div>{unanswered > 0 && <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm font-semibold text-amber-900">You still have {unanswered} unanswered question{unanswered === 1 ? "" : "s"}.</p>}<div className="mt-7 flex justify-end gap-3"><button type="button" onClick={onCancel} className="rounded-xl border px-4 py-3 text-sm font-bold">Continue test</button><button type="button" onClick={onSubmit} disabled={submitting} className="rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{submitting ? "Submitting…" : "Submit test"}</button></div></section></div>;
-}
-
-function SubmissionResult({ mockTestId, title, result, onRetry }: { mockTestId: string; title: string; result: SubmitAttemptResult; onRetry: () => void }) {
-  return <main className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10"><section className="w-full max-w-2xl rounded-3xl border bg-white p-8 text-center shadow-xl sm:p-10"><p className={`text-xs font-bold uppercase tracking-[0.16em] ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.success ? "Test submitted" : "Submission needs attention"}</p><h1 className="mt-3 text-3xl font-black">{title}</h1>{result.success ? <><p className="mt-7 text-5xl font-black">{result.score} <span className="text-2xl text-slate-400">/ {result.totalMarks}</span></p><div className="mt-7 grid grid-cols-3 gap-3"><Metric value={result.correctAnswers ?? 0} label="Correct" tone="text-emerald-800" /><Metric value={result.incorrectAnswers ?? 0} label="Incorrect" tone="text-red-800" /><Metric value={result.unansweredQuestions ?? 0} label="Unanswered" tone="text-slate-700" /></div><div className="mt-8 flex flex-wrap justify-center gap-3">{result.attemptId && <Link href={`/dashboard/attempts/${result.attemptId}`} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Review answers</Link>}<Link href={`/mock-tests/${mockTestId}`} className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white">Retake test</Link><Link href="/dashboard" className="rounded-xl border px-5 py-3 text-sm font-bold">Go to dashboard</Link></div></> : <><p className="mt-5 text-slate-600">{result.message}</p><button type="button" onClick={onRetry} className="mt-7 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Try submission again</button></>}</section></main>;
+function SubmissionResult({ publicTestPath, title, result, onRetry }: { publicTestPath: string; title: string; result: SubmitAttemptResult; onRetry: () => void }) {
+  return <main className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10"><section className="w-full max-w-2xl rounded-3xl border bg-white p-8 text-center shadow-xl sm:p-10"><p className={`text-xs font-bold uppercase tracking-[0.16em] ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.success ? "Test submitted" : "Submission needs attention"}</p><h1 className="mt-3 text-3xl font-black">{title}</h1>{result.success ? <><p className="mt-7 text-5xl font-black">{result.score} <span className="text-2xl text-slate-400">/ {result.totalMarks}</span></p><div className="mt-7 grid grid-cols-3 gap-3"><Metric value={result.correctAnswers ?? 0} label="Correct" tone="text-emerald-800" /><Metric value={result.incorrectAnswers ?? 0} label="Incorrect" tone="text-red-800" /><Metric value={result.unansweredQuestions ?? 0} label="Unanswered" tone="text-slate-700" /></div><div className="mt-8 flex flex-wrap justify-center gap-3">{result.attemptId && <Link href={`/dashboard/attempts/${result.attemptId}`} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Review answers</Link>}<Link href={publicTestPath} className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white">Retake test</Link><Link href="/dashboard" className="rounded-xl border px-5 py-3 text-sm font-bold">Go to dashboard</Link></div></> : <><p className="mt-5 text-slate-600">{result.message}</p><button type="button" onClick={onRetry} className="mt-7 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Try submission again</button></>}</section></main>;
 }
 
 function Metric({ value, label, tone }: { value: number; label: string; tone: string }) { return <div className="rounded-xl border bg-white px-3 py-3 text-center"><strong className={`block text-lg font-black ${tone}`}>{value}</strong><span className="text-xs font-semibold text-slate-500">{label}</span></div>; }
@@ -288,7 +297,7 @@ function PracticeTimerControl({ remaining, paused, busy, disabled, onToggle }: {
   return (
     <div className={`flex items-stretch rounded-2xl border p-1 shadow-inner transition ${paused ? "border-teal-400/60 bg-teal-300/10" : urgent ? "border-red-400/50 bg-red-500/10" : "border-slate-700 bg-slate-900"}`}>
       <button type="button" onClick={onToggle} disabled={disabled} aria-label={paused ? "Resume test timer" : "Pause test timer"} title={paused ? "Resume timer" : "Pause timer"} className={`inline-flex min-w-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${paused ? "bg-teal-300 text-slate-950 hover:bg-teal-200" : "text-white hover:bg-slate-800"}`}>
-        {paused ? (
+        {busy ? <LoadingSpinner className="h-4 w-4" /> : paused ? (
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d="M8 5.2v13.6c0 .9 1 1.4 1.7.9l9.1-6.8a1.1 1.1 0 0 0 0-1.8L9.7 4.3A1.1 1.1 0 0 0 8 5.2Z" /></svg>
         ) : (
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current"><rect x="6" y="5" width="4.5" height="14" rx="1.2" /><rect x="13.5" y="5" width="4.5" height="14" rx="1.2" /></svg>

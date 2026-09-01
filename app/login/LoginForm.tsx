@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/auth/PasswordInput";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
+import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { loginWithPassword, type LoginResult } from "./actions";
+import { EmailOtpLoginForm } from "./EmailOtpLoginForm";
 
 type Notice = {
   tone: "error" | "success" | "info";
@@ -21,22 +24,33 @@ const noticeStyles = {
 export function LoginForm({
   nextPath,
   initialMessage,
+  initialError,
 }: {
   nextPath: string;
   initialMessage?: string;
+  initialError?: string;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice | null>(
-    initialMessage ? { tone: "success", message: initialMessage } : null,
+    initialError
+      ? { tone: "error", message: initialError }
+      : initialMessage
+        ? { tone: "success", message: initialMessage }
+        : null,
   );
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [loginMethod, setLoginMethod] = useState<"password" | "otp">("password");
   const registerHref = `/register?next=${encodeURIComponent(nextPath)}`;
   const forgotPasswordHref = `/forgot-password?next=${encodeURIComponent(nextPath)}`;
+
+  if (loginMethod === "otp") {
+    return <EmailOtpLoginForm nextPath={nextPath} onUsePassword={() => setLoginMethod("password")} />;
+  }
 
   function confirmationRedirectUrl() {
     const redirectUrl = new URL("/login", window.location.origin);
@@ -121,7 +135,7 @@ export function LoginForm({
   }
 
   return (
-    <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+    <section className="min-w-0 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
       <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">
         Student login
       </p>
@@ -129,8 +143,17 @@ export function LoginForm({
         Sign in to continue
       </h2>
       <p className="mt-3 text-sm leading-6 text-slate-600">
-        Use the same email and password you entered during registration.
+        Continue with Google, or use your registered email credentials.
       </p>
+      <div className="mt-6">
+        <GoogleSignInButton nextPath={nextPath} />
+      </div>
+      <div className="my-6 flex items-center gap-3" aria-hidden="true">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">or use email</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
+      <button type="button" onClick={() => setLoginMethod("otp")} className="w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in using a six-digit email code</button>
       <form onSubmit={handleLogin} className="mt-7 space-y-5">
         <label htmlFor="login_email" className="block text-sm font-bold text-slate-800">
           Email
@@ -151,18 +174,22 @@ export function LoginForm({
           <PasswordInput id="current_password" required maxLength={72} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password" />
         </div>
         <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
-        <button type="submit" disabled={loading || !captchaToken} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
-          {loading ? "Signing in…" : "Sign in and continue"}
+        <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+          <PendingButtonContent pending={loading} pendingLabel="Signing in…">Sign in and continue</PendingButtonContent>
         </button>
+        <LongPendingNotice pending={loading} />
         {notice && (
           <p aria-live="polite" className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeStyles[notice.tone]}`}>
             {notice.message}
           </p>
         )}
         {needsConfirmation && (
-          <button type="button" onClick={resendConfirmation} disabled={resending || !captchaToken} className="w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100 disabled:opacity-50">
-            {resending ? "Requesting confirmation…" : "Resend confirmation email"}
-          </button>
+          <div>
+            <button type="button" onClick={resendConfirmation} disabled={resending || !captchaToken} aria-busy={resending} className="w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100 disabled:opacity-50">
+              <PendingButtonContent pending={resending} pendingLabel="Requesting confirmation…">Resend confirmation email</PendingButtonContent>
+            </button>
+            <LongPendingNotice pending={resending} />
+          </div>
         )}
       </form>
       <div className="mt-6 border-t border-slate-100 pt-5">

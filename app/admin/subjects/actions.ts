@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { createClient } from "@/lib/supabase/server";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 
@@ -39,7 +40,7 @@ export async function createSubjects(_previous: CreateSubjectState, formData: Fo
   const examGroupId = String(formData.get("exam_group_id") ?? "").trim();
   const paperId = String(formData.get("paper_id") ?? "").trim();
   const subjectInput = readSubjects(formData.get("subjects_json"));
-  if (!categoryId || !examGroupId || !paperId) return { success: false, message: "Choose an Exam Category, Exam, and Paper." };
+  if (!categoryId || !examGroupId || !paperId) return { success: false, message: "Choose a Recruiting Board, Exam, and Paper." };
   if (subjectInput.error || !subjectInput.subjects) return { success: false, message: subjectInput.error ?? "Add Subjects." };
 
   const [{ data: paper }, { data: exam }] = await Promise.all([supabase.from("papers").select("id, exam_group_id").eq("id", paperId).maybeSingle(), supabase.from("exam_groups").select("id, exam_id").eq("id", examGroupId).maybeSingle()]);
@@ -54,6 +55,6 @@ export async function createSubjects(_previous: CreateSubjectState, formData: Fo
   const nextOrder = Math.max(0, ...(existingSubjects ?? []).map((subject) => subject.display_order)) + 1;
   const { error } = await supabase.from("subjects").insert(subjectInput.subjects.map((subject, index) => ({ paper_id: paperId, name: subject.name, slug: subjectSlug(subject.name, index, usedSlugs), description: null, content_language_mode: subject.contentLanguageMode, display_order: nextOrder + index, is_active: true })));
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/subjects"); revalidatePath("/admin/exams"); revalidatePath("/admin/questions"); revalidatePath("/admin/mock-tests"); revalidatePath("/mock-tests");
+  revalidatePath("/admin/subjects"); revalidatePath("/admin/exams"); revalidatePath("/admin/questions"); revalidatePath("/admin/mock-tests"); revalidatePath("/mock-tests"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
   return { success: true, message: `${subjectInput.subjects.length} ${subjectInput.subjects.length === 1 ? "Subject" : "Subjects"} added successfully.` };
 }

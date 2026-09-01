@@ -4,7 +4,7 @@ type FormattedQuestionTextProps = {
 };
 
 const labelledSection =
-  /^(Assertion\s*\([A]\)|(?:వాదన|ప్రకటన|ప్రతిపాదన)\s*\([A]\)|Reason\s*\([R]\)|కారణం\s*\([R]\)|(?:Statement|Conclusion|List)\s+(?:I{1,4}|V|\d+)|(?:ప్రకటన|వాక్యం|తీర్మానం|జాబితా)\s+(?:I{1,4}|V|\d+|[౦-౯]+))\s*:\s*(.*)$/i;
+  /^(Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List)\s+(?:I{1,4}|V|\d+)|(?:ప్రకటన|వాక్యం|తీర్మానం|జాబితా)\s+(?:I{1,4}|V|\d+|[౦-౯]+))\s*:\s*(.*)$/i;
 
 const instructionStart =
   /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick)\b|(?:సరైన|సరికాని|కింది|క్రింది).*(?:ఎంచుకోండి|గుర్తించండి))/i;
@@ -23,6 +23,9 @@ export function containsTeluguText(text: string) {
 
 function questionLines(text: string) {
   const lines = text
+    .replace(/\u00a0/g, " ")
+    .replace(/\*\*/g, "")
+    .replace(/;\s*(?=(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s)/g, "\n")
     .replace(/\r\n?/g, "\n")
     .replace(
       /((?:Statements?|ప్రకటనలు?)\s*:)[ \t]*(.*?)(?=[ \t]+(?:Conclusions?|తీర్మానాలు?)\s*:|$)/gim,
@@ -38,11 +41,11 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /[ \t]+(?=(?:Assertion\s*\([A]\)|(?:వాదన|ప్రకటన|ప్రతిపాదన)\s*\([A]\)|Reason\s*\([R]\)|కారణం\s*\([R]\)|(?:Statement|Conclusion|List)\s+(?:I{1,4}|V|\d+)|(?:ప్రకటన|వాక్యం|తీర్మానం|జాబితా)\s+(?:I{1,4}|V|\d+|[౦-౯]+))\s*:)/gi,
+      /[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List)\s+(?:I{1,4}|V|\d+)|(?:ప్రకటన|వాక్యం|తీర్మానం|జాబితా)\s+(?:I{1,4}|V|\d+|[౦-౯]+))\s*:)/gi,
       "\n",
     )
     .replace(
-      /;[ \t]*(?=(?:Assertion\s*\([A]\)|Reason\s*\([R]\))\s*:)/gi,
+      /;[ \t]*(?=(?:Assertion(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?)\s*:)/gi,
       "\n",
     )
     .replace(
@@ -79,7 +82,7 @@ function questionLines(text: string) {
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-H]|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
     .replace(/([^\s—–-])\s*[—–-]\s*(?=[\d౦-౯])/g, "$1 — ")
     .split(/\n+/)
-    .map((line) => line.trim())
+    .map((line) => line.trim().replace(/;\s*$/, ""))
     .filter(Boolean);
 
   return lines.reduce<string[]>((merged, line) => {
@@ -97,9 +100,35 @@ function questionLines(text: string) {
   }, []);
 }
 
+function normalizedSectionLabel(label: string) {
+  if (/^Assertion$/i.test(label)) return "Assertion (A)";
+  if (/^Reason$/i.test(label)) return "Reason (R)";
+  if (/^(?:వాదన|ప్రకటన|ప్రతిపాదన)$/i.test(label)) return `${label} (A)`;
+  if (/^కారణం$/i.test(label)) return `${label} (R)`;
+  return label;
+}
+
 const matchQuestion = /^(?:Match\b|.*\bmatch\b|జతపరచండి|.*జతపరచండి)/i;
 const numericListItem = /^(?:[1-9]|[౧-౯])[.)]\s+/;
 const alphabeticListItem = /^[a-h][.)]\s+/i;
+const teluguAlphabeticListItem = /^(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s+/;
+const romanListItem = /^(?:I|II|III|IV|V)[.)]\s+/i;
+
+function matchingListLayout(lines: string[]) {
+  const schemes = [
+    { left: numericListItem, right: alphabeticListItem },
+    { left: numericListItem, right: teluguAlphabeticListItem },
+    { left: alphabeticListItem, right: romanListItem },
+  ];
+
+  for (const scheme of schemes) {
+    const leftStart = lines.findIndex((line) => scheme.left.test(line));
+    const rightStart = lines.findIndex((line, index) => index > leftStart && scheme.right.test(line));
+    if (leftStart > 0 && rightStart > leftStart) return { ...scheme, leftStart, rightStart };
+  }
+
+  return null;
+}
 
 export function FormattedQuestionText({
   text,
@@ -107,15 +136,14 @@ export function FormattedQuestionText({
 }: FormattedQuestionTextProps) {
   const lines = questionLines(text);
   const isTelugu = containsTeluguText(text);
-  const firstNumeric = lines.findIndex((line) => numericListItem.test(line));
-  const firstAlphabetic = lines.findIndex((line) => alphabeticListItem.test(line));
-  const isMatching = matchQuestion.test(lines[0] ?? "") && firstNumeric > 0 && firstAlphabetic > firstNumeric;
+  const matchingLayout = matchQuestion.test(lines[0] ?? "") ? matchingListLayout(lines) : null;
 
-  if (isMatching) {
-    const heading = lines.slice(0, firstNumeric);
-    const leftItems = lines.slice(firstNumeric, firstAlphabetic).filter((line) => numericListItem.test(line));
-    const rightEnd = lines.findIndex((line, index) => index > firstAlphabetic && !alphabeticListItem.test(line));
-    const rightItems = lines.slice(firstAlphabetic, rightEnd === -1 ? undefined : rightEnd).filter((line) => alphabeticListItem.test(line));
+  if (matchingLayout) {
+    const { left, right, leftStart, rightStart } = matchingLayout;
+    const heading = lines.slice(0, leftStart);
+    const leftItems = lines.slice(leftStart, rightStart).filter((line) => left.test(line));
+    const rightEnd = lines.findIndex((line, index) => index > rightStart && !right.test(line));
+    const rightItems = lines.slice(rightStart, rightEnd === -1 ? undefined : rightEnd).filter((line) => right.test(line));
     const instruction = rightEnd === -1 ? [] : lines.slice(rightEnd);
 
     return (
@@ -159,7 +187,7 @@ export function FormattedQuestionText({
               <span className="text-slate-950">{line}</span>
             ) : labelled ? (
               <>
-                <span className="text-slate-950">{labelled[1]}:</span>{" "}
+                <span className="text-slate-950">{normalizedSectionLabel(labelled[1])}:</span>{" "}
                 {labelled[2]}
               </>
             ) : numbered ? (

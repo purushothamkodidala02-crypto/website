@@ -3,12 +3,23 @@
 import { revalidatePath } from "next/cache";
 import ExcelJS from "exceljs";
 import { createClient } from "@/lib/supabase/server";
+import { QUESTION_IMPORT_REQUIRED_HEADERS } from "@/lib/questions/import-format";
+import { normalizeQuestionImageUrl, questionMediaPath, removeQuestionImage, uploadQuestionImage } from "@/lib/questions/media";
 import type { CorrectAnswer, QuestionLifecycle } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 
 export type ImportQuestionsState = { success: boolean; message: string };
 
 type CsvRow = Record<string, string>;
+type EmbeddedQuestionImage = {
+  bytes: Buffer;
+  mimeType: "image/jpeg" | "image/png";
+  fileName: string;
+};
+type ParsedQuestionFile = {
+  rows: Array<{ values: CsvRow; rowNumber: number }>;
+  embeddedImages: Map<number, EmbeddedQuestionImage>;
+};
 type QuestionLanguageValues = {
   question: string;
   options: [string, string, string, string];
@@ -20,12 +31,9 @@ type MockImportTarget = {
   subject_id: string | null;
   test_scope: "paper" | "subject";
   status: string;
+  target_question_count: number;
 };
 
-const requiredHeaders = [
-  "import_key", "subject", "question_en", "option_a_en", "option_b_en", "option_c_en", "option_d_en",
-  "question_te", "option_a_te", "option_b_te", "option_c_te", "option_d_te", "correct_answer",
-];
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
 const lifecycles: QuestionLifecycle[] = ["permanent", "review", "expires"];
 const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
@@ -42,7 +50,7 @@ const normalizeLookup = (value: string) => cleanCellValue(value).replace(/\s+/g,
 
 function validateHeaders(headers: string[]) {
   if (new Set(headers).size !== headers.length) throw new Error("Each file column heading must be unique.");
-  const missingHeaders = requiredHeaders.filter((header) => !headers.includes(header));
+  const missingHeaders = QUESTION_IMPORT_REQUIRED_HEADERS.filter((header) => !headers.includes(header));
   if (missingHeaders.length) throw new Error(`Missing file column${missingHeaders.length === 1 ? "" : "s"}: ${missingHeaders.join(", ")}.`);
 }
 
@@ -86,7 +94,7 @@ function parseCsv(source: string): CsvRow[] {
   return rows.map((values) => Object.fromEntries(headers.map((header, index) => [header, cleanCellValue(values[index] ?? "")])));
 }
 
-async function parseExcel(file: File): Promise<CsvRow[]> {
+async function parseExcel(file: File): Promise<ParsedQuestionFile> {
   const workbook = new ExcelJS.Workbook();
   const fileBuffer = Buffer.from(await file.arrayBuffer()) as unknown as Parameters<typeof workbook.xlsx.load>[0];
   await workbook.xlsx.load(fileBuffer);
@@ -95,19 +103,45 @@ async function parseExcel(file: File): Promise<CsvRow[]> {
 
   const headers = Array.from({ length: worksheet.columnCount }, (_, index) => normalizeHeader(worksheet.getCell(1, index + 1).text));
   validateHeaders(headers);
-  const rows: CsvRow[] = [];
+  const embeddedImages = new Map<number, EmbeddedQuestionImage>();
+  for (const placement of worksheet.getImages()) {
+    const rowNumber = placement.range.tl.nativeRow + 1;
+    if (rowNumber < 2) continue;
+    if (embeddedImages.has(rowNumber)) throw new Error(`Row ${rowNumber}: use only one embedded Question image per row.`);
+
+    const image = workbook.getImage(Number(placement.imageId));
+    if (!image || !["jpeg", "png"].includes(image.extension)) {
+      throw new Error(`Row ${rowNumber}: embedded images must be PNG or JPG. WebP can be supplied as a public HTTPS URL.`);
+    }
+    const base64 = image.base64?.replace(/^data:[^;]+;base64,/, "");
+    const bytes = image.buffer ? Buffer.from(image.buffer) : base64 ? Buffer.from(base64, "base64") : null;
+    if (!bytes?.length) throw new Error(`Row ${rowNumber}: the embedded image could not be read from the Excel file.`);
+    const mimeType = image.extension === "jpeg" ? "image/jpeg" : "image/png";
+    embeddedImages.set(rowNumber, {
+      bytes,
+      mimeType,
+      fileName: `question-row-${rowNumber}.${image.extension === "jpeg" ? "jpg" : "png"}`,
+    });
+  }
+
+  const rows: ParsedQuestionFile["rows"] = [];
   for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
     const values = headers.map((header, index) => [header, cleanCellValue(worksheet.getCell(rowNumber, index + 1).text)] as const);
-    if (values.some(([, value]) => value)) rows.push(Object.fromEntries(values));
+    if (values.some(([, value]) => value) || embeddedImages.has(rowNumber)) rows.push({ values: Object.fromEntries(values), rowNumber });
   }
   if (!rows.length) throw new Error("The Excel sheet needs headings and at least one Question.");
-  return rows;
+  return { rows, embeddedImages };
 }
 
-async function parseQuestionFile(file: File): Promise<CsvRow[]> {
+async function parseQuestionFile(file: File): Promise<ParsedQuestionFile> {
   const extension = file.name.toLowerCase().split(".").pop();
   if (extension === "xlsx") return parseExcel(file);
-  if (extension === "csv") return parseCsv(await file.text());
+  if (extension === "csv") {
+    return {
+      rows: parseCsv(await file.text()).map((values, index) => ({ values, rowNumber: index + 2 })),
+      embeddedImages: new Map(),
+    };
+  }
   throw new Error("Choose an Excel (.xlsx) or CSV (.csv) file.");
 }
 
@@ -151,9 +185,18 @@ export async function importQuestionsIntoMockTest(
   return importQuestions(formData, mockTestId);
 }
 
+export async function replaceQuestionsInMockTest(
+  mockTestId: string,
+  _previous: ImportQuestionsState,
+  formData: FormData,
+): Promise<ImportQuestionsState> {
+  return importQuestions(formData, mockTestId, "replace");
+}
+
 async function importQuestions(
   formData: FormData,
   mockTestId?: string,
+  mode: "add" | "replace" = "add",
 ): Promise<ImportQuestionsState> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -169,15 +212,17 @@ async function importQuestions(
   if (mockTestId) {
     const { data } = await supabase
       .from("mock_tests")
-      .select("id, paper_id, subject_id, test_scope, status")
+      .select("id, paper_id, subject_id, test_scope, status, target_question_count")
       .eq("id", mockTestId)
       .maybeSingle();
     mockTest = data as MockImportTarget | null;
     if (!mockTest) return { success: false, message: "Mock Test not found." };
     if (mockTest.status !== "draft") return { success: false, message: "Only draft Mock Tests can receive a file import." };
+    const { count: attemptCount } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTest.id);
+    if ((attemptCount ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
     paperId = mockTest.paper_id;
   } else if (!categoryId || !examId || !paperId) {
-    return { success: false, message: "Choose an Exam Category, Exam, and Paper before importing." };
+    return { success: false, message: "Choose a Recruiting Board, Exam, and Paper before importing." };
   }
   if (!(file instanceof File) || !file.size) return { success: false, message: "Choose an Excel or CSV file to import." };
   if (file.size > 2_500_000) return { success: false, message: "This file is too large. Import up to 2.5 MB at a time." };
@@ -189,16 +234,17 @@ async function importQuestions(
       : supabase.from("exam_groups").select("id, exam_id").eq("id", examId).maybeSingle(),
   ]);
   if (!paper || (!mockTest && (!exam || paper.exam_group_id !== exam.id || exam.exam_id !== categoryId))) {
-    return { success: false, message: "The selected Exam Category, Exam, and Paper do not belong together." };
+    return { success: false, message: "The selected Recruiting Board, Exam, and Paper do not belong together." };
   }
 
-  let rows: CsvRow[];
+  let parsedFile: ParsedQuestionFile;
   try {
-    rows = await parseQuestionFile(file);
+    parsedFile = await parseQuestionFile(file);
   } catch (error) {
     return { success: false, message: error instanceof Error ? error.message : "The Question file could not be read." };
   }
-  if (rows.length > 500) return { success: false, message: "Import up to 500 Questions at one time." };
+  if (parsedFile.rows.length > 500) return { success: false, message: "Import up to 500 Questions at one time." };
+  if (mockTest && mode === "replace" && parsedFile.rows.length !== mockTest.target_question_count) return { success: false, message: `Nothing was replaced. The file has ${parsedFile.rows.length} row${parsedFile.rows.length === 1 ? "" : "s"}, but this Mock Test requires exactly ${mockTest.target_question_count}.` };
 
   const { data: subjects, error: subjectsError } = await supabase
     .from("subjects")
@@ -209,11 +255,14 @@ async function importQuestions(
   const importKeys = new Set<string>();
   const errors: string[] = [];
   const importRows: Record<string, unknown>[] = [];
+  const embeddedImageTargets: Array<{ importIndex: number; image: EmbeddedQuestionImage; rowNumber: number }> = [];
   const assignmentPreferences: Array<{ key: string; rowNumber: number; questionOrder: number | null; marks: number | null; negativeMarks: number | null }> = [];
 
-  rows.forEach((row, index) => {
-    const rowNumber = index + 2;
+  parsedFile.rows.forEach(({ values: row, rowNumber }) => {
     const importKey = (row.import_key ?? "").trim().toLocaleLowerCase();
+    // A file uploaded from a mock test owns its Questions. This prevents the
+    // same import_key in another mock test from updating this test's content.
+    const storedImportKey = mockTest ? `mock:${mockTest.id}:${importKey}` : importKey;
     const subject = subjectByName.get(normalizeLookup(row.subject ?? ""));
     const correctAnswer = (row.correct_answer ?? "").trim().toUpperCase() as CorrectAnswer;
     const lifecycle = ((row.content_lifecycle ?? "permanent").trim().toLowerCase() || "permanent") as QuestionLifecycle;
@@ -226,8 +275,11 @@ async function importQuestions(
     const questionOrder = optionalNumber(row.question_order ?? "");
     const marks = optionalNumber(row.marks ?? "");
     const negativeMarks = optionalNumber(row.negative_marks ?? "");
+    const embeddedImage = parsedFile.embeddedImages.get(rowNumber);
+    const image = embeddedImage ? { url: null, error: null } : normalizeQuestionImageUrl(row.image_url ?? "");
 
     if (!importKey) errors.push(`Row ${rowNumber}: import_key is required.`);
+    if (storedImportKey.length > 200) errors.push(`Row ${rowNumber}: import_key is too long.`);
     if (!subject) errors.push(`Row ${rowNumber}: Subject "${row.subject || "(blank)"}" does not exist in the chosen Paper.`);
     if (subject && importKeys.has(`${subject.id}:${importKey}`)) errors.push(`Row ${rowNumber}: import_key "${importKey}" is repeated for ${subject.name}.`);
     if (subject && importKey) importKeys.add(`${subject.id}:${importKey}`);
@@ -235,6 +287,8 @@ async function importQuestions(
     if (!lifecycles.includes(lifecycle) || (lifecycle === "review" && !validDate(reviewOn)) || (lifecycle === "expires" && !validDate(expiresOn))) errors.push(`Row ${rowNumber}: check content_lifecycle and its date.`);
     if (sourceExamDate && !validDate(sourceExamDate)) errors.push(`Row ${rowNumber}: source_exam_date must use YYYY-MM-DD.`);
     if (isActive === null) errors.push(`Row ${rowNumber}: is_active must be true or false.`);
+    if (image.error) errors.push(`Row ${rowNumber}: ${image.error}`);
+    if (embeddedImage && (row.image_url ?? "").trim()) errors.push(`Row ${rowNumber}: use either the embedded image or image_url, not both.`);
     if (mockTest && questionOrder !== null && (!Number.isInteger(questionOrder) || questionOrder < 1)) errors.push(`Row ${rowNumber}: question_order must be a whole number greater than zero.`);
     if (mockTest && marks !== null && (!Number.isFinite(marks) || marks <= 0)) errors.push(`Row ${rowNumber}: marks must be a number greater than zero.`);
     if (mockTest && negativeMarks !== null && (!Number.isFinite(negativeMarks) || negativeMarks < 0)) errors.push(`Row ${rowNumber}: negative_marks must be zero or a positive number.`);
@@ -258,9 +312,10 @@ async function importQuestions(
     }
     if (!subject || !importKey || !answers.includes(correctAnswer) || !lifecycles.includes(lifecycle) || isActive === null || (mockTest?.test_scope === "subject" && subject.id !== mockTest.subject_id)) return;
     const canonical = languageMode === "telugu" ? telugu : english;
+    const importIndex = importRows.length;
     importRows.push({
       subject_id: subject.id,
-      import_key: importKey,
+      import_key: storedImportKey,
       question_text: canonical.question,
       question_type: "mcq",
       option_a: canonical.options[0],
@@ -275,6 +330,7 @@ async function importQuestions(
       option_c_te: languageMode === "english" ? null : telugu.options[2],
       option_d_te: languageMode === "english" ? null : telugu.options[3],
       explanation_te: languageMode === "english" ? null : telugu.explanation,
+      image_url: image.url,
       source_reference: (row.source_reference ?? "").trim() || null,
       source_exam_date: sourceExamDate || null,
       difficulty: ["easy", "medium", "hard"].includes((row.difficulty ?? "").trim().toLowerCase()) ? (row.difficulty ?? "").trim().toLowerCase() : "medium",
@@ -283,12 +339,30 @@ async function importQuestions(
       review_on: lifecycle === "review" ? reviewOn : null,
       expires_on: lifecycle === "expires" ? expiresOn : null,
     });
-    assignmentPreferences.push({ key: `${subject.id}:${importKey}`, rowNumber, questionOrder, marks, negativeMarks });
+    if (embeddedImage) embeddedImageTargets.push({ importIndex, image: embeddedImage, rowNumber });
+    assignmentPreferences.push({ key: `${subject.id}:${storedImportKey}`, rowNumber, questionOrder, marks, negativeMarks });
   });
 
   if (errors.length) {
     const shownErrors = errors.slice(0, 6);
     return { success: false, message: `Nothing was imported. ${shownErrors.join(" ")}${errors.length > shownErrors.length ? ` Plus ${errors.length - shownErrors.length} more issue(s).` : ""}` };
+  }
+
+  const uploadedImagePaths: string[] = [];
+  try {
+    for (const target of embeddedImageTargets) {
+      const imageFile = new File([Uint8Array.from(target.image.bytes)], target.image.fileName, { type: target.image.mimeType });
+      const uploaded = await uploadQuestionImage(supabase, user.id, imageFile);
+      if (uploaded.error || !uploaded.url || !uploaded.path) {
+        await Promise.all(uploadedImagePaths.map((path) => removeQuestionImage(supabase, path)));
+        return { success: false, message: `Nothing was imported. Row ${target.rowNumber}: ${uploaded.error ?? "the embedded image could not be uploaded."}` };
+      }
+      importRows[target.importIndex].image_url = uploaded.url;
+      uploadedImagePaths.push(uploaded.path);
+    }
+  } catch (error) {
+    await Promise.all(uploadedImagePaths.map((path) => removeQuestionImage(supabase, path)));
+    return { success: false, message: `Nothing was imported. ${error instanceof Error ? error.message : "An embedded image could not be uploaded."}` };
   }
 
   const atomicAssignments = mockTest
@@ -297,36 +371,48 @@ async function importQuestions(
         return {
           subject_id: preference.key.slice(0, separator),
           import_key: preference.key.slice(separator + 1),
-          question_order: preference.questionOrder,
+          question_order: mode === "replace" ? preference.questionOrder ?? preference.rowNumber - 1 : preference.questionOrder,
           marks: preference.marks ?? paper.default_correct_marks ?? 1,
           negative_marks: preference.negativeMarks ?? paper.default_negative_marks ?? 0,
         };
       })
     : [];
-  const { data: importResult, error } = await supabase.rpc("import_questions_atomic", {
-    requested_paper_id: paperId,
-    requested_mock_test_id: mockTest?.id ?? null,
-    requested_questions: importRows,
-    requested_assignments: atomicAssignments,
-  });
+  const rpcName = mockTest && mode === "replace" ? "replace_mock_test_questions_atomic" : "import_questions_atomic";
+  const { data: importResult, error } = await supabase.rpc(rpcName, {
+      requested_paper_id: paperId,
+      requested_mock_test_id: mockTest?.id ?? null,
+      requested_questions: importRows,
+      requested_assignments: atomicAssignments,
+    });
   if (error) {
+    await Promise.all(uploadedImagePaths.map((path) => removeQuestionImage(supabase, path)));
     const orderConflict = error.code === "23505" && error.message.includes("question_order");
+    const targetReached = error.message.includes("target number of Questions");
     return {
       success: false,
       message: orderConflict
         ? "Nothing was imported. One or more Question order numbers are already in use."
+        : targetReached
+          ? "Nothing was imported. The file would exceed this Mock Test's target. Remove rows or increase the draft target first."
         : `Nothing was imported. ${error.message}`,
     };
   }
-  const summary = importResult?.[0] ?? { added: 0, updated: 0, assigned: 0, already_assigned: 0 };
+  const summary = importResult?.[0] ?? { added: 0, updated: 0, assigned: 0, already_assigned: 0, deleted_orphans: 0, orphan_image_urls: [] };
   const added = Number(summary.added);
   const updated = Number(summary.updated);
   const assigned = Number(summary.assigned);
   const alreadyAssigned = Number(summary.already_assigned);
+  if (mode === "replace") {
+    const imageUrls = Array.isArray(summary.orphan_image_urls) ? summary.orphan_image_urls : [];
+    await Promise.all(imageUrls.map((url: string) => removeQuestionImage(supabase, questionMediaPath(url))));
+  }
   revalidatePath("/admin/questions");
   revalidatePath("/admin/mock-tests");
   if (mockTest) {
     revalidatePath(`/admin/mock-tests/${mockTest.id}/edit`);
+    revalidatePath(`/admin/mock-tests/${mockTest.id}/questions`);
+    revalidatePath(`/admin/mock-tests/${mockTest.id}/preview`);
+    if (mode === "replace") return { success: true, message: `Replacement completed safely: ${assigned} Questions assigned, ${added} added to the Question Bank, ${updated} updated, and ${Number(summary.deleted_orphans ?? 0)} unused old Question${Number(summary.deleted_orphans ?? 0) === 1 ? "" : "s"} removed.` };
     return { success: true, message: `${added} Question${added === 1 ? "" : "s"} added, ${updated} updated, and ${assigned} assigned to this Mock Test from ${file.name}.${alreadyAssigned ? ` ${alreadyAssigned} already assigned Question${alreadyAssigned === 1 ? " was" : "s were"} kept.` : ""}` };
   }
   return { success: true, message: `${added} Question${added === 1 ? "" : "s"} added and ${updated} updated from ${file.name}.` };

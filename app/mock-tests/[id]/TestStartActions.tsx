@@ -1,21 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { beginMockTest } from "./start-actions";
 
 export function TestStartActions({
   testId,
+  testPath,
   isLoggedIn,
   hasResumableSession,
 }: {
   testId: string;
+  testPath: string;
   isLoggedIn: boolean;
   hasResumableSession: boolean;
 }) {
   if (!isLoggedIn) {
     return (
       <Link
-        href={`/login?next=${encodeURIComponent(`/mock-tests/${testId}`)}`}
+        href={`/login?next=${encodeURIComponent(testPath)}`}
         className="mt-6 block rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200"
       >
         Sign in to start
@@ -24,50 +27,41 @@ export function TestStartActions({
   }
 
   if (!hasResumableSession) {
-    const startAction = beginMockTest.bind(null, testId, "resume");
+    const startAction = beginMockTest.bind(null, testId, testPath, "resume");
     return (
       <form action={startAction} className="mt-6">
-        <button
-          type="submit"
-          className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200"
-        >
+        <PendingSubmitButton pendingLabel="Starting test…" className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70">
           Start test
-        </button>
+        </PendingSubmitButton>
       </form>
     );
   }
 
-  const resumeAction = beginMockTest.bind(null, testId, "resume");
-  const restartAction = beginMockTest.bind(null, testId, "restart");
+  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume");
+  const restartAction = beginMockTest.bind(null, testId, testPath, "restart");
 
   return (
     <div className="mt-6 grid gap-3">
       <form action={resumeAction}>
-        <button
-          type="submit"
-          className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200"
-        >
+        <PendingSubmitButton pendingLabel="Resuming test…" className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70">
           Resume test
-        </button>
+        </PendingSubmitButton>
       </form>
       <form
         action={restartAction}
         onSubmit={(event) => {
           if (
             !window.confirm(
-              "Start this test again? Your unfinished answers and saved time will be cleared.",
+              "Restart this test? Your unfinished answers and saved time will be cleared.",
             )
           ) {
             event.preventDefault();
           }
         }}
       >
-        <button
-          type="submit"
-          className="block w-full rounded-xl border border-slate-600 px-5 py-3.5 text-center font-black text-white hover:border-white hover:bg-white/10"
-        >
-          Start test
-        </button>
+        <PendingSubmitButton pendingLabel="Restarting test…" className="block w-full rounded-xl border border-slate-600 px-5 py-3.5 text-center font-black text-white hover:border-white hover:bg-white/10 disabled:cursor-wait disabled:opacity-70">
+          Restart test
+        </PendingSubmitButton>
       </form>
     </div>
   );

@@ -1,6 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
 export type SpecializationActionState = { success: boolean; message: string };
@@ -18,10 +20,12 @@ function readSpecialization(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
   const displayOrder = Number(formData.get("display_order") ?? 0);
+  const seo = readSeoFields(formData);
   if (!examGroupId || !name) return { error: "Choose an Exam and enter the Specialisation name." };
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) return { error: "Slug can contain only lowercase letters, numbers and hyphens." };
   if (!Number.isInteger(displayOrder) || displayOrder < 0) return { error: "Display order must be zero or a positive number." };
-  return { value: { exam_group_id: examGroupId, name, slug, description: String(formData.get("description") ?? "").trim() || null, display_order: displayOrder, is_active: formData.get("is_active") === "on" } };
+  if (seo.error) return { error: seo.error };
+  return { value: { exam_group_id: examGroupId, name, slug, description: String(formData.get("description") ?? "").trim() || null, ...seo.value, display_order: displayOrder, is_active: formData.get("is_active") === "on" } };
 }
 
 export async function createSpecialization(_previous: SpecializationActionState, formData: FormData): Promise<SpecializationActionState> {
@@ -36,7 +40,7 @@ export async function createSpecialization(_previous: SpecializationActionState,
   const { error } = await result.supabase.from("exam_specializations").insert(parsed.value);
   if (error?.code === "23505") return { success: false, message: "This Specialisation already exists for the selected Exam." };
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests");
+  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
   return { success: true, message: "Specialisation created successfully." };
 }
 
@@ -50,7 +54,7 @@ export async function updateSpecialization(_previous: SpecializationActionState,
   if ((existing ?? []).some((item) => item.name.trim().toLowerCase() === parsed.value!.name.toLowerCase())) return { success: false, message: `"${parsed.value.name}" already exists for this Exam.` };
   const { error } = await result.supabase.from("exam_specializations").update(parsed.value).eq("id", specializationId);
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests");
+  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
   return { success: true, message: "Specialisation updated successfully." };
 }
 

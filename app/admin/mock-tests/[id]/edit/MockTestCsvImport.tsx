@@ -1,14 +1,18 @@
 "use client";
 
 import { useActionState } from "react";
+import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import {
   importQuestionsIntoMockTest,
+  replaceQuestionsInMockTest,
   type ImportQuestionsState,
 } from "@/app/admin/questions/import-actions";
 
 type MockTestCsvImportProps = {
   mockTestId: string;
   isDraft: boolean;
+  targetQuestionCount: number;
+  assignedQuestionCount: number;
   paperName: string;
   subjectName: string | null;
 };
@@ -18,11 +22,15 @@ const initialState: ImportQuestionsState = { success: false, message: "" };
 export function MockTestCsvImport({
   mockTestId,
   isDraft,
+  targetQuestionCount,
+  assignedQuestionCount,
   paperName,
   subjectName,
 }: MockTestCsvImportProps) {
   const importForMock = importQuestionsIntoMockTest.bind(null, mockTestId);
   const [state, action, pending] = useActionState(importForMock, initialState);
+  const replaceForMock = replaceQuestionsInMockTest.bind(null, mockTestId);
+  const [replaceState, replaceAction, replacePending] = useActionState(replaceForMock, initialState);
 
   return (
     <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
@@ -36,12 +44,14 @@ export function MockTestCsvImport({
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           This draft already belongs to <strong>{paperName}</strong>
           {subjectName ? <> and <strong>{subjectName}</strong></> : ""}. The upload saves every
-          valid Question in the Question Bank and adds it to this mock test at the same time.
+          valid Question for this mock test and adds it here at the same time. The same
+          import key in another mock test does not update this test&apos;s Questions.
         </p>
       </div>
 
       {isDraft ? (
-        <form action={action} className="p-6 sm:p-7">
+        <div className="p-6 sm:p-7">
+          <form action={action}>
           <label className="block rounded-2xl border border-dashed border-teal-300 bg-slate-50 p-5 text-sm font-bold text-slate-800">
             Excel or CSV file
             <input
@@ -69,6 +79,9 @@ export function MockTestCsvImport({
             <p className="mt-3 text-sm leading-6 text-slate-700">
               Add these optional test columns when needed: <code className="rounded bg-white px-1.5 py-1 text-xs">question_order,marks,negative_marks</code>. Leave them blank to use file row order and this Paper&apos;s default scoring.
             </p>
+            <p className="mt-3 text-sm leading-6 text-slate-700">
+              In Excel, paste one PNG or JPG image into the same Question row and it will be uploaded automatically. Alternatively, use the optional <code className="rounded bg-white px-1.5 py-1 text-xs">image_url</code> column with a public HTTPS link. CSV files must use <code className="rounded bg-white px-1.5 py-1 text-xs">image_url</code>.
+            </p>
             <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
               <li>The <strong>subject</strong> must already exist under this Paper.</li>
               <li>For a subject-wise mock, every row must use that selected Subject.</li>
@@ -80,10 +93,12 @@ export function MockTestCsvImport({
           <div className="mt-5 flex flex-wrap items-center gap-4">
             <button
               disabled={pending}
+              aria-busy={pending}
               className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {pending ? "Checking and building test..." : "Import file and add to mock test"}
+              <PendingButtonContent pending={pending} pendingLabel="Checking and building test…">Import file and add to mock test</PendingButtonContent>
             </button>
+            <LongPendingNotice pending={pending} />
             <p className="text-sm text-slate-500">You can still add or remove individual Questions below.</p>
           </div>
 
@@ -95,7 +110,21 @@ export function MockTestCsvImport({
               {state.message}
             </p>
           )}
-        </form>
+          </form>
+
+          <div className="my-7 border-t border-slate-200" />
+          <form action={replaceAction} onSubmit={(event) => { if (!window.confirm(`Replace all ${assignedQuestionCount} assigned Questions?\n\nThe file must contain exactly ${targetQuestionCount} valid Questions. Validation and replacement run as one transaction; if anything fails, the current Questions stay unchanged.`)) event.preventDefault(); }}>
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.13em] text-red-700">Destructive draft action</p>
+              <h3 className="mt-2 text-lg font-black text-slate-950">Replace all Questions from Excel or CSV</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-700">The complete file is checked first. It must contain exactly <strong>{targetQuestionCount}</strong> valid Questions with unique order numbers. Any error rolls back the entire replacement.</p>
+              <label className="mt-4 block text-sm font-bold">Replacement file<input name="questions_file" type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required className="mt-2 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-red-700 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white" /></label>
+              <button disabled={replacePending} aria-busy={replacePending} className="mt-4 rounded-xl bg-red-700 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"><PendingButtonContent pending={replacePending} pendingLabel="Validating and replacing…">Validate and replace all</PendingButtonContent></button>
+              <LongPendingNotice pending={replacePending} />
+              {replaceState.message && <p aria-live="polite" className={`mt-4 rounded-xl border px-4 py-3 text-sm font-semibold ${replaceState.success ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-white text-red-700"}`}>{replaceState.message}</p>}
+            </div>
+          </form>
+        </div>
       ) : (
         <div className="m-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
           This Mock Test is published or archived. Its question list is locked.

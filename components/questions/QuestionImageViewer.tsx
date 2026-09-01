@@ -1,0 +1,43 @@
+"use client";
+
+/* eslint-disable @next/next/no-img-element */
+
+import { useEffect, useState } from "react";
+
+export function QuestionImageViewer({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  const [zoom, setZoom] = useState(1);
+
+  useEffect(() => {
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [onClose]);
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Enlarged Question image" aria-describedby="question-image-help" className="fixed inset-0 z-[100] flex flex-col bg-slate-950/95 text-white">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/15 px-3 py-3 sm:px-5">
+        <p className="text-sm font-bold">Question image</p>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => setZoom((value) => Math.max(1, value - 0.5))} disabled={zoom <= 1} aria-label="Zoom out" className="grid h-10 min-w-10 place-items-center rounded-lg border border-white/30 px-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-35"><span aria-hidden="true">-</span></button>
+          <span className="min-w-14 text-center text-xs font-bold" aria-live="polite" role="status">{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={() => setZoom((value) => Math.min(4, value + 0.5))} disabled={zoom >= 4} aria-label="Zoom in" className="grid h-10 min-w-10 place-items-center rounded-lg border border-white/30 px-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-35"><span aria-hidden="true">+</span></button>
+          <button type="button" onClick={() => setZoom(1)} disabled={zoom === 1} className="hidden h-10 rounded-lg border border-white/30 px-3 text-xs font-bold disabled:opacity-35 sm:inline-flex">Fit image</button>
+          <button type="button" autoFocus onClick={onClose} className="ml-1 h-10 rounded-lg bg-white px-4 text-sm font-black text-slate-950">Close</button>
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto p-3 sm:p-6">
+        <div className={zoom === 1 ? "mx-auto flex h-full w-full items-center justify-center" : "mx-auto flex min-h-full w-full items-center justify-center"}>
+          <img src={src} alt={alt} decoding="async" referrerPolicy="no-referrer" className={zoom === 1 ? "h-auto max-h-[calc(100dvh-8rem)] max-w-full w-auto object-contain" : "h-auto max-w-none object-contain"} style={zoom === 1 ? undefined : { width: `${zoom * 100}%` }} />
+        </div>
+      </div>
+      <p id="question-image-help" className="shrink-0 border-t border-white/15 px-4 py-2 text-center text-xs text-slate-300">Use zoom controls, then scroll to inspect the complete image. Press Escape to close.</p>
+    </div>
+  );
+}

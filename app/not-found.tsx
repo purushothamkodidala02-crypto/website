@@ -3,7 +3,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="student-page min-h-screen bg-slate-50 text-slate-950">
       <PublicHeader />
       <section className="mx-auto flex max-w-3xl flex-col items-center px-5 py-24 text-center sm:py-32">
         <p className="text-sm font-black uppercase tracking-[0.18em] text-teal-700">404 · Page not found</p>

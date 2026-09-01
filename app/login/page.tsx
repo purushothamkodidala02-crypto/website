@@ -17,6 +17,7 @@ export default async function LoginPage({
     next?: string | string[];
     confirmed?: string | string[];
     reset?: string | string[];
+    oauth_error?: string | string[];
   }>;
 }) {
   const params = await searchParams;
@@ -24,7 +25,7 @@ export default async function LoginPage({
   const nextPath =
     requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
       ? requestedPath
-      : "/dashboard";
+      : "/";
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,12 +49,15 @@ export default async function LoginPage({
       : params.confirmed === "1"
       ? "Email confirmed. Sign in to continue to your mock test."
       : undefined;
+  const initialError = params.oauth_error === "1"
+    ? "Google sign-in could not be completed. Please try again or use email sign-in."
+    : undefined;
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader compact />
       <div className="mx-auto grid max-w-4xl gap-8 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-[0.85fr_1.15fr] md:items-start">
-        <aside className="rounded-3xl bg-slate-950 p-7 text-white md:sticky md:top-8">
+        <aside className="min-w-0 rounded-3xl bg-slate-950 p-7 text-white md:sticky md:top-24">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
             Welcome back
           </p>
@@ -71,7 +75,7 @@ export default async function LoginPage({
             Browse available tests →
           </Link>
         </aside>
-        <LoginForm nextPath={nextPath} initialMessage={initialMessage} />
+        <LoginForm nextPath={nextPath} initialMessage={initialMessage} initialError={initialError} />
       </div>
     </main>
   );

@@ -35,7 +35,7 @@ export default async function ResetPasswordPage({
     assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2";
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader compact />
       <div className="mx-auto grid max-w-4xl gap-8 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-[0.85fr_1.15fr] md:items-start">
         <aside className="rounded-3xl bg-slate-950 p-7 text-white md:sticky md:top-8">

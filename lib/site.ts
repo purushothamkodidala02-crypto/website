@@ -1,6 +1,6 @@
 export const SITE_NAME = "Varadhi Prep";
 export const SITE_DESCRIPTION =
-  "Smart mock tests for career growth, with English and Telugu practice, flexible timed attempts, and detailed answer review.";
+  "Prepare for Telangana, Andhra Pradesh and Central exams with Varadhi Prep mock tests. Practise TGPRB Police Constable, TSPSC, APPSC, TG TET and other competitive exam papers in Telugu and English, take timed tests, review detailed solutions, track weak topics, and improve your study plan after every attempt.";
 
 const configuredSiteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://varadhiprep.in";

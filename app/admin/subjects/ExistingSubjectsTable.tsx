@@ -54,7 +54,7 @@ export function ExistingSubjectsTable({
     <section className="mt-8 overflow-hidden rounded-2xl border bg-white">
       <div className="border-b px-6 py-5">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="font-bold">Existing Subjects</h2>
+          <h2 className="font-bold">Existing subjects</h2>
           {[categoryName, examName, specializationName, paperName].filter(Boolean).map((name) => (
             <span
               key={name}
@@ -65,13 +65,13 @@ export function ExistingSubjectsTable({
           ))}
         </div>
         <p className="mt-1 text-sm text-slate-600">
-          This list follows the Category, Exam, and Paper selected above in Add Subjects.
+          This list follows the category, exam, and paper selected above.
         </p>
       </div>
 
       <div className="border-b bg-slate-50 px-6 py-5">
         <label className="block max-w-xl text-sm font-bold">
-          Search existing Subjects
+          Search existing subjects
           <input
             type="search"
             value={search}
@@ -85,11 +85,11 @@ export function ExistingSubjectsTable({
 
       {!paperId ? (
         <p className="p-6 text-sm text-slate-600">
-          Choose an Exam Category, Exam, and Paper in Add Subjects to see existing Subjects.
+          Choose a Recruiting Board, Exam, and Paper above to see existing Subjects.
         </p>
       ) : filtered.length === 0 ? (
         <p className="p-6 text-sm text-slate-600">
-          No Subjects match this Paper and search.
+          No subjects match this paper and search.
         </p>
       ) : (
         <>

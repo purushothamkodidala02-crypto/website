@@ -17,11 +17,11 @@ export function ExistingExamCategoriesTable({ exams }: { exams: Exam[] }) {
   return (
     <section className="mt-8 overflow-hidden rounded-2xl border bg-white">
       <div className="border-b px-6 py-5">
-        <h2 className="font-bold">Existing Exam Categories</h2>
+        <h2 className="font-bold">Existing Recruiting Boards</h2>
       </div>
       <div className="border-b bg-slate-50 px-6 py-5">
         <label className="block max-w-xl text-sm font-bold">
-          Search existing Exam Categories
+          Search existing Recruiting Boards
           <input
             type="search"
             value={search}
@@ -32,7 +32,7 @@ export function ExistingExamCategoriesTable({ exams }: { exams: Exam[] }) {
         </label>
       </div>
       {filtered.length === 0 ? (
-        <p className="p-6 text-sm text-slate-600">No Exam Categories match your search.</p>
+        <p className="p-6 text-sm text-slate-600">No Recruiting Boards match your search.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">

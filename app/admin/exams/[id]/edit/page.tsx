@@ -19,7 +19,7 @@ export default async function EditExamPage({
   const [{ data, error }, statesResult] = await Promise.all([
     supabase
       .from("exams")
-      .select("id, state_id, name, slug, description, is_active, display_order, created_at, updated_at")
+      .select("id, state_id, name, slug, description, seo_title, seo_description, is_active, display_order, created_at, updated_at")
       .eq("id", id)
       .single(),
     supabase.from("exam_states").select("id, name, code").order("display_order"),
@@ -37,11 +37,11 @@ export default async function EditExamPage({
         href="/admin/exams"
         className="text-sm font-medium text-gray-600 hover:text-black"
       >
-        ← Back to Exam Categories
+        ← Back to Recruiting Boards
       </Link>
 
       <div className="mt-6">
-        <h1 className="text-3xl font-bold">Edit Exam Category</h1>
+        <h1 className="text-3xl font-bold">Edit Recruiting Board</h1>
 
         <p className="mt-2 text-gray-600">
           Update the selected exam’s details and status.

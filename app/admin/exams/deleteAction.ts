@@ -47,7 +47,7 @@ export async function deleteExam(
   if (examError || !exam) {
     return {
       success: false,
-      message: "Exam category not found.",
+      message: "Recruiting Board not found.",
     };
   }
 

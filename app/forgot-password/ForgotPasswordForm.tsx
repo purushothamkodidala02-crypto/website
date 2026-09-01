@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
+import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 
 type Notice = {
   tone: "error" | "success";
@@ -67,7 +68,7 @@ export function ForgotPasswordForm({
       setNotice({
         tone: "success",
         message:
-          "If this email has a Varadhi Prep account, a password-reset link has been sent. Open the newest email on this same device and browser to create a new password.",
+          "If this email has a Varadhi Prep account, a password-reset link has been sent. The newest link can be opened on any phone, tablet, or computer.",
       });
     }
 
@@ -104,10 +105,12 @@ export function ForgotPasswordForm({
         <button
           type="submit"
           disabled={loading || !captchaToken}
+          aria-busy={loading}
           className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Sending reset link…" : "Send password-reset link"}
+          <PendingButtonContent pending={loading} pendingLabel="Sending password reset email…">Send password reset email</PendingButtonContent>
         </button>
+        <LongPendingNotice pending={loading} />
         {notice && (
           <p
             aria-live="polite"
@@ -119,7 +122,7 @@ export function ForgotPasswordForm({
       </form>
 
       <p className="mt-6 border-t border-slate-100 pt-5 text-sm text-slate-600">
-        Remembered your password?{" "}
+        Have your password?{" "}
         <Link href={loginHref} className="font-bold text-teal-700 hover:text-teal-800">
           Return to sign in
         </Link>

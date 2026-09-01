@@ -3,14 +3,41 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
+import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@/lib/auth/password-policy";
+import { normaliseIndianMobile } from "@/lib/phone";
 
 type Notice = {
   tone: "error" | "success" | "info";
   message: string;
 };
+
+function registrationErrorMessage(error: { code?: string; message?: string }) {
+  const code = (error.code ?? "").toLowerCase();
+  const message = (error.message ?? "").toLowerCase();
+  if (code === "captcha_failed" || message.includes("captcha") || message.includes("turnstile")) {
+    return "Security verification was rejected. Refresh this page, complete the verification again, and retry.";
+  }
+  if (code === "over_email_send_rate_limit" || message.includes("rate limit") || message.includes("too many")) {
+    return "Too many confirmation emails were requested. Wait a few minutes, then try again.";
+  }
+  if (code === "signup_disabled" || message.includes("signups are disabled")) {
+    return "New registrations are temporarily unavailable. Please try again later.";
+  }
+  if (message.includes("redirect") && (message.includes("allow") || message.includes("url"))) {
+    return "The confirmation link settings need attention. Please contact support before trying again.";
+  }
+  if (message.includes("email") && (message.includes("send") || message.includes("smtp") || message.includes("provider"))) {
+    return "Your details were not sent because the confirmation email service is unavailable. Please try again shortly.";
+  }
+  if (message.includes("database error") || message.includes("unexpected failure")) {
+    return "Your account service could not finish setting up the profile. Please try again shortly; no password was saved.";
+  }
+  return "We could not create the account right now. Check the details and try again.";
+}
 
 const noticeStyles = {
   error: "border-red-200 bg-red-50 text-red-700",
@@ -21,6 +48,7 @@ const noticeStyles = {
 export function RegisterForm({ nextPath }: { nextPath: string }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -44,8 +72,14 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
 
     const supabase = createClient();
     const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = normaliseIndianMobile(phone);
+    if (!normalizedPhone) {
+      setNotice({ tone: "error", message: "Enter a valid 10-digit Indian mobile number." });
+      setLoading(false);
+      return;
+    }
     if (fullName.trim().length > 120 || normalizedEmail.length > 254 || password.length > MAX_PASSWORD_LENGTH) {
-      setNotice({ tone: "error", message: "Check your name, email, and password lengths, then try again." });
+      setNotice({ tone: "error", message: "Check your name, email, mobile number, and password lengths, then try again." });
       setLoading(false);
       return;
     }
@@ -54,7 +88,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
       password,
       options: {
         emailRedirectTo: confirmationRedirectUrl(),
-        data: { full_name: fullName.trim() },
+        data: { full_name: fullName.trim(), phone: normalizedPhone },
         captchaToken: captchaToken ?? undefined,
       },
     });
@@ -69,10 +103,8 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
       setNotice({
         tone: "error",
         message: mayAlreadyExist
-          ? "This email may already have a Varadhi Prep account. Try signing in instead."
-          : error.code === "over_email_send_rate_limit"
-            ? "Too many confirmation emails were requested. Wait a few minutes, then try again."
-            : "We could not create the account right now. Check the details and try again.",
+          ? "This email may already have a Varadhi Prep account. Please sign in with your existing credentials."
+          : registrationErrorMessage(error),
       });
       setLoading(false);
       return;
@@ -82,7 +114,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
       setNotice({
         tone: "error",
         message:
-          "This email may already have a Varadhi Prep account. Sign in with your existing password instead.",
+          "This email may already have a Varadhi Prep account. Please sign in with your existing password.",
       });
       setLoading(false);
       return;
@@ -142,7 +174,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
   }
 
   return (
-    <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+    <section className="min-w-0 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
       <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">
         Student registration
       </p>
@@ -164,7 +196,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
             </li>
             <li className="flex gap-3 rounded-2xl bg-slate-50 p-4">
               <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-teal-700 text-xs font-black text-white">2</span>
-              Confirm the email, sign in, and you will return to the test you selected.
+              Confirm the email, sign in, and continue from the page you selected.
             </li>
           </ol>
           {notice && (
@@ -179,16 +211,27 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
             <Link href={loginHref} className="rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white hover:bg-slate-800">
               Go to sign in
             </Link>
-            <button type="button" onClick={resendConfirmation} disabled={resending || !captchaToken} className="rounded-xl border px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
-              {resending ? "Requesting…" : "Resend email"}
+            <button type="button" onClick={resendConfirmation} disabled={resending || !captchaToken} aria-busy={resending} className="rounded-xl border px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+              <PendingButtonContent pending={resending} pendingLabel="Requesting…">Resend email</PendingButtonContent>
             </button>
+            <LongPendingNotice pending={resending} />
           </div>
           <button type="button" onClick={useDifferentEmail} className="mt-4 w-full text-sm font-bold text-teal-700 hover:text-teal-800">
-            Use a different email
+            Change email address
           </button>
+          <LongPendingNotice pending={loading} />
         </div>
       ) : (
-        <form onSubmit={handleRegister} className="mt-7 space-y-5">
+        <>
+          <div className="mt-7">
+            <GoogleSignInButton nextPath={nextPath} />
+          </div>
+          <div className="my-6 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">or register with email</span>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+          <form onSubmit={handleRegister} className="space-y-5">
           <label htmlFor="full_name" className="block text-sm font-bold text-slate-800">
             Full name
             <input id="full_name" type="text" required maxLength={120} autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your name" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
@@ -197,21 +240,28 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
             Email
             <input id="register_email" type="email" required maxLength={254} autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
           </label>
+          <label htmlFor="register_phone" className="block text-sm font-bold text-slate-800">
+            Mobile number
+            <input id="register_phone" type="tel" required inputMode="numeric" autoComplete="tel-national" maxLength={13} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="10-digit Indian mobile number" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
+            <span className="mt-2 block text-xs font-normal text-slate-500">Used only for secure payment details. We do not send login codes by SMS.</span>
+          </label>
           <label htmlFor="new_password" className="block text-sm font-bold text-slate-800">
             Password
             <PasswordInput id="new_password" required minLength={MIN_PASSWORD_LENGTH} maxLength={MAX_PASSWORD_LENGTH} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`} />
             <span className="mt-2 block text-xs font-normal text-slate-500">Minimum {MIN_PASSWORD_LENGTH} characters. A longer password or short phrase is safer.</span>
           </label>
           <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
-          <button type="submit" disabled={loading || !captchaToken} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
-            {loading ? "Creating account…" : "Create free account"}
+          <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+            <PendingButtonContent pending={loading} pendingLabel="Creating account…">Create free account</PendingButtonContent>
           </button>
+          <LongPendingNotice pending={loading} />
           {notice && (
             <p aria-live="polite" className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeStyles[notice.tone]}`}>
               {notice.message}
             </p>
           )}
-        </form>
+          </form>
+        </>
       )}
 
       {!awaitingConfirmation && (

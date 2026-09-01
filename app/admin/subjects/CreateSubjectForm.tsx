@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { createSubjects, type CreateSubjectState } from "./actions";
 import { SubjectListInput } from "./SubjectListInput";
@@ -80,20 +81,20 @@ export function CreateSubjectForm({
 
   return (
     <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-bold">Add Subjects</h2>
+      <h2 className="text-xl font-bold">Add subjects</h2>
       <p className="mt-1 text-sm text-slate-600">
-        First choose where the Subjects belong, including a Specialisation when this Exam has branches.
+        First choose where the subjects belong, including a specialisation when the exam has branches.
       </p>
 
       <form action={formAction} className="mt-6 space-y-5">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <label className="block text-sm font-bold">
-            Exam Category
-            <SearchableSelect name="exam_category_id" value={categoryId} onChange={changeCategory} options={categories.map((category) => ({ value: category.id, label: category.name }))} placeholder="Search and choose a category" />
+            Recruiting Board
+            <SearchableSelect name="exam_category_id" value={categoryId} onChange={changeCategory} options={categories.map((category) => ({ value: category.id, label: category.name }))} placeholder="Search and choose a Recruiting Board" />
           </label>
           <label className="block text-sm font-bold">
             Exam
-            <SearchableSelect name="exam_group_id" value={examId} onChange={changeExam} options={availableExams.map((exam) => ({ value: exam.id, label: exam.name }))} placeholder="Search and choose an Exam" disabled={!categoryId} emptyMessage="No Exams in this category." />
+            <SearchableSelect name="exam_group_id" value={examId} onChange={changeExam} options={availableExams.map((exam) => ({ value: exam.id, label: exam.name }))} placeholder="Search and choose an Exam" disabled={!categoryId} emptyMessage="No Exams under this Recruiting Board." />
           </label>
           <label className="block text-sm font-bold">
             Specialisation <span className="font-normal text-slate-500">(optional)</span>
@@ -108,7 +109,7 @@ export function CreateSubjectForm({
         <SubjectListInput key={subjectResetKey} />
 
         <button disabled={pending || !paperId} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">
-          {pending ? "Adding..." : "Add Subjects"}
+          <PendingButtonContent pending={pending} pendingLabel="Adding subjects…">Add subjects</PendingButtonContent>
         </button>
         {state.message && <p aria-live="polite" className={`text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}
       </form>

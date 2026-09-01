@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LocationFilters,
   type LocationCategory,
@@ -12,7 +12,8 @@ import {
 } from "@/components/admin/LocationFilters";
 import type { MockTestStatus } from "@/types/mock-test";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
-import { mockTestLabel } from "@/lib/exam-catalog";
+import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
+import { mockTestUrl } from "@/lib/public-urls";
 import { MockTestManagementButtons } from "./MockTestManagementButtons";
 
 type ExistingMockTest = {
@@ -20,12 +21,16 @@ type ExistingMockTest = {
   stateId: string;
   stateName: string;
   stateCode: string;
+  stateSlug: string;
   categoryId: string;
   examId: string;
   specializationId: string;
   paperId: string;
   examName: string;
+  examSlug: string;
+  paperSlug: string;
   paperName: string;
+  paperLabel: string;
   seriesNumber: number;
   title: string;
   slug: string;
@@ -34,9 +39,13 @@ type ExistingMockTest = {
   subjectName: string | null;
   status: MockTestStatus;
   questionCount: number;
+  targetQuestionCount: number;
   usableQuestionCount: number;
   totalMarks: number;
   attemptCount: number;
+  replacesMockTestId: string | null;
+  supersededByMockTestId: string | null;
+  correctedVersionStatus: MockTestStatus | null;
 };
 
 const emptyLocation: LocationFilterValue = { categoryId: "", examId: "", specializationId: "", paperId: "", subjectId: "" };
@@ -66,18 +75,22 @@ const filterStyles = {
   },
 };
 
-export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests }: {
+export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialStatus }: {
   states: Array<{ id: string; name: string; code: string; slug: string }>;
   categories: Array<LocationCategory & { stateId: string }>;
   exams: LocationExam[];
   specializations: LocationSpecialization[];
   papers: LocationPaper[];
   tests: ExistingMockTest[];
+  initialStateId: string;
+  initialLocation: LocationFilterValue;
+  initialSearch: string;
+  initialStatus: MockTestStatus | "all";
 }) {
-  const [stateId, setStateId] = useState("");
-  const [location, setLocation] = useState(emptyLocation);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<MockTestStatus | "all">("all");
+  const [stateId, setStateId] = useState(initialStateId);
+  const [location, setLocation] = useState(initialLocation);
+  const [search, setSearch] = useState(initialSearch);
+  const [status, setStatus] = useState<MockTestStatus | "all">(initialStatus);
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     return tests.filter((test) =>
@@ -97,6 +110,23 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     published: tests.filter((test) => test.status === "published").length,
     archived: tests.filter((test) => test.status === "archived").length,
   };
+
+  const mockTestAdminUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (stateId) params.set("state", stateId);
+    if (location.categoryId) params.set("category", location.categoryId);
+    if (location.examId) params.set("exam", location.examId);
+    if (location.specializationId) params.set("specialization", location.specializationId);
+    if (location.paperId) params.set("paper", location.paperId);
+    if (status !== "all") params.set("status", status);
+    if (search.trim()) params.set("q", search.trim().slice(0, 100));
+    const query = params.toString();
+    return query ? `/admin/mock-tests?${query}` : "/admin/mock-tests";
+  }, [location, search, stateId, status]);
+
+  useEffect(() => {
+    window.history.replaceState(window.history.state, "", mockTestAdminUrl);
+  }, [mockTestAdminUrl]);
 
   return (
     <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-lg shadow-slate-950/[0.04]">
@@ -133,7 +163,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
         <div className="divide-y divide-slate-100">
           {filtered.map((test) => {
             const unavailableCount = test.questionCount - test.usableQuestionCount;
-            const ready = test.questionCount > 0 && unavailableCount === 0;
+            const ready = test.questionCount === test.targetQuestionCount && unavailableCount === 0;
             const statusDetail = statusDetails[test.status];
             return (
               <article key={test.id} className="p-6 transition hover:bg-teal-50/25 sm:p-7">
@@ -142,25 +172,28 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusDetail.className}`}>{statusDetail.label}</span>
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{test.scope === "paper" ? "Paper-wise" : "Subject-wise"}</span>
+                      {test.supersededByMockTestId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Correction in progress</span>}
+                      {test.replacesMockTestId && <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Corrected version</span>}
                     </div>
-                    <div className="mt-3 flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200"><MockSymbol className="h-5 w-5" /></span><div><h3 className="font-display text-xl text-slate-950">{mockTestLabel(test.seriesNumber)}</h3><p className="mt-1 text-sm font-semibold text-slate-700">{test.stateCode} · {test.examName} · {test.paperName}{test.subjectName ? ` · ${test.subjectName}` : ""}</p><p className="mt-1 text-xs text-slate-400">Stored title: {test.title}</p></div></div>
+                    <div className="mt-3 flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200"><MockSymbol className="h-5 w-5" /></span><div><p className="text-[10px] font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p><h3 className="font-display mt-1 text-xl text-slate-950">{studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}</h3><p className="mt-1 text-xs text-slate-500">{test.stateCode} · {test.paperName}</p></div></div>
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    {test.status === "published" && <Link href={`/mock-tests/${test.id}`} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}
-                    <Link href={`/admin/mock-tests/${test.id}/edit`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
-                    <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} />
+                    {test.status === "published" && <Link href={mockTestUrl(test.stateSlug, test.examSlug, test.paperSlug, test.slug)} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}
+                    <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
+                    <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
+                    <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} hasAttempts={test.attemptCount > 0} hasCorrectedVersion={Boolean(test.supersededByMockTestId)} canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"} />
                   </div>
                 </div>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                  <Metric label="Questions" value={String(test.questionCount)} />
+                  <Metric label="Questions" value={`${test.questionCount} / ${test.targetQuestionCount}`} warning={test.questionCount !== test.targetQuestionCount} />
                   <Metric label="Usable" value={`${test.usableQuestionCount} / ${test.questionCount}`} warning={unavailableCount > 0} />
                   <Metric label="Total marks" value={test.totalMarks.toFixed(2).replace(/\.00$/, "")} />
                   <Metric label="Duration" value={`${test.durationMinutes} min`} />
                   <Metric label="Attempts" value={String(test.attemptCount)} />
                 </div>
 
-                {!ready && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">{test.questionCount === 0 ? "Add at least one question before publishing." : `${unavailableCount} assigned question${unavailableCount === 1 ? " is" : "s are"} unavailable. Fix the questions before publishing.`}</p>}
+                {!ready && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">{unavailableCount > 0 ? `${unavailableCount} assigned question${unavailableCount === 1 ? " is" : "s are"} unavailable. Fix the questions before publishing.` : `${test.questionCount} of ${test.targetQuestionCount} questions are assigned. The exact target is required before publishing.`}</p>}
               </article>
             );
           })}
