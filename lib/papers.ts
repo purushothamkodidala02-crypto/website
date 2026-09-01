@@ -53,10 +53,14 @@ export function buildPaperDisplayMap(papers: OrderedPaper[]) {
       while (usedNumbers.has(number)) number += 1;
       usedNumbers.add(number);
 
+      // If the paper name already includes "Paper" or "P1" (e.g., "Paper 1 - Telugu" or "Civil P1"), use it as the label
+      // to avoid renaming it to a confusing "Paper 5".
+      const hasPaperInName = /p(?:aper)?\s*[-_]?\s*\d+/i.test(paper.name.trim());
+      
       displayById.set(paper.id, {
         number,
-        shortLabel: `Paper ${number}`,
-        label: `Paper ${number}`,
+        shortLabel: hasPaperInName ? paper.name : `Paper ${number}`,
+        label: hasPaperInName ? paper.name : `Paper ${number} · ${paper.name}`,
       });
     });
   }
