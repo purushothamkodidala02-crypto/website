@@ -20,6 +20,7 @@ const sections = [
     label: "Content and publishing",
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
+      { href: "/admin/excel-import-guide", label: "Excel import guide", icon: "guide" as const },
       { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
       { href: "/admin/access", label: "Exam series", icon: "passes" as const },
@@ -39,7 +40,8 @@ type NavIconName =
   | "results"
   | "passes"
   | "students"
-  | "reports";
+  | "reports"
+  | "guide";
 
 function NavIcon({ name }: { name: NavIconName }) {
   const common = {
@@ -105,6 +107,7 @@ function NavIcon({ name }: { name: NavIconName }) {
       {name === "passes" && <><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7Z" /><path d="M12 4v16M4 8.5l8 4.5 8-4.5" /></>}
       {name === "students" && <><circle cx="9" cy="8" r="3" /><path d="M3.5 20v-2.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V20" /><path d="M15 5.5a3 3 0 0 1 0 5.8M16 14a4.5 4.5 0 0 1 4.5 4.5V20" /></>}
       {name === "reports" && <><path d="M5 4h14v16H5z" /><path d="M8 8h8M8 12h5M8 16h4" /><path d="m15 15 1.5 1.5L19 14" /></>}
+      {name === "guide" && <><path d="M6 3.5h10l3 3V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" /><path d="M13 3.5V7h3" /><path d="M8 11h8M8 14.5h8M8 18h5" /></>}
     </svg>
   );
 }
