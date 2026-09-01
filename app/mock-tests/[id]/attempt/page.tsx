@@ -30,7 +30,13 @@ function TestNotReady({ title, message, testPath }: { title: string; message: st
   return <main className="min-h-screen bg-slate-50 px-5 py-16"><section className="mx-auto max-w-2xl rounded-3xl border bg-white p-8 text-center shadow-sm"><p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700">Test unavailable</p><h1 className="mt-3 text-3xl font-black text-slate-950">{title}</h1><p className="mt-4 leading-7 text-slate-600">{message}</p><Link href={testPath} className="mt-7 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Back to test details</Link></section></main>;
 }
 
-export default async function TakeMockTestPage({ params, searchParams }: PageProps<"/mock-tests/[id]/attempt">) {
+export default async function TakeMockTestPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ session?: string }>;
+}) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const publicContext = await getMockTestPublicContextById(id);
   if (!publicContext) notFound();

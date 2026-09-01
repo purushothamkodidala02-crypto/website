@@ -8,7 +8,10 @@ import { EditQuestionForm } from "./EditQuestionForm";
 export default async function EditQuestionPage({
   params,
   searchParams,
-}: PageProps<"/admin/questions/[id]/edit">) {
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
+}) {
   const { id } = await params;
   const { returnTo } = await searchParams;
   const backHref =
