@@ -147,7 +147,7 @@ export function FormattedQuestionText({
     const instruction = rightEnd === -1 ? [] : lines.slice(rightEnd);
 
     return (
-      <div lang={isTelugu ? "te" : undefined} className={`font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}>
+      <div lang={isTelugu ? "te" : undefined} className={`font-medium break-words ${isTelugu ? "font-telugu" : ""} ${className}`}>
         <div className="space-y-1.5">
           {heading.map((line, index) => <p key={`${index}-${line}`} className="font-semibold text-slate-950">{line}</p>)}
         </div>
@@ -169,7 +169,7 @@ export function FormattedQuestionText({
   return (
     <div
       lang={isTelugu ? "te" : undefined}
-      className={`space-y-1.5 font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}
+      className={`space-y-1.5 font-medium break-words ${isTelugu ? "font-telugu" : ""} ${className}`}
     >
       {lines.map((line, index) => {
         const labelled = line.match(labelledSection);

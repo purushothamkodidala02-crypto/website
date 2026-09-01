@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BrandLockup, BrandMark } from "@/components/brand/VaradhiBrand";
 import { usePathname } from "next/navigation";
@@ -183,6 +184,13 @@ function Brand({ linked = true, collapsed = false }: { linked?: boolean; collaps
 }
 
 export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <>
       <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-5"}`}>
@@ -210,26 +218,28 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
       </aside>
 
       <div className="border-b border-slate-800 bg-slate-950 px-4 py-4 text-white md:hidden">
-        <details className="group">
-          <summary className="flex cursor-pointer list-none items-center justify-between">
+        <div>
+          <button type="button" onClick={() => setMobileOpen(!mobileOpen)} className="flex w-full cursor-pointer items-center justify-between">
             <Brand linked={false} />
-            <span className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 group-open:bg-white/10">
+            <span className={`rounded-lg border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 ${mobileOpen ? "bg-white/10" : ""}`}>
               Menu
             </span>
-          </summary>
-          <div className="mt-5 border-t border-slate-800 pt-5">
-            <NavigationLinks />
-            <Link
-              href="/"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-3 text-sm font-bold text-slate-200"
-            >
-              <span>Student</span>
-              <span className="text-[10px] tracking-wider text-teal-200">Open</span>
-            </Link>
-          </div>
-        </details>
+          </button>
+          {mobileOpen && (
+            <div className="mt-5 border-t border-slate-800 pt-5">
+              <NavigationLinks />
+              <Link
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-3 text-sm font-bold text-slate-200"
+              >
+                <span>Student</span>
+                <span className="text-[10px] tracking-wider text-teal-200">Open</span>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
