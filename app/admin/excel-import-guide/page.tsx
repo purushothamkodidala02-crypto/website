@@ -73,6 +73,32 @@ export default function ExcelImportGuidePage() {
       </section>
 
       <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Question Bank editor examples</p>
+        <h2 className="mt-2 text-2xl font-black">Match the Following and Statement–Reason</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Use the same Excel columns as a standard MCQ. Put the matching lists or the statement and reason in the Question field, then put four answer combinations in options A–D. The student sees four answer choices, not a drag-and-match grid.</p>
+        <div className="mt-6 grid gap-5 xl:grid-cols-2">
+          <article className="rounded-2xl border border-teal-100 bg-teal-50 p-5">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Match the Following</p>
+            <h3 className="mt-2 font-black text-teal-950">Delhi Sultanate dynasties and founders</h3>
+            <div className="mt-4 grid gap-4 text-sm leading-6 text-teal-950 sm:grid-cols-2">
+              <div><p className="font-bold">English</p><p className="mt-1">Match the Delhi Sultanate dynasties with their founders.</p><p className="mt-2">1. Slave Dynasty<br />2. Khilji Dynasty<br />3. Tughlaq Dynasty</p><p className="mt-2">A. Jalaluddin Firuz Khilji<br />B. Ghiyasuddin Tughlaq<br />C. Qutbuddin Aibak</p></div>
+              <div><p className="font-bold">Telugu</p><p className="mt-1">ఢిల్లీ సుల్తానేట్ వంశాలను వాటి స్థాపకులతో జతపరచండి.</p><p className="mt-2">1. బానిస వంశం<br />2. ఖిల్జీ వంశం<br />3. తుగ్లక్ వంశం</p><p className="mt-2">ఎ. జలాలుద్దీన్ ఫిరోజ్ ఖిల్జీ<br />బి. ఘియాసుద్దీన్ తుగ్లక్<br />సి. కుతుబుద్దీన్ ఐబక్</p></div>
+            </div>
+            <div className="mt-4 rounded-xl bg-white p-3 text-sm text-teal-900"><p className="font-bold">Put these in the Excel option columns:</p><p className="mt-1">A: 1–C, 2–A, 3–B &nbsp; <strong>(correct_answer: A)</strong><br />B: 1–A, 2–B, 3–C<br />C: 1–B, 2–C, 3–A<br />D: 1–C, 2–B, 3–A</p></div>
+          </article>
+          <article className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-indigo-700">Statement–Reason</p>
+            <h3 className="mt-2 font-black text-indigo-950">Parliamentary government in India</h3>
+            <div className="mt-4 grid gap-4 text-sm leading-6 text-indigo-950 sm:grid-cols-2">
+              <div><p className="font-bold">English</p><p className="mt-1"><strong>Statement:</strong> India has a parliamentary form of government.</p><p className="mt-2"><strong>Reason:</strong> The Council of Ministers is collectively responsible to the Lok Sabha.</p></div>
+              <div><p className="font-bold">Telugu</p><p className="mt-1"><strong>ప్రకటన:</strong> భారతదేశంలో పార్లమెంటరీ ప్రభుత్వ విధానం ఉంది.</p><p className="mt-2"><strong>కారణం:</strong> మంత్రిమండలి లోక్‌సభకు సమష్టిగా బాధ్యత వహిస్తుంది.</p></div>
+            </div>
+            <div className="mt-4 rounded-xl bg-white p-3 text-sm text-indigo-900"><p className="font-bold">Put these in the Excel option columns:</p><p className="mt-1">A: Both are true, and Reason correctly explains Statement. <strong>(correct_answer: A)</strong><br />B: Both are true, but Reason does not explain Statement.<br />C: Statement is true, but Reason is false.<br />D: Statement is false, but Reason is true.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Optional columns</p>
         <h2 className="mt-2 text-2xl font-black">Add more details when needed</h2>
         <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
@@ -83,7 +109,7 @@ export default function ExcelImportGuidePage() {
 
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Accepted</p><h2 className="mt-2 text-xl font-black text-emerald-950">Standard four-option MCQ</h2><ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-6 text-emerald-900"><li>All four options must be filled and different.</li><li>Use a stable unique <code className="rounded bg-white px-1">import_key</code> per Subject. Re-uploading it updates that Question.</li><li>Use an Excel row image or an <code className="rounded bg-white px-1">image_url</code>, never both.</li></ul></div>
-        <div className="rounded-3xl border border-amber-100 bg-amber-50 p-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Use the editor instead</p><h2 className="mt-2 text-xl font-black text-amber-950">Special question layouts</h2><p className="mt-4 text-sm leading-6 text-amber-900">The Excel importer creates standard MCQ Questions. For Match the Following, Assertion–Reason, or another special display, add the Question in the Question Bank editor after importing, then choose its format there.</p></div>
+        <div className="rounded-3xl border border-amber-100 bg-amber-50 p-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Display note</p><h2 className="mt-2 text-xl font-black text-amber-950">All imported Questions use MCQ options</h2><p className="mt-4 text-sm leading-6 text-amber-900">Excel can import Match the Following and Statement–Reason in the four-option format shown above. Use Question Bank only when you need a different custom or interactive display.</p></div>
       </section>
 
       <section className="rounded-3xl border border-teal-100 bg-teal-50 p-6 sm:p-8"><h2 className="text-xl font-black text-teal-950">Before you upload</h2><ol className="mt-4 grid gap-3 text-sm leading-6 text-teal-950 sm:grid-cols-2"><li><strong>1.</strong> Select Recruiting Board, Exam, and Paper.</li><li><strong>2.</strong> Confirm the Subject names already exist in that Paper.</li><li><strong>3.</strong> Keep the headings in row 1 and save as .xlsx.</li><li><strong>4.</strong> Import into Question Bank, or open a draft Mock Test to import and assign Questions directly.</li></ol></section>
