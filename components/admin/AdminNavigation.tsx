@@ -199,7 +199,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
           {!collapsed && <button type="button" onClick={onToggle} aria-label="Collapse sidebar" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
         </div>
         {collapsed && <button type="button" onClick={onToggle} aria-label="Expand sidebar" className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
-        <div className="mt-8">
+        <div className="mt-6 flex-1 overflow-y-auto pb-4 pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NavigationLinks collapsed={collapsed} />
         </div>
         <div className="mt-auto border-t border-slate-800 pt-5">
