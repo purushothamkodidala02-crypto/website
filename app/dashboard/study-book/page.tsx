@@ -53,37 +53,44 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
 
   const { data, error } = await supabase.rpc("get_student_study_book", { requested_kind: view });
   const rawRows = (data ?? []) as StudyRow[];
-  const questionIds = rawRows.map((row) => row.question_id);
-  const questionResult = questionIds.length
-    ? await supabase.from("questions").select("id, subject_id").in("id", questionIds)
-    : { data: [] };
-  const subjectIds = [...new Set((questionResult.data ?? []).map((item) => item.subject_id))];
-  const subjectResult = subjectIds.length
-    ? await supabase.from("subjects").select("id, paper_id, name").in("id", subjectIds)
-    : { data: [] };
-  const paperIds = [...new Set((subjectResult.data ?? []).map((item) => item.paper_id))];
-  const paperResult = paperIds.length
-    ? await supabase.from("papers").select("id, exam_group_id, name").in("id", paperIds)
-    : { data: [] };
-  const examIds = [...new Set((paperResult.data ?? []).map((item) => item.exam_group_id))];
-  const examResult = examIds.length
-    ? await supabase.from("exam_groups").select("id, exam_id, name").in("id", examIds)
-    : { data: [] };
-  const boardIds = [...new Set((examResult.data ?? []).map((item) => item.exam_id))];
-  const boardResult = boardIds.length
-    ? await supabase.from("exams").select("id, state_id").in("id", boardIds)
-    : { data: [] };
-  const stateIds = [...new Set((boardResult.data ?? []).map((item) => item.state_id))];
-  const stateResult = stateIds.length
-    ? await supabase.from("exam_states").select("id, name, code").in("id", stateIds)
-    : { data: [] };
-  const questionById = new Map((questionResult.data ?? []).map((item) => [item.id, item]));
-  const subjectById = new Map((subjectResult.data ?? []).map((item) => [item.id, item]));
-  const paperById = new Map((paperResult.data ?? []).map((item) => [item.id, item]));
-  const examById = new Map((examResult.data ?? []).map((item) => [item.id, item]));
-  const boardById = new Map((boardResult.data ?? []).map((item) => [item.id, item]));
-  const stateById = new Map((stateResult.data ?? []).map((item) => [item.id, item]));
+  
+  // The RPC already returns state_name, exam_name, paper_name, and subject_name.
+  // We only need to fetch missing data if the RPC failed to resolve some of them.
+  const rowsMissingData = rawRows.filter(r => !r.state_name || !r.exam_name || !r.paper_name || !r.subject_name);
+  
+  let questionById = new Map();
+  let subjectById = new Map();
+  let paperById = new Map();
+  let examById = new Map();
+  let boardById = new Map();
+  let stateById = new Map();
+
+  if (rowsMissingData.length > 0) {
+    const questionIds = rowsMissingData.map((row) => row.question_id);
+    const questionResult = await supabase.from("questions").select("id, subject_id").in("id", questionIds);
+    const subjectIds = [...new Set((questionResult.data ?? []).map((item) => item.subject_id))];
+    const subjectResult = subjectIds.length ? await supabase.from("subjects").select("id, paper_id, name").in("id", subjectIds) : { data: [] };
+    const paperIds = [...new Set((subjectResult.data ?? []).map((item) => item.paper_id))];
+    const paperResult = paperIds.length ? await supabase.from("papers").select("id, exam_group_id, name").in("id", paperIds) : { data: [] };
+    const examIds = [...new Set((paperResult.data ?? []).map((item) => item.exam_group_id))];
+    const examResult = examIds.length ? await supabase.from("exam_groups").select("id, exam_id, name").in("id", examIds) : { data: [] };
+    const boardIds = [...new Set((examResult.data ?? []).map((item) => item.exam_id))];
+    const boardResult = boardIds.length ? await supabase.from("exams").select("id, state_id").in("id", boardIds) : { data: [] };
+    const stateIds = [...new Set((boardResult.data ?? []).map((item) => item.state_id))];
+    const stateResult = stateIds.length ? await supabase.from("exam_states").select("id, name, code").in("id", stateIds) : { data: [] };
+    
+    questionById = new Map((questionResult.data ?? []).map((item) => [item.id, item]));
+    subjectById = new Map((subjectResult.data ?? []).map((item) => [item.id, item]));
+    paperById = new Map((paperResult.data ?? []).map((item) => [item.id, item]));
+    examById = new Map((examResult.data ?? []).map((item) => [item.id, item]));
+    boardById = new Map((boardResult.data ?? []).map((item) => [item.id, item]));
+    stateById = new Map((stateResult.data ?? []).map((item) => [item.id, item]));
+  }
+
   const rows = rawRows.map((row) => {
+    if (row.state_name && row.exam_name && row.paper_name && row.subject_name) {
+      return row;
+    }
     const question = questionById.get(row.question_id);
     const subjectLocation = question ? subjectById.get(question.subject_id) : undefined;
     const paperLocation = subjectLocation ? paperById.get(subjectLocation.paper_id) : undefined;

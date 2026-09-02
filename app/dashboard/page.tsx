@@ -60,11 +60,8 @@ export default async function Dashboard({
   const [
     attemptsResult,
     attemptSummaryResult,
-    latestAttemptsResult,
     subjectAnalyticsResult,
     availableTestsResult,
-    allTestsResult,
-    papersResult,
     catalog,
   ] = await Promise.all([
     supabase
@@ -76,13 +73,6 @@ export default async function Dashboard({
       .order("submitted_at", { ascending: false })
       .range((page - 1) * attemptsPerPage, page * attemptsPerPage - 1),
     supabase.rpc("get_student_attempt_history_summary"),
-    supabase
-      .from("test_attempts")
-      .select(
-        "id, mock_test_id, detailed_review_available, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
-      )
-      .order("submitted_at", { ascending: false })
-      .limit(5),
     supabase.rpc("get_student_subject_analytics"),
     supabase
       .from("mock_tests")
@@ -90,16 +80,11 @@ export default async function Dashboard({
       .eq("status", "published")
       .order("display_order", { ascending: true })
       .limit(4),
-    supabase.from("mock_tests").select("id, title"),
-    supabase
-      .from("papers")
-      .select("id, exam_group_id, specialization_id, name, display_order")
-      .eq("is_active", true),
     getMockTestCatalogData(),
   ]);
 
   const attempts = (attemptsResult.data ?? []) as Attempt[];
-  const latestAttempts = (latestAttemptsResult.data ?? []) as Attempt[];
+  const latestAttempts = page === 1 ? attempts.slice(0, 5) : []; // we only show latest attempts card on page 1 usually, or we can just use slice
   const attemptSummary = (attemptSummaryResult.data?.[0] ?? {
     completed_attempts: attemptsResult.count ?? 0,
     average_score: 0,
@@ -112,12 +97,8 @@ export default async function Dashboard({
   if (totalAttempts > 0 && page > totalPages) redirect(`/dashboard?page=${totalPages}`);
   const subjectAnalytics = (subjectAnalyticsResult.data ?? []) as SubjectAnalytics[];
   const availableTests = (availableTestsResult.data ?? []) as AvailableMockTest[];
-  const paperDisplayById = buildPaperDisplayMap(
-    (papersResult.data ?? []) as OrderedPaper[],
-  );
-  const testTitles = new Map(
-    (allTestsResult.data ?? []).map((test) => [test.id, test.title]),
-  );
+  const paperDisplayById = buildPaperDisplayMap(catalog.papers as OrderedPaper[]);
+  const testTitles = new Map(catalog.tests.map((test) => [test.id, test.title]));
   const catalogPaperById = new Map(catalog.papers.map((item) => [item.id, item]));
   const catalogExamById = new Map(catalog.exams.map((item) => [item.id, item]));
   const catalogCategoryById = new Map(catalog.categories.map((item) => [item.id, item]));
