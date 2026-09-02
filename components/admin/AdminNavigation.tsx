@@ -27,6 +27,7 @@ const sections = [
       { href: "/admin/access", label: "Exam series", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations", icon: "students" as const },
       { href: "/admin/results", label: "Results", icon: "results" as const },
+      { href: "/admin/surveys", label: "Surveys", icon: "reports" as const },
     ],
   },
 ];
