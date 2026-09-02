@@ -15,7 +15,7 @@ import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { AccountActionButton } from "@/components/exams/AccountActionButton";
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
 
@@ -66,22 +66,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
     description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
   });
   
-  const supabase = await createClient();
-  const [authResult, savedQuestions] = await Promise.all([
-    supabase.auth.getUser(),
-    getCachedFaqs(context.exam!.id),
-  ]);
-  
-  const user = authResult.data.user;
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
-    : { data: null };
-    
-  const accountAction = user
-    ? profile?.role === "admin"
-      ? { href: "/admin", label: "Admin workspace" }
-      : { href: "/dashboard", label: "Go to my progress" }
-    : { href: `/login?next=${encodeURIComponent(canonical)}`, label: "Sign in" };
+  const savedQuestions = await getCachedFaqs(context.exam!.id);
     
   const introduction = context.exam.description?.trim() || seo.description;
   const standardQuestions = [
@@ -118,7 +103,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
               <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {context.state.code} exam preparation</p>
               <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{context.exam.name} Mock Tests</h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{introduction}</p>
-              <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><Link href={accountAction.href} className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">{accountAction.label}</Link></div>
+              <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><AccountActionButton canonical={canonical} /></div>
             </div>
           </div>
         </div>
