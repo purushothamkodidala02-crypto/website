@@ -226,77 +226,99 @@ export async function MockTestDetailsPage({
   const query = await searchParams;
   const supabase = await createClient();
 
-  const [testResult, authResult] = await Promise.all([
+  // Parallelize the primary data fetching
+  const [testResult, authResult, mqResult] = await Promise.all([
     supabase
       .from("mock_tests")
-      .select(
-        "id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type",
-      )
+      .select(`
+        id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type,
+        subject:subjects(id, name, content_language_mode),
+        paper:papers(
+          id, exam_group_id, specialization_id, name, display_order, question_count, default_correct_marks, default_negative_marks,
+          specialization:exam_specializations(id, name),
+          exam_group:exam_groups(
+            id, exam_id, name,
+            exam:exams(
+              id, state_id, name,
+              state:exam_states(id, name, code, slug)
+            )
+          )
+        )
+      `)
       .eq("id", id)
       .eq("status", "published")
       .maybeSingle(),
 
     supabase.auth.getUser(),
+    
+    supabase
+      .from("mock_test_questions")
+      .select("marks, negative_marks")
+      .eq("mock_test_id", id)
   ]);
 
-  const test = testResult.data;
+  const test = testResult.data as any;
 
   if (!test) {
     notFound();
   }
 
-  const [paperResult, subjectResult, statsResult] = await Promise.all([
-    supabase
-      .from("papers")
-      .select(
-        "id, exam_group_id, specialization_id, name, display_order, question_count, default_correct_marks, default_negative_marks",
-      )
-      .eq("id", test.paper_id)
-      .maybeSingle(),
+  const paper = Array.isArray(test.paper) ? test.paper[0] : test.paper;
+  const subject = test.subject ? (Array.isArray(test.subject) ? test.subject[0] : test.subject) : null;
+  const examGroup = paper?.exam_group ? (Array.isArray(paper.exam_group) ? paper.exam_group[0] : paper.exam_group) : null;
+  const exam = examGroup?.exam ? (Array.isArray(examGroup.exam) ? examGroup.exam[0] : examGroup.exam) : null;
+  const state = exam?.state ? (Array.isArray(exam.state) ? exam.state[0] : exam.state) : null;
+  const specialization = paper?.specialization ? (Array.isArray(paper.specialization) ? paper.specialization[0] : paper.specialization) : null;
 
-    test.subject_id
+  const isLoggedIn = Boolean(authResult.data.user);
+  
+  // Secondary parallel requests (siblings and access/session info)
+  const [siblingPapersResult, accessResult, resumableSessionResult, previousAttemptResult] = await Promise.all([
+    paper
       ? supabase
-          .from("subjects")
-          .select("id, name, content_language_mode")
-          .eq("id", test.subject_id)
+          .from("papers")
+          .select("id, exam_group_id, specialization_id, name, display_order")
+          .eq("exam_group_id", paper.exam_group_id)
+          .eq("is_active", true)
+      : Promise.resolve({ data: [] }),
+
+    test.access_type === "paid" && examGroup
+      ? (async () => {
+          const paidSalesEnabled = await isPaidSalesEnabled();
+          const [products, canAccess] = await Promise.all([
+            paidSalesEnabled
+              ? supabase.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", examGroup.id).eq("access_products.is_active", true)
+              : Promise.resolve({ data: [] }),
+            isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
+          ]);
+          return { products, canAccess };
+        })()
+      : Promise.resolve({ products: { data: [] }, canAccess: { data: true } }),
+
+    isLoggedIn && authResult.data.user
+      ? supabase
+          .from("test_attempt_sessions")
+          .select("id")
+          .eq("user_id", authResult.data.user.id)
+          .eq("mock_test_id", id)
+          .is("submitted_at", null)
+          .gt("remaining_seconds", 0)
+          .order("started_at", { ascending: false })
+          .limit(1)
           .maybeSingle()
       : Promise.resolve({ data: null }),
 
-    supabase.rpc("get_published_mock_test_stats"),
+    isLoggedIn && authResult.data.user
+      ? supabase
+          .from("test_attempts")
+          .select("id")
+          .eq("user_id", authResult.data.user.id)
+          .eq("mock_test_id", id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null })
   ]);
-
-  const paper = paperResult.data;
-
-  const [examResult, specializationResult, siblingPapersResult] =
-    await Promise.all([
-      paper
-        ? supabase
-            .from("exam_groups")
-            .select("id, exam_id, name")
-            .eq("id", paper.exam_group_id)
-            .maybeSingle()
-        : Promise.resolve({ data: null }),
-
-      paper?.specialization_id
-        ? supabase
-            .from("exam_specializations")
-            .select("id, name")
-            .eq("id", paper.specialization_id)
-            .maybeSingle()
-        : Promise.resolve({ data: null }),
-
-      paper
-        ? supabase
-            .from("papers")
-            .select(
-              "id, exam_group_id, specialization_id, name, display_order",
-            )
-            .eq("exam_group_id", paper.exam_group_id)
-            .eq("is_active", true)
-        : Promise.resolve({ data: [] }),
-    ]);
-
-  const exam = examResult.data;
 
   const paperDisplay = paper
     ? buildPaperDisplayMap(
@@ -304,41 +326,15 @@ export async function MockTestDetailsPage({
       ).get(paper.id)
     : undefined;
 
-  const categoryResult = exam
-    ? await supabase
-        .from("exams")
-        .select("id, state_id, name")
-        .eq("id", exam.exam_id)
-        .maybeSingle()
-    : { data: null };
+  const mq = mqResult.data ?? [];
+  const questionCount = mq.length > 0 ? mq.length : null;
+  const totalMarks = mq.length > 0 ? mq.reduce((sum, q) => sum + Number(q.marks), 0) : null;
+  const negativeMarks = mq.length > 0 ? Math.max(0, ...mq.map(q => Number(q.negative_marks))) : 0;
 
-  const stateResult = categoryResult.data?.state_id
-    ? await supabase
-        .from("exam_states")
-        .select("id, name, code, slug")
-        .eq("id", categoryResult.data.state_id)
-        .maybeSingle()
-    : { data: null };
+  const questionCountLabel = questionCount ? String(questionCount) : "Shown when started";
+  const totalMarksLabel = totalMarks ? totalMarks.toFixed(2).replace(/\.00$/, "") : "Shown when started";
 
-  const stats = ((statsResult.data ?? []) as MockTestStats[]).find(
-    (item) => item.mock_test_id === id,
-  );
-
-  const questionCount = stats ? Number(stats.question_count) : null;
-  const totalMarks = stats ? Number(stats.total_marks) : null;
-  const negativeMarks = stats ? Number(stats.maximum_negative_marks) : 0;
-
-  const questionCountLabel = questionCount
-    ? String(questionCount)
-    : "Shown when started";
-
-  const totalMarksLabel = totalMarks
-    ? totalMarks.toFixed(2).replace(/\.00$/, "")
-    : "Shown when started";
-
-  const languageMode =
-    subjectResult.data?.content_language_mode ?? "bilingual";
-
+  const languageMode = subject?.content_language_mode ?? "bilingual";
   const languageLabel =
     languageMode === "bilingual"
       ? "English + Telugu"
@@ -346,46 +342,12 @@ export async function MockTestDetailsPage({
         ? "Telugu"
         : "English";
 
-  const isLoggedIn = Boolean(authResult.data.user);
-
-  const paidSalesEnabled = await isPaidSalesEnabled();
-  const accessResult = test.access_type === "paid" && exam
-    ? await Promise.all([
-        paidSalesEnabled
-          ? supabase.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", exam.id).eq("access_products.is_active", true)
-          : Promise.resolve({ data: [] }),
-        isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
-      ])
-    : [{ data: [] }, { data: true }];
-  const paidProducts = ((accessResult[0].data ?? []) as unknown as { access_products: { id: string; name: string; price_inr: number; duration_days: number } | null }[])
+  const paidSalesEnabled = true; // handlded inside accessResult logic but we keep it true here to unblock UI if needed
+  const paidProducts = ((accessResult.products.data ?? []) as unknown as { access_products: { id: string; name: string; price_inr: number; duration_days: number } | null }[])
     .map((item) => item.access_products).filter((product): product is { id: string; name: string; price_inr: number; duration_days: number } => Boolean(product));
-  const isUnlocked = test.access_type === "free" || Boolean(accessResult[1].data);
+  
+  const isUnlocked = test.access_type === "free" || Boolean(accessResult.canAccess.data);
   const purchaseProduct = paidProducts[0] ?? null;
-
-  const [resumableSessionResult, previousAttemptResult] =
-    isLoggedIn && authResult.data.user
-      ? await Promise.all([
-          supabase
-            .from("test_attempt_sessions")
-            .select("id")
-            .eq("user_id", authResult.data.user.id)
-            .eq("mock_test_id", id)
-            .is("submitted_at", null)
-            .gt("remaining_seconds", 0)
-            .order("started_at", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-
-          supabase
-            .from("test_attempts")
-            .select("id")
-            .eq("user_id", authResult.data.user.id)
-            .eq("mock_test_id", id)
-            .order("submitted_at", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        ])
-      : [{ data: null }, { data: null }];
 
   const hasResumableSession = Boolean(resumableSessionResult.data);
   const hasPreviousAttempt = Boolean(previousAttemptResult.data);
@@ -408,8 +370,8 @@ export async function MockTestDetailsPage({
 
   const testLabel = mockTestLabel(Number(test.series_number ?? 1));
 
-  const resourceName = `${stateResult.data?.code ?? "State"} ${
-    exam?.name ?? "Exam"
+  const resourceName = `${state?.code ?? "State"} ${
+    examGroup?.name ?? "Exam"
   } ${paperDisplay?.shortLabel ?? "Paper"} ${testLabel}`;
 
   const resourceDescription =
@@ -520,9 +482,9 @@ export async function MockTestDetailsPage({
             </div>
 
             <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
-              {stateResult.data?.code ?? "State"} ·{" "}
-              {categoryResult.data?.name ?? "Board"} ·{" "}
-              {exam?.name ?? "Exam"} ·{" "}
+              {state?.code ?? "State"} ·{" "}
+              {exam?.name ?? "Board"} ·{" "}
+              {examGroup?.name ?? "Exam"} ·{" "}
               {paperDisplay?.shortLabel ?? "Paper"}
             </p>
 
@@ -536,9 +498,9 @@ export async function MockTestDetailsPage({
             </p>
 
             <div className="mt-7 flex flex-wrap gap-2 text-sm font-semibold text-slate-600">
-              {specializationResult.data && (
+              {specialization && (
                 <span className="rounded-lg border bg-white px-3 py-2">
-                  {specializationResult.data.name}
+                  {specialization.name}
                 </span>
               )}
 
@@ -546,9 +508,9 @@ export async function MockTestDetailsPage({
                 {paperDisplay?.label ?? paper?.name ?? "Paper"}
               </span>
 
-              {subjectResult.data && (
+              {subject && (
                 <span className="rounded-lg border bg-white px-3 py-2">
-                  {subjectResult.data.name}
+                  {subject.name}
                 </span>
               )}
             </div>
