@@ -10,6 +10,7 @@ export default function AdminSurveysList() {
   const [surveys, setSurveys] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTitle, setNewTitle] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -26,9 +27,12 @@ export default function AdminSurveysList() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    const { id } = await createAdminSurvey(newTitle);
-    if (id) {
-      router.push(`/admin/surveys/${id}`);
+    setErrorMsg("");
+    const res = await createAdminSurvey(newTitle);
+    if (res.id) {
+      router.push(`/admin/surveys/${res.id}`);
+    } else if (res.error) {
+      setErrorMsg(res.error);
     }
   };
 
@@ -48,6 +52,7 @@ export default function AdminSurveysList() {
 
       <div className="mb-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-bold text-slate-900">Create New Survey</h2>
+        {errorMsg && <div className="mt-2 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-800">{errorMsg}</div>}
         <form onSubmit={handleCreate} className="mt-4 flex gap-3">
           <input
             type="text"
