@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, TouchEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
@@ -32,6 +32,8 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   const router = useRouter();
   const searchParams = useSearchParams();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Sync state if URL changes externally
   useEffect(() => {
@@ -49,6 +51,27 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
     const params = new URLSearchParams(searchParams.toString());
     params.set("item", String(newIndex + 1));
     router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  const onTouchStart = (e: TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    
+    if (distance > minSwipeDistance && currentIndex < rows.length - 1) {
+      handleNavigate(currentIndex + 1);
+    } else if (distance < -minSwipeDistance && currentIndex > 0) {
+      handleNavigate(currentIndex - 1);
+    }
   };
 
   const currentRow = rows[currentIndex];
@@ -70,7 +93,12 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           <span className="rounded-lg bg-slate-200 px-3 py-2 text-xs font-black text-slate-400">Next →</span>
         )}
       </div>
-      <div className="max-h-[64vh] overflow-y-auto overscroll-contain p-3 sm:max-h-[72vh] sm:p-5">
+      <div 
+        className="max-h-[64vh] overflow-y-auto overscroll-contain p-3 sm:max-h-[72vh] sm:p-5"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <StudyQuestionCard key={currentRow.question_id} row={currentRow} index={currentIndex} />
       </div>
       <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 py-3">
