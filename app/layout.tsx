@@ -63,8 +63,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full bg-white text-gray-900">
+    <html lang="en" className={`${inter.variable} antialiased`}>
+      <body className="min-h-screen bg-white text-gray-900">
         <PostHogProvider>
           <NavigationProgress />
           {children}
