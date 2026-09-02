@@ -48,10 +48,16 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   const query = await searchParams;
   const view = query.view === "bookmarks" ? "bookmarks" : "mistakes";
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  
+  const [authResult, rpcResult] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.rpc("get_student_study_book", { requested_kind: view })
+  ]);
+  
+  const { data: { user } } = authResult;
   if (!user) redirect("/login?next=/dashboard/study-book");
 
-  const { data, error } = await supabase.rpc("get_student_study_book", { requested_kind: view });
+  const { data, error } = rpcResult;
   const rawRows = (data ?? []) as StudyRow[];
   
   // The RPC already returns state_name, exam_name, paper_name, and subject_name.

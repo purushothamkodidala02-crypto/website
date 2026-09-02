@@ -54,16 +54,16 @@ export default async function Dashboard({
   const requestedPage = Number(query.page ?? "1");
   const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/dashboard");
 
   const [
+    authResult,
     attemptsResult,
     attemptSummaryResult,
     subjectAnalyticsResult,
     availableTestsResult,
     catalog,
   ] = await Promise.all([
+    supabase.auth.getUser(),
     supabase
       .from("test_attempts")
       .select(
@@ -82,6 +82,9 @@ export default async function Dashboard({
       .limit(4),
     getMockTestCatalogData(),
   ]);
+
+  const { data: { user } } = authResult;
+  if (!user) redirect("/login?next=/dashboard");
 
   const attempts = (attemptsResult.data ?? []) as Attempt[];
   const latestAttempts = page === 1 ? attempts.slice(0, 5) : []; // we only show latest attempts card on page 1 usually, or we can just use slice
