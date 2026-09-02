@@ -5,6 +5,8 @@ import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { mockTestUrl } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveSurvey } from "@/app/actions/surveys";
+import { SurveyPopup } from "@/components/dashboard/SurveyPopup";
 
 type Attempt = {
   id: string;
@@ -62,6 +64,7 @@ export default async function Dashboard({
     subjectAnalyticsResult,
     availableTestsResult,
     catalog,
+    activeSurvey,
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -81,6 +84,7 @@ export default async function Dashboard({
       .order("display_order", { ascending: true })
       .limit(4),
     getMockTestCatalogData(),
+    getActiveSurvey(),
   ]);
 
   const { data: { user } } = authResult;
@@ -144,6 +148,7 @@ export default async function Dashboard({
   return (
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
+      <SurveyPopup survey={activeSurvey as any} />
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
         <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
