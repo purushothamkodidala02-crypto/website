@@ -55,42 +55,56 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
 
   if (rowsMissingData.length > 0) {
     const questionIds = rowsMissingData.map((row) => row.question_id);
-    const questionResult = await supabase.from("questions").select("id, subject_id").in("id", questionIds);
-    const subjectIds = [...new Set((questionResult.data ?? []).map((item) => item.subject_id))];
-    const subjectResult = subjectIds.length ? await supabase.from("subjects").select("id, paper_id, name").in("id", subjectIds) : { data: [] };
-    const paperIds = [...new Set((subjectResult.data ?? []).map((item) => item.paper_id))];
-    const paperResult = paperIds.length ? await supabase.from("papers").select("id, exam_group_id, name").in("id", paperIds) : { data: [] };
-    const examIds = [...new Set((paperResult.data ?? []).map((item) => item.exam_group_id))];
-    const examResult = examIds.length ? await supabase.from("exam_groups").select("id, exam_id, name").in("id", examIds) : { data: [] };
-    const boardIds = [...new Set((examResult.data ?? []).map((item) => item.exam_id))];
-    const boardResult = boardIds.length ? await supabase.from("exams").select("id, state_id").in("id", boardIds) : { data: [] };
-    const stateIds = [...new Set((boardResult.data ?? []).map((item) => item.state_id))];
-    const stateResult = stateIds.length ? await supabase.from("exam_states").select("id, name, code").in("id", stateIds) : { data: [] };
-    
-    questionById = new Map((questionResult.data ?? []).map((item) => [item.id, item]));
-    subjectById = new Map((subjectResult.data ?? []).map((item) => [item.id, item]));
-    paperById = new Map((paperResult.data ?? []).map((item) => [item.id, item]));
-    examById = new Map((examResult.data ?? []).map((item) => [item.id, item]));
-    boardById = new Map((boardResult.data ?? []).map((item) => [item.id, item]));
-    stateById = new Map((stateResult.data ?? []).map((item) => [item.id, item]));
+    const questionResult = await supabase
+      .from("questions")
+      .select(`
+        id,
+        subject:subjects (
+          name,
+          paper:papers (
+            name,
+            exam_group:exam_groups (
+              name,
+              exam:exams (
+                state:exam_states (
+                  name,
+                  code
+                )
+              )
+            )
+          )
+        )
+      `)
+      .in("id", questionIds);
+      
+    for (const item of (questionResult.data ?? []) as any[]) {
+      const subject = Array.isArray(item.subject) ? item.subject[0] : item.subject;
+      if (!subject) continue;
+      const paper = Array.isArray(subject.paper) ? subject.paper[0] : subject.paper;
+      const examGroup = paper ? (Array.isArray(paper.exam_group) ? paper.exam_group[0] : paper.exam_group) : null;
+      const exam = examGroup ? (Array.isArray(examGroup.exam) ? examGroup.exam[0] : examGroup.exam) : null;
+      const state = exam ? (Array.isArray(exam.state) ? exam.state[0] : exam.state) : null;
+
+      questionById.set(item.id, {
+        subjectName: subject?.name,
+        paperName: paper?.name,
+        examName: examGroup?.name,
+        stateName: state ? `${state.code} · ${state.name}` : null
+      });
+    }
   }
 
   const rows = rawRows.map((row) => {
     if (row.state_name && row.exam_name && row.paper_name && row.subject_name) {
       return row;
     }
-    const question = questionById.get(row.question_id);
-    const subjectLocation = question ? subjectById.get(question.subject_id) : undefined;
-    const paperLocation = subjectLocation ? paperById.get(subjectLocation.paper_id) : undefined;
-    const examLocation = paperLocation ? examById.get(paperLocation.exam_group_id) : undefined;
-    const boardLocation = examLocation ? boardById.get(examLocation.exam_id) : undefined;
-    const stateLocation = boardLocation ? stateById.get(boardLocation.state_id) : undefined;
+    const loc = questionById.get(row.question_id);
     return {
       ...row,
-      state_name: row.state_name || (stateLocation ? `${stateLocation.code} · ${stateLocation.name}` : "Other catalogue"),
-      exam_name: row.exam_name || examLocation?.name || "Other exam",
-      paper_name: row.paper_name || paperLocation?.name || "Other paper",
-      subject_name: row.subject_name || subjectLocation?.name || "Other subject",
+      state_name: row.state_name || loc?.stateName || "Other catalogue",
+      exam_name: row.exam_name || loc?.examName || "Other exam",
+      paper_name: row.paper_name || loc?.paperName || "Other paper",
+      subject_name: row.subject_name || loc?.subjectName || "Other subject",
     };
   });
   
