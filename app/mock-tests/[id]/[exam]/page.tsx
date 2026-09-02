@@ -13,6 +13,8 @@ import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionM
 import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
@@ -28,6 +30,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   });
   return publicCollectionMetadata({ ...seo, canonical, indexable: isIndexableCollectionQuery(await searchParams) });
 }
+
+const getCachedFaqs = unstable_cache(
+  async (examId: string) => {
+    const admin = createAdminClient();
+    const { data } = await admin.from("exam_page_faqs").select("id, question, answer, display_order").eq("exam_group_id", examId).order("display_order");
+    return data;
+  },
+  ["exam-faqs"],
+  { revalidate: 300 }
+);
 
 export default async function ExamPage({ params, searchParams }: Props) {
   const { id, exam } = await params;
@@ -53,24 +65,25 @@ export default async function ExamPage({ params, searchParams }: Props) {
     title: `${context.exam.name} Mock Tests in ${context.state.name}`,
     description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
   });
+  
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [authResult, savedQuestions] = await Promise.all([
+    supabase.auth.getUser(),
+    getCachedFaqs(context.exam!.id),
+  ]);
+  
+  const user = authResult.data.user;
   const { data: profile } = user
     ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
     : { data: null };
+    
   const accountAction = user
     ? profile?.role === "admin"
       ? { href: "/admin", label: "Admin workspace" }
       : { href: "/dashboard", label: "Go to my progress" }
-    : { href: `/login?next=${encodeURIComponent(canonical)}`, label: "Sign" };
+    : { href: `/login?next=${encodeURIComponent(canonical)}`, label: "Sign in" };
+    
   const introduction = context.exam.description?.trim() || seo.description;
-  const { data: savedQuestions } = await supabase
-    .from("exam_page_faqs")
-    .select("id, question, answer, display_order")
-    .eq("exam_group_id", context.exam.id)
-    .order("display_order");
   const standardQuestions = [
     { question: `Where can I take ${context.exam.name} mock tests?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: 0 },
     { question: `How many ${context.exam.name} mock tests are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: 1 },
