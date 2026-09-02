@@ -26,14 +26,24 @@ export function SurveyPopup({ survey }: { survey: ActiveSurvey | null }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("SurveyPopup mounted. Survey data from server:", survey);
     if (!survey) return;
     
     // Check if they already completed or dismissed this specific survey
     const storageKey = `survey_completed_${survey.id}`;
-    if (!localStorage.getItem(storageKey)) {
+    const hasCompleted = localStorage.getItem(storageKey);
+    console.log("Has completed in localStorage?", hasCompleted);
+    
+    if (!hasCompleted) {
       // Small delay so it doesn't pop up instantly on page load
-      const timer = setTimeout(() => setIsOpen(true), 1500);
+      console.log("Starting 1.5s timer for popup...");
+      const timer = setTimeout(() => {
+        console.log("Timer finished, opening popup!");
+        setIsOpen(true);
+      }, 1500);
       return () => clearTimeout(timer);
+    } else {
+      console.log("Popup blocked because user already completed/dismissed it.");
     }
   }, [survey]);
 
