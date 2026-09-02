@@ -3,12 +3,13 @@
 import { useState, useEffect, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { saveSurveyQuestion, deleteSurveyQuestion } from "@/app/actions/surveys-admin";
-import Link from "next/link";
+import { BackButton } from "@/components/admin/BackButton";
 
 export default function AdminSurveyEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id: surveyId } = use(params);
   const [survey, setSurvey] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
+
   const [responses, setResponses] = useState<any[]>([]);
   
   // New Question Form
@@ -66,7 +67,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <Link href="/admin/surveys" className="mb-4 inline-block text-sm font-bold text-teal-600 hover:underline">← Back to Surveys</Link>
+      <BackButton fallbackHref="/admin/surveys" label="← Back to Surveys" className="mb-4 inline-block text-sm font-bold text-teal-600 hover:underline" />
       
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-black text-slate-900">{survey.title}</h1>
