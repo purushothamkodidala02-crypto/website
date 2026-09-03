@@ -34,7 +34,7 @@ function buildContentSecurityPolicy(nonce?: string) {
   ].join("; ");
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const permanentDestination = await resolvePublicPermanentRedirect(request);
   if (permanentDestination === "not-found") {
     return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
