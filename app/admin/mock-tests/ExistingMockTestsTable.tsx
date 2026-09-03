@@ -128,6 +128,22 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const router = useRouter();
   
   useEffect(() => {
+    setStateId(initialStateId);
+  }, [initialStateId]);
+
+  useEffect(() => {
+    setLocation(initialLocation);
+  }, [initialLocation.categoryId, initialLocation.examId, initialLocation.specializationId, initialLocation.paperId]);
+
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
+  useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
+
+  useEffect(() => {
     router.replace(mockTestAdminUrl, { scroll: false });
   }, [mockTestAdminUrl, router]);
 

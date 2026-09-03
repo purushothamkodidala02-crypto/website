@@ -59,10 +59,10 @@ export default async function MockTestsPage({
   const specializationOptions = specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }));
   const paperOptions = papers.map((item) => ({ id: item.id, examId: item.exam_group_id, specializationId: item.specialization_id, name: item.name, duration: item.duration_minutes, questionCount: item.question_count }));
   const stateId = states.some((item) => item.id === query.state) ? query.state ?? "" : "";
-  const categoryId = categoryOptions.some((item) => item.id === query.category && item.stateId === stateId) ? query.category ?? "" : "";
-  const examId = examOptions.some((item) => item.id === query.exam && item.categoryId === categoryId) ? query.exam ?? "" : "";
-  const specializationId = specializationOptions.some((item) => item.id === query.specialization && item.examId === examId) ? query.specialization ?? "" : "";
-  const paperId = paperOptions.some((item) => item.id === query.paper && item.examId === examId && item.specializationId === (specializationId || null)) ? query.paper ?? "" : "";
+  const categoryId = categoryOptions.some((item) => item.id === query.category && (!stateId || item.stateId === stateId)) ? query.category ?? "" : "";
+  const examId = examOptions.some((item) => item.id === query.exam && (!categoryId || item.categoryId === categoryId)) ? query.exam ?? "" : "";
+  const specializationId = specializationOptions.some((item) => item.id === query.specialization && (!examId || item.examId === examId)) ? query.specialization ?? "" : "";
+  const paperId = paperOptions.some((item) => item.id === query.paper && (!examId || item.examId === examId) && (!specializationId || item.specializationId === specializationId)) ? query.paper ?? "" : "";
   const initialStatus: MockTestStatus | "all" = query.status === "draft" || query.status === "published" || query.status === "archived" ? query.status : "all";
   const initialSearch = String(query.q ?? "").trim().slice(0, 100);
   const initialLocation = { categoryId, examId, specializationId, paperId, subjectId: "" };
@@ -119,7 +119,7 @@ export default async function MockTestsPage({
       <WorkflowStep number="4" title="Choose access" detail="Set the test to Free or Paid series." />
       <WorkflowStep number="5" title="Publish" detail="Publishing is the final student visibility control." />
     </section>
-    {testsResult.error || statesResult.error || summariesResult.error ? <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{testsResult.error?.message ?? statesResult.error?.message ?? summariesResult.error?.message}</p> : <ExistingMockTestsTable states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} tests={mappedTests} initialStateId={stateId} initialLocation={initialLocation} initialSearch={initialSearch} initialStatus={initialStatus} />}
+    {testsResult.error || statesResult.error || summariesResult.error ? <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{testsResult.error?.message ?? statesResult.error?.message ?? summariesResult.error?.message}</p> : <ExistingMockTestsTable key={`${stateId}-${categoryId}-${examId}-${specializationId}-${paperId}-${initialStatus}-${initialSearch}`} states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} tests={mappedTests} initialStateId={stateId} initialLocation={initialLocation} initialSearch={initialSearch} initialStatus={initialStatus} />}
     <details className="mt-8 overflow-hidden rounded-3xl border border-teal-200 bg-gradient-to-br from-white to-teal-50 shadow-sm"><summary className="cursor-pointer list-none px-7 py-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Create</p><h2 className="font-display mt-2 text-xl">+ Create the next mock test</h2><p className="mt-1 text-sm text-slate-600">A guided workflow keeps the state, exam, paper and test series correct.</p></summary><div className="border-t border-teal-100 px-4 pb-7 sm:px-7"><CreateMockTestForm states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))} existingSeries={tests.map((test) => ({ paperId: test.paper_id, subjectId: test.subject_id, scope: test.test_scope as "paper" | "subject", seriesNumber: Number(test.series_number ?? 1) }))} /></div></details>
   </main>;
 }
