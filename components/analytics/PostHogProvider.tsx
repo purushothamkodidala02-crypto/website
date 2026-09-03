@@ -5,17 +5,15 @@ import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+    person_profiles: "identified_only", 
+    capture_pageview: false, // We handle this manually in PostHogPageView
+  });
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    // Only initialize PostHog on the client side if the key is provided in the environment
-    if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-        person_profiles: "identified_only", 
-        capture_pageview: false, // We handle this manually in PostHogPageView
-      });
-    }
-  }, []);
 
   useEffect(() => {
     import("@/lib/supabase/client").then(({ createClient }) => {
