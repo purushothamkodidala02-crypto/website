@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   LocationFilters,
   type LocationCategory,
@@ -124,9 +125,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     return query ? `/admin/mock-tests?${query}` : "/admin/mock-tests";
   }, [location, search, stateId, status]);
 
+  const router = useRouter();
+  
   useEffect(() => {
-    window.history.replaceState(window.history.state, "", mockTestAdminUrl);
-  }, [mockTestAdminUrl]);
+    router.replace(mockTestAdminUrl, { scroll: false });
+  }, [mockTestAdminUrl, router]);
 
   return (
     <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-lg shadow-slate-950/[0.04]">
