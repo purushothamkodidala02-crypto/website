@@ -200,11 +200,15 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
   return <main className="student-page min-h-screen bg-slate-100 pb-8">
-    <header className="sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2.5 text-white shadow-lg sm:px-8">
+    <header className="sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2 sm:py-2.5 text-white shadow-lg sm:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex items-center justify-between gap-3 sm:hidden">
+          <p className="truncate text-xs font-semibold text-slate-300">{title}</p>
+          <PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} />
+        </div>
+        <div className="hidden flex-col gap-2 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-400 sm:text-sm">{title}</p><h1 className="mt-0.5 whitespace-nowrap text-base font-black sm:text-lg">Question {index + 1} <span className="text-slate-400">of {questions.length}</span></h1></div>
-          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end"><button type="button" onClick={() => setNavigatorOpen(true)} aria-label={`Open Question navigator, Question ${index + 1} of ${questions.length}`} className="whitespace-nowrap rounded-xl border border-slate-700 px-3 py-2.5 text-xs font-bold lg:hidden">Questions <span className="text-teal-200">{index + 1}/{questions.length}</span></button><PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} /></div>
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end"><PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} /></div>
         </div>
         <div className="mt-2 flex items-center gap-3"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-700"><div className="h-full rounded-full bg-teal-300 transition-all" style={{ width: `${Math.round((answered / questions.length) * 100)}%` }} /></div><span className={`text-[11px] font-bold ${saveState === "error" ? "text-red-300" : "text-teal-100"}`}>{saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Answers saved"}</span></div>
       </div>
@@ -267,7 +271,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       </div>
     </div>
 
-    {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} />}
+    {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} questions={questions} answers={answers as any} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
   </main>;
 }
 
