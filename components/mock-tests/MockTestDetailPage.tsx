@@ -231,7 +231,7 @@ export async function MockTestDetailsPage({
     supabase
       .from("mock_tests")
       .select(`
-        id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type,
+        id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
         subject:subjects(id, name, content_language_mode),
         paper:papers(
           id, exam_group_id, specialization_id, name, display_order, question_count, default_correct_marks, default_negative_marks,
@@ -327,9 +327,18 @@ export async function MockTestDetailsPage({
     : undefined;
 
   const mq = mqResult.data ?? [];
-  const questionCount = mq.length > 0 ? mq.length : null;
-  const totalMarks = mq.length > 0 ? mq.reduce((sum, q) => sum + Number(q.marks), 0) : null;
-  const negativeMarks = mq.length > 0 ? Math.max(0, ...mq.map(q => Number(q.negative_marks))) : 0;
+  const configuredQuestionCount = Number(test.target_question_count ?? paper?.question_count ?? 0);
+  const questionCount = mq.length > 0 ? mq.length : (configuredQuestionCount > 0 ? configuredQuestionCount : null);
+  
+  const defaultCorrectMarks = Number(paper?.default_correct_marks ?? 0);
+  const totalMarks = mq.length > 0 
+    ? mq.reduce((sum, q) => sum + Number(q.marks), 0) 
+    : (questionCount !== null && defaultCorrectMarks > 0 ? questionCount * defaultCorrectMarks : null);
+    
+  const defaultNegativeMarks = Number(paper?.default_negative_marks ?? 0);
+  const negativeMarks = mq.length > 0 
+    ? Math.max(0, ...mq.map(q => Number(q.negative_marks))) 
+    : defaultNegativeMarks;
 
   const questionCountLabel = questionCount ? String(questionCount) : "Shown when started";
   const totalMarksLabel = totalMarks ? totalMarks.toFixed(2).replace(/\.00$/, "") : "Shown when started";
