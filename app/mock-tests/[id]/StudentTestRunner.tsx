@@ -210,10 +210,25 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       </div>
     </header>
 
-      <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
+      <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8 pb-24 lg:pb-8">
       {pauseError && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{pauseError}</p>}
       {paused && <p className="mb-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
-      {navigatorOpen && <section className="mb-5 rounded-3xl border bg-white p-5 shadow-sm lg:hidden"><button type="button" onClick={() => setNavigatorOpen(false)} className="float-right text-xs font-bold text-slate-500">Close</button>{navigator}</section>}
+      
+      {/* Mobile Navigator Overlay */}
+      {navigatorOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/50 backdrop-blur-sm lg:hidden">
+          <div className="mt-auto max-h-[85vh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <h2 className="text-lg font-black text-slate-900">Questions</h2>
+              <button type="button" onClick={() => setNavigatorOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            </div>
+            <div className="p-5">{navigator}</div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
         <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">Multiple choice question</p><p className="mt-1 text-xs font-semibold text-slate-500">{current.marks} mark{Number(current.marks) === 1 ? "" : "s"}{Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}</p></div>{bilingual && <div className="rounded-lg bg-slate-100 p-1 text-xs font-bold"><button type="button" onClick={() => setLanguage("en")} className={`rounded-md px-3 py-1.5 ${language === "en" ? "bg-white shadow-sm" : "text-slate-600"}`}>English</button><button type="button" onClick={() => setLanguage("te")} className={`rounded-md px-3 py-1.5 ${language === "te" ? "bg-white shadow-sm" : "text-slate-600"}`}>తెలుగు</button></div>}</div>
@@ -225,7 +240,27 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
         <aside className="hidden h-[calc(100vh-7rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:block">{navigator}</aside>
       </div>
       {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
-      <div className="mt-6 flex justify-between gap-3"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border bg-white px-5 py-3 text-sm font-bold disabled:opacity-40">Previous</button>{index === questions.length - 1 ? <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">Review & finish</button> : <button type="button" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">Save & next</button>}</div>
+      
+      {/* Fixed Bottom Navigation for Mobile / Inline for Desktop */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:static lg:mt-6 lg:border-t-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+        <button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 shadow-sm disabled:opacity-40 lg:border-0 lg:shadow-none lg:border lg:bg-white lg:py-3">
+          Previous
+        </button>
+        
+        <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl bg-teal-50 px-5 py-3.5 text-sm font-bold text-teal-800 lg:hidden">
+          {index + 1} / {questions.length}
+        </button>
+
+        {index === questions.length - 1 ? (
+          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm disabled:opacity-50 lg:py-3">
+            Review & finish
+          </button>
+        ) : (
+          <button type="button" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-6 py-3.5 text-sm font-bold text-white shadow-sm disabled:opacity-50 lg:py-3">
+            Save & next
+          </button>
+        )}
+      </div>
     </div>
 
     {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} />}
@@ -251,7 +286,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
       </div>
 
       <div className="mt-4 max-h-[45vh] min-h-0 overflow-y-auto overscroll-contain pr-1 lg:max-h-none lg:flex-1">
-        <div className="grid grid-cols-5 gap-2 lg:grid-cols-4">
+        <div className="flex flex-wrap gap-2">
           {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);
             const answered = Boolean(answers[item.question_id]);
@@ -261,7 +296,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
                 type="button"
                 disabled={locked}
                 onClick={() => onSelect(index)}
-                className={`grid aspect-square place-items-center rounded-lg text-xs font-black ${index === currentIndex ? "bg-slate-950 text-white ring-2 ring-teal-300 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}
+                className={`flex h-11 w-11 items-center justify-center rounded-lg text-xs font-black ${index === currentIndex ? "bg-slate-950 text-white ring-2 ring-teal-300 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}
               >
                 {index + 1}
               </button>
