@@ -476,83 +476,85 @@ export async function MockTestDetailsPage({
           ← Back to mock tests
         </Link>
 
-        <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
-          <section>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                {test.access_type === "free" ? "Free" : "Premium series"}
-              </span>
+        <div className="mt-7">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+              {test.access_type === "free" ? "Free" : "Premium series"}
+            </span>
 
-              <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
-                {test.test_scope === "paper"
-                  ? "Full-length Paper test"
-                  : "Subject test"}
-              </span>
-            </div>
+            <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+              {test.test_scope === "paper"
+                ? "Full-length Paper test"
+                : "Subject test"}
+            </span>
+          </div>
 
-            <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
-              {state?.code ?? "State"} ·{" "}
-              {exam?.name ?? "Board"} ·{" "}
-              {examGroup?.name ?? "Exam"} ·{" "}
-              {paperDisplay?.shortLabel ?? "Paper"}
-            </p>
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
+            {state?.code ?? "State"} ·{" "}
+            {exam?.name ?? "Board"} ·{" "}
+            {examGroup?.name ?? "Exam"} ·{" "}
+            {paperDisplay?.shortLabel ?? "Paper"}
+          </p>
 
-            <h1 className="font-display mt-3 text-4xl leading-tight tracking-tight text-slate-950 sm:text-5xl">
-              {resourceName}
-            </h1>
+          <h1 className="font-display mt-3 text-3xl leading-tight tracking-tight text-slate-950 sm:text-5xl">
+            {resourceName}
+          </h1>
 
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-              {test.description ??
-                "A focused Varadhi Prep mock test designed to strengthen your exam preparation."}
-            </p>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">
+            {test.description ??
+              "A focused Varadhi Prep mock test designed to strengthen your exam preparation."}
+          </p>
 
-            <div className="mt-7 flex flex-wrap gap-2 text-sm font-semibold text-slate-600">
-              {specialization && (
-                <span className="rounded-lg border bg-white px-3 py-2">
-                  {specialization.name}
-                </span>
-              )}
-
+          <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold text-slate-600 sm:mt-7 sm:text-sm">
+            {specialization && (
               <span className="rounded-lg border bg-white px-3 py-2">
-                {paperDisplay?.label ?? paper?.name ?? "Paper"}
+                {specialization.name}
               </span>
+            )}
 
-              {subject && (
-                <span className="rounded-lg border bg-white px-3 py-2">
-                  {subject.name}
-                </span>
-              )}
-            </div>
+            <span className="rounded-lg border bg-white px-3 py-2">
+              {paperDisplay?.label ?? paper?.name ?? "Paper"}
+            </span>
 
-            <section className="student-card mt-10 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-              <h2 className="text-2xl font-black">Before you begin</h2>
+            {subject && (
+              <span className="rounded-lg border bg-white px-3 py-2">
+                {subject.name}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-8 flex flex-col-reverse gap-8 lg:grid lg:grid-cols-[1fr_22rem] lg:items-start">
+          <section className="space-y-6 sm:space-y-8">
+            <section className="student-card rounded-3xl border bg-white p-5 shadow-sm sm:p-8">
+              <h2 className="text-xl font-black sm:text-2xl">Before you begin</h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Review the test rules now. The timer starts only after you
                 select the start button.
               </p>
 
-              <div className="student-stagger mt-7 grid gap-4 sm:grid-cols-2">
+              <div className="student-stagger mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:gap-4">
                 {testSummaryMetrics.map(([label, value]) => (
-                  <div key={label} className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  <div key={label} className="rounded-2xl bg-slate-50 p-3 sm:p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">
                       {label}
                     </p>
-                    <p className="mt-2 font-black text-slate-950">{value}</p>
+                    <p className="mt-1 text-sm font-black text-slate-950 sm:mt-2 sm:text-base">{value}</p>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="student-card mt-6 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-              <h2 className="text-2xl font-black">Instructions</h2>
+            <section className="student-card rounded-3xl border bg-white p-5 shadow-sm sm:p-8">
+              <h2 className="text-xl font-black sm:text-2xl">Instructions</h2>
 
               {test.instructions ? (
-                <div className="mt-5 whitespace-pre-line text-sm leading-7 text-slate-700">
+                <div className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700 sm:mt-5">
                   {test.instructions}
                 </div>
               ) : (
-                <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-700">
+                <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-700 sm:mt-5">
                   <li className="flex gap-3">
                     <span className="font-black text-teal-700">01</span>
                     Answer each question before moving on, or return to it later
@@ -585,7 +587,7 @@ export async function MockTestDetailsPage({
               Ready to begin?
             </p>
 
-            <h2 className="mt-3 text-2xl font-black">
+            <h2 className="mt-2 text-xl font-black sm:mt-3 sm:text-2xl">
               Take the test at your pace.
             </h2>
 
