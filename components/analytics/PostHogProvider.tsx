@@ -17,6 +17,28 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+      
+      const updateIdentity = async (session: any) => {
+        if (session?.user) {
+          posthog.identify(session.user.id, { email: session.user.email });
+        } else {
+          posthog.reset();
+        }
+      };
+
+      supabase.auth.getSession().then(({ data }) => updateIdentity(data.session));
+
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        updateIdentity(session);
+      });
+
+      return () => listener.subscription.unsubscribe();
+    });
+  }, []);
+
   return (
     <PHProvider client={posthog}>
       <Suspense fallback={null}>
