@@ -200,13 +200,9 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
   return <main className="student-page min-h-screen bg-slate-100 pb-8">
-    <header className="sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2 sm:py-2.5 text-white shadow-lg sm:px-8">
+    <header className="hidden sm:block sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2 sm:py-2.5 text-white shadow-lg sm:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between gap-3 sm:hidden">
-          <p className="truncate text-xs font-semibold text-slate-300">{title}</p>
-          <PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} />
-        </div>
-        <div className="hidden flex-col gap-2 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-400 sm:text-sm">{title}</p><h1 className="mt-0.5 whitespace-nowrap text-base font-black sm:text-lg">Question {index + 1} <span className="text-slate-400">of {questions.length}</span></h1></div>
           <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end"><PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} /></div>
         </div>
@@ -214,7 +210,21 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       </div>
     </header>
 
-      <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8 pb-24 lg:pb-8">
+    <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8 pb-24 lg:pb-8">
+      
+      {/* Mobile-only inline header (Not sticky, scrolls away) */}
+      <div className="mb-4 flex items-center justify-between sm:hidden">
+        <div className="min-w-0 flex-1 pr-4">
+          <p className="truncate text-xs font-semibold text-slate-500">{title}</p>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+              <div className="h-full rounded-full bg-teal-500 transition-all" style={{ width: `${Math.round((answered / questions.length) * 100)}%` }} />
+            </div>
+            <span className={`shrink-0 text-[10px] font-bold ${saveState === "error" ? "text-red-500" : "text-slate-400"}`}>{saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Saved"}</span>
+          </div>
+        </div>
+        <PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} />
+      </div>
       {pauseError && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{pauseError}</p>}
       {paused && <p className="mb-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
       
