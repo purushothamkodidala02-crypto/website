@@ -31,6 +31,7 @@ export default async function AttemptReviewPage({
       .from("test_attempts")
       .select("mock_test_id, session_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions, detailed_review_available")
       .eq("id", id)
+      .eq("user_id", user.id)
       .maybeSingle(),
     supabase.rpc("get_attempt_review", { requested_attempt_id: id }),
   ]);

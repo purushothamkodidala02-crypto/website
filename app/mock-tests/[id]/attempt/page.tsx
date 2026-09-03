@@ -58,6 +58,7 @@ export default async function TakeMockTestPage({
     .from("test_attempt_sessions")
     .select("id, expires_at, session_state")
     .eq("id", requestedSessionId)
+    .eq("user_id", user.id)
     .eq("mock_test_id", id)
     .is("submitted_at", null)
     .maybeSingle();
