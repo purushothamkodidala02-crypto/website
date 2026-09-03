@@ -7,6 +7,8 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { getHomeCatalogData } from "@/lib/catalog-data";
 import { examUrl, stateUrl } from "@/lib/public-urls";
 import { absoluteUrl, SITE_DESCRIPTION } from "@/lib/site";
+import { getActiveSurvey } from "@/app/actions/surveys";
+import { SurveyPopup } from "@/components/dashboard/SurveyPopup";
 
 // ⚡ Cache on Edge CDN and revalidate in the background every 5 minutes
 export const revalidate = 300;
@@ -30,7 +32,10 @@ const benefits = [
 ];
 
 export default async function Home() {
-  const { states, categories, exams, papers, hasStateError } = await getHomeCatalogData();
+  const [{ states, categories, exams, papers, hasStateError }, activeSurvey] = await Promise.all([
+    getHomeCatalogData(),
+    getActiveSurvey(),
+  ]);
   const categoryById = new Map(categories.map((item) => [item.id, item]));
 
   const activeExams = exams;
@@ -74,6 +79,7 @@ export default async function Home() {
     <main className="student-page min-h-screen bg-white text-slate-950">
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
+      <SurveyPopup survey={activeSurvey as any} />
 
       <section className="border-b bg-[#f4f7f8]">
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
