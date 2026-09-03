@@ -35,8 +35,15 @@ export function EditMockTestForm({
     [subjects, paperId],
   );
 
+  const isPublished = mockTest.status !== "draft";
+
   return (
     <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+      {isPublished && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+          <strong>Published Test Settings:</strong> You can update the Description, Instructions, Permanent URL slug, and Access type below. Structural properties (Paper, Subject, Duration, and Target Questions) are locked to protect student test attempts.
+        </div>
+      )}
       <form action={action} className="grid gap-5 md:grid-cols-2">
         <div className="rounded-2xl border border-teal-200 bg-teal-50 p-5 md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p><h2 className="font-display mt-1 text-2xl">{studentTitle}</h2><p className="mt-1 text-sm text-slate-600">Generated automatically from the selected Exam, Paper, optional Subject, and series number.</p></div>
         <label className="block text-sm font-bold md:col-span-2">Permanent URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={mockTest.slug} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Changing this keeps the previous URL as a permanent redirect.</span></label>
@@ -45,7 +52,9 @@ export function EditMockTestForm({
           <SearchableSelect
             name="paper_id"
             value={paperId}
+            disabled={isPublished}
             onChange={(value) => {
+              if (isPublished) return;
               setPaperId(value);
               setSubjectId("");
             }}
@@ -54,15 +63,16 @@ export function EditMockTestForm({
           />
         </label>
 
-        <fieldset className="rounded-xl border p-4">
+        <fieldset className={`rounded-xl border p-4 ${isPublished ? "opacity-60" : ""}`}>
           <legend className="px-1 text-sm font-bold">Mock type</legend>
           <label className="flex gap-2 text-sm">
             <input
               name="test_scope"
               type="radio"
               value="paper"
+              disabled={isPublished}
               checked={scope === "paper"}
-              onChange={() => setScope("paper")}
+              onChange={() => !isPublished && setScope("paper")}
             />
             Paper-wise
           </label>
@@ -71,8 +81,9 @@ export function EditMockTestForm({
               name="test_scope"
               type="radio"
               value="subject"
+              disabled={isPublished}
               checked={scope === "subject"}
-              onChange={() => setScope("subject")}
+              onChange={() => !isPublished && setScope("subject")}
             />
             Subject-wise
           </label>
@@ -84,7 +95,8 @@ export function EditMockTestForm({
             <SearchableSelect
               name="subject_id"
               value={subjectId}
-              onChange={setSubjectId}
+              disabled={isPublished}
+              onChange={(value) => !isPublished && setSubjectId(value)}
               options={availableSubjects.map((subject) => ({
                 value: subject.id,
                 label: subject.name,
@@ -116,13 +128,14 @@ export function EditMockTestForm({
             type="number"
             min="1"
             required
+            disabled={isPublished}
             defaultValue={mockTest.duration_minutes}
-            className="mt-2 w-full rounded-xl border px-4 py-3 font-normal"
+            className="mt-2 w-full rounded-xl border px-4 py-3 font-normal disabled:bg-slate-100 disabled:text-slate-500"
           />
         </label>
         <label className="block text-sm font-bold">
           Target questions
-          <input name="target_question_count" type="number" min="1" max="500" required defaultValue={mockTest.target_question_count} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
+          <input name="target_question_count" type="number" min="1" max="500" required disabled={isPublished} defaultValue={mockTest.target_question_count} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal disabled:bg-slate-100 disabled:text-slate-500" />
           <span className="mt-1 block text-xs font-normal text-slate-500">Locked after publishing or after the first student attempt.</span>
         </label>
         <input type="hidden" name="status" value={mockTest.status} />

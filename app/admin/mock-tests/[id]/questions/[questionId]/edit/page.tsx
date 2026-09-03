@@ -11,7 +11,7 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
   const { returnTo } = await searchParams;
   const supabase = await createClient();
   const [mockTestResult, assignmentResult, questionResult, subjectsResult, papersResult, groupsResult, categoriesResult] = await Promise.all([
-    supabase.from("mock_tests").select("id, title").eq("id", mockTestId).maybeSingle(),
+    supabase.from("mock_tests").select("id, title, status").eq("id", mockTestId).maybeSingle(),
     supabase.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
     supabase.from("questions").select("id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at").eq("id", questionId).maybeSingle(),
     supabase.from("subjects").select("id, paper_id, name, content_language_mode").order("display_order"),
@@ -20,6 +20,7 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
     supabase.from("exams").select("id, name"),
   ]);
   if (!mockTestResult.data || !assignmentResult.data || !questionResult.data) notFound();
+  const isDraft = mockTestResult.data.status === "draft";
   const papers = new Map((papersResult.data ?? []).map((item) => [item.id, item]));
   const groups = new Map((groupsResult.data ?? []).map((item) => [item.id, item]));
   const categories = new Map((categoriesResult.data ?? []).map((item) => [item.id, item]));
@@ -37,6 +38,12 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
     <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">← Back to {returningToPreview ? "Student Preview" : `${mockTestResult.data.title} Questions`}</Link>
     <h1 className="mt-5 text-3xl font-black">Edit question in this mock test</h1>
     <p className="mt-2 text-slate-600">This edit applies only to this mock test. Other mock tests keep their own question version.</p>
-    <EditQuestionForm question={questionResult.data as Question} subjects={subjects} mockTestId={mockTestId} />
+    {isDraft ? (
+      <EditQuestionForm question={questionResult.data as Question} subjects={subjects} mockTestId={mockTestId} />
+    ) : (
+      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-950 font-semibold">
+        This mock test is published or archived, so its questions are locked to protect student test attempts.
+      </div>
+    )}
   </main>;
 }

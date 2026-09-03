@@ -18,25 +18,17 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   if (profile?.role !== "admin") return { success: false, message: "You are not authorized to update mock tests." };
   const { data: current } = await supabase.from("mock_tests").select("status, series_number, slug, target_question_count, paper_id, subject_id, test_scope, duration_minutes").eq("id", mockTestId).maybeSingle();
   if (!current) return { success: false, message: "Mock test not found." };
-  if (current.status !== "draft") return { success: false, message: "Only draft Mock Tests can be edited. Archive a published test, then restore it as a draft before changing it." };
+  const isPublished = current.status !== "draft";
 
-  const paperId = String(formData.get("paper_id") ?? "").trim();
-  const scope = String(formData.get("test_scope") ?? "paper") as MockTestScope;
-  const subjectId = String(formData.get("subject_id") ?? "").trim() || null;
-  const duration = Number(formData.get("duration_minutes") ?? 0);
-  const targetQuestionCount = Number(formData.get("target_question_count") ?? 0);
-  const status = String(formData.get("status") ?? "draft") as MockTestStatus;
+  const paperId = isPublished ? current.paper_id : String(formData.get("paper_id") ?? "").trim();
+  const scope = isPublished ? current.test_scope : (String(formData.get("test_scope") ?? "paper") as MockTestScope);
+  const subjectId = isPublished ? current.subject_id : (String(formData.get("subject_id") ?? "").trim() || null);
+  const duration = isPublished ? current.duration_minutes : Number(formData.get("duration_minutes") ?? 0);
+  const targetQuestionCount = isPublished ? current.target_question_count : Number(formData.get("target_question_count") ?? 0);
+  const status = current.status;
   const slug = String(formData.get("slug") ?? current.slug).trim().toLowerCase();
   const pricing = readMockTestAccess(formData);
-  if (!paperId || !Number.isInteger(duration) || duration <= 0) return { success: false, message: "Choose a paper and enter a valid duration." };
-  if (!Number.isInteger(targetQuestionCount) || targetQuestionCount < 1 || targetQuestionCount > 500) return { success: false, message: "Enter a target between 1 and 500 Questions." };
-  if ((scope !== "paper" && scope !== "subject") || (scope === "subject" && !subjectId) || status !== "draft") return { success: false, message: "Check the mock type and draft status." };
-  if (!PUBLIC_SLUG_PATTERN.test(slug) || ["attempt", "subject", "specialization", "opengraph-image"].includes(slug)) return { success: false, message: "Enter a URL slug using lowercase letters, numbers and single hyphens." };
-  if (pricing.error) return { success: false, message: pricing.error };
-  // Some older paper-wise mock tests retained a subject_id even though the
-  // subject is not part of their test structure. Treat that legacy value as
-  // unused so saving a description or slug does not look like a protected
-  // structural change after students have attempted the test.
+
   const currentSubjectId = current.test_scope === "subject" ? current.subject_id : null;
   const submittedSubjectId = scope === "subject" ? subjectId : null;
   const structureChanged =
@@ -46,11 +38,13 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const resultAffectingChange =
     structureChanged ||
     duration !== current.duration_minutes ||
-    targetQuestionCount !== current.target_question_count ||
-    status !== current.status;
-  if (resultAffectingChange) {
-    const { count: attemptCount } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId);
-    if ((attemptCount ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and is locked to protect their results. You can still update its description, instructions and URL slug without changing Paper, Subject, duration or target Questions." };
+    targetQuestionCount !== current.target_question_count;
+
+  if (isPublished && resultAffectingChange) {
+    return {
+      success: false,
+      message: "This mock test is published. You can update its description, instructions, URL slug, and access settings, but its Paper, Subject, Duration, and Target Questions are locked to protect test integrity.",
+    };
   }
   if (structureChanged) {
     const { count: assignmentCount } = await supabase.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId);
