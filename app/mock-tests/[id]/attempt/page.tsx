@@ -48,9 +48,10 @@ export default async function TakeMockTestPage({
 
   const { data: mockTest } = await supabase.from("mock_tests").select("id, title, status, access_type").eq("id", id).eq("status", "published").maybeSingle();
   if (!mockTest) notFound();
+  const testTitle = publicContext.mockTest.title ?? mockTest.title;
   const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
   const hasAccess = Boolean(access);
-  if (!hasAccess) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test needs an active exam-series purchase. Return to the test details page to unlock it there." />;
+  if (!hasAccess) return <TestNotReady title={testTitle} testPath={testPath} message="This mock test needs an active exam-series purchase. Return to the test details page to unlock it there." />;
 
   const requestedSessionId = typeof query.session === "string" ? query.session : "";
   if (!/^[0-9a-f-]{36}$/i.test(requestedSessionId)) redirect(testPath);
@@ -77,7 +78,7 @@ export default async function TakeMockTestPage({
       return (
         <SubmissionResult
           publicTestPath={testPath}
-          title={mockTest.title}
+          title={testTitle}
           result={{
             success: true,
             message: "Attempt submitted successfully.",
@@ -99,11 +100,11 @@ export default async function TakeMockTestPage({
 
   const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
   const questions = (data ?? []) as TestQuestion[];
-  if (error || questions.length === 0) return <TestNotReady title={mockTest.title} testPath={testPath} message="This mock test does not have active questions available yet. Please try again later." />;
+  if (error || questions.length === 0) return <TestNotReady title={testTitle} testPath={testPath} message="This mock test does not have active questions available yet. Please try again later." />;
   const { data: bookmarks } = await supabase
     .from("student_question_bookmarks")
     .select("question_id")
     .eq("user_id", user.id)
     .in("question_id", questions.map((question) => question.question_id));
-  return <StudentTestRunner mockTestId={id} publicTestPath={testPath} title={mockTest.title} sessionId={session.id} expiresAt={session.expires_at} questions={questions} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />;
+  return <StudentTestRunner mockTestId={id} publicTestPath={testPath} title={testTitle} sessionId={session.id} expiresAt={session.expires_at} questions={questions} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />;
 }

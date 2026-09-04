@@ -1,6 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
+import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
@@ -99,6 +100,34 @@ export const getMockTestCatalogData = unstable_cache(
     const publishedCategoryIds = new Set(allExams.filter((exam) => publishedExamIds.has(exam.id)).map((exam) => exam.exam_id));
     const publishedStateIds = new Set(allCategories.filter((category) => publishedCategoryIds.has(category.id)).map((category) => category.state_id));
 
+    const stateMap = new Map(allStates.map((item) => [item.id, item]));
+    const categoryMap = new Map(allCategories.map((item) => [item.id, item]));
+    const examMap = new Map(allExams.map((item) => [item.id, item]));
+    const specializationMap = new Map(allSpecializations.map((item) => [item.id, item]));
+    const paperMap = new Map(allPapers.map((item) => [item.id, item]));
+    const subjectMap = new Map(allSubjects.map((item) => [item.id, item]));
+
+    const standardizedTests = tests.map((test) => {
+      const paper = paperMap.get(test.paper_id);
+      const exam = paper ? examMap.get(paper.exam_group_id) : undefined;
+      const category = exam ? categoryMap.get(exam.exam_id) : undefined;
+      const state = category ? stateMap.get(category.state_id) : undefined;
+      const specialization = paper?.specialization_id ? specializationMap.get(paper.specialization_id) : undefined;
+      const subject = test.subject_id ? subjectMap.get(test.subject_id) : undefined;
+
+      if (state && exam && paper) {
+        const canonicalTitle = buildMockTestTitle({
+          stateCode: state.code,
+          examName: exam.name,
+          paperName: specialization?.name ?? paper.name,
+          subjectName: subject?.name,
+          seriesNumber: Number(test.series_number ?? 1),
+        });
+        return { ...test, title: canonicalTitle };
+      }
+      return test;
+    });
+
     return {
       states: allStates.filter((state) => state.is_active || publishedStateIds.has(state.id)),
       categories: allCategories.filter((category) => category.is_active || publishedCategoryIds.has(category.id)),
@@ -106,7 +135,7 @@ export const getMockTestCatalogData = unstable_cache(
       specializations: allSpecializations.filter((specialization) => specialization.is_active || publishedSpecializationIds.has(specialization.id)),
       papers: allPapers.filter((paper) => paper.is_active || publishedPaperIds.has(paper.id)),
       subjects: allSubjects.filter((subject) => subject.is_active || publishedSubjectIds.has(subject.id)),
-      tests,
+      tests: standardizedTests,
       stats: statsResult.data ?? [],
       hasError: Boolean(
         statesResult.error ||
@@ -119,6 +148,6 @@ export const getMockTestCatalogData = unstable_cache(
       hasSupplementaryError: Boolean(specializationsResult.error || statsResult.error),
     };
   },
-  ["mock-test-catalog-v6"],
+  ["mock-test-catalog-v7"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );

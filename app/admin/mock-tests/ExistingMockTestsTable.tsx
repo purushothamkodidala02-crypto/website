@@ -16,6 +16,7 @@ import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { mockTestUrl } from "@/lib/public-urls";
 import { MockTestManagementButtons } from "./MockTestManagementButtons";
+import { syncAllMockTestTitles } from "./manage-actions";
 
 type ExistingMockTest = {
   id: string;
@@ -92,6 +93,26 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const [location, setLocation] = useState(initialLocation);
   const [search, setSearch] = useState(initialSearch);
   const [status, setStatus] = useState<MockTestStatus | "all">(initialStatus);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const handleSyncTitles = async () => {
+    if (!window.confirm("Standardize all mock test titles in the database to match the canonical format? This will update any legacy titles.")) {
+      return;
+    }
+    setIsSyncing(true);
+    setSyncMessage(null);
+    try {
+      const res = await syncAllMockTestTitles();
+      setSyncMessage(res.message);
+      router.refresh();
+    } catch (err: any) {
+      setSyncMessage(err?.message ?? "An error occurred while synchronizing titles.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     return tests.filter((test) =>
@@ -163,9 +184,27 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   return (
     <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-lg shadow-slate-950/[0.04]">
       <div className="border-b border-teal-100 bg-gradient-to-br from-white via-white to-teal-50 px-6 py-6 sm:px-7">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Student visibility</p>
-        <h2 className="mt-2 text-2xl font-black">Manage all mock tests</h2>
-        <p className="mt-2 text-sm text-slate-600">Mock tests are the single publishing control. Questions and Subjects remain reusable building blocks.</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Student visibility</p>
+            <h2 className="mt-2 text-2xl font-black">Manage all mock tests</h2>
+            <p className="mt-2 text-sm text-slate-600">Mock tests are the single publishing control. Questions and Subjects remain reusable building blocks.</p>
+          </div>
+          <button
+            type="button"
+            disabled={isSyncing}
+            onClick={handleSyncTitles}
+            className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-900 transition hover:bg-teal-100 disabled:opacity-50"
+            title="Update all mock test titles in the database to the canonical standard format"
+          >
+            {isSyncing ? "Syncing titles…" : "Standardize all test titles"}
+          </button>
+        </div>
+        {syncMessage && (
+          <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50/80 px-4 py-2.5 text-xs font-semibold text-teal-900">
+            {syncMessage}
+          </p>
+        )}
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {([
             ["all", "All tests", counts.all],

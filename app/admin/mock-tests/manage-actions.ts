@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { createClient } from "@/lib/supabase/server";
 
 export type MockTestManagementResult = {
@@ -202,4 +203,96 @@ export async function permanentlyDeleteMockTest(mockTestId: string, confirmation
 
   revalidateMockTestPages(mockTestId);
   return { success: true, message: `“${result.mockTest.title}” and its complete attempt history were permanently deleted.` };
+}
+
+export type SyncMockTestTitlesResult = {
+  success: boolean;
+  message: string;
+  updatedCount: number;
+};
+
+export async function syncAllMockTestTitles(): Promise<SyncMockTestTitlesResult> {
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) return { success: false, message: "You must be logged in.", updatedCount: 0 };
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || profile?.role !== "admin") {
+    return { success: false, message: "You are not authorized to manage Mock Tests.", updatedCount: 0 };
+  }
+
+  const { data: mockTests, error: fetchError } = await supabase
+    .from("mock_tests")
+    .select("id, paper_id, subject_id, series_number, title");
+
+  if (fetchError || !mockTests) {
+    return { success: false, message: fetchError?.message ?? "Failed to fetch mock tests.", updatedCount: 0 };
+  }
+
+  const [papersRes, specializationsRes, examsRes, categoriesRes, statesRes, subjectsRes] = await Promise.all([
+    supabase.from("papers").select("id, exam_group_id, specialization_id, name"),
+    supabase.from("exam_specializations").select("id, name"),
+    supabase.from("exam_groups").select("id, exam_id, name"),
+    supabase.from("exams").select("id, state_id, name"),
+    supabase.from("exam_states").select("id, code"),
+    supabase.from("subjects").select("id, name"),
+  ]);
+
+  const paperMap = new Map((papersRes.data ?? []).map((p) => [p.id, p]));
+  const specializationMap = new Map((specializationsRes.data ?? []).map((s) => [s.id, s]));
+  const examMap = new Map((examsRes.data ?? []).map((e) => [e.id, e]));
+  const categoryMap = new Map((categoriesRes.data ?? []).map((c) => [c.id, c]));
+  const stateMap = new Map((statesRes.data ?? []).map((s) => [s.id, s]));
+  const subjectMap = new Map((subjectsRes.data ?? []).map((sb) => [sb.id, sb]));
+
+  let updatedCount = 0;
+  for (const test of mockTests) {
+    const paper = paperMap.get(test.paper_id);
+    const exam = paper ? examMap.get(paper.exam_group_id) : undefined;
+    const category = exam ? categoryMap.get(exam.exam_id) : undefined;
+    const state = category ? stateMap.get(category.state_id) : undefined;
+    const specialization = paper?.specialization_id ? specializationMap.get(paper.specialization_id) : undefined;
+    const subject = test.subject_id ? subjectMap.get(test.subject_id) : undefined;
+
+    if (state && exam && paper) {
+      const canonicalTitle = buildMockTestTitle({
+        stateCode: state.code,
+        examName: exam.name,
+        paperName: specialization?.name ?? paper.name,
+        subjectName: subject?.name,
+        seriesNumber: Number(test.series_number ?? 1),
+      });
+
+      if (test.title !== canonicalTitle) {
+        const { error: updateError } = await supabase
+          .from("mock_tests")
+          .update({ title: canonicalTitle })
+          .eq("id", test.id);
+
+        if (!updateError) {
+          updatedCount += 1;
+        }
+      }
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/mock-tests");
+  revalidatePath("/mock-tests");
+  revalidatePath("/dashboard");
+  revalidateTag(PUBLIC_CATALOG_TAG, "max");
+
+  return {
+    success: true,
+    message: updatedCount > 0
+      ? `Successfully synchronized ${updatedCount} mock test title(s) to the canonical standard.`
+      : "All mock test titles are already up to date with the canonical naming standard.",
+    updatedCount,
+  };
 }

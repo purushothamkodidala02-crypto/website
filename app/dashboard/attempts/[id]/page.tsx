@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
+import { buildMockTestTitle } from "@/lib/exam-catalog";
+import { getMockTestPublicContextById } from "@/lib/public-route-data";
 import { createClient } from "@/lib/supabase/server";
 import { AttemptReviewNavigator, type ReviewRow } from "./AttemptReviewNavigator";
 
@@ -37,9 +39,53 @@ export default async function AttemptReviewPage({
   ]);
   const attempt = attemptResult.data as AttemptSummary | null;
   if (!attempt) notFound();
+
+  const publicContext = await getMockTestPublicContextById(attempt.mock_test_id);
+  let resolvedTitle = publicContext?.mockTest.title;
+  if (!resolvedTitle) {
+    const { data: rawTest } = await supabase
+      .from("mock_tests")
+      .select("paper_id, subject_id, series_number, title")
+      .eq("id", attempt.mock_test_id)
+      .maybeSingle();
+    if (rawTest) {
+      const { data: paper } = await supabase
+        .from("papers")
+        .select("exam_group_id, specialization_id, name")
+        .eq("id", rawTest.paper_id)
+        .maybeSingle();
+      const { data: specialization } = paper?.specialization_id
+        ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
+        : { data: null };
+      const { data: group } = paper
+        ? await supabase.from("exam_groups").select("exam_id, name").eq("id", paper.exam_group_id).maybeSingle()
+        : { data: null };
+      const { data: exam } = group
+        ? await supabase.from("exams").select("state_id, name").eq("id", group.exam_id).maybeSingle()
+        : { data: null };
+      const { data: state } = exam
+        ? await supabase.from("exam_states").select("code").eq("id", exam.state_id).maybeSingle()
+        : { data: null };
+      const { data: subject } = rawTest.subject_id
+        ? await supabase.from("subjects").select("name").eq("id", rawTest.subject_id).maybeSingle()
+        : { data: null };
+
+      if (state && group && paper) {
+        resolvedTitle = buildMockTestTitle({
+          stateCode: state.code,
+          examName: group.name,
+          paperName: specialization?.name ?? paper.name,
+          subjectName: subject?.name,
+          seriesNumber: Number(rawTest.series_number ?? 1),
+        });
+      } else {
+        resolvedTitle = rawTest.title;
+      }
+    }
+  }
+
   if (!attempt.detailed_review_available) {
-    const { data: mockTest } = await supabase.from("mock_tests").select("title").eq("id", attempt.mock_test_id).maybeSingle();
-    return <ExpiredAttemptReview attempt={attempt} title={mockTest?.title ?? "Mock test"} />;
+    return <ExpiredAttemptReview attempt={attempt} title={resolvedTitle ?? "Mock test"} />;
   }
 
   const { data, error } = reviewResult;
@@ -78,7 +124,7 @@ export default async function AttemptReviewPage({
                 Attempt review
               </p>
               <h1 className="mt-5 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">
-                {summary.mock_test_title}
+                {resolvedTitle ?? summary.mock_test_title}
               </h1>
               <p className="mt-3 max-w-2xl leading-7 text-slate-300">
                 Review every answer and use the explanations to plan your next

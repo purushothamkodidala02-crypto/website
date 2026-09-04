@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
+import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { mockTestUrl } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
@@ -106,6 +107,97 @@ export default async function Dashboard({
   const catalogExamById = new Map(catalog.exams.map((item) => [item.id, item]));
   const catalogCategoryById = new Map(catalog.categories.map((item) => [item.id, item]));
   const catalogStateById = new Map(catalog.states.map((item) => [item.id, item]));
+  const catalogSpecializationById = new Map((catalog.specializations ?? []).map((item) => [item.id, item]));
+  const catalogSubjectById = new Map((catalog.subjects ?? []).map((item) => [item.id, item]));
+
+  const missingTestIds = new Set<string>();
+  if (attemptSummary.latest_mock_test_id && !testTitles.has(attemptSummary.latest_mock_test_id)) {
+    missingTestIds.add(attemptSummary.latest_mock_test_id);
+  }
+  for (const attempt of attempts) {
+    if (attempt.mock_test_id && !testTitles.has(attempt.mock_test_id)) {
+      missingTestIds.add(attempt.mock_test_id);
+    }
+  }
+
+  if (missingTestIds.size > 0) {
+    const { data: missingTests } = await supabase
+      .from("mock_tests")
+      .select("id, paper_id, subject_id, series_number, title")
+      .in("id", Array.from(missingTestIds));
+
+    for (const test of missingTests ?? []) {
+      let paper = catalogPaperById.get(test.paper_id);
+      if (!paper) {
+        const { data: fetchedPaper } = await supabase
+          .from("papers")
+          .select("id, exam_group_id, specialization_id, name")
+          .eq("id", test.paper_id)
+          .maybeSingle();
+        if (fetchedPaper) paper = fetchedPaper as any;
+      }
+      let exam = paper ? catalogExamById.get(paper.exam_group_id) : undefined;
+      if (paper && !exam) {
+        const { data: fetchedExam } = await supabase
+          .from("exam_groups")
+          .select("id, exam_id, name")
+          .eq("id", paper.exam_group_id)
+          .maybeSingle();
+        if (fetchedExam) exam = fetchedExam as any;
+      }
+      let category = exam ? catalogCategoryById.get(exam.exam_id) : undefined;
+      if (exam && !category) {
+        const { data: fetchedCategory } = await supabase
+          .from("exams")
+          .select("id, state_id, name")
+          .eq("id", exam.exam_id)
+          .maybeSingle();
+        if (fetchedCategory) category = fetchedCategory as any;
+      }
+      let state = category ? catalogStateById.get(category.state_id) : undefined;
+      if (category && !state) {
+        const { data: fetchedState } = await supabase
+          .from("exam_states")
+          .select("id, code, name")
+          .eq("id", category.state_id)
+          .maybeSingle();
+        if (fetchedState) state = fetchedState as any;
+      }
+      let specialization = paper?.specialization_id ? catalogSpecializationById.get(paper.specialization_id) : undefined;
+      if (paper?.specialization_id && !specialization) {
+        const { data: fetchedSpecialization } = await supabase
+          .from("exam_specializations")
+          .select("id, name")
+          .eq("id", paper.specialization_id)
+          .maybeSingle();
+        if (fetchedSpecialization) specialization = fetchedSpecialization as any;
+      }
+      let subject = test.subject_id ? catalogSubjectById.get(test.subject_id) : undefined;
+      if (test.subject_id && !subject) {
+        const { data: fetchedSubject } = await supabase
+          .from("subjects")
+          .select("id, name")
+          .eq("id", test.subject_id)
+          .maybeSingle();
+        if (fetchedSubject) subject = fetchedSubject as any;
+      }
+
+      if (state && exam && paper) {
+        testTitles.set(
+          test.id,
+          buildMockTestTitle({
+            stateCode: state.code,
+            examName: exam.name,
+            paperName: specialization?.name ?? paper.name,
+            subjectName: subject?.name,
+            seriesNumber: Number(test.series_number ?? 1),
+          }),
+        );
+      } else if (test.title) {
+        testTitles.set(test.id, test.title);
+      }
+    }
+  }
   const publicTestPath = (test: AvailableMockTest) => {
     const paper = catalogPaperById.get(test.paper_id);
     const exam = paper ? catalogExamById.get(paper.exam_group_id) : undefined;
@@ -228,7 +320,7 @@ export default async function Dashboard({
                     </span>
                   </div>
                   <h3 className="mt-5 text-lg font-black leading-7 text-slate-950">
-                    {test.title}
+                    {testTitles.get(test.id) ?? test.title}
                   </h3>
                   <p className="mt-2 text-xs font-bold uppercase tracking-wide text-teal-700">
                     {paperDisplayById.get(test.paper_id)?.label ?? "Paper"}
