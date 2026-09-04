@@ -58,27 +58,28 @@ export default async function AdminExamStructurePage() {
   const subjects = subjectsResult.data ?? [];
 
   return (
-    <main>
-      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
-        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
-        <div className="relative flex flex-wrap items-end justify-between gap-6">
+    <main className="space-y-6">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800/60 bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 p-6 text-white shadow-xl shadow-slate-950/10 sm:p-7">
+        <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-wrap items-center justify-between gap-6">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-teal-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
-              State-first structure manager
-            </p>
-            <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">
-              Exam Structure
+            <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-teal-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
+              Catalogue Manager
+            </div>
+            <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl text-white">
+              Exam Structure & Catalogue
             </h1>
-            <p className="mt-3 max-w-2xl leading-7 text-slate-300">
-              Keep Telangana, Andhra Pradesh and Central exams separate, then
-              manage boards, Exams, Specialisations, Papers and Subjects.
+            <p className="mt-1 max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Manage State workspaces, Recruiting Boards, Exams, Specialisations, Papers, and Subject display orders.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-2">
             <SummaryCount value={states.length} label="States" tone="teal" />
             <SummaryCount value={categories.length} label="Boards" tone="amber" />
-            <SummaryCount value={exams.length} label="Exams" tone="amber" />
+            <SummaryCount value={exams.length} label="Exams" tone="slate" />
+            <SummaryCount value={papers.length} label="Papers" tone="slate" />
+            <SummaryCount value={subjects.length} label="Subjects" tone="teal" />
           </div>
         </div>
       </section>
@@ -152,14 +153,14 @@ function SummaryCount({
   tone: "teal" | "amber" | "slate";
 }) {
   const styles = {
-    teal: "bg-teal-300/10 text-teal-200",
-    amber: "bg-amber-300/10 text-amber-200",
-    slate: "bg-white/5 text-slate-300",
+    teal: "bg-teal-400/10 text-teal-200 border-teal-400/20",
+    amber: "bg-amber-400/10 text-amber-200 border-amber-400/20",
+    slate: "bg-white/5 text-slate-300 border-white/10",
   };
   return (
-    <div className={`min-w-24 rounded-xl px-3 py-3 ${styles[tone]}`}>
-      <strong className="block text-lg text-white">{value}</strong>
-      {label}
+    <div className={`min-w-16 rounded-xl border px-3 py-1.5 text-center ${styles[tone]}`}>
+      <strong className="block text-base font-black text-white">{value}</strong>
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">{label}</span>
     </div>
   );
 }
