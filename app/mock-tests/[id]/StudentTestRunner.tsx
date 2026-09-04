@@ -126,13 +126,26 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
   useEffect(() => {
     function navigateWithKeyboard(event: KeyboardEvent) {
       if (locked || confirming) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       const target = event.target as HTMLElement | null;
-      if (target?.matches("input, textarea, select, button, a, [contenteditable='true']")) return;
+      if (target?.isContentEditable) return;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        if (tag === "textarea" || tag === "select") return;
+        if (tag === "input") {
+          const type = (target as HTMLInputElement).type?.toLowerCase();
+          if (!["radio", "checkbox", "button", "submit", "reset"].includes(type)) return;
+        }
+      }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
+        target?.blur();
+        setNavigatorOpen(false);
         setIndex((value) => Math.max(0, value - 1));
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
+        target?.blur();
+        setNavigatorOpen(false);
         setIndex((value) => Math.min(questions.length - 1, value + 1));
       }
     }
@@ -369,7 +382,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       
       {/* Fixed Bottom Navigation for Mobile / Inline for Desktop */}
       <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t bg-white/95 backdrop-blur-md p-3 sm:p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.08)] lg:static lg:mt-6 lg:border-t-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        <button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40">
+        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40">
           Previous
         </button>
         
@@ -382,7 +395,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
             Review & finish
           </button>
         ) : (
-          <button type="button" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50">
+          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50">
             Save & next
           </button>
         )}

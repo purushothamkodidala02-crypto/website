@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { mockTestPreviewHref } from "@/lib/admin/mock-test-navigation";
@@ -32,6 +32,33 @@ export type PreviewQuestion = {
 export function StudentPreview({ mockTestId, questions, canEdit, backHref, listReturnTo, initialQuestion }: { mockTestId: string; questions: PreviewQuestion[]; canEdit: boolean; backHref: string; listReturnTo: string; initialQuestion: number }) {
   const [index, setIndex] = useState(() => Math.min(Math.max(initialQuestion - 1, 0), Math.max(questions.length - 1, 0)));
   const [language, setLanguage] = useState<"en" | "te">("en");
+
+  useEffect(() => {
+    function navigateWithKeyboard(event: KeyboardEvent) {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable) return;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        if (tag === "textarea" || tag === "select") return;
+        if (tag === "input") {
+          const type = (target as HTMLInputElement).type?.toLowerCase();
+          if (!["radio", "checkbox", "button", "submit", "reset"].includes(type)) return;
+        }
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        target?.blur();
+        setIndex((value) => Math.max(0, value - 1));
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        target?.blur();
+        setIndex((value) => Math.min(questions.length - 1, value + 1));
+      }
+    }
+    window.addEventListener("keydown", navigateWithKeyboard);
+    return () => window.removeEventListener("keydown", navigateWithKeyboard);
+  }, [questions.length]);
   const current = questions[index];
   const previewHref = mockTestPreviewHref(mockTestId, listReturnTo, index + 1);
   const editHref = current ? `/admin/mock-tests/${mockTestId}/questions/${current.id}/edit?returnTo=${encodeURIComponent(previewHref)}` : backHref;
@@ -58,7 +85,7 @@ export function StudentPreview({ mockTestId, questions, canEdit, backHref, listR
         {current.imageUrl && <QuestionMedia src={current.imageUrl} className="mt-6" />}
         <div className="mt-7 grid gap-3">{options.map(([key, text]) => { const correct = key === current.correctAnswer; const teluguOption = containsTeluguText(text); return <div key={key} className={`flex gap-4 rounded-2xl border p-4 ${correct ? "border-emerald-400 bg-emerald-50" : "bg-white"}`}><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black ${correct ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-600"}`}>{key}</span><span lang={teluguOption ? "te" : undefined} className={`pt-1 text-sm font-medium leading-6 text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>{text}</span>{correct && <span className="ml-auto shrink-0 self-center rounded-full bg-emerald-200 px-2.5 py-1 text-xs font-black text-emerald-950">Correct answer</span>}</div>; })}</div>
         <section className="mt-6 rounded-2xl border border-teal-200 bg-teal-50 p-5" aria-label="Administrator answer key"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Administrator answer key</p><p className="mt-2 text-sm font-semibold text-slate-900">Correct answer: Option {current.correctAnswer}</p>{explanation ? <><p className="mt-4 text-sm font-black text-slate-950">Explanation</p><FormattedQuestionText text={explanation} className="mt-1 text-sm leading-6 text-slate-700" /></> : <p className="mt-3 text-sm leading-6 text-slate-600">No explanation has been added for this question.</p>}</section>
-        <div className="mt-6 flex justify-between gap-3 border-t pt-5"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0} className="rounded-xl border bg-white px-5 py-3 text-sm font-bold disabled:opacity-40">Previous</button><button type="button" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={index === questions.length - 1} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-40">Next</button></div>
+        <div className="mt-6 flex justify-between gap-3 border-t pt-5"><button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0} className="rounded-xl border bg-white px-5 py-3 text-sm font-bold disabled:opacity-40">Previous</button><button type="button" title="Next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={index === questions.length - 1} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-40">Next</button></div>
       </section>
       <aside className="rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-36 lg:self-start"><p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Question navigator</p><p className="mt-2 text-sm leading-6 text-slate-600">Select any question to inspect its student view.</p><div aria-label="Preview question list" className="mt-4 grid max-h-72 grid-cols-[repeat(auto-fill,2.5rem)] justify-start gap-2 overflow-y-auto overscroll-contain pr-1 sm:max-h-80 lg:max-h-[calc(100vh-18rem)]">{questions.map((question, questionIndex) => <button key={question.id} type="button" onClick={() => setIndex(questionIndex)} aria-label={`Preview question ${questionIndex + 1}`} aria-current={questionIndex === index ? "step" : undefined} className={`grid h-10 w-10 place-items-center rounded-lg text-xs font-black ${questionIndex === index ? "bg-slate-950 text-white ring-2 ring-teal-300 ring-offset-2" : "bg-slate-100 text-slate-700 hover:bg-teal-50"}`}>{questionIndex + 1}</button>)}</div><p className="mt-5 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">This is an administrator-only preview. Students cannot see answer keys or explanations before submitting their test.</p></aside>
     </div>
