@@ -268,7 +268,7 @@ export function QuestionBankTable({
                         {question.subjectName}
                       </td>
                     )}
-                    <td className="max-w-xl px-5 py-5 font-semibold leading-6">
+                    <td className="min-w-[340px] max-w-xl px-5 py-5 font-semibold leading-6">
                       <FormattedQuestionText text={question.questionText} />
                     </td>
                     <td className="px-5 py-5">

@@ -79,8 +79,8 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /([:;]|[^\s:])\s+([A-Za-z\u0c00-\u0c7f\s-]{2,25}:)\s*(?=(?:[a-hA-H]|\d{1,2}|I{1,4}|V|ఎ|బి|సి|డి)[.)]\s)/gi,
-      "$1\n$2\n",
+      /([:;])\s*(Traveler|Country|List\s+I{1,2}|జాబితా\s+[I1-2]):\s*/gi,
+      "$1\n$2:\n",
     )
     .replace(/[,;]\s*(?=(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|ఎ|బి|సి|డి)[.)]\s)/gi, "\n")
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -193,18 +193,16 @@ function matchingListLayout(lines: string[]) {
       let rightTitle = isTelugu ? "జాబితా II" : "List II";
       let headingEnd = leftStart;
 
-      if (
-        leftStart > 0 &&
-        /^[A-Za-z\u0c00-\u0c7f\s-]{2,25}:$/i.test(lines[leftStart - 1])
-      ) {
+      const isExplicitHeader = (line: string | undefined) =>
+        Boolean(line) &&
+        /^(?:List\s+I{1,2}|జాబితా\s+[I1-2]|Traveler|Country):$/i.test(line!.trim());
+
+      if (leftStart > 0 && isExplicitHeader(lines[leftStart - 1])) {
         leftTitle = lines[leftStart - 1].replace(/:$/, "").trim();
         headingEnd = leftStart - 1;
       }
 
-      if (
-        rightStart > 0 &&
-        /^[A-Za-z\u0c00-\u0c7f\s-]{2,25}:$/i.test(lines[rightStart - 1])
-      ) {
+      if (rightStart > 0 && isExplicitHeader(lines[rightStart - 1])) {
         rightTitle = lines[rightStart - 1].replace(/:$/, "").trim();
       }
 
@@ -290,18 +288,18 @@ export function FormattedQuestionText({
       matchingLayout;
 
     return (
-      <div lang={isTelugu ? "te" : undefined} className={`font-medium break-words ${isTelugu ? "font-telugu" : ""} ${className}`}>
+      <div lang={isTelugu ? "te" : undefined} className={`font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}>
         <div className="space-y-1.5">
           {heading.map((line, index) => <p key={`${index}-${line}`} className="font-semibold text-slate-950">{line}</p>)}
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:gap-6">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{leftTitle}</p>
-            <div className="space-y-2">{leftItems.map((line) => <p key={line}>{line}</p>)}</div>
+            <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{leftItems.map((line) => <p key={line} className="break-normal whitespace-normal">{line}</p>)}</div>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{rightTitle}</p>
-            <div className="space-y-2">{rightItems.map((line) => <p key={line}>{line}</p>)}</div>
+            <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{rightItems.map((line) => <p key={line} className="break-normal whitespace-normal">{line}</p>)}</div>
           </div>
         </div>
         {instruction.length > 0 && <div className="mt-3 space-y-1.5 text-slate-700">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
