@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
-import { moveAssignedQuestion, removeAssignedQuestion } from "./question-actions";
+import { moveAssignedQuestion, removeAssignedQuestion, sortAssignedQuestionsBySubjectOrder } from "./question-actions";
 
 type AssignedQuestion = {
   id: string;
@@ -26,6 +26,26 @@ type QuestionAssignmentsProps = {
   questionsPath: string;
   returnTo?: string;
 };
+
+function SortBySubjectButton({ mockTestId }: { mockTestId: string }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+
+  async function sort() {
+    if (!window.confirm("Are you sure you want to reorder all questions in this mock test by their subject's display order?")) return;
+    setPending(true);
+    const result = await sortAssignedQuestionsBySubjectOrder(mockTestId);
+    if (!result.success) window.alert(result.message);
+    setPending(false);
+    router.refresh();
+  }
+
+  return (
+    <button type="button" onClick={sort} disabled={pending} aria-busy={pending} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50">
+      <PendingButtonContent pending={pending} pendingLabel="Sorting…">Sort by Subject Order</PendingButtonContent>
+    </button>
+  );
+}
 
 function RemoveAssignmentButton({ mockTestId, assignmentId }: { mockTestId: string; assignmentId: string }) {
   const router = useRouter();
@@ -76,8 +96,15 @@ export function QuestionAssignments({ mockTestId, isDraft, targetQuestionCount, 
 
   return <section className="mt-8 overflow-hidden rounded-3xl border bg-white shadow-sm">
     <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 bg-slate-50 px-6 py-5 sm:px-7">
-      <div><p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">This mock test</p><h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Questions</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">These questions belong to this mock test. Adding, editing, or removing them here does not change another mock test.</p></div>
-      <span className="rounded-full bg-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700">{assignedQuestions.length} of {targetQuestionCount} assigned · {readyQuestionCount} ready</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">This mock test</p>
+        <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Questions</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">These questions belong to this mock test. Adding, editing, or removing them here does not change another mock test.</p>
+      </div>
+      <div className="flex flex-col items-end gap-3">
+        <span className="rounded-full bg-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700">{assignedQuestions.length} of {targetQuestionCount} assigned · {readyQuestionCount} ready</span>
+        {isDraft && assignedQuestions.length > 1 && <SortBySubjectButton mockTestId={mockTestId} />}
+      </div>
     </div>
 
     {isDraft ? <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 p-6 sm:p-7"><div><p className="text-sm font-black text-slate-950">Add an individual question</p><p className="mt-1 text-sm text-slate-600">Create it directly inside this mock test and it will be assigned here automatically.</p></div><Link href={`${questionsPath}/new${returnToQuery}`} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800">+ Add question to this mock test</Link></div> : <div className="m-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">This mock test is published or archived, so its questions are locked.</div>}

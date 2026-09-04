@@ -32,3 +32,44 @@ export async function moveAssignedQuestion(mockTestId: string, assignmentId: str
   revalidateMockTestQuestions(mockTestId);
   return { success: true, message: "Question order updated." };
 }
+
+export async function sortAssignedQuestionsBySubjectOrder(mockTestId: string): Promise<AssignmentState> {
+  const result = await draft(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to sort Questions." };
+
+  const { data: assignments, error: fetchError } = await result.supabase
+    .from("mock_test_questions")
+    .select("id, question_order, questions!inner ( subject_id, subjects!inner ( display_order ) )")
+    .eq("mock_test_id", mockTestId)
+    .order("question_order");
+
+  if (fetchError || !assignments) return { success: false, message: fetchError?.message || "Could not fetch questions." };
+  if (assignments.length <= 1) return { success: true, message: "No questions to sort." };
+
+  const sorted = [...assignments].sort((a, b) => {
+    // @ts-expect-error Inner join returns single object
+    const orderA = Number(a.questions?.subjects?.display_order ?? 0);
+    // @ts-expect-error Inner join returns single object
+    const orderB = Number(b.questions?.subjects?.display_order ?? 0);
+    if (orderA !== orderB) return orderA - orderB;
+    return a.question_order - b.question_order;
+  });
+
+  const needsUpdate = sorted.some((a, index) => a.id !== assignments[index].id);
+  if (!needsUpdate) return { success: true, message: "Questions are already sorted by subject." };
+
+  const offset = 100000;
+  
+  // Pass 1: Shift to avoid unique constraint violations
+  await Promise.all(sorted.map((item, index) => 
+    result.supabase.from("mock_test_questions").update({ question_order: offset + index + 1 }).eq("id", item.id)
+  ));
+
+  // Pass 2: Set final order
+  await Promise.all(sorted.map((item, index) => 
+    result.supabase.from("mock_test_questions").update({ question_order: index + 1 }).eq("id", item.id)
+  ));
+
+  revalidateMockTestQuestions(mockTestId);
+  return { success: true, message: "Questions reordered by subject successfully." };
+}
