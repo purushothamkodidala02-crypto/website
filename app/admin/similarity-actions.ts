@@ -21,7 +21,13 @@ export type DuplicateQuestionItem = {
   subjectId: string | null;
   subjectName: string;
   createdAt: string;
-  assignedTests: Array<{ id: string; title: string }>;
+  assignedTests: Array<{
+    id: string;
+    title: string;
+    paperId: string;
+    paperName: string;
+    examName: string;
+  }>;
 };
 
 export type DuplicateTextGroup = {
@@ -31,6 +37,7 @@ export type DuplicateTextGroup = {
   subjectNames: string[];
   items: DuplicateQuestionItem[];
   hasIdenticalOptions: boolean;
+  isSamePaperConflict: boolean;
 };
 
 export type ScanDuplicatesResult = {
@@ -147,23 +154,46 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
     return { success: false, message: "Admin privileges required", totalQuestionsScanned: 0, duplicateGroups: [] };
   }
 
-  // Fetch all active questions, subjects, assignments, and tests with automatic pagination past 1000
-  const [questions, subjectsResult, assignments, testsResult] = await Promise.all([
+  // Fetch all active questions, subjects, assignments, tests, papers, and exam groups with automatic pagination past 1000
+  const [questions, subjectsResult, assignments, testsResult, papersResult, groupsResult] = await Promise.all([
     fetchAllActiveQuestions(supabase),
     supabase.from("subjects").select("id, name"),
     fetchAllAssignments(supabase),
-    supabase.from("mock_tests").select("id, title"),
+    supabase.from("mock_tests").select("id, title, paper_id"),
+    supabase.from("papers").select("id, name, exam_group_id"),
+    supabase.from("exam_groups").select("id, name"),
   ]);
 
   const subjectMap = new Map((subjectsResult.data ?? []).map((s) => [s.id, s.name]));
-  const testMap = new Map((testsResult.data ?? []).map((t) => [t.id, t.title]));
+  const paperMap = new Map((papersResult.data ?? []).map((p) => [p.id, p]));
+  const groupMap = new Map((groupsResult.data ?? []).map((g) => [g.id, g.name]));
+
+  type TestMeta = { id: string; title: string; paperId: string; paperName: string; examName: string };
+  const testMap = new Map<string, TestMeta>();
+  for (const t of testsResult.data ?? []) {
+    const paper = t.paper_id ? paperMap.get(t.paper_id) : undefined;
+    const examName = paper?.exam_group_id ? groupMap.get(paper.exam_group_id) ?? "Unknown Exam" : "Unknown Exam";
+    testMap.set(t.id, {
+      id: t.id,
+      title: t.title,
+      paperId: t.paper_id ?? "",
+      paperName: paper?.name ?? "Unknown Paper",
+      examName,
+    });
+  }
 
   // Build question -> assigned tests map
-  const questionTestsMap = new Map<string, Array<{ id: string; title: string }>>();
+  const questionTestsMap = new Map<string, TestMeta[]>();
   for (const row of assignments) {
     const list = questionTestsMap.get(row.question_id) ?? [];
-    const title = testMap.get(row.mock_test_id) ?? "Unknown test";
-    list.push({ id: row.mock_test_id, title });
+    const meta = testMap.get(row.mock_test_id) ?? {
+      id: row.mock_test_id,
+      title: "Unknown test",
+      paperId: "",
+      paperName: "Unknown Paper",
+      examName: "Unknown Exam",
+    };
+    list.push(meta);
     questionTestsMap.set(row.question_id, list);
   }
 
@@ -234,6 +264,17 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
         return fp === baseOptionsFingerprint;
       });
 
+      // Check if this duplicate appears across multiple tests belonging to the SAME PAPER
+      const paperCounts = new Map<string, number>();
+      for (const item of items) {
+        for (const t of item.assignedTests) {
+          if (t.paperId) {
+            paperCounts.set(t.paperId, (paperCounts.get(t.paperId) ?? 0) + 1);
+          }
+        }
+      }
+      const isSamePaperConflict = Array.from(paperCounts.values()).some((count) => count > 1);
+
       duplicateGroups.push({
         normalizedKey,
         questionTextSample: items[0].questionText,
@@ -241,12 +282,17 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
         subjectNames: uniqueSubjects,
         items,
         hasIdenticalOptions,
+        isSamePaperConflict,
       });
     }
   }
 
-  // Sort by count descending
-  duplicateGroups.sort((a, b) => b.count - a.count);
+  // Sort: Same-paper conflicts FIRST (critical!), then by count descending
+  duplicateGroups.sort((a, b) => {
+    if (a.isSamePaperConflict && !b.isSamePaperConflict) return -1;
+    if (!a.isSamePaperConflict && b.isSamePaperConflict) return 1;
+    return b.count - a.count;
+  });
 
   return {
     success: true,

@@ -6,8 +6,44 @@ import {
   scanQuestionTextDuplicates,
   deleteUnassignedQuestion,
   deleteBulkUnassignedDuplicates,
-  type DuplicateTextGroup,
 } from "./similarity-actions";
+
+export type DuplicateQuestionItem = {
+  id: string;
+  questionText: string;
+  questionTextTe: string | null;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  optionATe: string | null;
+  optionBTe: string | null;
+  optionCTe: string | null;
+  optionDTe: string | null;
+  correctAnswer: string;
+  explanation: string | null;
+  explanationTe: string | null;
+  subjectId: string | null;
+  subjectName: string;
+  createdAt: string;
+  assignedTests: Array<{
+    id: string;
+    title: string;
+    paperId?: string;
+    paperName?: string;
+    examName?: string;
+  }>;
+};
+
+export type DuplicateTextGroup = {
+  normalizedKey: string;
+  questionTextSample: string;
+  count: number;
+  subjectNames: string[];
+  items: DuplicateQuestionItem[];
+  hasIdenticalOptions: boolean;
+  isSamePaperConflict?: boolean;
+};
 
 type TestRecord = {
   id: string;
@@ -1174,7 +1210,7 @@ export function QuestionSimilarityScanner({
                                                   key={t.id}
                                                   className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-900 border border-emerald-200"
                                                 >
-                                                  {t.examName} · {t.paperName}: <strong>{t.title}</strong>
+                                                  {t.examName && t.paperName ? `${t.examName} · ${t.paperName}: ` : ""}<strong>{t.title}</strong>
                                                 </span>
                                               ))}
                                             </div>
@@ -1233,7 +1269,9 @@ export function QuestionSimilarityScanner({
                                                 className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-900 border border-emerald-200"
                                               >
                                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                                <span className="text-slate-500 font-medium">{t.examName} · {t.paperName}:</span>
+                                                {t.examName && t.paperName ? (
+                                                  <span className="text-slate-500 font-medium">{t.examName} · {t.paperName}:</span>
+                                                ) : null}
                                                 <span>{t.title}</span>
                                               </span>
                                             ))
