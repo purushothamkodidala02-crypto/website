@@ -63,7 +63,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /(?:[,;.]|[ \t]+)\s*(?=(?:\([a-hA-H\d]\)|\([ivxIVX]{1,5}\)|\((?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|ఎ|బి|సి|డి)[.)])\s*)/g,
+      /(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/g,
       "\n",
     )
     .replace(
@@ -93,7 +93,7 @@ function questionLines(text: string) {
     )
     .replace(/[ \t]+(?=Which\s+[A-Za-z])/g, "\n")
     .replace(
-      /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|ఎ|బి|సి|డి)[.)])\s)/gi,
+      /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -410,11 +410,25 @@ export function FormattedQuestionText({
         const data = line.match(dataRow);
         const isHeading = sectionHeading.test(line);
         const isInstruction = instructionStart.test(line);
+        const isIntroHeading =
+          index === 0 &&
+          lines.length > 1 &&
+          !labelled &&
+          !numbered &&
+          (/:$/.test(line) ||
+            isHeading ||
+            /^(?:Read|Consider|Study|Directions?|గమనిక|కింది|క్రింది)\b/i.test(line));
 
         return (
           <p
             key={`${index}-${line}`}
-            className={isInstruction ? "pt-2 font-semibold text-slate-800" : index === 0 && lines.length > 1 ? "font-semibold text-slate-950 pb-0.5" : "leading-relaxed"}
+            className={
+              isInstruction
+                ? "pt-2 font-semibold text-slate-800"
+                : isIntroHeading
+                  ? "font-semibold text-slate-950 pb-0.5"
+                  : "leading-relaxed"
+            }
           >
             {isHeading ? (
               <span className="font-bold text-slate-950">{line}</span>
