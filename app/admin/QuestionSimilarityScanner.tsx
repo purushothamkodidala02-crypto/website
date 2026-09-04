@@ -1,0 +1,739 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  scanQuestionTextDuplicates,
+  type DuplicateTextGroup,
+} from "./similarity-actions";
+
+type TestRecord = {
+  id: string;
+  title: string;
+  status: string;
+  paper_id: string;
+  subject_id: string | null;
+  series_number: number | string | null;
+  updated_at: string;
+};
+
+type AssignmentRecord = {
+  mock_test_id: string;
+  question_id: string;
+};
+
+type PaperRecord = {
+  id: string;
+  exam_group_id: string;
+  specialization_id: string | null;
+  name: string;
+  display_order: number;
+};
+
+type ExamRecord = {
+  id: string;
+  name: string;
+};
+
+type SpecializationRecord = {
+  id: string;
+  exam_group_id: string;
+  name: string;
+  slug: string;
+};
+
+type SubjectRecord = {
+  id: string;
+  name: string;
+};
+
+type OverlapClassification =
+  | "common_specialization"
+  | "subject_practice"
+  | "same_series"
+  | "cross_exam";
+
+type OverlapDetail = {
+  targetTestId: string;
+  targetTestTitle: string;
+  sharedCount: number;
+  percentage: number;
+  classification: OverlapClassification;
+  explanation: string;
+  targetExamName: string;
+  targetSpecializationName?: string;
+};
+
+type TestAnalysis = {
+  test: TestRecord;
+  examName: string;
+  paperName: string;
+  specializationName?: string;
+  subjectName?: string;
+  totalQuestions: number;
+  isSubjectTest: boolean;
+  overlaps: OverlapDetail[];
+  commonSpecializationCount: number;
+  practiceReuseCount: number;
+  sameSeriesCount: number;
+};
+
+export function QuestionSimilarityScanner({
+  tests,
+  assignments,
+  papers,
+  exams,
+  specializations,
+  subjects,
+}: {
+  tests: TestRecord[];
+  assignments: AssignmentRecord[];
+  papers: PaperRecord[];
+  exams: ExamRecord[];
+  specializations: SpecializationRecord[];
+  subjects: SubjectRecord[];
+}) {
+  const [selectedExamId, setSelectedExamId] = useState<string>("all");
+  const [filterMode, setFilterMode] = useState<
+    "all" | "warnings" | "common_syllabus" | "practice_reuse" | "unique_only"
+  >("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedTestId, setExpandedTestId] = useState<string | null>(null);
+
+  // Text duplicate scanner state
+  const [textScannerOpen, setTextScannerOpen] = useState(false);
+  const [scanningText, setScanningText] = useState(false);
+  const [scannedTextResult, setScannedTextResult] = useState<{
+    total: number;
+    groups: DuplicateTextGroup[];
+  } | null>(null);
+
+  // Lookup maps
+  const examMap = useMemo(() => new Map(exams.map((e) => [e.id, e.name])), [exams]);
+  const paperMap = useMemo(() => new Map(papers.map((p) => [p.id, p])), [papers]);
+  const specMap = useMemo(
+    () => new Map(specializations.map((s) => [s.id, s.name])),
+    [specializations],
+  );
+  const subjectMap = useMemo(
+    () => new Map(subjects.map((s) => [s.id, s.name])),
+    [subjects],
+  );
+
+  // Test ID -> Question IDs set
+  const testQuestionsMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const a of assignments) {
+      const set = map.get(a.mock_test_id) ?? new Set<string>();
+      set.add(a.question_id);
+      map.set(a.mock_test_id, set);
+    }
+    return map;
+  }, [assignments]);
+
+  // Compute test analysis matrix
+  const analyzedTests = useMemo(() => {
+    const results: TestAnalysis[] = [];
+
+    for (const test of tests) {
+      const paper = paperMap.get(test.paper_id);
+      const examName = paper ? examMap.get(paper.exam_group_id) ?? "Unknown Exam" : "Unknown Exam";
+      const specializationName = paper?.specialization_id
+        ? specMap.get(paper.specialization_id)
+        : undefined;
+      const subjectName = test.subject_id ? subjectMap.get(test.subject_id) : undefined;
+      const questions = testQuestionsMap.get(test.id) ?? new Set<string>();
+      const totalQuestions = questions.size;
+      const isSubjectTest = Boolean(test.subject_id);
+
+      const overlaps: OverlapDetail[] = [];
+      let commonSpecializationCount = 0;
+      let practiceReuseCount = 0;
+      let sameSeriesCount = 0;
+
+      if (totalQuestions > 0) {
+        for (const otherTest of tests) {
+          if (otherTest.id === test.id) continue;
+
+          const otherPaper = paperMap.get(otherTest.paper_id);
+          const otherExamName = otherPaper
+            ? examMap.get(otherPaper.exam_group_id) ?? "Unknown Exam"
+            : "Unknown Exam";
+          const otherSpecializationName = otherPaper?.specialization_id
+            ? specMap.get(otherPaper.specialization_id)
+            : undefined;
+          const otherQuestions = testQuestionsMap.get(otherTest.id) ?? new Set<string>();
+
+          // Count shared question IDs
+          let shared = 0;
+          for (const qId of questions) {
+            if (otherQuestions.has(qId)) {
+              shared += 1;
+            }
+          }
+
+          if (shared > 0) {
+            const percentage = Math.round((shared / totalQuestions) * 100);
+            const otherIsSubjectTest = Boolean(otherTest.subject_id);
+
+            // Classification Logic
+            let classification: OverlapClassification;
+            let explanation: string;
+
+            if (isSubjectTest !== otherIsSubjectTest) {
+              // One is subject test, one is full paper test
+              classification = "subject_practice";
+              explanation =
+                "Subject-wise practice test questions reused in full paper test (Expected for student revision).";
+              practiceReuseCount += shared;
+            } else if (
+              paper &&
+              otherPaper &&
+              paper.exam_group_id === otherPaper.exam_group_id &&
+              paper.specialization_id !== otherPaper.specialization_id &&
+              (paper.specialization_id || otherPaper.specialization_id)
+            ) {
+              // Different specializations of the SAME exam (e.g. TG TET Paper 2 Maths/Science vs Social)
+              classification = "common_specialization";
+              explanation = `Shared common syllabus questions across specializations (e.g., CDP, Languages in TET). Normal and syllabus-aligned.`;
+              commonSpecializationCount += shared;
+            } else if (
+              paper &&
+              otherPaper &&
+              paper.id === otherPaper.id &&
+              !isSubjectTest &&
+              !otherIsSubjectTest
+            ) {
+              // Same paper and same specialization (e.g. Grand Test 1 vs Grand Test 2)
+              classification = "same_series";
+              explanation = `Repeated questions within the same paper test series. Students taking both tests will see repeated questions.`;
+              sameSeriesCount += shared;
+            } else {
+              classification = "cross_exam";
+              explanation = `Questions shared between general mock tests.`;
+            }
+
+            overlaps.push({
+              targetTestId: otherTest.id,
+              targetTestTitle: otherTest.title,
+              sharedCount: shared,
+              percentage,
+              classification,
+              explanation,
+              targetExamName: otherExamName,
+              targetSpecializationName: otherSpecializationName,
+            });
+          }
+        }
+      }
+
+      // Sort overlaps: warnings first, then by shared count descending
+      overlaps.sort((a, b) => {
+        if (a.classification === "same_series" && b.classification !== "same_series") return -1;
+        if (b.classification === "same_series" && a.classification !== "same_series") return 1;
+        return b.sharedCount - a.sharedCount;
+      });
+
+      results.push({
+        test,
+        examName,
+        paperName: paper?.name ?? "Unknown Paper",
+        specializationName,
+        subjectName,
+        totalQuestions,
+        isSubjectTest,
+        overlaps,
+        commonSpecializationCount,
+        practiceReuseCount,
+        sameSeriesCount,
+      });
+    }
+
+    return results;
+  }, [tests, paperMap, examMap, specMap, subjectMap, testQuestionsMap]);
+
+  // Overall metrics
+  const totalAnalyzedTests = analyzedTests.length;
+  const testsWithSameSeriesWarnings = analyzedTests.filter((t) => t.sameSeriesCount > 0);
+  const testsWithCommonSyllabus = analyzedTests.filter((t) => t.commonSpecializationCount > 0);
+  const testsWithPracticeReuse = analyzedTests.filter((t) => t.practiceReuseCount > 0);
+
+  // Filtered view
+  const filteredTests = useMemo(() => {
+    return analyzedTests.filter((item) => {
+      const paper = paperMap.get(item.test.paper_id);
+      if (selectedExamId !== "all" && paper?.exam_group_id !== selectedExamId) {
+        return false;
+      }
+
+      if (filterMode === "warnings" && item.sameSeriesCount === 0) return false;
+      if (filterMode === "common_syllabus" && item.commonSpecializationCount === 0) return false;
+      if (filterMode === "practice_reuse" && item.practiceReuseCount === 0) return false;
+      if (filterMode === "unique_only" && item.overlaps.length > 0) return false;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = item.test.title.toLowerCase().includes(q);
+        const matchExam = item.examName.toLowerCase().includes(q);
+        const matchSpec = (item.specializationName ?? "").toLowerCase().includes(q);
+        if (!matchTitle && !matchExam && !matchSpec) return false;
+      }
+
+      return true;
+    });
+  }, [analyzedTests, selectedExamId, filterMode, searchQuery, paperMap]);
+
+  // Handle run text duplicate scanner
+  const handleRunTextScan = async () => {
+    setScanningText(true);
+    setTextScannerOpen(true);
+    try {
+      const res = await scanQuestionTextDuplicates();
+      if (res.success) {
+        setScannedTextResult({
+          total: res.totalQuestionsScanned,
+          groups: res.duplicateGroups,
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setScanningText(false);
+    }
+  };
+
+  return (
+    <div className="overflow-hidden rounded-[2rem] border border-teal-100 bg-white p-6 shadow-sm sm:p-8">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-800">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </span>
+            <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-800">
+              Exam Intelligence
+            </p>
+          </div>
+          <h2 className="mt-2 text-2xl font-black text-slate-950">
+            Question Similarity & Overlap Scanner
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Automatically distinguishes intentional multi-stream overlaps (e.g. TG TET CDP & Languages) and subject practice reuse from accidental duplicates.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleRunTextScan}
+            disabled={scanningText}
+            className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50/70 px-4 py-2.5 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-60"
+          >
+            {scanningText ? (
+              <>
+                <svg className="h-3.5 w-3.5 animate-spin text-teal-800" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                Scanning Question Bank…
+              </>
+            ) : (
+              <>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Scan Question Bank for Duplicates
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Metric Cards */}
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Tests Analyzed</p>
+          <p className="mt-1.5 text-2xl font-black text-slate-900">{totalAnalyzedTests}</p>
+          <span className="mt-1 inline-block text-xs font-semibold text-slate-600">Across all active papers</span>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Shared Specialisations</p>
+          <p className="mt-1.5 text-2xl font-black text-emerald-900">{testsWithCommonSyllabus.length} tests</p>
+          <span className="mt-1 inline-block text-xs font-bold text-emerald-700">✅ Intentional Common Syllabus</span>
+        </div>
+
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-blue-800">Subject Practice Reuses</p>
+          <p className="mt-1.5 text-2xl font-black text-blue-900">{testsWithPracticeReuse.length} tests</p>
+          <span className="mt-1 inline-block text-xs font-bold text-blue-700">✅ Subject to Paper Practice</span>
+        </div>
+
+        <div className={`rounded-2xl border p-4 ${testsWithSameSeriesWarnings.length > 0 ? "border-amber-200 bg-amber-50/60" : "border-emerald-100 bg-emerald-50/50"}`}>
+          <p className={`text-[11px] font-bold uppercase tracking-wider ${testsWithSameSeriesWarnings.length > 0 ? "text-amber-800" : "text-emerald-800"}`}>
+            Same-Series Overlaps
+          </p>
+          <p className={`mt-1.5 text-2xl font-black ${testsWithSameSeriesWarnings.length > 0 ? "text-amber-900" : "text-emerald-900"}`}>
+            {testsWithSameSeriesWarnings.length} {testsWithSameSeriesWarnings.length === 1 ? "test" : "tests"}
+          </p>
+          <span className={`mt-1 inline-block text-xs font-bold ${testsWithSameSeriesWarnings.length > 0 ? "text-amber-800" : "text-emerald-700"}`}>
+            {testsWithSameSeriesWarnings.length > 0 ? "⚠️ Review Test 1 vs Test 2" : "✨ All Papers Clean"}
+          </span>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor="similarity-exam-select" className="sr-only">Filter by Exam</label>
+          <select
+            id="similarity-exam-select"
+            value={selectedExamId}
+            onChange={(e) => setSelectedExamId(e.target.value)}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm focus:border-teal-500 focus:outline-none"
+          >
+            <option value="all">All Exams ({exams.length})</option>
+            {exams.map((exam) => (
+              <option key={exam.id} value={exam.id}>
+                {exam.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Quick Filter Buttons */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setFilterMode("all")}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${filterMode === "all" ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}
+            >
+              All Tests
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode("warnings")}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${filterMode === "warnings" ? "bg-amber-700 text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}
+            >
+              ⚠️ Warnings ({testsWithSameSeriesWarnings.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode("common_syllabus")}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${filterMode === "common_syllabus" ? "bg-emerald-700 text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}
+            >
+              ✅ Specialisations ({testsWithCommonSyllabus.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode("practice_reuse")}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${filterMode === "practice_reuse" ? "bg-blue-700 text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}
+            >
+              ✅ Practice Reuse ({testsWithPracticeReuse.length})
+            </button>
+          </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="w-full sm:w-64">
+          <input
+            type="text"
+            placeholder="Search test or exam…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder-slate-400 shadow-sm focus:border-teal-500 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Tests Analysis List */}
+      <div className="mt-4 divide-y divide-slate-100 rounded-2xl border border-slate-200/80 bg-white">
+        {filteredTests.length === 0 ? (
+          <div className="p-8 text-center text-sm text-slate-500">
+            No mock tests match the selected filters.
+          </div>
+        ) : (
+          filteredTests.map((item) => {
+            const isExpanded = expandedTestId === item.test.id;
+            const hasOverlaps = item.overlaps.length > 0;
+
+            return (
+              <div key={item.test.id} className="p-4 transition hover:bg-slate-50/40 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase text-slate-700">
+                        {item.examName}
+                      </span>
+                      {item.specializationName && (
+                        <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                          {item.specializationName}
+                        </span>
+                      )}
+                      {item.isSubjectTest ? (
+                        <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-800">
+                          Subject: {item.subjectName ?? "Subject Practice"}
+                        </span>
+                      ) : (
+                        <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-800">
+                          Full Paper
+                        </span>
+                      )}
+                      <span className="text-xs font-semibold text-slate-400">
+                        {item.totalQuestions} Questions
+                      </span>
+                    </div>
+
+                    <h3 className="mt-1 text-base font-bold text-slate-900">
+                      {item.test.title}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Paper: {item.paperName}
+                      {item.test.series_number && ` · Series #${item.test.series_number}`}
+                    </p>
+                  </div>
+
+                  {/* Overlap Status Badges */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.sameSeriesCount > 0 && (
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">
+                        ⚠️ {item.sameSeriesCount} Qs Same-Series
+                      </span>
+                    )}
+
+                    {item.commonSpecializationCount > 0 && (
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-900">
+                        ✅ {item.commonSpecializationCount} Qs Shared Common
+                      </span>
+                    )}
+
+                    {item.practiceReuseCount > 0 && (
+                      <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-900">
+                        ✅ {item.practiceReuseCount} Qs Practice Reuse
+                      </span>
+                    )}
+
+                    {!hasOverlaps && (
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                        ✨ 100% Unique
+                      </span>
+                    )}
+
+                    {hasOverlaps && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedTestId(isExpanded ? null : item.test.id)}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                      >
+                        {isExpanded ? "Hide Overlaps ▲" : `View Overlaps (${item.overlaps.length}) ▼`}
+                      </button>
+                    )}
+
+                    <Link
+                      href={`/admin/mock-tests/${item.test.id}/edit`}
+                      className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-900 hover:bg-teal-100"
+                    >
+                      Edit Test
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Expanded Overlaps Breakdown */}
+                {isExpanded && hasOverlaps && (
+                  <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                      Tests sharing questions with &ldquo;{item.test.title}&rdquo;
+                    </p>
+                    <div className="mt-3 space-y-2.5">
+                      {item.overlaps.map((overlap) => {
+                        const isWarning = overlap.classification === "same_series";
+                        const isCommon = overlap.classification === "common_specialization";
+                        const isPractice = overlap.classification === "subject_practice";
+
+                        return (
+                          <div
+                            key={overlap.targetTestId}
+                            className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 ${
+                              isWarning
+                                ? "border-amber-200 bg-amber-50/50 text-amber-950"
+                                : isCommon
+                                ? "border-emerald-200 bg-emerald-50/40 text-emerald-950"
+                                : isPractice
+                                ? "border-blue-200 bg-blue-50/40 text-blue-950"
+                                : "border-slate-200 bg-white text-slate-800"
+                            }`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
+                                    isWarning
+                                      ? "bg-amber-200 text-amber-900"
+                                      : isCommon
+                                      ? "bg-emerald-200 text-emerald-900"
+                                      : isPractice
+                                      ? "bg-blue-200 text-blue-900"
+                                      : "bg-slate-200 text-slate-800"
+                                  }`}
+                                >
+                                  {isWarning
+                                    ? "⚠️ Same-Series Overlap"
+                                    : isCommon
+                                    ? "✅ Common Specialisation (TG TET Syllabus)"
+                                    : isPractice
+                                    ? "✅ Practice Reuse (Subject to Paper)"
+                                    : "General Overlap"}
+                                </span>
+                                {overlap.targetSpecializationName && (
+                                  <span className="text-xs font-semibold text-slate-600">
+                                    Specialisation: {overlap.targetSpecializationName}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-sm font-bold text-slate-900">
+                                {overlap.targetTestTitle}
+                              </p>
+                              <p className="mt-0.5 text-xs text-slate-600">
+                                {overlap.explanation}
+                              </p>
+                            </div>
+
+                            <div className="text-right">
+                              <strong className="block text-base font-black">
+                                {overlap.sharedCount} questions
+                              </strong>
+                              <span className="text-xs font-semibold text-slate-500">
+                                {overlap.percentage}% of test
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Duplicate Question Text Scanner Modal */}
+      {textScannerOpen && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 p-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-700">
+                  Question Bank Integrity
+                </p>
+                <h3 className="mt-1 text-xl font-black text-slate-900">
+                  Duplicate Question Text Scanner
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTextScannerOpen(false)}
+                className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-100"
+                aria-label="Close dialog"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {scanningText ? (
+                <div className="py-12 text-center">
+                  <svg className="mx-auto h-8 w-8 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  <p className="mt-3 text-sm font-bold text-slate-700">
+                    Scanning active questions in the Question Bank…
+                  </p>
+                </div>
+              ) : scannedTextResult ? (
+                <div>
+                  <div className="rounded-xl bg-slate-50 p-4 text-xs font-semibold text-slate-700">
+                    Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
+                    <strong>{scannedTextResult.groups.length}</strong> duplicate question text{" "}
+                    {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
+                  </div>
+
+                  {scannedTextResult.groups.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                        ✓
+                      </div>
+                      <h4 className="text-base font-bold text-slate-900">
+                        No Duplicate Texts Found!
+                      </h4>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Every question in the Question Bank has distinct wording.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-4 space-y-4">
+                      {scannedTextResult.groups.map((group, idx) => (
+                        <div key={idx} className="rounded-2xl border border-amber-200 bg-amber-50/30 p-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
+                              {group.count} Identical Records
+                            </span>
+                            <span className="text-xs text-slate-500">
+                              Subject: {group.subjectNames.join(", ")}
+                            </span>
+                          </div>
+
+                          <p className="mt-2 text-sm font-semibold text-slate-900">
+                            &ldquo;{group.questionTextSample}&rdquo;
+                          </p>
+
+                          <div className="mt-3 divide-y divide-amber-100 rounded-xl border border-amber-100 bg-white text-xs">
+                            {group.items.map((item) => (
+                              <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 p-2.5">
+                                <div>
+                                  <span className="font-mono text-[10px] text-slate-400">ID: {item.id.slice(0, 8)}…</span>
+                                  <span className="ml-2 font-medium text-slate-700">Subject: {item.subjectName}</span>
+                                </div>
+                                <div className="text-right">
+                                  {item.assignedTests.length > 0 ? (
+                                    <span className="font-bold text-teal-800">
+                                      Assigned in: {item.assignedTests.map((t) => t.title).join(", ")}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400">Not assigned to any test</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex justify-end border-t border-slate-100 p-4">
+              <button
+                type="button"
+                onClick={() => setTextScannerOpen(false)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -3,25 +3,36 @@ import { createClient } from "@/lib/supabase/server";
 import { indiaDateKey } from "@/lib/date";
 import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
+import { QuestionSimilarityScanner } from "./QuestionSimilarityScanner";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
-  const [testsResult, assignmentsResult, questionsResult, attemptsResult, reportsResult, papersResult, groupsResult, subjectsResult] =
-    await Promise.all([
-      supabase
-        .from("mock_tests")
-        .select("id, title, status, updated_at, paper_id, subject_id, series_number")
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("mock_test_questions")
-        .select("mock_test_id, question_id, marks, negative_marks"),
-      supabase.from("questions").select("id, is_active, expires_on"),
-      supabase.from("test_attempts").select("id", { count: "exact", head: true }),
-      supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
-      supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
-      supabase.from("exam_groups").select("id, name"),
-      supabase.from("subjects").select("id, name"),
-    ]);
+  const [
+    testsResult,
+    assignmentsResult,
+    questionsResult,
+    attemptsResult,
+    reportsResult,
+    papersResult,
+    groupsResult,
+    subjectsResult,
+    specializationsResult,
+  ] = await Promise.all([
+    supabase
+      .from("mock_tests")
+      .select("id, title, status, updated_at, paper_id, subject_id, series_number")
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("mock_test_questions")
+      .select("mock_test_id, question_id, marks, negative_marks"),
+    supabase.from("questions").select("id, is_active, expires_on"),
+    supabase.from("test_attempts").select("id", { count: "exact", head: true }),
+    supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+    supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
+    supabase.from("exam_groups").select("id, name"),
+    supabase.from("subjects").select("id, name"),
+    supabase.from("exam_specializations").select("id, exam_group_id, name, slug"),
+  ]);
 
   const tests = testsResult.data ?? [];
   const papers = papersResult.data ?? [];
@@ -233,6 +244,16 @@ export default async function AdminDashboard() {
           )}
         </div>
       </section>
+
+      {/* Question Similarity & Overlap Intelligence */}
+      <QuestionSimilarityScanner
+        tests={tests}
+        assignments={assignmentsResult.data ?? []}
+        papers={papers}
+        exams={groupsResult.data ?? []}
+        specializations={specializationsResult.data ?? []}
+        subjects={subjectsResult.data ?? []}
+      />
 
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-950 via-slate-950 to-slate-900 p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-teal-300/10 blur-3xl" />
