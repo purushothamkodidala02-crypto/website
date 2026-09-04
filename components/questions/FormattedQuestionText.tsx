@@ -41,7 +41,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List)\s+(?:I{1,4}|V|\d+)|(?:ప్రకటన|వాక్యం|తీర్మానం|జాబితా)\s+(?:I{1,4}|V|\d+|[౦-౯]+))\s*:)/gi,
+      /(?<!\b(?:and|&|or|మరియు))[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List)\s+(?:I{1,4}|V|\d+)|(?:ప్రకటన|వాక్యం|తీర్మానం|జాబితా)\s+(?:I{1,4}|V|\d+|[౦-౯]+))\s*:)/gi,
       "\n",
     )
     .replace(
@@ -75,7 +75,7 @@ function questionLines(text: string) {
     )
     .replace(/[ \t]+(?=Which\s+[A-Za-z])/g, "\n")
     .replace(
-      /([.?:])\s+(?=(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|ఎ|బి|సి|డి)[.)]\s)/gi,
+      /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|ఎ|బి|సి|డి)[.)])\s)/gi,
       "$1\n",
     )
     .replace(
@@ -359,13 +359,13 @@ export function FormattedQuestionText({
         return (
           <p
             key={`${index}-${line}`}
-            className={isInstruction ? "pt-1 text-slate-700" : undefined}
+            className={isInstruction ? "pt-2 text-slate-700" : index === 0 && lines.length > 1 ? "font-semibold text-slate-950 pb-0.5" : "leading-relaxed"}
           >
             {isHeading ? (
               <span className="font-bold text-slate-950">{line}</span>
             ) : labelled ? (
               <>
-                <span className="text-slate-950">{normalizedSectionLabel(labelled[1])}:</span>{" "}
+                <span className="font-bold text-slate-950">{normalizedSectionLabel(labelled[1])}:</span>{" "}
                 {labelled[2]}
               </>
             ) : numbered ? (
