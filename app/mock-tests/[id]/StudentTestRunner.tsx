@@ -201,31 +201,82 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
   return <main className="student-page min-h-screen bg-slate-100 pb-8">
-    <header className="hidden sm:block sticky top-0 z-20 border-b border-slate-700 bg-slate-950 px-4 py-2 sm:py-2.5 text-white shadow-lg sm:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-400 sm:text-sm">{title}</p><h1 className="mt-0.5 whitespace-nowrap text-base font-black sm:text-lg">Question {index + 1} <span className="text-slate-400">of {questions.length}</span></h1></div>
-          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end"><PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} /></div>
+    <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md text-white shadow-lg">
+      <div className="mx-auto w-full max-w-[1600px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-4">
+          
+          {/* Box 1: Test Title & Question Indicator */}
+          <div className="flex min-w-0 items-center gap-2 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 backdrop-blur-sm shadow-sm">
+            <div className="min-w-0">
+              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-400 max-w-[200px] xl:max-w-xs" title={title}>
+                {title}
+              </p>
+              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-white">
+                Question {index + 1}{" "}
+                <span className="text-slate-400 font-medium text-[10px] sm:text-xs">of {questions.length}</span>
+              </h1>
+            </div>
+          </div>
+
+          {/* Box 2: Attempted Questions Progress & Stats */}
+          <div className="flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="hidden sm:inline text-[11px] font-bold text-slate-300">Attempted:</span>
+              <span className="sm:hidden text-[10px] font-bold text-slate-300">Done:</span>
+              <strong className="text-xs sm:text-sm font-black text-emerald-400">
+                {answered}
+              </strong>
+              <span className="text-[10px] sm:text-xs text-slate-400 font-medium">/{questions.length}</span>
+              <span className="hidden md:inline rounded bg-emerald-950/80 border border-emerald-500/30 px-1.5 py-0.2 text-[10px] font-bold text-emerald-300">
+                {Math.round((answered / questions.length) * 100)}%
+              </span>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5 border-l border-white/10 pl-2.5 sm:pl-3">
+              <span className="text-[11px] font-semibold text-slate-400">Review:</span>
+              <strong className="text-xs sm:text-sm font-black text-amber-400">{reviewIds.size}</strong>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-1.5 border-l border-white/10 pl-3">
+              <span className="text-[11px] font-semibold text-slate-400">Left:</span>
+              <strong className="text-xs sm:text-sm font-black text-slate-200">{unanswered}</strong>
+            </div>
+
+            <div className="hidden sm:flex items-center border-l border-white/10 pl-2.5 sm:pl-3">
+              <span
+                className={`text-[10px] font-bold ${
+                  saveState === "error" ? "text-rose-300" : saveState === "saving" ? "text-amber-200 animate-pulse" : "text-teal-200"
+                }`}
+              >
+                {saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Saved ✓"}
+              </span>
+            </div>
+          </div>
+
+          {/* Box 3: Time / Timer Control Box */}
+          <div className="flex shrink-0 items-center">
+            <PracticeTimerControl
+              remaining={remaining}
+              paused={paused}
+              busy={pausing}
+              disabled={pauseControlDisabled}
+              onToggle={() => void togglePause()}
+            />
+          </div>
         </div>
-        <div className="mt-2 flex items-center gap-3"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-700"><div className="h-full rounded-full bg-teal-300 transition-all" style={{ width: `${Math.round((answered / questions.length) * 100)}%` }} /></div><span className={`text-[11px] font-bold ${saveState === "error" ? "text-red-300" : "text-teal-100"}`}>{saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Answers saved"}</span></div>
+      </div>
+
+      {/* Slim responsive progress bar */}
+      <div className="h-1 w-full bg-slate-800/80 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-300 transition-all duration-300"
+          style={{ width: `${Math.round((answered / questions.length) * 100)}%` }}
+        />
       </div>
     </header>
 
-    <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8 pb-24 lg:pb-8">
-      
-      {/* Mobile-only inline header (Not sticky, scrolls away) */}
-      <div className="mb-4 flex items-center justify-between sm:hidden">
-        <div className="min-w-0 flex-1 pr-4">
-          <p className="truncate text-xs font-semibold text-slate-500">{title}</p>
-          <div className="mt-2 flex items-center gap-2">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full rounded-full bg-teal-500 transition-all" style={{ width: `${Math.round((answered / questions.length) * 100)}%` }} />
-            </div>
-            <span className={`shrink-0 text-[10px] font-bold ${saveState === "error" ? "text-red-500" : "text-slate-400"}`}>{saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Saved"}</span>
-          </div>
-        </div>
-        <PracticeTimerControl remaining={remaining} paused={paused} busy={pausing} disabled={pauseControlDisabled} onToggle={() => void togglePause()} />
-      </div>
+    <div className="mx-auto w-full max-w-[1600px] px-3 pt-3 sm:px-6 sm:pt-5 lg:px-8 pb-24 lg:pb-8">
       {pauseError && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{pauseError}</p>}
       {paused && <p className="mb-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
       
@@ -244,38 +295,94 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-5">
-          <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">Multiple choice question</p><p className="mt-1 text-xs font-semibold text-slate-500">{current.marks} mark{Number(current.marks) === 1 ? "" : "s"}{Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}</p></div>{bilingual && <div className="rounded-lg bg-slate-100 p-1 text-xs font-bold"><button type="button" onClick={() => setLanguage("en")} className={`rounded-md px-3 py-1.5 ${language === "en" ? "bg-white shadow-sm" : "text-slate-600"}`}>English</button><button type="button" onClick={() => setLanguage("te")} className={`rounded-md px-3 py-1.5 ${language === "te" ? "bg-white shadow-sm" : "text-slate-600"}`}>తెలుగు</button></div>}</div>
-            <FormattedQuestionText text={questionText} className="mt-6 text-lg leading-8" />
+          <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">Multiple choice question</p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">
+                  {current.marks} mark{Number(current.marks) === 1 ? "" : "s"}
+                  {Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}
+                </p>
+              </div>
+              {bilingual && (
+                <div className="rounded-xl bg-slate-100 p-1 text-xs font-bold shadow-inner">
+                  <button type="button" onClick={() => setLanguage("en")} className={`rounded-lg px-3.5 py-1.5 transition ${language === "en" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>English</button>
+                  <button type="button" onClick={() => setLanguage("te")} className={`rounded-lg px-3.5 py-1.5 transition ${language === "te" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>తెలుగు</button>
+                </div>
+              )}
+            </div>
+            <FormattedQuestionText text={questionText} className="mt-6 text-lg sm:text-xl leading-8 sm:leading-9 font-medium text-slate-950" />
             {current.image_url && <QuestionMedia src={current.image_url} className="mt-6" />}
-            <div className="mt-7 grid gap-3">{options.map(([key, text]) => { const selected = answers[current.question_id] === key; const teluguOption = containsTeluguText(text); return <label key={key} className={`flex cursor-pointer gap-4 rounded-2xl border p-4 transition hover:border-teal-300 ${selected ? "border-teal-600 bg-teal-50" : "bg-white"} ${locked ? "pointer-events-none opacity-60" : ""}`}><input className="sr-only" type="radio" name={current.question_id} value={key} checked={selected} disabled={locked} onChange={() => { setSaveState("saving"); setAnswers((value) => ({ ...value, [current.question_id]: key })); queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key)); }} /><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black ${selected ? "bg-teal-700 text-white" : "bg-slate-100 text-slate-600"}`}>{key}</span><span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line pt-1 text-sm font-medium leading-6 text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>{text}</span></label>; })}</div>
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><button type="button" onClick={clearAnswer} disabled={!answers[current.question_id] || locked} className="text-sm font-bold text-slate-500 hover:text-red-700 disabled:opacity-40">Clear answer</button><div className="flex flex-wrap gap-2"><ReportQuestionButton key={`report-${current.question_id}`} questionId={current.question_id} /><BookmarkButton key={current.question_id} questionId={current.question_id} initialBookmarked={bookmarkedQuestionIds.includes(current.question_id)} /><button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900" : "border text-slate-700"}`}>{reviewIds.has(current.question_id) ? "Marked for review" : "Mark for review"}</button></div></div>
+            <div className="mt-7 grid gap-3 sm:gap-3.5">
+              {options.map(([key, text]) => {
+                const selected = answers[current.question_id] === key;
+                const teluguOption = containsTeluguText(text);
+                return (
+                  <label
+                    key={key}
+                    className={`flex cursor-pointer gap-4 rounded-2xl border p-4 sm:p-4.5 transition hover:border-teal-400 ${
+                      selected ? "border-teal-600 bg-teal-50/70 shadow-sm ring-1 ring-teal-500" : "border-slate-200/90 bg-white hover:bg-slate-50/50"
+                    } ${locked ? "pointer-events-none opacity-60" : ""}`}
+                  >
+                    <input
+                      className="sr-only"
+                      type="radio"
+                      name={current.question_id}
+                      value={key}
+                      checked={selected}
+                      disabled={locked}
+                      onChange={() => {
+                        setSaveState("saving");
+                        setAnswers((value) => ({ ...value, [current.question_id]: key }));
+                        queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key));
+                      }}
+                    />
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm font-black transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
+                      {key}
+                    </span>
+                    <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line pt-1 text-sm sm:text-base font-medium leading-relaxed text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>
+                      {text}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5">
+              <button type="button" onClick={clearAnswer} disabled={!answers[current.question_id] || locked} className="text-sm font-bold text-slate-500 hover:text-red-700 disabled:opacity-40">Clear answer</button>
+              <div className="flex flex-wrap gap-2">
+                <ReportQuestionButton key={`report-${current.question_id}`} questionId={current.question_id} />
+                <BookmarkButton key={current.question_id} questionId={current.question_id} initialBookmarked={bookmarkedQuestionIds.includes(current.question_id)} />
+                <button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900" : "border text-slate-700"}`}>
+                  {reviewIds.has(current.question_id) ? "Marked for review" : "Mark for review"}
+                </button>
+              </div>
+            </div>
           </section>
           
           <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
         </div>
-        <aside className="hidden h-[calc(100vh-7rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:block">{navigator}</aside>
+        <aside className="hidden h-[calc(100vh-7rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-20 lg:block">{navigator}</aside>
       </div>
       {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
       
       {/* Fixed Bottom Navigation for Mobile / Inline for Desktop */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:static lg:mt-6 lg:border-t-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        <button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 shadow-sm disabled:opacity-40 lg:border-0 lg:shadow-none lg:border lg:bg-white lg:py-3">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t bg-white/95 backdrop-blur-md p-3 sm:p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.08)] lg:static lg:mt-6 lg:border-t-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+        <button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40">
           Previous
         </button>
         
-        <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl bg-teal-50 px-5 py-3.5 text-sm font-bold text-teal-800 lg:hidden">
-          {index + 1} / {questions.length}
+        <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 lg:hidden">
+          Questions ({index + 1}/{questions.length})
         </button>
 
         {index === questions.length - 1 ? (
-          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm disabled:opacity-50 lg:py-3">
+          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50">
             Review & finish
           </button>
         ) : (
-          <button type="button" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-6 py-3.5 text-sm font-bold text-white shadow-sm disabled:opacity-50 lg:py-3">
+          <button type="button" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50">
             Save & next
           </button>
         )}
@@ -305,7 +412,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
       </div>
 
       <div className="mt-4 max-h-[45vh] min-h-0 overflow-y-auto overscroll-contain pr-1 lg:max-h-none lg:flex-1">
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-5 xl:grid-cols-6 gap-2">
           {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);
             const answered = Boolean(answers[item.question_id]);
@@ -315,7 +422,15 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
                 type="button"
                 disabled={locked}
                 onClick={() => onSelect(index)}
-                className={`flex h-11 w-11 items-center justify-center rounded-lg text-xs font-black ${index === currentIndex ? "bg-slate-950 text-white ring-2 ring-teal-300 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}
+                className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-black transition-all ${
+                  index === currentIndex
+                    ? "bg-slate-950 text-white shadow-md ring-2 ring-teal-300 ring-offset-2 scale-105"
+                    : marked
+                    ? "bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200"
+                    : answered
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200"
+                    : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
+                }`}
               >
                 {index + 1}
               </button>
@@ -341,21 +456,72 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
 function NavigatorMetric({ value, label, tone }: { value: number; label: string; tone: string }) { return <div className="rounded-xl bg-slate-50 px-2 py-2.5 text-center"><strong className={`block text-base font-black ${tone}`}>{value}</strong><span className="mt-0.5 block text-[10px] font-bold text-slate-500">{label}</span></div>; }
 function Legend({ color, label }: { color: string; label: string }) { return <span className="flex items-center gap-2"><span className={`h-3 w-3 rounded ${color}`} />{label}</span>; }
 
-function PracticeTimerControl({ remaining, paused, busy, disabled, onToggle }: { remaining: number | null; paused: boolean; busy: boolean; disabled: boolean; onToggle: () => void }) {
+function PracticeTimerControl({
+  remaining,
+  paused,
+  busy,
+  disabled,
+  onToggle,
+}: {
+  remaining: number | null;
+  paused: boolean;
+  busy: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+}) {
   const urgent = remaining !== null && remaining <= 300 && !paused;
   return (
-    <div className={`flex items-stretch rounded-2xl border p-1 shadow-inner transition ${paused ? "border-teal-400/60 bg-teal-300/10" : urgent ? "border-red-400/50 bg-red-500/10" : "border-slate-700 bg-slate-900"}`}>
-      <button type="button" onClick={onToggle} disabled={disabled} aria-label={paused ? "Resume test timer" : "Pause test timer"} title={paused ? "Resume timer" : "Pause timer"} className={`inline-flex min-w-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${paused ? "bg-teal-300 text-slate-950 hover:bg-teal-200" : "text-white hover:bg-slate-800"}`}>
-        {busy ? <LoadingSpinner className="h-4 w-4" /> : paused ? (
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d="M8 5.2v13.6c0 .9 1 1.4 1.7.9l9.1-6.8a1.1 1.1 0 0 0 0-1.8L9.7 4.3A1.1 1.1 0 0 0 8 5.2Z" /></svg>
+    <div
+      className={`flex items-center rounded-xl sm:rounded-2xl border p-1 shadow-sm backdrop-blur-sm transition ${
+        paused
+          ? "border-teal-400/50 bg-teal-400/10"
+          : urgent
+          ? "border-rose-400/60 bg-rose-500/15 animate-pulse"
+          : "border-white/10 bg-white/5"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        disabled={disabled}
+        aria-label={paused ? "Resume test timer" : "Pause test timer"}
+        title={paused ? "Resume timer" : "Pause timer"}
+        className={`inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
+          paused
+            ? "bg-teal-400 text-slate-950 hover:bg-teal-300 shadow-sm"
+            : "border border-white/10 bg-white/10 text-white hover:bg-white/20"
+        }`}
+      >
+        {busy ? (
+          <LoadingSpinner className="h-3.5 w-3.5" />
+        ) : paused ? (
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current">
+            <path d="M8 5.2v13.6c0 .9 1 1.4 1.7.9l9.1-6.8a1.1 1.1 0 0 0 0-1.8L9.7 4.3A1.1 1.1 0 0 0 8 5.2Z" />
+          </svg>
         ) : (
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current"><rect x="6" y="5" width="4.5" height="14" rx="1.2" /><rect x="13.5" y="5" width="4.5" height="14" rx="1.2" /></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current">
+            <rect x="6" y="5" width="4.5" height="14" rx="1.2" />
+            <rect x="13.5" y="5" width="4.5" height="14" rx="1.2" />
+          </svg>
         )}
         <span className="hidden sm:inline">{busy ? (paused ? "Resuming" : "Pausing") : paused ? "Resume" : "Pause"}</span>
       </button>
-      <div className="ml-1 min-w-[5.8rem] border-l border-slate-700/80 px-3 py-1 text-right">
-        <span className={`block text-[9px] font-black uppercase tracking-[0.14em] ${paused ? "text-teal-200" : urgent ? "text-red-200" : "text-slate-400"}`}>{paused ? "Paused" : "Time left"}</span>
-        <strong className={`mt-0.5 block font-mono text-lg leading-none ${urgent ? "text-red-300" : "text-white"}`}>{remaining === null ? "--:--" : displayTime(remaining)}</strong>
+
+      <div className="ml-1 sm:ml-1.5 min-w-[4.2rem] sm:min-w-[5.6rem] border-l border-white/10 px-1.5 py-0.5 sm:px-2.5 text-right">
+        <span
+          className={`block text-[8px] sm:text-[9px] font-black uppercase tracking-[0.14em] ${
+            paused ? "text-teal-300" : urgent ? "text-rose-300 font-black" : "text-slate-400"
+          }`}
+        >
+          {paused ? "Paused" : "Time Left"}
+        </span>
+        <strong
+          className={`block font-mono text-xs sm:text-sm lg:text-base font-black leading-tight tracking-wider ${
+            urgent ? "text-rose-300" : "text-white"
+          }`}
+        >
+          {remaining === null ? "--:--" : displayTime(remaining)}
+        </strong>
       </div>
     </div>
   );
