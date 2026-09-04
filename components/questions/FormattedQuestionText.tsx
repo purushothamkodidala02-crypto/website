@@ -13,7 +13,7 @@ const numberedSection =
   /^((?:(?:\d{1,2}|[౦-౯]{1,2})|I{1,3}|IV|V|[a-h])[.)])\s+(.*)$/i;
 
 const sectionHeading =
-  /^(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|Questions?|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం|ప్రశ్న)\s*:?$/i;
+  /^(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:?$/i;
 
 const dataRow = /^(.{1,40}?)\s+—\s+([\d౦-౯].*)$/;
 
@@ -33,11 +33,11 @@ function questionLines(text: string) {
         `${heading}\n${body.trim().replace(/\.\s+/g, ".\n")}`,
     )
     .replace(
-      /[ \t]+(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|Questions?|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం|ప్రశ్న)\s*:)/gi,
+      /[ \t]+(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)/gi,
       "\n",
     )
     .replace(
-      /((?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|Questions?|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం|ప్రశ్న)\s*:)[ \t]*/gi,
+      /((?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)[ \t]*/gi,
       "$1\n",
     )
     .replace(
@@ -256,12 +256,18 @@ function passageListLayout(lines: string[]) {
 
   if (promptIndex > 1) {
     const heading = [lines[0]];
-    const passage = lines.slice(1, promptIndex);
+    const rawPassage = lines.slice(1, promptIndex);
+    const passage = rawPassage
+      .map((p) => p.replace(/^(?:Passage|Questions?|గద్యం|ప్రశ్న)\s*:\s*/i, "").trim())
+      .filter(Boolean);
     const questionPrompt = lines.slice(promptIndex);
     return { heading, passage, questionPrompt };
   } else if (lines.length >= 2) {
     const heading = [lines[0]];
-    const passage = lines.slice(1, lines.length - 1);
+    const rawPassage = lines.slice(1, lines.length - 1);
+    const passage = rawPassage
+      .map((p) => p.replace(/^(?:Passage|Questions?|గద్యం|ప్రశ్న)\s*:\s*/i, "").trim())
+      .filter(Boolean);
     const questionPrompt = [lines[lines.length - 1]];
     if (passage.length > 0) {
       return { heading, passage, questionPrompt };
@@ -314,7 +320,7 @@ export function FormattedQuestionText({
         {heading.length > 0 && (
           <div className="space-y-1">
             {heading.map((line, index) => (
-              <p key={`${index}-${line}`} className="text-xs font-bold uppercase tracking-wider text-teal-800">
+              <p key={`${index}-${line}`} className="text-sm sm:text-base font-semibold text-slate-900 leading-snug">
                 {line}
               </p>
             ))}
