@@ -69,16 +69,23 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       const target = event.target as HTMLElement | null;
-      if (target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName ?? "")) return;
+      if (target?.isContentEditable) return;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        if (tag === "textarea" || tag === "select") return;
+        if (tag === "input") {
+          const type = (target as HTMLInputElement).type?.toLowerCase();
+          if (!["radio", "checkbox", "button", "submit", "reset"].includes(type)) return;
+        }
+      }
       if (event.key === "ArrowLeft" && index > 0) {
         event.preventDefault();
-        setIndex(index - 1);
-        requestAnimationFrame(() => questionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
-      }
-      if (event.key === "ArrowRight" && index < rows.length - 1) {
+        target?.blur();
+        showQuestion(index - 1);
+      } else if (event.key === "ArrowRight" && index < rows.length - 1) {
         event.preventDefault();
-        setIndex(index + 1);
-        requestAnimationFrame(() => questionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+        target?.blur();
+        showQuestion(index + 1);
       }
     }
 
@@ -196,7 +203,7 @@ function OptionRow({ optionKey, label, correct, selected }: { optionKey: string;
 
 function ReviewArrow({ direction, disabled, onClick, className = "" }: { direction: "previous" | "next"; disabled: boolean; onClick: () => void; className?: string }) {
   const previous = direction === "previous";
-  return <button type="button" onClick={onClick} disabled={disabled} aria-label={previous ? "Previous question" : "Next question"} title={previous ? "Previous question" : "Next question"} className={`grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-950 shadow-lg transition-colors hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-30 ${className}`}><svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 fill-none stroke-current stroke-2 ${previous ? "" : "rotate-180"}`}><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>;
+  return <button type="button" onClick={onClick} disabled={disabled} aria-label={previous ? "Previous question" : "Next question"} title={previous ? "Previous question (← Arrow)" : "Next question (→ Arrow)"} className={`grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-950 shadow-lg transition-colors hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-30 ${className}`}><svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 fill-none stroke-current stroke-2 ${previous ? "" : "rotate-180"}`}><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>;
 }
 
 function Legend({ tone, label }: { tone: "emerald" | "red"; label: string }) {

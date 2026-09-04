@@ -53,6 +53,34 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable) return;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        if (tag === "textarea" || tag === "select") return;
+        if (tag === "input") {
+          const type = (target as HTMLInputElement).type?.toLowerCase();
+          if (!["radio", "checkbox", "button", "submit", "reset"].includes(type)) return;
+        }
+      }
+      if (event.key === "ArrowLeft" && currentIndex > 0) {
+        event.preventDefault();
+        target?.blur();
+        handleNavigate(currentIndex - 1);
+      } else if (event.key === "ArrowRight" && currentIndex < rows.length - 1) {
+        event.preventDefault();
+        target?.blur();
+        handleNavigate(currentIndex + 1);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, rows.length]);
+
   const onTouchStart = (e: TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -82,13 +110,13 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
     <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-slate-200 bg-white px-3 py-3 sm:gap-4 sm:px-5">
         {currentIndex > 0 ? (
-          <button onClick={() => handleNavigate(currentIndex - 1)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:border-teal-300 hover:text-teal-800">← Previous</button>
+          <button title="Previous question (← Arrow)" onClick={() => handleNavigate(currentIndex - 1)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:border-teal-300 hover:text-teal-800">← Previous</button>
         ) : (
           <span className="rounded-lg border border-slate-100 px-3 py-2 text-xs font-black text-slate-300">← Previous</span>
         )}
         <p className="text-center text-xs font-black text-slate-700 sm:text-sm">Question {currentIndex + 1} of {rows.length}</p>
         {currentIndex < rows.length - 1 ? (
-          <button onClick={() => handleNavigate(currentIndex + 1)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white">Next →</button>
+          <button title="Next question (→ Arrow)" onClick={() => handleNavigate(currentIndex + 1)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white">Next →</button>
         ) : (
           <span className="rounded-lg bg-slate-200 px-3 py-2 text-xs font-black text-slate-400">Next →</span>
         )}
