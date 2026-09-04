@@ -47,7 +47,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /(?<!\b(?:and|&|or|మరియు|as|is|of|the|one|other|అని|గా))[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:)/gi,
+      /(?<!(?:\b(?:and|&|or|as|is|of|the|one|other)|(?:మరియు|అని|గా))[ \t]*)[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:)/gi,
       "\n",
     )
     .replace(
@@ -55,7 +55,7 @@ function questionLines(text: string) {
       "\n",
     )
     .replace(
-      /(?<!\b(?:and|&|or|మరియు|as|is|of))[ \t.]+(?=(?:List|Column|Group|జాబితా|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)/gi,
+      /(?<!(?:\b(?:and|&|or|as|is|of)|మరియు)[ \t.]*)[ \t.]+(?=(?:List|Column|Group|జాబితా|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)/gi,
       "\n",
     )
     .replace(
@@ -63,7 +63,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /(?<!\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|వాదన|ప్రకటన|ప్రతిపాదన|కారణం)[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:and|&|or|is|was|are|were|refers|means|denotes|to|మరియు)\b)[A-Za-z0-9\u0c00-\u0c7f"'])/g,
+      /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం))[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))[A-Za-z0-9\u0c00-\u0c7f"'])/g,
       "\n",
     )
     .replace(
