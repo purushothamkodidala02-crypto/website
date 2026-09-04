@@ -100,7 +100,7 @@ async function fetchAllActiveQuestions(supabase: Awaited<ReturnType<typeof creat
   return all;
 }
 
-export async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createClient>>) {
+async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createClient>>) {
   const pageSize = 1000;
   let from = 0;
   let all: Array<{ mock_test_id: string; question_id: string }> = [];

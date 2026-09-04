@@ -1,6 +1,31 @@
 import { createClient } from "@/lib/supabase/server";
 import { QuestionSimilarityScanner } from "../QuestionSimilarityScanner";
-import { fetchAllAssignments } from "../similarity-actions";
+
+async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const pageSize = 1000;
+  let from = 0;
+  let all: Array<{ mock_test_id: string; question_id: string }> = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("mock_test_questions")
+      .select("mock_test_id, question_id")
+      .range(from, from + pageSize - 1);
+
+    if (error || !data || data.length === 0) {
+      hasMore = false;
+    } else {
+      all = all.concat(data);
+      if (data.length < pageSize) {
+        hasMore = false;
+      } else {
+        from += pageSize;
+      }
+    }
+  }
+  return all;
+}
 
 export default async function AdminSimilarityPage() {
   const supabase = await createClient();
