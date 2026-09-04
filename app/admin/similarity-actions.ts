@@ -134,7 +134,10 @@ async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createCli
   return all;
 }
 
-export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult> {
+export async function scanQuestionTextDuplicates(scope?: {
+  examGroupId?: string;
+  paperId?: string;
+}): Promise<ScanDuplicatesResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -157,15 +160,18 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
   // Fetch all active questions, subjects, assignments, tests, papers, and exam groups with automatic pagination past 1000
   const [questions, subjectsResult, assignments, testsResult, papersResult, groupsResult] = await Promise.all([
     fetchAllActiveQuestions(supabase),
-    supabase.from("subjects").select("id, name"),
+    supabase.from("subjects").select("id, name, paper_id"),
     fetchAllAssignments(supabase),
     supabase.from("mock_tests").select("id, title, paper_id"),
     supabase.from("papers").select("id, name, exam_group_id"),
     supabase.from("exam_groups").select("id, name"),
   ]);
 
-  const subjectMap = new Map((subjectsResult.data ?? []).map((s) => [s.id, s.name]));
-  const paperMap = new Map((papersResult.data ?? []).map((p) => [p.id, p]));
+  const rawSubjects = subjectsResult.data ?? [];
+  const rawPapers = papersResult.data ?? [];
+  const subjectMap = new Map(rawSubjects.map((s) => [s.id, s.name]));
+  const subjectPaperMap = new Map(rawSubjects.map((s) => [s.id, s.paper_id]));
+  const paperMap = new Map(rawPapers.map((p) => [p.id, p]));
   const groupMap = new Map((groupsResult.data ?? []).map((g) => [g.id, g.name]));
 
   type TestMeta = { id: string; title: string; paperId: string; paperName: string; examName: string };
@@ -197,10 +203,38 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
     questionTestsMap.set(row.question_id, list);
   }
 
+  // Filter questions by scope if paperId or examGroupId is specified
+  const targetPaperId = scope?.paperId && scope.paperId !== "all" ? scope.paperId : undefined;
+  const targetExamId = scope?.examGroupId && scope.examGroupId !== "all" ? scope.examGroupId : undefined;
+
+  const scopedQuestions = questions.filter((q) => {
+    const assignedTests = questionTestsMap.get(q.id) ?? [];
+    const qPaperId = q.subject_id ? subjectPaperMap.get(q.subject_id) : undefined;
+
+    if (targetPaperId) {
+      // Must belong to this paper either via subject or assigned mock test
+      const matchesSubject = qPaperId === targetPaperId;
+      const matchesAssignment = assignedTests.some((t) => t.paperId === targetPaperId);
+      if (!matchesSubject && !matchesAssignment) return false;
+    }
+
+    if (targetExamId) {
+      const paperOfSubject = qPaperId ? paperMap.get(qPaperId) : undefined;
+      const matchesExam = paperOfSubject?.exam_group_id === targetExamId;
+      const matchesAssignmentExam = assignedTests.some((t) => {
+        const p = paperMap.get(t.paperId);
+        return p?.exam_group_id === targetExamId;
+      });
+      if (!matchesExam && !matchesAssignmentExam) return false;
+    }
+
+    return true;
+  });
+
   // Group by normalized question text
   const groupsMap = new Map<string, DuplicateQuestionItem[]>();
 
-  for (const q of questions) {
+  for (const q of scopedQuestions) {
     if (!q.question_text) continue;
     // Normalize text: lowercase, remove excess whitespace and common punctuation
     const normalized = q.question_text
@@ -296,7 +330,7 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
 
   return {
     success: true,
-    totalQuestionsScanned: questions.length,
+    totalQuestionsScanned: scopedQuestions.length,
     duplicateGroups,
   };
 }

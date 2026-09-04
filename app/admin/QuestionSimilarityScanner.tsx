@@ -132,6 +132,7 @@ export function QuestionSimilarityScanner({
   subjects: SubjectRecord[];
 }) {
   const [selectedExamId, setSelectedExamId] = useState<string>("all");
+  const [selectedPaperId, setSelectedPaperId] = useState<string>("all");
   const [comparisonScope, setComparisonScope] = useState<
     "same_paper" | "same_exam" | "all"
   >("same_paper");
@@ -147,6 +148,7 @@ export function QuestionSimilarityScanner({
   const [scannedTextResult, setScannedTextResult] = useState<{
     total: number;
     groups: DuplicateTextGroup[];
+    scopeLabel?: string;
   } | null>(null);
   const [expandedOptionGroups, setExpandedOptionGroups] = useState<Set<string>>(new Set());
   const [expandedItemIds, setExpandedItemIds] = useState<Set<string>>(new Set());
@@ -260,13 +262,11 @@ export function QuestionSimilarityScanner({
             } else if (
               paper &&
               otherPaper &&
-              paper.id === otherPaper.id &&
-              !isSubjectTest &&
-              !otherIsSubjectTest
+              paper.id === otherPaper.id
             ) {
-              // Same paper and same specialization (e.g. Grand Test 1 vs Grand Test 2)
+              // Same paper series (e.g. Mock Test 1 vs Mock Test 2 of Endowment Officer Paper 2)
               classification = "same_series";
-              explanation = `Repeated questions within the same paper test series. Students taking both tests will see repeated questions.`;
+              explanation = `Repeated questions within the same paper series (${test.title} vs ${otherTest.title}). Students taking both tests will see repeated questions.`;
               sameSeriesCount += shared;
             } else {
               classification = "cross_exam";
@@ -318,11 +318,19 @@ export function QuestionSimilarityScanner({
   const testsWithCommonSyllabus = analyzedTests.filter((t) => t.commonSpecializationCount > 0);
   const testsWithPracticeReuse = analyzedTests.filter((t) => t.practiceReuseCount > 0);
 
+  const examPapers = useMemo(() => {
+    if (selectedExamId === "all") return papers;
+    return papers.filter((p) => p.exam_group_id === selectedExamId);
+  }, [papers, selectedExamId]);
+
   // Filtered view
   const filteredTests = useMemo(() => {
     return analyzedTests.filter((item) => {
       const paper = paperMap.get(item.test.paper_id);
       if (selectedExamId !== "all" && paper?.exam_group_id !== selectedExamId) {
+        return false;
+      }
+      if (selectedPaperId !== "all" && item.test.paper_id !== selectedPaperId) {
         return false;
       }
 
@@ -341,19 +349,46 @@ export function QuestionSimilarityScanner({
 
       return true;
     });
-  }, [analyzedTests, selectedExamId, filterMode, searchQuery, paperMap]);
+  }, [analyzedTests, selectedExamId, selectedPaperId, filterMode, searchQuery, paperMap]);
+
+  const currentScopeLabel = useMemo(() => {
+    if (selectedPaperId !== "all") {
+      const p = paperMap.get(selectedPaperId);
+      const e = p ? examMap.get(p.exam_group_id) : undefined;
+      return e ? `${e} · ${p?.name}` : (p?.name ?? "Selected Paper");
+    }
+    if (selectedExamId !== "all") {
+      return `${examMap.get(selectedExamId) ?? "Selected Exam"} (All Papers)`;
+    }
+    return "All Exams & Papers";
+  }, [selectedExamId, selectedPaperId, paperMap, examMap]);
 
   // Handle run text duplicate scanner
-  const handleRunTextScan = async () => {
+  const handleRunTextScan = async (overrideScope?: {
+    examGroupId?: string;
+    paperId?: string;
+    scopeLabel?: string;
+  }) => {
     setScanningText(true);
     setTextScannerOpen(true);
     setActionNotice(null);
+    const scopeToRun = overrideScope
+      ? {
+          examGroupId: overrideScope.examGroupId,
+          paperId: overrideScope.paperId,
+        }
+      : {
+          examGroupId: selectedExamId !== "all" ? selectedExamId : undefined,
+          paperId: selectedPaperId !== "all" ? selectedPaperId : undefined,
+        };
+    const label = overrideScope?.scopeLabel ?? currentScopeLabel;
     try {
-      const res = await scanQuestionTextDuplicates();
+      const res = await scanQuestionTextDuplicates(scopeToRun);
       if (res.success) {
         setScannedTextResult({
           total: res.totalQuestionsScanned,
           groups: res.duplicateGroups,
+          scopeLabel: label,
         });
       }
     } catch (e) {
@@ -413,6 +448,7 @@ export function QuestionSimilarityScanner({
           return {
             total: prev.total - 1,
             groups: nextGroups,
+            scopeLabel: prev.scopeLabel,
           };
         });
       } else {
@@ -469,6 +505,7 @@ export function QuestionSimilarityScanner({
           return {
             total: prev.total - res.deletedCount,
             groups: nextGroups,
+            scopeLabel: prev.scopeLabel,
           };
         });
       } else {
@@ -507,9 +544,9 @@ export function QuestionSimilarityScanner({
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
-            onClick={handleRunTextScan}
+            onClick={() => handleRunTextScan()}
             disabled={scanningText}
-            className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50/70 px-4 py-2.5 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl border border-teal-300 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-950 shadow-sm transition hover:bg-teal-100 disabled:opacity-60"
           >
             {scanningText ? (
               <>
@@ -517,14 +554,18 @@ export function QuestionSimilarityScanner({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                Scanning Question Bank…
+                Scanning {currentScopeLabel}…
               </>
             ) : (
               <>
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-3.5 w-3.5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                Scan Question Bank for Duplicates
+                {selectedPaperId !== "all" || selectedExamId !== "all" ? (
+                  <span>⚡ Scan <strong>{currentScopeLabel}</strong> for Duplicates</span>
+                ) : (
+                  <span>Scan Entire Question Bank for Duplicates</span>
+                )}
               </>
             )}
           </button>
@@ -627,7 +668,10 @@ export function QuestionSimilarityScanner({
           <select
             id="similarity-exam-select"
             value={selectedExamId}
-            onChange={(e) => setSelectedExamId(e.target.value)}
+            onChange={(e) => {
+              setSelectedExamId(e.target.value);
+              setSelectedPaperId("all");
+            }}
             className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm focus:border-teal-500 focus:outline-none"
           >
             <option value="all">All Exams ({exams.length})</option>
@@ -637,6 +681,35 @@ export function QuestionSimilarityScanner({
               </option>
             ))}
           </select>
+
+          {selectedExamId !== "all" && examPapers.length > 0 && (
+            <>
+              <select
+                id="similarity-paper-select"
+                value={selectedPaperId}
+                onChange={(e) => setSelectedPaperId(e.target.value)}
+                className="rounded-xl border border-teal-300 bg-teal-50/70 px-3 py-2 text-xs font-bold text-teal-950 shadow-sm focus:border-teal-500 focus:outline-none"
+              >
+                <option value="all">All Papers ({examPapers.length})</option>
+                {examPapers.map((paper) => (
+                  <option key={paper.id} value={paper.id}>
+                    {paper.name}
+                  </option>
+                ))}
+              </select>
+              {selectedPaperId !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => handleRunTextScan()}
+                  disabled={scanningText}
+                  className="inline-flex items-center gap-1 rounded-xl border border-teal-300 bg-teal-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-60"
+                  title="Scan only questions under this paper for duplicates"
+                >
+                  ⚡ Scan Paper Duplicates
+                </button>
+              )}
+            </>
+          )}
 
           {/* Quick Filter Buttons */}
           <div className="flex flex-wrap items-center gap-1.5">
@@ -871,6 +944,11 @@ export function QuestionSimilarityScanner({
                 <h3 className="mt-1 text-xl font-black text-slate-900">
                   Duplicate Question Text Scanner
                 </h3>
+                {scannedTextResult?.scopeLabel && (
+                  <p className="mt-0.5 text-xs font-semibold text-teal-800">
+                    Scope: <strong>{scannedTextResult.scopeLabel}</strong>
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -883,6 +961,42 @@ export function QuestionSimilarityScanner({
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
+              {/* Quick scope switcher in modal */}
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-teal-100 bg-teal-50/70 p-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="font-bold text-teal-900">Active Scope:</span>
+                  <span className="rounded-lg bg-teal-800 px-2.5 py-1 font-bold text-white shadow-sm">
+                    {scannedTextResult?.scopeLabel ?? currentScopeLabel}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(selectedPaperId !== "all" || selectedExamId !== "all") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleRunTextScan({
+                          examGroupId: undefined,
+                          paperId: undefined,
+                          scopeLabel: "All Exams & Papers",
+                        });
+                      }}
+                      disabled={scanningText}
+                      className="rounded-lg border border-teal-300 bg-white px-2.5 py-1 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-50 disabled:opacity-50"
+                    >
+                      🌐 Scan All Exams
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleRunTextScan()}
+                    disabled={scanningText}
+                    className="rounded-lg border border-teal-400 bg-teal-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm transition hover:bg-teal-700 disabled:opacity-50"
+                  >
+                    🔄 Re-scan Scope
+                  </button>
+                </div>
+              </div>
+
               {scanningText ? (
                 <div className="py-12 text-center">
                   <svg className="mx-auto h-8 w-8 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24">
@@ -890,7 +1004,7 @@ export function QuestionSimilarityScanner({
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
                   <p className="mt-3 text-sm font-bold text-slate-700">
-                    Scanning active questions in the Question Bank…
+                    Scanning active questions in {currentScopeLabel}…
                   </p>
                 </div>
               ) : scannedTextResult ? (
@@ -929,7 +1043,7 @@ export function QuestionSimilarityScanner({
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
                           <div className="text-xs font-semibold text-slate-700">
-                            Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
+                            Scanned <strong>{scannedTextResult.total}</strong> active questions{scannedTextResult.scopeLabel ? ` in ${scannedTextResult.scopeLabel}` : ""}. Found{" "}
                             <strong>{scannedTextResult.groups.length}</strong> matching question text{" "}
                             {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
                             {samePaperConflictsCount > 0 && (
