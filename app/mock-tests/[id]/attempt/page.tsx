@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMockTestPublicContextById } from "@/lib/public-route-data";
 import { mockTestUrl } from "@/lib/public-urls";
 import { StudentTestRunner } from "../StudentTestRunner";
+import { SubmissionResult } from "../SubmissionResult";
 
 type TestQuestion = {
   question_id: string;
@@ -56,13 +57,45 @@ export default async function TakeMockTestPage({
 
   const { data: session } = await supabase
     .from("test_attempt_sessions")
-    .select("id, expires_at, session_state")
+    .select("id, expires_at, session_state, submitted_at")
     .eq("id", requestedSessionId)
     .eq("user_id", user.id)
     .eq("mock_test_id", id)
-    .is("submitted_at", null)
     .maybeSingle();
-  if (!session || session.session_state !== "active") redirect(testPath);
+
+  if (!session) redirect(testPath);
+
+  if (session.submitted_at || session.session_state === "submitted") {
+    const { data: attempt } = await supabase
+      .from("test_attempts")
+      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+      .eq("session_id", session.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (attempt) {
+      return (
+        <SubmissionResult
+          publicTestPath={testPath}
+          title={mockTest.title}
+          result={{
+            success: true,
+            message: "Attempt submitted successfully.",
+            attemptId: attempt.id,
+            score: Number(attempt.score),
+            totalMarks: Number(attempt.total_marks),
+            correctAnswers: attempt.correct_answers,
+            incorrectAnswers: attempt.incorrect_answers,
+            unansweredQuestions: attempt.unanswered_questions,
+          }}
+        />
+      );
+    }
+
+    redirect(testPath);
+  }
+
+  if (session.session_state !== "active") redirect(testPath);
 
   const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
   const questions = (data ?? []) as TestQuestion[];
