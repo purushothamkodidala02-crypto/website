@@ -67,20 +67,20 @@ function questionLines(text: string) {
       "\n",
     )
     .replace(
-      /[ \t.]+(?=(?:Choose|Select|Pick)\s+(?:the|a)?\s*(?:correct|incorrect|most appropriate|suitable)?\s*(?:code|answer|option|pair|match)\b)/gi,
+      /(?<=[.?!;:\)])[ \t]+(?=(?:Choose|Select|Pick)\s+(?:the|a)?\s*(?:correct|incorrect|most appropriate|suitable)?\s*(?:code|answer|option|pair|match)\b)/gi,
       "\n",
     )
     .replace(
-      /[ \t]+(?=(?:Which\s+(?:one\s+)?of\s+(?:the\s+)?(?:above|following)|How\s+many\s+of\s+(?:the\s+)?(?:above|following))\b)/gi,
+      /(?<=[.?!;:\)])[ \t]+(?=(?:Which\s+(?:one\s+)?of\s+(?:the\s+)?(?:above|following)|How\s+many\s+of\s+(?:the\s+)?(?:above|following))\b)/gi,
       "\n",
     )
     .replace(
-      /[ \t.]+(?=(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను)|(?:కింది|క్రింది)\s+వాటిలో).*(?:ఎంచుకోండి|గుర్తించండి):?)/gi,
+      /(?<!,)[ \t.]+(?=(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను)|(?:కింది|క్రింది)\s+వాటిలో).*(?:ఎంచుకోండి|గుర్తించండి):?)/gi,
       "\n",
     )
     .replace(/[ \t]+(?=(?:I{1,3}|IV|V)\.\s)/gi, "\n")
     .replace(
-      /[ \t]+(?=Which\s+(?:conclusion|statement)s?\b)/gi,
+      /(?<=[.?!;:\)])[ \t]+(?=Which\s+(?:conclusion|statement)s?\b)/gi,
       "\n",
     )
     .replace(
@@ -91,7 +91,6 @@ function questionLines(text: string) {
       /;\s*(?=(?:(?:District|జిల్లా)\s+[A-Z]|[A-Z])\s*[—–-]\s*[\d౦-౯])/g,
       "\n",
     )
-    .replace(/[ \t]+(?=Which\s+[A-Za-z])/g, "\n")
     .replace(
       /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
