@@ -248,8 +248,9 @@ async function importQuestions(
 
   const { data: subjects, error: subjectsError } = await supabase
     .from("subjects")
-    .select("id, name, content_language_mode")
-    .eq("paper_id", paperId);
+    .select("id, name, content_language_mode, display_order")
+    .eq("paper_id", paperId)
+    .order("display_order");
   if (subjectsError) return { success: false, message: subjectsError.message };
   const subjectByName = new Map((subjects ?? []).map((subject) => [normalizeLookup(subject.name), subject]));
 
@@ -507,18 +508,37 @@ async function importQuestions(
     return { success: false, message: `Nothing was imported. ${error instanceof Error ? error.message : "An embedded image could not be uploaded."}` };
   }
 
-  const atomicAssignments = mockTest
-    ? assignmentPreferences.map((preference) => {
-        const separator = preference.key.indexOf(":");
-        return {
-          subject_id: preference.key.slice(0, separator),
-          import_key: preference.key.slice(separator + 1),
-          question_order: mode === "replace" ? preference.questionOrder ?? preference.rowNumber - 1 : preference.questionOrder,
-          marks: preference.marks ?? paper.default_correct_marks ?? 1,
-          negative_marks: preference.negativeMarks ?? paper.default_negative_marks ?? 0,
-        };
-      })
-    : [];
+  let atomicAssignments: Array<{
+    subject_id: string;
+    import_key: string;
+    question_order: number;
+    marks: number;
+    negative_marks: number;
+  }> = [];
+
+  if (mockTest) {
+    const subjectOrderMap = new Map((subjects ?? []).map((s) => [s.id, Number(s.display_order ?? 999)]));
+    // Sort preferences by subject's display_order first, then by row order
+    const sortedPreferences = [...assignmentPreferences].sort((a, b) => {
+      const subjectIdA = a.key.slice(0, a.key.indexOf(":"));
+      const subjectIdB = b.key.slice(0, b.key.indexOf(":"));
+      const orderA = subjectOrderMap.get(subjectIdA) ?? 999;
+      const orderB = subjectOrderMap.get(subjectIdB) ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
+      return (a.questionOrder ?? a.rowNumber) - (b.questionOrder ?? b.rowNumber);
+    });
+
+    atomicAssignments = sortedPreferences.map((preference, index) => {
+      const separator = preference.key.indexOf(":");
+      return {
+        subject_id: preference.key.slice(0, separator),
+        import_key: preference.key.slice(separator + 1),
+        question_order: mode === "replace" ? index + 1 : preference.questionOrder ?? (index + 1),
+        marks: preference.marks ?? paper.default_correct_marks ?? 1,
+        negative_marks: preference.negativeMarks ?? paper.default_negative_marks ?? 0,
+      };
+    });
+  }
   const rpcName = mockTest && mode === "replace" ? "replace_mock_test_questions_atomic" : "import_questions_atomic";
   const { data: importResult, error } = await supabase.rpc(rpcName, {
       requested_paper_id: paperId,

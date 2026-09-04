@@ -14,7 +14,7 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
   const [testResult, papersResult, subjectsResult, assignmentsResult] = await Promise.all([
     supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, title, status, target_question_count").eq("id", id).maybeSingle(),
     supabase.from("papers").select("id, name, default_correct_marks, default_negative_marks"),
-    supabase.from("subjects").select("id, paper_id, name"),
+    supabase.from("subjects").select("id, paper_id, name, display_order"),
     supabase.from("mock_test_questions").select("id, question_id, question_order, marks, negative_marks").eq("mock_test_id", id).order("question_order"),
   ]);
   if (!testResult.data) notFound();
@@ -22,7 +22,7 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
   const assignmentRows = assignmentsResult.data ?? [];
   const questionIds = [...new Set(assignmentRows.map((item) => item.question_id))];
   const questionsResult = questionIds.length
-    ? await supabase.from("questions").select("id, question_text, is_active, expires_on").in("id", questionIds)
+    ? await supabase.from("questions").select("id, subject_id, question_text, is_active, expires_on").in("id", questionIds)
     : { data: [], error: null };
   if (assignmentsResult.error || questionsResult.error) {
     throw new Error("Assigned questions could not be loaded.");
@@ -31,16 +31,23 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
   const subjects = subjectsResult.data ?? [];
   const questionById = new Map((questionsResult.data ?? []).map((item) => [item.id, item]));
   const today = indiaDateKey();
+  const subjectDisplayOrder = new Map(subjects.map((s) => [s.id, Number(s.display_order ?? 999)]));
   const assignments = assignmentRows.map((item) => {
     const question = questionById.get(item.question_id);
     return {
       ...item,
+      subject_id: question?.subject_id,
       question_text: question?.question_text ?? "Question unavailable",
       is_active: Boolean(
         question?.is_active && (!question.expires_on || question.expires_on >= today),
       ),
       is_score_valid: Number(item.marks) > 0 && Number(item.negative_marks) >= 0,
     };
+  }).sort((a, b) => {
+    const orderA = subjectDisplayOrder.get(a.subject_id ?? "") ?? 999;
+    const orderB = subjectDisplayOrder.get(b.subject_id ?? "") ?? 999;
+    if (orderA !== orderB) return orderA - orderB;
+    return a.question_order - b.question_order;
   });
   const subjectName = test.subject_id ? subjects.find((item) => item.id === test.subject_id)?.name ?? null : null;
   const mockTestsPath = mockTestsListReturnTo(returnTo);

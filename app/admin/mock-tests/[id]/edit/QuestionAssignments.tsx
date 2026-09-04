@@ -103,7 +103,7 @@ export function QuestionAssignments({ mockTestId, isDraft, targetQuestionCount, 
       </div>
       <div className="flex flex-col items-end gap-3">
         <span className="rounded-full bg-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700">{assignedQuestions.length} of {targetQuestionCount} assigned · {readyQuestionCount} ready</span>
-        {isDraft && assignedQuestions.length > 1 && <SortBySubjectButton mockTestId={mockTestId} />}
+        {assignedQuestions.length > 1 && <SortBySubjectButton mockTestId={mockTestId} />}
       </div>
     </div>
 

@@ -8,7 +8,19 @@ function revalidateMockTestQuestions(mockTestId: string) {
   revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
   revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
 }
-async function draft(mockTestId: string) { const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) return { supabase, error: "You must be logged in." }; const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single(); if (profile?.role !== "admin") return { supabase, error: "You are not authorized to manage Questions." }; const { data: mockTest } = await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count").eq("id", mockTestId).maybeSingle(); if (!mockTest) return { supabase, error: "Mock Test not found." }; if (mockTest.status !== "draft") return { supabase, error: "Only draft Mock Tests can be changed." }; const { count } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId); if ((count ?? 0) > 0) return { supabase, error: "This Mock Test has student attempts and its Questions are locked." }; return { supabase, mockTest }; }
+async function draft(mockTestId: string, allowPublishedWithoutAttempts = false) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { supabase, error: "You must be logged in." };
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "admin") return { supabase, error: "You are not authorized to manage Questions." };
+  const { data: mockTest } = await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count").eq("id", mockTestId).maybeSingle();
+  if (!mockTest) return { supabase, error: "Mock Test not found." };
+  const { count } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId);
+  if ((count ?? 0) > 0) return { supabase, error: "This Mock Test has student attempts and its Questions are locked." };
+  if (mockTest.status !== "draft" && !allowPublishedWithoutAttempts) return { supabase, error: "Only draft Mock Tests can be changed." };
+  return { supabase, mockTest };
+}
 function normalizeText(text: string | null | undefined): string {
   if (!text) return "";
   return text
@@ -155,7 +167,7 @@ export async function moveAssignedQuestion(mockTestId: string, assignmentId: str
 }
 
 export async function sortAssignedQuestionsBySubjectOrder(mockTestId: string): Promise<AssignmentState> {
-  const result = await draft(mockTestId);
+  const result = await draft(mockTestId, true);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to sort Questions." };
 
   const { data: assignments, error: fetchError } = await result.supabase
