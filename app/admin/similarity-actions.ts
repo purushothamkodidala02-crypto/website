@@ -159,7 +159,7 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
 
   // Build question -> assigned tests map
   const questionTestsMap = new Map<string, Array<{ id: string; title: string }>>();
-  for (const row of assignmentsResult.data ?? []) {
+  for (const row of assignments) {
     const list = questionTestsMap.get(row.question_id) ?? [];
     const title = testMap.get(row.mock_test_id) ?? "Unknown test";
     list.push({ id: row.mock_test_id, title });
