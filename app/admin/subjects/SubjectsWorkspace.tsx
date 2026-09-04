@@ -9,7 +9,7 @@ type Category = { id: string; name: string };
 type Exam = { id: string; exam_id: string; name: string };
 type Specialization = { id: string; examId: string; name: string };
 type Paper = { id: string; exam_group_id: string; specialization_id: string | null; name: string };
-type Subject = { id: string; paperId: string; name: string; slug: string; contentLanguageMode: SubjectContentLanguageMode; isActive: boolean };
+type Subject = { id: string; paperId: string; name: string; slug: string; contentLanguageMode: SubjectContentLanguageMode; isActive: boolean; displayOrder: number };
 type Location = { categoryId: string; examId: string; specializationId: string; paperId: string };
 
 const emptyLocation: Location = { categoryId: "", examId: "", specializationId: "", paperId: "" };

@@ -12,6 +12,7 @@ type ExistingSubject = {
   slug: string;
   contentLanguageMode: SubjectContentLanguageMode;
   isActive: boolean;
+  displayOrder: number;
 };
 type ReturnLocation = { categoryId: string; examId: string; specializationId: string; paperId: string };
 
@@ -97,6 +98,7 @@ export function ExistingSubjectsTable({
             <table className="min-w-[640px] w-full text-left text-sm">
               <thead className="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
+                  <th className="px-5 py-3 w-16 text-slate-500">Order</th>
                   <th className="px-5 py-3">Subject</th>
                   <th className="px-5 py-3">Question language</th>
                   <th className="px-5 py-3">Status</th>
@@ -106,6 +108,9 @@ export function ExistingSubjectsTable({
               <tbody className="divide-y">
                 {visibleSubjects.map((subject) => (
                   <tr key={subject.id}>
+                    <td className="px-5 py-4 font-mono text-xs font-bold text-slate-500">
+                      #{subject.displayOrder}
+                    </td>
                     <td className="px-5 py-4">
                       <p className="font-bold">{subject.name}</p>
                       <p className="text-xs text-slate-500">{subject.slug}</p>
