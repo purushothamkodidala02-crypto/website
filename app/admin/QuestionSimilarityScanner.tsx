@@ -114,6 +114,7 @@ export function QuestionSimilarityScanner({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [actionNotice, setActionNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [textDuplicateFilter, setTextDuplicateFilter] = useState<"all" | "exact_only" | "different_options">("all");
 
   // Lookup maps
   const examMap = useMemo(() => new Map(exams.map((e) => [e.id, e.name])), [exams]);
@@ -805,29 +806,81 @@ export function QuestionSimilarityScanner({
                       0,
                     );
 
+                    const exactDuplicatesCount = scannedTextResult.groups.filter(
+                      (g) => g.hasIdenticalOptions,
+                    ).length;
+                    const differentOptionsCount = scannedTextResult.groups.filter(
+                      (g) => !g.hasIdenticalOptions,
+                    ).length;
+
                     return (
-                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                        <div className="text-xs font-semibold text-slate-700">
-                          Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
-                          <strong>{scannedTextResult.groups.length}</strong> duplicate question text{" "}
-                          {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                          <div className="text-xs font-semibold text-slate-700">
+                            Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
+                            <strong>{scannedTextResult.groups.length}</strong> matching question text{" "}
+                            {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
+                            {totalUnassigned > 0 && (
+                              <span className="ml-1 text-amber-900 font-bold">
+                                ({totalUnassigned} unassigned copies can be safely deleted).
+                              </span>
+                            )}
+                          </div>
+
                           {totalUnassigned > 0 && (
-                            <span className="ml-1 text-amber-900 font-bold">
-                              ({totalUnassigned} unassigned copies can be safely deleted).
-                            </span>
+                            <button
+                              type="button"
+                              onClick={handleDeleteAllUnassigned}
+                              disabled={bulkDeleting}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                              {bulkDeleting ? "Cleaning up…" : `🗑️ Delete All ${totalUnassigned} Unassigned Duplicates`}
+                            </button>
                           )}
                         </div>
 
-                        {totalUnassigned > 0 && (
+                        {/* Filter Tabs: All vs 100% Identical vs Different Options */}
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
-                            onClick={handleDeleteAllUnassigned}
-                            disabled={bulkDeleting}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                            onClick={() => setTextDuplicateFilter("all")}
+                            className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                              textDuplicateFilter === "all"
+                                ? "bg-slate-900 text-white"
+                                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            }`}
                           >
-                            {bulkDeleting ? "Cleaning up…" : `🗑️ Delete All ${totalUnassigned} Unassigned Duplicates`}
+                            All Matches ({scannedTextResult.groups.length})
                           </button>
-                        )}
+                          <button
+                            type="button"
+                            onClick={() => setTextDuplicateFilter("exact_only")}
+                            className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                              textDuplicateFilter === "exact_only"
+                                ? "bg-red-700 text-white"
+                                : "border border-red-200 bg-red-50 text-red-800 hover:bg-red-100"
+                            }`}
+                          >
+                            <span>⚠️ 100% True Duplicates (Same Options)</span>
+                            <span className="rounded-full bg-black/10 px-1.5 py-0.2 text-[10px]">
+                              {exactDuplicatesCount}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTextDuplicateFilter("different_options")}
+                            className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                              textDuplicateFilter === "different_options"
+                                ? "bg-indigo-700 text-white"
+                                : "border border-indigo-200 bg-indigo-50 text-indigo-800 hover:bg-indigo-100"
+                            }`}
+                          >
+                            <span>💡 Same Instruction, Different Options</span>
+                            <span className="rounded-full bg-black/10 px-1.5 py-0.2 text-[10px]">
+                              {differentOptionsCount}
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     );
                   })()}
@@ -846,17 +899,45 @@ export function QuestionSimilarityScanner({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {scannedTextResult.groups.map((group, idx) => {
+                      {scannedTextResult.groups
+                        .filter((g) => {
+                          if (textDuplicateFilter === "exact_only") return g.hasIdenticalOptions;
+                          if (textDuplicateFilter === "different_options") return !g.hasIdenticalOptions;
+                          return true;
+                        })
+                        .map((group, idx) => {
                         const isGroupOptionsExpanded = expandedOptionGroups.has(group.normalizedKey);
                         const sample = group.items[0];
 
                         return (
-                          <div key={idx} className="rounded-2xl border border-amber-200/90 bg-amber-50/25 p-4 sm:p-5">
+                          <div
+                            key={idx}
+                            className={`rounded-2xl border p-4 sm:p-5 ${
+                              group.hasIdenticalOptions
+                                ? "border-amber-200/90 bg-amber-50/25"
+                                : "border-indigo-100 bg-indigo-50/20"
+                            }`}
+                          >
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
-                                  {group.count} Identical Records
+                                <span
+                                  className={`rounded-md px-2 py-0.5 text-xs font-bold ${
+                                    group.hasIdenticalOptions
+                                      ? "bg-amber-100 text-amber-900"
+                                      : "bg-indigo-100 text-indigo-900"
+                                  }`}
+                                >
+                                  {group.count} Records
                                 </span>
+                                {group.hasIdenticalOptions ? (
+                                  <span className="rounded-md bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-800">
+                                    ⚠️ 100% Identical Questions & Options
+                                  </span>
+                                ) : (
+                                  <span className="rounded-md bg-indigo-100 px-2 py-0.5 text-[11px] font-bold text-indigo-800">
+                                    💡 Same Prompt with Different Options (Legitimate Unique Questions)
+                                  </span>
+                                )}
                                 <span className="text-xs font-semibold text-slate-500">
                                   Subject: {group.subjectNames.join(", ")}
                                 </span>

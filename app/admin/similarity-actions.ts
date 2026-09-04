@@ -30,6 +30,7 @@ export type DuplicateTextGroup = {
   count: number;
   subjectNames: string[];
   items: DuplicateQuestionItem[];
+  hasIdenticalOptions: boolean;
 };
 
 export type ScanDuplicatesResult = {
@@ -210,12 +211,36 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
   for (const [normalizedKey, items] of groupsMap.entries()) {
     if (items.length > 1) {
       const uniqueSubjects = Array.from(new Set(items.map((i) => i.subjectName)));
+
+      // Compare options across all items in this text group
+      const normalizeOption = (str: string | null | undefined) =>
+        (str ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+
+      const firstItem = items[0];
+      const baseOptionsFingerprint = [
+        normalizeOption(firstItem.optionA),
+        normalizeOption(firstItem.optionB),
+        normalizeOption(firstItem.optionC),
+        normalizeOption(firstItem.optionD),
+      ].sort().join("|||");
+
+      const hasIdenticalOptions = items.every((it) => {
+        const fp = [
+          normalizeOption(it.optionA),
+          normalizeOption(it.optionB),
+          normalizeOption(it.optionC),
+          normalizeOption(it.optionD),
+        ].sort().join("|||");
+        return fp === baseOptionsFingerprint;
+      });
+
       duplicateGroups.push({
         normalizedKey,
         questionTextSample: items[0].questionText,
         count: items.length,
         subjectNames: uniqueSubjects,
         items,
+        hasIdenticalOptions,
       });
     }
   }
