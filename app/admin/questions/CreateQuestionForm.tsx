@@ -6,7 +6,7 @@ import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { QuestionImageField } from "@/components/admin/QuestionImageField";
 import type { QuestionLifecycle } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
-import { createQuestion, type CreateQuestionState } from "./actions";
+import { createQuestion, checkQuestionDuplicate, type CreateQuestionState } from "./actions";
 
 type Category = { id: string; name: string };
 type Exam = { id: string; categoryId: string; name: string };
@@ -52,6 +52,28 @@ export function CreateQuestionForm({
   const [subjectId, setSubjectId] = useState(mockTest?.testScope === "subject" ? mockTest.subjectId ?? "" : "");
   const [lifecycle, setLifecycle] = useState<QuestionLifecycle | "">("");
   const [correctAnswer, setCorrectAnswer] = useState("");
+  const [duplicateWarningEn, setDuplicateWarningEn] = useState<string | null>(null);
+  const [duplicateWarningTe, setDuplicateWarningTe] = useState<string | null>(null);
+
+  const handleCheckDuplicate = async (text: string, isTelugu: boolean) => {
+    if (!paperId || !text || text.trim().length < 10) {
+      if (isTelugu) setDuplicateWarningTe(null);
+      else setDuplicateWarningEn(null);
+      return;
+    }
+    try {
+      const res = await checkQuestionDuplicate(paperId, text, mockTest?.id);
+      if (res.isDuplicate && res.message) {
+        if (isTelugu) setDuplicateWarningTe(res.message);
+        else setDuplicateWarningEn(res.message);
+      } else {
+        if (isTelugu) setDuplicateWarningTe(null);
+        else setDuplicateWarningEn(null);
+      }
+    } catch {
+      // Non-blocking background check
+    }
+  };
 
   const visibleExams = useMemo(
     () => exams.filter((exam) => exam.categoryId === categoryId),
@@ -146,8 +168,23 @@ export function CreateQuestionForm({
               <div className="mt-4 rounded-2xl border border-dashed p-8 text-center text-sm text-slate-500">Choose a Subject to open the correct language fields.</div>
             ) : (
               <div className="mt-4 space-y-5">
-                {languageMode !== "telugu" && <LanguageFields language="English" suffix="" />}
-                {languageMode !== "english" && <LanguageFields language="తెలుగు" suffix="_te" lang="te" />}
+                {languageMode !== "telugu" && (
+                  <LanguageFields
+                    language="English"
+                    suffix=""
+                    duplicateWarning={duplicateWarningEn}
+                    onQuestionBlur={(text) => handleCheckDuplicate(text, false)}
+                  />
+                )}
+                {languageMode !== "english" && (
+                  <LanguageFields
+                    language="తెలుగు"
+                    suffix="_te"
+                    lang="te"
+                    duplicateWarning={duplicateWarningTe}
+                    onQuestionBlur={(text) => handleCheckDuplicate(text, true)}
+                  />
+                )}
                 <QuestionImageField />
                 <label className="block text-sm font-bold">Correct answer<SearchableSelect name="correct_answer" value={correctAnswer} onChange={setCorrectAnswer} options={["A", "B", "C", "D"].map((letter) => ({ value: letter, label: `Option ${letter}` }))} placeholder="Choose the correct option" /></label>
                 <label className="block text-sm font-bold">Source reference <span className="font-normal text-slate-500">(optional)</span><input name="source_reference" placeholder="For example: TGPSC Group 2 Paper I, 2025" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
@@ -168,15 +205,65 @@ function SelectField(props: { label: string; name?: string; value: string; onCha
   return <label className="block text-sm font-bold">{props.label}<SearchableSelect {...props} /></label>;
 }
 
-function LanguageFields({ language, suffix, lang }: { language: string; suffix: "" | "_te"; lang?: string }) {
+function LanguageFields({
+  language,
+  suffix,
+  lang,
+  duplicateWarning,
+  onQuestionBlur,
+}: {
+  language: string;
+  suffix: "" | "_te";
+  lang?: string;
+  duplicateWarning?: string | null;
+  onQuestionBlur?: (text: string) => void;
+}) {
   return (
     <fieldset lang={lang} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
       <legend className="px-2 text-sm font-black text-slate-950">{language}</legend>
-      <label className="block text-sm font-bold">Question<textarea name={`question_text${suffix}`} required rows={5} placeholder={suffix ? "ప్రశ్నను తెలుగులో నమోదు చేయండి" : "Type the question in English"} className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal leading-7" /></label>
+      <label className="block text-sm font-bold">
+        Question
+        <textarea
+          name={`question_text${suffix}`}
+          required
+          rows={5}
+          placeholder={suffix ? "ప్రశ్నను తెలుగులో నమోదు చేయండి" : "Type the question in English"}
+          onBlur={(e) => onQuestionBlur?.(e.target.value)}
+          className={`mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal leading-7 ${
+            duplicateWarning ? "border-amber-400 ring-2 ring-amber-200" : ""
+          }`}
+        />
+      </label>
+      {duplicateWarning && (
+        <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-950">
+          <span className="text-sm">⚠️</span>
+          <div>
+            <p className="font-bold">Duplicate Question Alert</p>
+            <p className="mt-0.5">{duplicateWarning}</p>
+          </div>
+        </div>
+      )}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        {["A", "B", "C", "D"].map((letter) => <label key={letter} className="block text-sm font-bold">Option {letter}<textarea name={`option_${letter.toLowerCase()}${suffix}`} required rows={2} className="mt-2 w-full resize-y rounded-xl border bg-white px-4 py-3 font-normal leading-6" /></label>)}
+        {["A", "B", "C", "D"].map((letter) => (
+          <label key={letter} className="block text-sm font-bold">
+            Option {letter}
+            <textarea
+              name={`option_${letter.toLowerCase()}${suffix}`}
+              required
+              rows={2}
+              className="mt-2 w-full resize-y rounded-xl border bg-white px-4 py-3 font-normal leading-6"
+            />
+          </label>
+        ))}
       </div>
-      <label className="mt-4 block text-sm font-bold">Explanation <span className="font-normal text-slate-500">(optional)</span><textarea name={`explanation${suffix}`} rows={3} className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal leading-6" /></label>
+      <label className="mt-4 block text-sm font-bold">
+        Explanation <span className="font-normal text-slate-500">(optional)</span>
+        <textarea
+          name={`explanation${suffix}`}
+          rows={3}
+          className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal leading-6"
+        />
+      </label>
     </fieldset>
   );
 }

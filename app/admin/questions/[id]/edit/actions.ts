@@ -34,6 +34,15 @@ function languageIsComplete(values: ReturnType<typeof languageValues>) {
   return Boolean(values.question) && values.options.every(Boolean);
 }
 
+function normalizeText(text: string | null | undefined): string {
+  if (!text) return "";
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\s+/g, " ");
+}
+
 export async function updateQuestion(
   questionId: string,
   _previous: UpdateQuestionState,
@@ -113,15 +122,82 @@ export async function updateQuestion(
     return { success: false, message: "All four answer options must be different." };
   }
 
-  const { data: duplicate } = await supabase
-    .from("questions")
-    .select("id")
-    .eq("subject_id", subjectId)
-    .eq("question_text", canonical.question)
-    .neq("id", questionId)
-    .maybeSingle();
-  if (duplicate && !mockTestId) {
-    return { success: false, message: "This Question already exists under the selected Subject." };
+  // Paper series duplicate check for question update
+  const { data: subjectData } = await supabase
+    .from("subjects")
+    .select("id, name, paper_id")
+    .eq("id", subjectId)
+    .single();
+
+  if (subjectData?.paper_id) {
+    const { data: siblingSubjects } = await supabase
+      .from("subjects")
+      .select("id, name")
+      .eq("paper_id", subjectData.paper_id);
+    const siblingSubjectIds = (siblingSubjects ?? []).map((s) => s.id);
+
+    const { data: existingQuestions } = await supabase
+      .from("questions")
+      .select(`
+        id,
+        question_text,
+        question_text_te,
+        subject_id,
+        mock_test_questions (
+          mock_test_id,
+          mock_tests (
+            id,
+            title
+          )
+        )
+      `)
+      .in("subject_id", siblingSubjectIds)
+      .neq("id", questionId)
+      .eq("is_active", true);
+
+    const normNewEn = normalizeText(english.question);
+    const normNewTe = normalizeText(telugu.question);
+
+    const match = (existingQuestions ?? []).find((q) => {
+      const normDbEn = normalizeText(q.question_text);
+      const normDbTe = normalizeText(q.question_text_te);
+      if (normNewEn && normDbEn && normNewEn.length >= 10 && normNewEn === normDbEn) return true;
+      if (normNewTe && normDbTe && normNewTe.length >= 10 && normNewTe === normDbTe) return true;
+      return false;
+    });
+
+    if (match) {
+      type MockTestRef = { id: string; title: string };
+      const assignedTests: MockTestRef[] = [];
+      for (const mtq of match.mock_test_questions ?? []) {
+        const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
+        if (rawMtq.mock_tests?.title) {
+          assignedTests.push({ id: rawMtq.mock_tests.id, title: rawMtq.mock_tests.title });
+        }
+      }
+
+      if (mockTestId) {
+        const otherTest = assignedTests.find((t) => t.id !== mockTestId);
+        if (otherTest) {
+          return {
+            success: false,
+            message: `This question text already exists in "${otherTest.title}" in this paper series.`,
+          };
+        }
+        const inThisTest = assignedTests.some((t) => t.id === mockTestId);
+        if (inThisTest) {
+          return {
+            success: false,
+            message: "Another question in this Mock Test already has this exact text.",
+          };
+        }
+      }
+      const matchSubjectName = siblingSubjects?.find((s) => s.id === match.subject_id)?.name ?? "Subject";
+      return {
+        success: false,
+        message: `This question text already exists under ${matchSubjectName}.`,
+      };
+    }
   }
 
   const imageFile = formData.get("question_image");

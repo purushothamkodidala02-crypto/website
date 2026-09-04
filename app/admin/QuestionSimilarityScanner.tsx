@@ -96,6 +96,9 @@ export function QuestionSimilarityScanner({
   subjects: SubjectRecord[];
 }) {
   const [selectedExamId, setSelectedExamId] = useState<string>("all");
+  const [comparisonScope, setComparisonScope] = useState<
+    "same_paper" | "same_exam" | "all"
+  >("same_paper");
   const [filterMode, setFilterMode] = useState<
     "all" | "warnings" | "common_syllabus" | "practice_reuse" | "unique_only"
   >("all");
@@ -114,7 +117,9 @@ export function QuestionSimilarityScanner({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [actionNotice, setActionNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [textDuplicateFilter, setTextDuplicateFilter] = useState<"all" | "exact_only" | "different_options">("all");
+  const [textDuplicateFilter, setTextDuplicateFilter] = useState<
+    "all" | "same_paper" | "exact_only" | "different_options"
+  >("same_paper");
 
   // Lookup maps
   const examMap = useMemo(() => new Map(exams.map((e) => [e.id, e.name])), [exams]);
@@ -162,6 +167,17 @@ export function QuestionSimilarityScanner({
       if (totalQuestions > 0) {
         for (const otherTest of tests) {
           if (otherTest.id === test.id) continue;
+
+          // Scope filtering: focus strictly on same paper series or same exam if selected
+          if (comparisonScope === "same_paper") {
+            // Only compare tests within the exact same paper series (e.g. Mock 1 vs Mock 2)
+            if (otherTest.paper_id !== test.paper_id) continue;
+          } else if (comparisonScope === "same_exam") {
+            const otherPaper = paperMap.get(otherTest.paper_id);
+            if (!paper || !otherPaper || paper.exam_group_id !== otherPaper.exam_group_id) {
+              continue;
+            }
+          }
 
           const otherPaper = paperMap.get(otherTest.paper_id);
           const otherExamName = otherPaper
@@ -258,7 +274,7 @@ export function QuestionSimilarityScanner({
     }
 
     return results;
-  }, [tests, paperMap, examMap, specMap, subjectMap, testQuestionsMap]);
+  }, [tests, paperMap, examMap, specMap, subjectMap, testQuestionsMap, comparisonScope]);
 
   // Overall metrics
   const totalAnalyzedTests = analyzedTests.length;
@@ -512,8 +528,64 @@ export function QuestionSimilarityScanner({
         </div>
       </div>
 
+      {/* Comparison Scope Bar */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-200/80 bg-teal-50/60 p-3 sm:p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-teal-900">
+            Comparison Scope:
+          </span>
+          <div className="flex flex-wrap items-center gap-1 rounded-xl border border-teal-200 bg-white p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setComparisonScope("same_paper")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                comparisonScope === "same_paper"
+                  ? "bg-teal-800 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              🎯 Same Paper Series (Mock 1 vs Mock 2)
+            </button>
+            <button
+              type="button"
+              onClick={() => setComparisonScope("same_exam")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                comparisonScope === "same_exam"
+                  ? "bg-teal-800 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              🏛️ Same Exam (All Papers)
+            </button>
+            <button
+              type="button"
+              onClick={() => setComparisonScope("all")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                comparisonScope === "all"
+                  ? "bg-teal-800 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              🌐 All Exams (Cross-Exam)
+            </button>
+          </div>
+        </div>
+
+        <p className="text-xs text-teal-900 font-medium">
+          {comparisonScope === "same_paper" && (
+            <span>Filtering strictly to mock tests of the <strong>same exam and same paper</strong> to catch repeated questions between test series.</span>
+          )}
+          {comparisonScope === "same_exam" && (
+            <span>Comparing mock tests across different papers and specialisations within the <strong>same exam</strong>.</span>
+          )}
+          {comparisonScope === "all" && (
+            <span>Comparing mock tests across <strong>all exams</strong> in the question bank.</span>
+          )}
+        </p>
+      </div>
+
       {/* Filter and Search Bar */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3">
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="similarity-exam-select" className="sr-only">Filter by Exam</label>
           <select
@@ -644,7 +716,7 @@ export function QuestionSimilarityScanner({
 
                     {!hasOverlaps && (
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
-                        ✨ 100% Unique
+                        {comparisonScope === "same_paper" ? "✨ 100% Unique in Paper Series" : "✨ 100% Unique"}
                       </span>
                     )}
 
@@ -813,6 +885,10 @@ export function QuestionSimilarityScanner({
                       (g) => !g.hasIdenticalOptions,
                     ).length;
 
+                    const samePaperConflictsCount = scannedTextResult.groups.filter(
+                      (g) => g.isSamePaperConflict,
+                    ).length;
+
                     return (
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
@@ -820,6 +896,11 @@ export function QuestionSimilarityScanner({
                             Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
                             <strong>{scannedTextResult.groups.length}</strong> matching question text{" "}
                             {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
+                            {samePaperConflictsCount > 0 && (
+                              <span className="ml-1 rounded-md bg-rose-100 px-2 py-0.5 text-xs font-black text-rose-900">
+                                🚨 {samePaperConflictsCount} repeated in the same exam paper (e.g. Mock 1 & Mock 2)!
+                              </span>
+                            )}
                             {totalUnassigned > 0 && (
                               <span className="ml-1 text-amber-900 font-bold">
                                 ({totalUnassigned} unassigned copies can be safely deleted).
@@ -839,7 +920,7 @@ export function QuestionSimilarityScanner({
                           )}
                         </div>
 
-                        {/* Filter Tabs: All vs 100% Identical vs Different Options */}
+                        {/* Filter Tabs: Same Paper Conflicts vs 100% Identical vs All */}
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
@@ -851,6 +932,20 @@ export function QuestionSimilarityScanner({
                             }`}
                           >
                             All Matches ({scannedTextResult.groups.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTextDuplicateFilter("same_paper")}
+                            className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                              textDuplicateFilter === "same_paper"
+                                ? "bg-rose-700 text-white shadow-sm"
+                                : "border border-rose-300 bg-rose-50 text-rose-900 hover:bg-rose-100"
+                            }`}
+                          >
+                            <span>🚨 Same-Paper Duplicates (Mock 1 & Mock 2)</span>
+                            <span className="rounded-full bg-black/15 px-1.5 py-0.2 text-[10px] font-black">
+                              {samePaperConflictsCount}
+                            </span>
                           </button>
                           <button
                             type="button"
@@ -901,6 +996,7 @@ export function QuestionSimilarityScanner({
                     <div className="space-y-4">
                       {scannedTextResult.groups
                         .filter((g) => {
+                          if (textDuplicateFilter === "same_paper") return g.isSamePaperConflict;
                           if (textDuplicateFilter === "exact_only") return g.hasIdenticalOptions;
                           if (textDuplicateFilter === "different_options") return !g.hasIdenticalOptions;
                           return true;
@@ -913,7 +1009,9 @@ export function QuestionSimilarityScanner({
                           <div
                             key={idx}
                             className={`rounded-2xl border p-4 sm:p-5 ${
-                              group.hasIdenticalOptions
+                              group.isSamePaperConflict
+                                ? "border-rose-300 bg-rose-50/30 ring-1 ring-rose-200"
+                                : group.hasIdenticalOptions
                                 ? "border-amber-200/90 bg-amber-50/25"
                                 : "border-indigo-100 bg-indigo-50/20"
                             }`}
@@ -922,13 +1020,20 @@ export function QuestionSimilarityScanner({
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
                                   className={`rounded-md px-2 py-0.5 text-xs font-bold ${
-                                    group.hasIdenticalOptions
+                                    group.isSamePaperConflict
+                                      ? "bg-rose-600 text-white"
+                                      : group.hasIdenticalOptions
                                       ? "bg-amber-100 text-amber-900"
                                       : "bg-indigo-100 text-indigo-900"
                                   }`}
                                 >
                                   {group.count} Records
                                 </span>
+                                {group.isSamePaperConflict && (
+                                  <span className="rounded-md bg-rose-200 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-rose-950">
+                                    🚨 Conflict: Repeated in Same Exam Paper (e.g. Mock 1 & Mock 2)
+                                  </span>
+                                )}
                                 {group.hasIdenticalOptions ? (
                                   <span className="rounded-md bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-800">
                                     ⚠️ 100% Identical Questions & Options
@@ -1061,9 +1166,19 @@ export function QuestionSimilarityScanner({
 
                                       <div className="mt-3 border-t border-slate-200 pt-2">
                                         {item.assignedTests.length > 0 ? (
-                                          <p className="text-[10px] font-semibold text-emerald-800">
-                                            Assigned in: {item.assignedTests.map((t) => t.title).join(", ")}
-                                          </p>
+                                          <div className="space-y-1">
+                                            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Assigned In:</span>
+                                            <div className="flex flex-wrap gap-1">
+                                              {item.assignedTests.map((t) => (
+                                                <span
+                                                  key={t.id}
+                                                  className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-900 border border-emerald-200"
+                                                >
+                                                  {t.examName} · {t.paperName}: <strong>{t.title}</strong>
+                                                </span>
+                                              ))}
+                                            </div>
+                                          </div>
                                         ) : (
                                           <div className="flex items-center justify-between">
                                             <span className="text-[10px] text-amber-800 font-medium">
@@ -1110,12 +1225,18 @@ export function QuestionSimilarityScanner({
                                           </span>
                                         </div>
 
-                                        <div className="mt-1">
+                                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
                                           {item.assignedTests.length > 0 ? (
-                                            <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-800">
-                                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                              Assigned in: {item.assignedTests.map((t) => t.title).join(", ")}
-                                            </span>
+                                            item.assignedTests.map((t) => (
+                                              <span
+                                                key={t.id}
+                                                className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-900 border border-emerald-200"
+                                              >
+                                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                                <span className="text-slate-500 font-medium">{t.examName} · {t.paperName}:</span>
+                                                <span>{t.title}</span>
+                                              </span>
+                                            ))
                                           ) : (
                                             <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/70 px-2 py-0.5 text-xs font-semibold text-amber-900">
                                               Not assigned to any test (Extra Copy)

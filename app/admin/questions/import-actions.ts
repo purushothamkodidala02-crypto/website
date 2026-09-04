@@ -252,7 +252,105 @@ async function importQuestions(
     .eq("paper_id", paperId);
   if (subjectsError) return { success: false, message: subjectsError.message };
   const subjectByName = new Map((subjects ?? []).map((subject) => [normalizeLookup(subject.name), subject]));
+
+  // Pre-fetch active questions in this paper to check for duplicates
+  const subjectIds = (subjects ?? []).map((subject) => subject.id);
+  let existingPaperQuestions: Array<{
+    id: string;
+    question_text: string;
+    question_text_te: string | null;
+    subject_id: string;
+    import_key: string | null;
+    mock_test_questions: Array<{
+      mock_test_id: string;
+      mock_tests: { id: string; title: string; paper_id: string } | null;
+    }>;
+  }> = [];
+
+  if (subjectIds.length > 0) {
+    const pageSize = 1000;
+    let from = 0;
+    let hasMore = true;
+    while (hasMore) {
+      const { data, error: qError } = await supabase
+        .from("questions")
+        .select(`
+          id,
+          question_text,
+          question_text_te,
+          subject_id,
+          import_key,
+          mock_test_questions (
+            mock_test_id,
+            mock_tests (
+              id,
+              title,
+              paper_id
+            )
+          )
+        `)
+        .in("subject_id", subjectIds)
+        .eq("is_active", true)
+        .range(from, from + pageSize - 1);
+
+      if (qError || !data || data.length === 0) {
+        hasMore = false;
+      } else {
+        existingPaperQuestions = existingPaperQuestions.concat(data as any);
+        if (data.length < pageSize) {
+          hasMore = false;
+        } else {
+          from += pageSize;
+        }
+      }
+    }
+  }
+
+  const normalizeQuestionText = (text: string | null | undefined) =>
+    (text ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .replace(/\s+/g, " ");
+
+  type ExistingDbQuestion = {
+    id: string;
+    importKey: string | null;
+    subjectId: string;
+    subjectName: string;
+    assignedMockTests: Array<{ id: string; title: string }>;
+  };
+
+  const existingByText = new Map<string, ExistingDbQuestion>();
+  for (const q of existingPaperQuestions) {
+    const normEn = normalizeQuestionText(q.question_text);
+    const normTe = normalizeQuestionText(q.question_text_te);
+    const subjName = (subjects ?? []).find((s) => s.id === q.subject_id)?.name ?? "Subject";
+    const assignedMockTests: Array<{ id: string; title: string }> = [];
+
+    for (const mtq of q.mock_test_questions ?? []) {
+      if (mtq.mock_tests?.title) {
+        assignedMockTests.push({
+          id: mtq.mock_tests.id,
+          title: mtq.mock_tests.title,
+        });
+      }
+    }
+
+    const entry: ExistingDbQuestion = {
+      id: q.id,
+      importKey: q.import_key,
+      subjectId: q.subject_id,
+      subjectName: subjName,
+      assignedMockTests,
+    };
+
+    if (normEn && normEn.length >= 10) existingByText.set(normEn, entry);
+    if (normTe && normTe.length >= 10) existingByText.set(normTe, entry);
+  }
+
   const importKeys = new Set<string>();
+  const seenFileQuestions = new Map<string, number>();
   const errors: string[] = [];
   const importRows: Record<string, unknown>[] = [];
   const embeddedImageTargets: Array<{ importIndex: number; image: EmbeddedQuestionImage; rowNumber: number }> = [];
@@ -310,8 +408,52 @@ async function importQuestions(
     if (mockTest?.test_scope === "subject" && subject && subject.id !== mockTest.subject_id) {
       errors.push(`Row ${rowNumber}: this subject-wise Mock Test only accepts Questions for its selected Subject.`);
     }
-    if (!subject || !importKey || !answers.includes(correctAnswer) || !lifecycles.includes(lifecycle) || isActive === null || (mockTest?.test_scope === "subject" && subject.id !== mockTest.subject_id)) return;
+
     const canonical = languageMode === "telugu" ? telugu : english;
+    const normCanonical = normalizeQuestionText(canonical.question);
+
+    if (normCanonical && normCanonical.length >= 10) {
+      // In-file duplicate check (catches repeated questions within the same file)
+      const seenRow = seenFileQuestions.get(normCanonical);
+      if (seenRow !== undefined) {
+        errors.push(
+          `Row ${rowNumber}: Duplicate question text in file. Matches Row ${seenRow}. Questions in the file must be unique.`
+        );
+      } else {
+        seenFileQuestions.set(normCanonical, rowNumber);
+      }
+
+      // Database duplicate check in this paper
+      const existingMatch = existingByText.get(normCanonical);
+      if (existingMatch) {
+        if (mockTest) {
+          const otherTests = existingMatch.assignedMockTests.filter((t) => t.id !== mockTest.id);
+          if (otherTests.length > 0) {
+            errors.push(
+              `Row ${rowNumber}: Duplicate question! This question already exists in "${otherTests[0].title}". Questions cannot be repeated across mock tests in the same paper.`
+            );
+          } else if (existingMatch.assignedMockTests.some((t) => t.id === mockTest.id)) {
+            if (mode === "add" && existingMatch.importKey !== storedImportKey) {
+              errors.push(
+                `Row ${rowNumber}: This question is already assigned to this Mock Test.`
+              );
+            }
+          } else if (existingMatch.importKey !== storedImportKey) {
+            errors.push(
+              `Row ${rowNumber}: Duplicate question! An identical question already exists in the Question Bank for this paper (Subject: ${existingMatch.subjectName}).`
+            );
+          }
+        } else {
+          if (existingMatch.importKey !== storedImportKey) {
+            errors.push(
+              `Row ${rowNumber}: Duplicate question! An identical question already exists under ${existingMatch.subjectName}.`
+            );
+          }
+        }
+      }
+    }
+
+    if (!subject || !importKey || !answers.includes(correctAnswer) || !lifecycles.includes(lifecycle) || isActive === null || (mockTest?.test_scope === "subject" && subject.id !== mockTest.subject_id)) return;
     const importIndex = importRows.length;
     importRows.push({
       subject_id: subject.id,

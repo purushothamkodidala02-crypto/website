@@ -33,6 +33,106 @@ function languageIsComplete(values: ReturnType<typeof languageValues>) {
   return Boolean(values.question) && values.options.every(Boolean);
 }
 
+function normalizeText(text: string | null | undefined): string {
+  if (!text) return "";
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+export type DuplicateCheckResult = {
+  isDuplicate: boolean;
+  message?: string;
+  foundInTestTitle?: string;
+};
+
+export async function checkQuestionDuplicate(
+  paperId: string,
+  questionText: string,
+  mockTestId?: string,
+  excludeQuestionId?: string,
+): Promise<DuplicateCheckResult> {
+  if (!paperId || !questionText || questionText.trim().length < 10) {
+    return { isDuplicate: false };
+  }
+
+  const supabase = await createClient();
+  const { data: paperSubjects } = await supabase
+    .from("subjects")
+    .select("id, name")
+    .eq("paper_id", paperId);
+  const paperSubjectIds = (paperSubjects ?? []).map((s) => s.id);
+  if (!paperSubjectIds.length) return { isDuplicate: false };
+
+  let query = supabase
+    .from("questions")
+    .select(`
+      id,
+      question_text,
+      question_text_te,
+      subject_id,
+      mock_test_questions (
+        mock_test_id,
+        mock_tests (
+          id,
+          title
+        )
+      )
+    `)
+    .in("subject_id", paperSubjectIds)
+    .eq("is_active", true);
+
+  if (excludeQuestionId) {
+    query = query.neq("id", excludeQuestionId);
+  }
+
+  const { data: existingQuestions } = await query;
+  const normInput = normalizeText(questionText);
+
+  const match = (existingQuestions ?? []).find((q) => {
+    const normDbEn = normalizeText(q.question_text);
+    const normDbTe = normalizeText(q.question_text_te);
+    return (normDbEn && normDbEn === normInput) || (normDbTe && normDbTe === normInput);
+  });
+
+  if (!match) return { isDuplicate: false };
+
+  type MockTestRef = { id: string; title: string };
+  const assignedTests: MockTestRef[] = [];
+  for (const mtq of match.mock_test_questions ?? []) {
+    const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
+    if (rawMtq.mock_tests?.title) {
+      assignedTests.push({ id: rawMtq.mock_tests.id, title: rawMtq.mock_tests.title });
+    }
+  }
+
+  if (mockTestId) {
+    const otherTest = assignedTests.find((t) => t.id !== mockTestId);
+    if (otherTest) {
+      return {
+        isDuplicate: true,
+        message: `This question already exists in "${otherTest.title}" in this paper series.`,
+        foundInTestTitle: otherTest.title,
+      };
+    }
+    const inThisTest = assignedTests.some((t) => t.id === mockTestId);
+    if (inThisTest) {
+      return {
+        isDuplicate: true,
+        message: "This question is already added to this Mock Test.",
+      };
+    }
+  }
+
+  const subjectName = paperSubjects?.find((s) => s.id === match.subject_id)?.name ?? "Subject";
+  return {
+    isDuplicate: true,
+    message: `This question already exists in the Question Bank under ${subjectName}.`,
+  };
+}
+
 export async function createQuestion(
   _previous: CreateQuestionState,
   formData: FormData,
@@ -126,14 +226,81 @@ export async function createQuestion(
     return { success: false, message: "All four answer options must be different." };
   }
 
-  const { data: duplicate } = await supabase
-    .from("questions")
-    .select("id")
-    .eq("subject_id", subjectId)
-    .eq("question_text", canonical.question)
-    .maybeSingle();
-  if (duplicate && !mockTest) {
-    return { success: false, message: "This Question already exists under the selected Subject." };
+  // Duplicate question check across paper and mock test series
+  const { data: paperSubjects } = await supabase
+    .from("subjects")
+    .select("id, name")
+    .eq("paper_id", paperId);
+  const paperSubjectIds = (paperSubjects ?? []).map((s) => s.id);
+
+  if (paperSubjectIds.length > 0) {
+    const { data: existingQuestions } = await supabase
+      .from("questions")
+      .select(`
+        id,
+        question_text,
+        question_text_te,
+        subject_id,
+        mock_test_questions (
+          mock_test_id,
+          mock_tests (
+            id,
+            title
+          )
+        )
+      `)
+      .in("subject_id", paperSubjectIds)
+      .eq("is_active", true);
+
+    const normNewEn = normalizeText(english.question);
+    const normNewTe = normalizeText(telugu.question);
+
+    const match = (existingQuestions ?? []).find((q) => {
+      const normDbEn = normalizeText(q.question_text);
+      const normDbTe = normalizeText(q.question_text_te);
+
+      if (normNewEn && normDbEn && normNewEn.length >= 10 && normNewEn === normDbEn) return true;
+      if (normNewTe && normDbTe && normNewTe.length >= 10 && normNewTe === normDbTe) return true;
+      return false;
+    });
+
+    if (match) {
+      type MockTestRef = { id: string; title: string };
+      const assignedTests: MockTestRef[] = [];
+      for (const mtq of match.mock_test_questions ?? []) {
+        const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
+        if (rawMtq.mock_tests?.title) {
+          assignedTests.push({ id: rawMtq.mock_tests.id, title: rawMtq.mock_tests.title });
+        }
+      }
+
+      if (mockTest) {
+        const inThisTest = assignedTests.some((t) => t.id === mockTest.id);
+        if (inThisTest) {
+          return {
+            success: false,
+            message: "This question is already added to this Mock Test.",
+          };
+        }
+        const otherTest = assignedTests.find((t) => t.id !== mockTest.id);
+        if (otherTest) {
+          return {
+            success: false,
+            message: `Duplicate question detected! This question already exists in "${otherTest.title}". Questions cannot be repeated across mock tests in the same paper series.`,
+          };
+        }
+        return {
+          success: false,
+          message: "This question already exists in the Question Bank for this Paper. Questions cannot be duplicated.",
+        };
+      } else {
+        const subjectName = paperSubjects?.find((s) => s.id === match.subject_id)?.name ?? "the selected Subject";
+        return {
+          success: false,
+          message: `This question already exists under ${subjectName}.`,
+        };
+      }
+    }
   }
 
   const imageFile = formData.get("question_image");
