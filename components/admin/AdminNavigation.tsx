@@ -21,6 +21,7 @@ const sections = [
     label: "Content and publishing",
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
+      { href: "/admin/similarity", label: "Similarity scanner", icon: "questions" as const },
       { href: "/admin/excel-import-guide", label: "Excel import guide", icon: "guide" as const },
       { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
