@@ -109,6 +109,10 @@ export function QuestionSimilarityScanner({
     total: number;
     groups: DuplicateTextGroup[];
   } | null>(null);
+  const [expandedOptionGroups, setExpandedOptionGroups] = useState<Set<string>>(new Set());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [actionNotice, setActionNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Lookup maps
   const examMap = useMemo(() => new Map(exams.map((e) => [e.id, e.name])), [exams]);
