@@ -4,7 +4,7 @@ type FormattedQuestionTextProps = {
 };
 
 const labelledSection =
-  /^(Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:\s*(.*)$/i;
+  /^(Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం\s*\([R]\)|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:\s*(.+)$/i;
 
 const instructionStart =
   /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick)\b|(?:సరైన|సరికాని|కింది|క్రింది).*(?:ఎంచుకోండి|గుర్తించండి))/i;
@@ -47,7 +47,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /(?<!(?:\b(?:and|&|or|as|is|of|the|one|other)|(?:మరియు|అని|గా))[ \t]*)[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:)/gi,
+      /(?<=[.?!;:\)])[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం\s*\([R]\)|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:)/gi,
       "\n",
     )
     .replace(
@@ -92,7 +92,7 @@ function questionLines(text: string) {
       "\n",
     )
     .replace(
-      /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం(?:\s*\([R]\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం\s*\([R]\)|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -120,8 +120,7 @@ function normalizedSectionLabel(label: string) {
   const trimmed = label.trim();
   if (/^Assertion$/i.test(trimmed)) return "Assertion (A)";
   if (/^Reason$/i.test(trimmed)) return "Reason (R)";
-  if (/^(?:వాదన|ప్రకటన|ప్రతిపాదన)$/i.test(trimmed)) return `${trimmed} (A)`;
-  if (/^కారణం$/i.test(trimmed)) return `${trimmed} (R)`;
+  if (/^వాదన$/i.test(trimmed)) return "వాదన (A)";
   return trimmed;
 }
 
