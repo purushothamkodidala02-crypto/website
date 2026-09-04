@@ -357,7 +357,7 @@ export function FormattedQuestionText({
             <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{rightItems.map((line) => renderListItem(line))}</div>
           </div>
         </div>
-        {instruction.length > 0 && <div className="mt-3.5 space-y-1.5 font-semibold text-slate-800">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
+        {instruction.length > 0 && <div className="mt-3.5 space-y-1.5 text-slate-700">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
       </div>
     );
   }
@@ -410,42 +410,28 @@ export function FormattedQuestionText({
         const data = line.match(dataRow);
         const isHeading = sectionHeading.test(line);
         const isInstruction = instructionStart.test(line);
-        const isIntroHeading =
-          index === 0 &&
-          lines.length > 1 &&
-          !labelled &&
-          !numbered &&
-          (/:$/.test(line) ||
-            isHeading ||
-            /^(?:Read|Consider|Study|Directions?|గమనిక|కింది|క్రింది)\b/i.test(line));
 
         return (
           <p
             key={`${index}-${line}`}
-            className={
-              isInstruction
-                ? "pt-2 font-semibold text-slate-800"
-                : isIntroHeading
-                  ? "font-semibold text-slate-950 pb-0.5"
-                  : "leading-relaxed"
-            }
+            className={isInstruction ? "pt-1.5 text-slate-700" : "leading-relaxed text-slate-950"}
           >
             {isHeading ? (
-              <span className="font-bold text-slate-950">{line}</span>
+              <span>{line}</span>
             ) : labelled ? (
               <>
-                <span className="font-bold text-slate-950">{normalizedSectionLabel(labelled[1].trim())}:</span>{" "}
-                {labelled[2]}
+                <span>{normalizedSectionLabel(labelled[1].trim())}:</span>{" "}
+                <span>{labelled[2]}</span>
               </>
             ) : numbered ? (
               <>
-                <span className="mr-1.5 font-bold text-slate-950">{numbered[1]}</span>{" "}
-                {numbered[2]}
+                <span className="mr-1.5">{numbered[1]}</span>{" "}
+                <span>{numbered[2]}</span>
               </>
             ) : data ? (
               <>
-                <span className="text-slate-950">{data[1]}</span>{" — "}
-                {data[2]}
+                <span>{data[1]}</span>{" — "}
+                <span>{data[2]}</span>
               </>
             ) : (
               line
