@@ -142,8 +142,14 @@ export default async function AdminDashboard() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/admin/mock-tests"
+              href="/admin/similarity"
               className="rounded-xl bg-teal-300 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/20 hover:bg-teal-200"
+            >
+              Similarity scanner
+            </Link>
+            <Link
+              href="/admin/mock-tests"
+              className="rounded-xl border border-slate-700 bg-white/5 px-4 py-3 text-sm font-bold text-white hover:border-slate-500 hover:bg-white/10"
             >
               Manage mock tests
             </Link>

@@ -1,10 +1,23 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export type DuplicateQuestionItem = {
   id: string;
   questionText: string;
+  questionTextTe: string | null;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  optionATe: string | null;
+  optionBTe: string | null;
+  optionCTe: string | null;
+  optionDTe: string | null;
+  correctAnswer: string;
+  explanation: string | null;
+  explanationTe: string | null;
   subjectId: string | null;
   subjectName: string;
   createdAt: string;
@@ -46,11 +59,28 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
     return { success: false, message: "Admin privileges required", totalQuestionsScanned: 0, duplicateGroups: [] };
   }
 
-  // Fetch questions with text and subject
+  // Fetch active questions with text, options, explanations, and subjects
   const [questionsResult, subjectsResult, assignmentsResult, testsResult] = await Promise.all([
     supabase
       .from("questions")
-      .select("id, question_text, subject_id, created_at")
+      .select(`
+        id,
+        question_text,
+        question_text_te,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        option_a_te,
+        option_b_te,
+        option_c_te,
+        option_d_te,
+        correct_answer,
+        explanation,
+        explanation_te,
+        subject_id,
+        created_at
+      `)
       .eq("is_active", true),
     supabase.from("subjects").select("id, name"),
     supabase.from("mock_test_questions").select("mock_test_id, question_id"),
@@ -88,6 +118,18 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
     currentList.push({
       id: q.id,
       questionText: q.question_text,
+      questionTextTe: q.question_text_te,
+      optionA: q.option_a,
+      optionB: q.option_b,
+      optionC: q.option_c,
+      optionD: q.option_d,
+      optionATe: q.option_a_te,
+      optionBTe: q.option_b_te,
+      optionCTe: q.option_c_te,
+      optionDTe: q.option_d_te,
+      correctAnswer: q.correct_answer,
+      explanation: q.explanation,
+      explanationTe: q.explanation_te,
       subjectId: q.subject_id,
       subjectName: q.subject_id ? subjectMap.get(q.subject_id) ?? "Unknown subject" : "Unassigned",
       createdAt: q.created_at,
@@ -119,5 +161,122 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
     success: true,
     totalQuestionsScanned: questions.length,
     duplicateGroups,
+  };
+}
+
+export async function deleteUnassignedQuestion(
+  questionId: string,
+): Promise<{ success: boolean; message: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: "Unauthorized." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (profile?.role !== "admin") return { success: false, message: "Admin privileges required." };
+
+  // Safety check: verify it is not assigned to any mock test
+  const { count: assignmentCount } = await supabase
+    .from("mock_test_questions")
+    .select("id", { count: "exact", head: true })
+    .eq("question_id", questionId);
+
+  if ((assignmentCount ?? 0) > 0) {
+    return {
+      success: false,
+      message: "This question is actively assigned to a mock test and cannot be deleted here.",
+    };
+  }
+
+  // Safety check: verify no student attempts reference this question
+  const { count: attemptUsage } = await supabase
+    .from("test_attempt_session_questions")
+    .select("id", { count: "exact", head: true })
+    .eq("question_id", questionId);
+
+  if ((attemptUsage ?? 0) > 0) {
+    return {
+      success: false,
+      message: "This question is referenced in student attempt history and cannot be deleted.",
+    };
+  }
+
+  const { error } = await supabase.from("questions").delete().eq("id", questionId);
+  if (error) return { success: false, message: error.message };
+
+  revalidatePath("/admin/questions");
+  revalidatePath("/admin/similarity");
+  revalidatePath("/admin");
+
+  return { success: true, message: "Unassigned duplicate question deleted successfully." };
+}
+
+export async function deleteBulkUnassignedDuplicates(questionIds: string[]): Promise<{
+  success: boolean;
+  deletedCount: number;
+  message: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, deletedCount: 0, message: "Unauthorized." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (profile?.role !== "admin") return { success: false, deletedCount: 0, message: "Admin privileges required." };
+
+  if (!questionIds.length) {
+    return { success: false, deletedCount: 0, message: "No question IDs provided." };
+  }
+
+  // Find all questionIds that are assigned to mock tests
+  const { data: assignedRows } = await supabase
+    .from("mock_test_questions")
+    .select("question_id")
+    .in("question_id", questionIds);
+
+  const assignedSet = new Set((assignedRows ?? []).map((r) => r.question_id));
+
+  // Find all questionIds in student attempts
+  const { data: attemptRows } = await supabase
+    .from("test_attempt_session_questions")
+    .select("question_id")
+    .in("question_id", questionIds);
+
+  const attemptSet = new Set((attemptRows ?? []).map((r) => r.question_id));
+
+  // Filter only truly unassigned, safe-to-delete question IDs
+  const safeToDelete = questionIds.filter((id) => !assignedSet.has(id) && !attemptSet.has(id));
+
+  if (!safeToDelete.length) {
+    return {
+      success: false,
+      deletedCount: 0,
+      message: "None of the selected questions are unassigned (they are actively in use).",
+    };
+  }
+
+  const { error } = await supabase.from("questions").delete().in("id", safeToDelete);
+  if (error) {
+    return { success: false, deletedCount: 0, message: error.message };
+  }
+
+  revalidatePath("/admin/questions");
+  revalidatePath("/admin/similarity");
+  revalidatePath("/admin");
+
+  return {
+    success: true,
+    deletedCount: safeToDelete.length,
+    message: `Successfully deleted ${safeToDelete.length} unassigned duplicate question${safeToDelete.length === 1 ? "" : "s"}.`,
   };
 }

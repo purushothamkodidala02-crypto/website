@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   scanQuestionTextDuplicates,
+  deleteUnassignedQuestion,
+  deleteBulkUnassignedDuplicates,
   type DuplicateTextGroup,
 } from "./similarity-actions";
 
@@ -287,6 +289,7 @@ export function QuestionSimilarityScanner({
   const handleRunTextScan = async () => {
     setScanningText(true);
     setTextScannerOpen(true);
+    setActionNotice(null);
     try {
       const res = await scanQuestionTextDuplicates();
       if (res.success) {
@@ -299,6 +302,115 @@ export function QuestionSimilarityScanner({
       console.error(e);
     } finally {
       setScanningText(false);
+    }
+  };
+
+  const toggleOptionDetails = (key: string) => {
+    setExpandedOptionGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const handleDeleteUnassigned = async (questionId: string, groupKey: string) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this unassigned duplicate question?\n\nActive questions assigned to mock tests will NOT be touched."
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(questionId);
+    setActionNotice(null);
+    try {
+      const res = await deleteUnassignedQuestion(questionId);
+      if (res.success) {
+        setActionNotice({ type: "success", text: res.message });
+        setScannedTextResult((prev) => {
+          if (!prev) return null;
+          const nextGroups = prev.groups
+            .map((g) => {
+              if (g.normalizedKey !== groupKey) return g;
+              const nextItems = g.items.filter((i) => i.id !== questionId);
+              return {
+                ...g,
+                count: nextItems.length,
+                items: nextItems,
+              };
+            })
+            .filter((g) => g.count > 1);
+
+          return {
+            total: prev.total - 1,
+            groups: nextGroups,
+          };
+        });
+      } else {
+        setActionNotice({ type: "error", text: res.message });
+      }
+    } catch (e) {
+      setActionNotice({ type: "error", text: "Failed to delete question." });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDeleteAllUnassigned = async () => {
+    if (!scannedTextResult) return;
+    const allUnassignedIds: string[] = [];
+    for (const g of scannedTextResult.groups) {
+      for (const item of g.items) {
+        if (item.assignedTests.length === 0) {
+          allUnassignedIds.push(item.id);
+        }
+      }
+    }
+
+    if (!allUnassignedIds.length) return;
+
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete all ${allUnassignedIds.length} unassigned duplicate questions?\n\nAll active questions currently assigned to mock tests will be kept safe.`
+      )
+    ) {
+      return;
+    }
+
+    setBulkDeleting(true);
+    setActionNotice(null);
+    try {
+      const res = await deleteBulkUnassignedDuplicates(allUnassignedIds);
+      if (res.success) {
+        setActionNotice({ type: "success", text: res.message });
+        const unassignedSet = new Set(allUnassignedIds);
+        setScannedTextResult((prev) => {
+          if (!prev) return null;
+          const nextGroups = prev.groups
+            .map((g) => {
+              const nextItems = g.items.filter((i) => !unassignedSet.has(i.id));
+              return {
+                ...g,
+                count: nextItems.length,
+                items: nextItems,
+              };
+            })
+            .filter((g) => g.count > 1);
+
+          return {
+            total: prev.total - res.deletedCount,
+            groups: nextGroups,
+          };
+        });
+      } else {
+        setActionNotice({ type: "error", text: res.message });
+      }
+    } catch (e) {
+      setActionNotice({ type: "error", text: "Failed to perform bulk cleanup." });
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -659,12 +771,52 @@ export function QuestionSimilarityScanner({
                   </p>
                 </div>
               ) : scannedTextResult ? (
-                <div>
-                  <div className="rounded-xl bg-slate-50 p-4 text-xs font-semibold text-slate-700">
-                    Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
-                    <strong>{scannedTextResult.groups.length}</strong> duplicate question text{" "}
-                    {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
-                  </div>
+                <div className="space-y-4">
+                  {actionNotice && (
+                    <div
+                      className={`rounded-2xl p-4 text-xs font-bold ${
+                        actionNotice.type === "success"
+                          ? "border border-emerald-200 bg-emerald-50 text-emerald-900"
+                          : "border border-red-200 bg-red-50 text-red-900"
+                      }`}
+                    >
+                      {actionNotice.text}
+                    </div>
+                  )}
+
+                  {(() => {
+                    const totalUnassigned = scannedTextResult.groups.reduce(
+                      (sum, g) =>
+                        sum + g.items.filter((i) => i.assignedTests.length === 0).length,
+                      0,
+                    );
+
+                    return (
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <div className="text-xs font-semibold text-slate-700">
+                          Scanned <strong>{scannedTextResult.total}</strong> active questions. Found{" "}
+                          <strong>{scannedTextResult.groups.length}</strong> duplicate question text{" "}
+                          {scannedTextResult.groups.length === 1 ? "group" : "groups"}.
+                          {totalUnassigned > 0 && (
+                            <span className="ml-1 text-amber-900 font-bold">
+                              ({totalUnassigned} unassigned copies can be safely deleted).
+                            </span>
+                          )}
+                        </div>
+
+                        {totalUnassigned > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleDeleteAllUnassigned}
+                            disabled={bulkDeleting}
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                          >
+                            {bulkDeleting ? "Cleaning up…" : `🗑️ Delete All ${totalUnassigned} Unassigned Duplicates`}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {scannedTextResult.groups.length === 0 ? (
                     <div className="py-10 text-center">
@@ -679,43 +831,182 @@ export function QuestionSimilarityScanner({
                       </p>
                     </div>
                   ) : (
-                    <div className="mt-4 space-y-4">
-                      {scannedTextResult.groups.map((group, idx) => (
-                        <div key={idx} className="rounded-2xl border border-amber-200 bg-amber-50/30 p-4">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
-                              {group.count} Identical Records
-                            </span>
-                            <span className="text-xs text-slate-500">
-                              Subject: {group.subjectNames.join(", ")}
-                            </span>
-                          </div>
+                    <div className="space-y-4">
+                      {scannedTextResult.groups.map((group, idx) => {
+                        const isGroupOptionsExpanded = expandedOptionGroups.has(group.normalizedKey);
+                        const sample = group.items[0];
 
-                          <p className="mt-2 text-sm font-semibold text-slate-900">
-                            &ldquo;{group.questionTextSample}&rdquo;
-                          </p>
+                        return (
+                          <div key={idx} className="rounded-2xl border border-amber-200/90 bg-amber-50/25 p-4 sm:p-5">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
+                                  {group.count} Identical Records
+                                </span>
+                                <span className="text-xs font-semibold text-slate-500">
+                                  Subject: {group.subjectNames.join(", ")}
+                                </span>
+                              </div>
 
-                          <div className="mt-3 divide-y divide-amber-100 rounded-xl border border-amber-100 bg-white text-xs">
-                            {group.items.map((item) => (
-                              <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 p-2.5">
-                                <div>
-                                  <span className="font-mono text-[10px] text-slate-400">ID: {item.id.slice(0, 8)}…</span>
-                                  <span className="ml-2 font-medium text-slate-700">Subject: {item.subjectName}</span>
-                                </div>
-                                <div className="text-right">
-                                  {item.assignedTests.length > 0 ? (
-                                    <span className="font-bold text-teal-800">
-                                      Assigned in: {item.assignedTests.map((t) => t.title).join(", ")}
+                              <button
+                                type="button"
+                                onClick={() => toggleOptionDetails(group.normalizedKey)}
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                              >
+                                {isGroupOptionsExpanded ? "▲ Hide Options" : "👁️ View Question & Options ▼"}
+                              </button>
+                            </div>
+
+                            <p className="mt-2 text-sm font-semibold text-slate-900">
+                              &ldquo;{group.questionTextSample}&rdquo;
+                            </p>
+
+                            {/* Question & Options Viewer */}
+                            {isGroupOptionsExpanded && sample && (
+                              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                <div className="space-y-3 text-xs">
+                                  <div>
+                                    <span className="font-bold uppercase tracking-wider text-slate-400">
+                                      Question Content:
                                     </span>
-                                  ) : (
-                                    <span className="text-slate-400">Not assigned to any test</span>
+                                    <p className="mt-1 font-semibold text-slate-900 text-sm">
+                                      {sample.questionText}
+                                    </p>
+                                    {sample.questionTextTe && (
+                                      <p className="mt-1 font-medium text-slate-700">
+                                        {sample.questionTextTe}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="border-t border-slate-100 pt-3">
+                                    <span className="font-bold uppercase tracking-wider text-slate-400">
+                                      Options & Answer:
+                                    </span>
+                                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                      {(["A", "B", "C", "D"] as const).map((letter) => {
+                                        const isCorrect = sample.correctAnswer?.toUpperCase() === letter;
+                                        const optEn =
+                                          letter === "A"
+                                            ? sample.optionA
+                                            : letter === "B"
+                                            ? sample.optionB
+                                            : letter === "C"
+                                            ? sample.optionC
+                                            : sample.optionD;
+                                        const optTe =
+                                          letter === "A"
+                                            ? sample.optionATe
+                                            : letter === "B"
+                                            ? sample.optionBTe
+                                            : letter === "C"
+                                            ? sample.optionCTe
+                                            : sample.optionDTe;
+
+                                        return (
+                                          <div
+                                            key={letter}
+                                            className={`rounded-xl border p-3 transition ${
+                                              isCorrect
+                                                ? "border-emerald-300 bg-emerald-50/80 text-emerald-950 font-bold"
+                                                : "border-slate-200 bg-slate-50/60 text-slate-700"
+                                            }`}
+                                          >
+                                            <div className="flex items-center justify-between">
+                                              <span className="font-black text-xs">Option {letter}</span>
+                                              {isCorrect && (
+                                                <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-900">
+                                                  ✓ Correct Answer
+                                                </span>
+                                              )}
+                                            </div>
+                                            <p className="mt-1 text-xs">{optEn}</p>
+                                            {optTe && (
+                                              <p className="mt-0.5 text-xs font-normal text-slate-600">
+                                                {optTe}
+                                              </p>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  {(sample.explanation || sample.explanationTe) && (
+                                    <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-3 text-[11px] text-amber-950">
+                                      <span className="font-bold uppercase tracking-wider text-amber-800">
+                                        Explanation:
+                                      </span>
+                                      {sample.explanation && (
+                                        <p className="mt-0.5 leading-relaxed">{sample.explanation}</p>
+                                      )}
+                                      {sample.explanationTe && (
+                                        <p className="mt-0.5 leading-relaxed text-amber-900">
+                                          {sample.explanationTe}
+                                        </p>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                            ))}
+                            )}
+
+                            {/* Copies and Delete Action */}
+                            <div className="mt-3 divide-y divide-amber-100 rounded-xl border border-amber-100 bg-white text-xs">
+                              {group.items.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex flex-wrap items-center justify-between gap-3 p-3"
+                                >
+                                  <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="font-mono text-[10px] font-bold text-slate-400">
+                                        ID: {item.id.slice(0, 8)}…
+                                      </span>
+                                      <span className="font-medium text-slate-700">
+                                        Subject: {item.subjectName}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400">
+                                        Added: {new Date(item.createdAt).toLocaleDateString("en-IN")}
+                                      </span>
+                                    </div>
+
+                                    <div className="mt-1">
+                                      {item.assignedTests.length > 0 ? (
+                                        <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-800">
+                                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                          Assigned in: {item.assignedTests.map((t) => t.title).join(", ")}
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/70 px-2 py-0.5 text-xs font-semibold text-amber-900">
+                                          Not assigned to any test (Extra Copy)
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    {item.assignedTests.length === 0 ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteUnassigned(item.id, group.normalizedKey)}
+                                        disabled={deletingId === item.id || bulkDeleting}
+                                        className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                                      >
+                                        {deletingId === item.id ? "Deleting…" : "🗑️ Delete Unused Copy"}
+                                      </button>
+                                    ) : (
+                                      <span className="text-[11px] font-bold text-emerald-800">
+                                        🛡️ Kept & Protected
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
