@@ -5,33 +5,85 @@ import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { QuestionSimilarityScanner } from "./QuestionSimilarityScanner";
 
+async function fetchAllMockTestQuestions(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const pageSize = 1000;
+  let from = 0;
+  let all: Array<{ mock_test_id: string; question_id: string; marks: number; negative_marks: number }> = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("mock_test_questions")
+      .select("mock_test_id, question_id, marks, negative_marks")
+      .range(from, from + pageSize - 1);
+
+    if (error || !data || data.length === 0) {
+      hasMore = false;
+    } else {
+      all = all.concat(data);
+      if (data.length < pageSize) {
+        hasMore = false;
+      } else {
+        from += pageSize;
+      }
+    }
+  }
+  return all;
+}
+
+async function fetchAllQuestionsSummary(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const pageSize = 1000;
+  let from = 0;
+  let all: Array<{ id: string; is_active: boolean; expires_on: string | null }> = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("questions")
+      .select("id, is_active, expires_on")
+      .range(from, from + pageSize - 1);
+
+    if (error || !data || data.length === 0) {
+      hasMore = false;
+    } else {
+      all = all.concat(data);
+      if (data.length < pageSize) {
+        hasMore = false;
+      } else {
+        from += pageSize;
+      }
+    }
+  }
+  return all;
+}
+
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const [
     testsResult,
-    assignmentsResult,
-    questionsResult,
+    assignments,
+    questions,
     attemptsResult,
     reportsResult,
     papersResult,
     groupsResult,
     subjectsResult,
     specializationsResult,
+    totalQuestionsCountResult,
   ] = await Promise.all([
     supabase
       .from("mock_tests")
       .select("id, title, status, updated_at, paper_id, subject_id, series_number")
       .order("updated_at", { ascending: false }),
-    supabase
-      .from("mock_test_questions")
-      .select("mock_test_id, question_id, marks, negative_marks"),
-    supabase.from("questions").select("id, is_active, expires_on"),
+    fetchAllMockTestQuestions(supabase),
+    fetchAllQuestionsSummary(supabase),
     supabase.from("test_attempts").select("id", { count: "exact", head: true }),
     supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
     supabase.from("exam_groups").select("id, name"),
     supabase.from("subjects").select("id, name"),
     supabase.from("exam_specializations").select("id, exam_group_id, name, slug"),
+    supabase.from("questions").select("id", { count: "exact", head: true }),
   ]);
 
   const tests = testsResult.data ?? [];
@@ -52,7 +104,7 @@ export default async function AdminDashboard() {
       subjectName: subject?.name ?? null,
     });
   };
-  const questions = questionsResult.data ?? [];
+
   const today = indiaDateKey();
   const usableIds = new Set(
     questions
@@ -62,9 +114,9 @@ export default async function AdminDashboard() {
       )
       .map((item) => item.id),
   );
-  type Assignment = NonNullable<typeof assignmentsResult.data>[number];
+  type Assignment = (typeof assignments)[number];
   const assignmentsByTest = new Map<string, Assignment[]>();
-  for (const assignment of assignmentsResult.data ?? []) {
+  for (const assignment of assignments) {
     const current = assignmentsByTest.get(assignment.mock_test_id) ?? [];
     current.push(assignment);
     assignmentsByTest.set(assignment.mock_test_id, current);
@@ -106,7 +158,7 @@ export default async function AdminDashboard() {
     {
       label: "Available questions",
       value: usableIds.size,
-      detail: `${questions.length} total in the Question Bank`,
+      detail: `${totalQuestionsCountResult.count ?? questions.length} total in the Question Bank`,
       href: "/admin/questions",
       accent: "teal",
       short: "BANK",
@@ -254,7 +306,7 @@ export default async function AdminDashboard() {
       {/* Question Similarity & Overlap Intelligence */}
       <QuestionSimilarityScanner
         tests={tests}
-        assignments={assignmentsResult.data ?? []}
+        assignments={assignments}
         papers={papers}
         exams={groupsResult.data ?? []}
         specializations={specializationsResult.data ?? []}

@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { QuestionSimilarityScanner } from "../QuestionSimilarityScanner";
+import { fetchAllAssignments } from "../similarity-actions";
 
 export default async function AdminSimilarityPage() {
   const supabase = await createClient();
   const [
     testsResult,
-    assignmentsResult,
+    allAssignments,
     papersResult,
     groupsResult,
     subjectsResult,
@@ -15,9 +16,7 @@ export default async function AdminSimilarityPage() {
       .from("mock_tests")
       .select("id, title, status, updated_at, paper_id, subject_id, series_number")
       .order("updated_at", { ascending: false }),
-    supabase
-      .from("mock_test_questions")
-      .select("mock_test_id, question_id, marks, negative_marks"),
+    fetchAllAssignments(supabase),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
     supabase.from("exam_groups").select("id, name"),
     supabase.from("subjects").select("id, name"),
@@ -42,7 +41,7 @@ export default async function AdminSimilarityPage() {
 
       <QuestionSimilarityScanner
         tests={testsResult.data ?? []}
-        assignments={assignmentsResult.data ?? []}
+        assignments={allAssignments}
         papers={papersResult.data ?? []}
         exams={groupsResult.data ?? []}
         specializations={specializationsResult.data ?? []}

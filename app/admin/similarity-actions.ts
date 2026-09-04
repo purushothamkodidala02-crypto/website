@@ -39,6 +39,93 @@ export type ScanDuplicatesResult = {
   duplicateGroups: DuplicateTextGroup[];
 };
 
+async function fetchAllActiveQuestions(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const pageSize = 1000;
+  let from = 0;
+  let all: Array<{
+    id: string;
+    question_text: string;
+    question_text_te: string | null;
+    option_a: string;
+    option_b: string;
+    option_c: string;
+    option_d: string;
+    option_a_te: string | null;
+    option_b_te: string | null;
+    option_c_te: string | null;
+    option_d_te: string | null;
+    correct_answer: string;
+    explanation: string | null;
+    explanation_te: string | null;
+    subject_id: string | null;
+    created_at: string;
+  }> = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("questions")
+      .select(`
+        id,
+        question_text,
+        question_text_te,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        option_a_te,
+        option_b_te,
+        option_c_te,
+        option_d_te,
+        correct_answer,
+        explanation,
+        explanation_te,
+        subject_id,
+        created_at
+      `)
+      .eq("is_active", true)
+      .range(from, from + pageSize - 1);
+
+    if (error || !data || data.length === 0) {
+      hasMore = false;
+    } else {
+      all = all.concat(data);
+      if (data.length < pageSize) {
+        hasMore = false;
+      } else {
+        from += pageSize;
+      }
+    }
+  }
+  return all;
+}
+
+export async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const pageSize = 1000;
+  let from = 0;
+  let all: Array<{ mock_test_id: string; question_id: string }> = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("mock_test_questions")
+      .select("mock_test_id, question_id")
+      .range(from, from + pageSize - 1);
+
+    if (error || !data || data.length === 0) {
+      hasMore = false;
+    } else {
+      all = all.concat(data);
+      if (data.length < pageSize) {
+        hasMore = false;
+      } else {
+        from += pageSize;
+      }
+    }
+  }
+  return all;
+}
+
 export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult> {
   const supabase = await createClient();
   const {
@@ -59,35 +146,14 @@ export async function scanQuestionTextDuplicates(): Promise<ScanDuplicatesResult
     return { success: false, message: "Admin privileges required", totalQuestionsScanned: 0, duplicateGroups: [] };
   }
 
-  // Fetch active questions with text, options, explanations, and subjects
-  const [questionsResult, subjectsResult, assignmentsResult, testsResult] = await Promise.all([
-    supabase
-      .from("questions")
-      .select(`
-        id,
-        question_text,
-        question_text_te,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        option_a_te,
-        option_b_te,
-        option_c_te,
-        option_d_te,
-        correct_answer,
-        explanation,
-        explanation_te,
-        subject_id,
-        created_at
-      `)
-      .eq("is_active", true),
+  // Fetch all active questions, subjects, assignments, and tests with automatic pagination past 1000
+  const [questions, subjectsResult, assignments, testsResult] = await Promise.all([
+    fetchAllActiveQuestions(supabase),
     supabase.from("subjects").select("id, name"),
-    supabase.from("mock_test_questions").select("mock_test_id, question_id"),
+    fetchAllAssignments(supabase),
     supabase.from("mock_tests").select("id, title"),
   ]);
 
-  const questions = questionsResult.data ?? [];
   const subjectMap = new Map((subjectsResult.data ?? []).map((s) => [s.id, s.name]));
   const testMap = new Map((testsResult.data ?? []).map((t) => [t.id, t.title]));
 
