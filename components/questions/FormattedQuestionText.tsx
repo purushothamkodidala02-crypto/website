@@ -39,7 +39,7 @@ function questionLines(text: string) {
         `${heading}\n${body.trim().replace(/\.\s+/g, ".\n")}`,
     )
     .replace(
-      /[ \t]+(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)/gi,
+      /(?<=[.?!;:\)])[ \t]+(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)/gi,
       "\n",
     )
     .replace(
