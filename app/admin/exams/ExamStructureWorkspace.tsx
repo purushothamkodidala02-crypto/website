@@ -299,7 +299,7 @@ export function ExamStructureWorkspace({
             </div>
           ) : (
             <div className="space-y-4 p-5 sm:p-7">
-              {visibleExams.map((exam, index) => (
+              {visibleExams.map((exam) => (
                 <ExamBranch
                   key={exam.id}
                   exam={exam}
@@ -309,7 +309,7 @@ export function ExamStructureWorkspace({
                   )}
                   papers={papers.filter((paper) => paper.examId === exam.id)}
                   subjects={subjects}
-                  defaultOpen={index === 0}
+                  defaultOpen={false}
                 />
               ))}
             </div>
@@ -326,18 +326,18 @@ function ExamBranch({
   specializations,
   papers,
   subjects,
-  defaultOpen,
+  defaultOpen = false,
 }: {
   exam: Exam;
   categoryId: string;
   specializations: Specialization[];
   papers: Paper[];
   subjects: Subject[];
-  defaultOpen: boolean;
+  defaultOpen?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [expandedSpecializations, setExpandedSpecializations] = useState<Record<string, boolean>>({});
-  const [directPapersOpen, setDirectPapersOpen] = useState(specializations.length === 0);
+  const [directPapersOpen, setDirectPapersOpen] = useState(false);
 
   const examSubjects = subjects.filter((subject) =>
     papers.some((paper) => paper.id === subject.paperId),
@@ -581,7 +581,7 @@ function PaperBranch({
   specializationId: string | null;
   subjects: Subject[];
 }) {
-  const [showSubjects, setShowSubjects] = useState(true);
+  const [showSubjects, setShowSubjects] = useState(false);
   const subjectsHref = `/admin/subjects?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`;
 
   return (
