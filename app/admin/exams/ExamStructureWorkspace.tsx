@@ -62,6 +62,7 @@ type Subject = {
   paperId: string;
   name: string;
   isActive: boolean;
+  displayOrder?: number;
 };
 
 function stateCategoriesFor(categories: Category[], stateId: string) {
@@ -335,10 +336,32 @@ function ExamBranch({
   defaultOpen: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [expandedSpecializations, setExpandedSpecializations] = useState<Record<string, boolean>>({});
+  const [directPapersOpen, setDirectPapersOpen] = useState(specializations.length === 0);
+
   const examSubjects = subjects.filter((subject) =>
     papers.some((paper) => paper.id === subject.paperId),
   );
   const directPapers = papers.filter((paper) => !paper.specializationId);
+
+  const toggleSpecialization = (id: string) => {
+    setExpandedSpecializations((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const expandAll = () => {
+    const allExpanded: Record<string, boolean> = {};
+    specializations.forEach((s) => { allExpanded[s.id] = true; });
+    setExpandedSpecializations(allExpanded);
+    setDirectPapersOpen(true);
+  };
+
+  const collapseAll = () => {
+    setExpandedSpecializations({});
+    setDirectPapersOpen(false);
+  };
 
   return (
     <details
@@ -362,22 +385,45 @@ function ExamBranch({
             <StructureCount value={specializations.length} label="Specialisations" />
             <StructureCount value={papers.length} label="Papers" />
             <StructureCount value={examSubjects.length} label="Subjects" />
-            <span className="ml-1 grid h-9 w-9 place-items-center rounded-lg bg-teal-50 text-lg text-teal-800 group-open:rotate-180">
+            <span className="ml-1 grid h-9 w-9 place-items-center rounded-lg bg-teal-50 text-lg text-teal-800 transition-transform group-open:rotate-180">
              ⌄
             </span>
           </div>
         </div>
       </summary>
 
-      <div className="border-t border-teal-100 bg-[#f8fbfb] p-5 sm:p-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-slate-600">
-            Manage this Exam’s details, branches, Papers, and Subjects.
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
+      <div className="border-t border-teal-100 bg-[#f8fbfb] p-5 sm:p-6 space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">
+              Exam workspace & structure
+            </p>
+            <p className="text-xs text-slate-500">
+              Explore specialisations, papers, and subject display orders below.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {(specializations.length > 0 || directPapers.length > 0) && (
+              <div className="flex items-center gap-1.5 mr-2">
+                <button
+                  type="button"
+                  onClick={expandAll}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
+                >
+                  Expand all
+                </button>
+                <button
+                  type="button"
+                  onClick={collapseAll}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
+                >
+                  Collapse all
+                </button>
+              </div>
+            )}
             <Link
               href={`/admin/groups/${exam.id}/edit`}
-              className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white hover:bg-teal-800"
+              className="rounded-lg bg-teal-700 px-3 py-2 text-xs font-bold text-white hover:bg-teal-800"
             >
               Open Exam workspace
             </Link>
@@ -386,61 +432,135 @@ function ExamBranch({
         </div>
 
         {directPapers.length > 0 && (
-          <StructureSection title="Direct / common Papers" detail="Papers that belong to the whole Exam.">
-            {directPapers.map((paper) => (
-              <PaperBranch
-                key={paper.id}
-                paper={paper}
-                categoryId={categoryId}
-                examId={exam.id}
-                specializationId={null}
-                subjects={subjects.filter((subject) => subject.paperId === paper.id)}
-              />
-            ))}
-          </StructureSection>
-        )}
-
-        {specializations.map((specialization) => {
-          const specializationPapers = papers.filter(
-            (paper) => paper.specializationId === specialization.id,
-          );
-          return (
-            <StructureSection
-              key={specialization.id}
-              title={specialization.name}
-              detail="Specialisation"
-              action={
-                <DeleteSpecializationButton
-                  specializationId={specialization.id}
-                  name={specialization.name}
-                />
-              }
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div 
+              onClick={() => setDirectPapersOpen(!directPapersOpen)}
+              className="flex items-center justify-between gap-3 p-4 bg-slate-50 cursor-pointer select-none hover:bg-slate-100 transition"
             >
-              {specializationPapers.length === 0 ? (
-                <p className="rounded-xl border border-dashed bg-white p-4 text-sm text-slate-500">
-                  No Papers in this Specialisation yet. Open the Exam workspace to add one.
-                </p>
-              ) : (
-                specializationPapers.map((paper) => (
+              <div className="flex items-center gap-3">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-200 text-xs font-bold text-slate-700">
+                  📄
+                </span>
+                <div>
+                  <h4 className="font-black text-slate-900 text-sm">Direct / Common Papers</h4>
+                  <p className="text-xs text-slate-500">Papers that belong to the whole Exam ({directPapers.length} {directPapers.length === 1 ? "Paper" : "Papers"})</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm"
+              >
+                {directPapersOpen ? "Hide Papers ▴" : `Show Papers (${directPapers.length}) ▾`}
+              </button>
+            </div>
+            {directPapersOpen && (
+              <div className="p-4 border-t border-slate-100 grid gap-3 bg-[#fafafa]">
+                {directPapers.map((paper) => (
                   <PaperBranch
                     key={paper.id}
                     paper={paper}
                     categoryId={categoryId}
                     examId={exam.id}
-                    specializationId={specialization.id}
-                    subjects={subjects.filter(
-                      (subject) => subject.paperId === paper.id,
-                    )}
+                    specializationId={null}
+                    subjects={subjects.filter((subject) => subject.paperId === paper.id)}
                   />
-                ))
-              )}
-            </StructureSection>
-          );
-        })}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {specializations.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Specialisations ({specializations.length})
+              </h4>
+            </div>
+
+            {specializations.map((specialization) => {
+              const specializationPapers = papers.filter(
+                (paper) => paper.specializationId === specialization.id,
+              );
+              const specSubjects = subjects.filter((subject) =>
+                specializationPapers.some((paper) => paper.id === subject.paperId),
+              );
+              const isExpanded = !!expandedSpecializations[specialization.id];
+
+              return (
+                <div
+                  key={specialization.id}
+                  className="rounded-2xl border border-teal-100 bg-white shadow-sm overflow-hidden"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-gradient-to-r from-teal-50/70 via-white to-white border-b border-teal-100/60">
+                    <div 
+                      onClick={() => toggleSpecialization(specialization.id)}
+                      className="flex items-center gap-3 cursor-pointer flex-1 min-w-[200px]"
+                    >
+                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-teal-100 text-teal-900 text-xs font-bold">
+                        ★
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-black text-slate-950 text-base">{specialization.name}</h4>
+                          <Status active={specialization.isActive} compact />
+                        </div>
+                        <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                          {specializationPapers.length} {specializationPapers.length === 1 ? "Paper" : "Papers"} · {specSubjects.length} {specSubjects.length === 1 ? "Subject" : "Subjects"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleSpecialization(specialization.id)}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                          isExpanded 
+                            ? "bg-teal-700 text-white hover:bg-teal-800" 
+                            : "border border-teal-200 bg-teal-50 text-teal-900 hover:bg-teal-100"
+                        }`}
+                      >
+                        {isExpanded ? "Hide Papers ▴" : `Show Papers (${specializationPapers.length}) ▾`}
+                      </button>
+                      <DeleteSpecializationButton
+                        specializationId={specialization.id}
+                        name={specialization.name}
+                      />
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="p-4 border-t border-teal-50 bg-[#fbfdfd] space-y-3">
+                      {specializationPapers.length === 0 ? (
+                        <p className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                          No Papers in this Specialisation yet. Open the Exam workspace to add one.
+                        </p>
+                      ) : (
+                        specializationPapers.map((paper) => (
+                          <PaperBranch
+                            key={paper.id}
+                            paper={paper}
+                            categoryId={categoryId}
+                            examId={exam.id}
+                            specializationId={specialization.id}
+                            subjects={subjects.filter(
+                              (subject) => subject.paperId === paper.id,
+                            )}
+                          />
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {papers.length === 0 && specializations.length === 0 && (
           <div className="rounded-xl border border-dashed border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            This Exam has no Papers yet. Open its workspace and add the first Paper.
+            This Exam has no Papers or Specialisations yet. Open its workspace and add the first Paper.
           </div>
         )}
       </div>
@@ -461,24 +581,36 @@ function PaperBranch({
   specializationId: string | null;
   subjects: Subject[];
 }) {
+  const [showSubjects, setShowSubjects] = useState(true);
   const subjectsHref = `/admin/subjects?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`;
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h5 className="font-black text-slate-950">{paper.name}</h5>
-            <Status active={paper.isActive} compact />
+    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h5 className="font-black text-slate-950 text-sm">{paper.name}</h5>
+              <Status active={paper.isActive} compact />
+            </div>
+            <p className="mt-0.5 text-xs font-semibold text-slate-500">
+              {subjects.length} {subjects.length === 1 ? "Subject" : "Subjects"}
+            </p>
           </div>
-          <p className="mt-1 text-xs font-semibold text-slate-500">
-            {subjects.length} {subjects.length === 1 ? "Subject" : "Subjects"}
-          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {subjects.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowSubjects(!showSubjects)}
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-100"
+            >
+              {showSubjects ? "Hide Subjects ▴" : `Show Subjects (${subjects.length}) ▾`}
+            </button>
+          )}
           <Link
             href={`/admin/papers/${paper.id}/edit?fromExam=${examId}`}
-            className="text-sm font-bold text-teal-700 hover:underline"
+            className="rounded-lg px-2.5 py-1 text-xs font-bold text-teal-700 hover:bg-teal-50"
           >
             Edit Paper
           </Link>
@@ -486,75 +618,55 @@ function PaperBranch({
         </div>
       </div>
 
-      <div className="mt-4 border-t border-slate-100 pt-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-            Subjects
-          </p>
-          <Link
-            href={subjectsHref}
-            className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800"
-          >
-            + Add or manage Subjects
-          </Link>
-        </div>
-        {subjects.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">No Subjects added yet.</p>
-        ) : (
-          <div className="mt-3 grid gap-2 md:grid-cols-2">
-            {subjects.map((subject) => (
-              <div
-                key={subject.id}
-                className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5"
-              >
-                <span className="min-w-0 truncate text-sm font-semibold text-slate-800">
-                  {subject.name}
-                </span>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Link
-                    href={`/admin/subjects/${subject.id}/edit?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`}
-                    className="text-xs font-bold text-teal-700"
-                  >
-                    Edit
-                  </Link>
-                  <DeleteSubjectButton
-                    subjectId={subject.id}
-                    subjectName={subject.name}
-                  />
-                </div>
-              </div>
-            ))}
+      {showSubjects && (
+        <div className="mt-3 border-t border-slate-100 pt-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+              Assigned Subjects
+            </span>
+            <Link
+              href={subjectsHref}
+              className="rounded-lg bg-slate-950 px-2.5 py-1 text-xs font-bold text-white hover:bg-slate-800"
+            >
+              + Add or manage Subjects
+            </Link>
           </div>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function StructureSection({
-  title,
-  detail,
-  action,
-  children,
-}: {
-  title: string;
-  detail: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="mb-4 rounded-2xl border border-teal-100 bg-teal-50/40 p-4 last:mb-0">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div>
-          <h4 className="font-black text-teal-950">{title}</h4>
-          <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-teal-700">
-            {detail}
-          </p>
+          {subjects.length === 0 ? (
+            <p className="mt-2 text-xs text-slate-500 italic">No Subjects added to this paper yet.</p>
+          ) : (
+            <div className="mt-2.5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {subjects.map((subject) => (
+                <div
+                  key={subject.id}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2 hover:bg-slate-100/70 transition"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="shrink-0 rounded bg-slate-200 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700">
+                      #{subject.displayOrder ?? "-"}
+                    </span>
+                    <span className="truncate text-xs font-bold text-slate-800" title={subject.name}>
+                      {subject.name}
+                    </span>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <Link
+                      href={`/admin/subjects/${subject.id}/edit?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`}
+                      className="rounded px-1.5 py-0.5 text-[11px] font-bold text-teal-700 hover:bg-teal-50 hover:underline"
+                    >
+                      Edit
+                    </Link>
+                    <DeleteSubjectButton
+                      subjectId={subject.id}
+                      subjectName={subject.name}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        {action}
-      </div>
-      <div className="grid gap-3">{children}</div>
-    </section>
+      )}
+    </article>
   );
 }
 

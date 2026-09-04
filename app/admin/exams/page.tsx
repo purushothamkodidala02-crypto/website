@@ -135,6 +135,7 @@ export default async function AdminExamStructurePage() {
           paperId: subject.paper_id,
           name: subject.name,
           isActive: subject.is_active,
+          displayOrder: subject.display_order,
         }))}
       />
     </main>
