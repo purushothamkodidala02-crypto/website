@@ -252,15 +252,17 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="grid gap-3 p-6">
-            {expiringSoonCount > 0 && (
-              <AttentionItem
-                count={expiringSoonCount}
-                title="Questions expiring soon (≤ 30 days)"
-                detail="Review upcoming expiring questions in the Question Bank before they leave student exams."
-                tone="amber"
-                href="/admin/questions?status=expiring_soon"
-              />
-            )}
+            <AttentionItem
+              count={expiringSoonCount}
+              title={expiringSoonCount > 0 ? "Questions expiring soon (≤ 30 days)" : "No questions expiring soon"}
+              detail={
+                expiringSoonCount > 0
+                  ? "Review upcoming expiring questions in the Question Bank before they leave student exams."
+                  : "All questions in your Question Bank are permanent or within safe expiration dates."
+              }
+              tone={expiringSoonCount > 0 ? "amber" : "teal"}
+              href="/admin/questions?status=expiring_soon"
+            />
             <AttentionItem
               count={reportsResult.count ?? 0}
               title="Student question reports are open"
