@@ -368,7 +368,7 @@ export async function MockTestDetailsPage({
     [
       "Negative marking",
       negativeMarks > 0
-        ? `Up to ${negativeMarks} per wrong answer`
+        ? `${negativeMarks} per wrong answer`
         : "No negative marking",
     ],
     ["Language", languageLabel],
