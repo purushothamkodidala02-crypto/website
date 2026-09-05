@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { indiaDateKey } from "@/lib/date";
 import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
@@ -59,6 +60,7 @@ async function fetchAllQuestionsSummary(supabase: Awaited<ReturnType<typeof crea
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
+  const admin = createAdminClient();
   const [
     testsResult,
     assignments,
@@ -77,8 +79,8 @@ export default async function AdminDashboard() {
       .order("updated_at", { ascending: false }),
     fetchAllMockTestQuestions(supabase),
     fetchAllQuestionsSummary(supabase),
-    supabase.from("test_attempts").select("id", { count: "exact", head: true }),
-    supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+    admin.from("test_attempts").select("id", { count: "exact", head: true }),
+    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
     supabase.from("exam_groups").select("id, name"),
     supabase.from("subjects").select("id, name"),
