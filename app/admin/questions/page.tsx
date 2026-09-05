@@ -48,7 +48,7 @@ export default async function QuestionsPage({
   const requestedPage = Number(query.page ?? "1");
   const initialPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const initialSearch = String(query.q ?? "").trim().slice(0, 100);
-  const initialStatus = String(query.status ?? "all").trim();
+  const initialStatus = String((query as Record<string, string | undefined>).status ?? "all").trim();
   const initialLocation = { categoryId, examId, specializationId, paperId, subjectId };
   const tableStateKey = [categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialStatus, initialPage].join(":");
 
