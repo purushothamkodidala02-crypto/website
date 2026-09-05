@@ -11,6 +11,7 @@ type QuestionBankSearchParams = {
   paper?: string;
   subject?: string;
   q?: string;
+  status?: string;
   page?: string;
 };
 
