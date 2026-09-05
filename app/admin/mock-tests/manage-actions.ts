@@ -161,18 +161,32 @@ export async function deleteDraftMockTest(mockTestId: string): Promise<MockTestM
     .eq("mock_test_id", mockTestId);
   const assignedQuestionIds = (assignments ?? []).map((a) => a.question_id);
 
-  // Safely detach foreign key references from both sides of the corrected version relationship:
-  // 1. If an original test has superseded_by_mock_test_id pointing to this draft, clear it
+  // Safely detach foreign key references from both sides of any version relationship:
+  // 1. Temporarily set this draft's superseded_by_mock_test_id to itself so it is excluded
+  // from unique partial indexes (which index: where superseded_by_mock_test_id is null)
   await admin
     .from("mock_tests")
-    .update({ superseded_by_mock_test_id: null })
-    .eq("superseded_by_mock_test_id", mockTestId);
+    .update({ superseded_by_mock_test_id: mockTestId })
+    .eq("id", mockTestId);
 
-  // 2. Clear replaces_mock_test_id on this draft
+  // 2. Clear replaces_mock_test_id on any other test pointing to this test
+  await admin
+    .from("mock_tests")
+    .update({ replaces_mock_test_id: null })
+    .eq("replaces_mock_test_id", mockTestId);
+
+  // 3. Clear replaces_mock_test_id on this draft itself
   await admin
     .from("mock_tests")
     .update({ replaces_mock_test_id: null })
     .eq("id", mockTestId);
+
+  // 4. Safely clear superseded_by_mock_test_id on any other test pointing to this test
+  await admin
+    .from("mock_tests")
+    .update({ superseded_by_mock_test_id: null })
+    .eq("superseded_by_mock_test_id", mockTestId)
+    .neq("id", mockTestId);
 
   // 3. Clean up any draft preview sessions or slug aliases
   await admin
