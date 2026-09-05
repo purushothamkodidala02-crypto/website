@@ -31,6 +31,17 @@ function questionLines(text: string) {
   const lines = text
     .replace(/\u00a0/g, " ")
     .replace(/\*\*/g, "")
+    // Join accidental linebreaks in legal citations (e.g. "Suraj Bhan\nv. Financial Commissioner")
+    .replace(
+      /(?<=(?:[A-Za-z0-9\u0c00-\u0c7f'"\)]|\b(?:Ltd|Co|Govt|Inc|Corp|Anr|Ors)\.))[ \t]*\r?\n[ \t]*(?=(?:v|vs)\.[ \t]+[A-Za-z0-9\u0c00-\u0c7f'"])/gi,
+      " ",
+    )
+    // Protect legal case citations (e.g. "Suraj Bhan v. Financial Commissioner" or "A vs. B")
+    // so that 'v.' or 'vs.' is not mistaken for Roman numeral 'v.' (5) or split onto a new line.
+    .replace(
+      /(?<=(?:[A-Za-z0-9\u0c00-\u0c7f'"\)]|\b(?:Ltd|Co|Govt|Inc|Corp|Anr|Ors)\.))[ \t]+(v|vs)\.[ \t]+(?=[A-Za-z0-9\u0c00-\u0c7f'"])/gi,
+      " __$1_DOT__ ",
+    )
     .replace(/[ \t]*:\s*;+[ \t]*/g, ":\n")
     .replace(/[ \t]*\.\s*;+[ \t]*/g, ".\n")
     .replace(/[ \t]*;;+[ \t]*/g, "\n")
@@ -66,7 +77,7 @@ function questionLines(text: string) {
       "\n",
     )
     .replace(
-      /(?<!(?:\b(?:and|&|or|as|is|of)|మరియు)[ \t.]*)[ \t.]+(?=(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)/gi,
+      /(?<!(?:\b(?:and|&|or|as|is|of|in|with|to|from|between|for|into)|మరియు|లోని|తో|నుండి|మధ్య)[ \t.]*)[ \t.]+(?=(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)/gi,
       "\n",
     )
     .replace(
@@ -89,7 +100,7 @@ function questionLines(text: string) {
       /(?<=[.?!;:\)])[ \t]*(?=(?:(?:Choose|Select|Pick|Identify|Which\s+of|How\s+many\s+of)\b|(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను|కోడ్|కోడ్‌ను|కోడ్ను|వాక్యాన్ని)|(?:కింది|క్రింది|పై|ఇచ్చిన)\s+(?:వాటిలో|ఐచ్ఛికాల|కోడ్ల|కోడ్‌ల|వాక్యాల|ప్రకటనల|నుండి|నుంచి|ఇచ్చిన|సరైన)?.*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి):?)))/gi,
       "\n",
     )
-    .replace(/[ \t]+(?=(?:I{1,3}|IV|V)\.\s)/gi, "\n")
+    .replace(/(?<=[.?!;:\)])[ \t]+(?=(?:I{1,3}|IV|V)\.\s)/gi, "\n")
     .replace(
       /(?<=[.?!;:\)])[ \t]+(?=Which\s+(?:conclusion|statement)s?\b)/gi,
       "\n",
@@ -112,19 +123,21 @@ function questionLines(text: string) {
     .map((line) => line.trim().replace(/^;+|;+$/g, "").trim())
     .filter(Boolean);
 
-  return lines.reduce<string[]>((merged, line) => {
-    if (/^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[ఎ-హ])[.)])$/i.test(line)) {
-      merged.push(line);
+  return lines
+    .reduce<string[]>((merged, line) => {
+      if (/^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[ఎ-హ])[.)])$/i.test(line)) {
+        merged.push(line);
+        return merged;
+      }
+      const previous = merged.at(-1);
+      if (previous && /^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[ఎ-హ])[.)])$/i.test(previous)) {
+        merged[merged.length - 1] = `${previous} ${line}`;
+      } else {
+        merged.push(line);
+      }
       return merged;
-    }
-    const previous = merged.at(-1);
-    if (previous && /^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[ఎ-హ])[.)])$/i.test(previous)) {
-      merged[merged.length - 1] = `${previous} ${line}`;
-    } else {
-      merged.push(line);
-    }
-    return merged;
-  }, []);
+    }, [])
+    .map((line) => line.replace(/__(v|vs)_DOT__/gi, "$1."));
 }
 
 function normalizedSectionLabel(label: string) {
@@ -187,7 +200,23 @@ function matchingListLayout(lines: string[]) {
   if (pairedIndices.length >= 2) {
     const firstPairIdx = pairedIndices[0];
     const lastPairIdx = pairedIndices[pairedIndices.length - 1];
-    const heading = lines.slice(0, firstPairIdx);
+    const heading = lines
+      .slice(0, firstPairIdx)
+      .reduce<string[]>((acc, curr) => {
+        const prev = acc.at(-1);
+        if (
+          prev &&
+          (/\b(?:in|with|to|from|between|and|of|for|into)\s*$/i.test(prev) ||
+            /^(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+):?$/i.test(
+              curr,
+            ))
+        ) {
+          acc[acc.length - 1] = `${prev} ${curr}`.replace(/\s+/g, " ");
+        } else {
+          acc.push(curr);
+        }
+        return acc;
+      }, []);
     const instruction = lines.slice(lastPairIdx + 1);
 
     let leftTitle = isTelugu ? "జాబితా I" : "List I";
@@ -248,7 +277,23 @@ function matchingListLayout(lines: string[]) {
         rightTitle = lines[rightStart - 1].replace(/:$/, "").trim();
       }
 
-      const heading = lines.slice(0, headingEnd);
+      const heading = lines
+        .slice(0, headingEnd)
+        .reduce<string[]>((acc, curr) => {
+          const prev = acc.at(-1);
+          if (
+            prev &&
+            (/\b(?:in|with|to|from|between|and|of|for|into)\s*$/i.test(prev) ||
+              /^(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+):?$/i.test(
+                curr,
+              ))
+          ) {
+            acc[acc.length - 1] = `${prev} ${curr}`.replace(/\s+/g, " ");
+          } else {
+            acc.push(curr);
+          }
+          return acc;
+        }, []);
       const leftItems = lines
         .slice(leftStart, rightStart)
         .filter((line) => scheme.left.test(line))
@@ -468,7 +513,14 @@ export function FormattedQuestionText({
           );
         }
 
-        if (numbered) {
+        const isCaseCitation =
+          numbered &&
+          /^(?:v|vs)[.)]$/i.test(numbered[1]) &&
+          /^(?:Financial|State|Union|Commissioner|Collector|Govt|Government|Board|Council|Secretary|Inspector|Municipal|High\s+Court|Supreme\s+Court)\b/i.test(
+            numbered[2],
+          );
+
+        if (numbered && !isCaseCitation) {
           return (
             <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
               <strong className="font-bold text-slate-950 mr-1.5">{numbered[1]}</strong>
