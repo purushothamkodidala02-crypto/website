@@ -35,13 +35,13 @@ async function fetchAllMockTestQuestions(supabase: Awaited<ReturnType<typeof cre
 async function fetchAllQuestionsSummary(supabase: Awaited<ReturnType<typeof createClient>>) {
   const pageSize = 1000;
   let from = 0;
-  let all: Array<{ id: string; is_active: boolean; expires_on: string | null }> = [];
+  let all: Array<{ id: string; is_active: boolean; expires_on: string | null; content_lifecycle: string | null }> = [];
   let hasMore = true;
 
   while (hasMore) {
     const { data, error } = await supabase
       .from("questions")
-      .select("id, is_active, expires_on")
+      .select("id, is_active, expires_on, content_lifecycle")
       .range(from, from + pageSize - 1);
 
     if (error || !data || data.length === 0) {
@@ -139,6 +139,18 @@ export default async function AdminDashboard() {
       )
     );
   });
+
+  const future30Date = new Date();
+  future30Date.setDate(future30Date.getDate() + 30);
+  const future30Key = indiaDateKey(future30Date);
+  const expiringSoonCount = questions.filter(
+    (item) =>
+      item.is_active &&
+      item.content_lifecycle === "expires" &&
+      item.expires_on &&
+      item.expires_on >= today &&
+      item.expires_on <= future30Key,
+  ).length;
 
   const metrics = [
     {
@@ -240,6 +252,15 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="grid gap-3 p-6">
+            {expiringSoonCount > 0 && (
+              <AttentionItem
+                count={expiringSoonCount}
+                title="Questions expiring soon (≤ 30 days)"
+                detail="Review upcoming expiring questions in the Question Bank before they leave student exams."
+                tone="amber"
+                href="/admin/questions?status=expiring_soon"
+              />
+            )}
             <AttentionItem
               count={reportsResult.count ?? 0}
               title="Student question reports are open"
@@ -418,19 +439,21 @@ function AttentionItem({
   title,
   detail,
   tone,
+  href,
 }: {
   count: number;
   title: string;
   detail: string;
   tone: "amber" | "teal" | "slate";
+  href?: string;
 }) {
   const colors = {
     amber: "border-amber-100 bg-amber-50 text-amber-950",
     teal: "border-teal-100 bg-teal-50 text-teal-950",
     slate: "border-slate-200 bg-slate-50 text-slate-900",
   };
-  return (
-    <div className={`flex gap-4 rounded-2xl border p-4 ${colors[tone]}`}>
+  const content = (
+    <div className={`flex gap-4 rounded-2xl border p-4 ${colors[tone]} ${href ? "transition hover:shadow-md hover:border-amber-300" : ""}`}>
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg font-black shadow-sm">
         {count}
       </span>
@@ -440,6 +463,11 @@ function AttentionItem({
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link href={href} className="block">{content}</Link>;
+  }
+  return content;
 }
 
 function Status({

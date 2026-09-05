@@ -42,14 +42,34 @@ function statusOf(question: QuestionBankRow) {
     return { label: "Unavailable", className: "bg-slate-200 text-slate-700" };
   }
   if (question.expiresOn && question.expiresOn < today) {
-    return { label: "Expired", className: "bg-rose-100 text-rose-800" };
+    return { label: "Expired", className: "bg-rose-100 text-rose-800 font-semibold" };
   }
   if (
     question.contentLifecycle === "review" &&
     question.reviewOn &&
     question.reviewOn <= today
   ) {
-    return { label: "Review due", className: "bg-amber-100 text-amber-800" };
+    return { label: "Review due", className: "bg-amber-100 text-amber-800 font-semibold" };
+  }
+
+  // Calculate upcoming expiration countdown
+  if (question.contentLifecycle === "expires" && question.expiresOn) {
+    const todayDate = new Date(`${today}T00:00:00Z`);
+    const expiryDate = new Date(`${question.expiresOn}T00:00:00Z`);
+    const diffDays = Math.ceil((expiryDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return { label: "Expires today!", className: "bg-rose-100 text-rose-900 border border-rose-300 font-bold" };
+    }
+    if (diffDays === 1) {
+      return { label: "Expires tomorrow", className: "bg-amber-100 text-amber-900 border border-amber-300 font-bold" };
+    }
+    if (diffDays <= 7) {
+      return { label: `Expires in ${diffDays} days`, className: "bg-amber-100 text-amber-900 border border-amber-300 font-bold" };
+    }
+    if (diffDays <= 30) {
+      return { label: `Expires in ${diffDays}d (${question.expiresOn})`, className: "bg-amber-50 text-amber-800 border border-amber-200 font-medium" };
+    }
   }
 
   return {
@@ -75,6 +95,7 @@ export function QuestionBankTable({
   initialLocation,
   initialSearch,
   initialPage,
+  initialStatus = "all",
 }: {
   categories: LocationCategory[];
   exams: LocationExam[];
@@ -84,9 +105,11 @@ export function QuestionBankTable({
   initialLocation: LocationFilterValue;
   initialSearch: string;
   initialPage: number;
+  initialStatus?: string;
 }) {
   const [location, setLocation] = useState(initialLocation);
   const [search, setSearch] = useState(initialSearch);
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [questions, setQuestions] = useState<QuestionBankRow[]>([]);
   const [page, setPage] = useState(initialPage);
   const [total, setTotal] = useState(0);
@@ -116,10 +139,29 @@ export function QuestionBankTable({
         setLoading(true);
         setLoadError("");
         const supabase = createClient();
+        const today = indiaDateKey();
         let query = supabase
           .from("questions")
           .select("id, subject_id, question_text, correct_answer, is_active, content_lifecycle, review_on, expires_on", { count: "exact" })
-          .in("subject_id", visibleSubjectIds)
+          .in("subject_id", visibleSubjectIds);
+
+        if (statusFilter === "expiring_soon") {
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + 30);
+          const futureDateKey = indiaDateKey(futureDate);
+          query = query
+            .eq("content_lifecycle", "expires")
+            .gte("expires_on", today)
+            .lte("expires_on", futureDateKey);
+        } else if (statusFilter === "expired") {
+          query = query.eq("content_lifecycle", "expires").lt("expires_on", today);
+        } else if (statusFilter === "review_due") {
+          query = query.eq("content_lifecycle", "review").lte("review_on", today);
+        } else if (statusFilter === "permanent") {
+          query = query.eq("content_lifecycle", "permanent");
+        }
+
+        query = query
           .order("created_at", { ascending: false })
           .range((page - 1) * pageSize, page * pageSize - 1);
         const normalizedSearch = search.trim().slice(0, 100);
@@ -169,7 +211,7 @@ export function QuestionBankTable({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [exams, location.categoryId, page, papers, search, specializations, subjects, visibleSubjectIds]);
+  }, [exams, location.categoryId, page, papers, search, specializations, statusFilter, subjects, visibleSubjectIds]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const questionBankUrl = useMemo(() => {
@@ -180,10 +222,11 @@ export function QuestionBankTable({
     if (location.paperId) params.set("paper", location.paperId);
     if (location.subjectId) params.set("subject", location.subjectId);
     if (search.trim()) params.set("q", search.trim().slice(0, 100));
+    if (statusFilter && statusFilter !== "all") params.set("status", statusFilter);
     if (page > 1) params.set("page", String(page));
     const query = params.toString();
     return query ? `/admin/questions?${query}` : "/admin/questions";
-  }, [location, page, search]);
+  }, [location, page, search, statusFilter]);
 
   useEffect(() => {
     window.history.replaceState(window.history.state, "", questionBankUrl);
@@ -208,17 +251,34 @@ export function QuestionBankTable({
           onChange={(value) => { setLocation(value); setPage(1); }}
           includeSubjects
         />
-        <label className="block max-w-xl text-sm font-bold">
-          Search existing questions
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => { setSearch(event.target.value); setPage(1); }}
-            placeholder="Type a word from the question"
-            disabled={!location.categoryId}
-            className="mt-2 w-full rounded-xl border px-4 py-3 font-normal disabled:cursor-not-allowed disabled:bg-slate-100"
-          />
-        </label>
+        <div className="flex flex-wrap items-end gap-4">
+          <label className="block flex-1 min-w-[240px] text-sm font-bold">
+            Search existing questions
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+              placeholder="Type a word from the question"
+              disabled={!location.categoryId}
+              className="mt-2 w-full rounded-xl border px-4 py-2.5 font-normal disabled:cursor-not-allowed disabled:bg-slate-100"
+            />
+          </label>
+          <label className="block min-w-[210px] text-sm font-bold">
+            Filter by status / expiry
+            <select
+              value={statusFilter}
+              onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
+              disabled={!location.categoryId}
+              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 disabled:cursor-not-allowed disabled:bg-slate-100"
+            >
+              <option value="all">All statuses</option>
+              <option value="expiring_soon">⚠️ Expiring soon (&le; 30 days)</option>
+              <option value="expired">🛑 Expired</option>
+              <option value="review_due">⏳ Review due</option>
+              <option value="permanent">✅ Permanent only</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       {!location.categoryId ? (

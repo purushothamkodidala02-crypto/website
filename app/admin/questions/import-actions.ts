@@ -126,7 +126,14 @@ async function parseExcel(file: File): Promise<ParsedQuestionFile> {
 
   const rows: ParsedQuestionFile["rows"] = [];
   for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
-    const values = headers.map((header, index) => [header, cleanCellValue(worksheet.getCell(rowNumber, index + 1).text)] as const);
+    const values = headers.map((header, index) => {
+      const cell = worksheet.getCell(rowNumber, index + 1);
+      let text = cell.text;
+      if (cell.value instanceof Date && !Number.isNaN(cell.value.getTime())) {
+        text = cell.value.toISOString().slice(0, 10);
+      }
+      return [header, cleanCellValue(text)] as const;
+    });
     if (values.some(([, value]) => value) || embeddedImages.has(rowNumber)) rows.push({ values: Object.fromEntries(values), rowNumber });
   }
   if (!rows.length) throw new Error("The Excel sheet needs headings and at least one Question.");
@@ -364,9 +371,37 @@ async function importQuestions(
     const storedImportKey = mockTest ? `mock:${mockTest.id}:${importKey}` : importKey;
     const subject = subjectByName.get(normalizeLookup(row.subject ?? ""));
     const correctAnswer = (row.correct_answer ?? "").trim().toUpperCase() as CorrectAnswer;
-    const lifecycle = ((row.content_lifecycle ?? "permanent").trim().toLowerCase() || "permanent") as QuestionLifecycle;
-    const reviewOn = (row.review_on ?? "").trim();
-    const expiresOn = (row.expires_on ?? "").trim();
+    const rawExpiresOn = (
+      row.expires_on ??
+      row.expire_on ??
+      row.expiry_date ??
+      row.expire_date ??
+      row.expires ??
+      row.expiry ??
+      row.exper ??
+      row.expire ??
+      ""
+    ).trim();
+
+    let expiresOn = rawExpiresOn;
+    const ddmmyyyyMatch = expiresOn.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (ddmmyyyyMatch) {
+      const [, day, month, year] = ddmmyyyyMatch;
+      expiresOn = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
+
+    const rawReviewOn = (row.review_on ?? row.review_date ?? "").trim();
+    let reviewOn = rawReviewOn;
+    const reviewDdmmyyyyMatch = reviewOn.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (reviewDdmmyyyyMatch) {
+      const [, day, month, year] = reviewDdmmyyyyMatch;
+      reviewOn = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
+
+    let lifecycle = ((row.content_lifecycle ?? "").trim().toLowerCase()) as QuestionLifecycle;
+    if (!lifecycle) {
+      lifecycle = expiresOn ? "expires" : (reviewOn ? "review" : "permanent");
+    }
     const sourceExamDate = (row.source_exam_date ?? "").trim();
     const isActive = activeValue(row.is_active ?? "");
     const english = languageValues(row, "en");
@@ -383,7 +418,9 @@ async function importQuestions(
     if (subject && importKeys.has(`${subject.id}:${importKey}`)) errors.push(`Row ${rowNumber}: import_key "${importKey}" is repeated for ${subject.name}.`);
     if (subject && importKey) importKeys.add(`${subject.id}:${importKey}`);
     if (!answers.includes(correctAnswer)) errors.push(`Row ${rowNumber}: correct_answer must be A, B, C, or D.`);
-    if (!lifecycles.includes(lifecycle) || (lifecycle === "review" && !validDate(reviewOn)) || (lifecycle === "expires" && !validDate(expiresOn))) errors.push(`Row ${rowNumber}: check content_lifecycle and its date.`);
+    if (!lifecycles.includes(lifecycle) || (lifecycle === "review" && !validDate(reviewOn)) || (lifecycle === "expires" && !validDate(expiresOn))) {
+      errors.push(`Row ${rowNumber}: check content_lifecycle and its date (use YYYY-MM-DD).`);
+    }
     if (sourceExamDate && !validDate(sourceExamDate)) errors.push(`Row ${rowNumber}: source_exam_date must use YYYY-MM-DD.`);
     if (isActive === null) errors.push(`Row ${rowNumber}: is_active must be true or false.`);
     if (image.error) errors.push(`Row ${rowNumber}: ${image.error}`);

@@ -47,8 +47,9 @@ export default async function QuestionsPage({
   const requestedPage = Number(query.page ?? "1");
   const initialPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const initialSearch = String(query.q ?? "").trim().slice(0, 100);
+  const initialStatus = String(query.status ?? "all").trim();
   const initialLocation = { categoryId, examId, specializationId, paperId, subjectId };
-  const tableStateKey = [categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialPage].join(":");
+  const tableStateKey = [categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialStatus, initialPage].join(":");
 
   return (
     <main>
@@ -66,7 +67,7 @@ export default async function QuestionsPage({
       </nav>
 
       <div id="existing-questions" className="scroll-mt-24">
-        <QuestionBankTable key={tableStateKey} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjectOptions} initialLocation={initialLocation} initialSearch={initialSearch} initialPage={initialPage} />
+        <QuestionBankTable key={tableStateKey} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjectOptions} initialLocation={initialLocation} initialSearch={initialSearch} initialPage={initialPage} initialStatus={initialStatus} />
       </div>
 
       <details id="add-one-question" className="mt-8 scroll-mt-24 overflow-hidden rounded-3xl border border-teal-200 bg-white shadow-sm">
