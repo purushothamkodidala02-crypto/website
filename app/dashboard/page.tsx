@@ -467,6 +467,7 @@ export default async function Dashboard({
                           {new Intl.DateTimeFormat("en-IN", {
                             dateStyle: "medium",
                             timeStyle: "short",
+                            timeZone: "Asia/Kolkata",
                           }).format(new Date(attempt.submitted_at))}
                         </p>
                         <h3 className="mt-2 text-lg font-black text-slate-950">

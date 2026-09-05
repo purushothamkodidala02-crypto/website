@@ -9,7 +9,7 @@ type RecentOrder = PaidOrder & { merchant_order_id: string; status: string; paid
 type Product = { id: string; name: string; is_active: boolean };
 type Student = { id: string; full_name: string | null; phone: string | null; created_at: string };
 
-const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" });
+const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" });
 
 async function loadAllPaidOrders() {
   const admin = createAdminClient();

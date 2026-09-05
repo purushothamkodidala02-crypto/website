@@ -290,6 +290,7 @@ export default async function AdminDashboard() {
                       Updated{" "}
                       {new Intl.DateTimeFormat("en-IN", {
                         dateStyle: "medium",
+                        timeZone: "Asia/Kolkata",
                       }).format(new Date(test.updated_at))}
                     </p>
                   </div>

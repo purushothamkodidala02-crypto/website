@@ -31,7 +31,7 @@ type PaymentRow = {
   access_products: { name: string } | null;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeZone: "Asia/Kolkata" });
 
 const paymentErrors: Record<string, string> = {
   already_active: "You already have active access to this exam series.",

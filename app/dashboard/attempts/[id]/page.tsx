@@ -201,7 +201,7 @@ export default async function AttemptReviewPage({
                 {resolvedTitle ?? summary.mock_test_title}
               </h1>
               <p className="mt-3 max-w-2xl leading-7 text-slate-300">
-                Review every answer and use the explanations to plan your next
+                Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))} · Review every answer and use the explanations to plan your next
                 practice session.
               </p>
             </div>
@@ -275,7 +275,7 @@ function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; tit
         <section className="mt-6 rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-200">Attempt summary</p>
           <h1 className="mt-4 text-3xl font-black tracking-tight">{title}</h1>
-          <p className="mt-3 text-sm text-slate-300">Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.submitted_at))}</p>
+          <p className="mt-3 text-sm text-slate-300">Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))}</p>
         </section>
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <SummaryMetric label="Score" value={`${attempt.score} / ${attempt.total_marks}`} tone="teal" />
