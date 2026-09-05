@@ -59,7 +59,15 @@ export default async function ExamPage({ params, searchParams }: Props) {
   const papers = catalog.papers.filter((paper) => paper.exam_group_id === context.exam!.id);
   const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const paperIds = new Set(papers.map((paper) => paper.id));
-  const tests = catalog.tests.filter((test) => paperIds.has(test.paper_id));
+  const tests = catalog.tests
+    .filter((test) => paperIds.has(test.paper_id))
+    .sort((a, b) => {
+      const diff = Number(b.series_number ?? 0) - Number(a.series_number ?? 0);
+      if (diff !== 0) return diff;
+      const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+      const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+      return timeB - timeA;
+    });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
   const seo = resolveSeoFields(context.exam, {
     title: `${context.exam.name} Mock Tests in ${context.state.name}`,
