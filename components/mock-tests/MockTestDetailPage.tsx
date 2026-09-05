@@ -367,9 +367,7 @@ export async function MockTestDetailsPage({
     ["Total marks", totalMarksLabel],
     [
       "Negative marking",
-      negativeMarks > 0
-        ? `${negativeMarks} per wrong answer`
-        : "No negative marking",
+      negativeMarks > 0 ? `${negativeMarks}` : "No negative marking",
     ],
     ["Language", languageLabel],
     ...(hasResumableSession
