@@ -4,9 +4,11 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { getMockTestPublicContextById } from "@/lib/public-route-data";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { AttemptReviewNavigator, type ReviewRow } from "./AttemptReviewNavigator";
 
 type AttemptSummary = {
+  user_id: string;
   mock_test_id: string;
   submitted_at: string;
   score: number;
@@ -24,50 +26,53 @@ export default async function AttemptReviewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) notFound();
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/dashboard");
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/dashboard/attempts/${id}`)}`);
+
+  const admin = createAdminClient();
 
   const [attemptResult, reviewResult] = await Promise.all([
-    supabase
+    admin
       .from("test_attempts")
-      .select("mock_test_id, session_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions, detailed_review_available")
+      .select("user_id, mock_test_id, session_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions, detailed_review_available")
       .eq("id", id)
-      .eq("user_id", user.id)
       .maybeSingle(),
     supabase.rpc("get_attempt_review", { requested_attempt_id: id }),
   ]);
   const attempt = attemptResult.data as AttemptSummary | null;
-  if (!attempt) notFound();
+  if (!attempt || attempt.user_id !== user.id) notFound();
 
   const publicContext = await getMockTestPublicContextById(attempt.mock_test_id);
   let resolvedTitle = publicContext?.mockTest.title;
   if (!resolvedTitle) {
-    const { data: rawTest } = await supabase
+    const { data: rawTest } = await admin
       .from("mock_tests")
       .select("paper_id, subject_id, series_number, title")
       .eq("id", attempt.mock_test_id)
       .maybeSingle();
     if (rawTest) {
-      const { data: paper } = await supabase
+      const { data: paper } = await admin
         .from("papers")
         .select("exam_group_id, specialization_id, name")
         .eq("id", rawTest.paper_id)
         .maybeSingle();
       const { data: specialization } = paper?.specialization_id
-        ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
+        ? await admin.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
         : { data: null };
       const { data: group } = paper
-        ? await supabase.from("exam_groups").select("exam_id, name").eq("id", paper.exam_group_id).maybeSingle()
+        ? await admin.from("exam_groups").select("exam_id, name").eq("id", paper.exam_group_id).maybeSingle()
         : { data: null };
       const { data: exam } = group
-        ? await supabase.from("exams").select("state_id, name").eq("id", group.exam_id).maybeSingle()
+        ? await admin.from("exams").select("state_id, name").eq("id", group.exam_id).maybeSingle()
         : { data: null };
       const { data: state } = exam
-        ? await supabase.from("exam_states").select("code").eq("id", exam.state_id).maybeSingle()
+        ? await admin.from("exam_states").select("code").eq("id", exam.state_id).maybeSingle()
         : { data: null };
       const { data: subject } = rawTest.subject_id
-        ? await supabase.from("subjects").select("name").eq("id", rawTest.subject_id).maybeSingle()
+        ? await admin.from("subjects").select("name").eq("id", rawTest.subject_id).maybeSingle()
         : { data: null };
 
       if (state && group && paper) {
@@ -88,15 +93,84 @@ export default async function AttemptReviewPage({
     return <ExpiredAttemptReview attempt={attempt} title={resolvedTitle ?? "Mock test"} />;
   }
 
-  const { data, error } = reviewResult;
+  const { data } = reviewResult;
   const rawRows = (data ?? []) as Omit<ReviewRow, "question_id">[];
   const questionOrderResult = attempt.session_id
-    ? await supabase.from("test_attempt_session_questions").select("question_id").eq("session_id", attempt.session_id).order("question_order")
-    : await supabase.from("mock_test_questions").select("question_id").eq("mock_test_id", attempt.mock_test_id).order("question_order");
+    ? await admin.from("test_attempt_session_questions").select("question_id").eq("session_id", attempt.session_id).order("question_order")
+    : await admin.from("mock_test_questions").select("question_id").eq("mock_test_id", attempt.mock_test_id).order("question_order");
   const questionIds = (questionOrderResult.data ?? []).map((item) => item.question_id);
-  const rows = rawRows.map((row, index) => ({ ...row, question_id: questionIds[index] })).filter((row): row is ReviewRow => Boolean(row.question_id));
-  if (error || rows.length === 0) notFound();
-  const { data: bookmarks } = await supabase.from("student_question_bookmarks").select("question_id").eq("user_id", user.id).in("question_id", questionIds);
+
+  let rows: ReviewRow[] = [];
+
+  if (rawRows.length > 0) {
+    rows = rawRows.map((row, index) => ({
+      ...row,
+      question_id: questionIds[index] ?? `q-${row.question_order}`,
+    }));
+  } else if (attempt.session_id) {
+    // Fallback if RPC returns empty: fetch directly from session questions & responses
+    const [sessionQuestionsResult, responsesResult] = await Promise.all([
+      admin
+        .from("test_attempt_session_questions")
+        .select("*")
+        .eq("session_id", attempt.session_id)
+        .order("question_order"),
+      admin
+        .from("attempt_responses")
+        .select("question_id, selected_answer, is_correct, marks_awarded")
+        .eq("attempt_id", id),
+    ]);
+
+    const responsesByQuestion = new Map(
+      (responsesResult.data ?? []).map((r) => [r.question_id, r])
+    );
+
+    rows = (sessionQuestionsResult.data ?? []).map((sq) => {
+      const resp = responsesByQuestion.get(sq.question_id);
+      return {
+        question_id: sq.question_id,
+        mock_test_title: resolvedTitle ?? "Mock test",
+        score: attempt.score,
+        total_marks: attempt.total_marks,
+        correct_answers: attempt.correct_answers,
+        incorrect_answers: attempt.incorrect_answers,
+        unanswered_questions: attempt.unanswered_questions,
+        question_order: sq.question_order,
+        question_text: sq.question_text,
+        option_a: sq.option_a,
+        option_b: sq.option_b,
+        option_c: sq.option_c,
+        option_d: sq.option_d,
+        content_language_mode: sq.content_language_mode ?? "english",
+        question_text_te: sq.question_text_te,
+        option_a_te: sq.option_a_te,
+        option_b_te: sq.option_b_te,
+        option_c_te: sq.option_c_te,
+        option_d_te: sq.option_d_te,
+        selected_answer: resp?.selected_answer ?? null,
+        correct_answer: sq.correct_answer,
+        is_correct: resp?.is_correct ?? false,
+        marks_awarded: Number(resp?.marks_awarded ?? 0),
+        explanation: sq.explanation,
+        explanation_te: sq.explanation_te,
+        image_url: sq.image_url,
+      };
+    });
+  }
+
+  if (rows.length === 0) notFound();
+
+  const validQuestionIds = rows
+    .map((item) => item.question_id)
+    .filter((qid) => /^[0-9a-f-]{36}$/i.test(qid));
+
+  const { data: bookmarks } = validQuestionIds.length > 0
+    ? await supabase
+        .from("student_question_bookmarks")
+        .select("question_id")
+        .eq("user_id", user.id)
+        .in("question_id", validQuestionIds)
+    : { data: [] };
 
   const summary = rows[0];
   const percentage =
