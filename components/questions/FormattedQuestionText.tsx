@@ -4,10 +4,10 @@ type FormattedQuestionTextProps = {
 };
 
 const labelledSection =
-  /^(Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం\s*\([R]\)|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:\s*(.+)$/i;
+  /^(Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-]\s*(.+)$/i;
 
 const instructionStart =
-  /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick)\b|(?:సరైన|సరికాని|కింది|క్రింది).*(?:ఎంచుకోండి|గుర్తించండి))/i;
+  /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick|Identify|In\s+the\s+light\s+of)\b|(?:సరైన|సరికాని|కింది|క్రింది|పై|ఇచ్చిన).*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/i;
 
 const numberedSection =
   /^((?:\((?:[a-hA-H]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[a-hA-H]|[ఎ-హ])[.)]))\s+(.*)$/i;
@@ -23,7 +23,7 @@ export function containsTeluguText(text: string) {
 
 const isExplicitHeader = (line: string | undefined) =>
   Boolean(line) &&
-  /^(?:(?:List|Column|Group)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI)(?:\s*\([^)]+\))?|(?:జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)(?:\s*\([^)]+\))?|Traveler|Country):?$/i.test(
+  /^(?:(?:List|Column|Group)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI)(?:\s*\([^)]+\))?|(?:జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)(?:\s*\([^)]+\))?|Traveler|Country):?$/i.test(
     line!.trim(),
   );
 
@@ -31,7 +31,10 @@ function questionLines(text: string) {
   const lines = text
     .replace(/\u00a0/g, " ")
     .replace(/\*\*/g, "")
-    .replace(/;\s*(?=(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s)/g, "\n")
+    .replace(/[ \t]*:\s*;+[ \t]*/g, ":\n")
+    .replace(/[ \t]*\.\s*;+[ \t]*/g, ".\n")
+    .replace(/[ \t]*;;+[ \t]*/g, "\n")
+    .replace(/[ \t]*;\s*(?=(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s)/g, "\n")
     .replace(/\r\n?/g, "\n")
     .replace(
       /((?:Statements?|ప్రకటనలు?)\s*:)[ \t]*(.*?)(?=[ \t]+(?:Conclusions?|తీర్మానాలు?)\s*:|$)/gim,
@@ -39,7 +42,7 @@ function questionLines(text: string) {
         `${heading}\n${body.trim().replace(/\.\s+/g, ".\n")}`,
     )
     .replace(
-      /(?<=[.?!;:\)])[ \t]+(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)/gi,
+      /(?<=[.?!;:\)])[ \t]*(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)/gi,
       "\n",
     )
     .replace(
@@ -47,23 +50,31 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /(?<=[.?!;:\)])[ \t]+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం\s*\([R]\)|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*:)/gi,
+      /(?<=[.?!;:\)])[ \t]*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-])/gi,
       "\n",
     )
     .replace(
-      /;[ \t]*(?=(?:Assertion(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?)\s*:)/gi,
+      /[ \t]*;+[ \t]*(?=(?:Assertion|Reason|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|కారణం|కారణము|హేతువు|Statement|Conclusion|List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\b|(?:\((?:[A-Za-z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|[ఎ-హ])[.)])\s)/gi,
       "\n",
     )
     .replace(
-      /(?<!(?:\b(?:and|&|or|as|is|of)|మరియు)[ \t.]*)[ \t.]+(?=(?:List|Column|Group|జాబితా|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)/gi,
+      /[ \t]*;+[ \t]*(?=(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])[.)])\s)/gi,
       "\n",
     )
     .replace(
-      /((?:List|Column|Group|జాబితా|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)[ \t]*(?=(?:\([a-hA-H\d]\)|\([ivxIVX]+\)|(?:[a-hA-H\d]|[ivxIVX]+)[.)])\s)/gi,
+      /[ \t]*;+[ \t]*(?=(?:(?:Choose|Select|Pick|Identify|Which\s+of|How\s+many\s+of)\b|(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను|కోడ్|కోడ్‌ను|కోడ్ను|వాక్యాన్ని)|(?:కింది|క్రింది|పై|ఇచ్చిన)\s+(?:వాటిలో|ఐచ్ఛికాల|కోడ్ల|కోడ్‌ల|వాక్యాల|ప్రకటనల|నుండి|నుంచి|ఇచ్చిన|సరైన)?.*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి):?)|సరైన\s+కోడ్ను\s+ఎంచుకోండి))/gi,
+      "\n",
+    )
+    .replace(
+      /(?<!(?:\b(?:and|&|or|as|is|of)|మరియు)[ \t.]*)[ \t.]+(?=(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)/gi,
+      "\n",
+    )
+    .replace(
+      /((?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)[ \t]*(?=(?:\([a-hA-H\d]\)|\([ivxIVX]+\)|(?:[a-hA-H\d]|[ivxIVX]+)[.)])\s)/gi,
       "$1\n",
     )
     .replace(
-      /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం))[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))[A-Za-z0-9\u0c00-\u0c7f"'])/g,
+      /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము))[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))[A-Za-z0-9\u0c00-\u0c7f"'])/g,
       "\n",
     )
     .replace(
@@ -75,7 +86,7 @@ function questionLines(text: string) {
       "\n",
     )
     .replace(
-      /(?<!,)[ \t.]+(?=(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను)|(?:కింది|క్రింది)\s+వాటిలో).*(?:ఎంచుకోండి|గుర్తించండి):?)/gi,
+      /(?<=[.?!;:\)])[ \t]*(?=(?:(?:Choose|Select|Pick|Identify|Which\s+of|How\s+many\s+of)\b|(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను|కోడ్|కోడ్‌ను|కోడ్ను|వాక్యాన్ని)|(?:కింది|క్రింది|పై|ఇచ్చిన)\s+(?:వాటిలో|ఐచ్ఛికాల|కోడ్ల|కోడ్‌ల|వాక్యాల|ప్రకటనల|నుండి|నుంచి|ఇచ్చిన|సరైన)?.*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి):?)))/gi,
       "\n",
     )
     .replace(/[ \t]+(?=(?:I{1,3}|IV|V)\.\s)/gi, "\n")
@@ -92,13 +103,13 @@ function questionLines(text: string) {
       "\n",
     )
     .replace(
-      /([.?:])\s+(?=(?:Assertion(?:\s*\([A]\))?|(?:వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A]\))?|Reason(?:\s*\([R]\))?|కారణం\s*\([R]\)|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /([.?:])\s+(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
     .replace(/([^\s—–-])\s*[—–-]\s*(?=[\d౦-౯])/g, "$1 — ")
     .split(/\n+/)
-    .map((line) => line.trim().replace(/;\s*$/, ""))
+    .map((line) => line.trim().replace(/^;+|;+$/g, "").trim())
     .filter(Boolean);
 
   return lines.reduce<string[]>((merged, line) => {
@@ -121,10 +132,14 @@ function normalizedSectionLabel(label: string) {
   if (/^Assertion$/i.test(trimmed)) return "Assertion (A)";
   if (/^Reason$/i.test(trimmed)) return "Reason (R)";
   if (/^వాదన$/i.test(trimmed)) return "వాదన (A)";
+  if (/^నిశ్చితార్థం$/i.test(trimmed)) return "నిశ్చితార్థం (A)";
+  if (/^నిశ్చితార్థము$/i.test(trimmed)) return "నిశ్చితార్థము (A)";
+  if (/^కారణం$/i.test(trimmed)) return "కారణం (R)";
+  if (/^కారణము$/i.test(trimmed)) return "కారణము (R)";
   return trimmed;
 }
 
-const matchQuestion = /^(?:Match\b|.*\bmatch\b|జాబితా|జతపరచండి|.*జతపరచండి|.*\b(pairs|జతలు)\b)/i;
+const matchQuestion = /^(?:Match\b|.*\bmatch\b|జాబితా|కాలమ్|కాలం|జతపరచండి|.*జతపరచండి|.*\b(pairs|జతలు)\b)/i;
 const numericListItem = /^(?:\([1-9]\d?\)\s*|(?:[1-9]\d?|[౧-౯])[.)]\s+)/;
 const alphabeticListItem = /^(?:\([a-hA-H]\)\s*|[a-hA-H][.)]\s+)/;
 const teluguAlphabeticListItem = /^(?:\((?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)\)\s*|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s+)/;
@@ -355,7 +370,7 @@ export function FormattedQuestionText({
             <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{rightItems.map((line) => renderListItem(line))}</div>
           </div>
         </div>
-        {instruction.length > 0 && <div className="mt-3.5 space-y-1.5 text-slate-700">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
+        {instruction.length > 0 && <div className="mt-4 space-y-1.5 font-semibold text-slate-900">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
       </div>
     );
   }
@@ -409,31 +424,88 @@ export function FormattedQuestionText({
         const isHeading = sectionHeading.test(line);
         const isInstruction = instructionStart.test(line);
 
+        const isAssertionOrReason =
+          labelled &&
+          /^(?:Assertion(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రతిపాదన|కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?)$/i.test(
+            labelled[1].trim(),
+          );
+
+        if (isAssertionOrReason) {
+          const label = normalizedSectionLabel(labelled[1].trim());
+          const isAssertion = /^(?:Assertion|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ|వాదన|ప్రతిపాదన)/i.test(
+            label,
+          );
+          return (
+            <div
+              key={`${index}-${line}`}
+              className="my-2.5 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3.5 sm:p-4 shadow-sm"
+            >
+              <div className="flex items-start gap-2.5">
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-lg px-2.5 py-1 text-xs font-black uppercase tracking-wide ${
+                    isAssertion
+                      ? "bg-slate-950 text-teal-300"
+                      : "bg-slate-800 text-amber-300"
+                  }`}
+                >
+                  {label}
+                </span>
+                <span className="min-w-0 flex-1 text-slate-950 leading-relaxed font-medium">
+                  {labelled[2]}
+                </span>
+              </div>
+            </div>
+          );
+        }
+
+        if (isHeading) {
+          return (
+            <p key={`${index}-${line}`} className="font-bold text-slate-950">
+              {line}
+            </p>
+          );
+        }
+
+        if (labelled) {
+          return (
+            <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
+              <strong className="font-bold text-slate-950 mr-1.5">
+                {normalizedSectionLabel(labelled[1].trim())}:
+              </strong>
+              <span>{labelled[2]}</span>
+            </p>
+          );
+        }
+
+        if (numbered) {
+          return (
+            <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
+              <strong className="font-bold text-slate-950 mr-1.5">{numbered[1]}</strong>
+              <span>{numbered[2]}</span>
+            </p>
+          );
+        }
+
+        if (data) {
+          return (
+            <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
+              <strong className="font-bold text-slate-950">{data[1]}</strong>
+              {" — "}
+              <span>{data[2]}</span>
+            </p>
+          );
+        }
+
         return (
           <p
             key={`${index}-${line}`}
-            className={isInstruction ? "pt-1.5 text-slate-700" : "leading-relaxed text-slate-950"}
+            className={
+              isInstruction
+                ? "pt-2 font-semibold text-slate-800"
+                : "leading-relaxed text-slate-950"
+            }
           >
-            {isHeading ? (
-              <span>{line}</span>
-            ) : labelled ? (
-              <>
-                <span>{normalizedSectionLabel(labelled[1].trim())}:</span>{" "}
-                <span>{labelled[2]}</span>
-              </>
-            ) : numbered ? (
-              <>
-                <span className="mr-1.5">{numbered[1]}</span>{" "}
-                <span>{numbered[2]}</span>
-              </>
-            ) : data ? (
-              <>
-                <span>{data[1]}</span>{" — "}
-                <span>{data[2]}</span>
-              </>
-            ) : (
-              line
-            )}
+            {line}
           </p>
         );
       })}
