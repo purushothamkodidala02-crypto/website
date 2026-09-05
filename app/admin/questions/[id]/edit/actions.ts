@@ -8,6 +8,7 @@ import {
   removeQuestionImage,
   uploadQuestionImage,
 } from "@/lib/questions/media";
+import { syncQuestionToAttemptSessions } from "@/lib/questions/sync-attempt-sessions";
 import type { CorrectAnswer, QuestionLifecycle } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 
@@ -89,21 +90,22 @@ export async function updateQuestion(
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    supabase.from("questions").select("id, image_url").eq("id", questionId).maybeSingle(),
+    supabase.from("questions").select("id, image_url, correct_answer").eq("id", questionId).maybeSingle(),
     mockTestId ? supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
     return { success: false, message: "The selected Subject could not be found." };
   }
+  let hasAttempts = false;
   if (mockTestId) {
-    if (!mockTest || mockTest.status !== "draft") return { success: false, message: "Only draft Mock Tests can change their Questions." };
+    if (!mockTest) return { success: false, message: "The selected Mock Test could not be found." };
     if (subject.paper_id !== mockTest.paper_id || (mockTest.test_scope === "subject" && subject.id !== mockTest.subject_id)) return { success: false, message: "This Question must stay inside this Mock Test's Paper and Subject." };
     const [{ count: attemptCount }, { data: assignment }] = await Promise.all([
       supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
       supabase.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
     ]);
-    if ((attemptCount ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
     if (!assignment) return { success: false, message: "This Question is not assigned to the selected Mock Test." };
+    hasAttempts = (attemptCount ?? 0) > 0 || mockTest.status !== "draft";
   }
 
   const languageMode =
@@ -237,7 +239,7 @@ export async function updateQuestion(
 
   let copiedForThisMock = false;
   let updateError: { message: string } | null = null;
-  if (mockTestId) {
+  if (mockTestId && !hasAttempts) {
     const { count: otherAssignmentCount } = await supabase.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("question_id", questionId).neq("mock_test_id", mockTestId);
     if ((otherAssignmentCount ?? 0) > 0) {
       const { data: copiedQuestion, error: copyError } = await supabase.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
@@ -266,13 +268,46 @@ export async function updateQuestion(
   if (!copiedForThisMock && existingQuestion.image_url && existingQuestion.image_url !== uploadedImage.url) {
     await removeQuestionImage(supabase, questionMediaPath(existingQuestion.image_url));
   }
+
+  // Synchronize clarifying updates (diagram image, typos, explanations, answer key) to student attempt sessions:
+  const syncResult = await syncQuestionToAttemptSessions(
+    questionId,
+    {
+      question_text: nextQuestion.question_text,
+      option_a: nextQuestion.option_a,
+      option_b: nextQuestion.option_b,
+      option_c: nextQuestion.option_c,
+      option_d: nextQuestion.option_d,
+      question_text_te: nextQuestion.question_text_te,
+      option_a_te: nextQuestion.option_a_te,
+      option_b_te: nextQuestion.option_b_te,
+      option_c_te: nextQuestion.option_c_te,
+      option_d_te: nextQuestion.option_d_te,
+      explanation: nextQuestion.explanation,
+      explanation_te: nextQuestion.explanation_te,
+      image_url: nextQuestion.image_url,
+      correct_answer: nextQuestion.correct_answer,
+    },
+    existingQuestion.correct_answer,
+  );
+
   revalidatePath("/admin/questions");
   revalidatePath(`/admin/questions/${questionId}/edit`);
   revalidatePath("/admin/mock-tests");
   if (mockTestId) {
     revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
     revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
-    return { success: true, message: copiedForThisMock ? "Question updated only in this Mock Test. A separate copy was kept for its other use." : "Question updated only in this Mock Test." };
   }
-  return { success: true, message: "Question updated in English and Telugu." };
+
+  let successMessage = "Question updated in English and Telugu.";
+  if (syncResult.rescoredCount > 0) {
+    successMessage = `Question updated. The answer key correction was applied and ${syncResult.rescoredCount} student attempt${syncResult.rescoredCount === 1 ? "" : "s"} were re-scored.`;
+  } else if (syncResult.syncedCount > 0) {
+    successMessage = "Question updated and synchronized to student attempt reviews.";
+  } else if (mockTestId) {
+    successMessage = copiedForThisMock
+      ? "Question updated only in this Mock Test. A separate copy was kept for its other use."
+      : "Question updated in this Mock Test.";
+  }
+  return { success: true, message: successMessage };
 }

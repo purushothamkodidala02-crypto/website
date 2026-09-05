@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type MockTestManagementResult = {
@@ -29,7 +30,7 @@ async function getManagedMockTest(mockTestId: string) {
 
   const { data: mockTest, error: mockTestError } = await supabase
     .from("mock_tests")
-    .select("id, title, status, superseded_by_mock_test_id")
+    .select("id, title, status, superseded_by_mock_test_id, replaces_mock_test_id")
     .eq("id", mockTestId)
     .single();
 
@@ -151,8 +152,56 @@ export async function deleteDraftMockTest(mockTestId: string): Promise<MockTestM
     return { success: false, message: "This Mock Test has student attempts and cannot be deleted. Archive it instead." };
   }
 
-  const { error } = await result.supabase.from("mock_tests").delete().eq("id", mockTestId);
+  const admin = createAdminClient();
+
+  // Find any questions assigned to this draft so we can clean them up if they were cloned
+  const { data: assignments } = await admin
+    .from("mock_test_questions")
+    .select("question_id")
+    .eq("mock_test_id", mockTestId);
+  const assignedQuestionIds = (assignments ?? []).map((a) => a.question_id);
+
+  // Safely detach foreign key references from both sides of the corrected version relationship:
+  // 1. If an original test has superseded_by_mock_test_id pointing to this draft, clear it
+  await admin
+    .from("mock_tests")
+    .update({ superseded_by_mock_test_id: null })
+    .eq("superseded_by_mock_test_id", mockTestId);
+
+  // 2. Clear replaces_mock_test_id on this draft
+  await admin
+    .from("mock_tests")
+    .update({ replaces_mock_test_id: null })
+    .eq("id", mockTestId);
+
+  // 3. Clean up any draft preview sessions or slug aliases
+  await admin
+    .from("test_attempt_sessions")
+    .delete()
+    .eq("mock_test_id", mockTestId);
+
+  await admin
+    .from("public_slug_aliases")
+    .delete()
+    .eq("entity_type", "mock_test")
+    .eq("entity_id", mockTestId);
+
+  // 4. Delete the mock test itself (cascades to mock_test_questions)
+  const { error } = await admin.from("mock_tests").delete().eq("id", mockTestId);
   if (error) return { success: false, message: error.message };
+
+  // 5. Clean up any cloned questions that were created exclusively for this draft version
+  if (result.mockTest.replaces_mock_test_id && assignedQuestionIds.length > 0) {
+    for (const qId of assignedQuestionIds) {
+      const { count: otherCount } = await admin
+        .from("mock_test_questions")
+        .select("id", { count: "exact", head: true })
+        .eq("question_id", qId);
+      if ((otherCount ?? 0) === 0) {
+        await admin.from("questions").delete().eq("id", qId);
+      }
+    }
+  }
 
   revalidateMockTestPages(mockTestId);
   return { success: true, message: `“${result.mockTest.title}” was deleted.` };

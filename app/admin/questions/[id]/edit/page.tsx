@@ -20,7 +20,7 @@ export default async function EditQuestionPage({
       ? returnTo
       : "/admin/questions";
   const supabase = await createClient();
-  const [questionResult, subjectsResult, papersResult, groupsResult, categoriesResult] =
+  const [questionResult, subjectsResult, papersResult, groupsResult, categoriesResult, sessionResult] =
     await Promise.all([
       supabase
         .from("questions")
@@ -36,9 +36,14 @@ export default async function EditQuestionPage({
       supabase.from("papers").select("id, exam_group_id, name"),
       supabase.from("exam_groups").select("id, exam_id, name"),
       supabase.from("exams").select("id, name"),
+      supabase
+        .from("test_attempt_session_questions")
+        .select("session_id", { count: "exact", head: true })
+        .eq("question_id", id),
     ]);
 
   if (!questionResult.data) notFound();
+  const hasAttempts = (sessionResult.count ?? 0) > 0;
 
   const papers = new Map((papersResult.data ?? []).map((item) => [item.id, item]));
   const groups = new Map((groupsResult.data ?? []).map((item) => [item.id, item]));
@@ -67,6 +72,7 @@ export default async function EditQuestionPage({
       <EditQuestionForm
         question={questionResult.data as Question}
         subjects={options}
+        hasAttempts={hasAttempts}
       />
     </main>
   );

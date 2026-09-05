@@ -20,10 +20,12 @@ export function EditQuestionForm({
   question,
   subjects,
   mockTestId,
+  hasAttempts,
 }: {
   question: Question;
   subjects: SubjectOption[];
   mockTestId?: string;
+  hasAttempts?: boolean;
 }) {
   const [state, action, pending] = useActionState(
     (previousState: UpdateQuestionState, formData: FormData) => updateQuestion(question.id, previousState, formData, mockTestId),
@@ -154,6 +156,11 @@ export function EditQuestionForm({
           <input name="is_active" type="checkbox" defaultChecked={question.is_active} className="h-4 w-4" />
           Ready to use in mock tests
         </label>
+        {hasAttempts && (
+          <div className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-xs font-semibold text-teal-950">
+            Student attempts exist for this question. Updates to text, diagram images, or explanations will automatically synchronize to student attempt reviews.
+          </div>
+        )}
         <button disabled={pending} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">
           <PendingButtonContent pending={pending} pendingLabel="Saving question…">Save Question</PendingButtonContent>
         </button>

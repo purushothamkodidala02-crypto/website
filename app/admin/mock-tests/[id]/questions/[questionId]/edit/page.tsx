@@ -10,7 +10,7 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
   const { id: mockTestId, questionId } = await params;
   const { returnTo } = await searchParams;
   const supabase = await createClient();
-  const [mockTestResult, assignmentResult, questionResult, subjectsResult, papersResult, groupsResult, categoriesResult] = await Promise.all([
+  const [mockTestResult, assignmentResult, questionResult, subjectsResult, papersResult, groupsResult, categoriesResult, attemptsResult] = await Promise.all([
     supabase.from("mock_tests").select("id, title, status").eq("id", mockTestId).maybeSingle(),
     supabase.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
     supabase.from("questions").select("id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at").eq("id", questionId).maybeSingle(),
@@ -18,9 +18,11 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
     supabase.from("papers").select("id, exam_group_id, name"),
     supabase.from("exam_groups").select("id, exam_id, name"),
     supabase.from("exams").select("id, name"),
+    supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
   ]);
   if (!mockTestResult.data || !assignmentResult.data || !questionResult.data) notFound();
   const isDraft = mockTestResult.data.status === "draft";
+  const hasAttempts = (attemptsResult.count ?? 0) > 0 || !isDraft;
   const papers = new Map((papersResult.data ?? []).map((item) => [item.id, item]));
   const groups = new Map((groupsResult.data ?? []).map((item) => [item.id, item]));
   const categories = new Map((categoriesResult.data ?? []).map((item) => [item.id, item]));
@@ -37,13 +39,13 @@ export default async function EditMockTestQuestionPage({ params, searchParams }:
   return <main>
     <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">← Back to {returningToPreview ? "Student Preview" : `${mockTestResult.data.title} Questions`}</Link>
     <h1 className="mt-5 text-3xl font-black">Edit question in this mock test</h1>
-    <p className="mt-2 text-slate-600">This edit applies only to this mock test. Other mock tests keep their own question version.</p>
-    {isDraft ? (
-      <EditQuestionForm question={questionResult.data as Question} subjects={subjects} mockTestId={mockTestId} />
-    ) : (
-      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-950 font-semibold">
-        This mock test is published or archived, so its questions are locked to protect student test attempts.
+    <p className="mt-2 text-slate-600">This edit applies to this mock test and synchronizes to student attempt reviews.</p>
+    {!isDraft && (
+      <div className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm leading-6 text-sky-950 font-medium">
+        <span className="font-bold">Live Mock Test Rectification: </span>
+        This mock test is published. You can add diagram images, fix typos, and enrich explanations. Your changes will safely update the question and reflect in both student attempt reviews and future attempts.
       </div>
     )}
+    <EditQuestionForm question={questionResult.data as Question} subjects={subjects} mockTestId={mockTestId} hasAttempts={hasAttempts} />
   </main>;
 }
