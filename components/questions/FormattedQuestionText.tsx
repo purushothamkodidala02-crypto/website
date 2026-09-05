@@ -432,28 +432,19 @@ export function FormattedQuestionText({
 
         if (isAssertionOrReason) {
           const label = normalizedSectionLabel(labelled[1].trim());
-          const isAssertion = /^(?:Assertion|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ|వాదన|ప్రతిపాదన)/i.test(
-            label,
-          );
           return (
             <div
               key={`${index}-${line}`}
-              className="my-2.5 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3.5 sm:p-4 shadow-sm"
+              className="my-2 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 sm:p-4"
             >
-              <div className="flex items-start gap-2.5">
-                <span
-                  className={`inline-flex shrink-0 items-center rounded-lg px-2.5 py-1 text-xs font-black uppercase tracking-wide ${
-                    isAssertion
-                      ? "bg-slate-950 text-teal-300"
-                      : "bg-slate-800 text-amber-300"
-                  }`}
-                >
-                  {label}
-                </span>
-                <span className="min-w-0 flex-1 text-slate-950 leading-relaxed font-medium">
+              <p className="leading-relaxed text-slate-950">
+                <strong className="font-bold text-slate-950 mr-2">
+                  {label}:
+                </strong>
+                <span className="text-slate-900 font-normal">
                   {labelled[2]}
                 </span>
-              </div>
+              </p>
             </div>
           );
         }
