@@ -90,7 +90,7 @@ export async function updateQuestion(
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    supabase.from("questions").select("id, image_url, correct_answer").eq("id", questionId).maybeSingle(),
+    supabase.from("questions").select("id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
     mockTestId ? supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
@@ -124,81 +124,97 @@ export async function updateQuestion(
     return { success: false, message: "All four answer options must be different." };
   }
 
-  // Paper series duplicate check for question update
-  const { data: subjectData } = await supabase
-    .from("subjects")
-    .select("id, name, paper_id")
-    .eq("id", subjectId)
-    .single();
+  const normNewEn = normalizeText(english.question);
+  const normNewTe = normalizeText(telugu.question);
+  const normOldEn = normalizeText(existingQuestion.question_text);
+  const normOldTe = normalizeText(existingQuestion.question_text_te);
+  const questionTextUnchanged =
+    (!normNewEn || normNewEn === normOldEn) &&
+    (!normNewTe || normNewTe === normOldTe);
 
-  if (subjectData?.paper_id) {
-    const { data: siblingSubjects } = await supabase
+  // Paper series duplicate check for question update (only when question text was actually modified)
+  if (!questionTextUnchanged) {
+    const { data: subjectData } = await supabase
       .from("subjects")
-      .select("id, name")
-      .eq("paper_id", subjectData.paper_id);
-    const siblingSubjectIds = (siblingSubjects ?? []).map((s) => s.id);
+      .select("id, name, paper_id")
+      .eq("id", subjectId)
+      .single();
 
-    const { data: existingQuestions } = await supabase
-      .from("questions")
-      .select(`
-        id,
-        question_text,
-        question_text_te,
-        subject_id,
-        mock_test_questions (
-          mock_test_id,
-          mock_tests (
-            id,
-            title
+    if (subjectData?.paper_id) {
+      const { data: siblingSubjects } = await supabase
+        .from("subjects")
+        .select("id, name")
+        .eq("paper_id", subjectData.paper_id);
+      const siblingSubjectIds = (siblingSubjects ?? []).map((s) => s.id);
+
+      const { data: existingQuestions } = await supabase
+        .from("questions")
+        .select(`
+          id,
+          question_text,
+          question_text_te,
+          subject_id,
+          mock_test_questions (
+            mock_test_id,
+            mock_tests (
+              id,
+              title,
+              replaces_mock_test_id,
+              superseded_by_mock_test_id
+            )
           )
-        )
-      `)
-      .in("subject_id", siblingSubjectIds)
-      .neq("id", questionId)
-      .eq("is_active", true);
+        `)
+        .in("subject_id", siblingSubjectIds)
+        .neq("id", questionId)
+        .eq("is_active", true);
 
-    const normNewEn = normalizeText(english.question);
-    const normNewTe = normalizeText(telugu.question);
+      const match = (existingQuestions ?? []).find((q) => {
+        const normDbEn = normalizeText(q.question_text);
+        const normDbTe = normalizeText(q.question_text_te);
+        if (normNewEn && normDbEn && normNewEn.length >= 10 && normNewEn === normDbEn) return true;
+        if (normNewTe && normDbTe && normNewTe.length >= 10 && normNewTe === normDbTe) return true;
+        return false;
+      });
 
-    const match = (existingQuestions ?? []).find((q) => {
-      const normDbEn = normalizeText(q.question_text);
-      const normDbTe = normalizeText(q.question_text_te);
-      if (normNewEn && normDbEn && normNewEn.length >= 10 && normNewEn === normDbEn) return true;
-      if (normNewTe && normDbTe && normNewTe.length >= 10 && normNewTe === normDbTe) return true;
-      return false;
-    });
-
-    if (match) {
-      type MockTestRef = { id: string; title: string };
-      const assignedTests: MockTestRef[] = [];
-      for (const mtq of match.mock_test_questions ?? []) {
-        const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
-        if (rawMtq.mock_tests?.title) {
-          assignedTests.push({ id: rawMtq.mock_tests.id, title: rawMtq.mock_tests.title });
+      if (match) {
+        type MockTestRef = { id: string; title: string; replaces_mock_test_id?: string | null; superseded_by_mock_test_id?: string | null };
+        const assignedTests: MockTestRef[] = [];
+        for (const mtq of match.mock_test_questions ?? []) {
+          const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
+          if (rawMtq.mock_tests?.title) {
+            assignedTests.push(rawMtq.mock_tests);
+          }
         }
-      }
 
-      if (mockTestId) {
-        const otherTest = assignedTests.find((t) => t.id !== mockTestId);
-        if (otherTest) {
+        if (mockTestId) {
+          const relatedTestIds = new Set([
+            mockTestId,
+            mockTest?.replaces_mock_test_id,
+            mockTest?.superseded_by_mock_test_id,
+          ].filter(Boolean));
+
+          const otherTest = assignedTests.find((t) => !relatedTestIds.has(t.id));
+          if (otherTest) {
+            return {
+              success: false,
+              message: `This question text already exists in "${otherTest.title}" in this paper series.`,
+            };
+          }
+          const inThisTest = assignedTests.some((t) => t.id === mockTestId);
+          if (inThisTest) {
+            return {
+              success: false,
+              message: "Another question in this Mock Test already has this exact text.",
+            };
+          }
+        } else {
+          const matchSubjectName = siblingSubjects?.find((s) => s.id === match.subject_id)?.name ?? "Subject";
           return {
             success: false,
-            message: `This question text already exists in "${otherTest.title}" in this paper series.`,
-          };
-        }
-        const inThisTest = assignedTests.some((t) => t.id === mockTestId);
-        if (inThisTest) {
-          return {
-            success: false,
-            message: "Another question in this Mock Test already has this exact text.",
+            message: `This question text already exists under ${matchSubjectName}.`,
           };
         }
       }
-      const matchSubjectName = siblingSubjects?.find((s) => s.id === match.subject_id)?.name ?? "Subject";
-      return {
-        success: false,
-        message: `This question text already exists under ${matchSubjectName}.`,
-      };
     }
   }
 
