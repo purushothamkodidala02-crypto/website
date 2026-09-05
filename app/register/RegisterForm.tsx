@@ -45,9 +45,15 @@ const noticeStyles = {
   info: "border-sky-200 bg-sky-50 text-sky-800",
 };
 
-export function RegisterForm({ nextPath }: { nextPath: string }) {
+export function RegisterForm({
+  nextPath,
+  initialEmail = "",
+}: {
+  nextPath: string;
+  initialEmail?: string;
+}) {
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);

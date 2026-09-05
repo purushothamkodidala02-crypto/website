@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type LoginInput = {
   email: string;
@@ -32,14 +33,30 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
     options: { captchaToken: input.captchaToken },
   });
   if (loginError || !authData.user) {
-    const code = loginError?.code ?? "invalid_credentials";
-    const message = code === "email_not_confirmed"
-      ? "Your account exists, but the email is not confirmed yet."
-      : code === "captcha_failed"
-        ? "Security verification was rejected. Refresh the page and complete it again."
-        : code === "over_request_rate_limit"
-          ? "Too many sign-in attempts. Wait a few minutes and try again."
-          : "The email or password is incorrect. Check both fields and try again.";
+    let code = loginError?.code ?? "invalid_credentials";
+    let message = "The email or password is incorrect. Check both fields and try again.";
+
+    if (code === "email_not_confirmed") {
+      message = "Your account exists, but the email is not confirmed yet.";
+    } else if (code === "captcha_failed") {
+      message = "Security verification was rejected. Refresh the page and complete it again.";
+    } else if (code === "over_request_rate_limit") {
+      message = "Too many sign-in attempts. Wait a few minutes and try again.";
+    } else {
+      try {
+        const admin = createAdminClient();
+        const { data: userId } = await admin.rpc("find_auth_user_id_by_email", {
+          requested_email: email,
+        });
+        if (!userId) {
+          code = "user_not_found";
+          message = "No Varadhi Prep account was found with this email. Please create a free account to continue.";
+        }
+      } catch {
+        // Fall back to standard message if admin check is unavailable
+      }
+    }
+
     return { success: false, code, message };
   }
 

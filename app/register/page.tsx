@@ -12,10 +12,11 @@ export const metadata: Metadata = {
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string | string[] }>;
+  searchParams: Promise<{ next?: string | string[]; email?: string | string[] }>;
 }) {
   const params = await searchParams;
   const requestedPath = typeof params.next === "string" ? params.next : undefined;
+  const initialEmail = typeof params.email === "string" ? params.email.trim() : "";
   const nextPath =
     requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
       ? requestedPath
@@ -43,7 +44,7 @@ export default async function RegisterPage({
             <li>• Review attempts and subject accuracy</li>
           </ul>
         </aside>
-        <RegisterForm nextPath={nextPath} />
+        <RegisterForm nextPath={nextPath} initialEmail={initialEmail} />
       </div>
     </main>
   );

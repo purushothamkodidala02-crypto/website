@@ -40,6 +40,7 @@ export function LoginForm({
         : null,
   );
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [userNotFound, setUserNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -63,6 +64,7 @@ export function LoginForm({
     event.preventDefault();
     setLoading(true);
     setNeedsConfirmation(false);
+    setUserNotFound(false);
     setNotice(null);
     const normalizedEmail = email.trim().toLowerCase();
     let result: LoginResult;
@@ -86,7 +88,9 @@ export function LoginForm({
 
     if (!result.success || !result.redirectTo) {
       const emailNotConfirmed = result.code === "email_not_confirmed";
+      const isNotFound = result.code === "user_not_found";
       setNeedsConfirmation(emailNotConfirmed);
+      setUserNotFound(isNotFound);
       setNotice({
         tone: emailNotConfirmed ? "info" : "error",
         message: result.message ?? "Sign-in could not be completed. Please try again.",
@@ -179,9 +183,25 @@ export function LoginForm({
         </button>
         <LongPendingNotice pending={loading} />
         {notice && (
-          <p aria-live="polite" className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeStyles[notice.tone]}`}>
-            {notice.message}
-          </p>
+          <div
+            aria-live="polite"
+            className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeStyles[notice.tone]}`}
+          >
+            <p>{notice.message}</p>
+            {userNotFound && (
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-red-200/70 pt-2.5">
+                <span className="text-xs text-red-800">
+                  New to Varadhi Prep?
+                </span>
+                <Link
+                  href={`/register?email=${encodeURIComponent(email.trim().toLowerCase())}&next=${encodeURIComponent(nextPath)}`}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-teal-800 bg-teal-100 hover:bg-teal-200 px-3 py-1.5 rounded-lg transition"
+                >
+                  Create free account &rarr;
+                </Link>
+              </div>
+            )}
+          </div>
         )}
         {needsConfirmation && (
           <div>
