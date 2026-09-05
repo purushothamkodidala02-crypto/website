@@ -91,7 +91,7 @@ export async function updateQuestion(
       .eq("id", subjectId)
       .maybeSingle(),
     supabase.from("questions").select("id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
-    mockTestId ? supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
+    mockTestId ? supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, replaces_mock_test_id, superseded_by_mock_test_id").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
     return { success: false, message: "The selected Subject could not be found." };
@@ -187,10 +187,11 @@ export async function updateQuestion(
         }
 
         if (mockTestId) {
+          const testMeta = mockTest as { replaces_mock_test_id?: string | null; superseded_by_mock_test_id?: string | null } | null;
           const relatedTestIds = new Set([
             mockTestId,
-            mockTest?.replaces_mock_test_id,
-            mockTest?.superseded_by_mock_test_id,
+            testMeta?.replaces_mock_test_id,
+            testMeta?.superseded_by_mock_test_id,
           ].filter(Boolean));
 
           const otherTest = assignedTests.find((t) => !relatedTestIds.has(t.id));
