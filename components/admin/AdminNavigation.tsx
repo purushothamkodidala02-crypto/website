@@ -14,6 +14,7 @@ const sections = [
     label: "Exam structure",
     links: [
       { href: "/admin/exams", label: "Exam catalogue", icon: "categories" as const },
+      { href: "/admin/subjects", label: "Subjects", icon: "subjects" as const },
       { href: "/admin/exam-pages", label: "Public exam pages", icon: "exams" as const },
     ],
   },

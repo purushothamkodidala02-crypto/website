@@ -84,6 +84,14 @@ export function CreateGroupForm({ categories, existingExams, initialCategoryId =
         <div className="max-w-xs"><label className="block text-sm font-bold">Display order<input id="display_order" name="display_order" type="number" min="0" step="1" required placeholder="For example: 1" className="mt-2 w-full rounded-lg border px-4 py-3 font-normal" /></label></div>
         <SpecializationPapersInput />
         <PaperListInput inputName="papers_json" initialRows={0} title="Direct / common Papers" description="Add Papers that belong directly to this Exam. Use this for Group 1, Group 2, and Group 4, or for a Paper shared by every Specialisation." />
+        <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-4 text-xs text-teal-950">
+          <p className="font-bold flex items-center gap-1.5">
+            💡 Where to add Subjects:
+          </p>
+          <p className="mt-1 text-slate-700 leading-relaxed">
+            Subjects belong inside Papers. First create this Exam with its Papers above and click <strong>Create Exam</strong>. Once created, click <strong>+ Add Subjects</strong> on any paper in the catalogue or use the <strong>Subjects</strong> menu.
+          </p>
+        </div>
         <label className="flex items-center gap-3"><input name="is_active" type="checkbox" defaultChecked className="h-4 w-4" /><span className="text-sm font-medium">Available to students</span></label>
         <button type="submit" disabled={pending || categories.length === 0 || !examId || duplicate} aria-busy={pending} className="rounded-lg bg-slate-950 px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating exam…">Create Exam</PendingButtonContent></button>
         {state.message && <p aria-live="polite" className={state.success ? "text-sm font-semibold text-green-700" : "text-sm font-semibold text-red-600"}>{state.message}</p>}

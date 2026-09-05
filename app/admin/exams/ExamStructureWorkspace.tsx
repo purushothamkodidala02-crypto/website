@@ -704,6 +704,12 @@ function PaperBranch({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={subjectsHref}
+            className="rounded-lg bg-teal-700 px-2.5 py-1 text-xs font-bold text-white hover:bg-teal-800 shadow-sm"
+          >
+            + Add Subjects
+          </Link>
           {subjects.length > 0 && (
             <button
               type="button"
