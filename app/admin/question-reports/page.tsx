@@ -23,6 +23,7 @@ const categoryLabels: Record<string, string> = {
   duplicate: "Duplicate question",
   other: "Other problem",
 };
+const statusStyles: Record<string, string> = { open: "bg-red-100 text-red-800", reviewing: "bg-amber-100 text-amber-900", resolved: "bg-emerald-100 text-emerald-800", dismissed: "bg-slate-200 text-slate-700" };
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" });
 
 export default async function AdminQuestionReportsPage({ searchParams }: { searchParams: Promise<{ status?: string; category?: string }> }) {
