@@ -87,13 +87,13 @@ export default async function Home() {
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-teal-700">Start with what matters</p>
               <h1 className="font-display mt-3 max-w-3xl text-4xl leading-[1.08] tracking-tight sm:text-5xl">Choose your state. We&apos;ll show only the right exams.</h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">Telangana, Andhra Pradesh and Central exam catalogues stay separate from the first click.</p>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-700">Telangana, Andhra Pradesh and Central exam catalogues stay separate from the first click.</p>
             </div>
             <Link href="/mock-tests" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:border-teal-300">Browse complete catalogue <span aria-hidden="true">→</span></Link>
           </div>
 
           {hasStateError ? (
-            <div className="mt-8 rounded-3xl border border-dashed bg-white p-8 text-center text-sm text-slate-600">The new state catalogue will appear after its database update is applied.</div>
+            <div className="mt-8 rounded-3xl border border-dashed bg-white p-8 text-center text-sm text-slate-700">The new state catalogue will appear after its database update is applied.</div>
           ) : (
             <div className="student-stagger mt-8 grid gap-4 md:grid-cols-3">
               {states.map((state, index) => {
@@ -111,9 +111,9 @@ export default async function Home() {
                       <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">State</span>
                     </div>
                     <h2 className="font-display mt-5 text-2xl">{state.name}</h2>
-                    <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{description}</p>
+                    <p className="mt-2 min-h-12 text-sm leading-6 text-slate-700">{description}</p>
                     <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
-                      <span className="font-semibold text-slate-500">{stateExams.length} exam{stateExams.length === 1 ? "" : "s"}</span>
+                      <span className="font-semibold text-slate-700">{stateExams.length} exam{stateExams.length === 1 ? "" : "s"}</span>
                       <span className="font-black text-teal-800 transition group-hover:translate-x-1">Explore →</span>
                     </div>
                   </Link>
@@ -126,7 +126,7 @@ export default async function Home() {
             <div className="mt-12">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Popular exam collections</p>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-700">Popular exam collections</p>
                   <h2 className="font-display mt-2 text-2xl">Continue directly to an exam</h2>
                 </div>
               </div>
@@ -142,7 +142,7 @@ export default async function Home() {
                         <span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.name}</span>
                       </div>
                       <h3 className="font-display mt-4 leading-6">{exam.name}</h3>
-                      <p className="mt-2 text-xs font-semibold text-slate-500">{paperCount} paper{paperCount === 1 ? "" : "s"}</p>
+                      <p className="mt-2 text-xs font-semibold text-slate-700">{paperCount} paper{paperCount === 1 ? "" : "s"}</p>
                     </Link>
                   ) : null;
                 })}
@@ -185,7 +185,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="border-t bg-slate-950 text-slate-300">
+      <footer className="border-t bg-slate-950 text-slate-200">
         <div className="mx-auto grid max-w-6xl gap-7 px-5 py-9 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:items-start">
           <div className="max-w-xl">
             <div className="flex items-center gap-3">
@@ -198,7 +198,7 @@ export default async function Home() {
           </div>
           <div className="grid gap-5">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Student help</p>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Student help</p>
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
                 <Link href="/support" className="hover:text-white">Support</Link>
                 <Link href="/login" className="hover:text-white">Sign in</Link>
