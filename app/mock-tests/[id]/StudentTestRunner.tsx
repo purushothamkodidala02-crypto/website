@@ -289,7 +289,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       </div>
     </header>
 
-    <div className="mx-auto w-full max-w-[1600px] px-3 pt-3 sm:px-6 sm:pt-5 lg:px-8 pb-24 lg:pb-8">
+    <div className="mx-auto w-full max-w-[1600px] px-3 pt-3 sm:px-6 sm:pt-5 lg:px-8 pb-24 lg:pb-28">
       {pauseError && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{pauseError}</p>}
       {paused && <p className="mb-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
       
@@ -376,29 +376,33 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
           
           <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
         </div>
-        <aside className="hidden h-[calc(100vh-7rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-20 lg:block">{navigator}</aside>
+        <aside className="hidden h-[calc(100vh-13rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-20 lg:block">{navigator}</aside>
       </div>
       {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
       
-      {/* Fixed Bottom Navigation for Mobile / Inline for Desktop */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t bg-white/95 backdrop-blur-md p-3 sm:p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.08)] lg:static lg:mt-6 lg:border-t-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40">
-          Previous
-        </button>
-        
-        <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 lg:hidden">
-          Questions ({index + 1}/{questions.length})
-        </button>
+      {/* Fixed Bottom Navigation for all screens */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/95 p-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-4 lg:px-8 lg:py-5">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3">
+          <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-5 sm:py-3">
+            <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white lg:inline-block">←</kbd>
+            Previous
+          </button>
+          
+          <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-5 sm:py-3 sm:text-sm lg:hidden">
+            Questions ({index + 1}/{questions.length})
+          </button>
 
-        {index === questions.length - 1 ? (
-          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50">
-            Review & finish
-          </button>
-        ) : (
-          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="rounded-xl bg-slate-950 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50">
-            Save & next
-          </button>
-        )}
+          {index === questions.length - 1 ? (
+            <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-6 sm:py-3">
+              Review & finish
+            </button>
+          ) : (
+            <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50 sm:px-6 sm:py-3">
+              Save & next
+              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 lg:inline-block">→</kbd>
+            </button>
+          )}
+        </div>
       </div>
     </div>
 
