@@ -67,6 +67,12 @@ export function LoginForm({
     setUserNotFound(false);
     setNotice(null);
     const normalizedEmail = email.trim().toLowerCase();
+    
+    // Log the attempt to PostHog so admins can see which email was used
+    if (typeof window !== "undefined" && (window as any).posthog) {
+      (window as any).posthog.capture("password_login_attempted", { email: normalizedEmail });
+    }
+
     let result: LoginResult;
     try {
       result = await loginWithPassword({

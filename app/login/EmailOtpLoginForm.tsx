@@ -22,6 +22,12 @@ export function EmailOtpLoginForm({ nextPath, onUsePassword }: { nextPath: strin
     event.preventDefault(); const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail || !captchaToken) return;
     setSending(true); setNotice(null);
+    
+    // Log the attempt to PostHog so admins can see which email was used
+    if (typeof window !== "undefined" && (window as any).posthog) {
+      (window as any).posthog.capture("otp_requested", { email: normalizedEmail });
+    }
+
     const result = await postOtp("/api/auth/email-otp/request", { email: normalizedEmail, captchaToken });
     setCaptchaToken(null); setCaptchaResetKey((value) => value + 1); setSending(false);
     if (!result.ok) { setNotice({ tone: "error", message: result.message ?? "We could not send a code right now. Please try again." }); return; }
