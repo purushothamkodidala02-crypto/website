@@ -180,7 +180,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     ? specializations.find((item) => item.exam_group_id === selectedExam.id && (item.id === filters.specialization || item.slug === filters.specialization))
     : undefined;
   if (!selectedSpecialization && selectedState && selectedExam && filters.specialization) selectedSpecialization = (await resolvePublicRoute({ stateSlug: selectedState.slug, examSlug: selectedExam.slug, specializationSlug: filters.specialization }))?.specialization;
-  const examPapers = selectedExam ? papers.filter((paper) => paper.exam_group_id === selectedExam.id && (!selectedSpecialization || paper.specialization_id === selectedSpecialization.id)) : [];
+  const examPapers = selectedExam ? papers.filter((paper) => paper.exam_group_id === selectedExam.id && (!selectedSpecialization || paper.specialization_id === selectedSpecialization.id || !paper.specialization_id)) : [];
   let selectedPaper = examPapers.find((paper) => paper.id === filters.paper || paper.slug === filters.paper);
   if (!selectedPaper && selectedState && selectedExam && filters.paper) selectedPaper = (await resolvePublicRoute({ stateSlug: selectedState.slug, examSlug: selectedExam.slug, paperSlug: filters.paper }))?.paper;
   let selectedSubject = selectedPaper
@@ -213,7 +213,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       (!selectedState || test.state.id === selectedState.id) &&
       (!selectedCategory || test.category.id === selectedCategory.id) &&
       (!selectedExam || test.exam.id === selectedExam.id) &&
-      (!selectedSpecialization || test.specialization?.id === selectedSpecialization.id) &&
+      (!selectedSpecialization || test.specialization?.id === selectedSpecialization.id || !test.specialization) &&
       (!selectedPaper || test.paper.id === selectedPaper.id) &&
       (selectedType !== "subject" || !selectedSubject || test.subject?.id === selectedSubject.id) &&
       (selectedType === "all" || test.test_scope === selectedType) &&
