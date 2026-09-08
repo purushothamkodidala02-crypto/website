@@ -118,7 +118,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
-    .replace(/([^\s—–-])\s*[—–-]\s*(?=[\d౦-౯])/g, "$1 — ")
+    .replace(/([^\d\s—–-])\s*[—–-]\s*(?=[\d౦-౯])/g, "$1 — ")
     .split(/\n+/)
     .map((line) => line.trim().replace(/^;+|;+$/g, "").trim())
     .filter(Boolean);
@@ -529,7 +529,7 @@ export function FormattedQuestionText({
           );
         }
 
-        if (data) {
+        if (data && !line.endsWith('?') && line.split(/\s+/).length <= 15) {
           return (
             <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
               <strong className="font-bold text-slate-950">{data[1]}</strong>
