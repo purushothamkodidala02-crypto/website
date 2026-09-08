@@ -26,9 +26,46 @@ const isExplicitHeader = (line: string | undefined) =>
   /^(?:(?:List|Column|Group)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI)(?:\s*\([^)]+\))?|(?:జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)(?:\s*\([^)]+\))?|Traveler|Country):?$/i.test(
     line!.trim(),
   );
+function splitInlineLists(text: string): string {
+  const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
-function questionLines(text: string) {
-  const lines = text
+  const matches = Array.from(text.matchAll(inlineListRegex));
+  if (matches.length === 0) return text;
+
+  const typeCounts: Record<string, number> = {};
+  
+  for (const match of matches) {
+    const marker = match[2];
+    const clean = marker.replace(/[().]/g, '');
+    let type = 'unknown';
+    if (/^\d+$/.test(clean)) type = 'num';
+    else if (/^[a-hA-H]$/.test(clean)) type = 'alpha';
+    else if (/^[ivxIVX]+$/i.test(clean)) type = 'roman';
+    else if (/^[ఎ-హ]$/.test(clean)) type = 'telugu-alpha';
+    else if (/^[౧-౯]$/.test(clean)) type = 'telugu-num';
+    
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+  }
+
+  return text.replace(inlineListRegex, (match, p1, marker, p3) => {
+    const clean = marker.replace(/[().]/g, '');
+    let type = 'unknown';
+    if (/^\d+$/.test(clean)) type = 'num';
+    else if (/^[a-hA-H]$/.test(clean)) type = 'alpha';
+    else if (/^[ivxIVX]+$/i.test(clean)) type = 'roman';
+    else if (/^[ఎ-హ]$/.test(clean)) type = 'telugu-alpha';
+    else if (/^[౧-౯]$/.test(clean)) type = 'telugu-num';
+
+    if (type !== 'unknown' && typeCounts[type] >= 2) {
+      return `\n${marker} ${p3}`;
+    }
+    return match;
+  });
+}
+
+
+function questionLines(rawText: string) {
+  let text = rawText
     .replace(/\u00a0/g, " ")
     .replace(/\*\*/g, "")
     // Join accidental linebreaks in legal citations (e.g. "Suraj Bhan\nv. Financial Commissioner")
@@ -83,11 +120,11 @@ function questionLines(text: string) {
     .replace(
       /((?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్|Traveler|Country)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)?(?:\s*\([^)]+\))?\s*:)[ \t]*(?=(?:\([a-hA-H\d]\)|\([ivxIVX]+\)|(?:[a-hA-H\d]|[ivxIVX]+)[.)])\s)/gi,
       "$1\n",
-    )
-    .replace(
-      /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Priority|Phase|Stage|Type|Level|Part|Article|Section|Medium|Step|Zone|Case|Layer|Tier|Round|Day|Month|Year|Model|Version)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము|ప్రాధాన్యత|దశ|భాగం|రకం|స్థాయి))[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))[A-Za-z0-9\u0c00-\u0c7f"'])/g,
-      "\n",
-    )
+    );
+
+  text = splitInlineLists(text);
+
+  const lines = text
     .replace(
       /(?<!,)[ \t]+(?=(?:Choose|Select|Pick)\s+(?:the|a)?\s*(?:correct|incorrect|most appropriate|suitable)?\s*(?:code|answer|option|pair|match)\b)/gi,
       "\n",
