@@ -30,7 +30,7 @@ export default async function LoginPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user) {
+  if (user && params.confirmed !== "1" && params.reset !== "1") {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
