@@ -85,7 +85,7 @@ function questionLines(text: string) {
       "$1\n",
     )
     .replace(
-      /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Priority|Phase|Stage|Type|Level|Part|Article|Section)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము|ప్రాధాన్యత|దశ|భాగం))[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))[A-Za-z0-9\u0c00-\u0c7f"'])/g,
+      /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Priority|Phase|Stage|Type|Level|Part|Article|Section|Medium|Step|Zone|Case|Layer|Tier|Round|Day|Month|Year|Model|Version)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము|ప్రాధాన్యత|దశ|భాగం|రకం|స్థాయి))[ \t]*)(?:[,;.]|[ \t]+)\s*(?=(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)])\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))[A-Za-z0-9\u0c00-\u0c7f"'])/g,
       "\n",
     )
     .replace(
