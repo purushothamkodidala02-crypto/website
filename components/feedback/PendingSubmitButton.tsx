@@ -9,11 +9,13 @@ export function PendingSubmitButton({
   pendingLabel,
   className,
   disabled = false,
+  onClick,
 }: {
   children: React.ReactNode;
   pendingLabel: string;
   className: string;
   disabled?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   const { pending } = useFormStatus();
 
@@ -24,6 +26,7 @@ export function PendingSubmitButton({
         disabled={disabled || pending}
         aria-busy={pending}
         className={className}
+        onClick={onClick}
       >
         <PendingButtonContent pending={pending} pendingLabel={pendingLabel}>{children}</PendingButtonContent>
       </button>

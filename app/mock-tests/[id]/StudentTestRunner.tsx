@@ -10,6 +10,13 @@ import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, subm
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { SubmissionResult } from "./SubmissionResult";
+import {
+  isBigScreen,
+  isCurrentlyFullscreen,
+  isFullscreenSupported,
+  subscribeToFullscreenChange,
+  toggleFullscreenSafely,
+} from "@/lib/fullscreen";
 
 const SubmissionDialog = dynamic(
   () => import("./SubmissionDialog").then((module) => module.SubmissionDialog),
@@ -58,6 +65,10 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
   const [paused, setPaused] = useState(false);
   const [pauseError, setPauseError] = useState("");
   const [submission, setSubmission] = useState<SubmitAttemptResult | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
+  const [isBigDisplay, setIsBigDisplay] = useState(false);
+  const [showFullscreenNotice, setShowFullscreenNotice] = useState(true);
   const saveChains = useRef(new Map<string, Promise<void>>());
 
   const current = questions[index];
@@ -152,6 +163,29 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
     window.addEventListener("keydown", navigateWithKeyboard);
     return () => window.removeEventListener("keydown", navigateWithKeyboard);
   }, [confirming, locked, questions.length]);
+
+  useEffect(() => {
+    setIsFullscreen(isCurrentlyFullscreen());
+    setFullscreenAvailable(isFullscreenSupported());
+    setIsBigDisplay(isBigScreen());
+
+    const unsubscribe = subscribeToFullscreenChange((active) => {
+      setIsFullscreen(active);
+      if (active) {
+        setShowFullscreenNotice(false);
+      }
+    });
+
+    const handleResize = () => {
+      setIsBigDisplay(isBigScreen());
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   if (submission) return <SubmissionResult publicTestPath={publicTestPath} title={title} result={submission} onRetry={() => setSubmission(null)} />;
 
@@ -267,8 +301,42 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
             </div>
           </div>
 
-          {/* Box 3: Time / Timer Control Box */}
-          <div className="flex shrink-0 items-center">
+          {/* Box 3: Controls (Fullscreen Toggle & Timer) */}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {fullscreenAvailable && (
+              <button
+                type="button"
+                onClick={() => void toggleFullscreenSafely()}
+                title={
+                  isFullscreen
+                    ? "Exit full screen (or use normal / split screen)"
+                    : "Enter full screen (CBT Exam Mode)"
+                }
+                aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+                className={`flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-sm ${
+                  isFullscreen
+                    ? "border-teal-500/50 bg-teal-950/70 text-teal-300 hover:bg-teal-900/80"
+                    : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {isFullscreen ? (
+                  <>
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                    </svg>
+                    <span className="hidden md:inline">Exit full screen</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                    <span className="hidden md:inline">Full screen</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <PracticeTimerControl
               remaining={remaining}
               paused={paused}
@@ -290,6 +358,41 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
     </header>
 
     <div className="mx-auto w-full max-w-[1600px] px-3 pt-3 sm:px-6 sm:pt-5 lg:px-8 pb-24 lg:pb-28">
+      {!isFullscreen && isBigDisplay && showFullscreenNotice && (
+        <aside
+          aria-label="Exam display mode option"
+          className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-200/80 bg-gradient-to-r from-teal-50 via-emerald-50 to-teal-50 p-3 sm:px-4 sm:py-3 text-slate-800 shadow-sm"
+        >
+          <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium">
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-teal-700 text-white shadow-sm">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              </svg>
+            </span>
+            <span>
+              <strong>Exam Hall Mode:</strong> Switch to full screen for a focused test environment, or continue in normal screen / split view anytime.
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void toggleFullscreenSafely()}
+              className="rounded-xl bg-teal-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
+            >
+              Enter Full Screen
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFullscreenNotice(false)}
+              className="rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+              title="Keep using normal or split screen"
+            >
+              Normal / Split screen ✕
+            </button>
+          </div>
+        </aside>
+      )}
+
       {pauseError && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{pauseError}</p>}
       {paused && <p className="mb-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
       

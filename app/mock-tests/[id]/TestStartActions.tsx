@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { beginMockTest } from "./start-actions";
+import { isBigScreen, isCurrentlyFullscreen, isFullscreenSupported, requestFullscreenSafely } from "@/lib/fullscreen";
 
 export function TestStartActions({
   testId,
@@ -15,6 +16,12 @@ export function TestStartActions({
   isLoggedIn: boolean;
   hasResumableSession: boolean;
 }) {
+  const handleFullscreenOnStart = () => {
+    if (isBigScreen() && isFullscreenSupported() && !isCurrentlyFullscreen()) {
+      void requestFullscreenSafely();
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <Link
@@ -30,7 +37,11 @@ export function TestStartActions({
     const startAction = beginMockTest.bind(null, testId, testPath, "resume");
     return (
       <form action={startAction} className="mt-6">
-        <PendingSubmitButton pendingLabel="Starting test…" className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70">
+        <PendingSubmitButton
+          onClick={handleFullscreenOnStart}
+          pendingLabel="Starting test…"
+          className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70"
+        >
           Start test
         </PendingSubmitButton>
       </form>
@@ -43,7 +54,11 @@ export function TestStartActions({
   return (
     <div className="mt-6 grid gap-3">
       <form action={resumeAction}>
-        <PendingSubmitButton pendingLabel="Resuming test…" className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70">
+        <PendingSubmitButton
+          onClick={handleFullscreenOnStart}
+          pendingLabel="Resuming test…"
+          className="block w-full rounded-xl bg-teal-300 px-5 py-3.5 text-center font-black text-slate-950 hover:bg-teal-200 disabled:cursor-wait disabled:opacity-70"
+        >
           Resume test
         </PendingSubmitButton>
       </form>
@@ -56,6 +71,8 @@ export function TestStartActions({
             )
           ) {
             event.preventDefault();
+          } else {
+            handleFullscreenOnStart();
           }
         }}
       >
