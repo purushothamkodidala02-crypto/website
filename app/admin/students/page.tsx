@@ -77,7 +77,7 @@ export default async function AdminStudentsPage() {
   const [{ data: visibleProfiles }, emailResult] = visibleUserIds.length
     ? await Promise.all([
         admin.from("profiles").select("id, full_name").in("id", visibleUserIds),
-        supabase.rpc("get_admin_user_emails", { requested_user_ids: visibleUserIds }),
+        admin.rpc("get_admin_user_emails", { requested_user_ids: visibleUserIds }),
       ])
     : [{ data: [] as { id: string; full_name: string | null }[] }, { data: [] as { user_id: string; email: string }[], error: null }];
   const names = new Map((visibleProfiles ?? []).map((item) => [item.id, item.full_name?.trim() || "Student"]));

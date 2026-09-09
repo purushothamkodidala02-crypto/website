@@ -41,7 +41,7 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
   const [{ data: visibleProfiles }, emailResult] = userIds.length > 0
     ? await Promise.all([
         admin.from("profiles").select("id, full_name, phone").in("id", userIds),
-        supabase.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
+        admin.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
       ])
     : [{ data: [] }, { data: [] }];
 
