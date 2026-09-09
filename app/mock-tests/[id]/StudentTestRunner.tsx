@@ -249,7 +249,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
 
   return <main className="student-page min-h-screen bg-slate-100 pb-8">
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md text-white shadow-lg">
-      <div className="mx-auto w-full max-w-[1600px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
+      <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
           
           {/* Box 1: Test Title & Question Indicator */}
@@ -357,7 +357,7 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       </div>
     </header>
 
-    <div className="mx-auto w-full max-w-[1600px] px-3 pt-3 sm:px-6 sm:pt-5 lg:px-8 pb-24 lg:pb-28">
+    <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 pt-3 sm:px-6 sm:pt-5 lg:px-8 pb-24 lg:pb-28">
       {!isFullscreen && isBigDisplay && showFullscreenNotice && (
         <aside
           aria-label="Exam display mode option"
@@ -411,88 +411,93 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_22rem] 2xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="flex min-w-0 flex-col gap-5">
-          <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">Multiple choice question</p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">
-                  {current.marks} mark{Number(current.marks) === 1 ? "" : "s"}
-                  {Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}
-                </p>
-              </div>
-              {bilingual && (
-                <div className="rounded-xl bg-slate-100 p-1 text-xs font-bold shadow-inner">
-                  <button type="button" onClick={() => setLanguage("en")} className={`rounded-lg px-3.5 py-1.5 transition ${language === "en" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>English</button>
-                  <button type="button" onClick={() => setLanguage("te")} className={`rounded-lg px-3.5 py-1.5 transition ${language === "te" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>తెలుగు</button>
+          <section className="flex min-h-[calc(100vh-14rem)] flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:p-10 xl:p-12 2xl:p-14">
+            <div className="flex-1">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-700">Multiple choice question</p>
+                  <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-500">
+                    {current.marks} mark{Number(current.marks) === 1 ? "" : "s"}
+                    {Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}
+                  </p>
                 </div>
-              )}
+                {bilingual && (
+                  <div className="rounded-xl bg-slate-100 p-1 text-xs font-bold shadow-inner">
+                    <button type="button" onClick={() => setLanguage("en")} className={`rounded-lg px-3.5 py-1.5 transition ${language === "en" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>English</button>
+                    <button type="button" onClick={() => setLanguage("te")} className={`rounded-lg px-3.5 py-1.5 transition ${language === "te" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>తెలుగు</button>
+                  </div>
+                )}
+              </div>
+              <FormattedQuestionText text={questionText} className="mt-6 text-lg sm:text-xl lg:text-2xl xl:text-[1.65rem] leading-8 sm:leading-9 lg:leading-[2.75rem] xl:leading-[2.9rem] font-semibold text-slate-950 tracking-[-0.01em]" />
+              {current.image_url && <QuestionMedia src={current.image_url} className="mt-6 max-h-[500px] w-auto" />}
+              <div className="mt-8 lg:mt-10 grid gap-3.5 sm:gap-4 lg:gap-4.5">
+                {options.map(([key, text]) => {
+                  const selected = answers[current.question_id] === key;
+                  const teluguOption = containsTeluguText(text);
+                  return (
+                    <label
+                      key={key}
+                      className={`flex cursor-pointer gap-4 lg:gap-5 rounded-2xl border p-4 sm:p-5 lg:p-5.5 xl:p-6 transition hover:border-teal-400 ${
+                        selected ? "border-teal-600 bg-teal-50/80 shadow-md ring-2 ring-teal-500" : "border-slate-200/90 bg-white hover:bg-slate-50/70 hover:shadow-sm"
+                      } ${locked ? "pointer-events-none opacity-60" : ""}`}
+                    >
+                      <input
+                        className="sr-only"
+                        type="radio"
+                        name={current.question_id}
+                        value={key}
+                        checked={selected}
+                        disabled={locked}
+                        onChange={() => {
+                          setSaveState("saving");
+                          setAnswers((value) => ({ ...value, [current.question_id]: key }));
+                          queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key));
+                        }}
+                      />
+                      <span className={`grid h-8 w-8 sm:h-9 sm:w-9 lg:h-11 lg:w-11 shrink-0 place-items-center rounded-xl text-sm sm:text-base lg:text-lg font-black transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
+                        {key}
+                      </span>
+                      <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line pt-0.5 sm:pt-1 text-sm sm:text-base lg:text-lg xl:text-xl font-medium leading-relaxed text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>
+                        {text}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
-            <FormattedQuestionText text={questionText} className="mt-6 text-lg sm:text-xl leading-8 sm:leading-9 font-medium text-slate-950" />
-            {current.image_url && <QuestionMedia src={current.image_url} className="mt-6" />}
-            <div className="mt-7 grid gap-3 sm:gap-3.5">
-              {options.map(([key, text]) => {
-                const selected = answers[current.question_id] === key;
-                const teluguOption = containsTeluguText(text);
-                return (
-                  <label
-                    key={key}
-                    className={`flex cursor-pointer gap-4 rounded-2xl border p-4 sm:p-4.5 transition hover:border-teal-400 ${
-                      selected ? "border-teal-600 bg-teal-50/70 shadow-sm ring-1 ring-teal-500" : "border-slate-200/90 bg-white hover:bg-slate-50/50"
-                    } ${locked ? "pointer-events-none opacity-60" : ""}`}
-                  >
-                    <input
-                      className="sr-only"
-                      type="radio"
-                      name={current.question_id}
-                      value={key}
-                      checked={selected}
-                      disabled={locked}
-                      onChange={() => {
-                        setSaveState("saving");
-                        setAnswers((value) => ({ ...value, [current.question_id]: key }));
-                        queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key));
-                      }}
-                    />
-                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm font-black transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
-                      {key}
-                    </span>
-                    <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line pt-1 text-sm sm:text-base font-medium leading-relaxed text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>
-                      {text}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5">
+            <div className="mt-8 lg:mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
               <button type="button" onClick={clearAnswer} disabled={!answers[current.question_id] || locked} className="text-sm font-bold text-slate-500 hover:text-red-700 disabled:opacity-40">Clear answer</button>
               <div className="flex flex-wrap gap-2">
                 <ReportQuestionButton key={`report-${current.question_id}`} questionId={current.question_id} />
                 <BookmarkButton key={current.question_id} questionId={current.question_id} initialBookmarked={bookmarkedQuestionIds.includes(current.question_id)} />
-                <button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900" : "border text-slate-700"}`}>
+                <button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-4 py-2.5 text-sm font-bold transition ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900 border border-amber-300" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
                   {reviewIds.has(current.question_id) ? "Marked for review" : "Mark for review"}
                 </button>
               </div>
             </div>
           </section>
           
-          <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
+          {/* Mobile/Tablet number scroller (hidden on PC / desktop where right-side Question Navigator is active) */}
+          <div className="lg:hidden">
+            <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
+          </div>
         </div>
-        <aside className="hidden h-[calc(100vh-13rem)] min-h-0 overflow-hidden rounded-3xl border bg-white p-5 shadow-sm lg:sticky lg:top-20 lg:block">{navigator}</aside>
+        <aside className="hidden h-[calc(100vh-13rem)] min-h-0 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 xl:p-6 shadow-sm lg:sticky lg:top-20 lg:block">{navigator}</aside>
       </div>
       {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
       
       {/* Fixed Bottom Navigation for all screens */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/95 p-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-4 lg:px-8 lg:py-5">
-        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3">
+        <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-3">
           <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-5 sm:py-3">
             <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white lg:inline-block">←</kbd>
             Previous
           </button>
           
           <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-5 sm:py-3 sm:text-sm lg:hidden">
-            Questions ({index + 1}/{questions.length})
+            Questions <span className="font-mono">({index + 1}/{questions.length})</span>
           </button>
 
           {index === questions.length - 1 ? (
