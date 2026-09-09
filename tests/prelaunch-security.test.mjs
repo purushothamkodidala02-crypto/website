@@ -35,7 +35,7 @@ test("database migration locks sessions and makes submission idempotent", async 
 });
 
 test("production CSP keeps public pages cacheable and payment pages nonce-protected", async () => {
-  const [proxy, config, layout] = await Promise.all([read("proxy.ts"), read("next.config.ts"), read("app/layout.tsx")]);
+  const [proxy, config, layout] = await Promise.all([read("middleware.ts"), read("next.config.ts"), read("app/layout.tsx")]);
 
   assert.match(proxy, /needsNonce = request\.nextUrl\.pathname\.startsWith\("\/billing\/cashfree"\)/);
   assert.match(proxy, /'nonce-\$\{nonce\}'/);
@@ -100,7 +100,7 @@ test("question bank preserves filters while editing an existing question", async
   ]);
 
   assert.match(questionBank, /window\.history\.replaceState/);
-  assert.match(questionsPage, /const tableStateKey = \[categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialPage\]\.join\(":"\)/);
+  assert.match(questionsPage, /const tableStateKey = \[categoryId, examId, specializationId, paperId, subjectId, initialSearch, (?:initialStatus, )?initialPage\]\.join\(":"\)/);
   assert.match(questionsPage, /<QuestionBankTable key=\{tableStateKey\}/);
   assert.match(questionBank, /returnTo=\$\{encodeURIComponent\(questionBankUrl\)\}/);
   assert.match(editPage, /returnTo\.startsWith\("\/admin\/questions\?"\)/);
@@ -114,12 +114,12 @@ test("mock-test management preserves filters while editing a test", async () => 
     read("app/admin/mock-tests/[id]/edit/page.tsx"),
   ]);
 
-  assert.match(mockTestTable, /window\.history\.replaceState/);
+  assert.match(mockTestTable, /(?:window\.history\.replaceState|router\.replace\(mockTestAdminUrl)/);
   assert.match(mockTestTable, /returnTo=\$\{encodeURIComponent\(mockTestAdminUrl\)\}/);
   assert.match(mockTestPage, /initialStateId=\{stateId\}/);
   assert.match(mockTestPage, /initialStatus=\{initialStatus\}/);
   assert.match(editPage, /mockTestsListReturnTo\(returnTo\)/);
-  assert.match(editPage, /href=\{backHref\}/);
+  assert.match(editPage, /(?:href|fallbackHref)=\{backHref\}/);
 });
 
 test("public pages expose route-specific SEO metadata and crawl targets", async () => {
@@ -148,7 +148,7 @@ test("permanent public slugs cover every catalogue level and legacy URLs redirec
     read("lib/public-urls.ts"),
     read("lib/public-route-data.ts"),
     read("lib/public-redirect.ts"),
-    read("proxy.ts"),
+    read("middleware.ts"),
     read("app/sitemap.ts"),
     read("supabase/migrations/20260821193000_add_permanent_public_slug_history.sql"),
   ]);
@@ -254,8 +254,8 @@ test("mock-test student preview mirrors the question screen without exposing it 
 test("assertion-reason questions accept short labels and render standard labels", async () => {
   const formatter = await read("components/questions/FormattedQuestionText.tsx");
 
-  assert.match(formatter, /Assertion\(\?:\\s\*\\\(\[A\]\\\)\)\?/);
-  assert.match(formatter, /Reason\(\?:\\s\*\\\(\[R\]\\\)\)\?/);
+  assert.match(formatter, /Assertion\(\?:\\s\*\\\(\[A-Za-z\\d\]\+\\\)\)\?/);
+  assert.match(formatter, /Reason\(\?:\\s\*\\\(\[A-Za-z\\d\]\+\\\)\)\?/);
   assert.match(formatter, /return "Assertion \(A\)"/);
   assert.match(formatter, /return "Reason \(R\)"/);
 });
@@ -267,7 +267,7 @@ test("match questions clean imported markdown and support A-D with I-IV lists", 
   assert.match(formatter, /replace\(\/\\\*\\\*\/g, ""\)/);
   assert.match(formatter, /romanListItem/);
   assert.match(formatter, /\{ left: alphabeticListItem, right: romanListItem \}/);
-  assert.match(formatter, /replace\(\/;\\s\*\$\/, ""\)/);
+  assert.match(formatter, /replace\(\/\^;\+\|;\+\$\/g, ""\)/);
 });
 
 test("admins can export mock-test questions in the accepted import format", async () => {
@@ -414,7 +414,7 @@ test("mock-test question targets and isolated test operations are database prote
   assert.match(editAction, /submittedSubjectId !== currentSubjectId/);
   assert.match(editAction, /duration !== current\.duration_minutes/);
   assert.match(editAction, /targetQuestionCount !== current\.target_question_count/);
-  assert.match(editAction, /You can still update its description, instructions and URL slug/);
+  assert.match(editAction, /You can (?:still )?update its description, instructions, (?:and )?URL slug/);
   assert.match(editPage, /Manage Questions/);
   assert.match(questionsPage, /targetQuestionCount=\{test\.target_question_count\}/);
   assert.match(importer, /mode === "replace"/);

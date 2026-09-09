@@ -43,4 +43,12 @@ test("fullscreen exam mode opens on tablet/PC start and gracefully supports norm
   // Question layout fits screen on PC without perpetual scrolling
   assert.match(runner, /max-w-\[1720px\]/);
   assert.match(runner, /FormattedQuestionText text=\{questionText\}/);
+
+  // Status and multi-target fallback checks
+  assert.match(fullscreenLib, /export function getLastFullscreenStatus/);
+  assert.match(fullscreenLib, /document\.documentElement/);
+  assert.match(fullscreenLib, /document\.body/);
+  assert.match(fullscreenLib, /ALLOW_KEYBOARD_INPUT/);
+  assert.match(runner, /handleToggleFullscreen/);
+  assert.match(runner, /fullscreenFeedback/);
 });

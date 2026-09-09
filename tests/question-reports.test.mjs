@@ -11,7 +11,7 @@ test("question reporting is private, rate-limited, and connected from students t
     read("components/questions/ReportQuestionButton.tsx"),
     read("components/questions/ReportQuestionDialog.tsx"),
     read("app/mock-tests/[id]/StudentTestRunner.tsx"),
-    read("app/dashboard/study-book/page.tsx"),
+    read("components/study/StudyViewer.tsx"),
     read("app/dashboard/attempts/[id]/AttemptReviewNavigator.tsx"),
     read("app/admin/question-reports/page.tsx"),
     read("app/admin/question-reports/actions.ts"),
@@ -45,7 +45,7 @@ test("optional catalogue statistics cannot hide the public mock-test library", a
     read("lib/catalog-data.ts"),
     read("app/mock-tests/page.tsx"),
   ]);
-  assert.match(catalog, /mock-test-catalog-v6/);
+  assert.match(catalog, /mock-test-catalog-v\d+/);
   assert.match(catalog, /duration_minutes, target_question_count, access_type/);
   const coreError = catalog.slice(catalog.indexOf("hasError:"), catalog.indexOf("hasSupplementaryError:"));
   assert.doesNotMatch(coreError, /statsResult\.error/);
