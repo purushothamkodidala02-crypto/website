@@ -16,6 +16,8 @@ import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
+import { ExamLandingGuide } from "@/components/exams/ExamLandingGuide";
+import { buildQuizStructuredData, getExamGuide } from "@/lib/exam-guides";
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
 
@@ -24,9 +26,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const context = await resolvePublicRoute({ stateSlug: id, examSlug: exam });
   if (!context?.exam) return { title: "Exam Mock Tests Not Found", robots: { index: false, follow: false } };
   const canonical = examUrl(context.state.slug, context.exam.slug);
+  const guide = getExamGuide(context.exam.slug);
+  const defaultTitle = guide?.seoTitle ?? `${context.exam.name} Mock Tests in ${context.state.name}`;
+  const defaultDescription = guide?.seoDescription ?? `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`;
   const seo = resolveSeoFields(context.exam, {
-    title: `${context.exam.name} Mock Tests in ${context.state.name}`,
-    description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
+    title: defaultTitle,
+    description: defaultDescription,
   });
   return publicCollectionMetadata({ ...seo, canonical, indexable: isIndexableCollectionQuery(await searchParams) });
 }
@@ -69,18 +74,23 @@ export default async function ExamPage({ params, searchParams }: Props) {
       return timeB - timeA;
     });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
+  const guide = getExamGuide(context.exam.slug);
+  const defaultTitle = guide?.seoTitle ?? `${context.exam.name} Mock Tests in ${context.state.name}`;
+  const defaultDescription = guide?.seoDescription ?? `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`;
   const seo = resolveSeoFields(context.exam, {
-    title: `${context.exam.name} Mock Tests in ${context.state.name}`,
-    description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
+    title: defaultTitle,
+    description: defaultDescription,
   });
   
   const savedQuestions = await getCachedFaqs(context.exam!.id);
     
   const introduction = context.exam.description?.trim() || seo.description;
+  const guideFaqs = guide?.faqs ?? [];
   const standardQuestions = [
-    { question: `Where can I take ${context.exam.name} mock tests?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: 0 },
-    { question: `How many ${context.exam.name} mock tests are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: 1 },
-    { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard.", displayOrder: 2 },
+    ...guideFaqs.map((faq, idx) => ({ question: faq.question, answer: faq.answer, displayOrder: idx })),
+    { question: `Where can I take ${context.exam.name} mock tests?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: guideFaqs.length },
+    { question: `How many ${context.exam.name} mock tests are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: guideFaqs.length + 1 },
+    { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard.", displayOrder: guideFaqs.length + 2 },
   ];
   const savedByOrder = new Map((savedQuestions ?? []).map((item) => [item.display_order, item]));
   const questions = [
@@ -94,6 +104,13 @@ export default async function ExamPage({ params, searchParams }: Props) {
       { name: context.state.name, path: stateUrl(context.state.slug) },
       { name: context.exam.name, path: canonical },
     ]),
+    buildQuizStructuredData({
+      name: guide?.h1Title ?? `${context.exam.name} Mock Test Series`,
+      description: seo.description,
+      canonicalUrl: canonical,
+      questionCount: 200,
+      timeMinutes: 180,
+    }),
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
     { "@context": "https://schema.org", "@type": "ItemList", name: `${context.exam.name} mock tests`, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
   ];
@@ -108,10 +125,19 @@ export default async function ExamPage({ params, searchParams }: Props) {
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400"><Link href="/" className="hover:text-white">Home</Link><span aria-hidden="true">/</span><Link href={stateUrl(context.state.slug)} className="hover:text-white">{context.state.name}</Link><span aria-hidden="true">/</span><span className="text-teal-200">{context.exam.name}</span></nav>
           <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {context.state.code} exam preparation</p>
-              <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{context.exam.name} Mock Tests</h1>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{introduction}</p>
-              <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><AccountActionButton canonical={canonical} /></div>
+              <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {guide?.heroBadge ?? `${context.state.code} exam preparation`}</p>
+              <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{guide?.h1Title ?? `${context.exam.name} Mock Tests`}</h1>
+              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{guide?.heroSubtext ?? introduction}</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a>
+                {guide && (
+                  <>
+                    <a href="#exam-pattern" className="rounded-xl border border-slate-700 bg-slate-900/80 px-5 py-3.5 font-black text-white hover:bg-slate-800">Exam Pattern</a>
+                    <a href="#previous-year-papers" className="rounded-xl border border-teal-300/30 bg-teal-900/30 px-5 py-3.5 font-black text-teal-200 hover:bg-teal-900/50">Previous Year Papers</a>
+                  </>
+                )}
+                <AccountActionButton canonical={canonical} />
+              </div>
             </div>
           </div>
         </div>
@@ -122,6 +148,13 @@ export default async function ExamPage({ params, searchParams }: Props) {
           state={{ value: context.state.name, href: "/mock-tests" }}
           exam={{ value: context.exam.name, href: stateUrl(context.state.slug) }}
         />
+        {guide && (
+          <ExamLandingGuide
+            guide={guide}
+            canonicalUrl={canonical}
+            hasTests={tests.length > 0}
+          />
+        )}
         {specializations.length > 0 && <section aria-labelledby="specialisations-title"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Exam paths</p><h2 id="specialisations-title" className="font-display mt-2 text-3xl">Choose a specialisation</h2><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{specializations.map((item) => { return <Link key={item.id} href={specializationUrl(context.state.slug, context.exam!.slug, item.slug)} className="group flex flex-col justify-center rounded-3xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-lg"><h3 className="font-display text-xl">{item.name}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{item.description || `View papers and mock tests for ${item.name}.`}</p><span className="mt-5 inline-block text-sm font-black text-teal-800">Explore specialisation →</span></Link>; })}</div></section>}
 
         <section id="papers" aria-labelledby="papers-title" className="scroll-mt-24">
@@ -129,7 +162,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           {papers.length === 0 ? <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." /> : <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full table-auto text-left"><thead className="bg-slate-950 text-white"><tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Paper name</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr></thead><tbody className="divide-y divide-slate-200">{papers.map((paper) => <tr key={paper.id} className="transition hover:bg-teal-50/60"><td className="px-4 py-5 sm:px-6"><span className="font-display block break-words text-base text-slate-950 sm:text-lg">{paper.name}</span></td><td className="px-4 py-5 text-right sm:px-6"><Link href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)} className="inline-flex whitespace-nowrap rounded-lg bg-teal-100 px-3 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">Open paper →</Link></td></tr>)}</tbody></table></div>}
         </section>
 
-        <section aria-labelledby="tests-title">
+        <section id="tests" aria-labelledby="tests-title" className="scroll-mt-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Timed practice</p>
