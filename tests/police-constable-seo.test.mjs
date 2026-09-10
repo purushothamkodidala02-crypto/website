@@ -57,7 +57,10 @@ test("Social proof, trust badges, and competitor gap elements are present", asyn
     read("lib/exam-guides.ts"),
   ]);
 
-  // Social proof data in guides
+  // Social proof
+  assert.match(guideComponent, /guide\.socialProof\.studentCount/);
+  assert.match(guideComponent, /guide\.socialProof\.verifiedBadge/);
+  assert.match(guideComponent, /guide\.socialProof\.rating/);
   assert.match(guidesLib, /1,000\+ Active Aspirants/);
   assert.match(guidesLib, /100% TGPRB Syllabus Aligned/);
 

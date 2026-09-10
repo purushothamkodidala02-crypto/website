@@ -12,7 +12,43 @@ export function ExamLandingGuide({
 }) {
   return (
     <div className="space-y-14">
-      {/* What is Included in our Mock Test Series */}
+      {/* 1. Social Proof & Trust Bar */}
+      <section
+        aria-label="Social proof and trust indicators"
+        className="rounded-3xl border border-teal-200/80 bg-gradient-to-r from-teal-50/90 via-emerald-50/70 to-teal-50/90 p-5 shadow-sm sm:p-6"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-3 py-1 text-xs font-black text-white shadow-sm">
+              <svg className="h-3.5 w-3.5 text-teal-200" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {guide.socialProof.verifiedBadge}
+            </span>
+            <span className="text-xs font-bold text-slate-800 sm:text-sm">
+              👥 <strong>{guide.socialProof.studentCount}</strong>
+            </span>
+            <span className="text-xs font-bold text-amber-900 sm:text-sm">
+              ⭐ <strong>{guide.socialProof.rating}</strong>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-white/90 px-2.5 py-1 shadow-xs border border-slate-200">
+              ⏱ {guide.socialProof.avgTime}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-lg bg-white/90 px-2.5 py-1 shadow-xs border border-slate-200">
+              🌐 {guide.socialProof.languages}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. What is Included in our Mock Test Series */}
       <section aria-labelledby="features-heading">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Series Overview</p>
         <h2 id="features-heading" className="font-display mt-2 text-2xl sm:text-3xl text-slate-950">
