@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SeoFields } from "@/components/admin/SeoFields";
+import { formatExamHeading } from "@/lib/exam-catalog";
 import type { Exam } from "@/types/exam";
 import {
   updateExam,
@@ -60,7 +61,7 @@ export function EditExamForm({
         <SeoFields
           title={exam.seo_title}
           description={exam.seo_description}
-          titlePlaceholder={`${exam.name} Mock Tests`}
+          titlePlaceholder={formatExamHeading(exam.name)}
           descriptionPlaceholder={`Browse ${exam.name} exams and free mock tests.`}
         />
 

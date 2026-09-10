@@ -10,7 +10,7 @@ import { ExamSelectionGrid, type ExamSelectionItem } from "@/components/exams/Ex
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { CatalogSteps } from "@/components/exams/CatalogSteps";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
-import { mockTestLabel } from "@/lib/exam-catalog";
+import { hasMockTestSuffixOrMention, mockTestLabel } from "@/lib/exam-catalog";
 import {
   categoryUrl,
   examUrl,
@@ -265,7 +265,13 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               <MockSymbol className="h-4 w-4" /> Smart mock-test catalogue
             </p>
             <h1 className="font-display mt-5 max-w-3xl text-4xl leading-[1.05] tracking-tight sm:text-5xl">
-              {selectedExam && selectedState ? `${selectedExam.name} mock tests for ${selectedState.name}` : "Your state. Your exam. The exact paper you need."}
+              {selectedExam && selectedState
+                ? hasMockTestSuffixOrMention(selectedExam.name)
+                  ? selectedExam.name.toLowerCase().includes(selectedState.name.toLowerCase())
+                    ? selectedExam.name
+                    : `${selectedExam.name} for ${selectedState.name}`
+                  : `${selectedExam.name} mock tests for ${selectedState.name}`
+                : "Your state. Your exam. The exact paper you need."}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
               {selectedExam ? `Choose the correct ${selectedExam.name} paper, take a timed mock test and review every answer.` : "Move through four clear steps. No mixed AP and TG exams, no unrelated papers, and no confusing test names."}

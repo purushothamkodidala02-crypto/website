@@ -6,7 +6,13 @@ import { CatalogSteps } from "@/components/exams/CatalogSteps";
 import { ExamSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
-import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
+import {
+  formatExamFallbackDescription,
+  formatExamFallbackTitle,
+  formatExamHeading,
+  hasMockTestSuffixOrMention,
+  studentFacingMockTestTitle,
+} from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
@@ -25,8 +31,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!context?.exam) return { title: "Exam Mock Tests Not Found", robots: { index: false, follow: false } };
   const canonical = examUrl(context.state.slug, context.exam.slug);
   const seo = resolveSeoFields(context.exam, {
-    title: `${context.exam.name} Mock Tests in ${context.state.name}`,
-    description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
+    title: formatExamFallbackTitle(context.exam.name, context.state.name),
+    description: formatExamFallbackDescription(context.exam.name, context.state.name),
   });
   return publicCollectionMetadata({ ...seo, canonical, indexable: isIndexableCollectionQuery(await searchParams) });
 }
@@ -70,16 +76,17 @@ export default async function ExamPage({ params, searchParams }: Props) {
     });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
   const seo = resolveSeoFields(context.exam, {
-    title: `${context.exam.name} Mock Tests in ${context.state.name}`,
-    description: `Practise ${context.exam.name} mock tests for ${context.state.name}. Explore papers, take timed tests and review every answer.`,
+    title: formatExamFallbackTitle(context.exam.name, context.state.name),
+    description: formatExamFallbackDescription(context.exam.name, context.state.name),
   });
   
   const savedQuestions = await getCachedFaqs(context.exam!.id);
     
   const introduction = context.exam.description?.trim() || seo.description;
+  const examHeading = formatExamHeading(context.exam.name);
   const standardQuestions = [
-    { question: `Where can I take ${context.exam.name} mock tests?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: 0 },
-    { question: `How many ${context.exam.name} mock tests are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: 1 },
+    { question: `Where can I take ${hasMockTestSuffixOrMention(context.exam.name) ? context.exam.name : `${context.exam.name} mock tests`}?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: 0 },
+    { question: `How many ${hasMockTestSuffixOrMention(context.exam.name) ? `${context.exam.name} tests` : `${context.exam.name} mock tests`} are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: 1 },
     { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard.", displayOrder: 2 },
   ];
   const savedByOrder = new Map((savedQuestions ?? []).map((item) => [item.display_order, item]));
@@ -95,7 +102,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
       { name: context.exam.name, path: canonical },
     ]),
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
-    { "@context": "https://schema.org", "@type": "ItemList", name: `${context.exam.name} mock tests`, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
+    { "@context": "https://schema.org", "@type": "ItemList", name: examHeading, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
   ];
 
   return (
@@ -109,7 +116,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {context.state.code} exam preparation</p>
-              <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{context.exam.name} Mock Tests</h1>
+              <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{examHeading}</h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{introduction}</p>
               <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><AccountActionButton canonical={canonical} /></div>
             </div>
@@ -125,7 +132,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         {specializations.length > 0 && <section aria-labelledby="specialisations-title"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Exam paths</p><h2 id="specialisations-title" className="font-display mt-2 text-3xl">Choose a specialisation</h2><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{specializations.map((item) => { return <Link key={item.id} href={specializationUrl(context.state.slug, context.exam!.slug, item.slug)} className="group flex flex-col justify-center rounded-3xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-lg"><h3 className="font-display text-xl">{item.name}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{item.description || `View papers and mock tests for ${item.name}.`}</p><span className="mt-5 inline-block text-sm font-black text-teal-800">Explore specialisation →</span></Link>; })}</div></section>}
 
         <section id="papers" aria-labelledby="papers-title" className="scroll-mt-24">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Choose paper</p><h2 id="papers-title" className="font-display mt-2 text-3xl">{context.exam.name} mock test papers</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">Select a paper to view its mock tests, topic practice, and answer review.</p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Choose paper</p><h2 id="papers-title" className="font-display mt-2 text-3xl">{hasMockTestSuffixOrMention(context.exam.name) ? `${context.exam.name} papers` : `${context.exam.name} mock test papers`}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">Select a paper to view its mock tests, topic practice, and answer review.</p>
           {papers.length === 0 ? <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." /> : <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full table-auto text-left"><thead className="bg-slate-950 text-white"><tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Paper name</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr></thead><tbody className="divide-y divide-slate-200">{papers.map((paper) => <tr key={paper.id} className="transition hover:bg-teal-50/60"><td className="px-4 py-5 sm:px-6"><span className="font-display block break-words text-base text-slate-950 sm:text-lg">{paper.name}</span></td><td className="px-4 py-5 text-right sm:px-6"><Link href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)} className="inline-flex whitespace-nowrap rounded-lg bg-teal-100 px-3 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">Open paper →</Link></td></tr>)}</tbody></table></div>}
         </section>
 
@@ -153,7 +160,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           </>}
         </section>
 
-        <section aria-labelledby="faq-title" className="rounded-[2rem] bg-slate-950 p-6 text-white sm:p-9"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Common questions</p><h2 id="faq-title" className="font-display mt-2 text-3xl">About {context.exam.name} mock tests</h2><div className="mt-6 divide-y divide-slate-700">{questions.map((item) => <details key={item.question} className="group py-5"><summary className="cursor-pointer list-none font-bold marker:hidden">{item.question}<span className="float-right text-teal-200 transition group-open:rotate-45" aria-hidden="true">+</span></summary><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{item.answer}</p></details>)}</div></section>
+        <section aria-labelledby="faq-title" className="rounded-[2rem] bg-slate-950 p-6 text-white sm:p-9"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Common questions</p><h2 id="faq-title" className="font-display mt-2 text-3xl">About {examHeading}</h2><div className="mt-6 divide-y divide-slate-700">{questions.map((item) => <details key={item.question} className="group py-5"><summary className="cursor-pointer list-none font-bold marker:hidden">{item.question}<span className="float-right text-teal-200 transition group-open:rotate-45" aria-hidden="true">+</span></summary><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{item.answer}</p></details>)}</div></section>
       </div>
     </main>
   );

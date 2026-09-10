@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { SeoFields } from "@/components/admin/SeoFields";
+import { formatExamHeading } from "@/lib/exam-catalog";
 import { examUrl } from "@/lib/public-urls";
 import {
   createExamPageFaq,
@@ -60,9 +61,9 @@ function ExamPageContentForm({ exam, state }: { exam: Exam; state: State }) {
         <label className="block text-sm font-bold">
           Student introduction
           <textarea name="description" rows={5} maxLength={3000} defaultValue={exam.description ?? ""} placeholder={`Explain what students can practise for ${exam.name}.`} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal leading-7" />
-          <span className="mt-1 block text-xs font-normal text-slate-500">Shown below “{exam.name} Mock Tests” on the public exam landing page.</span>
+          <span className="mt-1 block text-xs font-normal text-slate-500">Shown below “{formatExamHeading(exam.name)}” on the public exam landing page.</span>
         </label>
-        <SeoFields title={exam.seoTitle} description={exam.seoDescription} titlePlaceholder={`${exam.name} Mock Tests`} descriptionPlaceholder={`Practise ${exam.name} mock tests, papers, and detailed solutions on Varadhi Prep.`} />
+        <SeoFields title={exam.seoTitle} description={exam.seoDescription} titlePlaceholder={formatExamHeading(exam.name)} descriptionPlaceholder={`Practise ${formatExamHeading(exam.name).toLowerCase()}, papers, and detailed solutions on Varadhi Prep.`} />
         <button disabled={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-50">
           {pending ? "Saving public page…" : "Save public page content"}
         </button>

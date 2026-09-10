@@ -53,3 +53,44 @@ export function inferExamKind(name: string) {
   if (/executive|officer|group|service|psc/.test(normalized)) return "administration" as const;
   return "general" as const;
 }
+
+export function hasMockTestSuffixOrMention(name: string): boolean {
+  if (!name) return false;
+  return /\b(mock[\s-]*tests?|test[\s-]*series)\b/i.test(name);
+}
+
+export function formatExamHeading(name: string): string {
+  if (!name) return "";
+  if (hasMockTestSuffixOrMention(name)) {
+    return name;
+  }
+  return `${name} Mock Tests`;
+}
+
+export function formatExamFallbackTitle(examName: string, stateName?: string): string {
+  if (!examName) return "";
+  const hasSuffix = hasMockTestSuffixOrMention(examName);
+  const mentionsState = Boolean(stateName && examName.toLowerCase().includes(stateName.toLowerCase()));
+
+  if (hasSuffix) {
+    if (mentionsState || !stateName) {
+      return examName;
+    }
+    return `${examName} in ${stateName}`;
+  }
+
+  if (mentionsState || !stateName) {
+    return `${examName} Mock Tests`;
+  }
+  return `${examName} Mock Tests in ${stateName}`;
+}
+
+export function formatExamFallbackDescription(examName: string, stateName?: string): string {
+  if (!examName) return "";
+  const hasSuffix = hasMockTestSuffixOrMention(examName);
+  const mentionsState = Boolean(stateName && examName.toLowerCase().includes(stateName.toLowerCase()));
+  const target = hasSuffix ? examName : `${examName} mock tests`;
+  const location = mentionsState || !stateName ? "" : ` for ${stateName}`;
+  return `Practise ${target}${location}. Explore papers, take timed tests and review every answer.`;
+}
+
