@@ -108,6 +108,11 @@ export default async function ExamPage({ params, searchParams }: Props) {
   return (
     <main className="student-page min-h-screen bg-[#f4f7f8] text-slate-950">
       <JsonLd data={structuredData} />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `if(window.location.hash==='#exam-pattern'){history.replaceState(null,'',window.location.pathname+window.location.search);}`,
+        }}
+      />
       <PublicHeader />
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(45,212,191,0.2),transparent_34%)]" />
