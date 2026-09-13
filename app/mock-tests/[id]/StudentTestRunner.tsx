@@ -272,52 +272,52 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
   return <main ref={containerRef} className="student-page min-h-screen bg-slate-100 pb-8">
-    <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md text-white shadow-lg">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
           
           {/* Box 1: Test Title & Question Indicator */}
-          <div className="flex min-w-0 items-center gap-2 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 backdrop-blur-sm shadow-sm">
+          <div className="flex min-w-0 items-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-xs">
             <div className="min-w-0">
-              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-400 max-w-[200px] xl:max-w-xs" title={title}>
+              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[200px] xl:max-w-xs" title={title}>
                 {title}
               </p>
-              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-white">
+              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
                 Question {index + 1}{" "}
-                <span className="text-slate-400 font-medium text-[10px] sm:text-xs">of {questions.length}</span>
+                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">of {questions.length}</span>
               </h1>
             </div>
           </div>
 
           {/* Box 2: Attempted Questions Progress & Stats */}
-          <div className="flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 sm:px-4 sm:py-2 shadow-xs">
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="hidden sm:inline text-[11px] font-bold text-slate-300">Attempted:</span>
-              <span className="sm:hidden text-[10px] font-bold text-slate-300">Done:</span>
-              <strong className="text-xs sm:text-sm font-black text-emerald-400">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="hidden sm:inline text-[11px] font-bold text-slate-600">Attempted:</span>
+              <span className="sm:hidden text-[10px] font-bold text-slate-600">Done:</span>
+              <strong className="text-xs sm:text-sm font-black text-emerald-700">
                 {answered}
               </strong>
               <span className="text-[10px] sm:text-xs text-slate-400 font-medium">/{questions.length}</span>
-              <span className="hidden md:inline rounded bg-emerald-950/80 border border-emerald-500/30 px-1.5 py-0.2 text-[10px] font-bold text-emerald-300">
+              <span className="hidden md:inline rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
                 {Math.round((answered / questions.length) * 100)}%
               </span>
             </div>
 
-            <div className="hidden sm:flex items-center gap-1.5 border-l border-white/10 pl-2.5 sm:pl-3">
-              <span className="text-[11px] font-semibold text-slate-400">Review:</span>
-              <strong className="text-xs sm:text-sm font-black text-amber-400">{reviewIds.size}</strong>
+            <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 pl-2.5 sm:pl-3">
+              <span className="text-[11px] font-semibold text-slate-500">Review:</span>
+              <strong className="text-xs sm:text-sm font-black text-amber-700">{reviewIds.size}</strong>
             </div>
 
-            <div className="hidden lg:flex items-center gap-1.5 border-l border-white/10 pl-3">
-              <span className="text-[11px] font-semibold text-slate-400">Left:</span>
-              <strong className="text-xs sm:text-sm font-black text-slate-200">{unanswered}</strong>
+            <div className="hidden lg:flex items-center gap-1.5 border-l border-slate-200 pl-3">
+              <span className="text-[11px] font-semibold text-slate-500">Left:</span>
+              <strong className="text-xs sm:text-sm font-black text-slate-800">{unanswered}</strong>
             </div>
 
-            <div className="hidden sm:flex items-center border-l border-white/10 pl-2.5 sm:pl-3">
+            <div className="hidden sm:flex items-center border-l border-slate-200 pl-2.5 sm:pl-3">
               <span
                 className={`text-[10px] font-bold ${
-                  saveState === "error" ? "text-rose-300" : saveState === "saving" ? "text-amber-200 animate-pulse" : "text-teal-200"
+                  saveState === "error" ? "text-rose-600" : saveState === "saving" ? "text-amber-600 animate-pulse" : "text-teal-700"
                 }`}
               >
                 {saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Saved ✓"}
@@ -337,10 +337,10 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
                     : "Enter full screen (CBT Exam Mode)"
                 }
                 aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
-                className={`flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-sm ${
+                className={`flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
                   isFullscreen
-                    ? "border-teal-500/50 bg-teal-950/70 text-teal-300 hover:bg-teal-900/80"
-                    : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                    ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
                 }`}
               >
                 {isFullscreen ? (
@@ -373,9 +373,9 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
       </div>
 
       {/* Slim responsive progress bar */}
-      <div className="h-1 w-full bg-slate-800/80 overflow-hidden">
+      <div className="h-1 w-full bg-slate-100 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-300 transition-all duration-300"
+          className="h-full bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 transition-all duration-300"
           style={{ width: `${Math.round((answered / questions.length) * 100)}%` }}
         />
       </div>
@@ -630,12 +630,12 @@ function PracticeTimerControl({
   const urgent = remaining !== null && remaining <= 300 && !paused;
   return (
     <div
-      className={`flex items-center rounded-xl sm:rounded-2xl border p-1 shadow-sm backdrop-blur-sm transition ${
+      className={`flex items-center rounded-xl sm:rounded-2xl border p-1 shadow-xs transition ${
         paused
-          ? "border-teal-400/50 bg-teal-400/10"
+          ? "border-teal-300 bg-teal-50"
           : urgent
-          ? "border-rose-400/60 bg-rose-500/15 animate-pulse"
-          : "border-white/10 bg-white/5"
+          ? "border-rose-300 bg-rose-50 animate-pulse"
+          : "border-slate-200 bg-slate-50/80"
       }`}
     >
       <button
@@ -646,8 +646,8 @@ function PracticeTimerControl({
         title={paused ? "Resume timer" : "Pause timer"}
         className={`inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
           paused
-            ? "bg-teal-400 text-slate-950 hover:bg-teal-300 shadow-sm"
-            : "border border-white/10 bg-white/10 text-white hover:bg-white/20"
+            ? "bg-teal-600 text-white hover:bg-teal-700 shadow-xs"
+            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-950 shadow-xs"
         }`}
       >
         {busy ? (
@@ -665,17 +665,17 @@ function PracticeTimerControl({
         <span className="hidden sm:inline">{busy ? (paused ? "Resuming" : "Pausing") : paused ? "Resume" : "Pause"}</span>
       </button>
 
-      <div className="ml-1 sm:ml-1.5 min-w-[4.2rem] sm:min-w-[5.6rem] border-l border-white/10 px-1.5 py-0.5 sm:px-2.5 text-right">
+      <div className="ml-1 sm:ml-1.5 min-w-[4.2rem] sm:min-w-[5.6rem] border-l border-slate-200 px-1.5 py-0.5 sm:px-2.5 text-right">
         <span
           className={`block text-[8px] sm:text-[9px] font-black uppercase tracking-[0.14em] ${
-            paused ? "text-teal-300" : urgent ? "text-rose-300 font-black" : "text-slate-400"
+            paused ? "text-teal-800 font-bold" : urgent ? "text-rose-600 font-black" : "text-slate-500"
           }`}
         >
           {paused ? "Paused" : "Time Left"}
         </span>
         <strong
           className={`block font-mono text-xs sm:text-sm lg:text-base font-black leading-tight tracking-wider ${
-            urgent ? "text-rose-300" : "text-white"
+            urgent ? "text-rose-600" : "text-slate-950"
           }`}
         >
           {remaining === null ? "--:--" : displayTime(remaining)}
