@@ -240,7 +240,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
 
   const dataError = catalog.hasError;
   const paperSubjects = selectedPaper
-    ? subjects.filter((subject) => subject.paper_id === selectedPaper.id && subject.is_active)
+    ? subjects.filter((subject) => {
+        if (subject.paper_id !== selectedPaper.id || !subject.is_active) return false;
+        const testCount = tests.filter((t) => t.subject?.id === subject.id).length;
+        return testCount > 0;
+      })
     : [];
   const examSelectionItems: ExamSelectionItem[] = selectedState
     ? stateExams.map((exam) => {
@@ -345,7 +349,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         ) : (
           <CatalogSection eyebrow={`${selectedState.code} · ${selectedExam.name} · ${paperDisplayById.get(selectedPaper.id)?.shortLabel}`} title="Choose a mock test" description="Tests use one predictable series: Mock Test 01, Mock Test 02, Mock Test 03…" action={<Link href={examUrl(selectedState.slug, selectedExam.slug)} className="text-sm font-bold text-teal-800">Change paper</Link>}>
-            {paperSubjects.length > 0 && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
+            </div>
+
+            {(selectedType === "subject" || Boolean(selectedSubject)) && paperSubjects.length > 0 && (
               <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -358,17 +366,17 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   </div>
                   {selectedSubject && (
                     <Link
-                      href={paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                      href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
                       className="text-xs font-bold text-teal-800 hover:text-teal-950"
                     >
-                      Show all subjects →
+                      Show all subject tests →
                     </Link>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   <Link
-                    href={paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                    href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
                     className={`group flex flex-col justify-between rounded-2xl border p-3.5 transition sm:p-4 ${
                       !selectedSubject
                         ? "border-teal-600 bg-teal-50/70 shadow-sm ring-1 ring-teal-500/30"
@@ -377,14 +385,14 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   >
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
-                        Entire Paper
+                        All Subjects
                       </span>
                       <strong className="mt-1 block text-sm font-bold text-slate-900 group-hover:text-teal-800">
-                        All Subjects
+                        All Subject Tests
                       </strong>
                     </div>
                     <span className="mt-3 text-xs font-semibold text-slate-500">
-                      {tests.filter((t) => t.paper.id === selectedPaper.id).length} tests
+                      {tests.filter((t) => t.paper.id === selectedPaper.id && t.test_scope === "subject").length} tests
                     </span>
                   </Link>
 
@@ -420,18 +428,13 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               </div>
             )}
 
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">
-                  {selectedSubject ? `${selectedSubject.name} Tests` : "Mock Series"}
-                </p>
-                <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
-                  {selectedSubject ? `${selectedSubject.name} Mock Tests` : "Latest Uploaded Mock Tests"}
-                </h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
-              </div>
+            <div className="mb-5">
+              <p className="text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">
+                {selectedSubject ? `${selectedSubject.name} Tests` : selectedType === "subject" ? "Subject Practice" : "Mock Series"}
+              </p>
+              <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
+                {selectedSubject ? `${selectedSubject.name} Mock Tests` : selectedType === "subject" ? "Subject Mock Tests" : "Latest Uploaded Mock Tests"}
+              </h3>
             </div>
 
             <TestGrid tests={paginatedTests} />
