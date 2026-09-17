@@ -14,8 +14,10 @@ import {
   type LocationSubject,
 } from "@/components/admin/LocationFilters";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
+import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import type { QuestionLifecycle } from "@/types/question";
 import { DeleteQuestionButton } from "./DeleteQuestionButton";
+import { bulkDeleteQuestions, bulkMakeQuestionsUnavailable } from "./deleteAction";
 
 export type QuestionBankRow = {
   id: string;
@@ -115,6 +117,10 @@ export function QuestionBankTable({
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkPending, setBulkPending] = useState<"delete" | "unavailable" | null>(null);
+  const [bulkFeedback, setBulkFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const pageSize = 50;
 
   const visibleSubjectIds = useMemo(() => {
@@ -211,7 +217,7 @@ export function QuestionBankTable({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [exams, location.categoryId, page, papers, search, specializations, statusFilter, subjects, visibleSubjectIds]);
+  }, [exams, location.categoryId, page, papers, refreshKey, search, specializations, statusFilter, subjects, visibleSubjectIds]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const questionBankUrl = useMemo(() => {
@@ -232,12 +238,86 @@ export function QuestionBankTable({
     window.history.replaceState(window.history.state, "", questionBankUrl);
   }, [questionBankUrl]);
 
+  const visibleIds = useMemo(() => questions.map((q) => q.id), [questions]);
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+  const someVisibleSelected = visibleIds.some((id) => selectedIds.has(id));
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        for (const id of visibleIds) next.delete(id);
+      } else {
+        for (const id of visibleIds) next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const singleSelectedId = useMemo(() => {
+    if (selectedIds.size !== 1) return null;
+    return Array.from(selectedIds)[0];
+  }, [selectedIds]);
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const count = ids.length;
+    const promptMsg = `Are you sure you want to permanently delete ${count} selected question${count === 1 ? "" : "s"}?\n\nAny questions assigned to mock tests or required for student reviews will be automatically protected.`;
+    if (!window.confirm(promptMsg)) return;
+
+    setBulkPending("delete");
+    setBulkFeedback(null);
+    const result = await bulkDeleteQuestions(ids);
+    setBulkPending(null);
+
+    if (result.success) {
+      setSelectedIds(new Set());
+      setBulkFeedback({ type: "success", text: result.message });
+      setRefreshKey((k) => k + 1);
+    } else {
+      setBulkFeedback({ type: "error", text: result.message });
+      setRefreshKey((k) => k + 1);
+    }
+  };
+
+  const handleBulkUnavailable = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const count = ids.length;
+    const promptMsg = `Mark ${count} selected question${count === 1 ? "" : "s"} as unavailable for future tests?\n\nExisting attempts and reviews remain safe.`;
+    if (!window.confirm(promptMsg)) return;
+
+    setBulkPending("unavailable");
+    setBulkFeedback(null);
+    const result = await bulkMakeQuestionsUnavailable(ids);
+    setBulkPending(null);
+
+    if (result.success) {
+      setSelectedIds(new Set());
+      setBulkFeedback({ type: "success", text: result.message });
+      setRefreshKey((k) => k + 1);
+    } else {
+      setBulkFeedback({ type: "error", text: result.message });
+      setRefreshKey((k) => k + 1);
+    }
+  };
+
   return (
     <section className="mt-10 overflow-hidden rounded-2xl border bg-white">
       <div className="border-b px-6 py-5">
         <h2 className="text-2xl font-black">Existing questions</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Browse the reusable Question Bank by where each question belongs.
+          Browse the reusable Question Bank by where each question belongs. Select questions to edit, manage, or delete in bulk.
         </p>
       </div>
       <div className="space-y-4 border-b bg-slate-50 px-6 py-5">
@@ -248,7 +328,12 @@ export function QuestionBankTable({
           papers={papers}
           subjects={subjects}
           value={location}
-          onChange={(value) => { setLocation(value); setPage(1); }}
+          onChange={(value) => {
+            setLocation(value);
+            setPage(1);
+            setSelectedIds(new Set());
+            setBulkFeedback(null);
+          }}
           includeSubjects
         />
         <div className="flex flex-wrap items-end gap-4">
@@ -257,7 +342,12 @@ export function QuestionBankTable({
             <input
               type="search"
               value={search}
-              onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+                setSelectedIds(new Set());
+                setBulkFeedback(null);
+              }}
               placeholder="Type a word from the question"
               disabled={!location.categoryId}
               className="mt-2 w-full rounded-xl border px-4 py-2.5 font-normal disabled:cursor-not-allowed disabled:bg-slate-100"
@@ -267,7 +357,12 @@ export function QuestionBankTable({
             Filter by status / expiry
             <select
               value={statusFilter}
-              onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setPage(1);
+                setSelectedIds(new Set());
+                setBulkFeedback(null);
+              }}
               disabled={!location.categoryId}
               className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
@@ -281,12 +376,92 @@ export function QuestionBankTable({
         </div>
       </div>
 
+      {bulkFeedback && (
+        <div
+          className={`mx-6 mt-4 flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold ${
+            bulkFeedback.type === "success"
+              ? "border border-emerald-200 bg-emerald-50 text-emerald-900"
+              : "border border-rose-200 bg-rose-50 text-rose-900"
+          }`}
+        >
+          <p>{bulkFeedback.text}</p>
+          <button
+            type="button"
+            onClick={() => setBulkFeedback(null)}
+            className="ml-3 text-xs font-bold uppercase tracking-wider opacity-70 hover:opacity-100"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {selectedIds.size > 0 && (
+        <div className="sticky top-4 z-20 mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-200 bg-teal-50/95 p-3.5 shadow-lg backdrop-blur sm:mx-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-700 text-xs font-black text-white">
+              {selectedIds.size}
+            </span>
+            <span className="text-sm font-bold text-teal-950">
+              {selectedIds.size} question{selectedIds.size === 1 ? "" : "s"} selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              className="text-xs font-semibold text-teal-800 underline hover:text-teal-950"
+            >
+              Deselect all
+            </button>
+            {!allVisibleSelected && questions.length > 0 && (
+              <button
+                type="button"
+                onClick={toggleSelectAll}
+                className="text-xs font-semibold text-teal-800 underline hover:text-teal-950"
+              >
+                Select all on this page ({questions.length})
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {singleSelectedId && (
+              <Link
+                href={`/admin/questions/${singleSelectedId}/edit?returnTo=${encodeURIComponent(questionBankUrl)}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
+              >
+                <span>✏️</span> Edit question
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={handleBulkUnavailable}
+              disabled={bulkPending !== null}
+              aria-busy={bulkPending === "unavailable"}
+              className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-bold text-amber-900 shadow-sm hover:bg-amber-100 disabled:opacity-50"
+            >
+              <PendingButtonContent pending={bulkPending === "unavailable"} pendingLabel="Updating…">
+                Make unavailable ({selectedIds.size})
+              </PendingButtonContent>
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={bulkPending !== null}
+              aria-busy={bulkPending === "delete"}
+              className="rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50"
+            >
+              <PendingButtonContent pending={bulkPending === "delete"} pendingLabel="Deleting…">
+                Delete permanently ({selectedIds.size})
+              </PendingButtonContent>
+            </button>
+          </div>
+        </div>
+      )}
+
       {!location.categoryId ? (
         <p className="p-6 text-sm text-slate-600">
           Select a Recruiting Board above to see its questions.
         </p>
       ) : loading ? (
-        <p className="p-6 text-sm text-slate-600">Loading questionsâ€¦</p>
+        <p className="p-6 text-sm text-slate-600">Loading questions…</p>
       ) : loadError ? (
         <p className="p-6 text-sm font-semibold text-red-700">{loadError}</p>
       ) : questions.length === 0 ? (
@@ -298,6 +473,23 @@ export function QuestionBankTable({
           <table className="min-w-[900px] w-full text-left">
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
+                <th className="w-12 px-5 py-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={questions.length > 0 && allVisibleSelected}
+                      ref={(el) => {
+                        if (el) {
+                          el.indeterminate = someVisibleSelected && !allVisibleSelected;
+                        }
+                      }}
+                      onChange={toggleSelectAll}
+                      disabled={loading || questions.length === 0}
+                      aria-label="Select all visible questions"
+                      className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </th>
                 {!location.examId && <th className="px-5 py-4">Exam</th>}
                 {!location.paperId && <th className="px-5 py-4">Paper</th>}
                 {!location.subjectId && <th className="px-5 py-4">Subject</th>}
@@ -310,9 +502,26 @@ export function QuestionBankTable({
             <tbody className="divide-y">
               {questions.map((question) => {
                 const status = statusOf(question);
+                const isSelected = selectedIds.has(question.id);
 
                 return (
-                  <tr key={question.id} className="align-top">
+                  <tr
+                    key={question.id}
+                    className={`align-top transition-colors ${
+                      isSelected ? "bg-teal-50/60" : "hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <td className="w-12 px-5 py-5">
+                      <div className="flex items-center pt-0.5">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectOne(question.id)}
+                          aria-label={`Select question: ${question.questionText.slice(0, 40)}`}
+                          className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                        />
+                      </div>
+                    </td>
                     {!location.examId && (
                       <td className="px-5 py-5 text-sm text-slate-600">
                         {question.examName}
@@ -354,6 +563,14 @@ export function QuestionBankTable({
                         <DeleteQuestionButton
                           questionId={question.id}
                           questionText={question.questionText}
+                          onDeleted={() => {
+                            setSelectedIds((prev) => {
+                              const next = new Set(prev);
+                              next.delete(question.id);
+                              return next;
+                            });
+                            setRefreshKey((k) => k + 1);
+                          }}
                         />
                       </div>
                     </td>
@@ -362,7 +579,37 @@ export function QuestionBankTable({
               })}
             </tbody>
           </table>
-          {totalPages > 1 && <div className="flex items-center justify-center gap-3 border-t p-4"><button type="button" disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-40">Previous</button><span className="text-sm font-semibold text-slate-600">Page {page} of {totalPages}</span><button type="button" disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-40">Next</button></div>}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 border-t p-4">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => {
+                  setPage((value) => Math.max(1, value - 1));
+                  setSelectedIds(new Set());
+                  setBulkFeedback(null);
+                }}
+                className="rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm font-semibold text-slate-600">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page === totalPages}
+                onClick={() => {
+                  setPage((value) => Math.min(totalPages, value + 1));
+                  setSelectedIds(new Set());
+                  setBulkFeedback(null);
+                }}
+                className="rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </section>

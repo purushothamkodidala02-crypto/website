@@ -45,3 +45,96 @@ export async function makeQuestionUnavailable(questionId: string): Promise<Delet
   revalidatePath("/admin/mock-tests");
   return { success: true, message: "Question is unavailable for future use. Existing attempts and reviews remain safe." };
 }
+
+export type BulkQuestionResult = {
+  success: boolean;
+  successCount: number;
+  failureCount: number;
+  message: string;
+};
+
+export async function bulkDeleteQuestions(questionIds: string[]): Promise<BulkQuestionResult> {
+  const result = await authorizedClient();
+  if ("error" in result) return { success: false, successCount: 0, failureCount: questionIds.length, message: result.error ?? "Unable to delete questions." };
+  if (!questionIds || questionIds.length === 0) {
+    return { success: false, successCount: 0, failureCount: 0, message: "No questions selected." };
+  }
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  for (const questionId of questionIds) {
+    const { data, error } = await result.supabase.rpc("delete_question_safely", { requested_question_id: questionId });
+    if (error) {
+      failureCount++;
+    } else {
+      successCount++;
+      const imageUrl = data?.[0]?.deleted_image_url;
+      if (imageUrl) {
+        try {
+          await removeQuestionImage(result.supabase, questionMediaPath(imageUrl));
+        } catch {
+          // Ignore image cleanup error on delete
+        }
+      }
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/questions");
+
+  if (failureCount === 0) {
+    return {
+      success: true,
+      successCount,
+      failureCount: 0,
+      message: `Permanently deleted ${successCount} question${successCount === 1 ? "" : "s"}.`,
+    };
+  } else if (successCount === 0) {
+    return {
+      success: false,
+      successCount: 0,
+      failureCount,
+      message: `Could not delete ${failureCount} question${failureCount === 1 ? "" : "s"}. They are assigned to mock tests or retained student attempts. Make them unavailable instead.`,
+    };
+  } else {
+    return {
+      success: true,
+      successCount,
+      failureCount,
+      message: `Deleted ${successCount} question${successCount === 1 ? "" : "s"}. ${failureCount} question${failureCount === 1 ? "" : "s"} were blocked (assigned to mock tests or student attempts).`,
+    };
+  }
+}
+
+export async function bulkMakeQuestionsUnavailable(questionIds: string[]): Promise<BulkQuestionResult> {
+  const result = await authorizedClient();
+  if ("error" in result) return { success: false, successCount: 0, failureCount: questionIds.length, message: result.error ?? "Unable to update questions." };
+  if (!questionIds || questionIds.length === 0) {
+    return { success: false, successCount: 0, failureCount: 0, message: "No questions selected." };
+  }
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  for (const questionId of questionIds) {
+    const { error } = await result.supabase.rpc("make_question_unavailable_safely", { requested_question_id: questionId });
+    if (error) {
+      failureCount++;
+    } else {
+      successCount++;
+    }
+  }
+
+  revalidatePath("/admin/questions");
+  revalidatePath("/admin/mock-tests");
+
+  return {
+    success: failureCount === 0,
+    successCount,
+    failureCount,
+    message: failureCount === 0
+      ? `Successfully marked ${successCount} question${successCount === 1 ? "" : "s"} as unavailable.`
+      : `Marked ${successCount} as unavailable. ${failureCount} failed.`,
+  };
+}

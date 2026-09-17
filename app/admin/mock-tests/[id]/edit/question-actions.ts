@@ -145,6 +145,22 @@ export async function assignQuestion(mockTestId: string, _previous: AssignmentSt
 }
 export async function removeAssignedQuestion(mockTestId: string, assignmentId: string): Promise<AssignmentState> { const result = await draft(mockTestId); if ("error" in result) return { success: false, message: result.error ?? "Unable to remove Question." }; const { error } = await result.supabase.from("mock_test_questions").delete().eq("id", assignmentId).eq("mock_test_id", mockTestId); if (error) return { success: false, message: error.message }; revalidateMockTestQuestions(mockTestId); return { success: true, message: "Question removed." }; }
 
+export async function bulkRemoveAssignedQuestions(mockTestId: string, assignmentIds: string[]): Promise<AssignmentState> {
+  const result = await draft(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to remove Questions." };
+  if (!assignmentIds || assignmentIds.length === 0) return { success: false, message: "No questions selected to remove." };
+
+  const { error } = await result.supabase
+    .from("mock_test_questions")
+    .delete()
+    .in("id", assignmentIds)
+    .eq("mock_test_id", mockTestId);
+
+  if (error) return { success: false, message: error.message };
+  revalidateMockTestQuestions(mockTestId);
+  return { success: true, message: `Removed ${assignmentIds.length} question${assignmentIds.length === 1 ? "" : "s"} from this mock test.` };
+}
+
 export async function fillRemainingWithLatest(mockTestId: string): Promise<AssignmentState> {
   const result = await draft(mockTestId);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to fill the remaining slots." };

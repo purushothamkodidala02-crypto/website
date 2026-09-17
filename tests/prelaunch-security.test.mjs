@@ -521,3 +521,32 @@ test("admin mock-test totals are aggregated in the database without row-limit tr
   assert.doesNotMatch(page, /from\("mock_test_questions"\)/);
   assert.doesNotMatch(page, /from\("test_attempts"\)/);
 });
+
+test("admin question management supports checkboxes, select-all, and bulk actions for editing and deletion", async () => {
+  const [questionBank, deleteActions, assignments, questionActions] = await Promise.all([
+    read("app/admin/questions/QuestionBankTable.tsx"),
+    read("app/admin/questions/deleteAction.ts"),
+    read("app/admin/mock-tests/[id]/edit/QuestionAssignments.tsx"),
+    read("app/admin/mock-tests/[id]/edit/question-actions.ts"),
+  ]);
+
+  // QuestionBankTable selection and bulk bar
+  assert.match(questionBank, /selectedIds/);
+  assert.match(questionBank, /toggleSelectAll/);
+  assert.match(questionBank, /toggleSelectOne/);
+  assert.match(questionBank, /indeterminate/);
+  assert.match(questionBank, /Delete permanently/);
+  assert.match(questionBank, /bulkDeleteQuestions/);
+  assert.match(questionBank, /bulkMakeQuestionsUnavailable/);
+  assert.match(questionBank, /Edit question/);
+
+  // deleteAction server actions
+  assert.match(deleteActions, /export async function bulkDeleteQuestions/);
+  assert.match(deleteActions, /export async function bulkMakeQuestionsUnavailable/);
+
+  // QuestionAssignments selection and bulk removal
+  assert.match(assignments, /selectedIds/);
+  assert.match(assignments, /toggleSelectAll/);
+  assert.match(assignments, /bulkRemoveAssignedQuestions/);
+  assert.match(questionActions, /export async function bulkRemoveAssignedQuestions/);
+});
