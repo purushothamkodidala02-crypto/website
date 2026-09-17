@@ -331,31 +331,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             </div>
           </CatalogSection>
         ) : !selectedExam ? (
-          <>
-            <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="Exams are organized by recruiting board for easy discovery." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
-              {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <ExamSelectionGrid exams={examSelectionItems} />}
-            </CatalogSection>
-
-            {matchingTests.length > 0 && (
-              <section className="mt-12 border-t border-slate-200/80 pt-10">
-                <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">
-                      {selectedState.code} · Timed Practice
-                    </p>
-                    <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                      Latest Mock Tests in all subjects
-                    </h2>
-                    <p className="mt-1.5 text-sm text-slate-600">
-                      Directly attempt the newest full-length and subject mock tests available in {selectedState.name}.
-                    </p>
-                  </div>
-                </div>
-
-                <TestGrid tests={matchingTests.slice(0, 9)} />
-              </section>
-            )}
-          </>
+          <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
+            {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <ExamSelectionGrid exams={examSelectionItems} />}
+          </CatalogSection>
         ) : !selectedPaper ? (
           <CatalogSection eyebrow={`${selectedState.code} · ${resolvedCategory?.name} · Step 3`} title={`Choose a paper for ${selectedExam.name}`} description="Paper numbers are generated consistently from the exam structure." action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">Change exam</Link>}>
             {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="student-stagger grid gap-4 md:grid-cols-2">{examPapers.map((paper) => {
@@ -376,14 +354,14 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             </div>
 
             {(selectedType === "subject" || Boolean(selectedSubject)) && paperSubjects.length > 0 && (
-              <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="mb-10">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.14em] text-teal-700">
                       Subject Catalogue
                     </p>
-                    <h3 className="font-display mt-0.5 text-lg font-bold text-slate-900 sm:text-xl">
-                      Practice by Subject
+                    <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
+                      Choose a subject for targeted practice
                     </h3>
                   </div>
                   {selectedSubject && (
@@ -391,33 +369,12 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                       href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
                       className="text-xs font-bold text-teal-800 hover:text-teal-950"
                     >
-                      Show all subject tests →
+                      Show all subjects →
                     </Link>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  <Link
-                    href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
-                    className={`group flex flex-col justify-between rounded-2xl border p-3.5 transition sm:p-4 ${
-                      !selectedSubject
-                        ? "border-teal-600 bg-teal-50/70 shadow-sm ring-1 ring-teal-500/30"
-                        : "border-slate-200 bg-slate-50/60 hover:border-teal-300 hover:bg-white"
-                    }`}
-                  >
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
-                        All Subjects
-                      </span>
-                      <strong className="mt-1 block text-sm font-bold text-slate-900 group-hover:text-teal-800">
-                        All Subject Tests
-                      </strong>
-                    </div>
-                    <span className="mt-3 text-xs font-semibold text-slate-500">
-                      {tests.filter((t) => t.paper.id === selectedPaper.id && t.test_scope === "subject").length} tests
-                    </span>
-                  </Link>
-
+                <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {paperSubjects.map((sub) => {
                     const isSelected = selectedSubject?.id === sub.id;
                     const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
@@ -425,23 +382,33 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                       <Link
                         key={sub.id}
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
-                        className={`group flex flex-col justify-between rounded-2xl border p-3.5 transition sm:p-4 ${
+                        className={`student-card group flex min-h-48 flex-col rounded-3xl border bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5 ${
                           isSelected
-                            ? "border-teal-600 bg-teal-50/70 shadow-sm ring-1 ring-teal-500/30"
-                            : "border-slate-200 bg-slate-50/60 hover:border-teal-300 hover:bg-white"
+                            ? "border-teal-500 ring-2 ring-teal-500/20"
+                            : "border-slate-200"
                         }`}
                       >
-                        <div>
-                          <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
-                            Subject
+                        <span className="flex items-center justify-between gap-3">
+                          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800">
+                            <PaperSymbol className="h-6 w-6" />
                           </span>
-                          <strong className="mt-1 block text-sm font-bold text-slate-900 group-hover:text-teal-800 line-clamp-2">
-                            {sub.name}
-                          </strong>
-                        </div>
-                        <span className="mt-3 flex items-center justify-between text-xs font-semibold text-slate-500">
-                          <span>{subTestsCount} test{subTestsCount === 1 ? "" : "s"}</span>
-                          <span className="font-bold text-teal-700 transition group-hover:translate-x-0.5">→</span>
+                          <span className="max-w-[62%] truncate rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">
+                            {paperDisplayById.get(selectedPaper.id)?.shortLabel ?? "Paper"}
+                          </span>
+                        </span>
+                        <h3 className="font-display mt-5 text-xl leading-7 text-slate-950 group-hover:text-teal-800 transition">
+                          {sub.name}
+                        </h3>
+                        <p className="mt-2 text-sm text-slate-500">
+                          {selectedState.code} · {selectedExam.name}
+                        </p>
+                        <span className="mt-auto flex items-center justify-between border-t pt-4 text-sm">
+                          <span className="font-semibold text-slate-500">
+                            {subTestsCount} mock test{subTestsCount === 1 ? "" : "s"}
+                          </span>
+                          <span className="font-black text-teal-800 transition group-hover:translate-x-1">
+                            Open →
+                          </span>
                         </span>
                       </Link>
                     );
@@ -452,15 +419,47 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
 
             <div className="mb-5">
               <p className="text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">
-                {selectedSubject ? `${selectedSubject.name} Tests` : selectedType === "subject" ? "Subject Practice" : "Mock Series"}
+                {selectedSubject
+                  ? `${selectedSubject.name} Tests`
+                  : selectedType === "subject"
+                    ? "Timed Practice"
+                    : "Mock Series"}
               </p>
               <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
-                {selectedSubject ? `${selectedSubject.name} Mock Tests` : selectedType === "subject" ? "Subject Mock Tests" : "Latest Uploaded Mock Tests"}
+                {selectedSubject
+                  ? `${selectedSubject.name} Mock Tests`
+                  : selectedType === "subject"
+                    ? "Latest mock tests in all subjects"
+                    : "Latest Uploaded Mock Tests"}
               </h3>
             </div>
 
-            <TestGrid tests={paginatedTests} />
-            <CatalogPagination filters={filters} page={currentPage} totalPages={totalPages} basePath={selectedType === "subject" && selectedSubject ? subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject.slug) : paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug)} />
+            <TestGrid
+              tests={
+                selectedType === "subject" && !selectedSubject
+                  ? paginatedTests.slice(0, 4)
+                  : paginatedTests
+              }
+            />
+
+            {selectedType === "subject" && !selectedSubject && paginatedTests.length > 4 ? (
+              <div className="mt-6 flex justify-center">
+                <p className="text-xs font-semibold text-slate-500">
+                  Select any subject above to practice all {matchingTests.length} tests
+                </p>
+              </div>
+            ) : (
+              <CatalogPagination
+                filters={filters}
+                page={currentPage}
+                totalPages={totalPages}
+                basePath={
+                  selectedType === "subject" && selectedSubject
+                    ? subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject.slug)
+                    : paperUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug)
+                }
+              />
+            )}
           </CatalogSection>
         )}
       </div>
