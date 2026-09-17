@@ -550,3 +550,22 @@ test("admin question management supports checkboxes, select-all, and bulk action
   assert.match(assignments, /bulkRemoveAssignedQuestions/);
   assert.match(questionActions, /export async function bulkRemoveAssignedQuestions/);
 });
+
+test("admin subjects management supports checkboxes, select-all, and bulk actions for editing and deletion", async () => {
+  const [subjectsTable, deleteActions] = await Promise.all([
+    read("app/admin/subjects/ExistingSubjectsTable.tsx"),
+    read("app/admin/subjects/deleteAction.ts"),
+  ]);
+
+  // ExistingSubjectsTable selection and bulk bar
+  assert.match(subjectsTable, /selectedIds/);
+  assert.match(subjectsTable, /toggleSelectAll/);
+  assert.match(subjectsTable, /toggleSelectOne/);
+  assert.match(subjectsTable, /indeterminate/);
+  assert.match(subjectsTable, /Delete selected/);
+  assert.match(subjectsTable, /bulkDeleteSubjects/);
+  assert.match(subjectsTable, /Edit subject/);
+
+  // deleteAction server action
+  assert.match(deleteActions, /export async function bulkDeleteSubjects/);
+});

@@ -7,11 +7,13 @@ import { deleteSubject } from "./deleteAction";
 type DeleteSubjectButtonProps = {
   subjectId: string;
   subjectName: string;
+  onDeleted?: () => void;
 };
 
 export function DeleteSubjectButton({
   subjectId,
   subjectName,
+  onDeleted,
 }: DeleteSubjectButtonProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -37,6 +39,7 @@ export function DeleteSubjectButton({
       return;
     }
 
+    onDeleted?.();
     router.refresh();
   }
 
