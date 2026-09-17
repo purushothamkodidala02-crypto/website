@@ -108,3 +108,57 @@ test("paper number extraction and display mapping logic handles AEE Paper II cor
   assert.equal(title, "AEE · Paper 2 · Mock Test 01");
   assert.notEqual(title, "AEE · Paper 1 · Mock Test 01");
 });
+
+test("buildPaperDisplayMap correctly coordinates stage-based exams (Screening & Mains) and Endowment Officer", async () => {
+  const { buildPaperDisplayMap } = await import("../lib/papers.ts");
+
+  // 1. Endowment Officer case: 2 common/screening papers + 1 Written Examination paper
+  const eoPapers = [
+    { id: "eo-c1", exam_group_id: "eo", name: "Screening Paper 1 - General Studies", display_order: 1 },
+    { id: "eo-c2", exam_group_id: "eo", name: "Screening Paper 2 - Hindu Philosophy", display_order: 2 },
+    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Hindu Philosophy & Temple System", display_order: 1 },
+  ];
+  const eoMap = buildPaperDisplayMap(eoPapers);
+  assert.equal(eoMap.get("eo-c1")?.shortLabel, "Paper 1");
+  assert.equal(eoMap.get("eo-c2")?.shortLabel, "Paper 2");
+  // Crucial: The written examination paper starts at Paper 1, NOT Paper 3!
+  assert.equal(eoMap.get("eo-m1")?.shortLabel, "Paper 1");
+  assert.equal(eoMap.get("eo-m1")?.label, "Paper 1 · Hindu Philosophy & Temple System");
+
+  // 2. Stage-based exam with specializations: Screening (P1, P2) and Mains (P1, P2) -> 4 papers total
+  const stagePapers = [
+    { id: "p-scr-1", exam_group_id: "group1", specialization_id: "spec-scr", name: "Paper 1 - General Studies", display_order: 1 },
+    { id: "p-scr-2", exam_group_id: "group1", specialization_id: "spec-scr", name: "Paper 2 - Mental Ability", display_order: 2 },
+    { id: "p-main-1", exam_group_id: "group1", specialization_id: "spec-main", name: "Paper 1 - General Studies", display_order: 1 },
+    { id: "p-main-2", exam_group_id: "group1", specialization_id: "spec-main", name: "Paper 2 - History & Constitution", display_order: 2 },
+  ];
+  const stageMap = buildPaperDisplayMap(stagePapers);
+  assert.equal(stageMap.get("p-scr-1")?.shortLabel, "Paper 1");
+  assert.equal(stageMap.get("p-scr-2")?.shortLabel, "Paper 2");
+  assert.equal(stageMap.get("p-main-1")?.shortLabel, "Paper 1");
+  assert.equal(stageMap.get("p-main-2")?.shortLabel, "Paper 2");
+
+  // 3. AEE case: 1 common paper (General Studies) + branch papers (Civil, Mechanical)
+  const aeePapers = [
+    { id: "aee-p1", exam_group_id: "aee", name: "Paper 1 - General Studies & Mental Ability", display_order: 1 },
+    { id: "aee-civil", exam_group_id: "aee", specialization_id: "spec-civil", name: "Civil Engineering", display_order: null },
+    { id: "aee-mech", exam_group_id: "aee", specialization_id: "spec-mech", name: "Mechanical Engineering", display_order: null },
+  ];
+  const aeeMap = buildPaperDisplayMap(aeePapers);
+  assert.equal(aeeMap.get("aee-p1")?.shortLabel, "Paper 1");
+  assert.equal(aeeMap.get("aee-civil")?.shortLabel, "Paper 2");
+  assert.equal(aeeMap.get("aee-mech")?.shortLabel, "Paper 2");
+
+  // 4. Common papers with stage names: Screening Paper 1 & 2 + Mains Paper 1 & 2 without specializations
+  const directStagePapers = [
+    { id: "dsp-1", exam_group_id: "psc", name: "Screening Test - Paper 1", display_order: 1 },
+    { id: "dsp-2", exam_group_id: "psc", name: "Screening Test - Paper 2", display_order: 2 },
+    { id: "dsp-3", exam_group_id: "psc", name: "Mains - Paper 1", display_order: 1 },
+    { id: "dsp-4", exam_group_id: "psc", name: "Mains - Paper 2", display_order: 2 },
+  ];
+  const directMap = buildPaperDisplayMap(directStagePapers);
+  assert.equal(directMap.get("dsp-1")?.shortLabel, "Paper 1");
+  assert.equal(directMap.get("dsp-2")?.shortLabel, "Paper 2");
+  assert.equal(directMap.get("dsp-3")?.shortLabel, "Paper 1");
+  assert.equal(directMap.get("dsp-4")?.shortLabel, "Paper 2");
+});

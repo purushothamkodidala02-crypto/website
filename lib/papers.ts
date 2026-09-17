@@ -114,6 +114,13 @@ export function formatPaperDisplay(
   };
 }
 
+export function extractStage(name: string): string | null {
+  const match = name.match(
+    /\b(screening(?:\s*test)?|prelims?|preliminary(?:\s*(?:written\s*test|examination|exam))?|\bpwt\b|mains?(?:\s*(?:written\s*test|examination|exam))?|\bfwe\b|written\s*(?:examination|exam)|tier\s*[-_]?[1234ivx]+|phase\s*[-_]?[1234ivx]+|stage\s*[-_]?[1234ivx]+)\b/i,
+  );
+  return match ? match[1].toLowerCase().replace(/\s+/g, " ") : null;
+}
+
 export function buildPaperDisplayMap(
   papers: OrderedPaper[],
 ): Map<string, PaperDisplay> {
@@ -170,29 +177,74 @@ export function buildPaperDisplayMap(
     };
 
     // 1. Process common papers
-    const sortedCommon = sortPapers(commonPapers);
-    const usedCommonNumbers = new Set<number>();
+    // Check if common papers contain multiple distinct stages (e.g. Screening vs Mains in direct papers)
+    const commonStages = new Set(
+      commonPapers
+        .map((p) => extractStage(p.name))
+        .filter((s): s is string => Boolean(s)),
+    );
+    const hasMultipleCommonStages = commonStages.size > 1;
 
-    sortedCommon.forEach((paper, index) => {
-      const explicitNum = extractPaperNumber(paper.name);
-      const storedOrder = Number(paper.display_order);
-      let num =
-        explicitNum ??
-        (Number.isInteger(storedOrder) && storedOrder > 0
-          ? storedOrder
-          : index + 1);
-      while (usedCommonNumbers.has(num)) num += 1;
-      usedCommonNumbers.add(num);
+    if (hasMultipleCommonStages) {
+      const commonByStage = new Map<string, OrderedPaper[]>();
+      for (const paper of commonPapers) {
+        const stage = extractStage(paper.name) ?? "common";
+        const list = commonByStage.get(stage) ?? [];
+        list.push(paper);
+        commonByStage.set(stage, list);
+      }
+      for (const stagePapers of commonByStage.values()) {
+        const sortedStage = sortPapers(stagePapers);
+        const usedStageNumbers = new Set<number>();
+        sortedStage.forEach((paper, index) => {
+          const explicitNum = extractPaperNumber(paper.name);
+          const storedOrder = Number(paper.display_order);
+          let num =
+            explicitNum ??
+            (Number.isInteger(storedOrder) && storedOrder > 0
+              ? storedOrder
+              : index + 1);
+          while (usedStageNumbers.has(num)) num += 1;
+          usedStageNumbers.add(num);
+          displayById.set(paper.id, formatPaperDisplay(paper.name, num));
+        });
+      }
+    } else {
+      const sortedCommon = sortPapers(commonPapers);
+      const usedCommonNumbers = new Set<number>();
 
-      displayById.set(paper.id, formatPaperDisplay(paper.name, num));
-    });
+      sortedCommon.forEach((paper, index) => {
+        const explicitNum = extractPaperNumber(paper.name);
+        const storedOrder = Number(paper.display_order);
+        let num =
+          explicitNum ??
+          (Number.isInteger(storedOrder) && storedOrder > 0
+            ? storedOrder
+            : index + 1);
+        while (usedCommonNumbers.has(num)) num += 1;
+        usedCommonNumbers.add(num);
 
-    const commonCount = sortedCommon.length;
+        displayById.set(paper.id, formatPaperDisplay(paper.name, num));
+      });
+    }
+
+    const commonCount = commonPapers.length;
 
     // 2. Process specialized papers per specialization branch
     for (const specPapers of specializedBySpec.values()) {
       const sortedSpec = sortPapers(specPapers);
-      const usedSpecNumbers = new Set<number>(usedCommonNumbers);
+
+      // Determine if this specialization represents an AEE-style technical branch:
+      // Exactly 1 common paper (Paper 1), and specialization papers do not explicitly
+      // declare themselves as Paper 1 or display_order 1 or a separate exam stage.
+      const hasExplicitFirstPaper = sortedSpec.some((paper) => {
+        const explicit = extractPaperNumber(paper.name);
+        const storedOrder = Number(paper.display_order);
+        return explicit === 1 || (Number.isInteger(storedOrder) && storedOrder === 1);
+      });
+
+      const isAeeStyleBranch = commonCount === 1 && !hasExplicitFirstPaper;
+      const usedSpecNumbers = new Set<number>();
 
       sortedSpec.forEach((paper, index) => {
         const explicitNum = extractPaperNumber(paper.name);
@@ -203,9 +255,12 @@ export function buildPaperDisplayMap(
           num = explicitNum;
         } else if (Number.isInteger(storedOrder) && storedOrder > 0) {
           num = storedOrder;
-        } else {
+        } else if (isAeeStyleBranch) {
           // If commonCount is 1, the first specialization paper defaults to Paper 2!
           num = commonCount + index + 1;
+        } else {
+          // Independent stage or track (Screening, Mains, Written Examination, etc.): starts at Paper 1, Paper 2...
+          num = index + 1;
         }
 
         while (usedSpecNumbers.has(num)) num += 1;
