@@ -360,7 +360,85 @@ function CatalogSection({ eyebrow, title, description, action, children }: { eye
 
 function TestGrid({ tests }: { tests: CatalogTest[] }) {
   if (tests.length === 0) return <EmptyCatalog title="No matching mock tests" detail="Try another paper or clear the current search." />;
-  return <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{tests.map((test) => <article key={test.id} className="group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5"><div className="h-1.5 bg-gradient-to-r from-teal-500 to-teal-300" /><div className="flex flex-1 flex-col p-6"><div className="flex items-start justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-950 text-teal-200"><MockSymbol /></span><span className={`rounded-full px-3 py-1 text-xs font-black ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>{test.access_type === "free" ? "Free" : "Paid series"}</span></div><p className="mt-5 text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">{test.state.code} · {test.exam.name} · {test.paperDisplay?.shortLabel ?? "Paper"}</p><h3 className="font-display mt-2 text-2xl">{mockTestLabel(Number(test.series_number ?? 1))}</h3>{test.subject && <p className="mt-1 text-sm font-bold text-slate-700">{test.subject.name}</p>}<p className="mt-3 flex-1 text-sm leading-6 text-slate-600">{test.description ?? "Focused exam practice with saved progress and detailed answer review."}</p><div className="mt-6 grid grid-cols-3 divide-x rounded-2xl bg-slate-50 py-3 text-center"><Metric value={test.questions ?? "—"} label="Questions" /><Metric value={test.duration_minutes} label="Minutes" /><Metric value={test.marks === null ? "—" : Number(test.marks).toFixed(2).replace(/\.00$/, "")} label="Marks" /></div><Link href={mockTestUrl(test.state.slug, test.exam.slug, test.paper.slug, test.slug)} className="mt-5 flex items-center justify-between rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white transition group-hover:bg-teal-700"><span>View test details</span><span>→</span></Link></div></article>)}</div>;
+  return (
+    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {tests.map((test) => {
+        const testNum = String(test.series_number ?? 1).padStart(2, "0");
+        const isFree = test.access_type === "free";
+        const testHref = mockTestUrl(test.state.slug, test.exam.slug, test.paper.slug, test.slug);
+        const marksDisplay = test.marks === null ? "—" : Number(test.marks).toFixed(2).replace(/\.00$/, "");
+
+        return (
+          <article
+            key={test.id}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md sm:p-5"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-emerald-400 opacity-90" />
+
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-black text-teal-800 border border-teal-100/80">
+                    {testNum}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-display text-base font-bold text-slate-900 transition group-hover:text-teal-800 sm:text-lg truncate">
+                      {mockTestLabel(Number(test.series_number ?? 1))}
+                    </h3>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700 truncate">
+                      {test.state.code} · {test.paperDisplay?.shortLabel ?? "Paper"}
+                      {test.subject && <span className="font-semibold text-slate-600 normal-case"> · {test.subject.name}</span>}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                    isFree
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      : "bg-amber-50 text-amber-800 border border-amber-200"
+                  }`}
+                >
+                  {isFree ? "Free" : "Paid series"}
+                </span>
+              </div>
+
+              <div className="mt-3.5 flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-2 text-xs border border-slate-100">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-900">{test.questions ?? "—"}</span>
+                  <span className="text-[11px] font-medium text-slate-500">Questions</span>
+                </div>
+                <span className="text-slate-300 font-bold">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-900">{test.duration_minutes}</span>
+                  <span className="text-[11px] font-medium text-slate-500">Mins</span>
+                </div>
+                <span className="text-slate-300 font-bold">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-900">{marksDisplay}</span>
+                  <span className="text-[11px] font-medium text-slate-500">Marks</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                <MockSymbol className="h-3.5 w-3.5 shrink-0 text-teal-600" />
+                <span>Timer & solution</span>
+              </span>
+              <Link
+                href={testHref}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-black text-white transition hover:bg-teal-700 group-hover:bg-teal-700"
+              >
+                <span>Start test</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
 }
 
 function CatalogPagination({ filters, page, totalPages, basePath }: { filters: Filters; page: number; totalPages: number; basePath: string }) {
@@ -374,10 +452,6 @@ function CatalogPagination({ filters, page, totalPages, basePath }: { filters: F
     <span className="text-sm font-semibold text-slate-600">Page {page} of {totalPages}</span>
     <Link href={pageHref(Math.min(totalPages, page + 1))} aria-disabled={page === totalPages} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === totalPages ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Next</Link>
   </nav>;
-}
-
-function Metric({ value, label }: { value: string | number; label: string }) {
-  return <span><strong className="block text-sm text-slate-950">{value}</strong><span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</span></span>;
 }
 
 function EmptyCatalog({ title, detail }: { title: string; detail: string }) {
