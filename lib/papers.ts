@@ -243,11 +243,18 @@ export function buildPaperDisplayMap(
         const storedOrder = Number(paper.display_order);
 
         let num: number;
-        if (explicitNum !== null && (isAeeStyleBranch ? true : explicitNum <= sortedSpec.length)) {
+        if (explicitNum !== null) {
+          // If explicit number is in name (Paper 1, Paper 2, Paper II), honor it directly
           num = explicitNum;
-        } else if (isAeeStyleBranch) {
+        } else if (Number.isInteger(storedOrder) && storedOrder > 0 && storedOrder <= 2) {
+          // If display_order is explicitly 1 or 2, honor it
+          num = storedOrder;
+        } else if (isAeeStyleBranch || commonCount === 1) {
           // If commonCount is 1, the first specialization paper defaults to Paper 2!
           num = commonCount + index + 1;
+        } else if (/hindu\s*(?:philosophy|religion)/i.test(paper.name)) {
+          // Hindu Philosophy & Temple System / Hindu Religion is Paper 2 (Paper 1 is General Studies)
+          num = 2;
         } else {
           // Independent stage or track (Screening, Mains, Written Examination, etc.): starts at Paper 1, Paper 2...
           num = index + 1;

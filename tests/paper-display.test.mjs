@@ -112,28 +112,28 @@ test("paper number extraction and display mapping logic handles AEE Paper II cor
 test("buildPaperDisplayMap correctly coordinates stage-based exams (Screening & Mains) and Endowment Officer", async () => {
   const { buildPaperDisplayMap } = await import("../lib/papers.ts");
 
-  // 1. Endowment Officer case: 2 common/screening papers + 1 Written Examination paper
+  // 1. Endowment Officer case: Screening Paper 1 & 2 + Hindu Philosophy is Paper 2 (General Studies is Paper 1)
   const eoPapers = [
     { id: "eo-c1", exam_group_id: "eo", name: "Screening Paper 1 - General Studies", display_order: 1 },
     { id: "eo-c2", exam_group_id: "eo", name: "Screening Paper 2 - Hindu Philosophy", display_order: 2 },
-    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Hindu Philosophy & Temple System", display_order: 3 },
+    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Hindu Philosophy & Temple System", display_order: 0 },
   ];
   const eoMap = buildPaperDisplayMap(eoPapers);
   assert.equal(eoMap.get("eo-c1")?.shortLabel, "Paper 1");
   assert.equal(eoMap.get("eo-c2")?.shortLabel, "Paper 2");
-  // Crucial: The written examination paper starts at Paper 1, NOT Paper 3!
-  assert.equal(eoMap.get("eo-m1")?.shortLabel, "Paper 1");
-  assert.equal(eoMap.get("eo-m1")?.label, "Paper 1 · Hindu Philosophy & Temple System");
+  // HP & TS in Endowment Officer is Paper 2!
+  assert.equal(eoMap.get("eo-m1")?.shortLabel, "Paper 2");
+  assert.equal(eoMap.get("eo-m1")?.label, "Paper 2 · Hindu Philosophy & Temple System");
 
-  // 1b. Endowment Officer with literal 'Paper 3 · Hindu Philosophy & Temple System' in name
-  const eoLegacyNamedPapers = [
+  // 1b. Endowment Officer with explicit Paper 2 in name
+  const eoExplicitPaper2 = [
     { id: "eo-c1", exam_group_id: "eo", name: "Screening Paper 1 - General Studies", display_order: 1 },
     { id: "eo-c2", exam_group_id: "eo", name: "Screening Paper 2 - Hindu Philosophy", display_order: 2 },
-    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Paper 3 · Hindu Philosophy & Temple System", display_order: 3 },
+    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Paper 2 · Hindu Philosophy & Temple System", display_order: 2 },
   ];
-  const eoLegacyMap = buildPaperDisplayMap(eoLegacyNamedPapers);
-  assert.equal(eoLegacyMap.get("eo-m1")?.shortLabel, "Paper 1");
-  assert.equal(eoLegacyMap.get("eo-m1")?.label, "Paper 1 · Hindu Philosophy & Temple System");
+  const eoLegacyMap = buildPaperDisplayMap(eoExplicitPaper2);
+  assert.equal(eoLegacyMap.get("eo-m1")?.shortLabel, "Paper 2");
+  assert.equal(eoLegacyMap.get("eo-m1")?.label, "Paper 2 · Hindu Philosophy & Temple System");
 
   // 2. Stage-based exam with specializations: Screening (P1, P2) and Mains (P1, P2) -> 4 papers total
   const stagePapers = [
