@@ -65,7 +65,7 @@ export function formatPaperDisplay(
   assignedNumber: number,
 ): PaperDisplay {
   const extractedNumber = extractPaperNumber(name);
-  const number = extractedNumber ?? assignedNumber;
+  const number = assignedNumber > 0 ? assignedNumber : (extractedNumber ?? 1);
   const shortLabel = `Paper ${number}`;
 
   const trimmed = name.trim();
@@ -97,14 +97,6 @@ export function formatPaperDisplay(
     };
   }
 
-  // Check if name is already formatted as "Paper <num> · <topic>"
-  if (/^paper\s+\d+\s*·/i.test(trimmed)) {
-    return {
-      number,
-      shortLabel,
-      label: trimmed,
-    };
-  }
 
   // If paper name is descriptive, like "Civil Engineering" or "General Studies"
   return {
@@ -251,10 +243,8 @@ export function buildPaperDisplayMap(
         const storedOrder = Number(paper.display_order);
 
         let num: number;
-        if (explicitNum !== null) {
+        if (explicitNum !== null && (isAeeStyleBranch ? true : explicitNum <= sortedSpec.length)) {
           num = explicitNum;
-        } else if (Number.isInteger(storedOrder) && storedOrder > 0) {
-          num = storedOrder;
         } else if (isAeeStyleBranch) {
           // If commonCount is 1, the first specialization paper defaults to Paper 2!
           num = commonCount + index + 1;

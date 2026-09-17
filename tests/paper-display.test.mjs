@@ -116,7 +116,7 @@ test("buildPaperDisplayMap correctly coordinates stage-based exams (Screening & 
   const eoPapers = [
     { id: "eo-c1", exam_group_id: "eo", name: "Screening Paper 1 - General Studies", display_order: 1 },
     { id: "eo-c2", exam_group_id: "eo", name: "Screening Paper 2 - Hindu Philosophy", display_order: 2 },
-    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Hindu Philosophy & Temple System", display_order: 1 },
+    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Hindu Philosophy & Temple System", display_order: 3 },
   ];
   const eoMap = buildPaperDisplayMap(eoPapers);
   assert.equal(eoMap.get("eo-c1")?.shortLabel, "Paper 1");
@@ -124,6 +124,16 @@ test("buildPaperDisplayMap correctly coordinates stage-based exams (Screening & 
   // Crucial: The written examination paper starts at Paper 1, NOT Paper 3!
   assert.equal(eoMap.get("eo-m1")?.shortLabel, "Paper 1");
   assert.equal(eoMap.get("eo-m1")?.label, "Paper 1 · Hindu Philosophy & Temple System");
+
+  // 1b. Endowment Officer with literal 'Paper 3 · Hindu Philosophy & Temple System' in name
+  const eoLegacyNamedPapers = [
+    { id: "eo-c1", exam_group_id: "eo", name: "Screening Paper 1 - General Studies", display_order: 1 },
+    { id: "eo-c2", exam_group_id: "eo", name: "Screening Paper 2 - Hindu Philosophy", display_order: 2 },
+    { id: "eo-m1", exam_group_id: "eo", specialization_id: "spec-written", name: "Paper 3 · Hindu Philosophy & Temple System", display_order: 3 },
+  ];
+  const eoLegacyMap = buildPaperDisplayMap(eoLegacyNamedPapers);
+  assert.equal(eoLegacyMap.get("eo-m1")?.shortLabel, "Paper 1");
+  assert.equal(eoLegacyMap.get("eo-m1")?.label, "Paper 1 · Hindu Philosophy & Temple System");
 
   // 2. Stage-based exam with specializations: Screening (P1, P2) and Mains (P1, P2) -> 4 papers total
   const stagePapers = [
