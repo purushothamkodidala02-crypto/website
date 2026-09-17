@@ -331,9 +331,31 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             </div>
           </CatalogSection>
         ) : !selectedExam ? (
-          <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
-            {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <ExamSelectionGrid exams={examSelectionItems} />}
-          </CatalogSection>
+          <>
+            <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="Exams are organized by recruiting board for easy discovery." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
+              {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <ExamSelectionGrid exams={examSelectionItems} />}
+            </CatalogSection>
+
+            {matchingTests.length > 0 && (
+              <section className="mt-12 border-t border-slate-200/80 pt-10">
+                <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">
+                      {selectedState.code} · Timed Practice
+                    </p>
+                    <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                      Latest Mock Tests in all subjects
+                    </h2>
+                    <p className="mt-1.5 text-sm text-slate-600">
+                      Directly attempt the newest full-length and subject mock tests available in {selectedState.name}.
+                    </p>
+                  </div>
+                </div>
+
+                <TestGrid tests={matchingTests.slice(0, 9)} />
+              </section>
+            )}
+          </>
         ) : !selectedPaper ? (
           <CatalogSection eyebrow={`${selectedState.code} · ${resolvedCategory?.name} · Step 3`} title={`Choose a paper for ${selectedExam.name}`} description="Paper numbers are generated consistently from the exam structure." action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">Change exam</Link>}>
             {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="student-stagger grid gap-4 md:grid-cols-2">{examPapers.map((paper) => {

@@ -45,8 +45,77 @@ export function ExamSelectionGrid({ exams }: { exams: ExamSelectionItem[] }) {
 
   return (
     <>
-      <ExamCards exams={visibleExams} />
-      {exams.length > 4 && (
+      {boards.length > 1 && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-xs font-bold text-slate-500">Categories:</span>
+          <button
+            type="button"
+            onClick={() => setBoard("all")}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+              board === "all"
+                ? "bg-slate-950 text-white shadow-sm"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-teal-300"
+            }`}
+          >
+            All categories ({exams.length})
+          </button>
+          {boards.map((b) => {
+            const count = exams.filter((e) => e.boardName === b).length;
+            return (
+              <button
+                key={b}
+                type="button"
+                onClick={() => setBoard(b)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                  board === b
+                    ? "bg-teal-800 text-white shadow-sm"
+                    : "border border-slate-200 bg-white text-slate-600 hover:border-teal-300"
+                }`}
+              >
+                {b} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {board === "all" && boards.length > 1 ? (
+        <div className="space-y-8">
+          {boards.map((boardName) => {
+            const boardExams = exams.filter((e) => e.boardName === boardName);
+            return (
+              <section key={boardName} className="rounded-3xl border border-slate-200 bg-white/70 p-5 sm:p-6">
+                <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-100 text-xs font-black text-teal-900">
+                      {boardName.slice(0, 2).toUpperCase()}
+                    </span>
+                    <h3 className="font-display text-lg font-bold text-slate-900">{boardName}</h3>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {boardExams.length} exam{boardExams.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <ExamCards exams={boardExams} />
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <div>
+          {board !== "all" && (
+            <div className="mb-4 flex items-center justify-between border-b border-slate-200/80 pb-2">
+              <h3 className="font-display text-lg font-bold text-slate-900">{board}</h3>
+              <span className="text-xs font-semibold text-slate-500">
+                {filteredExams.length} exam{filteredExams.length === 1 ? "" : "s"}
+              </span>
+            </div>
+          )}
+          <ExamCards exams={filteredExams} />
+        </div>
+      )}
+
+      {exams.length > 4 && board !== "all" && (
         <div className="mt-5 flex justify-center">
           <button
             type="button"
