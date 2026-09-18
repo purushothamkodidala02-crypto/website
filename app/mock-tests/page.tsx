@@ -206,7 +206,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   const isSearching = Boolean(query);
   const selectedType = filters.type === "paper" || filters.type === "subject"
     ? filters.type
-    : "all";
+    : selectedSubject
+      ? "subject"
+      : "all";
   const matchingTests = tests.filter((test) => {
     const searchable = `${test.state.name} ${test.state.code} ${test.category.name} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.title}`.toLowerCase();
     return (
@@ -348,12 +350,38 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             })}</div>}
           </CatalogSection>
         ) : (
-          <CatalogSection eyebrow={`${selectedState.code} · ${selectedExam.name} · ${paperDisplayById.get(selectedPaper.id)?.shortLabel}`} title="Choose a mock test" description="Tests use one predictable series: Mock Test 01, Mock Test 02, Mock Test 03…" action={<Link href={examUrl(selectedState.slug, selectedExam.slug)} className="text-sm font-bold text-teal-800">Change paper</Link>}>
+          <CatalogSection
+            eyebrow={`${selectedState.code} · ${selectedExam.name} · ${paperDisplayById.get(selectedPaper.id)?.shortLabel}`}
+            title="Choose a mock test"
+            description="Tests use one predictable series: Mock Test 01, Mock Test 02, Mock Test 03…"
+            action={
+              selectedSubject ? (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                    className="text-sm font-bold text-teal-800 hover:text-teal-950"
+                  >
+                    All subjects →
+                  </Link>
+                  <Link
+                    href={examUrl(selectedState.slug, selectedExam.slug)}
+                    className="text-sm font-bold text-slate-500 hover:text-slate-700"
+                  >
+                    Change paper
+                  </Link>
+                </div>
+              ) : (
+                <Link href={examUrl(selectedState.slug, selectedExam.slug)} className="text-sm font-bold text-teal-800">
+                  Change paper
+                </Link>
+              )
+            }
+          >
             <div className="mb-6 flex flex-wrap gap-2">
               {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
             </div>
 
-            {(selectedType === "subject" || Boolean(selectedSubject)) && paperSubjects.length > 0 && (
+            {selectedType === "subject" && !selectedSubject && paperSubjects.length > 0 && (
               <div className="mb-10">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -364,29 +392,16 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                       Choose a subject for targeted practice
                     </h3>
                   </div>
-                  {selectedSubject && (
-                    <Link
-                      href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
-                      className="text-xs font-bold text-teal-800 hover:text-teal-950"
-                    >
-                      Show all subjects →
-                    </Link>
-                  )}
                 </div>
 
                 <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {paperSubjects.map((sub) => {
-                    const isSelected = selectedSubject?.id === sub.id;
                     const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
                     return (
                       <Link
                         key={sub.id}
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
-                        className={`student-card group flex min-h-48 flex-col rounded-3xl border bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5 ${
-                          isSelected
-                            ? "border-teal-500 ring-2 ring-teal-500/20"
-                            : "border-slate-200"
-                        }`}
+                        className="student-card group flex min-h-48 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5"
                       >
                         <span className="flex items-center justify-between gap-3">
                           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800">
