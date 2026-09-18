@@ -377,9 +377,53 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               )
             }
           >
-            <div className="mb-6 flex flex-wrap gap-2">
+            <div className="mb-4 flex flex-wrap gap-2">
               {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
             </div>
+
+            {selectedType === "subject" && paperSubjects.length > 0 && (
+              <div className="mb-6 rounded-2xl border border-teal-100 bg-white p-3 sm:p-4 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <span className="mr-1 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Subjects:
+                  </span>
+                  <Link
+                    href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                    className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+                      !selectedSubject
+                        ? "bg-teal-800 text-white shadow-sm font-black border border-teal-800"
+                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300"
+                    }`}
+                  >
+                    📁 All subjects overview ({paperSubjects.length})
+                  </Link>
+                  {paperSubjects.map((sub) => {
+                    const isSelected = selectedSubject?.id === sub.id;
+                    const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
+                    return (
+                      <Link
+                        key={sub.id}
+                        href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
+                        className={`rounded-xl px-3.5 py-1.5 text-xs transition ${
+                          isSelected
+                            ? "bg-teal-800 text-white shadow-sm font-black border border-teal-800"
+                            : "border border-slate-200 bg-slate-50 text-slate-700 font-bold hover:border-teal-300"
+                        }`}
+                      >
+                        {isSelected ? "✓ " : ""}{sub.name}{" "}
+                        <span
+                          className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                            isSelected ? "bg-teal-900/60 text-teal-100" : "bg-slate-200/80 text-slate-600"
+                          }`}
+                        >
+                          {subTestsCount}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {selectedType === "subject" && !selectedSubject && paperSubjects.length > 0 && (
               <div className="mb-10">
