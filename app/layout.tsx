@@ -66,9 +66,12 @@ export const metadata: Metadata = {
     title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
     description: SITE_DESCRIPTION,
   },
-  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
-    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-    : undefined,
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    other: {
+      "msvalidate.01": "ECDDB1BF993A7E16288F00B7BDBCD3E7",
+    },
+  },
   robots: {
     index: true,
     follow: true,
