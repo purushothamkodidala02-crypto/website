@@ -26,7 +26,7 @@ export function BrandLockup({ context = "public", markClassName }: BrandLockupPr
       <BrandMark preload className={markClassName ?? "h-11 w-11 shrink-0 drop-shadow-[0_8px_12px_rgba(7,18,37,0.18)]"} />
       <span className="leading-none">
         <span className={`font-brand block text-[1.08rem] font-bold tracking-[-0.035em] sm:text-[1.28rem] ${admin ? "text-white" : "text-slate-950"}`}>Varadhi Prep</span>
-        <span className={`mt-1.5 hidden text-[8px] font-black uppercase tracking-[0.18em] sm:block ${admin ? "text-teal-200" : "text-teal-700"}`}>{admin ? "Admin workspace" : "Smart mock tests for career growth"}</span>
+        <span className={`mt-1.5 hidden text-[8px] font-black uppercase tracking-[0.18em] sm:block ${admin ? "text-teal-200" : "text-teal-700"}`}>{admin ? "Admin workspace" : "TG & AP Competitive Exams Free Mock Tests"}</span>
       </span>
     </span>
   );

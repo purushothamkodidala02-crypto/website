@@ -117,7 +117,7 @@ export default async function MockTestOpenGraphImage({
             <div style={{ display: "flex", flexDirection: "column", marginLeft: 20 }}>
               <div style={{ fontSize: 34, fontWeight: 900 }}>Varadhi Prep</div>
               <div style={{ color: "#5eead4", fontSize: 14, fontWeight: 800, letterSpacing: 3, marginTop: 4 }}>
-                SMART MOCK TESTS FOR CAREER GROWTH
+                TG & AP COMPETITIVE EXAMS FREE MOCK TESTS
               </div>
             </div>
           </div>

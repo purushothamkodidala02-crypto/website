@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Varadhi Prep",
     short_name: "Varadhi",
-    description: "Smart mock tests for career growth.",
+    description: "TG & AP Competitive Exams Free Mock Tests.",
     start_url: "/",
     display: "standalone",
     background_color: "#f8fafc",
