@@ -14,7 +14,9 @@ import { SurveyPopup } from "@/components/dashboard/SurveyPopup";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
+  title: {
+    absolute: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
+  },
   description: SITE_DESCRIPTION,
   keywords: [
     "Varadhi Prep",

@@ -72,7 +72,7 @@ type CatalogTest = {
 
 export async function generateMetadata({ searchParams }: MockTestsPageProps): Promise<Metadata> {
   const filters = await searchParams;
-  const title = "State Exam Mock Tests for Telangana & Andhra Pradesh";
+  const title = "TG & AP State Exam Mock Tests";
   const description =
     "Choose your state, exam and paper to find the right mock-test series. Practise Telangana and Andhra Pradesh exams in English and Telugu.";
   const isFiltered = Boolean(

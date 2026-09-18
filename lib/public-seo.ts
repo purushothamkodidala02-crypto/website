@@ -14,8 +14,22 @@ export function publicCollectionMetadata({
   indexable?: boolean;
   keywords?: string[];
 }): Metadata {
+  const brand = " | Varadhi Prep";
+  let metadataTitle: Metadata["title"] = title;
+  if (title.endsWith("Varadhi Prep")) {
+    metadataTitle = { absolute: title };
+  } else if (title.length + brand.length > 60) {
+    const firstPart = title.split("|")[0].trim();
+    if (firstPart && firstPart.length + brand.length <= 60) {
+      metadataTitle = { absolute: `${firstPart}${brand}` };
+    } else {
+      const trimmed = title.slice(0, 60 - brand.length).trim().replace(/[|,\-–]$/, "").trim();
+      metadataTitle = { absolute: `${trimmed}${brand}` };
+    }
+  }
+
   return {
-    title,
+    title: metadataTitle,
     description,
     keywords,
     alternates: { canonical },

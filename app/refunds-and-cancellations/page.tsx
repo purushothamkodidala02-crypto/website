@@ -4,7 +4,8 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 
 export const metadata: Metadata = {
   title: "Refunds and Cancellations",
-  description: "Refund and cancellation policy for Varadhi Prep paid exam series.",
+  description:
+    "Review Varadhi Prep's refund and cancellation policy for paid exam-series access, duplicate payment resolutions, and digital mock test practice subscriptions.",
   alternates: { canonical: "/refunds-and-cancellations" },
 };
 

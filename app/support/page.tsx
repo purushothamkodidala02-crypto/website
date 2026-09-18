@@ -5,7 +5,8 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { absoluteUrl } from "@/lib/site";
 
 const supportEmail = "support@varadhiprep.in";
-const supportDescription = "Contact Varadhi Prep support for help with your account, mock tests, attempts, payments or results.";
+const supportDescription =
+  "Contact Varadhi Prep support for fast assistance with student accounts, online mock tests, test attempts, score reviews, and exam series payments.";
 
 export const metadata: Metadata = {
   title: "Contact Support",

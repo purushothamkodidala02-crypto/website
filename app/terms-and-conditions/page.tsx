@@ -4,7 +4,8 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 
 export const metadata: Metadata = {
   title: "Terms and Conditions",
-  description: "Terms and Conditions for using Varadhi Prep mock tests and paid exam series.",
+  description:
+    "Review the terms and conditions for using Varadhi Prep online mock tests, student accounts, practice question sets, and paid exam series.",
   alternates: { canonical: "/terms-and-conditions" },
 };
 

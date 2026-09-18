@@ -23,7 +23,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const canonical = stateUrl(context.state.slug);
   const seo = resolveSeoFields(context.state, {
     title: `${context.state.name} Mock Tests`,
-    description: `Browse free ${context.state.name} exam mock tests by exam and paper on Varadhi Prep.`,
+    description: `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.`,
   });
   return publicCollectionMetadata({
     ...seo,
@@ -43,6 +43,6 @@ export default async function StateOrLegacyTestPage({ params, searchParams }: Pr
   if (!context) notFound();
   const canonical = stateUrl(context.state.slug);
   if (context.usedAlias || id !== context.state.slug) permanentRedirect(canonical);
-  const seo = resolveSeoFields(context.state, { title: `${context.state.name} Mock Tests`, description: `Browse free ${context.state.name} exam mock tests by exam and paper on Varadhi Prep.` });
+  const seo = resolveSeoFields(context.state, { title: `${context.state.name} Mock Tests`, description: `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.` });
   return <><JsonLd data={collectionStructuredData(seo.title, seo.description, canonical, [{ name: "Home", path: "/" }, { name: "Mock tests", path: "/mock-tests" }, { name: context.state.name, path: canonical }])} />{await MockTestsPage({ searchParams: Promise.resolve({ ...(await searchParams), state: context.state.slug }), canonicalPath: canonical })}</>;
 }

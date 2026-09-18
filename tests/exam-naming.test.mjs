@@ -52,11 +52,11 @@ test("formatExamFallbackTitle and Description prevent redundant titles or state 
 
   assert.equal(
     formatExamFallbackDescription("Telangana Police Constable Mock Test Series 2026", "Telangana"),
-    "Practise Telangana Police Constable Mock Test Series 2026. Explore papers, take timed tests and review every answer.",
+    "Practise free Telangana Police Constable Mock Test Series 2026 on Varadhi Prep. Take timed online practice tests, review comprehensive explanations, and improve your score.",
   );
   assert.equal(
     formatExamFallbackDescription("Police Constable", "Telangana"),
-    "Practise Police Constable mock tests for Telangana. Explore papers, take timed tests and review every answer.",
+    "Practise free Police Constable mock tests for Telangana on Varadhi Prep. Take timed online practice tests, review comprehensive explanations, and improve your score.",
   );
 });
 

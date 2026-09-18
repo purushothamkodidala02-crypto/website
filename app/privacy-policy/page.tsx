@@ -4,7 +4,8 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Varadhi Prep collects, uses and protects student account and study data.",
+  description:
+    "Learn how Varadhi Prep collects, uses, and safeguards your student account details, test attempts, study progress, score analytics, and payment data.",
   alternates: { canonical: "/privacy-policy" },
 };
 

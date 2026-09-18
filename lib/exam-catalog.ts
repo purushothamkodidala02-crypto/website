@@ -91,6 +91,6 @@ export function formatExamFallbackDescription(examName: string, stateName?: stri
   const mentionsState = Boolean(stateName && examName.toLowerCase().includes(stateName.toLowerCase()));
   const target = hasSuffix ? examName : `${examName} mock tests`;
   const location = mentionsState || !stateName ? "" : ` for ${stateName}`;
-  return `Practise ${target}${location}. Explore papers, take timed tests and review every answer.`;
+  return `Practise free ${target}${location} on Varadhi Prep. Take timed online practice tests, review comprehensive explanations, and improve your score.`;
 }
 
