@@ -43,9 +43,12 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/varadhi-icon-96.png", type: "image/png", sizes: "96x96" },
+      { url: "/varadhi-icon-192.png", type: "image/png", sizes: "192x192" },
       { url: "/varadhi-v-logo.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/varadhi-v-logo.png",
+    shortcut: "/favicon.ico",
     apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
   },
   manifest: "/manifest.webmanifest",
