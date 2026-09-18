@@ -77,7 +77,7 @@ const filterStyles = {
   },
 };
 
-export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialStatus }: {
+export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialStatus, initialScope = "all" }: {
   states: Array<{ id: string; name: string; code: string; slug: string }>;
   categories: Array<LocationCategory & { stateId: string }>;
   exams: LocationExam[];
@@ -88,11 +88,13 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   initialLocation: LocationFilterValue;
   initialSearch: string;
   initialStatus: MockTestStatus | "all";
+  initialScope?: "all" | "paper" | "subject";
 }) {
   const [stateId, setStateId] = useState(initialStateId);
   const [location, setLocation] = useState(initialLocation);
   const [search, setSearch] = useState(initialSearch);
   const [status, setStatus] = useState<MockTestStatus | "all">(initialStatus);
+  const [scope, setScope] = useState<"all" | "paper" | "subject">(initialScope);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
@@ -122,9 +124,10 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       (!location.specializationId || test.specializationId === location.specializationId) &&
       (!location.paperId || test.paperId === location.paperId) &&
       (status === "all" || test.status === status) &&
-      (!query || `${test.title} ${test.slug} ${test.examName} ${test.paperName}`.toLowerCase().includes(query)),
+      (scope === "all" || test.scope === scope) &&
+      (!query || `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""}`.toLowerCase().includes(query)),
     );
-  }, [location, search, stateId, status, tests]);
+  }, [location, search, stateId, status, scope, tests]);
 
   const counts = {
     all: tests.length,
@@ -141,10 +144,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     if (location.specializationId) params.set("specialization", location.specializationId);
     if (location.paperId) params.set("paper", location.paperId);
     if (status !== "all") params.set("status", status);
+    if (scope !== "all") params.set("scope", scope);
     if (search.trim()) params.set("q", search.trim().slice(0, 100));
     const query = params.toString();
     return query ? `/admin/mock-tests?${query}` : "/admin/mock-tests";
-  }, [location, search, stateId, status]);
+  }, [location, search, stateId, status, scope]);
 
   const router = useRouter();
   
@@ -165,6 +169,10 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   }, [initialStatus]);
 
   useEffect(() => {
+    setScope(initialScope);
+  }, [initialScope]);
+
+  useEffect(() => {
     router.replace(mockTestAdminUrl, { scroll: false });
   }, [mockTestAdminUrl, router]);
 
@@ -173,7 +181,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
 
   useEffect(() => {
     setPage(1);
-  }, [stateId, location, search, status]);
+  }, [stateId, location, search, status, scope]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -223,13 +231,26 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       <div className="space-y-4 border-b border-teal-100 bg-gradient-to-r from-slate-50 to-teal-50/70 px-6 py-5 sm:px-7">
         <div><p className="mb-3 text-xs font-black uppercase tracking-[0.13em] text-slate-500">Filter by state</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { setStateId(""); setLocation(emptyLocation); }} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${!stateId ? "border-slate-950 bg-slate-950 text-white" : "bg-white text-slate-600"}`}>All states</button>{states.map((state) => <button key={state.id} type="button" onClick={() => { setStateId(state.id); setLocation(emptyLocation); }} className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold ${stateId === state.id ? "border-teal-600 bg-teal-50 text-teal-900 ring-1 ring-teal-600" : "bg-white text-slate-600"}`}><StateSymbol slug={state.slug} className="h-4 w-4" />{state.code} · {state.name}</button>)}</div></div>
         <LocationFilters categories={categories.filter((category) => !stateId || category.stateId === stateId)} exams={exams} specializations={specializations} papers={papers} value={location} onChange={setLocation} />
-        <label className="block max-w-xl text-sm font-bold">Search mock tests
-          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by test, Exam, or Paper" className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal" />
-        </label>
+        <div className="flex flex-wrap items-end gap-4">
+          <label className="block flex-1 min-w-[240px] text-sm font-bold">Search mock tests
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by test, Exam, or Paper" className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal" />
+          </label>
+          <label className="block w-full sm:w-64 text-sm font-bold">Test scope
+            <select
+              value={scope}
+              onChange={(event) => setScope(event.target.value as "all" | "paper" | "subject")}
+              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="all">Both (Paper &amp; Subject wise)</option>
+              <option value="paper">Paper-wise only</option>
+              <option value="subject">Subject-wise only</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="p-10 text-center"><h3 className="font-bold text-slate-900">No matching mock tests</h3><p className="mt-2 text-sm text-slate-600">Change the visibility, location, or search filters.</p></div>
+        <div className="p-10 text-center"><h3 className="font-bold text-slate-900">No matching mock tests</h3><p className="mt-2 text-sm text-slate-600">Change the visibility, scope, location, or search filters.</p></div>
       ) : (
         <>
           <div className="divide-y divide-slate-100">
