@@ -107,67 +107,251 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   if (!currentRow) return null;
 
   return (
-    <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-slate-200 bg-white px-3 py-3 sm:gap-4 sm:px-5">
-        {currentIndex > 0 ? (
-          <button title="Previous question (← Arrow)" onClick={() => handleNavigate(currentIndex - 1)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:border-teal-300 hover:text-teal-800">← Previous</button>
-        ) : (
-          <span className="rounded-lg border border-slate-100 px-3 py-2 text-xs font-black text-slate-300">← Previous</span>
-        )}
-        <p className="text-center text-xs font-black text-slate-700 sm:text-sm">Question {currentIndex + 1} of {rows.length}</p>
-        {currentIndex < rows.length - 1 ? (
-          <button title="Next question (→ Arrow)" onClick={() => handleNavigate(currentIndex + 1)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white">Next →</button>
-        ) : (
-          <span className="rounded-lg bg-slate-200 px-3 py-2 text-xs font-black text-slate-400">Next →</span>
-        )}
+    <section className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
+      {/* Top Toolbar: Navigation & Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-5">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {currentIndex > 0 ? (
+            <button
+              type="button"
+              title="Previous question (← Arrow)"
+              onClick={() => handleNavigate(currentIndex - 1)}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-800 shadow-xs transition hover:border-teal-400 hover:bg-teal-50"
+            >
+              <span aria-hidden="true">←</span>
+              <span>Previous</span>
+              <kbd className="hidden rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500 xl:inline-block">←</kbd>
+            </button>
+          ) : (
+            <span className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-black text-slate-300">
+              <span aria-hidden="true">←</span>
+              <span>Previous</span>
+            </span>
+          )}
+
+          {currentIndex < rows.length - 1 ? (
+            <button
+              type="button"
+              title="Next question (→ Arrow)"
+              onClick={() => handleNavigate(currentIndex + 1)}
+              className="flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-black text-white shadow-xs transition hover:bg-teal-900"
+            >
+              <span>Next</span>
+              <span aria-hidden="true">→</span>
+              <kbd className="hidden rounded bg-slate-800 px-1 py-0.5 text-[10px] font-semibold text-slate-300 xl:inline-block">→</kbd>
+            </button>
+          ) : (
+            <span className="flex items-center gap-1.5 rounded-xl bg-slate-200 px-3.5 py-2 text-xs font-black text-slate-400">
+              <span>Next</span>
+              <span aria-hidden="true">→</span>
+            </span>
+          )}
+
+          <div className="hidden sm:flex items-center gap-2 pl-2 text-xs font-bold text-slate-600">
+            <span>Question <strong className="text-slate-950">{currentIndex + 1}</strong> of <strong className="text-slate-950">{rows.length}</strong></span>
+            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full bg-teal-600 transition-all duration-300"
+                style={{ width: `${((currentIndex + 1) / rows.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="sm:hidden text-xs font-black text-slate-800">
+          Q {currentIndex + 1} / {rows.length}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ReportQuestionButton questionId={currentRow.question_id} />
+          <BookmarkButton questionId={currentRow.question_id} initialBookmarked={currentRow.bookmarked} />
+        </div>
       </div>
+
+      {/* Main Content Area: Responsive 2-column on desktop, stacked on mobile */}
       <div 
-        className="max-h-[64vh] overflow-y-auto overscroll-contain p-3 sm:max-h-[72vh] sm:p-5"
+        className="p-2 sm:p-4 lg:p-5"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
         <StudyQuestionCard key={currentRow.question_id} row={currentRow} index={currentIndex} />
       </div>
-      <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 py-3">
-        <span className="text-xs font-bold text-slate-500">{rows.length} total</span>
-        <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:border-teal-300 hover:text-teal-800">Clear search and filters</Link>
+
+      {/* Bottom Bar: Shortcuts hint & filter status */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 py-2.5">
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          <span className="font-bold">{rows.length} questions available</span>
+          <span className="hidden md:inline text-slate-300">·</span>
+          <span className="hidden md:inline font-medium">Use <kbd className="rounded bg-slate-100 px-1 py-0.5 font-semibold text-slate-700">←</kbd> and <kbd className="rounded bg-slate-100 px-1 py-0.5 font-semibold text-slate-700">→</kbd> to navigate</span>
+        </div>
+        <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-700 transition hover:border-teal-400 hover:text-teal-900">Clear search and filters</Link>
       </div>
     </section>
   );
 }
 
 function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
-  const options = [["A", row.option_a], ["B", row.option_b], ["C", row.option_c], ["D", row.option_d]];
+  const options = [
+    ["A", row.option_a],
+    ["B", row.option_b],
+    ["C", row.option_c],
+    ["D", row.option_d],
+  ] as const;
+
   return (
-    <article className="student-card overflow-hidden rounded-3xl border bg-white shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50 px-5 py-4 sm:px-6">
-        <div className="min-w-0">
-          <p className="break-words text-xs font-black uppercase tracking-wide text-teal-700">{row.state_name} · {row.exam_name} · {row.paper_name} · {row.subject_name}</p>
-          <p className="mt-1 text-xs font-semibold text-slate-500">Question {index + 1}{row.mistake_count > 0 ? ` · Incorrect ${row.mistake_count} time${row.mistake_count === 1 ? "" : "s"}` : ""}</p>
+    <article className="student-card overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-sm">
+      {/* Context strip */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/90 px-4 py-2.5 sm:px-6">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs">
+          <span className="font-black uppercase tracking-wider text-teal-700">
+            {row.state_name} · {row.exam_name}
+          </span>
+          <span className="hidden sm:inline text-slate-300">|</span>
+          <span className="truncate font-semibold text-slate-600">
+            {row.paper_name} · {row.subject_name}
+          </span>
         </div>
-        <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
-          <ReportQuestionButton questionId={row.question_id} />
-          <BookmarkButton questionId={row.question_id} initialBookmarked={row.bookmarked} />
+        <div className="flex items-center gap-2">
+          {row.mistake_count > 0 ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
+              Incorrect {row.mistake_count} time{row.mistake_count === 1 ? "" : "s"}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-bold text-teal-800">
+              Bookmarked
+            </span>
+          )}
         </div>
       </div>
-      <div className="p-5 sm:p-6">
-        <FormattedQuestionText text={row.question_text} className="text-lg leading-8 text-slate-950" />
-        {row.image_url && <QuestionMedia src={row.image_url} className="mt-5" />}
-        <div className="mt-6 grid gap-3">
-          {options.map(([key, label]) => (
-            <div key={key} className={`flex gap-3 rounded-xl border p-3.5 text-sm leading-6 ${key === row.correct_answer ? "border-emerald-300 bg-emerald-50 text-emerald-950" : key === row.last_selected_answer ? "border-red-200 bg-red-50 text-red-900" : "border-slate-200 text-slate-700"}`}>
-              <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg font-black ${key === row.correct_answer ? "bg-emerald-700 text-white" : "bg-slate-100"}`}>{key}</span>
-              <span className="pt-1">{label}</span>
+
+      {/* 2-Column Grid on Desktop (lg:), Single-Column on Mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+        {/* Left Pane: Question text and options */}
+        <div className="lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto overscroll-contain">
+          <div>
+            <div className="flex items-start gap-3">
+              <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-xl bg-slate-950 text-xs font-black text-white">
+                {index + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <FormattedQuestionText text={row.question_text} className="text-base sm:text-lg font-medium leading-relaxed text-slate-950" />
+              </div>
             </div>
-          ))}
-        </div>
-        {row.explanation && (
-          <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-5 text-sm leading-7 text-teal-950">
-            <p className="text-xs font-black uppercase tracking-wide text-teal-700">Explanation</p>
-            <FormattedQuestionText text={row.explanation} className="mt-2" />
+
+            {row.image_url && (
+              <div className="mt-4">
+                <QuestionMedia src={row.image_url} />
+              </div>
+            )}
+
+            {/* Options */}
+            <div className="mt-5 space-y-2.5">
+              {options.map(([key, label]) => {
+                const isCorrect = key === row.correct_answer;
+                const isSelected = key === row.last_selected_answer;
+
+                let cardStyle = "border-slate-200 bg-white text-slate-800";
+                let badgeStyle = "bg-slate-100 text-slate-700";
+                let statusBadge = null;
+
+                if (isCorrect && isSelected) {
+                  cardStyle = "border-emerald-500 bg-emerald-50/90 text-emerald-950 ring-1 ring-emerald-400";
+                  badgeStyle = "bg-emerald-700 text-white";
+                  statusBadge = (
+                    <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-emerald-900">
+                      ✓ Your Answer · Correct
+                    </span>
+                  );
+                } else if (isCorrect) {
+                  cardStyle = "border-emerald-500 bg-emerald-50/80 text-emerald-950 ring-1 ring-emerald-400";
+                  badgeStyle = "bg-emerald-700 text-white";
+                  statusBadge = (
+                    <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-emerald-900">
+                      ✓ Correct Answer
+                    </span>
+                  );
+                } else if (isSelected) {
+                  cardStyle = "border-red-400 bg-red-50/90 text-red-950 ring-1 ring-red-300";
+                  badgeStyle = "bg-red-700 text-white";
+                  statusBadge = (
+                    <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-red-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-red-900">
+                      ✕ Your Answer
+                    </span>
+                  );
+                }
+
+                return (
+                  <div
+                    key={key}
+                    className={`flex items-start gap-3 rounded-2xl border p-3 sm:p-3.5 text-sm transition ${cardStyle}`}
+                  >
+                    <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${badgeStyle}`}>
+                      {key}
+                    </span>
+                    <span className="min-w-0 flex-1 pt-0.5 leading-relaxed font-medium">
+                      {label}
+                    </span>
+                    {statusBadge}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Right Pane: Explanation & Analysis */}
+        <div className="lg:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="grid h-6 w-6 place-items-center rounded-md bg-teal-600 text-white text-xs font-black">
+                  💡
+                </span>
+                <h3 className="text-xs font-black uppercase tracking-wider text-teal-900">
+                  Explanation & Key Concept
+                </h3>
+              </div>
+              {row.last_selected_answer && (
+                <span className="text-[11px] font-semibold text-slate-500">
+                  You chose: <strong className={row.last_selected_answer === row.correct_answer ? "text-emerald-700" : "text-red-700"}>Option {row.last_selected_answer}</strong>
+                </span>
+              )}
+            </div>
+
+            {row.explanation ? (
+              <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs">
+                <FormattedQuestionText text={row.explanation} className="text-sm sm:text-base leading-relaxed text-teal-950" />
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-2xs">
+                <p className="text-sm font-semibold text-slate-600">
+                  No detailed explanation has been added for this question yet.
+                </p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Use the Report button in the header if you notice an issue or want to request an explanation.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Quick summary strip */}
+          <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-500">Correct Answer:</span>
+              <span className="rounded border border-emerald-300 bg-emerald-50 px-2 py-0.5 font-black text-emerald-800">
+                Option {row.correct_answer}
+              </span>
+            </div>
+            {row.last_seen_at && (
+              <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] text-slate-400">
+                <span>Last attempted:</span>
+                <span>{new Date(row.last_seen_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </article>
   );

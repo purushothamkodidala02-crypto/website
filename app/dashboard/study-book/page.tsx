@@ -383,32 +383,72 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   return (
     <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader />
-      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
-        <Link href="/dashboard" className="text-sm font-bold text-teal-700 hover:underline">← Back to dashboard</Link>
-        <section className="mt-6 rounded-[2rem] bg-slate-950 p-7 text-white sm:p-9">
-          <p className="text-xs font-black uppercase tracking-[0.15em] text-teal-300">Personal revision</p>
-          <h1 className="mt-3 text-3xl font-black sm:text-4xl">Mistake Book and Bookmarks</h1>
-          <p className="mt-3 max-w-2xl leading-7 text-slate-300">Incorrect answers are collected automatically. Bookmark any useful question and return to it whenever you revise.</p>
+      <div className="mx-auto max-w-7xl 2xl:max-w-[90rem] px-4 py-4 sm:px-6 lg:py-6">
+        {/* Top bar: Back link and View Switcher Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900">
+            <span aria-hidden="true">←</span>
+            <span>Back to dashboard</span>
+          </Link>
+          <nav className="inline-flex rounded-xl bg-slate-200/80 p-1" aria-label="Study book views">
+            <StudyTab href="/dashboard/study-book" active={view === "mistakes"}>Mistake Book</StudyTab>
+            <StudyTab href="/dashboard/study-book?view=bookmarks" active={view === "bookmarks"}>Bookmarks</StudyTab>
+          </nav>
+        </div>
+
+        {/* Compact revision banner */}
+        <section className="mt-3 rounded-2xl bg-slate-950 p-4 sm:p-5 text-white sm:rounded-3xl shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] text-teal-300">Personal revision</p>
+              <h1 className="mt-0.5 text-xl sm:text-2xl lg:text-3xl font-black">Mistake Book and Bookmarks</h1>
+              <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                {view === "bookmarks"
+                  ? "Questions you bookmarked for review. Analyze solutions and master concepts side-by-side."
+                  : "Questions you answered incorrectly are collected here automatically with complete explanations."}
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-800 bg-slate-900/90 px-3.5 py-1.5 sm:py-2 text-center">
+              <span className="block text-lg sm:text-2xl font-black text-teal-300">{filteredRows.length}</span>
+              <span className="block text-[10px] sm:text-[11px] font-bold text-slate-400">
+                {view === "bookmarks" ? "Bookmarks" : "Mistakes"}
+              </span>
+            </div>
+          </div>
         </section>
 
-        <nav className="mt-6 grid grid-cols-2 gap-2 rounded-2xl bg-slate-200 p-1.5" aria-label="Study book views">
-          <StudyTab href="/dashboard/study-book" active={view === "mistakes"}>Mistake Book</StudyTab>
-          <StudyTab href="/dashboard/study-book?view=bookmarks" active={view === "bookmarks"}>Bookmarks</StudyTab>
-        </nav>
-
-        <form action="/dashboard/study-book" className="mt-6 rounded-2xl border bg-white p-4">
-          {view === "bookmarks" && <input type="hidden" name="view" value="bookmarks" />}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="block text-sm font-bold">State / catalogue<select name="state" defaultValue={state} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All states</option>{stateOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-            <label className="block text-sm font-bold">Exam<select name="exam" defaultValue={exam} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All exams</option>{examOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-            <label className="block text-sm font-bold">Paper<select name="paper" defaultValue={paper} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All papers</option>{paperOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-            <label className="block text-sm font-bold">Subject<select name="subject" defaultValue={subject} className="mt-2 w-full rounded-xl border bg-white px-3 py-2.5 font-normal"><option value="">All subjects</option>{subjectOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-          </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <label className="block text-sm font-bold">Search questions<input name="q" type="search" defaultValue={search} maxLength={120} placeholder="Search question text, exam, paper or subject" className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal" /></label>
-            <button type="submit" className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white">Search and filter</button>
-          </div>
-        </form>
+        {/* Collapsible Search & Filter Bar */}
+        <details className="group mt-3 rounded-2xl border border-slate-200 bg-white p-3 sm:p-3.5 shadow-2xs" open={Boolean(state || exam || paper || subject || search)}>
+          <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-black uppercase tracking-wider text-slate-700">
+            <div className="flex items-center gap-2">
+              <span>🔍 Search & Filter</span>
+              {(state || exam || paper || subject || search) && (
+                <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold tracking-normal text-teal-900 lowercase">
+                  filters active
+                </span>
+              )}
+            </div>
+            <span className="text-slate-400 text-xs transition group-open:rotate-180">▼</span>
+          </summary>
+          <form action="/dashboard/study-book" className="mt-3 border-t border-slate-100 pt-3">
+            {view === "bookmarks" && <input type="hidden" name="view" value="bookmarks" />}
+            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+              <label className="block text-xs font-bold text-slate-700">State / catalogue<select name="state" defaultValue={state} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All states</option>{stateOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+              <label className="block text-xs font-bold text-slate-700">Exam<select name="exam" defaultValue={exam} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All exams</option>{examOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+              <label className="block text-xs font-bold text-slate-700">Paper<select name="paper" defaultValue={paper} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All papers</option>{paperOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+              <label className="block text-xs font-bold text-slate-700">Subject<select name="subject" defaultValue={subject} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All subjects</option>{subjectOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+            </div>
+            <div className="mt-2.5 grid gap-2.5 sm:grid-cols-[1fr_auto] sm:items-end">
+              <label className="block text-xs font-bold text-slate-700">Search questions<input name="q" type="search" defaultValue={search} maxLength={120} placeholder="Search question text, exam, paper or subject..." className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal" /></label>
+              <div className="flex items-center gap-2">
+                {(state || exam || paper || subject || search) && (
+                  <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="inline-flex items-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50">Reset</Link>
+                )}
+                <button type="submit" className="rounded-xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-teal-900">Apply Filters</button>
+              </div>
+            </div>
+          </form>
+        </details>
 
         {loadError && rows.length === 0 ? (
           <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-800">Your study questions could not be loaded. Please refresh and try again.</p>
@@ -427,5 +467,5 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
 }
 
 function StudyTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return <Link href={href} aria-current={active ? "page" : undefined} className={`rounded-xl px-4 py-3 text-center text-sm font-black ${active ? "bg-white text-slate-950 shadow-sm" : "text-slate-600"}`}>{children}</Link>;
+  return <Link href={href} aria-current={active ? "page" : undefined} className={`rounded-lg px-3.5 py-1.5 text-center text-xs font-black transition ${active ? "bg-white text-slate-950 shadow-xs" : "text-slate-600 hover:text-slate-950"}`}>{children}</Link>;
 }
