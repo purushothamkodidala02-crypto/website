@@ -26,37 +26,111 @@ const isExplicitHeader = (line: string | undefined) =>
   /^(?:(?:List|Column|Group)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI)(?:\s*\([^)]+\))?|(?:జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)(?:\s*\([^)]+\))?|Traveler|Country):?$/i.test(
     line!.trim(),
   );
+const romanMap: Record<string, number> = {
+  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10,
+};
+
+const teluguAlphaMap: Record<string, number> = {
+  'ఎ': 1, 'బి': 2, 'సి': 3, 'డి': 4, 'ఈ': 5, 'ఎఫ్': 6, 'జి': 7, 'హెచ్': 8,
+};
+
+const teluguNumMap: Record<string, number> = {
+  '౧': 1, '౨': 2, '౩': 3, '౪': 4, '౫': 5, '౬': 6, '౭': 7, '౮': 8, '౯': 9,
+};
+
+function getMarkerInfo(marker: string) {
+  const isParenthesized = /^\(.*\)$/.test(marker.trim());
+  const clean = marker.replace(/[().]/g, '').trim();
+
+  if (/^\d+$/.test(clean)) {
+    return { type: 'num', val: parseInt(clean, 10), isParenthesized, clean };
+  }
+  if (/^[a-hA-H]$/.test(clean)) {
+    const val = clean.toUpperCase().charCodeAt(0) - 64;
+    return { type: 'alpha', val, isParenthesized, clean };
+  }
+  const lower = clean.toLowerCase();
+  if (romanMap[lower]) {
+    return { type: 'roman', val: romanMap[lower], isParenthesized, clean };
+  }
+  if (teluguAlphaMap[clean]) {
+    return { type: 'telugu-alpha', val: teluguAlphaMap[clean], isParenthesized, clean };
+  }
+  if (teluguNumMap[clean]) {
+    return { type: 'telugu-num', val: teluguNumMap[clean], isParenthesized, clean };
+  }
+  return { type: 'unknown', val: -1, isParenthesized, clean };
+}
+
+function findValidListIndices(matches: RegExpMatchArray[]): Set<number> {
+  const validIndices = new Set<number>();
+  const byType: Record<string, Array<{ idx: number; val: number; isParenthesized: boolean; type: string }>> = {};
+
+  matches.forEach((m, idx) => {
+    const info = getMarkerInfo(m[2]);
+    if (info.type === 'unknown') return;
+    if (!byType[info.type]) byType[info.type] = [];
+    byType[info.type].push({ idx, ...info });
+  });
+
+  for (const type of Object.keys(byType)) {
+    const items = byType[type];
+    if (items.length < 2) continue;
+
+    let currentRun = [items[0]];
+
+    const evaluateRun = (run: typeof items) => {
+      if (run.length < 2) return;
+
+      const isUnparenthesizedAlpha = run.some(r => r.type === 'alpha' && !r.isParenthesized);
+      if (isUnparenthesizedAlpha) {
+        // Unparenthesized letters (e.g. A., B.) must start with A (1) and be strictly consecutive
+        if (run[0].val !== 1) return;
+        for (let i = 1; i < run.length; i++) {
+          if (run[i].val !== run[i - 1].val + 1) return;
+        }
+      } else {
+        // For other types, markers must be strictly increasing without duplicates
+        for (let i = 1; i < run.length; i++) {
+          if (run[i].val <= run[i - 1].val) return;
+        }
+        const isConsecutive = run.every((item, i) => i === 0 || item.val === run[i - 1].val + 1);
+        if (!isConsecutive && run[0].val !== 1) return;
+      }
+
+      run.forEach(r => validIndices.add(r.idx));
+    };
+
+    for (let i = 1; i < items.length; i++) {
+      const prev = currentRun[currentRun.length - 1];
+      const curr = items[i];
+
+      if (curr.val > prev.val) {
+        currentRun.push(curr);
+      } else {
+        evaluateRun(currentRun);
+        currentRun = [curr];
+      }
+    }
+    evaluateRun(currentRun);
+  }
+
+  return validIndices;
+}
+
 function splitInlineLists(text: string): string {
-  const inlineListRegex = /(?<![\d౦-౯]\s*:[ \t]*)(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|\b[ఎ-హ])[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
+  const inlineListRegex = /(?<![\d౦-౯]\s*:[ \t]*)(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
   const matches = Array.from(text.matchAll(inlineListRegex));
   if (matches.length === 0) return text;
 
-  const typeCounts: Record<string, number> = {};
-  
-  for (const match of matches) {
-    const marker = match[2];
-    const clean = marker.replace(/[().]/g, '');
-    let type = 'unknown';
-    if (/^\d+$/.test(clean)) type = 'num';
-    else if (/^[a-hA-H]$/.test(clean)) type = 'alpha';
-    else if (/^[ivxIVX]+$/i.test(clean)) type = 'roman';
-    else if (/^[ఎ-హ]$/.test(clean)) type = 'telugu-alpha';
-    else if (/^[౧-౯]$/.test(clean)) type = 'telugu-num';
-    
-    typeCounts[type] = (typeCounts[type] || 0) + 1;
-  }
+  const validIndices = findValidListIndices(matches);
+  if (validIndices.size === 0) return text;
 
+  let matchIndex = 0;
   return text.replace(inlineListRegex, (match, p1, marker, p3) => {
-    const clean = marker.replace(/[().]/g, '');
-    let type = 'unknown';
-    if (/^\d+$/.test(clean)) type = 'num';
-    else if (/^[a-hA-H]$/.test(clean)) type = 'alpha';
-    else if (/^[ivxIVX]+$/i.test(clean)) type = 'roman';
-    else if (/^[ఎ-హ]$/.test(clean)) type = 'telugu-alpha';
-    else if (/^[౧-౯]$/.test(clean)) type = 'telugu-num';
-
-    if (type !== 'unknown' && typeCounts[type] >= 2) {
+    const isCurrentValid = validIndices.has(matchIndex++);
+    if (isCurrentValid) {
       return `\n${marker} ${p3}`;
     }
     return match;

@@ -277,6 +277,13 @@ test("ratio expressions in English and Telugu question texts are not split into 
   assert.match(formatter, /\(\[\.\?\]\|\(\?<!\[\\d౦-౯\]\\s\*\):\)/);
 });
 
+test("sentences ending with trainee or variable letters are not split into false list items", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /findValidListIndices/);
+  assert.match(formatter, /isUnparenthesizedAlpha/);
+});
+
 test("admins can export mock-test questions in the accepted import format", async () => {
   const [importer, format, exportRoute, testList, questionsPage] = await Promise.all([
     read("app/admin/questions/import-actions.ts"),
