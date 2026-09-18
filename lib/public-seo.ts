@@ -28,15 +28,28 @@ export function publicCollectionMetadata({
     }
   }
 
+  const safeDescription = trimMetaDescription(description, 155);
+
   return {
     title: metadataTitle,
-    description,
+    description: safeDescription,
     keywords,
     alternates: { canonical },
     robots: indexable ? undefined : { index: false, follow: true },
-    openGraph: { type: "website", url: canonical, title, description, siteName: "Varadhi Prep", images: ["/opengraph-image"] },
-    twitter: { card: "summary_large_image", title, description, images: ["/opengraph-image"] },
+    openGraph: { type: "website", url: canonical, title, description: safeDescription, siteName: "Varadhi Prep", images: ["/opengraph-image"] },
+    twitter: { card: "summary_large_image", title, description: safeDescription, images: ["/opengraph-image"] },
   };
+}
+
+export function trimMetaDescription(desc: string, max = 155): string {
+  if (!desc || desc.length <= max) return desc;
+  const sliced = desc.slice(0, max);
+  const lastPunctuation = Math.max(sliced.lastIndexOf(". "), sliced.lastIndexOf("! "), sliced.lastIndexOf("? "));
+  if (lastPunctuation > 60) {
+    return sliced.slice(0, lastPunctuation + 1).trim();
+  }
+  const lastSpace = sliced.lastIndexOf(" ");
+  return (lastSpace > 50 ? sliced.slice(0, lastSpace) : sliced).trim() + "...";
 }
 
 export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string; view?: string }) {
