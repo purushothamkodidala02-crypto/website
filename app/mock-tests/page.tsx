@@ -396,17 +396,12 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
 
                 <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {paperSubjects.map((sub) => {
-                    const isSelected = selectedSubject?.id === sub.id;
                     const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
                     return (
                       <Link
                         key={sub.id}
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
-                        className={`student-card group flex min-h-48 flex-col rounded-3xl border bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5 ${
-                          isSelected
-                            ? "border-teal-500 ring-2 ring-teal-500/20"
-                            : "border-slate-200"
-                        }`}
+                        className="student-card group flex min-h-48 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5"
                       >
                         <span className="flex items-center justify-between gap-3">
                           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800">
