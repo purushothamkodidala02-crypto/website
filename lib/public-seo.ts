@@ -33,14 +33,14 @@ export function publicCollectionMetadata({
     description,
     keywords,
     alternates: { canonical },
-    robots: { index: indexable, follow: true },
+    robots: indexable ? undefined : { index: false, follow: true },
     openGraph: { type: "website", url: canonical, title, description, siteName: "Varadhi Prep", images: ["/opengraph-image"] },
     twitter: { card: "summary_large_image", title, description, images: ["/opengraph-image"] },
   };
 }
 
 export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string; view?: string }) {
-  return !filters.q && !filters.type && !filters.view && (!filters.page || filters.page === "1");
+  return !filters.q && (!filters.page || filters.page === "1");
 }
 
 export function collectionStructuredData(
