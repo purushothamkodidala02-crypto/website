@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { StudyViewer } from "@/components/study/StudyViewer";
 
 type StudyRow = {
@@ -28,85 +29,336 @@ function unique(values: string[]) {
   return [...new Set(values.filter(Boolean))].sort((left, right) => left.localeCompare(right));
 }
 
+type QuestionMeta = {
+  subjectName?: string;
+  paperName?: string;
+  examName?: string;
+  stateName?: string;
+  questionText?: string;
+  optionA?: string;
+  optionB?: string;
+  optionC?: string;
+  optionD?: string;
+  correctAnswer?: string;
+  explanation?: string | null;
+  imageUrl?: string | null;
+};
+
+type AdminQuestionRow = {
+  id: string;
+  question_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  explanation: string | null;
+  image_url: string | null;
+  subject:
+    | {
+        name?: string;
+        paper?:
+          | {
+              name?: string;
+              exam_group?:
+                | {
+                    name?: string;
+                    exam?:
+                      | {
+                          state?: { name?: string; code?: string } | { name?: string; code?: string }[] | null;
+                        }
+                      | { state?: { name?: string; code?: string } | null }[]
+                      | null;
+                  }
+                | { exam?: unknown }[]
+                | null;
+            }
+          | { exam_group?: unknown }[]
+          | null;
+      }
+    | { name?: string; paper?: unknown }[]
+    | null;
+};
+
+type SessionQuestionRow = {
+  question_id: string;
+  question_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  explanation: string | null;
+  image_url: string | null;
+};
+
+async function fetchQuestionsMetadata(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  questionIds: string[]
+): Promise<Map<string, QuestionMeta>> {
+  const result = new Map<string, QuestionMeta>();
+  if (questionIds.length === 0) return result;
+
+  // 1. If service role key is configured, admin client can load directly from questions table with catalog relations
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const admin = createAdminClient();
+      const { data } = await admin
+        .from("questions")
+        .select(`
+          id,
+          question_text,
+          option_a,
+          option_b,
+          option_c,
+          option_d,
+          correct_answer,
+          explanation,
+          image_url,
+          subject:subjects (
+            name,
+            paper:papers (
+              name,
+              exam_group:exam_groups (
+                name,
+                exam:exams (
+                  state:exam_states (
+                    name,
+                    code
+                  )
+                )
+              )
+            )
+          )
+        `)
+        .in("id", questionIds);
+
+      for (const item of (data ?? []) as unknown as AdminQuestionRow[]) {
+        const subject = Array.isArray(item.subject) ? item.subject[0] : item.subject;
+        const paper = subject && typeof subject === "object" && "paper" in subject
+          ? Array.isArray(subject.paper) ? subject.paper[0] : subject.paper
+          : null;
+        const examGroup = paper && typeof paper === "object" && "exam_group" in paper
+          ? Array.isArray(paper.exam_group) ? paper.exam_group[0] : paper.exam_group
+          : null;
+        const exam = examGroup && typeof examGroup === "object" && "exam" in examGroup
+          ? Array.isArray(examGroup.exam) ? examGroup.exam[0] : examGroup.exam
+          : null;
+        const state = exam && typeof exam === "object" && "state" in exam
+          ? Array.isArray(exam.state) ? exam.state[0] : exam.state
+          : null;
+
+        result.set(item.id, {
+          subjectName: subject && "name" in subject && typeof subject.name === "string" ? subject.name : undefined,
+          paperName: paper && "name" in paper && typeof paper.name === "string" ? paper.name : undefined,
+          examName: examGroup && "name" in examGroup && typeof examGroup.name === "string" ? examGroup.name : undefined,
+          stateName: state && "name" in state && typeof state.name === "string"
+            ? `${state.code ? `${state.code} · ` : ""}${state.name}`
+            : undefined,
+          questionText: item.question_text,
+          optionA: item.option_a,
+          optionB: item.option_b,
+          optionC: item.option_c,
+          optionD: item.option_d,
+          correctAnswer: item.correct_answer,
+          explanation: item.explanation,
+          imageUrl: item.image_url,
+        });
+      }
+    } catch (e) {
+      console.error("Admin fetch questions metadata error:", e);
+    }
+  }
+
+  // 2. For any remaining questions, check test_attempt_session_questions (which students have RLS select access to)
+  const remainingIds = questionIds.filter((id) => !result.has(id));
+  if (remainingIds.length > 0) {
+    try {
+      const { data: sessionData } = await supabase
+        .from("test_attempt_session_questions")
+        .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url")
+        .in("question_id", remainingIds);
+
+      for (const item of (sessionData ?? []) as unknown as SessionQuestionRow[]) {
+        if (!result.has(item.question_id)) {
+          result.set(item.question_id, {
+            questionText: item.question_text,
+            optionA: item.option_a,
+            optionB: item.option_b,
+            optionC: item.option_c,
+            optionD: item.option_d,
+            correctAnswer: item.correct_answer,
+            explanation: item.explanation,
+            imageUrl: item.image_url,
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Session questions fetch error:", e);
+    }
+  }
+
+  return result;
+}
+
 export default async function StudyBookPage({ searchParams }: { searchParams: Promise<{ view?: string; state?: string; exam?: string; paper?: string; subject?: string; q?: string; item?: string }> }) {
   const query = await searchParams;
   const view = query.view === "bookmarks" ? "bookmarks" : "mistakes";
   const supabase = await createClient();
   
-  const [authResult, rpcResult] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase.rpc("get_student_study_book", { requested_kind: view })
-  ]);
-  
-  const { data: { user } } = authResult;
-  if (!user) redirect("/login?next=/dashboard/study-book");
+  // 1. Await user auth first to guarantee active tokens and prevent race conditions
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    const returnUrl = `/dashboard/study-book${view === "bookmarks" ? "?view=bookmarks" : ""}`;
+    redirect(`/login?next=${encodeURIComponent(returnUrl)}`);
+  }
 
-  const { data, error } = rpcResult;
-  const rawRows = (data ?? []) as StudyRow[];
-  
-  const rowsMissingData = rawRows.filter(r => !r.state_name || !r.exam_name || !r.paper_name || !r.subject_name);
-  
-  let questionById = new Map();
-  let subjectById = new Map();
-  let paperById = new Map();
-  let examById = new Map();
-  let boardById = new Map();
-  let stateById = new Map();
+  let rawRows: StudyRow[] = [];
+  let loadError = false;
 
-  if (rowsMissingData.length > 0) {
-    const questionIds = rowsMissingData.map((row) => row.question_id);
-    const questionResult = await supabase
-      .from("questions")
-      .select(`
-        id,
-        subject:subjects (
-          name,
-          paper:papers (
-            name,
-            exam_group:exam_groups (
-              name,
-              exam:exams (
-                state:exam_states (
-                  name,
-                  code
-                )
-              )
-            )
-          )
-        )
-      `)
-      .in("id", questionIds);
-      
-    for (const item of (questionResult.data ?? []) as any[]) {
-      const subject = Array.isArray(item.subject) ? item.subject[0] : item.subject;
-      if (!subject) continue;
-      const paper = Array.isArray(subject.paper) ? subject.paper[0] : subject.paper;
-      const examGroup = paper ? (Array.isArray(paper.exam_group) ? paper.exam_group[0] : paper.exam_group) : null;
-      const exam = examGroup ? (Array.isArray(examGroup.exam) ? examGroup.exam[0] : examGroup.exam) : null;
-      const state = exam ? (Array.isArray(exam.state) ? exam.state[0] : exam.state) : null;
+  // 2. Try loading questions through RPC function
+  try {
+    const rpcResult = await supabase.rpc("get_student_study_book", { requested_kind: view });
+    if (!rpcResult.error && Array.isArray(rpcResult.data)) {
+      rawRows = rpcResult.data as StudyRow[];
+    } else {
+      if (rpcResult.error) {
+        console.error("RPC get_student_study_book error, attempting fallback:", rpcResult.error);
+      }
+      throw rpcResult.error ?? new Error("RPC returned non-array data");
+    }
+  } catch {
+    // 3. Resilient Fallback: Query student mistakes/bookmarks directly with student RLS permissions
+    try {
+      if (view === "mistakes") {
+        const { data: mistakesData, error: mistakesError } = await supabase
+          .from("student_question_mistakes")
+          .select("question_id, mistake_count, last_selected_answer, last_seen_at")
+          .eq("user_id", user.id)
+          .is("mastered_at", null)
+          .order("last_seen_at", { ascending: false });
 
-      questionById.set(item.id, {
-        subjectName: subject?.name,
-        paperName: paper?.name,
-        examName: examGroup?.name,
-        stateName: state ? `${state.code} · ${state.name}` : null
-      });
+        if (mistakesError) {
+          console.error("Fallback mistakes query failed:", mistakesError);
+          loadError = true;
+        } else if (!mistakesData || mistakesData.length === 0) {
+          rawRows = [];
+        } else {
+          const questionIds = mistakesData.map((m) => m.question_id);
+          const [bookmarksResult, questionsMeta] = await Promise.all([
+            supabase
+              .from("student_question_bookmarks")
+              .select("question_id")
+              .eq("user_id", user.id)
+              .in("question_id", questionIds),
+            fetchQuestionsMetadata(supabase, questionIds),
+          ]);
+
+          const bookmarkedSet = new Set((bookmarksResult.data ?? []).map((b) => b.question_id));
+
+          rawRows = mistakesData
+            .map((m) => {
+              const meta = questionsMeta.get(m.question_id);
+              if (!meta || !meta.questionText) return null;
+              return {
+                question_id: m.question_id,
+                state_name: meta.stateName || "Other catalogue",
+                exam_name: meta.examName || "Other exam",
+                paper_name: meta.paperName || "Other paper",
+                subject_name: meta.subjectName || "Other subject",
+                question_text: meta.questionText,
+                option_a: meta.optionA || "",
+                option_b: meta.optionB || "",
+                option_c: meta.optionC || "",
+                option_d: meta.optionD || "",
+                correct_answer: meta.correctAnswer || "A",
+                explanation: meta.explanation ?? null,
+                image_url: meta.imageUrl ?? null,
+                mistake_count: m.mistake_count ?? 1,
+                last_selected_answer: m.last_selected_answer ?? null,
+                last_seen_at: m.last_seen_at,
+                bookmarked: bookmarkedSet.has(m.question_id),
+              };
+            })
+            .filter((r): r is StudyRow => r !== null);
+        }
+      } else {
+        const { data: bookmarksData, error: bookmarksError } = await supabase
+          .from("student_question_bookmarks")
+          .select("question_id, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (bookmarksError) {
+          console.error("Fallback bookmarks query failed:", bookmarksError);
+          loadError = true;
+        } else if (!bookmarksData || bookmarksData.length === 0) {
+          rawRows = [];
+        } else {
+          const questionIds = bookmarksData.map((b) => b.question_id);
+          const [mistakesResult, questionsMeta] = await Promise.all([
+            supabase
+              .from("student_question_mistakes")
+              .select("question_id, mistake_count, last_selected_answer, last_seen_at")
+              .eq("user_id", user.id)
+              .in("question_id", questionIds),
+            fetchQuestionsMetadata(supabase, questionIds),
+          ]);
+
+          const mistakesMap = new Map((mistakesResult.data ?? []).map((m) => [m.question_id, m]));
+
+          rawRows = bookmarksData
+            .map((b) => {
+              const meta = questionsMeta.get(b.question_id);
+              if (!meta || !meta.questionText) return null;
+              const mistake = mistakesMap.get(b.question_id);
+              return {
+                question_id: b.question_id,
+                state_name: meta.stateName || "Other catalogue",
+                exam_name: meta.examName || "Other exam",
+                paper_name: meta.paperName || "Other paper",
+                subject_name: meta.subjectName || "Other subject",
+                question_text: meta.questionText,
+                option_a: meta.optionA || "",
+                option_b: meta.optionB || "",
+                option_c: meta.optionC || "",
+                option_d: meta.optionD || "",
+                correct_answer: meta.correctAnswer || "A",
+                explanation: meta.explanation ?? null,
+                image_url: meta.imageUrl ?? null,
+                mistake_count: mistake?.mistake_count ?? 0,
+                last_selected_answer: mistake?.last_selected_answer ?? null,
+                last_seen_at: mistake?.last_seen_at || b.created_at,
+                bookmarked: true,
+              };
+            })
+            .filter((r): r is StudyRow => r !== null);
+        }
+      }
+    } catch (fallbackErr) {
+      console.error("Fallback execution error:", fallbackErr);
+      loadError = true;
     }
   }
 
-  const rows = rawRows.map((row) => {
-    if (row.state_name && row.exam_name && row.paper_name && row.subject_name) {
-      return row;
-    }
-    const loc = questionById.get(row.question_id);
-    return {
-      ...row,
-      state_name: row.state_name || loc?.stateName || "Other catalogue",
-      exam_name: row.exam_name || loc?.examName || "Other exam",
-      paper_name: row.paper_name || loc?.paperName || "Other paper",
-      subject_name: row.subject_name || loc?.subjectName || "Other subject",
-    };
-  });
+  // 4. Fill in missing catalogue names if any
+  const rowsMissingData = rawRows.filter((r) => !r.state_name || !r.exam_name || !r.paper_name || !r.subject_name);
+  if (rowsMissingData.length > 0) {
+    const missingIds = rowsMissingData.map((r) => r.question_id);
+    const extraMeta = await fetchQuestionsMetadata(supabase, missingIds);
+    rawRows = rawRows.map((row) => {
+      const meta = extraMeta.get(row.question_id);
+      return {
+        ...row,
+        state_name: row.state_name || meta?.stateName || "Other catalogue",
+        exam_name: row.exam_name || meta?.examName || "Other exam",
+        paper_name: row.paper_name || meta?.paperName || "Other paper",
+        subject_name: row.subject_name || meta?.subjectName || "Other subject",
+      };
+    });
+  }
+
+  const rows = rawRows;
   
   const state = String(query.state ?? "");
   const exam = String(query.exam ?? "");
@@ -158,7 +410,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
           </div>
         </form>
 
-        {error ? (
+        {loadError && rows.length === 0 ? (
           <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-800">Your study questions could not be loaded. Please refresh and try again.</p>
         ) : filteredRows.length === 0 ? (
           <section className="mt-6 rounded-3xl border border-dashed bg-white p-10 text-center">

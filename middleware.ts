@@ -14,16 +14,16 @@ function buildContentSecurityPolicy(nonce?: string) {
   }
 
   const scriptPolicy = nonce
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com${isDevelopment ? " 'unsafe-eval'" : ""}`
-    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com${isDevelopment ? " 'unsafe-eval'" : ""}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`;
 
   return [
     "default-src 'self'",
     scriptPolicy,
-    "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: ${supabaseOrigin}`,
+    "style-src 'self' 'unsafe-inline' https://accounts.google.com",
+    `img-src 'self' data: blob: ${supabaseOrigin} https://www.googletagmanager.com https://*.google-analytics.com`,
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com`,
+    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",
@@ -64,6 +64,31 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/refunds-and-cancellations") ||
     request.nextUrl.pathname.startsWith("/support")
   ) {
+    return response;
+  }
+
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token"));
+
+  // Fast-path redirect for unauthenticated dashboard access (eliminates RSC bootstrap & remote network delay)
+  if (request.nextUrl.pathname.startsWith("/dashboard") && !hasAuthCookie) {
+    const loginUrl = new URL("/login", request.url);
+    const search = request.nextUrl.search;
+    loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${search}`);
+    const redirectResponse = NextResponse.redirect(loginUrl, 307);
+    redirectResponse.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    return redirectResponse;
+  }
+
+  // Public auth pages without session cookies do not need Supabase getUser() round-trip
+  const isPublicAuthPage =
+    request.nextUrl.pathname === "/login" ||
+    request.nextUrl.pathname === "/register" ||
+    request.nextUrl.pathname === "/forgot-password" ||
+    request.nextUrl.pathname === "/reset-password";
+
+  if (isPublicAuthPage && !hasAuthCookie) {
     return response;
   }
 

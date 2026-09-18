@@ -160,7 +160,7 @@ export function LoginForm({
       </div>
       <div className="my-6 flex items-center gap-3" aria-hidden="true">
         <span className="h-px flex-1 bg-slate-200" />
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">or use email</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-600">or use email</span>
         <span className="h-px flex-1 bg-slate-200" />
       </div>
       <button type="button" onClick={() => setLoginMethod("otp")} className="w-full rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 hover:bg-teal-100">Sign in using a six-digit email code</button>

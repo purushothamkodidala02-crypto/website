@@ -93,7 +93,7 @@ export function TurnstileChallenge({
         strategy="afterInteractive"
         onReady={() => setReady(true)}
       />
-      <div ref={containerRef} className="min-h-16" aria-label="Security verification" />
+      <div ref={containerRef} className="min-h-16" role="region" aria-label="Security verification" />
       {errorMessage && <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{errorMessage}</p>}
       <p className="mt-2 text-center text-xs text-slate-500">
         Protected from automated abuse by Cloudflare Turnstile.
