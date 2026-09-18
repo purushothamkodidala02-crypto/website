@@ -6,6 +6,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { mockTestLabel } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { absoluteUrl } from "@/lib/site";
+import { paperUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +17,8 @@ import { BuyExamPassForm } from "@/app/dashboard/passes/BuyExamPassForm";
 type MockTestDetailsProps = {
   id: string;
   canonicalPath: string;
+  backHref?: string;
+  backLabel?: string;
 };
 
 type MockTestStats = {
@@ -219,6 +222,8 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
 export async function MockTestDetailsPage({
   id,
   canonicalPath,
+  backHref,
+  backLabel,
   searchParams,
 }: MockTestDetailsProps & {
   searchParams: Promise<{ start_error?: string; payment_error?: string }>;
@@ -234,12 +239,12 @@ export async function MockTestDetailsPage({
         id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
         subject:subjects(id, name, content_language_mode),
         paper:papers(
-          id, exam_group_id, specialization_id, name, display_order, question_count, default_correct_marks, default_negative_marks,
+          id, exam_group_id, specialization_id, name, slug, display_order, question_count, default_correct_marks, default_negative_marks,
           specialization:exam_specializations(id, name),
           exam_group:exam_groups(
-            id, exam_id, name,
+            id, exam_id, name, slug,
             exam:exams(
-              id, state_id, name,
+              id, state_id, name, slug,
               state:exam_states(id, name, code, slug)
             )
           )
@@ -385,6 +390,14 @@ export async function MockTestDetailsPage({
     test.description ??
     `A ${test.access_type === "free" ? "free" : "premium"}, timed ${resourceName} for focused competitive-exam preparation.`;
 
+  const fallbackBackHref =
+    state?.slug && examGroup?.slug && paper?.slug
+      ? paperUrl(state.slug, examGroup.slug, paper.slug)
+      : "/mock-tests";
+  const resolvedBackHref = backHref || fallbackBackHref;
+  const paperTitle = paperDisplay?.shortLabel ?? paper?.name;
+  const resolvedBackLabel = backLabel || "Back to mock tests";
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -424,12 +437,29 @@ export async function MockTestDetailsPage({
           name: "Mock tests",
           item: absoluteUrl("/mock-tests"),
         },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: resourceName,
-          item: absoluteUrl(canonicalPath),
-        },
+        ...(resolvedBackHref && resolvedBackHref !== "/mock-tests"
+          ? [
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: paperTitle ?? "Paper",
+                item: absoluteUrl(resolvedBackHref),
+              },
+              {
+                "@type": "ListItem",
+                position: 4,
+                name: resourceName,
+                item: absoluteUrl(canonicalPath),
+              },
+            ]
+          : [
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: resourceName,
+                item: absoluteUrl(canonicalPath),
+              },
+            ]),
       ],
     },
   ];
@@ -468,10 +498,10 @@ export async function MockTestDetailsPage({
         )}
 
         <Link
-          href="/mock-tests"
-          className="text-sm font-bold text-teal-700 hover:text-teal-800"
+          href={resolvedBackHref}
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-700 hover:text-teal-800"
         >
-          ← Back to mock tests
+          ← {resolvedBackLabel}
         </Link>
 
         <div className="mt-7">
