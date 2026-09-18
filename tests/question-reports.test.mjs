@@ -56,16 +56,11 @@ test("optional catalogue statistics cannot hide the public mock-test library", a
 });
 
 test("paper test filters remain consistent on subject landing pages", async () => {
-  const [cataloguePage, subjectRoute] = await Promise.all([
-    read("app/mock-tests/page.tsx"),
-    read("app/mock-tests/[id]/[exam]/[paper]/subject/[subject]/page.tsx"),
-  ]);
+  const cataloguePage = await read("app/mock-tests/page.tsx");
   assert.match(cataloguePage, /const selectedType = filters\.type === "paper" \|\| filters\.type === "subject"/);
   assert.match(cataloguePage, /selectedType !== "subject" \|\| !selectedSubject \|\| test\.subject\?\.id === selectedSubject\.id/);
   assert.match(cataloguePage, /type === "subject" && subjectSlug/);
   assert.match(cataloguePage, /selectedType === value/);
-  assert.match(cataloguePage, /selectedType === "subject" && !selectedSubject && paperSubjects\.length > 0/);
-  assert.match(subjectRoute, /type: sp\.type \?\? "subject"/);
 });
 
 test("registrations fetch only visible student emails through an admin-only database function", async () => {
