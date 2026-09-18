@@ -14,14 +14,37 @@ import { SurveyPopup } from "@/components/dashboard/SurveyPopup";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Varadhi Prep - TG & AP State Exam Mock Tests",
+  title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
   description: SITE_DESCRIPTION,
+  keywords: [
+    "Varadhi Prep",
+    "TG & AP Competitive Exams Free Mock Tests",
+    "TG Police Constable mock test",
+    "Telangana police constable free mock test",
+    "TGPRB police constable mock test 2026",
+    "TSPSC mock test free",
+    "TGPSC online test series",
+    "TG TET mock test papers",
+    "TG TET 2026 practice test",
+    "APPSC mock test in Telugu",
+    "Telangana competitive exams online test series",
+    "Telangana history and movement practice test",
+    "Current affairs mock test for Telangana exams",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+    "టీజీ టెట్ మాక్ టెస్ట్",
+    "పోటీ పరీక్షల మాక్ టెస్ట్‌లు",
+  ],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Varadhi Prep - TG & AP State Exam Mock Tests",
+    title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
     description: SITE_DESCRIPTION,
     url: "/",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
+    description: SITE_DESCRIPTION,
   },
 };
 

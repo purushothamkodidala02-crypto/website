@@ -17,11 +17,30 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Varadhi Prep: Smart Mock Tests for Career Growth",
+    default: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
     template: "%s | Varadhi Prep",
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  keywords: [
+    "Varadhi Prep",
+    "TG Police Constable mock test",
+    "Telangana police constable free mock test",
+    "TGPRB police constable mock test 2026",
+    "TSPSC mock test free",
+    "TGPSC online test series",
+    "TG TET mock test papers",
+    "TG TET 2026 practice test",
+    "APPSC mock test in Telugu",
+    "Telangana competitive exams online test series",
+    "Telangana history and movement practice test",
+    "Current affairs mock test for Telangana exams",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+    "టీజీ టెట్ మాక్ టెస్ట్",
+    "పోటీ పరీక్షల మాక్ టెస్ట్‌లు",
+    "online mock test papers in Telugu",
+    "free test series Telugu and English",
+  ],
   icons: {
     icon: [
       { url: "/varadhi-v-logo.png", type: "image/png", sizes: "512x512" },
@@ -36,14 +55,17 @@ export const metadata: Metadata = {
     locale: "en_IN",
     alternateLocale: ["te_IN"],
     siteName: SITE_NAME,
-    title: "Varadhi Prep: Smart Mock Tests for Career Growth",
+    title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
     description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Varadhi Prep: Smart Mock Tests for Career Growth",
+    title: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
     description: SITE_DESCRIPTION,
   },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
   robots: {
     index: true,
     follow: true,
