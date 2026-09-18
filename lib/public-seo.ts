@@ -6,15 +6,18 @@ export function publicCollectionMetadata({
   description,
   canonical,
   indexable = true,
+  keywords,
 }: {
   title: string;
   description: string;
   canonical: string;
   indexable?: boolean;
+  keywords?: string[];
 }): Metadata {
   return {
     title,
     description,
+    keywords,
     alternates: { canonical },
     robots: { index: indexable, follow: true },
     openGraph: { type: "website", url: canonical, title, description, siteName: "Varadhi Prep", images: ["/opengraph-image"] },

@@ -22,6 +22,7 @@ import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
+import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
 
@@ -30,11 +31,19 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const context = await resolvePublicRoute({ stateSlug: id, examSlug: exam });
   if (!context?.exam) return { title: "Exam Mock Tests Not Found", robots: { index: false, follow: false } };
   const canonical = examUrl(context.state.slug, context.exam.slug);
+  const teluguData = getExamTeluguMetadata(context.exam.slug, context.exam.name, context.state.slug);
+  const fallbackTitle = teluguData ? teluguData.bilingualPageTitle : formatExamFallbackTitle(context.exam.name, context.state.name);
+  const fallbackDescription = teluguData ? teluguData.bilingualDescription : formatExamFallbackDescription(context.exam.name, context.state.name);
   const seo = resolveSeoFields(context.exam, {
-    title: formatExamFallbackTitle(context.exam.name, context.state.name),
-    description: formatExamFallbackDescription(context.exam.name, context.state.name),
+    title: fallbackTitle,
+    description: fallbackDescription,
   });
-  return publicCollectionMetadata({ ...seo, canonical, indexable: isIndexableCollectionQuery(await searchParams) });
+  return publicCollectionMetadata({
+    ...seo,
+    keywords: teluguData?.keywords,
+    canonical,
+    indexable: isIndexableCollectionQuery(await searchParams),
+  });
 }
 
 const getCachedFaqs = unstable_cache(
@@ -75,9 +84,12 @@ export default async function ExamPage({ params, searchParams }: Props) {
       return timeB - timeA;
     });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
+  const teluguData = getExamTeluguMetadata(context.exam.slug, context.exam.name, context.state.slug);
+  const fallbackTitle = teluguData ? teluguData.bilingualPageTitle : formatExamFallbackTitle(context.exam.name, context.state.name);
+  const fallbackDescription = teluguData ? teluguData.bilingualDescription : formatExamFallbackDescription(context.exam.name, context.state.name);
   const seo = resolveSeoFields(context.exam, {
-    title: formatExamFallbackTitle(context.exam.name, context.state.name),
-    description: formatExamFallbackDescription(context.exam.name, context.state.name),
+    title: fallbackTitle,
+    description: fallbackDescription,
   });
   
   const savedQuestions = await getCachedFaqs(context.exam!.id);
@@ -90,9 +102,11 @@ export default async function ExamPage({ params, searchParams }: Props) {
     { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard.", displayOrder: 2 },
   ];
   const savedByOrder = new Map((savedQuestions ?? []).map((item) => [item.display_order, item]));
+  const teluguFaqItems = teluguData?.teluguFaqs ?? [];
   const questions = [
     ...standardQuestions.map((item) => savedByOrder.get(item.displayOrder) ?? item),
     ...(savedQuestions ?? []).filter((item) => item.display_order >= standardQuestions.length),
+    ...teluguFaqItems,
   ].map((item) => ({ question: item.question, answer: item.answer }));
   const structuredData = [
     ...collectionStructuredData(seo.title, seo.description, canonical, [
@@ -122,6 +136,11 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {context.state.code} exam preparation</p>
               <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{examHeading}</h1>
+              {teluguData && (
+                <p className="mt-3 text-lg font-bold text-teal-300 sm:text-xl">
+                  {teluguData.teluguTitle}
+                </p>
+              )}
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{introduction}</p>
               <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><AccountActionButton canonical={canonical} /></div>
             </div>

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { getExamTeluguMetadata } from "../lib/telugu-seo.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -59,4 +60,25 @@ test("admin SEO fields are validated, optional, and independent from slugs", asy
   assert.match(action, /tableByType/);
   assert.match(stateManager, /Save search appearance/);
   assert.match(migration, /Telangana Police Constable Mock Test 2026 – Free Online Tests/);
+});
+
+test("Telugu script SEO metadata generates bilingual titles, descriptions, and FAQs", async () => {
+  const pc = getExamTeluguMetadata("police-constable", "Police Constable", "tg");
+  assert.ok(pc);
+  assert.equal(pc.teluguName, "తెలంగాణ పోలీస్ కానిస్టేబుల్");
+  assert.match(pc.bilingualPageTitle, /TG Police Constable Free Mock Test 2026/);
+  assert.match(pc.bilingualPageTitle, /తెలంగాణ పోలీస్ కానిస్టేబుల్/);
+  assert.match(pc.bilingualDescription, /తెలంగాణ పోలీస్ కానిస్టేబుల్/);
+  assert.ok(pc.keywords.length >= 5);
+  assert.ok(pc.keywords.some((k) => k.includes("కానిస్టేబుల్")));
+  assert.ok(pc.teluguFaqs.length >= 2);
+
+  const dynamicTg = getExamTeluguMetadata("sub-inspector", "Sub Inspector", "tg");
+  assert.ok(dynamicTg);
+  assert.match(dynamicTg.teluguTitle, /తెలంగాణ Sub Inspector/);
+  assert.match(dynamicTg.bilingualPageTitle, /TG Sub Inspector/);
+
+  const examRoute = await read("app/mock-tests/[id]/[exam]/page.tsx");
+  assert.match(examRoute, /getExamTeluguMetadata/);
+  assert.match(examRoute, /teluguData\.teluguTitle/);
 });
