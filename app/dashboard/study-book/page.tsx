@@ -19,6 +19,13 @@ type StudyRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  content_language_mode: string;
+  question_text_te: string | null;
+  option_a_te: string | null;
+  option_b_te: string | null;
+  option_c_te: string | null;
+  option_d_te: string | null;
+  explanation_te: string | null;
   mistake_count: number;
   last_selected_answer: string | null;
   last_seen_at: string;
@@ -42,6 +49,13 @@ type QuestionMeta = {
   correctAnswer?: string;
   explanation?: string | null;
   imageUrl?: string | null;
+  contentLanguageMode?: string | null;
+  questionTextTe?: string | null;
+  optionATe?: string | null;
+  optionBTe?: string | null;
+  optionCTe?: string | null;
+  optionDTe?: string | null;
+  explanationTe?: string | null;
 };
 
 type AdminQuestionRow = {
@@ -54,9 +68,16 @@ type AdminQuestionRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  question_text_te?: string | null;
+  option_a_te?: string | null;
+  option_b_te?: string | null;
+  option_c_te?: string | null;
+  option_d_te?: string | null;
+  explanation_te?: string | null;
   subject:
     | {
         name?: string;
+        content_language_mode?: string | null;
         paper?:
           | {
               name?: string;
@@ -76,7 +97,7 @@ type AdminQuestionRow = {
           | { exam_group?: unknown }[]
           | null;
       }
-    | { name?: string; paper?: unknown }[]
+    | { name?: string; content_language_mode?: string | null; paper?: unknown }[]
     | null;
 };
 
@@ -90,6 +111,13 @@ type SessionQuestionRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  content_language_mode?: string | null;
+  question_text_te?: string | null;
+  option_a_te?: string | null;
+  option_b_te?: string | null;
+  option_c_te?: string | null;
+  option_d_te?: string | null;
+  explanation_te?: string | null;
 };
 
 async function fetchQuestionsMetadata(
@@ -115,8 +143,15 @@ async function fetchQuestionsMetadata(
           correct_answer,
           explanation,
           image_url,
+          question_text_te,
+          option_a_te,
+          option_b_te,
+          option_c_te,
+          option_d_te,
+          explanation_te,
           subject:subjects (
             name,
+            content_language_mode,
             paper:papers (
               name,
               exam_group:exam_groups (
@@ -163,6 +198,13 @@ async function fetchQuestionsMetadata(
           correctAnswer: item.correct_answer,
           explanation: item.explanation,
           imageUrl: item.image_url,
+          contentLanguageMode: subject && "content_language_mode" in subject && typeof subject.content_language_mode === "string" ? subject.content_language_mode : "bilingual",
+          questionTextTe: item.question_text_te,
+          optionATe: item.option_a_te,
+          optionBTe: item.option_b_te,
+          optionCTe: item.option_c_te,
+          optionDTe: item.option_d_te,
+          explanationTe: item.explanation_te,
         });
       }
     } catch (e) {
@@ -176,7 +218,7 @@ async function fetchQuestionsMetadata(
     try {
       const { data: sessionData } = await supabase
         .from("test_attempt_session_questions")
-        .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url")
+        .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, explanation_te")
         .in("question_id", remainingIds);
 
       for (const item of (sessionData ?? []) as unknown as SessionQuestionRow[]) {
@@ -190,6 +232,13 @@ async function fetchQuestionsMetadata(
             correctAnswer: item.correct_answer,
             explanation: item.explanation,
             imageUrl: item.image_url,
+            contentLanguageMode: item.content_language_mode ?? "bilingual",
+            questionTextTe: item.question_text_te,
+            optionATe: item.option_a_te,
+            optionBTe: item.option_b_te,
+            optionCTe: item.option_c_te,
+            optionDTe: item.option_d_te,
+            explanationTe: item.explanation_te,
           });
         }
       }
@@ -274,6 +323,13 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
                 correct_answer: meta.correctAnswer || "A",
                 explanation: meta.explanation ?? null,
                 image_url: meta.imageUrl ?? null,
+                content_language_mode: meta.contentLanguageMode ?? "bilingual",
+                question_text_te: meta.questionTextTe ?? null,
+                option_a_te: meta.optionATe ?? null,
+                option_b_te: meta.optionBTe ?? null,
+                option_c_te: meta.optionCTe ?? null,
+                option_d_te: meta.optionDTe ?? null,
+                explanation_te: meta.explanationTe ?? null,
                 mistake_count: m.mistake_count ?? 1,
                 last_selected_answer: m.last_selected_answer ?? null,
                 last_seen_at: m.last_seen_at,
@@ -326,6 +382,13 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
                 correct_answer: meta.correctAnswer || "A",
                 explanation: meta.explanation ?? null,
                 image_url: meta.imageUrl ?? null,
+                content_language_mode: meta.contentLanguageMode ?? "bilingual",
+                question_text_te: meta.questionTextTe ?? null,
+                option_a_te: meta.optionATe ?? null,
+                option_b_te: meta.optionBTe ?? null,
+                option_c_te: meta.optionCTe ?? null,
+                option_d_te: meta.optionDTe ?? null,
+                explanation_te: meta.explanationTe ?? null,
                 mistake_count: mistake?.mistake_count ?? 0,
                 last_selected_answer: mistake?.last_selected_answer ?? null,
                 last_seen_at: mistake?.last_seen_at || b.created_at,
@@ -354,6 +417,13 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
         exam_name: row.exam_name || meta?.examName || "Other exam",
         paper_name: row.paper_name || meta?.paperName || "Other paper",
         subject_name: row.subject_name || meta?.subjectName || "Other subject",
+        content_language_mode: row.content_language_mode || meta?.contentLanguageMode || "bilingual",
+        question_text_te: row.question_text_te || meta?.questionTextTe || null,
+        option_a_te: row.option_a_te || meta?.optionATe || null,
+        option_b_te: row.option_b_te || meta?.optionBTe || null,
+        option_c_te: row.option_c_te || meta?.optionCTe || null,
+        option_d_te: row.option_d_te || meta?.optionDTe || null,
+        explanation_te: row.explanation_te || meta?.explanationTe || null,
       };
     });
   }
@@ -373,7 +443,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   
   const filteredRows = rows.filter((row) => {
     const matchesLocation = (!state || row.state_name === state) && (!exam || row.exam_name === exam) && (!paper || row.paper_name === paper) && (!subject || row.subject_name === subject);
-    const searchable = `${row.question_text} ${row.state_name} ${row.exam_name} ${row.paper_name} ${row.subject_name}`.toLowerCase();
+    const searchable = `${row.question_text} ${row.question_text_te ?? ""} ${row.state_name} ${row.exam_name} ${row.paper_name} ${row.subject_name}`.toLowerCase();
     return matchesLocation && (!search || searchable.includes(search.toLowerCase()));
   });
   

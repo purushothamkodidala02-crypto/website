@@ -22,6 +22,13 @@ type StudyRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  content_language_mode: string;
+  question_text_te: string | null;
+  option_a_te: string | null;
+  option_b_te: string | null;
+  option_c_te: string | null;
+  option_d_te: string | null;
+  explanation_te: string | null;
   mistake_count: number;
   last_selected_answer: string | null;
   last_seen_at: string;
@@ -32,6 +39,9 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   const router = useRouter();
   const searchParams = useSearchParams();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [language, setLanguage] = useState<"english" | "telugu">(() => {
+    return rows[initialIndex]?.content_language_mode === "telugu" ? "telugu" : "english";
+  });
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -106,9 +116,29 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
 
   if (!currentRow) return null;
 
+  const hasTelugu = Boolean(
+    currentRow.question_text_te ||
+    currentRow.option_a_te ||
+    currentRow.option_b_te ||
+    currentRow.option_c_te ||
+    currentRow.option_d_te ||
+    currentRow.explanation_te
+  );
+  const isTeluguOnly = currentRow.content_language_mode === "telugu";
+  const isEnglishOnly = currentRow.content_language_mode === "english";
+  const canSwitchLanguage = hasTelugu && !isTeluguOnly && !isEnglishOnly;
+
+  const effectiveLanguage = isTeluguOnly
+    ? "telugu"
+    : isEnglishOnly
+      ? "english"
+      : language;
+
+  const showTelugu = (effectiveLanguage === "telugu" && hasTelugu) || isTeluguOnly;
+
   return (
     <section className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
-      {/* Top Toolbar: Navigation & Actions */}
+      {/* Top Toolbar: Navigation, Language Switch & Actions */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-5">
         <div className="flex items-center gap-2 sm:gap-3">
           {currentIndex > 0 ? (
@@ -163,6 +193,35 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
         </div>
 
         <div className="flex items-center gap-2">
+          {canSwitchLanguage && (
+            <div className="inline-flex rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Question language">
+              <button
+                type="button"
+                onClick={() => setLanguage("english")}
+                aria-pressed={effectiveLanguage === "english"}
+                className={`rounded-lg px-2.5 py-1 text-xs font-black transition ${
+                  effectiveLanguage === "english"
+                    ? "bg-white text-slate-950 shadow-xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("telugu")}
+                aria-pressed={effectiveLanguage === "telugu"}
+                lang="te"
+                className={`rounded-lg px-2.5 py-1 text-xs font-black transition ${
+                  effectiveLanguage === "telugu"
+                    ? "bg-white text-slate-950 shadow-xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                తెలుగు
+              </button>
+            </div>
+          )}
           <ReportQuestionButton questionId={currentRow.question_id} />
           <BookmarkButton questionId={currentRow.question_id} initialBookmarked={currentRow.bookmarked} />
         </div>
@@ -175,7 +234,15 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <StudyQuestionCard key={currentRow.question_id} row={currentRow} index={currentIndex} />
+        <StudyQuestionCard
+          key={currentRow.question_id}
+          row={currentRow}
+          index={currentIndex}
+          showTelugu={showTelugu}
+          canSwitchLanguage={canSwitchLanguage}
+          effectiveLanguage={effectiveLanguage}
+          onLanguageChange={setLanguage}
+        />
       </div>
 
       {/* Bottom Bar: Shortcuts hint & filter status */}
@@ -191,13 +258,31 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   );
 }
 
-function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
+function StudyQuestionCard({
+  row,
+  index,
+  showTelugu,
+  canSwitchLanguage,
+  effectiveLanguage,
+  onLanguageChange,
+}: {
+  row: StudyRow;
+  index: number;
+  showTelugu: boolean;
+  canSwitchLanguage: boolean;
+  effectiveLanguage: "english" | "telugu";
+  onLanguageChange: (lang: "english" | "telugu") => void;
+}) {
+  const questionText = (showTelugu && row.question_text_te) ? row.question_text_te : row.question_text;
   const options = [
-    ["A", row.option_a],
-    ["B", row.option_b],
-    ["C", row.option_c],
-    ["D", row.option_d],
+    ["A", (showTelugu && row.option_a_te) ? row.option_a_te : row.option_a],
+    ["B", (showTelugu && row.option_b_te) ? row.option_b_te : row.option_b],
+    ["C", (showTelugu && row.option_c_te) ? row.option_c_te : row.option_c],
+    ["D", (showTelugu && row.option_d_te) ? row.option_d_te : row.option_d],
   ] as const;
+  const explanation = showTelugu
+    ? (row.explanation_te || row.explanation)
+    : row.explanation;
 
   return (
     <article className="student-card overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-sm">
@@ -213,6 +298,35 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {canSwitchLanguage && (
+            <div className="inline-flex rounded-lg bg-slate-200/80 p-0.5 sm:hidden" role="group" aria-label="Question language">
+              <button
+                type="button"
+                onClick={() => onLanguageChange("english")}
+                aria-pressed={effectiveLanguage === "english"}
+                className={`rounded-md px-2 py-0.5 text-[11px] font-black transition ${
+                  effectiveLanguage === "english"
+                    ? "bg-white text-slate-950 shadow-xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => onLanguageChange("telugu")}
+                aria-pressed={effectiveLanguage === "telugu"}
+                lang="te"
+                className={`rounded-md px-2 py-0.5 text-[11px] font-black transition ${
+                  effectiveLanguage === "telugu"
+                    ? "bg-white text-slate-950 shadow-xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                తెలుగు
+              </button>
+            </div>
+          )}
           {row.mistake_count > 0 ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-800">
               <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
@@ -235,8 +349,11 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
               <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-xl bg-slate-950 text-xs font-black text-white">
                 {index + 1}
               </span>
-              <div className="min-w-0 flex-1">
-                <FormattedQuestionText text={row.question_text} className="text-base sm:text-lg font-medium leading-relaxed text-slate-950" />
+              <div className="min-w-0 flex-1" lang={showTelugu ? "te" : "en"}>
+                <FormattedQuestionText
+                  text={questionText}
+                  className={`text-base sm:text-lg font-medium leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
+                />
               </div>
             </div>
 
@@ -261,7 +378,7 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
                   badgeStyle = "bg-emerald-700 text-white";
                   statusBadge = (
                     <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-emerald-900">
-                      ✓ Your Answer · Correct
+                      {showTelugu ? "✓ మీ సమాధానం · సరైనది" : "✓ Your Answer · Correct"}
                     </span>
                   );
                 } else if (isCorrect) {
@@ -269,7 +386,7 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
                   badgeStyle = "bg-emerald-700 text-white";
                   statusBadge = (
                     <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-emerald-900">
-                      ✓ Correct Answer
+                      {showTelugu ? "✓ సరైన సమాధానం" : "✓ Correct Answer"}
                     </span>
                   );
                 } else if (isSelected) {
@@ -277,7 +394,7 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
                   badgeStyle = "bg-red-700 text-white";
                   statusBadge = (
                     <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-red-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-red-900">
-                      ✕ Your Answer
+                      {showTelugu ? "✕ మీ సమాధానం" : "✕ Your Answer"}
                     </span>
                   );
                 }
@@ -290,7 +407,7 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${badgeStyle}`}>
                       {key}
                     </span>
-                    <span className="min-w-0 flex-1 pt-0.5 leading-relaxed font-medium">
+                    <span className={`min-w-0 flex-1 pt-0.5 leading-relaxed font-medium ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
                       {label}
                     </span>
                     {statusBadge}
@@ -310,27 +427,37 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
                   💡
                 </span>
                 <h3 className="text-xs font-black uppercase tracking-wider text-teal-900">
-                  Explanation & Key Concept
+                  {showTelugu ? "వివరణ (Explanation)" : "Explanation & Key Concept"}
                 </h3>
               </div>
               {row.last_selected_answer && (
                 <span className="text-[11px] font-semibold text-slate-500">
-                  You chose: <strong className={row.last_selected_answer === row.correct_answer ? "text-emerald-700" : "text-red-700"}>Option {row.last_selected_answer}</strong>
+                  {showTelugu ? "మీ ఎంపిక: " : "You chose: "}
+                  <strong className={row.last_selected_answer === row.correct_answer ? "text-emerald-700" : "text-red-700"}>
+                    {showTelugu ? `ఆప్షన్ ${row.last_selected_answer}` : `Option ${row.last_selected_answer}`}
+                  </strong>
                 </span>
               )}
             </div>
 
-            {row.explanation ? (
-              <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs">
-                <FormattedQuestionText text={row.explanation} className="text-sm sm:text-base leading-relaxed text-teal-950" />
+            {explanation ? (
+              <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
+                <FormattedQuestionText
+                  text={explanation}
+                  className={`text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                />
               </div>
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-2xs">
                 <p className="text-sm font-semibold text-slate-600">
-                  No detailed explanation has been added for this question yet.
+                  {showTelugu
+                    ? "ఈ ప్రశ్నకు వివరణ ఇంకా జోడించబడలేదు."
+                    : "No detailed explanation has been added for this question yet."}
                 </p>
                 <p className="mt-1 text-xs text-slate-400">
-                  Use the Report button in the header if you notice an issue or want to request an explanation.
+                  {showTelugu
+                    ? "సమస్య ఉంటే లేదా వివరణ కోరడానికి పైన ఉన్న Report బటన్‌ను ఉపయోగించండి."
+                    : "Use the Report button in the header if you notice an issue or want to request an explanation."}
                 </p>
               </div>
             )}
@@ -339,14 +466,16 @@ function StudyQuestionCard({ row, index }: { row: StudyRow; index: number }) {
           {/* Quick summary strip */}
           <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-500">Correct Answer:</span>
+              <span className="font-semibold text-slate-500">
+                {showTelugu ? "సరైన సమాధానం:" : "Correct Answer:"}
+              </span>
               <span className="rounded border border-emerald-300 bg-emerald-50 px-2 py-0.5 font-black text-emerald-800">
-                Option {row.correct_answer}
+                {showTelugu ? `ఆప్షన్ ${row.correct_answer}` : `Option ${row.correct_answer}`}
               </span>
             </div>
             {row.last_seen_at && (
               <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] text-slate-400">
-                <span>Last attempted:</span>
+                <span>{showTelugu ? "చివరి ప్రయత్నం:" : "Last attempted:"}</span>
                 <span>{new Date(row.last_seen_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
               </div>
             )}
