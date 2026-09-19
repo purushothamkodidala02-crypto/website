@@ -511,24 +511,11 @@ function StudyQuestionCard({
             </div>
 
             {explanation ? (
-              <div className="space-y-3">
-                <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
-                  <FormattedQuestionText
-                    text={explanation}
-                    className={`text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
-                  />
-                </div>
-                <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs text-amber-950 shadow-2xs">
-                  <div className="flex items-center gap-1.5 font-black text-amber-900 mb-1">
-                    <span aria-hidden="true">🎯</span>
-                    <span>{showTelugu ? "కీలక ముఖ్యాంశం (Key Takeaway)" : "High-Yield Concept Note"}</span>
-                  </div>
-                  <p className={`leading-relaxed font-medium text-amber-900/90 ${showTelugu ? "font-telugu" : ""}`}>
-                    {showTelugu
-                      ? `సరైన సమాధానం ఆప్షన్ ${row.correct_answer}. పరీక్షలలో ఇలాంటి భావనలు తరచూ వస్తాయి, కాబట్టి ఈ వివరణలోని ముఖ్య అంశాలను జాగ్రత్తగా సమీక్షించండి.`
-                      : `Correct answer is Option ${row.correct_answer}. Commit the core concept highlighted above to memory to master similar questions in test series.`}
-                  </p>
-                </div>
+              <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
+                <FormattedQuestionText
+                  text={explanation}
+                  className={`text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                />
               </div>
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-2xs">
