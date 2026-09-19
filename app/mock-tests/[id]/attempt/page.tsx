@@ -106,5 +106,16 @@ export default async function TakeMockTestPage({
     .select("question_id")
     .eq("user_id", user.id)
     .in("question_id", questions.map((question) => question.question_id));
-  return <StudentTestRunner mockTestId={id} publicTestPath={testPath} title={testTitle} sessionId={session.id} expiresAt={session.expires_at} questions={questions} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />;
+  return (
+    <StudentTestRunner
+      mockTestId={id}
+      publicTestPath={testPath}
+      title={testTitle}
+      sessionId={session.id}
+      expiresAt={session.expires_at}
+      questions={questions}
+      bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)}
+      studentEmail={user.email ?? user.user_metadata?.email ?? ""}
+    />
+  );
 }

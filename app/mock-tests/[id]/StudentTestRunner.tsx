@@ -10,6 +10,7 @@ import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, subm
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { SubmissionResult } from "./SubmissionResult";
+import { ScreenWatermark } from "@/components/mock-tests/ScreenWatermark";
 import {
   getLastFullscreenStatus,
   isBigScreen,
@@ -36,7 +37,16 @@ type TestQuestion = {
   question_text_te: string | null; option_a_te: string | null; option_b_te: string | null;
   option_c_te: string | null; option_d_te: string | null;
 };
-type Props = { mockTestId: string; publicTestPath: string; title: string; sessionId: string; expiresAt: string; questions: TestQuestion[]; bookmarkedQuestionIds: string[] };
+type Props = {
+  mockTestId: string;
+  publicTestPath: string;
+  title: string;
+  sessionId: string;
+  expiresAt: string;
+  questions: TestQuestion[];
+  bookmarkedQuestionIds: string[];
+  studentEmail?: string;
+};
 
 function secondsLeft(expiresAt: string) { return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)); }
 function displayTime(total: number) {
@@ -46,7 +56,16 @@ function displayTime(total: number) {
   return hours ? `${String(hours).padStart(2, "0")}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 }
 
-export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId, expiresAt, questions, bookmarkedQuestionIds }: Props) {
+export function StudentTestRunner({
+  mockTestId,
+  publicTestPath,
+  title,
+  sessionId,
+  expiresAt,
+  questions,
+  bookmarkedQuestionIds,
+  studentEmail,
+}: Props) {
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
     const lastAnsweredIndex = questions.reduce((last, question, questionIndex) => question.selected_answer ? questionIndex : last, -1);
@@ -271,7 +290,10 @@ export function StudentTestRunner({ mockTestId, publicTestPath, title, sessionId
 
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
-  return <main ref={containerRef} className="student-page min-h-screen bg-slate-100 pb-8">
+  const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
+
+  return <main ref={containerRef} className="student-page relative min-h-screen bg-slate-100 pb-8">
+    <ScreenWatermark text={watermarkText} />
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
