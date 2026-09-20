@@ -536,7 +536,7 @@ export function StudentTestRunner({
                   </div>
                 )}
               </div>
-              <FormattedQuestionText text={questionText} className="mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-medium leading-relaxed sm:leading-8 text-slate-950" />
+              <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-medium leading-relaxed sm:leading-8 text-slate-950" />
               {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-48 sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
               <div className="mt-4 sm:mt-5 grid gap-2 sm:gap-2.5">
                 {options.map(([key, text]) => {
@@ -567,7 +567,7 @@ export function StudentTestRunner({
                       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
                         {key}
                       </span>
-                      <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line text-sm sm:text-base font-normal sm:font-medium leading-normal text-slate-800 ${teluguOption ? "font-telugu" : ""}`}>
+                      <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line text-sm sm:text-base font-normal sm:font-medium leading-normal text-slate-800 font-exam ${teluguOption ? "font-telugu" : ""}`}>
                         {text}
                       </span>
                     </label>

@@ -422,7 +422,7 @@ function StudyQuestionCard({
               <div className="min-w-0 flex-1" lang={showTelugu ? "te" : "en"}>
                 <FormattedQuestionText
                   text={questionText}
-                  className={`text-base sm:text-lg font-medium leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
+                  className={`font-exam text-base sm:text-lg font-medium leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
                 />
               </div>
             </div>
@@ -477,7 +477,7 @@ function StudyQuestionCard({
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${badgeStyle}`}>
                       {key}
                     </span>
-                    <span className={`min-w-0 flex-1 pt-0.5 leading-relaxed font-medium ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+                    <span className={`min-w-0 flex-1 pt-0.5 leading-relaxed font-medium font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
                       {label}
                     </span>
                     {statusBadge}
@@ -514,7 +514,7 @@ function StudyQuestionCard({
               <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
                 <FormattedQuestionText
                   text={explanation}
-                  className={`text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                  className={`font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
                 />
               </div>
             ) : (

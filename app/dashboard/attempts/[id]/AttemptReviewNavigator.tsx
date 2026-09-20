@@ -196,7 +196,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                   <div className="min-w-0 flex-1 pt-0.5" lang={showTelugu ? "te" : "en"}>
                     <FormattedQuestionText
                       text={questionText}
-                      className={`text-base sm:text-lg font-medium leading-relaxed sm:leading-8 text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
+                      className={`font-exam text-base sm:text-lg font-medium leading-relaxed sm:leading-8 text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
                     />
                   </div>
                 </div>
@@ -266,7 +266,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                   >
                     <FormattedQuestionText
                       text={explanation}
-                      className={`text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                      className={`font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
                     />
                   </div>
                 ) : (
@@ -389,7 +389,7 @@ function OptionRow({
       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-black ${badgeStyle}`}>
         {optionKey}
       </span>
-      <span className={`min-w-0 flex-1 pt-0.5 text-sm sm:text-base font-medium leading-relaxed ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+      <span className={`min-w-0 flex-1 pt-0.5 text-sm sm:text-base font-medium leading-relaxed font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
         {label}
       </span>
       {statusText && (

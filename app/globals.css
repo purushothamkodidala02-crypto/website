@@ -41,6 +41,10 @@ body {
   letter-spacing: normal;
 }
 
+.font-exam {
+  font-family: "Times New Roman", Times, Georgia, serif;
+}
+
 * {
   border-color: #e2e8f0;
 }
