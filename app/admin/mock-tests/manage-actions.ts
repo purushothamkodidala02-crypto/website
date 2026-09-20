@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
+import { sendMockTestNotifications } from "@/lib/notifications/mock-test-alerts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -66,7 +67,10 @@ export async function archiveMockTest(mockTestId: string): Promise<MockTestManag
   return { success: true, message: `“${result.mockTest.title}” is hidden from students.` };
 }
 
-export async function publishMockTest(mockTestId: string): Promise<MockTestManagementResult> {
+export async function publishMockTest(
+  mockTestId: string,
+  options?: { notifyStudents?: boolean }
+): Promise<MockTestManagementResult> {
   const result = await getManagedMockTest(mockTestId);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to publish the Mock Test." };
   if (result.mockTest.status !== "draft") return { success: false, message: "Only draft Mock Tests can be published." };
@@ -90,11 +94,32 @@ export async function publishMockTest(mockTestId: string): Promise<MockTestManag
         : knownMessage ?? "This Mock Test could not be published. Verify its Questions, marks, and Paper setup.",
     };
   }
+
+  let notificationNote = "";
+  if (options?.notifyStudents) {
+    try {
+      const { data: { user } } = await result.supabase.auth.getUser();
+      const notifyResult = await sendMockTestNotifications({
+        mockTestId,
+        adminUserId: user?.id,
+      });
+      if (notifyResult.sentCount > 0) {
+        notificationNote = ` and emailed ${notifyResult.sentCount} previous test-takers!`;
+      }
+    } catch (notifyErr) {
+      console.error("Failed to send mock test notifications on publish:", notifyErr);
+      notificationNote = " (Note: published, but email notification encountered an issue).";
+    }
+  }
+
   revalidateMockTestPages(mockTestId);
-  return { success: true, message: `“${result.mockTest.title}” is published.` };
+  return { success: true, message: `“${result.mockTest.title}” is published${notificationNote}.` };
 }
 
-export async function republishArchivedMockTest(mockTestId: string): Promise<MockTestManagementResult> {
+export async function republishArchivedMockTest(
+  mockTestId: string,
+  options?: { notifyStudents?: boolean }
+): Promise<MockTestManagementResult> {
   const result = await getManagedMockTest(mockTestId);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to publish the Mock Test again." };
   if (result.mockTest.status !== "archived") return { success: false, message: "Only hidden Mock Tests can be published again." };
@@ -110,8 +135,25 @@ export async function republishArchivedMockTest(mockTestId: string): Promise<Moc
     return { success: false, message: knownMessage ?? "This Mock Test could not be published again. Verify its Questions and publishing setup." };
   }
 
+  let notificationNote = "";
+  if (options?.notifyStudents) {
+    try {
+      const { data: { user } } = await result.supabase.auth.getUser();
+      const notifyResult = await sendMockTestNotifications({
+        mockTestId,
+        adminUserId: user?.id,
+      });
+      if (notifyResult.sentCount > 0) {
+        notificationNote = ` and emailed ${notifyResult.sentCount} previous test-takers!`;
+      }
+    } catch (notifyErr) {
+      console.error("Failed to send mock test notifications on republish:", notifyErr);
+      notificationNote = " (Note: live again, but email notification encountered an issue).";
+    }
+  }
+
   revalidateMockTestPages(mockTestId);
-  return { success: true, message: `“${result.mockTest.title}” is live again.` };
+  return { success: true, message: `“${result.mockTest.title}” is live again${notificationNote}.` };
 }
 
 export async function restoreMockTestAsDraft(mockTestId: string): Promise<MockTestManagementResult> {
