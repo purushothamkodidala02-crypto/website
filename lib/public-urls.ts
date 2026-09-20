@@ -29,7 +29,9 @@ export function mockTestUrl(stateSlug: string, examSlug: string, paperSlug: stri
   return `${paperUrl(stateSlug, examSlug, paperSlug)}/${mockTestSlug}`;
 }
 
-export function mockTestSlug(seriesNumber: number, subjectSlug?: string | null) {
+export function mockTestSlug(seriesNumber: number, subjectSlug?: string | null, sectionSlug?: string | null) {
   const series = String(Math.max(1, seriesNumber)).padStart(2, "0");
-  return `${subjectSlug ? `${subjectSlug}-` : ""}mock-test-${series}`;
+  const prefix = subjectSlug ? (sectionSlug ? `${subjectSlug}-${sectionSlug}-` : `${subjectSlug}-`) : "";
+  return `${prefix}mock-test-${series}`;
 }
+

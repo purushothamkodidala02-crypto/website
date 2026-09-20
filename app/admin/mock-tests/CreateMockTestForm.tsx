@@ -14,17 +14,19 @@ type Exam = { id: string; categoryId: string; name: string };
 type Specialization = { id: string; examId: string; name: string };
 type Paper = { id: string; examId: string; specializationId: string | null; name: string; duration: number | null; questionCount: number | null };
 type Subject = { id: string; paperId: string; name: string };
-type ExistingSeries = { paperId: string; subjectId: string | null; scope: "paper" | "subject"; seriesNumber: number };
+type SubjectSectionOption = { id: string; subjectId: string; name: string; slug: string };
+type ExistingSeries = { paperId: string; subjectId: string | null; subjectSectionId?: string | null; scope: "paper" | "subject"; seriesNumber: number };
 
 const initialState: CreateMockTestState = { success: false, message: "" };
 
-export function CreateMockTestForm({ states, categories, exams, specializations, papers, subjects, existingSeries }: {
+export function CreateMockTestForm({ states, categories, exams, specializations, papers, subjects, sections = [], existingSeries }: {
   states: ExamState[];
   categories: Category[];
   exams: Exam[];
   specializations: Specialization[];
   papers: Paper[];
   subjects: Subject[];
+  sections?: SubjectSectionOption[];
   existingSeries: ExistingSeries[];
 }) {
   const [result, action, pending] = useActionState(createMockTest, initialState);
@@ -34,6 +36,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [specializationId, setSpecializationId] = useState("");
   const [paperId, setPaperId] = useState("");
   const [subjectId, setSubjectId] = useState("");
+  const [subjectSectionId, setSubjectSectionId] = useState("");
   const [scope, setScope] = useState<"paper" | "subject">("paper");
   const [accessType, setAccessType] = useState<MockTestAccessType>("free");
   const state = states.find((item) => item.id === stateId);
@@ -42,17 +45,30 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const availableSpecializations = useMemo(() => specializations.filter((item) => item.examId === examId), [examId, specializations]);
   const availablePapers = useMemo(() => papers.filter((item) => item.examId === examId && (specializationId ? item.specializationId === specializationId : !item.specializationId)), [papers, examId, specializationId]);
   const availableSubjects = useMemo(() => subjects.filter((item) => item.paperId === paperId), [subjects, paperId]);
+  const availableSections = useMemo(() => sections.filter((item) => item.subjectId === subjectId), [sections, subjectId]);
   const exam = exams.find((item) => item.id === examId);
   const paper = papers.find((item) => item.id === paperId);
   const paperSpecialization = paper?.specializationId ? specializations.find((item) => item.id === paper.specializationId) : undefined;
   const subject = subjects.find((item) => item.id === subjectId);
-  const currentNumbers = existingSeries.filter((item) => item.paperId === paperId && item.scope === scope && (scope === "paper" || item.subjectId === subjectId)).map((item) => item.seriesNumber);
+  const section = availableSections.find((item) => item.id === subjectSectionId);
+  const currentNumbers = existingSeries
+    .filter(
+      (item) =>
+        item.paperId === paperId &&
+        item.scope === scope &&
+        (scope === "paper" ||
+          (item.subjectId === subjectId &&
+            (subjectSectionId
+              ? item.subjectSectionId === subjectSectionId
+              : !item.subjectSectionId))),
+    )
+    .map((item) => item.seriesNumber);
   const nextSeries = currentNumbers.length ? Math.max(...currentNumbers) + 1 : 1;
 
-  function resetAfterState(value: string) { setStateId(value); setCategoryId(""); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); }
-  function resetAfterCategory(value: string) { setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); }
-  function resetAfterExam(value: string) { setExamId(value); setSpecializationId(""); setPaperId(""); setSubjectId(""); }
-  function resetAfterSpecialization(value: string) { setSpecializationId(value); setPaperId(""); setSubjectId(""); }
+  function resetAfterState(value: string) { setStateId(value); setCategoryId(""); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterCategory(value: string) { setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterExam(value: string) { setExamId(value); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterSpecialization(value: string) { setSpecializationId(value); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
 
   return <section className="mt-6 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
     <div className="border-b bg-gradient-to-r from-slate-950 to-teal-950 px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-300 text-slate-950"><MockSymbol /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Guided test creator</p><h2 className="font-display mt-1 text-2xl">Create the next mock in its correct series</h2></div></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Select the location from left to right. Varadhi generates the test number, full name and URL automatically.</p></div>
@@ -65,12 +81,48 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       <label className="block text-sm font-bold">2. Recruiting board<SearchableSelect name="exam_id" value={categoryId} onChange={resetAfterCategory} options={availableCategories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose TGPSC, APPSC, DSC…" /></label>
       <label className="block text-sm font-bold">3. Exam<SearchableSelect name="exam_group_id" value={examId} onChange={resetAfterExam} options={availableExams.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose Executive Officer, Group 2…" disabled={!categoryId} /></label>
       <label className="block text-sm font-bold">Specialisation <span className="font-normal text-slate-500">(only when applicable)</span><SearchableSelect value={specializationId} onChange={resetAfterSpecialization} options={[{ value: "", label: availableSpecializations.length ? "Common / direct papers" : "No specialisation" }, ...availableSpecializations.map((item) => ({ value: item.id, label: item.name }))]} placeholder="Choose specialisation" disabled={!examId} /></label>
-      <label className="block text-sm font-bold md:col-span-2">4. Paper<SearchableSelect name="paper_id" value={paperId} onChange={(value) => { setPaperId(value); setSubjectId(""); }} options={availablePapers.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose the exact paper" disabled={!examId} emptyMessage="No papers exist in this selection." /></label>
-      <fieldset className="rounded-2xl border bg-slate-50 p-4"><legend className="px-1 text-sm font-bold">Practice coverage</legend><label className="mt-1 flex gap-3 text-sm"><input name="test_scope" type="radio" value="paper" checked={scope === "paper"} onChange={() => { setScope("paper"); setSubjectId(""); }} />Full paper mock</label><label className="mt-3 flex gap-3 text-sm"><input name="test_scope" type="radio" value="subject" checked={scope === "subject"} onChange={() => setScope("subject")} />One subject only</label></fieldset>
-      {scope === "subject" ? <label className="block text-sm font-bold">Subject<SearchableSelect name="subject_id" value={subjectId} onChange={setSubjectId} options={availableSubjects.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose a subject" disabled={!paperId} /></label> : <div className="rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm text-teal-900"><strong>Full paper selected</strong><p className="mt-1 leading-5">Questions can cover every subject assigned to this paper.</p></div>}
+      <label className="block text-sm font-bold md:col-span-2">4. Paper<SearchableSelect name="paper_id" value={paperId} onChange={(value) => { setPaperId(value); setSubjectId(""); setSubjectSectionId(""); }} options={availablePapers.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose the exact paper" disabled={!examId} emptyMessage="No papers exist in this selection." /></label>
+      <fieldset className="rounded-2xl border bg-slate-50 p-4"><legend className="px-1 text-sm font-bold">Practice coverage</legend><label className="mt-1 flex gap-3 text-sm"><input name="test_scope" type="radio" value="paper" checked={scope === "paper"} onChange={() => { setScope("paper"); setSubjectId(""); setSubjectSectionId(""); }} />Full paper mock</label><label className="mt-3 flex gap-3 text-sm"><input name="test_scope" type="radio" value="subject" checked={scope === "subject"} onChange={() => setScope("subject")} />One subject only</label></fieldset>
+      {scope === "subject" ? (
+        <div className="space-y-4">
+          <label className="block text-sm font-bold">
+            Subject
+            <SearchableSelect
+              name="subject_id"
+              value={subjectId}
+              onChange={(val) => {
+                setSubjectId(val);
+                setSubjectSectionId("");
+              }}
+              options={availableSubjects.map((item) => ({ value: item.id, label: item.name }))}
+              placeholder="Choose a subject"
+              disabled={!paperId}
+            />
+          </label>
+          <label className="block text-sm font-bold">
+            Sub-section / Month <span className="font-normal text-slate-500">(optional)</span>
+            <SearchableSelect
+              name="subject_section_id"
+              value={subjectSectionId}
+              onChange={setSubjectSectionId}
+              options={[
+                { value: "", label: "None (Common Subject Mock Test)" },
+                ...availableSections.map((item) => ({ value: item.id, label: item.name })),
+              ]}
+              placeholder={availableSections.length > 0 ? "Choose month/topic" : "No sub-sections available"}
+              disabled={!subjectId || availableSections.length === 0}
+            />
+          </label>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm text-teal-900">
+          <strong>Full paper selected</strong>
+          <p className="mt-1 leading-5">Questions can cover every subject assigned to this paper.</p>
+        </div>
+      )}
 
       <div className="md:col-span-2 rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-50 to-white p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex gap-4">{state && <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} className="h-5 w-5" /></span>}<div><p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name preview</p><h3 className="font-display mt-1 text-xl">{paper ? mockTestLabel(nextSeries) : "Choose a paper to generate the name"}</h3>{paper && <p className="mt-1 text-sm font-semibold text-slate-600">{state?.code} · {exam?.name} · {paperSpecialization?.name ?? paper.name}{subject ? ` · ${subject.name}` : ""}</p>}</div></div>{paper && <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-teal-800 shadow-sm">Next in series: {nextSeries}</span>}</div>
+        <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex gap-4">{state && <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} className="h-5 w-5" /></span>}<div><p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name preview</p><h3 className="font-display mt-1 text-xl">{paper ? mockTestLabel(nextSeries) : "Choose a paper to generate the name"}</h3>{paper && <p className="mt-1 text-sm font-semibold text-slate-600">{state?.code} · {exam?.name} · {paperSpecialization?.name ?? paper.name}{subject ? ` · ${subject.name}${section ? ` (${section.name})` : ""}` : ""}</p>}</div></div>{paper && <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-teal-800 shadow-sm">Next in series: {nextSeries}</span>}</div>
         <input type="hidden" name="expected_series_number" value={nextSeries} />
       </div>
 

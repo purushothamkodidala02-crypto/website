@@ -26,3 +26,25 @@ export interface CreateSubjectInput {
   is_active?: boolean;
   display_order?: number;
 }
+
+export interface SubjectSection {
+  id: string;
+  subject_id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSubjectSectionInput {
+  subject_id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  is_active?: boolean;
+  display_order?: number;
+}
+

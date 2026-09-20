@@ -31,14 +31,15 @@ export default async function MockTestsPage({
 }) {
   const query = await searchParams;
   const supabase = await createClient();
-  const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, summariesResult] = await Promise.all([
+  const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult, summariesResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").order("display_order"),
-    supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at, replaces_mock_test_id, superseded_by_mock_test_id").order("series_number"),
+    supabase.from("mock_tests").select("id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at, replaces_mock_test_id, superseded_by_mock_test_id").order("series_number"),
     supabase.from("subjects").select("id, paper_id, name"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, duration_minutes, question_count, display_order").order("display_order"),
     supabase.from("exam_groups").select("id, exam_id, name, slug").order("display_order"),
     supabase.from("exams").select("id, state_id, name, slug").order("display_order"),
     supabase.from("exam_specializations").select("id, exam_group_id, name").order("display_order"),
+    supabase.from("subject_sections").select("id, subject_id, name, slug").eq("is_active", true).order("display_order"),
     supabase.rpc("get_admin_mock_test_summaries"),
   ]);
   const states = statesResult.data ?? [];
@@ -46,6 +47,7 @@ export default async function MockTestsPage({
   const exams = groupsResult.data ?? [];
   const papers = papersResult.data ?? [];
   const subjects = subjectsResult.data ?? [];
+  const sections = sectionsResult.data ?? [];
   const tests = testsResult.data ?? [];
   const specializations = specializationsResult.data ?? [];
   const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
@@ -122,7 +124,7 @@ export default async function MockTestsPage({
       <WorkflowStep number="5" title="Publish" detail="Publishing is the final student visibility control." />
     </section>
     {testsResult.error || statesResult.error || summariesResult.error ? <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{testsResult.error?.message ?? statesResult.error?.message ?? summariesResult.error?.message}</p> : <ExistingMockTestsTable key={`${stateId}-${categoryId}-${examId}-${specializationId}-${paperId}-${initialStatus}-${initialScope}-${initialSearch}`} states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} tests={mappedTests} initialStateId={stateId} initialLocation={initialLocation} initialSearch={initialSearch} initialStatus={initialStatus} initialScope={initialScope} />}
-    <details className="mt-8 overflow-hidden rounded-3xl border border-teal-200 bg-gradient-to-br from-white to-teal-50 shadow-sm"><summary className="cursor-pointer list-none px-7 py-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Create</p><h2 className="font-display mt-2 text-xl">+ Create the next mock test</h2><p className="mt-1 text-sm text-slate-600">A guided workflow keeps the state, exam, paper and test series correct.</p></summary><div className="border-t border-teal-100 px-4 pb-7 sm:px-7"><CreateMockTestForm states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))} existingSeries={tests.map((test) => ({ paperId: test.paper_id, subjectId: test.subject_id, scope: test.test_scope as "paper" | "subject", seriesNumber: Number(test.series_number ?? 1) }))} /></div></details>
+    <details className="mt-8 overflow-hidden rounded-3xl border border-teal-200 bg-gradient-to-br from-white to-teal-50 shadow-sm"><summary className="cursor-pointer list-none px-7 py-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Create</p><h2 className="font-display mt-2 text-xl">+ Create the next mock test</h2><p className="mt-1 text-sm text-slate-600">A guided workflow keeps the state, exam, paper and test series correct.</p></summary><div className="border-t border-teal-100 px-4 pb-7 sm:px-7"><CreateMockTestForm states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))} sections={sections.map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))} existingSeries={tests.map((test) => ({ paperId: test.paper_id, subjectId: test.subject_id, subjectSectionId: test.subject_section_id, scope: test.test_scope as "paper" | "subject", seriesNumber: Number(test.series_number ?? 1) }))} /></div></details>
   </main>;
 }
 

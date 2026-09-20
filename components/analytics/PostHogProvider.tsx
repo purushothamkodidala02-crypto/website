@@ -2,11 +2,13 @@
 
 import { useEffect, useState, Suspense, type ComponentType } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import type { PostHog } from "posthog-js";
+import type { Session } from "@supabase/supabase-js";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const [phState, setPhState] = useState<{
-    client: any;
-    Provider: ComponentType<{ client: any; children: React.ReactNode }>;
+    client: PostHog;
+    Provider: ComponentType<{ client: PostHog; children: React.ReactNode }>;
   } | null>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       });
 
       const supabase = createClient();
-      const updateIdentity = async (session: any) => {
+      const updateIdentity = async (session: Session | null) => {
         if (session?.user) {
           posthog.identify(session.user.id, { email: session.user.email });
         } else {
@@ -70,7 +72,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PostHogPageView({ client }: { client: any }) {
+function PostHogPageView({ client }: { client: PostHog }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 

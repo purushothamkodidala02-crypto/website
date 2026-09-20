@@ -8,6 +8,7 @@ import { updateMockTest, type UpdateMockTestState } from "./actions";
 
 type Paper = { id: string; label: string; duration: number | null };
 type Subject = { id: string; paperId: string; name: string };
+type SubjectSection = { id: string; subjectId: string; name: string; slug: string };
 
 const initialState: UpdateMockTestState = { success: false, message: "" };
 
@@ -16,11 +17,13 @@ export function EditMockTestForm({
   studentTitle,
   papers,
   subjects,
+  sections = [],
 }: {
   mockTest: MockTest;
   studentTitle: string;
   papers: Paper[];
   subjects: Subject[];
+  sections?: SubjectSection[];
 }) {
   const [state, action, pending] = useActionState(
     updateMockTest.bind(null, mockTest.id),
@@ -28,11 +31,16 @@ export function EditMockTestForm({
   );
   const [paperId, setPaperId] = useState(mockTest.paper_id);
   const [subjectId, setSubjectId] = useState(mockTest.subject_id ?? "");
+  const [subjectSectionId, setSubjectSectionId] = useState(mockTest.subject_section_id ?? "");
   const [scope, setScope] = useState(mockTest.test_scope);
   const [accessType, setAccessType] = useState<MockTestAccessType>(mockTest.access_type);
   const availableSubjects = useMemo(
     () => subjects.filter((subject) => subject.paperId === paperId),
     [subjects, paperId],
+  );
+  const availableSections = useMemo(
+    () => sections.filter((sec) => sec.subjectId === subjectId),
+    [sections, subjectId],
   );
 
   const isPublished = mockTest.status !== "draft";
@@ -90,21 +98,44 @@ export function EditMockTestForm({
         </fieldset>
 
         {scope === "subject" && (
-          <label className="block text-sm font-bold">
-            Subject
-            <SearchableSelect
-              name="subject_id"
-              value={subjectId}
-              disabled={isPublished}
-              onChange={(value) => !isPublished && setSubjectId(value)}
-              options={availableSubjects.map((subject) => ({
-                value: subject.id,
-                label: subject.name,
-              }))}
-              placeholder="Search for a subject"
-              emptyMessage="Add a Subject to this Paper first."
-            />
-          </label>
+          <div className="space-y-4">
+            <label className="block text-sm font-bold">
+              Subject
+              <SearchableSelect
+                name="subject_id"
+                value={subjectId}
+                disabled={isPublished}
+                onChange={(value) => {
+                  if (isPublished) return;
+                  setSubjectId(value);
+                  setSubjectSectionId("");
+                }}
+                options={availableSubjects.map((subject) => ({
+                  value: subject.id,
+                  label: subject.name,
+                }))}
+                placeholder="Search for a subject"
+                emptyMessage="Add a Subject to this Paper first."
+              />
+            </label>
+            <label className="block text-sm font-bold">
+              Sub-section / Month <span className="font-normal text-slate-500">(optional)</span>
+              <SearchableSelect
+                name="subject_section_id"
+                value={subjectSectionId}
+                disabled={isPublished}
+                onChange={(val) => !isPublished && setSubjectSectionId(val)}
+                options={[
+                  { value: "", label: "None (Common Subject Mock Test)" },
+                  ...availableSections.map((sec) => ({
+                    value: sec.id,
+                    label: sec.name,
+                  })),
+                ]}
+                placeholder={availableSections.length > 0 ? "Search for sub-section" : "No sub-sections available"}
+              />
+            </label>
+          </div>
         )}
 
         <label className="block text-sm font-bold md:col-span-2">

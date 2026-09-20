@@ -23,6 +23,7 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   const paperId = String(formData.get("paper_id") ?? "").trim();
   const scope = String(formData.get("test_scope") ?? "paper") as MockTestScope;
   const subjectId = String(formData.get("subject_id") ?? "").trim() || null;
+  const subjectSectionId = String(formData.get("subject_section_id") ?? "").trim() || null;
   const duration = Number(formData.get("duration_minutes") ?? 0);
   const requestedTarget = Number(formData.get("target_question_count") ?? 0);
   const pricing = readMockTestAccess(formData);
@@ -33,35 +34,47 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   if (scope === "subject" && !subjectId) return { success: false, message: "Choose a subject for a subject-only mock." };
   if (pricing.error) return { success: false, message: pricing.error };
 
-  const [stateResult, categoryResult, groupResult, paperResult, subjectResult] = await Promise.all([
+  const [stateResult, categoryResult, groupResult, paperResult, subjectResult, sectionResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").eq("id", stateId).maybeSingle(),
     supabase.from("exams").select("id, state_id, name").eq("id", categoryId).maybeSingle(),
     supabase.from("exam_groups").select("id, exam_id, name, slug").eq("id", examId).maybeSingle(),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order, question_count").eq("id", paperId).maybeSingle(),
     subjectId ? supabase.from("subjects").select("id, paper_id, name, slug").eq("id", subjectId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    subjectSectionId ? supabase.from("subject_sections").select("id, subject_id, name, slug").eq("id", subjectSectionId).maybeSingle() : Promise.resolve({ data: null, error: null }),
   ]);
   const state = stateResult.data;
   const category = categoryResult.data;
   const group = groupResult.data;
   const paper = paperResult.data;
   const subject = subjectResult.data;
-  if (!state || !category || !group || !paper || category.state_id !== state.id || group.exam_id !== category.id || paper.exam_group_id !== group.id || (scope === "subject" && (!subject || subject.paper_id !== paper.id))) {
-    return { success: false, message: "The selected state, board, exam, paper and subject do not belong together." };
+  const section = sectionResult.data;
+  if (!state || !category || !group || !paper || category.state_id !== state.id || group.exam_id !== category.id || paper.exam_group_id !== group.id || (scope === "subject" && (!subject || subject.paper_id !== paper.id)) || (scope === "subject" && subjectSectionId && (!section || section.subject_id !== subjectId))) {
+    return { success: false, message: "The selected state, board, exam, paper, subject and sub-section do not belong together." };
   }
   let existingSeriesQuery = supabase.from("mock_tests").select("series_number").eq("paper_id", paperId).eq("test_scope", scope).order("series_number", { ascending: false }).limit(1);
-  existingSeriesQuery = scope === "subject" ? existingSeriesQuery.eq("subject_id", subjectId) : existingSeriesQuery.is("subject_id", null);
+  if (scope === "subject") {
+    existingSeriesQuery = existingSeriesQuery.eq("subject_id", subjectId);
+    if (subjectSectionId) {
+      existingSeriesQuery = existingSeriesQuery.eq("subject_section_id", subjectSectionId);
+    } else {
+      existingSeriesQuery = existingSeriesQuery.is("subject_section_id", null);
+    }
+  } else {
+    existingSeriesQuery = existingSeriesQuery.is("subject_id", null);
+  }
   const { data: existingSeries, error: seriesError } = await existingSeriesQuery;
   if (seriesError) return { success: false, message: seriesError.message };
   const seriesNumber = Number(existingSeries?.[0]?.series_number ?? 0) + 1;
   const { data: specialization } = paper.specialization_id
     ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
     : { data: null };
-  const title = buildMockTestTitle({ stateCode: state.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, seriesNumber });
-  const slug = mockTestSlug(seriesNumber, subject?.slug);
+  const title = buildMockTestTitle({ stateCode: state.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, sectionName: section?.name, seriesNumber });
+  const slug = mockTestSlug(seriesNumber, subject?.slug, section?.slug);
   const targetQuestionCount = scope === "paper" ? Number(paper.question_count ?? requestedTarget) : requestedTarget;
   const { error } = await supabase.from("mock_tests").insert({
     paper_id: paperId,
     subject_id: scope === "subject" ? subjectId : null,
+    subject_section_id: scope === "subject" ? subjectSectionId : null,
     test_scope: scope,
     series_number: seriesNumber,
     title,

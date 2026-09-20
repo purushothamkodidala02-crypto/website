@@ -11,16 +11,23 @@ export function buildMockTestTitle({
   examName,
   paperName,
   subjectName,
+  sectionName,
   seriesNumber,
 }: {
   stateCode: string;
   examName: string;
   paperName: string;
   subjectName?: string | null;
+  sectionName?: string | null;
   seriesNumber: number;
 }) {
   const location = `${stateCode} ${examName} · ${paperName}`;
-  return `${location}${subjectName ? ` · ${subjectName}` : ""} · ${mockTestLabel(seriesNumber)}`;
+  const subjectPart = subjectName
+    ? sectionName
+      ? ` · ${subjectName} (${sectionName})`
+      : ` · ${subjectName}`
+    : "";
+  return `${location}${subjectPart} · ${mockTestLabel(seriesNumber)}`;
 }
 
 export function toCatalogSlug(value: string) {
@@ -36,13 +43,20 @@ export function studentFacingMockTestTitle({
   paperLabel,
   seriesNumber,
   subjectName,
+  sectionName,
 }: {
   examName: string;
   paperLabel: string;
   seriesNumber: number;
   subjectName?: string | null;
+  sectionName?: string | null;
 }) {
-  return `${examName} · ${paperLabel}${subjectName ? ` · ${subjectName}` : ""} · ${mockTestLabel(seriesNumber)}`;
+  const subjectPart = subjectName
+    ? sectionName
+      ? ` · ${subjectName} (${sectionName})`
+      : ` · ${subjectName}`
+    : "";
+  return `${examName} · ${paperLabel}${subjectPart} · ${mockTestLabel(seriesNumber)}`;
 }
 
 export function inferExamKind(name: string) {

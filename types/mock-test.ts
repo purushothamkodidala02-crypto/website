@@ -16,6 +16,7 @@ export interface MockTest {
   id: string;
   paper_id: string;
   subject_id: string | null;
+  subject_section_id?: string | null;
   test_scope: MockTestScope;
   series_number: number;
   title: string;
@@ -40,6 +41,7 @@ export interface MockTest {
 export interface CreateMockTestInput {
   paper_id: string;
   subject_id?: string | null;
+  subject_section_id?: string | null;
   test_scope: MockTestScope;
   series_number?: number;
   title: string;

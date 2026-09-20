@@ -2,19 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EntitySeoForm } from "@/components/admin/EntitySeoForm";
 import { createClient } from "@/lib/supabase/server";
-import type { Subject } from "@/types/subject";
+import type { Subject, SubjectSection } from "@/types/subject";
 import { EditSubjectForm } from "./EditSubjectForm";
+import { SubjectSectionsManager } from "../sections/SubjectSectionsManager";
 
 export default async function EditSubjectPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ fromCategory?: string; fromExam?: string; fromSpecialization?: string; fromPaper?: string }> }) {
   const { id } = await params;
   const context = await searchParams;
   const supabase = await createClient();
-  const [subjectResult, papersResult, groupsResult, categoriesResult, specializationsResult] = await Promise.all([
+  const [subjectResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult] = await Promise.all([
     supabase.from("subjects").select("id, paper_id, name, slug, description, seo_title, seo_description, content_language_mode, is_active, display_order, created_at, updated_at").eq("id", id).maybeSingle(),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name").order("display_order"),
     supabase.from("exam_groups").select("id, exam_id, name"),
     supabase.from("exams").select("id, name"),
     supabase.from("exam_specializations").select("id, name"),
+    supabase.from("subject_sections").select("id, subject_id, name, slug, description, is_active, display_order, created_at, updated_at").eq("subject_id", id).order("display_order"),
   ]);
   if (!subjectResult.data) notFound();
   const subject = subjectResult.data;
@@ -32,6 +34,11 @@ export default async function EditSubjectPage({ params, searchParams }: { params
       <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">{backLabel}</Link>
       <h1 className="mt-5 text-3xl font-black">Edit Subject</h1>
       <EditSubjectForm subject={subject as Subject} papers={papers.map((paper) => { const group = groups.get(paper.exam_group_id); return { id: paper.id, label: `${categories.get(group?.exam_id ?? "") ?? "Unknown Recruiting Board"} → ${group?.name ?? "Unknown Exam"}${paper.specialization_id ? ` → ${specializations.get(paper.specialization_id) ?? "Unknown Specialisation"}` : ""} → ${paper.name}` }; })} />
+      <SubjectSectionsManager
+        subjectId={subject.id}
+        subjectName={subject.name}
+        sections={(sectionsResult.data ?? []) as SubjectSection[]}
+      />
       <EntitySeoForm entityType="subject" entityId={subject.id} title={subject.seo_title} description={subject.seo_description} titlePlaceholder={`${subject.name} Mock Tests for ${subjectExam?.name ?? "Exam"}`} descriptionPlaceholder={`Practise free ${subject.name} mock tests with timed questions and answer review.`} />
     </main>
   );
