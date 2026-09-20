@@ -31,6 +31,7 @@ export function NotifyStudentsModal({
   const [preview, setPreview] = useState<MockTestNotificationPreview | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   async function handleOpen() {
     setIsOpen(true);
@@ -175,15 +176,50 @@ export function NotifyStudentsModal({
                       <strong>{preview.examName}</strong> on Varadhi Prep and have a confirmed email.
                     </p>
 
-                    {preview.recipientsPreview.length > 0 && (
-                      <div className="mt-3 border-t border-teal-100 pt-2 text-[11px] text-slate-500">
-                        <span className="font-semibold text-slate-700">Sample recipients: </span>
-                        {preview.recipientsPreview.map((r, i) => (
-                          <span key={r.email}>
-                            {r.name} ({r.email})
-                            {i < preview.recipientsPreview.length - 1 ? ", " : ""}
-                          </span>
-                        ))}
+                    {preview.recipients && preview.recipients.length > 0 && (
+                      <div className="mt-3 border-t border-teal-100 pt-3">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <p className="text-[11px] font-bold text-teal-950 uppercase tracking-wider">
+                            Student Email List ({preview.recipients.length})
+                          </p>
+                          {preview.recipients.length > 5 && (
+                            <input
+                              type="text"
+                              placeholder="Search student or email…"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="rounded-lg border border-teal-200 bg-white px-2.5 py-1 text-xs text-slate-800 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
+                            />
+                          )}
+                        </div>
+
+                        <div className="max-h-44 overflow-y-auto rounded-lg border border-teal-200/60 bg-white divide-y divide-slate-100 shadow-2xs">
+                          {(searchQuery.trim()
+                            ? preview.recipients.filter(
+                                (r) =>
+                                  r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                  r.email.toLowerCase().includes(searchQuery.toLowerCase())
+                              )
+                            : preview.recipients
+                          ).map((student) => (
+                            <div
+                              key={student.email}
+                              className="flex items-center justify-between px-3 py-2 text-xs hover:bg-slate-50"
+                            >
+                              <div className="truncate pr-2">
+                                <p className="font-bold text-slate-900 truncate">
+                                  {student.name}
+                                </p>
+                                <p className="font-mono text-[11px] text-slate-500 truncate">
+                                  {student.email}
+                                </p>
+                              </div>
+                              <span className="shrink-0 rounded bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700">
+                                Exam Student
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -198,7 +234,7 @@ export function NotifyStudentsModal({
                         hour: "numeric",
                         minute: "numeric",
                       }).format(new Date(preview.alreadyNotifiedAt))}{" "}
-                      to {preview.previousSendCount} students. Sending again will resend to all eligible students.
+                      to {preview.previousSendCount} students.
                     </div>
                   )}
 

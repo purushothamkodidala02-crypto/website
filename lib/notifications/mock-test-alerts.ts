@@ -24,8 +24,15 @@ export type MockTestNotificationPreview = {
   questionCount: number;
   recipientCount: number;
   recipientsPreview: { email: string; name: string }[];
+  recipients: { email: string; name: string }[];
   alreadyNotifiedAt: string | null;
   previousSendCount: number;
+  previousSends: {
+    id: string;
+    sent_at: string;
+    recipient_count: number;
+    recipients?: { email: string; name: string }[];
+  }[];
 };
 
 export type SendNotificationResult = {
@@ -210,11 +217,16 @@ export async function previewMockTestNotification(mockTestId: string): Promise<M
   // Check if already notified
   const { data: notificationHistory } = await admin
     .from("mock_test_notifications")
-    .select("id, sent_at, recipient_count")
+    .select("id, sent_at, recipient_count, metadata")
     .eq("mock_test_id", mockTestId)
     .order("sent_at", { ascending: false });
 
-  const history = notificationHistory ?? [];
+  const history = (notificationHistory ?? []) as {
+    id: string;
+    sent_at: string;
+    recipient_count: number;
+    metadata?: { recipients?: { email: string; name: string }[] };
+  }[];
   const latestNotification = history[0];
 
   return {
@@ -227,8 +239,15 @@ export async function previewMockTestNotification(mockTestId: string): Promise<M
     questionCount: details.test.target_question_count,
     recipientCount: recipients.length,
     recipientsPreview: recipients.slice(0, 5).map((r) => ({ email: r.email, name: r.full_name })),
+    recipients: recipients.map((r) => ({ email: r.email, name: r.full_name })),
     alreadyNotifiedAt: latestNotification?.sent_at ?? null,
     previousSendCount: history.reduce((sum, item) => sum + (item.recipient_count || 0), 0),
+    previousSends: history.map((item) => ({
+      id: item.id,
+      sent_at: item.sent_at,
+      recipient_count: item.recipient_count,
+      recipients: item.metadata?.recipients ?? [],
+    })),
   };
 }
 
@@ -341,6 +360,10 @@ export async function sendMockTestNotifications({
       mock_title: details.formattedTitle,
       attempted_count: recipients.length,
       failed_count: failedCount,
+      recipients: recipients.map((r) => ({
+        email: r.email,
+        name: r.full_name,
+      })),
     },
   });
 
