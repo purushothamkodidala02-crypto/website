@@ -152,3 +152,148 @@ export async function deleteSubjectSection(
 
   return { success: true, message: "Sub-section deleted successfully." };
 }
+
+export async function quickCreateSubjectSection(
+  subjectId: string,
+  name: string,
+): Promise<{
+  success: boolean;
+  message: string;
+  section?: { id: string; subjectId: string; name: string; slug: string };
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: "You must be logged in." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (profile?.role !== "admin") {
+    return { success: false, message: "You are not authorized to create sections." };
+  }
+
+  const trimmedName = name.trim();
+  if (!subjectId) return { success: false, message: "Choose a subject." };
+  if (!trimmedName) return { success: false, message: "Enter a sub-section name." };
+
+  const { data: existing, error: existingError } = await supabase
+    .from("subject_sections")
+    .select("id, subject_id, name, slug, display_order")
+    .eq("subject_id", subjectId);
+
+  if (existingError) return { success: false, message: existingError.message };
+
+  const match = (existing ?? []).find(
+    (s) => s.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+  );
+  if (match) {
+    return {
+      success: true,
+      message: `Sub-section "${match.name}" already exists and was selected.`,
+      section: {
+        id: match.id,
+        subjectId: match.subject_id,
+        name: match.name,
+        slug: match.slug,
+      },
+    };
+  }
+
+  const usedSlugs = new Set((existing ?? []).map((s) => s.slug));
+  const nextOrder =
+    Math.max(0, ...(existing ?? []).map((s) => s.display_order)) + 1;
+  const slug = sectionSlug(trimmedName, 0, usedSlugs);
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("subject_sections")
+    .insert({
+      subject_id: subjectId,
+      name: trimmedName,
+      slug,
+      display_order: nextOrder,
+      is_active: true,
+    })
+    .select("id, subject_id, name, slug")
+    .single();
+
+  if (insertError) return { success: false, message: insertError.message };
+
+  revalidatePath("/admin/subjects");
+  revalidatePath(`/admin/subjects/${subjectId}/edit`);
+  revalidatePath("/admin/mock-tests");
+  revalidatePath("/mock-tests");
+  revalidateTag(PUBLIC_CATALOG_TAG, "max");
+
+  return {
+    success: true,
+    message: `Sub-section "${inserted.name}" added.`,
+    section: {
+      id: inserted.id,
+      subjectId: inserted.subject_id,
+      name: inserted.name,
+      slug: inserted.slug,
+    },
+  };
+}
+
+export async function updateSubjectSection(
+  sectionId: string,
+  subjectId: string,
+  name: string,
+): Promise<SectionActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: "You must be logged in." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (profile?.role !== "admin") {
+    return { success: false, message: "You are not authorized to update sections." };
+  }
+
+  const trimmedName = name.trim();
+  if (!trimmedName) return { success: false, message: "Sub-section name cannot be empty." };
+
+  const { data: existing, error: existingError } = await supabase
+    .from("subject_sections")
+    .select("id, name")
+    .eq("subject_id", subjectId);
+
+  if (existingError) return { success: false, message: existingError.message };
+
+  if (
+    (existing ?? []).some(
+      (s) => s.id !== sectionId && s.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+    )
+  ) {
+    return {
+      success: false,
+      message: `Another sub-section named "${trimmedName}" already exists.`,
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from("subject_sections")
+    .update({ name: trimmedName })
+    .eq("id", sectionId);
+
+  if (updateError) return { success: false, message: updateError.message };
+
+  revalidatePath("/admin/subjects");
+  revalidatePath(`/admin/subjects/${subjectId}/edit`);
+  revalidatePath("/admin/mock-tests");
+  revalidatePath("/mock-tests");
+  revalidateTag(PUBLIC_CATALOG_TAG, "max");
+
+  return { success: true, message: "Sub-section updated successfully." };
+}
+

@@ -5,6 +5,7 @@ import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import {
   createSubjectSection,
   deleteSubjectSection,
+  updateSubjectSection,
   type SectionActionState,
 } from "../../sections/actions";
 import type { SubjectSection } from "@/types/subject";
@@ -27,7 +28,33 @@ export function SubjectSectionsManager({
   const [names, setNames] = useState("");
   const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [editPending, setEditPending] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  const handleStartEdit = (sec: SubjectSection) => {
+    setEditingId(sec.id);
+    setEditingName(sec.name);
+    setEditError(null);
+  };
+
+  const handleSaveEdit = (sectionId: string) => {
+    if (!editingName.trim()) return;
+    setEditPending(true);
+    setEditError(null);
+    startTransition(async () => {
+      const res = await updateSubjectSection(sectionId, subjectId, editingName.trim());
+      setEditPending(false);
+      if (res.success) {
+        setEditingId(null);
+        setEditingName("");
+      } else {
+        setEditError(res.message);
+      }
+    });
+  };
 
   const handleDelete = (sectionId: string, sectionName: string) => {
     if (!window.confirm(`Delete sub-section "${sectionName}"?`)) return;
@@ -73,22 +100,74 @@ export function SubjectSectionsManager({
                   key={sec.id}
                   className="flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50/60 px-3.5 py-2 text-xs"
                 >
-                  <span className="font-bold text-teal-950">{sec.name}</span>
-                  <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-500">
-                    {sec.slug}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(sec.id, sec.name)}
-                    disabled={deletePendingId === sec.id}
-                    className="ml-1 text-slate-400 hover:text-red-600 transition disabled:opacity-50"
-                    title={`Delete ${sec.name}`}
-                  >
-                    {deletePendingId === sec.id ? "…" : "×"}
-                  </button>
+                  {editingId === sec.id ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSaveEdit(sec.id);
+                          } else if (e.key === "Escape") {
+                            setEditingId(null);
+                          }
+                        }}
+                        className="rounded border bg-white px-2 py-0.5 text-xs outline-none focus:border-teal-500"
+                        autoFocus
+                        disabled={editPending}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveEdit(sec.id)}
+                        disabled={editPending || !editingName.trim()}
+                        className="font-bold text-teal-800 hover:underline disabled:opacity-50"
+                      >
+                        {editPending ? "…" : "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(null)}
+                        disabled={editPending}
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="font-bold text-teal-950">{sec.name}</span>
+                      <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-500">
+                        {sec.slug}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(sec)}
+                        className="ml-1 text-teal-700 hover:text-teal-950 font-semibold transition"
+                        title={`Rename ${sec.name}`}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(sec.id, sec.name)}
+                        disabled={deletePendingId === sec.id}
+                        className="ml-1 text-slate-400 hover:text-red-600 transition disabled:opacity-50"
+                        title={`Delete ${sec.name}`}
+                      >
+                        {deletePendingId === sec.id ? "…" : "×"}
+                      </button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
+          )}
+          {editError && (
+            <p className="mt-2 text-xs font-semibold text-red-600">
+              {editError}
+            </p>
           )}
           {deleteError && (
             <p className="mt-2 text-xs font-semibold text-red-600">

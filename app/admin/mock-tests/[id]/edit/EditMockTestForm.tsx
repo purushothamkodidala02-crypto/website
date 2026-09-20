@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import type { MockTest, MockTestAccessType } from "@/types/mock-test";
+import { quickCreateSubjectSection } from "@/app/admin/subjects/sections/actions";
 import { updateMockTest, type UpdateMockTestState } from "./actions";
 
 type Paper = { id: string; label: string; duration: number | null };
@@ -34,14 +35,49 @@ export function EditMockTestForm({
   const [subjectSectionId, setSubjectSectionId] = useState(mockTest.subject_section_id ?? "");
   const [scope, setScope] = useState(mockTest.test_scope);
   const [accessType, setAccessType] = useState<MockTestAccessType>(mockTest.access_type);
+  const [allSections, setAllSections] = useState<SubjectSection[]>(sections);
+  const [isAddingSection, setIsAddingSection] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const [isAddingSectionPending, setIsAddingSectionPending] = useState(false);
+  const [addSectionError, setAddSectionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAllSections(sections);
+  }, [sections]);
+
   const availableSubjects = useMemo(
     () => subjects.filter((subject) => subject.paperId === paperId),
     [subjects, paperId],
   );
   const availableSections = useMemo(
-    () => sections.filter((sec) => sec.subjectId === subjectId),
-    [sections, subjectId],
+    () => allSections.filter((sec) => sec.subjectId === subjectId),
+    [allSections, subjectId],
   );
+
+  async function handleQuickAddSection() {
+    if (!subjectId || !newSectionName.trim()) return;
+    setIsAddingSectionPending(true);
+    setAddSectionError(null);
+    try {
+      const res = await quickCreateSubjectSection(subjectId, newSectionName.trim());
+      if (res.success && res.section) {
+        const created = res.section;
+        setAllSections((prev) => {
+          if (prev.some((s) => s.id === created.id)) return prev;
+          return [...prev, created];
+        });
+        setSubjectSectionId(created.id);
+        setNewSectionName("");
+        setIsAddingSection(false);
+      } else {
+        setAddSectionError(res.message || "Failed to create sub-section.");
+      }
+    } catch (err) {
+      setAddSectionError(err instanceof Error ? err.message : "Failed to create sub-section.");
+    } finally {
+      setIsAddingSectionPending(false);
+    }
+  }
 
   const isPublished = mockTest.status !== "draft";
 
@@ -49,7 +85,7 @@ export function EditMockTestForm({
     <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
       {isPublished && (
         <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-          <strong>Published Test Settings:</strong> You can update the Description, Instructions, Permanent URL slug, and Access type below. Structural properties (Paper, Subject, Duration, and Target Questions) are locked to protect student test attempts.
+          <strong>Published Test Settings:</strong> You can update the Description, Instructions, Permanent URL slug, Access type, and Sub-section (month) below. Structural properties (Paper, Subject, Duration, and Target Questions) are locked to protect student test attempts.
         </div>
       )}
       <form action={action} className="grid gap-5 md:grid-cols-2">
@@ -118,13 +154,29 @@ export function EditMockTestForm({
                 emptyMessage="Add a Subject to this Paper first."
               />
             </label>
-            <label className="block text-sm font-bold">
-              Sub-section / Month <span className="font-normal text-slate-500">(optional)</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-bold">
+                  Sub-section / Month <span className="font-normal text-slate-500">(optional)</span>
+                </label>
+                {subjectId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingSection((prev) => !prev);
+                      setAddSectionError(null);
+                    }}
+                    className="text-xs font-semibold text-teal-700 hover:text-teal-900 underline"
+                  >
+                    {isAddingSection ? "Cancel" : "+ Add month / sub-section"}
+                  </button>
+                )}
+              </div>
               <SearchableSelect
                 name="subject_section_id"
                 value={subjectSectionId}
-                disabled={isPublished}
-                onChange={(val) => !isPublished && setSubjectSectionId(val)}
+                disabled={false}
+                onChange={setSubjectSectionId}
                 options={[
                   { value: "", label: "None (Common Subject Mock Test)" },
                   ...availableSections.map((sec) => ({
@@ -132,9 +184,66 @@ export function EditMockTestForm({
                     label: sec.name,
                   })),
                 ]}
-                placeholder={availableSections.length > 0 ? "Search for sub-section" : "No sub-sections available"}
+                placeholder={availableSections.length > 0 ? "Search for sub-section" : "None (Common Subject Mock Test)"}
               />
-            </label>
+              {isAddingSection && (
+                <div className="mt-2 rounded-xl border border-teal-200 bg-teal-50/70 p-3">
+                  <p className="text-xs font-bold text-teal-950">Add new month / sub-section (e.g. June, July)</p>
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      type="text"
+                      value={newSectionName}
+                      onChange={(e) => setNewSectionName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleQuickAddSection();
+                        }
+                      }}
+                      placeholder="e.g. June"
+                      className="flex-1 rounded-lg border bg-white px-3 py-1.5 text-xs outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-200"
+                      disabled={isAddingSectionPending}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={handleQuickAddSection}
+                      disabled={isAddingSectionPending || !newSectionName.trim()}
+                      className="rounded-lg bg-teal-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-teal-900 disabled:opacity-50"
+                    >
+                      {isAddingSectionPending ? "Adding…" : "Add"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingSection(false);
+                        setNewSectionName("");
+                        setAddSectionError(null);
+                      }}
+                      className="rounded-lg border bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {addSectionError && (
+                    <p className="mt-1.5 text-xs font-semibold text-red-600">{addSectionError}</p>
+                  )}
+                </div>
+              )}
+              {subjectId && availableSections.length === 0 && !isAddingSection && (
+                <p className="mt-1 text-xs text-slate-500">
+                  No months or sub-sections exist for this subject yet. Click{" "}
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingSection(true)}
+                    className="font-bold text-teal-700 underline"
+                  >
+                    + Add month / sub-section
+                  </button>{" "}
+                  to create June, July, etc., or leave as Common.
+                </p>
+              )}
+            </div>
           </div>
         )}
 

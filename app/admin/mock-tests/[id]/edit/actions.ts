@@ -22,7 +22,8 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const paperId = isPublished ? current.paper_id : String(formData.get("paper_id") ?? "").trim();
   const scope = isPublished ? current.test_scope : (String(formData.get("test_scope") ?? "paper") as MockTestScope);
   const subjectId = isPublished ? current.subject_id : (String(formData.get("subject_id") ?? "").trim() || null);
-  const subjectSectionId = isPublished ? current.subject_section_id : (String(formData.get("subject_section_id") ?? "").trim() || null);
+  // Sub-section (month/topic) can be updated even when published so tests can be organized into months
+  const subjectSectionId = scope === "subject" ? (String(formData.get("subject_section_id") ?? "").trim() || null) : null;
   const duration = isPublished ? current.duration_minutes : Number(formData.get("duration_minutes") ?? 0);
   const targetQuestionCount = isPublished ? current.target_question_count : Number(formData.get("target_question_count") ?? 0);
   const status = current.status;
@@ -34,8 +35,7 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const structureChanged =
     paperId !== current.paper_id ||
     scope !== current.test_scope ||
-    submittedSubjectId !== currentSubjectId ||
-    (scope === "subject" && subjectSectionId !== current.subject_section_id);
+    submittedSubjectId !== currentSubjectId;
   const resultAffectingChange =
     structureChanged ||
     duration !== current.duration_minutes ||
@@ -44,7 +44,7 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   if (isPublished && resultAffectingChange) {
     return {
       success: false,
-      message: "This mock test is published. You can update its description, instructions, URL slug, and access settings, but its Paper, Subject, Duration, and Target Questions are locked to protect test integrity.",
+      message: "This mock test is published. You can update its description, instructions, URL slug, access settings, and sub-section, but its Paper, Subject, Duration, and Target Questions are locked to protect test integrity.",
     };
   }
   if (structureChanged) {
