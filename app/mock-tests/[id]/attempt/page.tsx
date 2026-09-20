@@ -67,12 +67,23 @@ export default async function TakeMockTestPage({
   if (!session) redirect(testPath);
 
   if (session.submitted_at || session.session_state === "submitted") {
-    const { data: attempt } = await supabase
+    let { data: attempt } = await supabase
       .from("test_attempts")
       .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
       .eq("session_id", session.id)
       .eq("user_id", user.id)
       .maybeSingle();
+
+    if (!attempt) {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const retry = await supabase
+        .from("test_attempts")
+        .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+        .eq("session_id", session.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      attempt = retry.data;
+    }
 
     if (attempt) {
       return (
@@ -93,7 +104,18 @@ export default async function TakeMockTestPage({
       );
     }
 
-    redirect(testPath);
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: true,
+          message: "Your test has been submitted successfully.",
+          score: 0,
+          totalMarks: 0,
+        }}
+      />
+    );
   }
 
   if (session.session_state !== "active") redirect(testPath);

@@ -6,12 +6,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
-import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, submitAttempt, syncAttemptTimer, type SubmitAttemptResult } from "./attempt-actions";
+import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, submitAttempt, syncAttemptTimer, verifySubmittedAttempt, type SubmitAttemptResult } from "./attempt-actions";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { SubmissionResult } from "./SubmissionResult";
 import { ScreenWatermark } from "@/components/mock-tests/ScreenWatermark";
 import {
+  exitFullscreenSafely,
   getLastFullscreenStatus,
   isBigScreen,
   isCurrentlyFullscreen,
@@ -125,9 +126,42 @@ export function StudentTestRunner({
     if (submitting || submission) return;
     setConfirming(false);
     setSubmitting(true);
-    await flushSaves();
-    setSubmission(await submitAttempt(sessionId, answers));
-    setSubmitting(false);
+    void exitFullscreenSafely();
+    try {
+      await flushSaves();
+      const res = await submitAttempt(sessionId, answers);
+      if (!res.success) {
+        const verified = await verifySubmittedAttempt(sessionId);
+        if (verified.success && verified.attempt) {
+          setSubmission(verified.attempt);
+        } else {
+          setSubmission(res);
+        }
+      } else {
+        setSubmission(res);
+      }
+    } catch (err) {
+      console.error("Error submitting test attempt:", err);
+      try {
+        const verified = await verifySubmittedAttempt(sessionId);
+        if (verified.success && verified.attempt) {
+          setSubmission(verified.attempt);
+        } else {
+          setSubmission({
+            success: false,
+            message: "Connection interrupted while submitting. Your answers are safely recorded. Please try again.",
+          });
+        }
+      } catch {
+        setSubmission({
+          success: false,
+          message: "Connection interrupted while submitting. Your answers are safely recorded. Please try again.",
+        });
+      }
+    } finally {
+      setSubmitting(false);
+      void exitFullscreenSafely();
+    }
   }, [answers, flushSaves, sessionId, submission, submitting]);
 
   useEffect(() => {

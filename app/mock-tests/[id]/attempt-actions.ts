@@ -135,41 +135,99 @@ export async function submitAttempt(
   sessionId: string,
   answers: Record<string, Answer>
 ): Promise<SubmitAttemptResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    return { success: false, message: "You must be logged in." };
+    if (userError || !user) {
+      return { success: false, message: "You must be logged in." };
+    }
+
+    const cleanedAnswers = cleanAnswers(answers);
+    if (!UUID_PATTERN.test(sessionId) || !cleanedAnswers) {
+      return { success: false, message: "One or more submitted answers are invalid." };
+    }
+
+    const { data, error } = await supabase.rpc("submit_mock_test_attempt", {
+      requested_session_id: sessionId,
+      submitted_answers: cleanedAnswers,
+    });
+
+    const result = data?.[0];
+    if (error || !result) {
+      const verified = await verifySubmittedAttempt(sessionId);
+      if (verified.success && verified.attempt) {
+        return verified.attempt;
+      }
+      return { success: false, message: "Unable to submit this attempt right now. Your saved answers are still protected; try again." };
+    }
+
+    return {
+      success: true,
+      message: "Attempt submitted successfully.",
+      attemptId: String(result.attempt_id),
+      score: Number(result.score),
+      totalMarks: Number(result.total_marks),
+      correctAnswers: Number(result.correct_answers),
+      incorrectAnswers: Number(result.incorrect_answers),
+      unansweredQuestions: Number(result.unanswered_questions),
+    };
+  } catch (err) {
+    console.error("submitAttempt error:", err);
+    const verified = await verifySubmittedAttempt(sessionId);
+    if (verified.success && verified.attempt) {
+      return verified.attempt;
+    }
+    return {
+      success: false,
+      message: "Network connection was interrupted during submission. Your answers are saved; please try again.",
+    };
   }
-
-  const cleanedAnswers = cleanAnswers(answers);
-  if (!UUID_PATTERN.test(sessionId) || !cleanedAnswers) {
-    return { success: false, message: "One or more submitted answers are invalid." };
-  }
-
-  const { data, error } = await supabase.rpc("submit_mock_test_attempt", {
-    requested_session_id: sessionId,
-    submitted_answers: cleanedAnswers,
-  });
-
-  const result = data?.[0];
-  if (error || !result) {
-    return { success: false, message: "Unable to submit this attempt right now. Your saved answers are still protected; try again." };
-  }
-
-  revalidatePath("/dashboard");
-
-  return {
-    success: true,
-    message: "Attempt submitted successfully.",
-    attemptId: String(result.attempt_id),
-    score: Number(result.score),
-    totalMarks: Number(result.total_marks),
-    correctAnswers: Number(result.correct_answers),
-    incorrectAnswers: Number(result.incorrect_answers),
-    unansweredQuestions: Number(result.unanswered_questions),
-  };
 }
+
+export async function verifySubmittedAttempt(sessionId: string): Promise<{
+  success: boolean;
+  attempt?: SubmitAttemptResult;
+}> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !UUID_PATTERN.test(sessionId)) {
+      return { success: false };
+    }
+
+    const { data: attempt } = await supabase
+      .from("test_attempts")
+      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+      .eq("session_id", sessionId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!attempt) {
+      return { success: false };
+    }
+
+    return {
+      success: true,
+      attempt: {
+        success: true,
+        message: "Attempt submitted successfully.",
+        attemptId: String(attempt.id),
+        score: Number(attempt.score),
+        totalMarks: Number(attempt.total_marks),
+        correctAnswers: Number(attempt.correct_answers),
+        incorrectAnswers: Number(attempt.incorrect_answers),
+        unansweredQuestions: Number(attempt.unanswered_questions),
+      },
+    };
+  } catch {
+    return { success: false };
+  }
+}
+

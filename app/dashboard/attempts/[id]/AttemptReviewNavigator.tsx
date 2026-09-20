@@ -5,6 +5,7 @@ import { FormattedQuestionText } from "@/components/questions/FormattedQuestionT
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
+import { exitFullscreenSafely } from "@/lib/fullscreen";
 
 export type ReviewRow = {
   question_id: string;
@@ -36,6 +37,10 @@ export type ReviewRow = {
 };
 
 export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds }: { attemptId: string; rows: ReviewRow[]; bookmarkedQuestionIds: string[] }) {
+  useEffect(() => {
+    void exitFullscreenSafely();
+  }, []);
+
   const [index, setIndex] = useState(0);
   const [language, setLanguage] = useState<"english" | "telugu">(
     rows[0]?.content_language_mode === "telugu" ? "telugu" : "english",

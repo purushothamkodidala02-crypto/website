@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { exitFullscreenSafely } from "@/lib/fullscreen";
 import type { SubmitAttemptResult } from "./attempt-actions";
 
 type SubmissionResultProps = {
@@ -16,6 +18,10 @@ export function SubmissionResult({
   result,
   onRetry,
 }: SubmissionResultProps) {
+  useEffect(() => {
+    void exitFullscreenSafely();
+  }, []);
+
   const percentage =
     result.totalMarks && result.totalMarks > 0 && typeof result.score === "number"
       ? Math.round((result.score / result.totalMarks) * 100)
@@ -86,6 +92,9 @@ export function SubmissionResult({
               {result.attemptId && (
                 <Link
                   href={`/dashboard/attempts/${result.attemptId}`}
+                  onClick={() => {
+                    void exitFullscreenSafely();
+                  }}
                   className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
                 >
                   Review answers
@@ -93,12 +102,18 @@ export function SubmissionResult({
               )}
               <Link
                 href={publicTestPath}
+                onClick={() => {
+                  void exitFullscreenSafely();
+                }}
                 className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
               >
                 Retake test
               </Link>
               <Link
                 href="/dashboard"
+                onClick={() => {
+                  void exitFullscreenSafely();
+                }}
                 className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
               >
                 Go to dashboard
@@ -111,7 +126,10 @@ export function SubmissionResult({
             {onRetry && (
               <button
                 type="button"
-                onClick={onRetry}
+                onClick={() => {
+                  void exitFullscreenSafely();
+                  onRetry();
+                }}
                 className="mt-7 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
               >
                 Try submission again
