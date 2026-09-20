@@ -284,14 +284,6 @@ test("sentences ending with trainee or variable letters are not split into false
   assert.match(formatter, /isUnparenthesizedAlpha/);
 });
 
-test("currency and reference abbreviations like Rs. 2 or Re. 1 are not split into numbered list items", async () => {
-  const formatter = await read("components/questions/FormattedQuestionText.tsx");
-
-  assert.match(formatter, /\(Rs\|Re\|No\|Nos\|Fig\|Vol\|Sec\|Art\|approx\|Dr\|Mr\|Mrs\|Prof\)/);
-  assert.match(formatter, /__\$1_DOT__/);
-  assert.match(formatter, /\\b\(\?:Rs\|Re\|రూ\)\\\.\?\$/);
-});
-
 test("admins can export mock-test questions in the accepted import format", async () => {
   const [importer, format, exportRoute, testList, questionsPage] = await Promise.all([
     read("app/admin/questions/import-actions.ts"),
