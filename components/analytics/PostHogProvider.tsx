@@ -1,31 +1,37 @@
 "use client";
 
-import posthog from "posthog-js";
-import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { useEffect, Suspense } from "react";
+import { useEffect, useState, Suspense, type ComponentType } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-if (typeof window !== "undefined") {
-  if (window.location.search.includes('disable_tracking=true')) {
-    localStorage.setItem('varadhi_disable_tracking', 'true');
-  }
-  
-  if (localStorage.getItem('varadhi_disable_tracking') !== 'true' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-      person_profiles: "identified_only", 
-      capture_pageview: false, // We handle this manually in PostHogPageView
-      disable_session_recording: true,
-    });
-  }
-}
-
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  const [phState, setPhState] = useState<{
+    client: any;
+    Provider: ComponentType<{ client: any; children: React.ReactNode }>;
+  } | null>(null);
 
   useEffect(() => {
-    import("@/lib/supabase/client").then(({ createClient }) => {
+    const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    if (!posthogKey) return;
+    if (localStorage.getItem("varadhi_disable_tracking") === "true") return;
+
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+
+    Promise.all([
+      import("posthog-js"),
+      import("posthog-js/react"),
+      import("@/lib/supabase/client"),
+    ]).then(([{ default: posthog }, { PostHogProvider: PHProvider }, { createClient }]) => {
+      if (!active) return;
+
+      posthog.init(posthogKey, {
+        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+        person_profiles: "identified_only",
+        capture_pageview: false,
+        disable_session_recording: true,
+      });
+
       const supabase = createClient();
-      
       const updateIdentity = async (session: any) => {
         if (session?.user) {
           posthog.identify(session.user.id, { email: session.user.email });
@@ -35,40 +41,50 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       };
 
       supabase.auth.getSession().then(({ data }) => updateIdentity(data.session));
-
       const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
         updateIdentity(session);
       });
+      unsubscribe = () => listener.subscription.unsubscribe();
 
-      return () => listener.subscription.unsubscribe();
+      setPhState({ client: posthog, Provider: PHProvider });
     });
+
+    return () => {
+      active = false;
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
+  if (!phState) {
+    return <>{children}</>;
+  }
+
+  const { Provider, client } = phState;
   return (
-    <PHProvider client={posthog}>
+    <Provider client={client}>
       <Suspense fallback={null}>
-        <PostHogPageView />
+        <PostHogPageView client={client} />
       </Suspense>
       {children}
-    </PHProvider>
+    </Provider>
   );
 }
 
-function PostHogPageView() {
+function PostHogPageView({ client }: { client: any }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (pathname && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+    if (pathname && client) {
       let url = window.origin + pathname;
       if (searchParams.toString()) {
         url = `${url}?${searchParams.toString()}`;
       }
-      posthog.capture("$pageview", {
+      client.capture("$pageview", {
         $current_url: url,
       });
     }
-  }, [pathname, searchParams]);
-  
+  }, [client, pathname, searchParams]);
+
   return null;
 }

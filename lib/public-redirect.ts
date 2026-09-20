@@ -53,6 +53,21 @@ export async function resolvePublicPermanentRedirect(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/mock-tests")) return null;
   const segments = request.nextUrl.pathname.split("/").filter(Boolean).slice(1);
   if (segments.includes("attempt") || segments.includes("opengraph-image")) return null;
+
+  const hasLegacyParams =
+    request.nextUrl.searchParams.has("state") ||
+    request.nextUrl.searchParams.has("exam") ||
+    request.nextUrl.searchParams.has("paper") ||
+    request.nextUrl.searchParams.has("category") ||
+    request.nextUrl.searchParams.has("specialization") ||
+    request.nextUrl.searchParams.has("subject");
+  const hasUuid = segments.some((segment) => UUID_PATTERN.test(segment));
+
+  // Canonical paths without legacy query parameters or UUIDs are handled directly by cached route handlers
+  if (!hasLegacyParams && !hasUuid && segments.length > 0) {
+    return null;
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !anonKey) return null;

@@ -23,6 +23,9 @@ import {
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 
+// ⚡ Cache on global Edge CDN and revalidate every 5 minutes
+export const revalidate = 300;
+
 export type Filters = {
   state?: string;
   category?: string;
@@ -30,6 +33,7 @@ export type Filters = {
   specialization?: string;
   paper?: string;
   subject?: string;
+  section?: string;
   q?: string;
   type?: string;
   page?: string;
@@ -52,6 +56,7 @@ type CatalogTest = {
   id: string;
   paper_id: string;
   subject_id: string | null;
+  subject_section_id?: string | null;
   test_scope: string;
   series_number: number;
   title: string;
@@ -65,6 +70,7 @@ type CatalogTest = {
   category: { id: string; name: string; slug: string };
   state: { id: string; name: string; code: string; slug: string };
   subject?: { id: string; name: string; slug: string };
+  section?: { id: string; name: string; slug: string };
   paperDisplay?: { number: number; shortLabel: string; label: string };
   questions: number | null;
   marks: number | null;
@@ -104,7 +110,7 @@ export async function generateMetadata({ searchParams }: MockTestsPageProps): Pr
 
 function withQuery(path: string, filters: Filters = {}) {
   const params = new URLSearchParams();
-  for (const key of ["q", "type", "page", "view"] as const) {
+  for (const key of ["q", "type", "page", "view", "section"] as const) {
     const value = filters[key];
     if (value && value !== "all") params.set(key, value);
   }
@@ -128,7 +134,7 @@ function testTypeUrl(
 export default async function MockTestsPage({ searchParams, canonicalPath }: MockTestsPageProps) {
   const filters = await searchParams;
   const catalog = await getMockTestCatalogData();
-  const { states, categories, exams, specializations, papers, subjects } = catalog;
+  const { states, categories, exams, specializations, papers, subjects, sections = [] } = catalog;
   const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const stateById = new Map(states.map((item) => [item.id, item]));
   const categoryById = new Map(categories.map((item) => [item.id, item]));
@@ -136,6 +142,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   const specializationById = new Map(specializations.map((item) => [item.id, item]));
   const paperById = new Map(papers.map((item) => [item.id, item]));
   const subjectById = new Map(subjects.map((item) => [item.id, item]));
+  const sectionById = new Map(sections.map((item) => [item.id, item]));
   const statsByTestId = new Map(
     (catalog.stats as MockTestStats[]).map((item) => [item.mock_test_id, item]),
   );
@@ -148,6 +155,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     if (!paper || !exam || !category || !state) return [];
     const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
     const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
+    const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
     const paperDisplay = paperDisplayById.get(paper.id);
     const stats = statsByTestId.get(test.id);
     const configuredQuestionCount = Number(test.target_question_count ?? paper.question_count ?? 0);
@@ -162,7 +170,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       : questions !== null && defaultCorrectMarks > 0
         ? questions * defaultCorrectMarks
         : null;
-    return [{ ...test, paper, exam, category, state, subject, specialization, paperDisplay, questions, marks }];
+    return [{ ...test, paper, exam, category, state, subject, specialization, section, paperDisplay, questions, marks }];
   });
 
   let selectedState = states.find((state) => state.slug === filters.state || state.id === filters.state);
@@ -209,8 +217,16 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     : selectedSubject
       ? "subject"
       : "all";
+
+  const subjectSections = selectedSubject
+    ? sections.filter((s) => s.subject_id === selectedSubject.id && s.is_active)
+    : [];
+  const selectedSection = filters.section
+    ? subjectSections.find((s) => s.slug === filters.section || s.id === filters.section)
+    : undefined;
+
   const matchingTests = tests.filter((test) => {
-    const searchable = `${test.state.name} ${test.state.code} ${test.category.name} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.title}`.toLowerCase();
+    const searchable = `${test.state.name} ${test.state.code} ${test.category.name} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.section?.name ?? ""} ${test.title}`.toLowerCase();
     return (
       (!selectedState || test.state.id === selectedState.id) &&
       (!selectedCategory || test.category.id === selectedCategory.id) &&
@@ -219,6 +235,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       (!selectedPaper || test.paper.id === selectedPaper.id) &&
       (selectedType !== "subject" || !selectedSubject || test.subject?.id === selectedSubject.id) &&
       (selectedType === "all" || test.test_scope === selectedType) &&
+      (!selectedSection
+        ? (selectedSubject && subjectSections.length > 0 && !isSearching
+            ? !test.subject_section_id
+            : true)
+        : test.subject_section_id === selectedSection.id) &&
       (!query || searchable.includes(query))
     );
   });
@@ -476,30 +497,121 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               </div>
             )}
 
-            <div className="mb-5">
-              <p className="text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">
-                {selectedSubject
-                  ? `${selectedSubject.name} Tests`
-                  : selectedType === "subject"
-                    ? "Timed Practice"
-                    : "Mock Series"}
-              </p>
-              <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
-                {selectedSubject
-                  ? `${selectedSubject.name} Mock Tests`
-                  : selectedType === "subject"
-                    ? "Latest mock tests in all subjects"
-                    : "Latest Uploaded Mock Tests"}
-              </h3>
-            </div>
+            {/* Sub-sections grid when in subject view and sections exist and not filtering to a section */}
+            {selectedType === "subject" && selectedSubject && subjectSections.length > 0 && !selectedSection && (
+              <div className="mb-10">
+                <div className="mb-4">
+                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-teal-700">
+                    Monthly & Topic Practice
+                  </p>
+                  <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
+                    Choose a month or topic in {selectedSubject.name}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-600">
+                    Select a month to practise its dedicated series of mock tests.
+                  </p>
+                </div>
 
-            <TestGrid
-              tests={
-                selectedType === "subject" && !selectedSubject
-                  ? paginatedTests.slice(0, 4)
-                  : paginatedTests
-              }
-            />
+                <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {subjectSections.map((sec) => {
+                    const secTests = tests.filter((t) => t.subject_section_id === sec.id);
+                    return (
+                      <Link
+                        key={sec.id}
+                        href={withQuery(subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject.slug), {
+                          ...filters,
+                          section: sec.slug,
+                          page: undefined,
+                        })}
+                        className="student-card group flex min-h-36 flex-col justify-between rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:shadow-xl hover:shadow-slate-950/5"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-teal-50 text-teal-800 border border-teal-100">
+                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                            </span>
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black tracking-wide text-teal-800">
+                              {secTests.length} test{secTests.length === 1 ? "" : "s"}
+                            </span>
+                          </div>
+                          <h4 className="font-display mt-4 text-xl font-bold text-slate-950 group-hover:text-teal-800 transition">
+                            {sec.name}
+                          </h4>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                          <span className="font-semibold text-slate-500">Practice series</span>
+                          <span className="font-black text-teal-800 transition group-hover:translate-x-1">
+                            Open tests →
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Sub-section header banner when viewing a specific section */}
+            {selectedType === "subject" && selectedSubject && selectedSection && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-200 bg-teal-50/60 p-4">
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={withQuery(subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject.slug), {
+                      ...filters,
+                      section: undefined,
+                      page: undefined,
+                    })}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-white px-3.5 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-50 transition shadow-sm"
+                  >
+                    ← Back to all {selectedSubject.name}
+                  </Link>
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700">Sub-section</span>
+                    <h4 className="font-display text-base font-bold text-slate-900">{selectedSection.name}</h4>
+                  </div>
+                </div>
+                <span className="rounded-full bg-teal-800 px-3 py-1 text-xs font-black text-white">
+                  {matchingTests.length} Mock Test{matchingTests.length === 1 ? "" : "s"}
+                </span>
+              </div>
+            )}
+
+            {(!selectedSubject || subjectSections.length === 0 || selectedSection || matchingTests.length > 0) && (
+              <div className="mb-5">
+                <p className="text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">
+                  {selectedSection
+                    ? `${selectedSection.name} Tests`
+                    : selectedSubject && subjectSections.length > 0
+                      ? "Common Subject Practice"
+                      : selectedSubject
+                        ? `${selectedSubject.name} Tests`
+                        : selectedType === "subject"
+                          ? "Timed Practice"
+                          : "Mock Series"}
+                </p>
+                <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
+                  {selectedSection
+                    ? `${selectedSubject?.name} · ${selectedSection.name} Mock Tests`
+                    : selectedSubject && subjectSections.length > 0
+                      ? `Common ${selectedSubject.name} Mock Tests`
+                      : selectedSubject
+                        ? `${selectedSubject.name} Mock Tests`
+                        : selectedType === "subject"
+                          ? "Latest mock tests in all subjects"
+                          : "Latest Uploaded Mock Tests"}
+                </h3>
+              </div>
+            )}
+
+            {(!selectedSubject || subjectSections.length === 0 || selectedSection || matchingTests.length > 0) && (
+              <TestGrid
+                tests={
+                  selectedType === "subject" && !selectedSubject
+                    ? paginatedTests.slice(0, 4)
+                    : paginatedTests
+                }
+              />
+            )}
 
             {selectedType === "subject" && !selectedSubject && paginatedTests.length > 4 ? (
               <div className="mt-6 flex justify-center">
@@ -560,6 +672,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700 truncate">
                       {test.state.code} · {test.paperDisplay?.shortLabel ?? "Paper"}
                       {test.subject && <span className="font-semibold text-slate-600 normal-case"> · {test.subject.name}</span>}
+                      {test.section && <span className="font-bold text-teal-800 normal-case"> ({test.section.name})</span>}
                     </p>
                   </div>
                 </div>

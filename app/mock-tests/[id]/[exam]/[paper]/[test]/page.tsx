@@ -3,6 +3,9 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { generateMockTestMetadata, MockTestDetailsPage } from "@/components/mock-tests/MockTestDetailPage";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { mockTestUrl, paperUrl } from "@/lib/public-urls";
+// ⚡ Cache on global Edge CDN and revalidate every 5 minutes
+export const revalidate = 300;
+
 type Props = { params: Promise<{ id: string; exam: string; paper: string; test: string }>; searchParams: Promise<{ start_error?: string; payment_error?: string }> };
 async function context(params: Props["params"]) { const p = await params; return { p, c: await resolvePublicRoute({ stateSlug: p.id, examSlug: p.exam, paperSlug: p.paper, mockTestSlug: p.test }) }; }
 export async function generateMetadata({ params }: Props): Promise<Metadata> { const { c } = await context(params); if (!c?.exam || !c.paper || !c.mockTest) return { title: "Mock Test Not Found", robots: { index: false, follow: false } }; return generateMockTestMetadata({ id: c.mockTest.id, canonicalPath: mockTestUrl(c.state.slug, c.exam.slug, c.paper.slug, c.mockTest.slug) }); }

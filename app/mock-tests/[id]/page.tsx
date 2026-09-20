@@ -8,6 +8,9 @@ import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionM
 import { mockTestUrl, stateUrl, UUID_PATTERN } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 
+// ⚡ Cache on global Edge CDN and revalidate every 5 minutes
+export const revalidate = 300;
+
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<Filters> };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
