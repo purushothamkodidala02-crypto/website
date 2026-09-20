@@ -42,13 +42,14 @@ export default async function TakeMockTestPage({
   const publicContext = await getMockTestPublicContextById(id);
   if (!publicContext) notFound();
   const testPath = mockTestUrl(publicContext.state.slug, publicContext.exam.slug, publicContext.paper.slug, publicContext.mockTest.slug);
+  const testTitle = publicContext.mockTest.title ?? "Mock Test";
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(testPath)}`);
 
   const { data: mockTest } = await supabase.from("mock_tests").select("id, title, status, access_type").eq("id", id).eq("status", "published").maybeSingle();
   if (!mockTest) notFound();
-  const testTitle = publicContext.mockTest.title ?? mockTest.title;
   const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
   const hasAccess = Boolean(access);
   if (!hasAccess) return <TestNotReady title={testTitle} testPath={testPath} message="This mock test needs an active exam-series purchase. Return to the test details page to unlock it there." />;
@@ -66,6 +67,7 @@ export default async function TakeMockTestPage({
 
   if (!session) redirect(testPath);
 
+  // 1. If session is marked submitted, fetch attempt and render SubmissionResult
   if (session.submitted_at || session.session_state === "submitted") {
     let { data: attempt } = await supabase
       .from("test_attempts")
@@ -118,6 +120,101 @@ export default async function TakeMockTestPage({
     );
   }
 
+  // 2. Even if submitted_at flag is pending, verify if an attempt record already exists in DB
+  const { data: existingAttempt } = await supabase
+    .from("test_attempts")
+    .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+    .eq("session_id", session.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingAttempt) {
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: true,
+          message: "Attempt submitted successfully.",
+          attemptId: existingAttempt.id,
+          score: Number(existingAttempt.score),
+          totalMarks: Number(existingAttempt.total_marks),
+          correctAnswers: existingAttempt.correct_answers,
+          incorrectAnswers: existingAttempt.incorrect_answers,
+          unansweredQuestions: existingAttempt.unanswered_questions,
+        }}
+      />
+    );
+  }
+
+  // 3. If the session has reached or passed deadline, finalize submission immediately
+  const isExpired = new Date(session.expires_at).getTime() <= Date.now();
+  if (isExpired) {
+    const { data: submitData } = await supabase.rpc("submit_mock_test_attempt", {
+      requested_session_id: session.id,
+      submitted_answers: {},
+    });
+    const finalResult = submitData?.[0];
+    if (finalResult) {
+      return (
+        <SubmissionResult
+          publicTestPath={testPath}
+          title={testTitle}
+          result={{
+            success: true,
+            message: "Attempt submitted successfully.",
+            attemptId: String(finalResult.attempt_id),
+            score: Number(finalResult.score),
+            totalMarks: Number(finalResult.total_marks),
+            correctAnswers: Number(finalResult.correct_answers),
+            incorrectAnswers: Number(finalResult.incorrect_answers),
+            unansweredQuestions: Number(finalResult.unanswered_questions),
+          }}
+        />
+      );
+    }
+
+    // Check once more in case of concurrent commit
+    const { data: confirmedAttempt } = await supabase
+      .from("test_attempts")
+      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+      .eq("session_id", session.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (confirmedAttempt) {
+      return (
+        <SubmissionResult
+          publicTestPath={testPath}
+          title={testTitle}
+          result={{
+            success: true,
+            message: "Attempt submitted successfully.",
+            attemptId: confirmedAttempt.id,
+            score: Number(confirmedAttempt.score),
+            totalMarks: Number(confirmedAttempt.total_marks),
+            correctAnswers: confirmedAttempt.correct_answers,
+            incorrectAnswers: confirmedAttempt.incorrect_answers,
+            unansweredQuestions: confirmedAttempt.unanswered_questions,
+          }}
+        />
+      );
+    }
+
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: true,
+          message: "The test time has ended and your attempt has been recorded.",
+          score: 0,
+          totalMarks: 0,
+        }}
+      />
+    );
+  }
+
   if (session.session_state !== "active") redirect(testPath);
 
   const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
@@ -128,6 +225,7 @@ export default async function TakeMockTestPage({
     .select("question_id")
     .eq("user_id", user.id)
     .in("question_id", questions.map((question) => question.question_id));
+
   return (
     <StudentTestRunner
       mockTestId={id}

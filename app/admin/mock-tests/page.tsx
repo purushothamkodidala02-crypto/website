@@ -31,7 +31,7 @@ export default async function MockTestsPage({
 }) {
   const query = await searchParams;
   const supabase = await createClient();
-  const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult, summariesResult] = await Promise.all([
+  const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult, summariesResult, notificationsResult] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").order("display_order"),
     supabase.from("mock_tests").select("id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at, replaces_mock_test_id, superseded_by_mock_test_id").order("series_number"),
     supabase.from("subjects").select("id, paper_id, name"),
@@ -41,6 +41,7 @@ export default async function MockTestsPage({
     supabase.from("exam_specializations").select("id, exam_group_id, name").order("display_order"),
     supabase.from("subject_sections").select("id, subject_id, name, slug").eq("is_active", true).order("display_order"),
     supabase.rpc("get_admin_mock_test_summaries"),
+    supabase.from("mock_test_notifications").select("mock_test_id, recipient_count, sent_at").order("sent_at", { ascending: false }),
   ]);
   const states = statesResult.data ?? [];
   const categories = categoriesResult.data ?? [];
@@ -73,6 +74,17 @@ export default async function MockTestsPage({
   const summaryByTestId = new Map(
     ((summariesResult.data ?? []) as MockTestSummary[]).map((summary) => [summary.mock_test_id, summary]),
   );
+  const notifications = (notificationsResult.data ?? []) as { mock_test_id: string; recipient_count: number; sent_at: string }[];
+  const notificationMap = new Map<string, { lastNotifiedAt: string; count: number }>();
+  for (const item of notifications) {
+    if (!notificationMap.has(item.mock_test_id)) {
+      notificationMap.set(item.mock_test_id, {
+        lastNotifiedAt: item.sent_at,
+        count: item.recipient_count,
+      });
+    }
+  }
+
   const mockTestStatusById = new Map(tests.map((test) => [test.id, test.status]));
   const mappedTests = tests.map((test) => {
     const paper = paperById.get(test.paper_id);
@@ -81,6 +93,7 @@ export default async function MockTestsPage({
     const state = category ? stateById.get(category.state_id) : undefined;
     const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
     const summary = summaryByTestId.get(test.id);
+    const notification = notificationMap.get(test.id);
     return {
       id: test.id,
       stateId: state?.id ?? "",
@@ -111,6 +124,8 @@ export default async function MockTestsPage({
       replacesMockTestId: test.replaces_mock_test_id,
       supersededByMockTestId: test.superseded_by_mock_test_id,
       correctedVersionStatus: test.superseded_by_mock_test_id ? mockTestStatusById.get(test.superseded_by_mock_test_id) ?? null : null,
+      lastNotifiedAt: notification?.lastNotifiedAt ?? null,
+      notificationCount: notification?.count ?? 0,
     };
   });
 

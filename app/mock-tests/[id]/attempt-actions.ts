@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 type Answer = "A" | "B" | "C" | "D";
@@ -202,12 +201,23 @@ export async function verifySubmittedAttempt(sessionId: string): Promise<{
       return { success: false };
     }
 
-    const { data: attempt } = await supabase
+    let { data: attempt } = await supabase
       .from("test_attempts")
       .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
       .eq("session_id", sessionId)
       .eq("user_id", user.id)
       .maybeSingle();
+
+    if (!attempt) {
+      await new Promise((r) => setTimeout(r, 400));
+      const retry = await supabase
+        .from("test_attempts")
+        .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+        .eq("session_id", sessionId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      attempt = retry.data;
+    }
 
     if (!attempt) {
       return { success: false };

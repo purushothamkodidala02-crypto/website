@@ -93,6 +93,8 @@ export function StudentTestRunner({
   const [fullscreenFeedback, setFullscreenFeedback] = useState("");
   const containerRef = useRef<HTMLElement | null>(null);
   const saveChains = useRef(new Map<string, Promise<void>>());
+  const isFinishingRef = useRef(false);
+  const hasAutoSubmittedRef = useRef(false);
 
   const current = questions[index];
   const answered = useMemo(() => Object.keys(answers).length, [answers]);
@@ -123,7 +125,8 @@ export function StudentTestRunner({
   }, []);
 
   const finish = useCallback(async () => {
-    if (submitting || submission) return;
+    if (isFinishingRef.current || submitting || submission) return;
+    isFinishingRef.current = true;
     setConfirming(false);
     setSubmitting(true);
     void exitFullscreenSafely();
@@ -169,7 +172,10 @@ export function StudentTestRunner({
     const updateTimer = () => {
       const next = secondsLeft(deadline);
       setRemaining(next);
-      if (next === 0 && !submitting) void finish();
+      if (next === 0 && !hasAutoSubmittedRef.current && !isFinishingRef.current && !submitting) {
+        hasAutoSubmittedRef.current = true;
+        void finish();
+      }
     };
     updateTimer();
     const timer = window.setInterval(() => {
@@ -243,7 +249,20 @@ export function StudentTestRunner({
     };
   }, []);
 
-  if (submission) return <SubmissionResult publicTestPath={publicTestPath} title={title} result={submission} onRetry={() => setSubmission(null)} />;
+  if (submission) {
+    return (
+      <SubmissionResult
+        publicTestPath={publicTestPath}
+        title={title}
+        result={submission}
+        onRetry={() => {
+          isFinishingRef.current = false;
+          hasAutoSubmittedRef.current = false;
+          setSubmission(null);
+        }}
+      />
+    );
+  }
 
   const bilingual = current.content_language_mode === "bilingual" && Boolean(current.question_text_te);
   const telugu = bilingual && language === "te";
