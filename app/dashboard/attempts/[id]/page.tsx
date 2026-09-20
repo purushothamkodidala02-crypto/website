@@ -181,7 +181,7 @@ export default async function AttemptReviewPage({
   return (
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
-      <div className="mx-auto max-w-7xl 2xl:max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8 sm:py-10">
+      <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800"

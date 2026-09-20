@@ -12,6 +12,7 @@ import type { MockTestNotificationPreview } from "@/lib/notifications/mock-test-
 type NotifyStudentsModalProps = {
   mockTestId: string;
   mockTestTitle: string;
+  isDraft?: boolean;
   hasNotificationHistory?: boolean;
   lastNotifiedAt?: string | null;
   notificationCount?: number;
@@ -20,6 +21,7 @@ type NotifyStudentsModalProps = {
 export function NotifyStudentsModal({
   mockTestId,
   mockTestTitle,
+  isDraft,
   hasNotificationHistory,
   lastNotifiedAt,
   notificationCount,
@@ -90,18 +92,24 @@ export function NotifyStudentsModal({
         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition ${
           hasNotificationHistory
             ? "border border-teal-200 bg-teal-50/50 text-teal-800 hover:bg-teal-100/70"
+            : isDraft
+            ? "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
             : "border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
         }`}
         title={
           hasNotificationHistory
             ? `Notified ${notificationCount ?? 0} students on ${formattedLastDate}`
+            : isDraft
+            ? "Check which students previously attempted this exam"
             : "Email previous test-takers about this new test"
         }
       >
-        <span>📢</span>
+        <span>{hasNotificationHistory ? "📢" : isDraft ? "👥" : "📢"}</span>
         <span>
           {hasNotificationHistory
             ? `Notified (${notificationCount ?? 0})`
+            : isDraft
+            ? "Check Students"
             : "Notify Students"}
         </span>
       </button>

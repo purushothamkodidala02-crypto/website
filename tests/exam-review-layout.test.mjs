@@ -10,9 +10,8 @@ test("exam review page displays questions and explanations wide and side-by-side
     read("app/dashboard/attempts/[id]/AttemptReviewNavigator.tsx"),
   ]);
 
-  // 1. Attempt review page uses a wide container suitable for laptop screens
-  assert.match(attemptPage, /max-w-7xl/);
-  assert.match(attemptPage, /2xl:max-w-\[90rem\]/);
+  // 1. Attempt review page uses full width without large empty spaces on left and right
+  assert.match(attemptPage, /w-full max-w-full/);
 
   // 2. Navigator splits questions and explanation into a wide 2-column layout on desktop/laptop
   assert.match(reviewNavigator, /grid-cols-1 lg:grid-cols-12/);

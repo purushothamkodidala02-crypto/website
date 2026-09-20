@@ -278,15 +278,14 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
                       <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
                       <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} hasAttempts={test.attemptCount > 0} hasCorrectedVersion={Boolean(test.supersededByMockTestId)} canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"} />
-                      {test.status === "published" && (
-                        <NotifyStudentsModal
-                          mockTestId={test.id}
-                          mockTestTitle={studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
-                          hasNotificationHistory={Boolean(test.lastNotifiedAt)}
-                          lastNotifiedAt={test.lastNotifiedAt}
-                          notificationCount={test.notificationCount}
-                        />
-                      )}
+                      <NotifyStudentsModal
+                        mockTestId={test.id}
+                        mockTestTitle={studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
+                        isDraft={test.status === "draft"}
+                        hasNotificationHistory={Boolean(test.lastNotifiedAt)}
+                        lastNotifiedAt={test.lastNotifiedAt}
+                        notificationCount={test.notificationCount}
+                      />
                     </div>
                   </div>
 

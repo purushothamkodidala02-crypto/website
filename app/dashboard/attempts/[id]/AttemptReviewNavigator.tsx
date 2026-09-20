@@ -150,26 +150,22 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
         </div>
       </div>
 
-      <div className="relative mt-5 sm:px-12 lg:px-14">
-        <div className="mb-3 flex items-center justify-between sm:hidden">
-          <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} />
-          <p className="text-sm font-bold text-slate-600">Question {index + 1} of {rows.length}</p>
-          <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} />
-        </div>
-        <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="absolute left-0 top-8 hidden sm:grid" />
-        <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="absolute right-0 top-8 hidden sm:grid" />
-
+      <div className="relative mt-4 w-full">
         <article
           ref={questionRef}
-          className="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:rounded-3xl"
+          className="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:rounded-3xl w-full"
           aria-live="polite"
         >
           {/* Header strip */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-3 sm:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-2.5 sm:px-6">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                Question {row.question_order} of {rows.length}
-              </span>
+              <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-0.5 shadow-2xs">
+                <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="h-7 w-7" />
+                <span className="px-2 text-xs font-black uppercase tracking-wider text-slate-700">
+                  Question {row.question_order} of {rows.length}
+                </span>
+                <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="h-7 w-7" />
+              </div>
               <QuestionStatus row={row} />
               <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-bold text-slate-700">
                 {row.marks_awarded > 0 ? `+${row.marks_awarded}` : row.marks_awarded} mark{row.marks_awarded === 1 ? "" : "s"}
