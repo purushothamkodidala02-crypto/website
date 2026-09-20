@@ -62,12 +62,12 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
   }, []);
 
   return (
-    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
       {!accountReady ? (
         <div
           role="status"
           aria-label="Loading account options"
-          className="h-10 w-24 animate-pulse rounded-xl bg-slate-100 motion-reduce:animate-none sm:w-40"
+          className="h-9 w-20 sm:h-10 sm:w-40 animate-pulse rounded-xl bg-slate-100 motion-reduce:animate-none"
         />
       ) : email ? (
         <>
@@ -75,7 +75,7 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
             <Link
               href="/dashboard/passes"
               aria-label={`My purchases${activePurchases ? `, ${activePurchases} active` : ""}`}
-              className="relative inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
+              className="relative inline-flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
             >
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
                 <path d="M6 8h12l-1 12H7L6 8Z" />

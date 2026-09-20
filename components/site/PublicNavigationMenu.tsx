@@ -95,7 +95,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
         aria-expanded={open}
         aria-controls={menuId}
         aria-label="Open navigation menu"
-        className="grid h-11 w-11 place-items-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-900"
+        className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-900"
       >
         <span className="space-y-1.5" aria-hidden="true">
           <span className="block h-0.5 w-5 rounded-full bg-current" />

@@ -16,12 +16,12 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(15,23,42,0.04)] backdrop-blur-xl">
       <div
-        className={`mx-auto flex items-center justify-between gap-2 px-4 sm:gap-4 sm:px-8 ${
-          compact ? "max-w-4xl py-3" : "max-w-6xl py-3.5"
+        className={`mx-auto flex items-center justify-between gap-1.5 px-3 sm:gap-4 sm:px-8 ${
+          compact ? "max-w-4xl py-2.5 sm:py-3" : "max-w-6xl py-2.5 sm:py-3.5"
         }`}
       >
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <Link href="/" className="group flex shrink-0 items-center gap-3" aria-label="Varadhi Prep home">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-3">
+          <Link href="/" className="group flex min-w-0 items-center gap-2 sm:gap-3" aria-label="Varadhi Prep home">
             <BrandLockup />
           </Link>
           <PublicNavigationMenu items={navigation} />

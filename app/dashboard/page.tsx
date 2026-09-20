@@ -234,28 +234,28 @@ export default async function Dashboard({
   ] as const;
 
   return (
-    <main className="student-page min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
-      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
-        <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-12 w-full">
+        <section className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-slate-950 px-5 py-7 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
-          <div className="relative flex flex-wrap items-end justify-between gap-7">
+          <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-5 sm:gap-7">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
                 Student dashboard
               </p>
-              <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">
+              <h1 className="mt-3 sm:mt-5 text-2xl sm:text-4xl font-black tracking-tight break-words">
                 Keep your preparation moving.
               </h1>
-              <p className="mt-3 max-w-2xl leading-7 text-slate-300">
+              <p className="mt-2 sm:mt-3 max-w-2xl text-xs sm:text-base leading-relaxed text-slate-300">
                 Review your progress, understand weaker subjects, and choose the
                 next focused mock test.
               </p>
             </div>
             <Link
               href="/mock-tests"
-              className="rounded-xl bg-teal-300 px-5 py-3.5 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/20 hover:bg-teal-200"
+              className="w-full sm:w-auto text-center rounded-xl bg-teal-300 px-5 py-3 sm:py-3.5 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/20 hover:bg-teal-200"
             >
               Find a mock test
             </Link>
