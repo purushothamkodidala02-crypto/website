@@ -181,7 +181,7 @@ export default async function AttemptReviewPage({
   return (
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
-      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
+      <div className="mx-auto max-w-7xl 2xl:max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8 sm:py-10">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800"
@@ -197,10 +197,10 @@ export default async function AttemptReviewPage({
                 <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
                 Attempt review
               </p>
-              <h1 className="mt-5 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">
+              <h1 className="mt-4 max-w-4xl text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl">
                 {resolvedTitle ?? summary.mock_test_title}
               </h1>
-              <p className="mt-3 max-w-2xl leading-7 text-slate-300">
+              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base">
                 Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))} · Review every answer and use the explanations to plan your next
                 practice session.
               </p>
