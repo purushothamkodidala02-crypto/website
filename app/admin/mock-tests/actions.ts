@@ -91,7 +91,15 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     access_type: pricing.accessType,
     price_inr: pricing.priceInr,
   });
-  if (error?.code === "23505") return { success: false, message: "This series number was just used. Submit again to create the next number." };
+  if (error?.code === "23505") {
+    if (error.message?.includes("uq_mock_tests_subject_series")) {
+      return {
+        success: false,
+        message: "Database index update required: Please execute migration 20260920130000_fix_subject_series_unique_index.sql in Supabase SQL Editor so sub-sections can start from Mock Test 01.",
+      };
+    }
+    return { success: false, message: "This series number or slug is already taken. Refresh and try again." };
+  }
   if (error) return { success: false, message: error.message };
   revalidatePath("/admin/mock-tests");
   revalidatePath("/mock-tests");
