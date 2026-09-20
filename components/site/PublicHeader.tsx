@@ -20,11 +20,11 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
           compact ? "max-w-4xl py-3" : "max-w-6xl py-3.5"
         }`}
       >
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <PublicNavigationMenu items={navigation} />
-          <Link href="/" className="group flex min-w-0 items-center gap-3" aria-label="Varadhi Prep home">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <Link href="/" className="group flex shrink-0 items-center gap-3" aria-label="Varadhi Prep home">
             <BrandLockup />
           </Link>
+          <PublicNavigationMenu items={navigation} />
         </div>
 
         <PublicAccountActions />
