@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 type Answer = "A" | "B" | "C" | "D";
@@ -160,10 +161,15 @@ export async function submitAttempt(
       console.error("submit_mock_test_attempt RPC error:", error, "data:", data);
       const verified = await verifySubmittedAttempt(sessionId);
       if (verified.success && verified.attempt) {
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/study-book");
         return verified.attempt;
       }
       return { success: false, message: error?.message || "Failed to submit attempt." };
     }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/study-book");
 
     return {
       success: true,
@@ -179,6 +185,8 @@ export async function submitAttempt(
     console.error("submitAttempt error:", err);
     const verified = await verifySubmittedAttempt(sessionId);
     if (verified.success && verified.attempt) {
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/study-book");
       return verified.attempt;
     }
     return {
