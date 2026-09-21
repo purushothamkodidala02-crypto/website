@@ -111,10 +111,8 @@ export default async function TakeMockTestPage({
         publicTestPath={testPath}
         title={testTitle}
         result={{
-          success: true,
-          message: "Your test has been submitted successfully.",
-          score: 0,
-          totalMarks: 0,
+          success: false,
+          message: "Your answers are saved in your account. Check your result in the dashboard.",
         }}
       />
     );
@@ -206,10 +204,8 @@ export default async function TakeMockTestPage({
         publicTestPath={testPath}
         title={testTitle}
         result={{
-          success: true,
-          message: "The test time has ended and your attempt has been recorded.",
-          score: 0,
-          totalMarks: 0,
+          success: false,
+          message: "The test time has ended and your answers are saved. Check your result in the dashboard.",
         }}
       />
     );

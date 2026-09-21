@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { RetryButton } from "@/components/feedback/RetryButton";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
 
 export default function AttemptErrorPage({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -35,25 +33,21 @@ export default function AttemptErrorPage({
           Test Submission Update
         </h1>
         <p className="mt-4 leading-7 text-slate-600">
-          Your answers are saved in your account. If your test time just concluded, your submission is recorded. You can refresh to view your score or check your dashboard.
+          Your answers are saved in your account. You can check your result in the dashboard.
         </p>
 
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <RetryButton
-            retry={reset}
-            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-70"
-          />
           <Link
             href="/dashboard"
             onClick={() => void exitFullscreenSafely()}
-            className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
+            className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
           >
-            Go to dashboard
+            Check your result in the dashboard
           </Link>
           <Link
             href="/"
             onClick={() => void exitFullscreenSafely()}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
           >
             Return home
           </Link>

@@ -152,13 +152,13 @@ export function StudentTestRunner({
         } else {
           setSubmission({
             success: false,
-            message: "Connection interrupted while submitting. Your answers are safely recorded. Please try again.",
+            message: "Your answers are saved in your account. Check your result in the dashboard.",
           });
         }
       } catch {
         setSubmission({
           success: false,
-          message: "Connection interrupted while submitting. Your answers are safely recorded. Please try again.",
+          message: "Your answers are saved in your account. Check your result in the dashboard.",
         });
       }
     } finally {
@@ -255,11 +255,6 @@ export function StudentTestRunner({
         publicTestPath={publicTestPath}
         title={title}
         result={submission}
-        onRetry={() => {
-          isFinishingRef.current = false;
-          hasAutoSubmittedRef.current = false;
-          setSubmission(null);
-        }}
       />
     );
   }

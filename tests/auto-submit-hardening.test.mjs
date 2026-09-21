@@ -29,8 +29,9 @@ test("mock test auto-submission is hardened against error boundary crashes and t
   // 4. attempt-actions verifySubmittedAttempt retries to avoid race condition on fast redirects
   assert.match(attemptActions, /verifySubmittedAttempt/);
 
-  // 5. Dedicated attempt error boundary exists and provides recovery options
+  // 5. Dedicated attempt error boundary exists and directs students to dashboard without RetryButton
   assert.match(attemptError, /Answers safely recorded/);
-  assert.match(attemptError, /RetryButton/);
+  assert.doesNotMatch(attemptError, /RetryButton/);
+  assert.match(attemptError, /Check your result in the dashboard/);
   assert.match(attemptError, /dashboard/);
 });

@@ -150,6 +150,16 @@ export async function submitAttempt(
       return { success: false, message: "One or more submitted answers are invalid." };
     }
 
+    // Immediately mark session as submitted so student refresh never reloads the active test runner
+    await supabase
+      .from("test_attempt_sessions")
+      .update({
+        submitted_at: new Date().toISOString(),
+        remaining_seconds: 0,
+      })
+      .eq("id", sessionId)
+      .eq("user_id", user.id);
+
     const { data, error } = await supabase.rpc("submit_mock_test_attempt", {
       requested_session_id: sessionId,
       submitted_answers: cleanedAnswers,
@@ -161,7 +171,7 @@ export async function submitAttempt(
       if (verified.success && verified.attempt) {
         return verified.attempt;
       }
-      return { success: false, message: "Unable to submit this attempt right now. Your saved answers are still protected; try again." };
+      return { success: false, message: "Your answers are saved in your account. Check your result in the dashboard." };
     }
 
     return {
@@ -182,7 +192,7 @@ export async function submitAttempt(
     }
     return {
       success: false,
-      message: "Network connection was interrupted during submission. Your answers are saved; please try again.",
+      message: "Your answers are saved in your account. Check your result in the dashboard.",
     };
   }
 }

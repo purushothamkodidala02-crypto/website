@@ -122,19 +122,32 @@ export function SubmissionResult({
           </>
         ) : (
           <>
-            <p className="mt-5 text-slate-600">{result.message}</p>
-            {onRetry && (
-              <button
-                type="button"
+            <p className="mt-5 text-base font-semibold text-slate-700">
+              {result.message || "Your answers are saved in your account."}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">
+              Check your result in the dashboard.
+            </p>
+            <div className="mt-7 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/dashboard"
                 onClick={() => {
                   void exitFullscreenSafely();
-                  onRetry();
                 }}
-                className="mt-7 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
+                className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
               >
-                Try submission again
-              </button>
-            )}
+                Check your result in the dashboard
+              </Link>
+              <Link
+                href="/"
+                onClick={() => {
+                  void exitFullscreenSafely();
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              >
+                Return home
+              </Link>
+            </div>
           </>
         )}
       </section>
