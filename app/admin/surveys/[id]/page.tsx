@@ -1,153 +1,357 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { saveSurveyQuestion, deleteSurveyQuestion } from "@/app/actions/surveys-admin";
+import {
+  saveSurveyQuestion,
+  deleteSurveyQuestion,
+  getAdminSurveyResponses,
+  type AdminSurveyResponse,
+} from "@/app/actions/surveys-admin";
 import { BackButton } from "@/components/admin/BackButton";
+
+type SurveyDetail = {
+  id: string;
+  title: string;
+  description?: string | null;
+  is_active: boolean;
+  created_at?: string;
+};
+
+type SurveyQuestionItem = {
+  id: string;
+  survey_id: string;
+  question_text: string;
+  question_type: string;
+  options: string[] | null;
+  display_order: number;
+};
 
 export default function AdminSurveyEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id: surveyId } = use(params);
-  const [survey, setSurvey] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [survey, setSurvey] = useState<SurveyDetail | null>(null);
+  const [questions, setQuestions] = useState<SurveyQuestionItem[]>([]);
+  const [responses, setResponses] = useState<AdminSurveyResponse[]>([]);
+  const [loadingResponses, setLoadingResponses] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
-  const [responses, setResponses] = useState<any[]>([]);
-  
   // New Question Form
   const [qText, setQText] = useState("");
   const [qType, setQType] = useState("text");
   const [qOptions, setQOptions] = useState("");
+  const [isSavingQuestion, setIsSavingQuestion] = useState(false);
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchData();
+  const loadResponses = useCallback(async () => {
+    setLoadingResponses(true);
+    const rData = await getAdminSurveyResponses(surveyId);
+    setResponses(rData || []);
+    setLoadingResponses(false);
   }, [surveyId]);
 
-  const fetchData = async () => {
-    const { data: s } = await supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single();
-    setSurvey(s);
-
-    const { data: q } = await supabase.from("dynamic_survey_questions").select("*").eq("survey_id", surveyId).order("display_order");
-    setQuestions(q || []);
-
-    // Fetch responses and answers
-    const { data: rData } = await supabase
-      .from("dynamic_survey_responses")
-      .select(`
-        id, submitted_at,
-        users:user_id ( email, raw_user_meta_data ),
-        answers:dynamic_survey_answers(question_id, answer_text)
-      `)
-      .eq("survey_id", surveyId)
-      .order("submitted_at", { ascending: false });
-    
+  const fetchData = useCallback(async () => {
+    const [sRes, qRes, rData] = await Promise.all([
+      supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single(),
+      supabase.from("dynamic_survey_questions").select("*").eq("survey_id", surveyId).order("display_order"),
+      getAdminSurveyResponses(surveyId),
+    ]);
+    setSurvey(sRes.data);
+    setQuestions(qRes.data || []);
     setResponses(rData || []);
-  };
+  }, [surveyId, supabase]);
+
+  useEffect(() => {
+    let ignore = false;
+    Promise.all([
+      supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single(),
+      supabase.from("dynamic_survey_questions").select("*").eq("survey_id", surveyId).order("display_order"),
+      getAdminSurveyResponses(surveyId),
+    ]).then(([sRes, qRes, rData]) => {
+      if (!ignore) {
+        setSurvey(sRes.data);
+        setQuestions(qRes.data || []);
+        setResponses(rData || []);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [surveyId, supabase]);
 
   const handleAddQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!qText.trim()) return;
-    
-    const optionsArray = qType === 'radio' ? qOptions.split(",").map(s => s.trim()).filter(Boolean) : [];
-    
-    await saveSurveyQuestion(surveyId, qText, qType, optionsArray, questions.length);
+
+    setIsSavingQuestion(true);
+    const optionsArray =
+      qType === "radio"
+        ? qOptions
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+    await saveSurveyQuestion(surveyId, qText.trim(), qType, optionsArray, questions.length);
     setQText("");
     setQOptions("");
+    setIsSavingQuestion(false);
     fetchData();
   };
 
   const handleDelete = async (questionId: string) => {
-    if (confirm("Are you sure?")) {
+    if (confirm("Are you sure you want to delete this question?")) {
       await deleteSurveyQuestion(questionId, surveyId);
       fetchData();
     }
   };
 
-  if (!survey) return <div className="p-8">Loading...</div>;
+  const getSurveyUrl = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return survey?.is_active ? `${origin}/survey` : `${origin}/survey?id=${surveyId}`;
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(getSurveyUrl());
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  if (!survey) return <div className="p-8 text-slate-500">Loading survey details...</div>;
 
   return (
-    <div className="mx-auto max-w-5xl p-6">
-      <BackButton fallbackHref="/admin/surveys" label="← Back to Surveys" className="mb-4 inline-block text-sm font-bold text-teal-600 hover:underline" />
-      
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-black text-slate-900">{survey.title}</h1>
-        {survey.is_active ? (
-          <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">Active (Live on Dashboard)</span>
-        ) : (
-          <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">Draft Status</span>
-        )}
+    <div className="mx-auto max-w-6xl p-6">
+      <BackButton
+        fallbackHref="/admin/surveys"
+        label="← Back to Surveys"
+        className="mb-4 inline-block text-sm font-bold text-teal-600 hover:underline"
+      />
+
+      {/* Header */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900">{survey.title}</h1>
+          {survey.description && (
+            <p className="mt-1 text-sm text-slate-600">{survey.description}</p>
+          )}
+        </div>
+        <div>
+          {survey.is_active ? (
+            <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">
+              Active (Live on /survey & Dashboard)
+            </span>
+          ) : (
+            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
+              Draft Status
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Shareable Link Box */}
+      <div className="mb-8 rounded-2xl border border-teal-200 bg-teal-50/60 p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-teal-900">
+              Shareable Public Survey Link
+            </h2>
+            <p className="mt-1 font-mono text-xs text-teal-950 sm:text-sm break-all">
+              {getSurveyUrl()}
+            </p>
+            <p className="mt-1 text-xs text-teal-700">
+              {survey.is_active
+                ? "This survey is active. Students visiting /survey will see this survey directly."
+                : "This survey is currently in draft. Use this link with ?id= to test or share directly."}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
+            >
+              {copiedLink ? "✓ Copied Link!" : "📋 Copy Survey Link"}
+            </button>
+            <a
+              href={survey.is_active ? "/survey" : `/survey?id=${surveyId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-xl border border-teal-300 bg-white px-3.5 py-2.5 text-xs font-bold text-teal-900 shadow-sm hover:bg-teal-50 transition"
+            >
+              Open Survey ↗
+            </a>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Editor Side */}
+        {/* Editor Side: Questions */}
         <section>
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Survey Questions</h2>
-          
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900">
+              Survey Questions ({questions.length})
+            </h2>
+          </div>
+
           <div className="space-y-3">
             {questions.map((q, i) => (
-              <div key={q.id} className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <button onClick={() => handleDelete(q.id)} className="absolute right-4 top-4 text-slate-400 hover:text-red-500">✕</button>
-                <p className="font-bold text-slate-900">{i + 1}. {q.question_text}</p>
-                <p className="mt-1 text-xs uppercase text-slate-500">Type: {q.question_type}</p>
-                {q.options && (
+              <div
+                key={q.id}
+                className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleDelete(q.id)}
+                  className="absolute right-4 top-4 text-slate-400 hover:text-red-500 font-bold transition"
+                  title="Delete Question"
+                >
+                  ✕
+                </button>
+                <p className="font-bold text-slate-900 pr-8">
+                  {i + 1}. {q.question_text}
+                </p>
+                <p className="mt-1 text-xs uppercase tracking-wider text-slate-500">
+                  Type: {q.question_type}
+                </p>
+                {q.options && q.options.length > 0 && (
                   <ul className="mt-2 list-inside list-disc text-sm text-slate-600">
-                    {q.options.map((opt: string, idx: number) => <li key={idx}>{opt}</li>)}
+                    {q.options.map((opt: string, idx: number) => (
+                      <li key={idx}>{opt}</li>
+                    ))}
                   </ul>
                 )}
               </div>
             ))}
-            {questions.length === 0 && <p className="text-sm text-slate-500">No questions added yet.</p>}
+            {questions.length === 0 && (
+              <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+                No questions added yet. Add your first question below!
+              </p>
+            )}
           </div>
 
-          <form onSubmit={handleAddQuestion} className="mt-8 rounded-2xl border border-teal-100 bg-teal-50 p-6">
+          {/* Add Question Form */}
+          <form
+            onSubmit={handleAddQuestion}
+            className="mt-8 rounded-2xl border border-teal-100 bg-teal-50 p-6"
+          >
             <h3 className="mb-4 font-bold text-teal-900">Add New Question</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-teal-800">Question Text</label>
-                <input required type="text" value={qText} onChange={(e) => setQText(e.target.value)} className="mt-1 block w-full rounded-lg border border-teal-200 p-2 text-sm" placeholder="e.g. Which exam?" />
+                <label className="block text-sm font-bold text-teal-900">Question Text</label>
+                <input
+                  required
+                  type="text"
+                  value={qText}
+                  onChange={(e) => setQText(e.target.value)}
+                  className="mt-1 block w-full rounded-lg border border-teal-200 bg-white p-2.5 text-sm text-slate-900 focus:border-teal-500 focus:outline-none"
+                  placeholder="e.g. Which exam are you primarily preparing for?"
+                />
               </div>
+
               <div>
-                <label className="block text-sm font-bold text-teal-800">Input Type</label>
-                <select value={qType} onChange={(e) => setQType(e.target.value)} className="mt-1 block w-full rounded-lg border border-teal-200 p-2 text-sm">
-                  <option value="text">Short Text</option>
-                  <option value="textarea">Long Text (Paragraph)</option>
-                  <option value="radio">Multiple Choice (Radio)</option>
+                <label className="block text-sm font-bold text-teal-900">Input Type</label>
+                <select
+                  value={qType}
+                  onChange={(e) => setQType(e.target.value)}
+                  className="mt-1 block w-full rounded-lg border border-teal-200 bg-white p-2.5 text-sm text-slate-900 focus:border-teal-500 focus:outline-none"
+                >
+                  <option value="text">Short Text (Single line)</option>
+                  <option value="textarea">Long Text (Multi-line paragraph)</option>
+                  <option value="radio">Multiple Choice (Single select radio)</option>
                 </select>
               </div>
-              {qType === 'radio' && (
+
+              {qType === "radio" && (
                 <div>
-                  <label className="block text-sm font-bold text-teal-800">Options (comma separated)</label>
-                  <input required type="text" value={qOptions} onChange={(e) => setQOptions(e.target.value)} className="mt-1 block w-full rounded-lg border border-teal-200 p-2 text-sm" placeholder="e.g. Option A, Option B, Option C" />
+                  <label className="block text-sm font-bold text-teal-900">
+                    Options (comma separated)
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    value={qOptions}
+                    onChange={(e) => setQOptions(e.target.value)}
+                    className="mt-1 block w-full rounded-lg border border-teal-200 bg-white p-2.5 text-sm text-slate-900 focus:border-teal-500 focus:outline-none"
+                    placeholder="e.g. Subject-wise mocks, Full mock tests, Both"
+                  />
+                  <p className="mt-1 text-xs text-teal-700">
+                    Separate multiple choices with commas.
+                  </p>
                 </div>
               )}
-              <button type="submit" className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white hover:bg-teal-800">Add Question</button>
+
+              <button
+                type="submit"
+                disabled={isSavingQuestion}
+                className="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-70 transition"
+              >
+                {isSavingQuestion ? "Saving..." : "Add Question"}
+              </button>
             </div>
           </form>
         </section>
 
         {/* Responses Side */}
         <section>
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Student Responses ({responses.length})</h2>
-          <div className="max-h-[800px] space-y-4 overflow-y-auto">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900">
+              Collected Responses ({responses.length})
+            </h2>
+            <button
+              type="button"
+              onClick={loadResponses}
+              disabled={loadingResponses}
+              className="text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline"
+            >
+              {loadingResponses ? "Refreshing..." : "↻ Refresh"}
+            </button>
+          </div>
+
+          <div className="max-h-[800px] space-y-4 overflow-y-auto pr-1">
             {responses.map((r) => (
-              <div key={r.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-500">
-                  {new Date(r.submitted_at).toLocaleString()} • {r.users?.raw_user_meta_data?.name || r.users?.email || "Anonymous"}
-                </p>
-                <div className="mt-3 space-y-3">
-                  {r.answers.map((ans: any) => {
-                    const q = questions.find(q => q.id === ans.question_id);
+              <div
+                key={r.id}
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                  <p className="text-xs font-bold text-slate-700">
+                    👤 {r.respondentName}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {new Date(r.submitted_at).toLocaleString()}
+                  </p>
+                </div>
+
+                {r.respondentEmail && (
+                  <p className="text-xs text-slate-500">Email: {r.respondentEmail}</p>
+                )}
+
+                <div className="space-y-3 pt-1">
+                  {r.answers.map((ans) => {
+                    const q = questions.find((item) => item.id === ans.question_id);
                     return (
                       <div key={ans.question_id} className="text-sm">
-                        <p className="font-bold text-slate-700">{q?.question_text || "Unknown Question"}</p>
-                        <p className="text-slate-900">{ans.answer_text}</p>
+                        <p className="font-semibold text-slate-600">
+                          {q?.question_text || "Question"}:
+                        </p>
+                        <p className="mt-0.5 text-slate-950 bg-slate-50 p-2 rounded-lg font-medium">
+                          {ans.answer_text}
+                        </p>
                       </div>
                     );
                   })}
                 </div>
               </div>
             ))}
-            {responses.length === 0 && <p className="text-sm text-slate-500">No responses yet.</p>}
+
+            {responses.length === 0 && (
+              <div className="rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
+                <p className="text-base font-semibold text-slate-700">No responses yet</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Share the public survey link above with students to collect responses. They will appear here in real time.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </div>
