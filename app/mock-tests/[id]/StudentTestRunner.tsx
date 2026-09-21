@@ -339,16 +339,6 @@ export function StudentTestRunner({
 
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
-  if (submission) {
-    return (
-      <SubmissionResult
-        publicTestPath={publicTestPath}
-        title={title}
-        result={submission}
-      />
-    );
-  }
-
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
   return <main ref={containerRef} className="student-page relative min-h-screen bg-slate-100 pb-8">

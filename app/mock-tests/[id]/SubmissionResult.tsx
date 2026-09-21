@@ -37,11 +37,11 @@ export function SubmissionResult({
         </div>
 
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-          {result.success ? "Test submitted successfully" : "Answers safely recorded"}
+          {result.success || typeof result.score === "number" ? "Test submitted successfully" : "Answers safely recorded"}
         </p>
         <h1 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">{title}</h1>
 
-        {result.success ? (
+        {result.success || typeof result.score === "number" ? (
           <>
             <div className="mt-6">
               <p className="text-5xl font-black text-slate-950">

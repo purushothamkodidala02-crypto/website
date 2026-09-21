@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMockTestPublicContextById } from "@/lib/public-route-data";
 import { mockTestUrl } from "@/lib/public-urls";
 import { StudentTestRunner } from "../StudentTestRunner";
+import { SubmissionResult } from "../SubmissionResult";
 
 type TestQuestion = {
   question_id: string;
@@ -66,30 +67,89 @@ export default async function TakeMockTestPage({
 
   if (!session) redirect("/dashboard");
 
-  // 1. If session is marked submitted, redirect directly to dashboard to view in exam history
-  if (session.submitted_at || session.session_state === "submitted") {
-    redirect("/dashboard");
-  }
-
-  // 2. Even if submitted_at flag is pending, verify if an attempt record already exists in DB
+  // 1. Check if an attempt record already exists in DB for this session
   const { data: existingAttempt } = await supabase
     .from("test_attempts")
-    .select("id")
+    .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
     .eq("session_id", session.id)
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (existingAttempt) {
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: true,
+          message: "Attempt submitted successfully.",
+          attemptId: String(existingAttempt.id),
+          score: Number(existingAttempt.score),
+          totalMarks: Number(existingAttempt.total_marks),
+          correctAnswers: Number(existingAttempt.correct_answers),
+          incorrectAnswers: Number(existingAttempt.incorrect_answers),
+          unansweredQuestions: Number(existingAttempt.unanswered_questions),
+        }}
+      />
+    );
+  }
+
+  // 2. If session is marked submitted, attempt to fetch the scored attempt
+  if (session.submitted_at || session.session_state === "submitted") {
+    const { data: attempt } = await supabase
+      .from("test_attempts")
+      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+      .eq("session_id", session.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (attempt) {
+      return (
+        <SubmissionResult
+          publicTestPath={testPath}
+          title={testTitle}
+          result={{
+            success: true,
+            message: "Attempt submitted successfully.",
+            attemptId: String(attempt.id),
+            score: Number(attempt.score),
+            totalMarks: Number(attempt.total_marks),
+            correctAnswers: Number(attempt.correct_answers),
+            incorrectAnswers: Number(attempt.incorrect_answers),
+            unansweredQuestions: Number(attempt.unanswered_questions),
+          }}
+        />
+      );
+    }
     redirect("/dashboard");
   }
 
-  // 3. If the session has reached or passed deadline, finalize submission immediately and redirect to dashboard
+  // 3. If the session has reached or passed deadline, finalize submission immediately and show results
   const isExpired = new Date(session.expires_at).getTime() <= Date.now();
   if (isExpired) {
-    await supabase.rpc("submit_mock_test_attempt", {
+    const { data: submitData } = await supabase.rpc("submit_mock_test_attempt", {
       requested_session_id: session.id,
       submitted_answers: {},
     });
+    const expiredResult = submitData?.[0];
+    if (expiredResult) {
+      return (
+        <SubmissionResult
+          publicTestPath={testPath}
+          title={testTitle}
+          result={{
+            success: true,
+            message: "Attempt submitted successfully.",
+            attemptId: String(expiredResult.attempt_id),
+            score: Number(expiredResult.score),
+            totalMarks: Number(expiredResult.total_marks),
+            correctAnswers: Number(expiredResult.correct_answers),
+            incorrectAnswers: Number(expiredResult.incorrect_answers),
+            unansweredQuestions: Number(expiredResult.unanswered_questions),
+          }}
+        />
+      );
+    }
     redirect("/dashboard");
   }
 
