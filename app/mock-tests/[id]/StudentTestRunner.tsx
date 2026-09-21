@@ -383,7 +383,7 @@ export function StudentTestRunner({
                     : "Enter full screen (CBT Exam Mode)"
                 }
                 aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
-                className={`flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
+                className={`hidden md:flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
                   isFullscreen
                     ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
