@@ -135,12 +135,33 @@ export function StudentTestRunner({
       const res = await submitAttempt(sessionId, answers);
       if (!res.success) {
         console.warn("submitAttempt returned unsuccessful:", res.message);
-        await verifySubmittedAttempt(sessionId);
+        const verified = await verifySubmittedAttempt(sessionId);
+        if (verified.success && verified.attempt) {
+          setSubmission(verified.attempt);
+        } else {
+          setSubmission(res);
+        }
+      } else {
+        setSubmission(res);
       }
-      window.location.replace("/dashboard");
     } catch (err) {
       console.error("Error submitting test attempt:", err);
-      window.location.replace("/dashboard");
+      try {
+        const verified = await verifySubmittedAttempt(sessionId);
+        if (verified.success && verified.attempt) {
+          setSubmission(verified.attempt);
+        } else {
+          setSubmission({
+            success: false,
+            message: "Your answers are saved in your account. Check your result in the dashboard.",
+          });
+        }
+      } catch {
+        setSubmission({
+          success: false,
+          message: "Your answers are saved in your account. Check your result in the dashboard.",
+        });
+      }
     } finally {
       setSubmitting(false);
       void exitFullscreenSafely();
@@ -317,6 +338,16 @@ export function StudentTestRunner({
   }, []);
 
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
+
+  if (submission) {
+    return (
+      <SubmissionResult
+        publicTestPath={publicTestPath}
+        title={title}
+        result={submission}
+      />
+    );
+  }
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
