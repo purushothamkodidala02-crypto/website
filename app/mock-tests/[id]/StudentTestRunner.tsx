@@ -132,7 +132,11 @@ export function StudentTestRunner({
     void exitFullscreenSafely();
     try {
       await flushSaves();
-      await submitAttempt(sessionId, answers);
+      const res = await submitAttempt(sessionId, answers);
+      if (!res.success) {
+        console.warn("submitAttempt returned unsuccessful:", res.message);
+        await verifySubmittedAttempt(sessionId);
+      }
       window.location.replace("/dashboard");
     } catch (err) {
       console.error("Error submitting test attempt:", err);

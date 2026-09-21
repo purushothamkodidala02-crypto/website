@@ -1,5 +1,5 @@
 -- Varadhi's branded six-digit email login codes. The raw code is never stored.
-create table public.email_login_challenges (
+create table if not exists public.email_login_challenges (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   email text not null,
@@ -12,8 +12,8 @@ create table public.email_login_challenges (
   check (expires_at > created_at)
 );
 
-create index email_login_challenges_user_created_idx on public.email_login_challenges(user_id, created_at desc);
-create index email_login_challenges_ip_created_idx on public.email_login_challenges(requester_ip_hash, created_at desc);
+create index if not exists email_login_challenges_user_created_idx on public.email_login_challenges(user_id, created_at desc);
+create index if not exists email_login_challenges_ip_created_idx on public.email_login_challenges(requester_ip_hash, created_at desc);
 alter table public.email_login_challenges enable row level security;
 
 create or replace function public.find_auth_user_id_by_email(requested_email text)

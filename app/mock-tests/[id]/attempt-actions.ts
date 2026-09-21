@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 type Answer = "A" | "B" | "C" | "D";
 const MAX_ANSWERS_PER_ATTEMPT = 500;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type SubmitAttemptResult = {
   success: boolean;
@@ -157,11 +157,12 @@ export async function submitAttempt(
 
     const result = data?.[0];
     if (error || !result) {
+      console.error("submit_mock_test_attempt RPC error:", error, "data:", data);
       const verified = await verifySubmittedAttempt(sessionId);
       if (verified.success && verified.attempt) {
         return verified.attempt;
       }
-      return { success: false, message: "Your answers are saved in your account. Check your result in the dashboard." };
+      return { success: false, message: error?.message || "Failed to submit attempt." };
     }
 
     return {

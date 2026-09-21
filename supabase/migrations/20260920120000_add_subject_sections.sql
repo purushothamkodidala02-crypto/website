@@ -17,15 +17,18 @@ create index if not exists idx_subject_sections_subject_id
 
 alter table public.subject_sections enable row level security;
 
+drop policy if exists "Public can view active subject sections" on public.subject_sections;
 create policy "Public can view active subject sections"
 on public.subject_sections for select
 using (is_active = true);
 
+drop policy if exists "Admins can manage subject sections" on public.subject_sections;
 create policy "Admins can manage subject sections"
 on public.subject_sections for all to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
+drop trigger if exists update_subject_sections_updated_at on public.subject_sections;
 create trigger update_subject_sections_updated_at
 before update on public.subject_sections
 for each row execute function public.update_updated_at_column();

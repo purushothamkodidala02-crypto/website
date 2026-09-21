@@ -22,10 +22,12 @@ alter table public.exam_page_faqs enable row level security;
 grant select on public.exam_page_faqs to anon, authenticated;
 grant insert, update, delete on public.exam_page_faqs to authenticated;
 
+drop policy if exists "Anyone can view public exam page FAQs" on public.exam_page_faqs;
 create policy "Anyone can view public exam page FAQs"
 on public.exam_page_faqs for select
 using (true);
 
+drop policy if exists "Admins can manage exam page FAQs" on public.exam_page_faqs;
 create policy "Admins can manage exam page FAQs"
 on public.exam_page_faqs for all to authenticated
 using (public.is_admin())

@@ -8,10 +8,13 @@ create unique index if not exists uq_mock_tests_replaces_one_version
 
 drop index if exists public.uq_mock_tests_paper_series;
 drop index if exists public.uq_mock_tests_subject_series;
-create unique index uq_mock_tests_paper_series on public.mock_tests(paper_id, series_number)
+create unique index if not exists uq_mock_tests_paper_series on public.mock_tests(paper_id, series_number)
   where test_scope = 'paper' and superseded_by_mock_test_id is null;
-create unique index uq_mock_tests_subject_series on public.mock_tests(subject_id, series_number)
-  where test_scope = 'subject' and superseded_by_mock_test_id is null;
+do $$ begin
+  create unique index uq_mock_tests_subject_series on public.mock_tests(subject_id, series_number)
+    where test_scope = 'subject' and superseded_by_mock_test_id is null;
+exception when unique_violation or duplicate_table then null;
+end $$;
 
 alter table public.mock_tests drop constraint if exists mock_tests_paper_id_slug_key;
 create unique index if not exists uq_mock_tests_current_paper_slug on public.mock_tests(paper_id, slug)

@@ -18,12 +18,14 @@ create index if not exists idx_mock_test_notifications_test_id
 
 alter table public.mock_test_notifications enable row level security;
 
+drop policy if exists "Admins can view and manage mock test notifications" on public.mock_test_notifications;
 create policy "Admins can view and manage mock test notifications"
   on public.mock_test_notifications
   for all to authenticated
   using (public.is_admin())
   with check (public.is_admin());
 
+drop policy if exists "Service role can manage mock test notifications" on public.mock_test_notifications;
 create policy "Service role can manage mock test notifications"
   on public.mock_test_notifications
   for all to service_role
