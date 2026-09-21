@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
@@ -67,6 +68,7 @@ export function StudentTestRunner({
   bookmarkedQuestionIds,
   studentEmail,
 }: Props) {
+  const router = useRouter();
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
     const lastAnsweredIndex = questions.reduce((last, question, questionIndex) => question.selected_answer ? questionIndex : last, -1);
@@ -133,6 +135,7 @@ export function StudentTestRunner({
     try {
       await flushSaves();
       const res = await submitAttempt(sessionId, answers);
+      router.refresh();
       if (!res.success) {
         console.warn("submitAttempt returned unsuccessful:", res.message);
         const verified = await verifySubmittedAttempt(sessionId);

@@ -1,3 +1,7 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -68,12 +72,29 @@ export default async function TakeMockTestPage({
   if (!session) redirect("/dashboard");
 
   // 1. Check if an attempt record already exists in DB for this session
-  const { data: existingAttempt } = await supabase
+  let { data: existingAttempt } = await supabase
     .from("test_attempts")
     .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
     .eq("session_id", session.id)
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // If session is submitted but attempt not found immediately, retry with delays
+  if (!existingAttempt && (session.submitted_at || session.session_state === "submitted")) {
+    for (let i = 0; i < 3; i++) {
+      await new Promise((r) => setTimeout(r, (i + 1) * 300));
+      const retry = await supabase
+        .from("test_attempts")
+        .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+        .eq("session_id", session.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (retry.data) {
+        existingAttempt = retry.data;
+        break;
+      }
+    }
+  }
 
   if (existingAttempt) {
     return (
@@ -84,44 +105,28 @@ export default async function TakeMockTestPage({
           success: true,
           message: "Attempt submitted successfully.",
           attemptId: String(existingAttempt.id),
-          score: Number(existingAttempt.score),
-          totalMarks: Number(existingAttempt.total_marks),
-          correctAnswers: Number(existingAttempt.correct_answers),
-          incorrectAnswers: Number(existingAttempt.incorrect_answers),
-          unansweredQuestions: Number(existingAttempt.unanswered_questions),
+          score: Number(existingAttempt.score ?? 0),
+          totalMarks: Number(existingAttempt.total_marks ?? 0),
+          correctAnswers: Number(existingAttempt.correct_answers ?? 0),
+          incorrectAnswers: Number(existingAttempt.incorrect_answers ?? 0),
+          unansweredQuestions: Number(existingAttempt.unanswered_questions ?? 0),
         }}
       />
     );
   }
 
-  // 2. If session is marked submitted, attempt to fetch the scored attempt
+  // 2. If session is marked submitted, show result screen safely without throwing redirect
   if (session.submitted_at || session.session_state === "submitted") {
-    const { data: attempt } = await supabase
-      .from("test_attempts")
-      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-      .eq("session_id", session.id)
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (attempt) {
-      return (
-        <SubmissionResult
-          publicTestPath={testPath}
-          title={testTitle}
-          result={{
-            success: true,
-            message: "Attempt submitted successfully.",
-            attemptId: String(attempt.id),
-            score: Number(attempt.score),
-            totalMarks: Number(attempt.total_marks),
-            correctAnswers: Number(attempt.correct_answers),
-            incorrectAnswers: Number(attempt.incorrect_answers),
-            unansweredQuestions: Number(attempt.unanswered_questions),
-          }}
-        />
-      );
-    }
-    redirect("/dashboard");
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: false,
+          message: "Your answers are saved in your account. Check your result in the dashboard.",
+        }}
+      />
+    );
   }
 
   // 3. If the session has reached or passed deadline, finalize submission immediately and show results
@@ -141,19 +146,39 @@ export default async function TakeMockTestPage({
             success: true,
             message: "Attempt submitted successfully.",
             attemptId: String(expiredResult.attempt_id),
-            score: Number(expiredResult.score),
-            totalMarks: Number(expiredResult.total_marks),
-            correctAnswers: Number(expiredResult.correct_answers),
-            incorrectAnswers: Number(expiredResult.incorrect_answers),
-            unansweredQuestions: Number(expiredResult.unanswered_questions),
+            score: Number(expiredResult.score ?? 0),
+            totalMarks: Number(expiredResult.total_marks ?? 0),
+            correctAnswers: Number(expiredResult.correct_answers ?? 0),
+            incorrectAnswers: Number(expiredResult.incorrect_answers ?? 0),
+            unansweredQuestions: Number(expiredResult.unanswered_questions ?? 0),
           }}
         />
       );
     }
-    redirect("/dashboard");
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: false,
+          message: "The test time has ended and your answers are saved. Check your result in the dashboard.",
+        }}
+      />
+    );
   }
 
-  if (session.session_state !== "active") redirect("/dashboard");
+  if (session.session_state !== "active") {
+    return (
+      <SubmissionResult
+        publicTestPath={testPath}
+        title={testTitle}
+        result={{
+          success: false,
+          message: "This test attempt is no longer active. Check your result in the dashboard.",
+        }}
+      />
+    );
+  }
 
   const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
   const questions = (data ?? []) as TestQuestion[];

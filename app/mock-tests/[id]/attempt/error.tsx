@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
+import { verifySubmittedAttempt, type SubmitAttemptResult } from "../attempt-actions";
+import { SubmissionResult } from "../SubmissionResult";
 
 export default function AttemptErrorPage({
   error,
@@ -10,12 +11,36 @@ export default function AttemptErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [recoveredResult, setRecoveredResult] = useState<SubmitAttemptResult | null>(null);
+
+  if (error?.message === "NEXT_REDIRECT" || error?.digest?.startsWith("NEXT_REDIRECT")) {
+    throw error;
+  }
+
   useEffect(() => {
     void exitFullscreenSafely();
-    if (process.env.NODE_ENV === "development") {
-      console.error("Test attempt route error:", error);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const session = params.get("session");
+      if (session) {
+        void verifySubmittedAttempt(session).then((res) => {
+          if (res.success && res.attempt) {
+            setRecoveredResult(res.attempt);
+          }
+        });
+      }
     }
-  }, [error]);
+  }, []);
+
+  if (recoveredResult) {
+    return (
+      <SubmissionResult
+        publicTestPath="/mock-tests"
+        title="Mock Test"
+        result={recoveredResult}
+      />
+    );
+  }
 
   return (
     <main className="student-page grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-950">
@@ -37,20 +62,20 @@ export default function AttemptErrorPage({
         </p>
 
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link
+          <a
             href="/dashboard"
             onClick={() => void exitFullscreenSafely()}
             className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
           >
             Check your result in the dashboard
-          </Link>
-          <Link
+          </a>
+          <a
             href="/"
             onClick={() => void exitFullscreenSafely()}
             className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
           >
             Return home
-          </Link>
+          </a>
         </div>
       </section>
     </main>

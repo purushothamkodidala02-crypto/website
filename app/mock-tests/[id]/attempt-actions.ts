@@ -175,11 +175,11 @@ export async function submitAttempt(
       success: true,
       message: "Attempt submitted successfully.",
       attemptId: String(result.attempt_id),
-      score: Number(result.score),
-      totalMarks: Number(result.total_marks),
-      correctAnswers: Number(result.correct_answers),
-      incorrectAnswers: Number(result.incorrect_answers),
-      unansweredQuestions: Number(result.unanswered_questions),
+      score: Number(result.score ?? 0),
+      totalMarks: Number(result.total_marks ?? 0),
+      correctAnswers: Number(result.correct_answers ?? 0),
+      incorrectAnswers: Number(result.incorrect_answers ?? 0),
+      unansweredQuestions: Number(result.unanswered_questions ?? 0),
     };
   } catch (err) {
     console.error("submitAttempt error:", err);
@@ -210,41 +210,33 @@ export async function verifySubmittedAttempt(sessionId: string): Promise<{
       return { success: false };
     }
 
-    let { data: attempt } = await supabase
-      .from("test_attempts")
-      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-      .eq("session_id", sessionId)
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (!attempt) {
-      await new Promise((r) => setTimeout(r, 400));
-      const retry = await supabase
+    for (let i = 0; i < 4; i++) {
+      const { data: attempt } = await supabase
         .from("test_attempts")
         .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
         .eq("session_id", sessionId)
         .eq("user_id", user.id)
         .maybeSingle();
-      attempt = retry.data;
+
+      if (attempt) {
+        return {
+          success: true,
+          attempt: {
+            success: true,
+            message: "Attempt submitted successfully.",
+            attemptId: String(attempt.id),
+            score: Number(attempt.score ?? 0),
+            totalMarks: Number(attempt.total_marks ?? 0),
+            correctAnswers: Number(attempt.correct_answers ?? 0),
+            incorrectAnswers: Number(attempt.incorrect_answers ?? 0),
+            unansweredQuestions: Number(attempt.unanswered_questions ?? 0),
+          },
+        };
+      }
+      await new Promise((r) => setTimeout(r, (i + 1) * 350));
     }
 
-    if (!attempt) {
-      return { success: false };
-    }
-
-    return {
-      success: true,
-      attempt: {
-        success: true,
-        message: "Attempt submitted successfully.",
-        attemptId: String(attempt.id),
-        score: Number(attempt.score),
-        totalMarks: Number(attempt.total_marks),
-        correctAnswers: Number(attempt.correct_answers),
-        incorrectAnswers: Number(attempt.incorrect_answers),
-        unansweredQuestions: Number(attempt.unanswered_questions),
-      },
-    };
+    return { success: false };
   } catch {
     return { success: false };
   }
