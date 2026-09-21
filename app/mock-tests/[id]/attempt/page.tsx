@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getMockTestPublicContextById } from "@/lib/public-route-data";
 import { mockTestUrl } from "@/lib/public-urls";
 import { StudentTestRunner } from "../StudentTestRunner";
-import { SubmissionResult } from "../SubmissionResult";
 
 type TestQuestion = {
   question_id: string;
@@ -65,153 +64,36 @@ export default async function TakeMockTestPage({
     .eq("mock_test_id", id)
     .maybeSingle();
 
-  if (!session) redirect(testPath);
+  if (!session) redirect("/dashboard");
 
-  // 1. If session is marked submitted, fetch attempt and render SubmissionResult
+  // 1. If session is marked submitted, redirect directly to dashboard to view in exam history
   if (session.submitted_at || session.session_state === "submitted") {
-    let { data: attempt } = await supabase
-      .from("test_attempts")
-      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-      .eq("session_id", session.id)
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (!attempt) {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const retry = await supabase
-        .from("test_attempts")
-        .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-        .eq("session_id", session.id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-      attempt = retry.data;
-    }
-
-    if (attempt) {
-      return (
-        <SubmissionResult
-          publicTestPath={testPath}
-          title={testTitle}
-          result={{
-            success: true,
-            message: "Attempt submitted successfully.",
-            attemptId: attempt.id,
-            score: Number(attempt.score),
-            totalMarks: Number(attempt.total_marks),
-            correctAnswers: attempt.correct_answers,
-            incorrectAnswers: attempt.incorrect_answers,
-            unansweredQuestions: attempt.unanswered_questions,
-          }}
-        />
-      );
-    }
-
-    return (
-      <SubmissionResult
-        publicTestPath={testPath}
-        title={testTitle}
-        result={{
-          success: false,
-          message: "Your answers are saved in your account. Check your result in the dashboard.",
-        }}
-      />
-    );
+    redirect("/dashboard");
   }
 
   // 2. Even if submitted_at flag is pending, verify if an attempt record already exists in DB
   const { data: existingAttempt } = await supabase
     .from("test_attempts")
-    .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+    .select("id")
     .eq("session_id", session.id)
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (existingAttempt) {
-    return (
-      <SubmissionResult
-        publicTestPath={testPath}
-        title={testTitle}
-        result={{
-          success: true,
-          message: "Attempt submitted successfully.",
-          attemptId: existingAttempt.id,
-          score: Number(existingAttempt.score),
-          totalMarks: Number(existingAttempt.total_marks),
-          correctAnswers: existingAttempt.correct_answers,
-          incorrectAnswers: existingAttempt.incorrect_answers,
-          unansweredQuestions: existingAttempt.unanswered_questions,
-        }}
-      />
-    );
+    redirect("/dashboard");
   }
 
-  // 3. If the session has reached or passed deadline, finalize submission immediately
+  // 3. If the session has reached or passed deadline, finalize submission immediately and redirect to dashboard
   const isExpired = new Date(session.expires_at).getTime() <= Date.now();
   if (isExpired) {
-    const { data: submitData } = await supabase.rpc("submit_mock_test_attempt", {
+    await supabase.rpc("submit_mock_test_attempt", {
       requested_session_id: session.id,
       submitted_answers: {},
     });
-    const finalResult = submitData?.[0];
-    if (finalResult) {
-      return (
-        <SubmissionResult
-          publicTestPath={testPath}
-          title={testTitle}
-          result={{
-            success: true,
-            message: "Attempt submitted successfully.",
-            attemptId: String(finalResult.attempt_id),
-            score: Number(finalResult.score),
-            totalMarks: Number(finalResult.total_marks),
-            correctAnswers: Number(finalResult.correct_answers),
-            incorrectAnswers: Number(finalResult.incorrect_answers),
-            unansweredQuestions: Number(finalResult.unanswered_questions),
-          }}
-        />
-      );
-    }
-
-    // Check once more in case of concurrent commit
-    const { data: confirmedAttempt } = await supabase
-      .from("test_attempts")
-      .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-      .eq("session_id", session.id)
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (confirmedAttempt) {
-      return (
-        <SubmissionResult
-          publicTestPath={testPath}
-          title={testTitle}
-          result={{
-            success: true,
-            message: "Attempt submitted successfully.",
-            attemptId: confirmedAttempt.id,
-            score: Number(confirmedAttempt.score),
-            totalMarks: Number(confirmedAttempt.total_marks),
-            correctAnswers: confirmedAttempt.correct_answers,
-            incorrectAnswers: confirmedAttempt.incorrect_answers,
-            unansweredQuestions: confirmedAttempt.unanswered_questions,
-          }}
-        />
-      );
-    }
-
-    return (
-      <SubmissionResult
-        publicTestPath={testPath}
-        title={testTitle}
-        result={{
-          success: false,
-          message: "The test time has ended and your answers are saved. Check your result in the dashboard.",
-        }}
-      />
-    );
+    redirect("/dashboard");
   }
 
-  if (session.session_state !== "active") redirect(testPath);
+  if (session.session_state !== "active") redirect("/dashboard");
 
   const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
   const questions = (data ?? []) as TestQuestion[];

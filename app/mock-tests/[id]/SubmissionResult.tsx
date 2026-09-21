@@ -89,20 +89,11 @@ export function SubmissionResult({
                 </Link>
               )}
               <Link
-                href={publicTestPath}
-                onClick={() => {
-                  void exitFullscreenSafely();
-                }}
-                className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
-              >
-                Retake test
-              </Link>
-              <Link
                 href="/dashboard"
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
               >
                 Go to dashboard
               </Link>

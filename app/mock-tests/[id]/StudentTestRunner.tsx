@@ -132,35 +132,11 @@ export function StudentTestRunner({
     void exitFullscreenSafely();
     try {
       await flushSaves();
-      const res = await submitAttempt(sessionId, answers);
-      if (!res.success) {
-        const verified = await verifySubmittedAttempt(sessionId);
-        if (verified.success && verified.attempt) {
-          setSubmission(verified.attempt);
-        } else {
-          setSubmission(res);
-        }
-      } else {
-        setSubmission(res);
-      }
+      await submitAttempt(sessionId, answers);
+      window.location.replace("/dashboard");
     } catch (err) {
       console.error("Error submitting test attempt:", err);
-      try {
-        const verified = await verifySubmittedAttempt(sessionId);
-        if (verified.success && verified.attempt) {
-          setSubmission(verified.attempt);
-        } else {
-          setSubmission({
-            success: false,
-            message: "Your answers are saved in your account. Check your result in the dashboard.",
-          });
-        }
-      } catch {
-        setSubmission({
-          success: false,
-          message: "Your answers are saved in your account. Check your result in the dashboard.",
-        });
-      }
+      window.location.replace("/dashboard");
     } finally {
       setSubmitting(false);
       void exitFullscreenSafely();
