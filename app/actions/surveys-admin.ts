@@ -20,6 +20,7 @@ export type AdminSurveyResponse = {
   submitted_at: string;
   user_id: string | null;
   respondentName: string;
+  respondentContact?: string | null;
   respondentEmail: string | null;
   answers: Array<{ question_id: string; answer_text: string }>;
 };
@@ -159,16 +160,33 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
       answers: Array<{ question_id: string; answer_text: string }>;
     }>).map((r) => {
       const profile = r.user_id ? profileMap.get(r.user_id) : null;
-      const respondentInfoAnswer = (r.answers || []).find(
-        (a) => a.question_id === "respondent_info"
-      );
+      let contactInfo: string | null = null;
 
-      let name = profile?.full_name || (r.user_id ? "Logged-in Student" : "Anonymous Visitor");
+      // Extract respondent contact if attached to any answer text
+      const cleanedAnswers = (r.answers || []).map((a) => {
+        const match = a.answer_text.match(/\n\[Respondent Contact:\s*(.*?)\]$/);
+        if (match) {
+          contactInfo = match[1];
+          return {
+            ...a,
+            answer_text: a.answer_text.replace(/\n\[Respondent Contact:\s*.*?\]$/, "").trim(),
+          };
+        }
+        return a;
+      });
+
+      let name = profile?.full_name || (r.user_id ? "Registered Student" : "Anonymous Visitor");
       const email = profile?.email || null;
 
-      if (respondentInfoAnswer?.answer_text) {
-        // e.g. "Name: Rahul | Contact: 9876543210"
-        name = `${name} (${respondentInfoAnswer.answer_text})`;
+      if (contactInfo) {
+        const nameMatch = (contactInfo as string).match(/Name:\s*([^|]+)/);
+        const contactMatch = (contactInfo as string).match(/Contact:\s*(.+)/);
+        if (nameMatch && nameMatch[1]) {
+          name = nameMatch[1].trim();
+        }
+        if (contactMatch && contactMatch[1]) {
+          contactInfo = contactMatch[1].trim();
+        }
       }
 
       return {
@@ -176,8 +194,9 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
         submitted_at: r.submitted_at,
         user_id: r.user_id,
         respondentName: name,
+        respondentContact: contactInfo,
         respondentEmail: email,
-        answers: (r.answers || []).filter((a) => a.question_id !== "respondent_info"),
+        answers: cleanedAnswers.filter((a) => a.question_id !== "respondent_info"),
       };
     });
   } catch (err) {

@@ -152,7 +152,7 @@ export function SurveyForm({ survey }: { survey: DynamicSurveyData }) {
                 id="respondent_name"
                 value={respondentName}
                 onChange={(e) => setRespondentName(e.target.value)}
-                placeholder="e.g. Ramesh Kumar"
+                placeholder="Enter your name"
                 className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
@@ -165,7 +165,7 @@ export function SurveyForm({ survey }: { survey: DynamicSurveyData }) {
                 id="respondent_contact"
                 value={respondentContact}
                 onChange={(e) => setRespondentContact(e.target.value)}
-                placeholder="e.g. 9876543210 or email@example.com"
+                placeholder="Enter your phone or email"
                 className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               />
             </div>

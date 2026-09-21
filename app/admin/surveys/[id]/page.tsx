@@ -311,30 +311,64 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             {responses.map((r) => (
               <div
                 key={r.id}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3"
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4"
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                  <p className="text-xs font-bold text-slate-700">
-                    👤 {r.respondentName}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {new Date(r.submitted_at).toLocaleString()}
-                  </p>
+                {/* Respondent Info Header */}
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 text-base font-bold text-teal-800">
+                        👤
+                      </span>
+                      <div>
+                        <p className="text-sm font-bold text-slate-950">
+                          {r.respondentName}
+                        </p>
+                        {r.user_id ? (
+                          <span className="text-[11px] font-semibold text-emerald-700">
+                            ✓ Registered Student Account
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-medium text-slate-500">
+                            Public Link Submission
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs text-slate-500 font-medium">
+                      {new Date(r.submitted_at).toLocaleString()}
+                    </span>
+                  </div>
+
+                  {(r.respondentContact || r.respondentEmail) && (
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200/60 pt-2.5 text-xs">
+                      {r.respondentContact && (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50/80 px-2.5 py-1 font-semibold text-teal-900">
+                          📱 Contact / Mobile: {r.respondentContact}
+                        </span>
+                      )}
+                      {r.respondentEmail && (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700">
+                          ✉️ Email: {r.respondentEmail}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {r.respondentEmail && (
-                  <p className="text-xs text-slate-500">Email: {r.respondentEmail}</p>
-                )}
-
+                {/* Question Answers */}
                 <div className="space-y-3 pt-1">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Survey Answers:
+                  </h4>
                   {r.answers.map((ans) => {
                     const q = questions.find((item) => item.id === ans.question_id);
                     return (
                       <div key={ans.question_id} className="text-sm">
-                        <p className="font-semibold text-slate-600">
+                        <p className="font-semibold text-slate-700">
                           {q?.question_text || "Question"}:
                         </p>
-                        <p className="mt-0.5 text-slate-950 bg-slate-50 p-2 rounded-lg font-medium">
+                        <p className="mt-1 rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 font-medium text-slate-900 whitespace-pre-wrap">
                           {ans.answer_text}
                         </p>
                       </div>
