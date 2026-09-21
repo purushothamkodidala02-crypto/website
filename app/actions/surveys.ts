@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { revalidatePath } from "next/cache";
 
 async function getSupabaseServerClient() {
@@ -108,7 +109,7 @@ export async function submitDynamicSurvey(
 
 export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
   try {
-    const dbClient = await getSupabaseServerClient();
+    const dbClient = createPublicClient();
     const { data: survey, error } = await dbClient
       .from("dynamic_surveys")
       .select("id, title, description, is_active")
@@ -139,7 +140,7 @@ export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
 
 export async function getSurveyById(surveyId: string): Promise<DynamicSurveyData | null> {
   try {
-    const dbClient = await getSupabaseServerClient();
+    const dbClient = createPublicClient();
     const { data: survey, error } = await dbClient
       .from("dynamic_surveys")
       .select("id, title, description, is_active")
