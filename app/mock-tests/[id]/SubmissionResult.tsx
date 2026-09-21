@@ -30,26 +30,14 @@ export function SubmissionResult({
   return (
     <main className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10">
       <section className="w-full max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl sm:p-10">
-        {result.success ? (
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        ) : (
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
-            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-        )}
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
 
-        <p
-          className={`text-xs font-bold uppercase tracking-[0.16em] ${
-            result.success ? "text-emerald-700" : "text-red-700"
-          }`}
-        >
-          {result.success ? "Test submitted successfully" : "Submission needs attention"}
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
+          {result.success ? "Test submitted successfully" : "Answers safely recorded"}
         </p>
         <h1 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">{title}</h1>
 

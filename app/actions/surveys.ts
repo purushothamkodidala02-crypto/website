@@ -56,18 +56,20 @@ export async function submitDynamicSurvey(
 
     if (responseError || !response) {
       console.error("Survey Response Insert Error:", responseError);
-      return { error: "Failed to submit survey. Please try again." };
+      return { error: responseError?.message || "Failed to submit survey. Please try again." };
     }
 
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     const answerInserts = Object.entries(answers)
-      .filter(([, text]) => text !== undefined && text !== null && text.trim() !== "")
+      .filter(([questionId, text]) => uuidRegex.test(questionId) && text !== undefined && text !== null && text.trim() !== "")
       .map(([questionId, text]) => ({
         response_id: response.id,
         question_id: questionId,
         answer_text: text.trim(),
       }));
 
-    // If respondent provided extra contact info and wasn't logged in, save it as a system entry
+    // If respondent provided extra contact info, append it cleanly to the last answer so foreign key constraint is preserved
     if (respondentInfo?.name || respondentInfo?.contact) {
       const contactText = [
         respondentInfo.name ? `Name: ${respondentInfo.name.trim()}` : null,
@@ -76,12 +78,8 @@ export async function submitDynamicSurvey(
         .filter(Boolean)
         .join(" | ");
 
-      if (contactText) {
-        answerInserts.push({
-          response_id: response.id,
-          question_id: "respondent_info",
-          answer_text: contactText,
-        });
+      if (contactText && answerInserts.length > 0) {
+        answerInserts[answerInserts.length - 1].answer_text += `\n[Respondent Contact: ${contactText}]`;
       }
     }
 
@@ -92,7 +90,7 @@ export async function submitDynamicSurvey(
 
       if (answersError) {
         console.error("Survey Answers Insert Error:", answersError);
-        return { error: "Failed to save survey answers." };
+        return { error: answersError.message || "Failed to save survey answers." };
       }
     }
 
