@@ -195,7 +195,7 @@ export function MockTestManagementButtons({
         </div>
       )}
 
-      {status === "draft" && !hasAttempts && (
+      {status === "draft" && (
         <div className="flex flex-wrap items-center gap-2">
           <ActionButton
             pending={pending}
@@ -205,19 +205,19 @@ export function MockTestManagementButtons({
             className="bg-teal-700 text-white hover:bg-teal-800"
             message={message}
           />
-          <ActionButton
-            pending={pending}
-            onClick={() => run("delete")}
-            label="Delete"
-            className="text-red-700 hover:bg-red-50"
-          />
-        </div>
-      )}
-
-      {status === "draft" && hasAttempts && (
-        <div className="flex flex-wrap items-center gap-2">
-          {correct}
-          {permanentDelete}
+          {!hasAttempts ? (
+            <ActionButton
+              pending={pending}
+              onClick={() => run("delete")}
+              label="Delete"
+              className="text-red-700 hover:bg-red-50"
+            />
+          ) : (
+            <>
+              {correct}
+              {permanentDelete}
+            </>
+          )}
         </div>
       )}
 
