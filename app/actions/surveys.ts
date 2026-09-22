@@ -97,6 +97,7 @@ export async function submitDynamicSurvey(
 
     revalidatePath(`/admin/surveys/${surveyId}`);
     revalidatePath("/admin/surveys");
+    revalidatePath("/admin");
     revalidatePath("/survey");
 
     return { success: true };

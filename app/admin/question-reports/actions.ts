@@ -32,5 +32,6 @@ export async function updateQuestionReport(_previous: ReportAdminState, formData
   }).eq("id", id);
   if (error) return { success: false, message: "The report could not be updated. Please try again." };
   revalidatePath("/admin/question-reports");
+  revalidatePath("/admin");
   return { success: true, message: "Report updated." };
 }

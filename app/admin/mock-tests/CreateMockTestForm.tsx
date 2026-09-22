@@ -45,6 +45,10 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [newSectionName, setNewSectionName] = useState("");
   const [isAddingSectionPending, setIsAddingSectionPending] = useState(false);
   const [addSectionError, setAddSectionError] = useState<string | null>(null);
+  const [durationMinutes, setDurationMinutes] = useState<number | string>(150);
+  const [targetQuestionCount, setTargetQuestionCount] = useState<number | string>(1);
+  const [isDurationCustom, setIsDurationCustom] = useState(false);
+  const [isTargetCountCustom, setIsTargetCountCustom] = useState(false);
 
   useEffect(() => {
     setAllSections(sections);
@@ -62,6 +66,22 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const paperSpecialization = paper?.specializationId ? specializations.find((item) => item.id === paper.specializationId) : undefined;
   const subject = subjects.find((item) => item.id === subjectId);
   const section = availableSections.find((item) => item.id === subjectSectionId);
+
+  useEffect(() => {
+    if (paper?.duration && !isDurationCustom) {
+      setDurationMinutes(paper.duration);
+    }
+  }, [paper?.duration, isDurationCustom]);
+
+  useEffect(() => {
+    if (!isTargetCountCustom) {
+      if (scope === "paper") {
+        setTargetQuestionCount(paper?.questionCount ?? 1);
+      } else {
+        setTargetQuestionCount(25);
+      }
+    }
+  }, [paper?.questionCount, scope, isTargetCountCustom]);
 
   async function handleQuickAddSection() {
     if (!subjectId || !newSectionName.trim()) return;
@@ -237,8 +257,8 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       </div>
 
       <label className="block text-sm font-bold md:col-span-2">Description <span className="font-normal text-slate-500">(optional)</span><textarea name="description" rows={3} placeholder="Tell students what this mock covers" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
-      <label className="block text-sm font-bold">Duration in minutes<input name="duration_minutes" type="number" min="1" required defaultValue={paper?.duration ?? 150} key={paperId || "duration"} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
-      <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required defaultValue={scope === "paper" ? paper?.questionCount ?? 1 : 25} key={`${paperId}-${scope}`} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
+      <label className="block text-sm font-bold">Duration in minutes<input name="duration_minutes" type="number" min="1" required value={durationMinutes} onChange={(e) => { setDurationMinutes(e.target.value); setIsDurationCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
+      <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required value={targetQuestionCount} onChange={(e) => { setTargetQuestionCount(e.target.value); setIsTargetCountCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
         <strong>Student access</strong>
         <div className="mt-3">

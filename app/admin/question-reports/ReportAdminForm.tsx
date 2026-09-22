@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { updateQuestionReport, type ReportAdminState } from "./actions";
 
@@ -8,6 +8,12 @@ const initialState: ReportAdminState = { success: false, message: "" };
 
 export function ReportAdminForm({ reportId, status, notes }: { reportId: string; status: string; notes: string | null }) {
   const [state, formAction] = useActionState(updateQuestionReport, initialState);
+
+  useEffect(() => {
+    if (state.success && typeof window !== "undefined") {
+      window.dispatchEvent(new Event("admin-badge-refresh"));
+    }
+  }, [state.success]);
   return (
     <form action={formAction} className="mt-4 rounded-2xl bg-slate-50 p-4">
       <input type="hidden" name="report_id" value={reportId} />

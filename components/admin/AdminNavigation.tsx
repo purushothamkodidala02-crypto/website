@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { BrandLockup, BrandMark } from "@/components/brand/VaradhiBrand";
 import { usePathname } from "next/navigation";
+import { getAdminNavBadges } from "@/app/actions/admin-badges";
 
 const sections = [
   {
@@ -129,45 +130,121 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === href : pathname.startsWith(href);
 }
 
-function NavigationLinks({ collapsed = false }: { collapsed?: boolean }) {
+type BadgeState = {
+  openReports: number;
+  newSurveys: number;
+  hasNewReport: boolean;
+};
+
+function NavigationLinks({
+  collapsed = false,
+  badges,
+}: {
+  collapsed?: boolean;
+  badges: BadgeState;
+}) {
   const pathname = usePathname();
 
   return (
     <nav className="grid gap-6">
-      {sections.map((section) => (
-        <section key={section.label}>
-          {!collapsed && <p className="px-3 text-[10px] font-black uppercase tracking-[0.17em] text-slate-500">{section.label}</p>}
-          <div className="mt-2 grid gap-1">
-            {section.links.map((link) => {
-              const active = isActive(pathname, link.href);
+      {sections.map((section) => {
+        const isContentSection = section.label === "Content and publishing";
+        const sectionHasUpdates = isContentSection && (badges.openReports > 0 || badges.newSurveys > 0);
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  title={collapsed ? link.label : undefined}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
-                    active
-                      ? "bg-teal-300 text-slate-950 shadow-lg shadow-teal-950/20"
-                      : "text-slate-300 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
+        return (
+          <section key={section.label}>
+            {!collapsed && (
+              <div className="flex items-center justify-between px-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.17em] text-slate-500">{section.label}</p>
+                {sectionHasUpdates && (
                   <span
-                    className={`grid h-8 w-8 place-items-center rounded-lg ${
+                    title="Updates available in this section"
+                    className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse"
+                  />
+                )}
+              </div>
+            )}
+            <div className="mt-2 grid gap-1">
+              {section.links.map((link) => {
+                const active = isActive(pathname, link.href);
+                const isReportsLink = link.href === "/admin/question-reports";
+                const isSurveysLink = link.href === "/admin/surveys";
+                const reportCount = isReportsLink ? badges.openReports : 0;
+                const surveyCount = isSurveysLink ? badges.newSurveys : 0;
+                const showBadge = reportCount > 0 || surveyCount > 0;
+                const badgeCount = reportCount || surveyCount;
+                const isReport = isReportsLink;
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    title={collapsed ? link.label : undefined}
+                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
                       active
-                        ? "bg-slate-950 text-teal-200"
-                        : "bg-white/10 text-slate-300"
+                        ? "bg-teal-300 text-slate-950 shadow-lg shadow-teal-950/20"
+                        : "text-slate-300 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <NavIcon name={link.icon} />
-                  </span>
-                  {!collapsed && link.label}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+                    <span
+                      className={`relative grid h-8 w-8 place-items-center rounded-lg ${
+                        active
+                          ? "bg-slate-950 text-teal-200"
+                          : "bg-white/10 text-slate-300"
+                      }`}
+                    >
+                      <NavIcon name={link.icon} />
+                      {collapsed && showBadge && (
+                        <span
+                          title={isReport ? `${reportCount} open question reports` : `${surveyCount} new survey responses`}
+                          className={`absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ring-slate-950 shadow-sm ${
+                            isReport
+                              ? "bg-amber-400 text-slate-950"
+                              : "bg-teal-300 text-slate-950"
+                          }`}
+                        >
+                          {badgeCount > 99 ? "99+" : badgeCount}
+                        </span>
+                      )}
+                    </span>
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 truncate">{link.label}</span>
+                        {showBadge && (
+                          <span
+                            aria-label={
+                              isReport
+                                ? `${reportCount} open question ${reportCount === 1 ? "report" : "reports"}`
+                                : `${surveyCount} new survey ${surveyCount === 1 ? "response" : "responses"}`
+                            }
+                            className={`ml-auto flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
+                              isReport
+                                ? active
+                                  ? "bg-slate-950 text-amber-300 ring-1 ring-amber-400/50"
+                                  : "bg-amber-400 text-slate-950 shadow-sm shadow-amber-400/30"
+                                : active
+                                  ? "bg-slate-950 text-teal-300 ring-1 ring-teal-300/50"
+                                  : "bg-teal-300 text-slate-950 shadow-sm shadow-teal-300/30"
+                            }`}
+                          >
+                            {((isReport && badges.hasNewReport) || (!isReport && surveyCount > 0)) && (
+                              <span className="relative flex h-2 w-2">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-900 opacity-75" />
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-950" />
+                              </span>
+                            )}
+                            <span>{badgeCount > 99 ? "99+" : badgeCount}{!isReport ? " new" : ""}</span>
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
     </nav>
   );
 }
@@ -188,11 +265,85 @@ function Brand({ linked = true, collapsed = false }: { linked?: boolean; collaps
 
 export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [badges, setBadges] = useState<BadgeState>({
+    openReports: 0,
+    newSurveys: 0,
+    hasNewReport: false,
+  });
   const pathname = usePathname();
+
+  const fetchBadges = useCallback(async () => {
+    try {
+      const lastSeenSurveys =
+        typeof window !== "undefined"
+          ? localStorage.getItem("varadhi_admin_surveys_last_seen")
+          : null;
+      const lastSeenReports =
+        typeof window !== "undefined"
+          ? localStorage.getItem("varadhi_admin_reports_last_seen")
+          : null;
+
+      const data = await getAdminNavBadges(lastSeenSurveys);
+
+      const hasNewReport = Boolean(
+        data.reports.latestCreatedAt &&
+          (!lastSeenReports ||
+            new Date(data.reports.latestCreatedAt) > new Date(lastSeenReports))
+      );
+
+      setBadges({
+        openReports: data.reports.openCount,
+        newSurveys: data.surveys.newCount,
+        hasNewReport,
+      });
+    } catch (err) {
+      console.error("Failed to fetch admin nav badges:", err);
+    }
+  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (pathname.startsWith("/admin/surveys")) {
+        localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
+        setBadges((prev) => ({ ...prev, newSurveys: 0 }));
+      }
+      if (pathname.startsWith("/admin/question-reports")) {
+        localStorage.setItem("varadhi_admin_reports_last_seen", new Date().toISOString());
+        setBadges((prev) => ({ ...prev, hasNewReport: false }));
+      }
+    }
+
+    fetchBadges();
+
+    const handleFocus = () => fetchBadges();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchBadges();
+    };
+    const handleBadgeRefresh = () => fetchBadges();
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("admin-badge-refresh", handleBadgeRefresh);
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchBadges();
+      }
+    }, 20000);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("admin-badge-refresh", handleBadgeRefresh);
+      clearInterval(interval);
+    };
+  }, [fetchBadges, pathname]);
+
+  const hasAnyUpdate = badges.openReports > 0 || badges.newSurveys > 0;
 
   return (
     <>
@@ -203,7 +354,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
         </div>
         {collapsed && <button type="button" onClick={onToggle} aria-label="Expand sidebar" className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
         <div className="mt-6 flex-1 overflow-y-auto pb-4 pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <NavigationLinks collapsed={collapsed} />
+          <NavigationLinks collapsed={collapsed} badges={badges} />
         </div>
         <div className="mt-auto border-t border-slate-800 pt-5">
           <Link
@@ -224,13 +375,16 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
         <div>
           <button type="button" onClick={() => setMobileOpen(!mobileOpen)} className="flex w-full cursor-pointer items-center justify-between">
             <Brand linked={false} />
-            <span className={`rounded-lg border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 ${mobileOpen ? "bg-white/10" : ""}`}>
+            <span className={`relative rounded-lg border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 ${mobileOpen ? "bg-white/10" : ""}`}>
               Menu
+              {hasAnyUpdate && (
+                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-slate-950" />
+              )}
             </span>
           </button>
           {mobileOpen && (
             <div className="mt-5 border-t border-slate-800 pt-5">
-              <NavigationLinks />
+              <NavigationLinks badges={badges} />
               <Link
                 href="/"
                 target="_blank"

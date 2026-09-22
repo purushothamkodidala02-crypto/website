@@ -176,8 +176,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   }, [initialScope]);
 
   useEffect(() => {
-    router.replace(mockTestAdminUrl, { scroll: false });
-  }, [mockTestAdminUrl, router]);
+    const timer = setTimeout(() => {
+      window.history.replaceState(null, "", mockTestAdminUrl);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [mockTestAdminUrl]);
 
   const [page, setPage] = useState(1);
   const pageSize = 6;

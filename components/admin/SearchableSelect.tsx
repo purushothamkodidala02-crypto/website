@@ -31,37 +31,47 @@ export function SearchableSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(selected?.label ?? "");
   const [activeIndex, setActiveIndex] = useState(-1);
+
+  useEffect(() => {
+    if (!open) {
+      setQuery(selected?.label ?? "");
+    }
+  }, [selected?.label, open]);
+
   const matches = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return options.filter(
-      (option) => !normalized || option.label.toLowerCase().includes(normalized),
+    if (!normalized || (selected && normalized === selected.label.trim().toLowerCase())) {
+      return options;
+    }
+    return options.filter((option) =>
+      option.label.toLowerCase().includes(normalized),
     );
-  }, [options, query]);
+  }, [options, query, selected]);
   const showList = open && !disabled;
 
-  function closeList() {
+  function closeList(customQuery?: string) {
     setOpen(false);
-    setQuery(selected?.label ?? "");
+    setQuery(customQuery !== undefined ? customQuery : (selected?.label ?? ""));
     setActiveIndex(-1);
   }
 
   function selectOption(option: SearchableSelectOption) {
     onChange(option.value);
-    setQuery(option.label);
-    closeList();
+    closeList(option.label);
   }
 
   useEffect(() => {
     function closeWhenClickingAway(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
+        setQuery(selected?.label ?? "");
         setActiveIndex(-1);
       }
     }
 
     document.addEventListener("mousedown", closeWhenClickingAway);
     return () => document.removeEventListener("mousedown", closeWhenClickingAway);
-  }, []);
+  }, [selected?.label]);
 
   useEffect(() => {
     if (activeIndex < 0 || !listRef.current) return;
@@ -86,14 +96,14 @@ export function SearchableSelect({
         value={open ? query : selected?.label ?? ""}
         onFocus={() => {
           setOpen(true);
-          setQuery("");
+          setQuery(selected?.label ?? "");
           setActiveIndex(-1);
         }}
         onChange={(event) => {
           setQuery(event.target.value);
           setOpen(true);
           setActiveIndex(0);
-          if (value) onChange("");
+          if (value && event.target.value !== selected?.label) onChange("");
         }}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
@@ -106,7 +116,7 @@ export function SearchableSelect({
             event.preventDefault();
             if (!open) {
               setOpen(true);
-              setQuery("");
+              setQuery(selected?.label ?? "");
             }
             if (matches.length === 0) return;
             setActiveIndex((current) => {
@@ -138,7 +148,7 @@ export function SearchableSelect({
             closeList();
           } else {
             setOpen(true);
-            setQuery("");
+            setQuery(selected?.label ?? "");
             setActiveIndex(-1);
             inputRef.current?.focus();
           }

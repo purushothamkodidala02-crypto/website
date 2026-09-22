@@ -35,6 +35,10 @@ export default function AdminSurveysList() {
 
   useEffect(() => {
     let ignore = false;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
+      window.dispatchEvent(new Event("admin-badge-refresh"));
+    }
     getAdminSurveysWithCounts().then((data) => {
       if (!ignore) {
         setSurveys(data || []);

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -36,5 +37,7 @@ export async function submitQuestionReport(
   });
   if (error?.code === "23505") return { success: true, message: "You already reported this issue. It is awaiting review." };
   if (error) return { success: false, message: "The report could not be submitted. Please try again." };
+  revalidatePath("/admin/question-reports");
+  revalidatePath("/admin");
   return { success: true, message: "Report submitted. Thank you for helping us improve this question." };
 }

@@ -116,6 +116,10 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
 
   useEffect(() => {
     let ignore = false;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
+      window.dispatchEvent(new Event("admin-badge-refresh"));
+    }
     Promise.all([
       supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single(),
       supabase.from("dynamic_survey_questions").select("*").eq("survey_id", surveyId).order("display_order"),
