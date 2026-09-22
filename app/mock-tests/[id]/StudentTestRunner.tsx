@@ -82,6 +82,7 @@ export function StudentTestRunner({
   const [language, setLanguage] = useState<"en" | "te">("en");
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const [navigatorOpenDesktop, setNavigatorOpenDesktop] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pausing, setPausing] = useState(false);
@@ -344,9 +345,9 @@ export function StudentTestRunner({
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
-  return <main ref={containerRef} className="student-page relative min-h-screen bg-slate-100 pb-8">
+  return <main ref={containerRef} className="student-page relative flex h-screen max-h-screen w-full flex-col overflow-hidden bg-slate-100">
     <ScreenWatermark text={watermarkText} />
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
+    <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
           
@@ -399,8 +400,27 @@ export function StudentTestRunner({
             </div>
           </div>
 
-          {/* Box 3: Controls (Fullscreen Toggle & Timer) */}
+          {/* Box 3: Controls (Palette Toggle, Fullscreen Toggle & Timer) */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {/* Desktop Palette Toggle */}
+            <button
+              type="button"
+              onClick={() => setNavigatorOpenDesktop((v) => !v)}
+              title={navigatorOpenDesktop ? "Hide Question Palette (Expand question width)" : "Show Question Palette"}
+              aria-label={navigatorOpenDesktop ? "Hide Question Palette" : "Show Question Palette"}
+              className={`hidden lg:flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
+                !navigatorOpenDesktop
+                  ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+              }`}
+            >
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="15" y1="3" x2="15" y2="21" />
+              </svg>
+              <span>{navigatorOpenDesktop ? "Hide Palette" : "View Palette"}</span>
+            </button>
+
             {fullscreenAvailable && (
               <button
                 type="button"
@@ -455,69 +475,56 @@ export function StudentTestRunner({
       </div>
     </header>
 
-    <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 pt-2 sm:px-4 sm:pt-3 lg:px-6 lg:pt-3.5 pb-20 sm:pb-22 lg:pb-24">
-      {!isFullscreen && isBigDisplay && showFullscreenNotice && (
-        <aside
-          aria-label="Exam display mode option"
-          className="mb-2.5 sm:mb-3 rounded-xl border border-teal-200/80 bg-teal-50/80 p-2.5 sm:px-3 sm:py-2 text-slate-800 shadow-sm"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-lg bg-teal-700 text-white shadow-sm">
-                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                </svg>
-              </span>
-              <span>
-                <strong>Exam Hall Mode:</strong> Switch to full screen for a focused test, or keep using normal / split screen.
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={handleToggleFullscreen}
-                className="rounded-lg bg-teal-700 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
-              >
-                Enter Full Screen
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFullscreenNotice(false)}
-                className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
-                title="Keep using normal or split screen"
-              >
-                Normal / Split screen ✕
-              </button>
-            </div>
-          </div>
-          {fullscreenFeedback && (
-            <p className="mt-1.5 rounded-md bg-amber-100/90 px-2.5 py-1 text-[11px] font-semibold text-amber-900">
-              ℹ️ {fullscreenFeedback}
-            </p>
+    {/* Middle Movable / Independently Scrollable Section */}
+    <div className="relative flex flex-1 min-h-0 w-full overflow-hidden">
+      {/* Scrollable Question Workspace (Independent Scroll) */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
+        <div className={`mx-auto w-full transition-all duration-300 ${navigatorOpenDesktop ? "max-w-5xl 2xl:max-w-6xl" : "max-w-6xl 2xl:max-w-7xl"}`}>
+          {!isFullscreen && isBigDisplay && showFullscreenNotice && (
+            <aside
+              aria-label="Exam display mode option"
+              className="mb-2.5 sm:mb-3 rounded-xl border border-teal-200/80 bg-teal-50/80 p-2.5 sm:px-3 sm:py-2 text-slate-800 shadow-sm"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs font-medium">
+                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-lg bg-teal-700 text-white shadow-sm">
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                  </span>
+                  <span>
+                    <strong>Exam Hall Mode:</strong> Switch to full screen for a focused test, or keep using normal / split screen.
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleToggleFullscreen}
+                    className="rounded-lg bg-teal-700 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
+                  >
+                    Enter Full Screen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFullscreenNotice(false)}
+                    className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+                    title="Keep using normal or split screen"
+                  >
+                    Normal / Split screen ✕
+                  </button>
+                </div>
+              </div>
+              {fullscreenFeedback && (
+                <p className="mt-1.5 rounded-md bg-amber-100/90 px-2.5 py-1 text-[11px] font-semibold text-amber-900">
+                  ℹ️ {fullscreenFeedback}
+                </p>
+              )}
+            </aside>
           )}
-        </aside>
-      )}
 
-      {pauseError && <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs sm:text-sm font-semibold text-red-700">{pauseError}</p>}
-      {paused && <p className="mb-3 rounded-xl border border-teal-200 bg-teal-50 p-2.5 text-xs sm:text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
-      
-      {/* Mobile Navigator Overlay */}
-      {navigatorOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/50 backdrop-blur-sm lg:hidden">
-          <div className="mt-auto max-h-[85vh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b px-5 py-4">
-              <h2 className="text-lg font-black text-slate-900">Questions</h2>
-              <button type="button" onClick={() => setNavigatorOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </button>
-            </div>
-            <div className="p-5">{navigator}</div>
-          </div>
-        </div>
-      )}
+          {pauseError && <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs sm:text-sm font-semibold text-red-700">{pauseError}</p>}
+          {paused && <p className="mb-3 rounded-xl border border-teal-200 bg-teal-50 p-2.5 text-xs sm:text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="flex min-w-0 flex-col gap-4">
           <section className="flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-5 lg:p-6 shadow-sm">
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -585,41 +592,115 @@ export function StudentTestRunner({
               </div>
             </div>
           </section>
-          
+
           {/* Mobile/Tablet number scroller (hidden on PC / desktop where right-side Question Navigator is active) */}
-          <div className="lg:hidden">
+          <div className="mt-4 lg:hidden">
             <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
           </div>
+
+          {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
         </div>
-        <aside className="hidden h-[calc(100vh-9.5rem)] min-h-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm lg:sticky lg:top-16 lg:block">{navigator}</aside>
       </div>
-      {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
-      
-      {/* Fixed Bottom Navigation for all screens */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/95 p-2.5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3.5">
-        <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-3">
-          <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
-            <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white lg:inline-block">←</kbd>
-            Previous
-          </button>
-          
+
+      {/* TCS iON Style Vertical Edge Toggle Button */}
+      <div className="hidden lg:flex items-center shrink-0 z-20">
+        <button
+          type="button"
+          onClick={() => setNavigatorOpenDesktop((v) => !v)}
+          title={navigatorOpenDesktop ? "Collapse Question Palette (Expand question width)" : "Expand Question Palette"}
+          aria-label={navigatorOpenDesktop ? "Collapse Question Palette" : "Expand Question Palette"}
+          className="group relative -ml-3 flex h-16 w-6 items-center justify-center rounded-l-lg border border-r-0 border-slate-300 bg-white text-slate-600 shadow-md hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 transition cursor-pointer"
+        >
+          <svg
+            className={`h-4 w-4 transition-transform duration-200 ${navigatorOpenDesktop ? "" : "rotate-180"}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Collapsible Question Navigator Sidebar (Desktop) */}
+      <aside
+        className={`hidden lg:flex flex-col shrink-0 border-l border-slate-200/90 bg-white transition-all duration-300 ease-in-out ${
+          navigatorOpenDesktop
+            ? "w-80 xl:w-88 2xl:w-96 p-4 overflow-y-auto"
+            : "w-0 p-0 border-l-0 overflow-hidden"
+        }`}
+      >
+        {navigatorOpenDesktop && (
+          <div className="flex h-full min-h-0 flex-col">
+            {navigator}
+          </div>
+        )}
+      </aside>
+    </div>
+
+    {/* Fixed Bottom Navigation (Lower part) */}
+    <footer className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 p-2.5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3">
+      <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-3">
+        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
+          <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white lg:inline-block">←</kbd>
+          Previous
+        </button>
+
+        {/* Center: Mobile Sheet Trigger & Desktop Palette Toggle */}
+        <div className="flex items-center gap-2">
+          {/* Mobile trigger */}
           <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-sm lg:hidden">
             Questions <span className="font-mono">({index + 1}/{questions.length})</span>
           </button>
 
-          {index === questions.length - 1 ? (
-            <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
-              Review & finish
+          {/* Desktop Palette Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setNavigatorOpenDesktop((v) => !v)}
+            className="hidden lg:flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-xs"
+            title={navigatorOpenDesktop ? "Hide Question Navigator (Full width question view)" : "Show Question Navigator"}
+          >
+            <svg className="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="15" y1="3" x2="15" y2="21" />
+            </svg>
+            <span>{navigatorOpenDesktop ? "Hide Navigator" : "View Navigator"}</span>
+            <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-mono font-bold text-teal-700 border border-slate-200">
+              {index + 1}/{questions.length}
+            </span>
+          </button>
+        </div>
+
+        {index === questions.length - 1 ? (
+          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
+            Review & finish
+          </button>
+        ) : (
+          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50 sm:px-5 sm:py-2.5">
+            Save & next
+            <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 lg:inline-block">→</kbd>
+          </button>
+        )}
+      </div>
+    </footer>
+
+    {/* Mobile Navigator Overlay */}
+    {navigatorOpen && (
+      <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/50 backdrop-blur-sm lg:hidden">
+        <div className="mt-auto max-h-[85vh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl">
+          <div className="flex items-center justify-between border-b px-5 py-4">
+            <h2 className="text-lg font-black text-slate-900">Questions</h2>
+            <button type="button" onClick={() => setNavigatorOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
-          ) : (
-            <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50 sm:px-5 sm:py-2.5">
-              Save & next
-              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 lg:inline-block">→</kbd>
-            </button>
-          )}
+          </div>
+          <div className="p-5">{navigator}</div>
         </div>
       </div>
-    </div>
+    )}
 
     {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} questions={questions} answers={answers as any} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
   </main>;
