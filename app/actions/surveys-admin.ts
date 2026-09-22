@@ -20,6 +20,7 @@ export type AdminSurveyResponse = {
   submitted_at: string;
   user_id: string | null;
   respondentName: string;
+  respondentPhone?: string | null;
   respondentContact?: string | null;
   respondentEmail: string | null;
   answers: Array<{ question_id: string; answer_text: string }>;
@@ -138,19 +139,90 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
       return [];
     }
 
-    // Collect user ids to fetch profiles if logged in
+    // Collect user ids to fetch profiles and emails if logged in
     const userIds = Array.from(new Set(responses.map((r) => r.user_id).filter(Boolean))) as string[];
-    const profileMap = new Map<string, { full_name?: string; email?: string }>();
+    const profileMap = new Map<string, { full_name?: string; phone?: string }>();
+    const emailMap = new Map<string, string>();
 
     if (userIds.length > 0) {
-      const { data: profiles } = await dbClient
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", userIds);
+      // 1. Fetch profiles (full_name and phone)
+      try {
+        const { data: profiles, error: pError } = await dbClient
+          .from("profiles")
+          .select("id, full_name, phone")
+          .in("id", userIds);
 
-      (profiles as Array<{ id: string; full_name?: string; email?: string }> || []).forEach((p) => {
-        profileMap.set(p.id, { full_name: p.full_name, email: p.email });
-      });
+        if (pError) {
+          console.error("Error fetching profiles for survey responses:", pError);
+        } else if (profiles) {
+          (profiles as Array<{ id: string; full_name?: string | null; phone?: string | null }>).forEach((p) => {
+            profileMap.set(p.id, {
+              full_name: p.full_name?.trim() || undefined,
+              phone: p.phone?.trim() || undefined,
+            });
+          });
+        }
+      } catch (err) {
+        console.error("Exception fetching profiles in getAdminSurveyResponses:", err);
+      }
+
+      // 2. Fetch student emails via get_admin_user_emails RPC in batches of 200
+      try {
+        for (let i = 0; i < userIds.length; i += 200) {
+          const batch = userIds.slice(i, i + 200);
+          const { data: emailRows, error: emailError } = await dbClient.rpc(
+            "get_admin_user_emails",
+            { requested_user_ids: batch }
+          );
+          if (emailError) {
+            console.error("Error fetching student emails via RPC:", emailError);
+          } else if (emailRows) {
+            (emailRows as Array<{ user_id: string; email: string }>).forEach((row) => {
+              if (row.email) {
+                emailMap.set(row.user_id, row.email.trim());
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Exception calling get_admin_user_emails in getAdminSurveyResponses:", err);
+      }
+
+      // 3. Fallback to auth.admin if available and any student info or emails are missing
+      if (dbClient.auth && "admin" in dbClient.auth) {
+        const missingUserIds = userIds.filter(
+          (uid) => !emailMap.has(uid) || !profileMap.get(uid)?.phone || !profileMap.get(uid)?.full_name
+        );
+        if (missingUserIds.length > 0) {
+          await Promise.allSettled(
+            missingUserIds.map(async (uid) => {
+              try {
+                const { data: authData } = await (dbClient.auth as any).admin.getUserById(uid);
+                const userObj = authData?.user;
+                if (!userObj) return;
+
+                if (userObj.email && !emailMap.has(uid)) {
+                  emailMap.set(uid, userObj.email.trim());
+                }
+
+                const existingProfile = profileMap.get(uid) || {};
+                const userMeta = userObj.user_metadata || {};
+                const phone = existingProfile.phone || userObj.phone || userMeta.phone;
+                const fullName = existingProfile.full_name || userMeta.full_name;
+
+                if (phone || fullName) {
+                  profileMap.set(uid, {
+                    full_name: fullName?.trim() || existingProfile.full_name,
+                    phone: phone?.trim() || existingProfile.phone,
+                  });
+                }
+              } catch {
+                // Ignore individual lookup errors
+              }
+            })
+          );
+        }
+      }
     }
 
     return (responses as Array<{
@@ -160,13 +232,13 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
       answers: Array<{ question_id: string; answer_text: string }>;
     }>).map((r) => {
       const profile = r.user_id ? profileMap.get(r.user_id) : null;
-      let contactInfo: string | null = null;
+      let rawContactInfo: string | null = null;
 
       // Extract respondent contact if attached to any answer text
       const cleanedAnswers = (r.answers || []).map((a) => {
         const match = a.answer_text.match(/\n\[Respondent Contact:\s*(.*?)\]$/);
         if (match) {
-          contactInfo = match[1];
+          rawContactInfo = match[1];
           return {
             ...a,
             answer_text: a.answer_text.replace(/\n\[Respondent Contact:\s*.*?\]$/, "").trim(),
@@ -175,27 +247,52 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
         return a;
       });
 
-      let name = profile?.full_name || (r.user_id ? "Registered Student" : "Anonymous Visitor");
-      const email = profile?.email || null;
+      let extractedName: string | null = null;
+      let extractedContact: string | null = null;
 
-      if (contactInfo) {
-        const nameMatch = (contactInfo as string).match(/Name:\s*([^|]+)/);
-        const contactMatch = (contactInfo as string).match(/Contact:\s*(.+)/);
+      if (rawContactInfo) {
+        const nameMatch = (rawContactInfo as string).match(/Name:\s*([^|]+)/);
+        const contactMatch = (rawContactInfo as string).match(/Contact:\s*(.+)/);
         if (nameMatch && nameMatch[1]) {
-          name = nameMatch[1].trim();
+          extractedName = nameMatch[1].trim();
         }
         if (contactMatch && contactMatch[1]) {
-          contactInfo = contactMatch[1].trim();
+          extractedContact = contactMatch[1].trim();
         }
       }
+
+      // Determine email
+      let email = (r.user_id ? emailMap.get(r.user_id) : null) || null;
+      if (!email && extractedContact && extractedContact.includes("@")) {
+        email = extractedContact;
+      }
+
+      // Determine phone
+      let phone = profile?.phone || null;
+      if (!phone && extractedContact && !extractedContact.includes("@")) {
+        phone = extractedContact;
+      }
+
+      // Determine display name
+      let name = profile?.full_name || extractedName || "";
+      if (!name) {
+        if (r.user_id) {
+          name = email ? email.split("@")[0] : "Registered Student";
+        } else {
+          name = "Anonymous Visitor";
+        }
+      }
+
+      const respondentContact = phone || extractedContact || null;
 
       return {
         id: r.id,
         submitted_at: r.submitted_at,
         user_id: r.user_id,
         respondentName: name,
-        respondentContact: contactInfo,
+        respondentPhone: phone,
         respondentEmail: email,
+        respondentContact,
         answers: cleanedAnswers.filter((a) => a.question_id !== "respondent_info"),
       };
     });

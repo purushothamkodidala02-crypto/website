@@ -50,6 +50,59 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
     setLoadingResponses(false);
   }, [surveyId]);
 
+  const handleExportCSV = () => {
+    if (responses.length === 0) return;
+
+    const headers = [
+      "Submitted At",
+      "Student Name",
+      "Account Type",
+      "Mobile / Phone",
+      "Email",
+      ...questions.map((q) => q.question_text),
+    ];
+
+    const escapeCSV = (val: string | null | undefined) => {
+      if (val === null || val === undefined) return '""';
+      const clean = String(val).replace(/"/g, '""');
+      return `"${clean}"`;
+    };
+
+    const rows = responses.map((r) => {
+      const phone =
+        r.respondentPhone ||
+        (r.respondentContact && !r.respondentContact.includes("@") ? r.respondentContact : "");
+      const email =
+        r.respondentEmail ||
+        (r.respondentContact && r.respondentContact.includes("@") ? r.respondentContact : "");
+      const accountType = r.user_id ? "Registered Student" : "Public Link";
+
+      const answerMap = new Map(r.answers.map((a) => [a.question_id, a.answer_text]));
+      const answerCols = questions.map((q) => answerMap.get(q.id) || "");
+
+      return [
+        escapeCSV(new Date(r.submitted_at).toLocaleString()),
+        escapeCSV(r.respondentName),
+        escapeCSV(accountType),
+        escapeCSV(phone ? (phone.startsWith("+") ? phone : `+91 ${phone}`) : ""),
+        escapeCSV(email),
+        ...answerCols.map((ans) => escapeCSV(ans)),
+      ].join(",");
+    });
+
+    const csvContent = [headers.map(escapeCSV).join(","), ...rows].join("\r\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const safeTitle = (survey?.title || "survey").toLowerCase().replace(/[^a-z0-9]+/g, "_");
+    link.download = `${safeTitle}_responses_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const fetchData = useCallback(async () => {
     const [sRes, qRes, rData] = await Promise.all([
       supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single(),
@@ -297,14 +350,26 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             <h2 className="text-xl font-bold text-slate-900">
               Collected Responses ({responses.length})
             </h2>
-            <button
-              type="button"
-              onClick={loadResponses}
-              disabled={loadingResponses}
-              className="text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline"
-            >
-              {loadingResponses ? "Refreshing..." : "↻ Refresh"}
-            </button>
+            <div className="flex items-center gap-2.5">
+              {responses.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition"
+                  title="Download all responses as a CSV spreadsheet"
+                >
+                  📥 Export CSV
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={loadResponses}
+                disabled={loadingResponses}
+                className="text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline"
+              >
+                {loadingResponses ? "Refreshing..." : "↻ Refresh"}
+              </button>
+            </div>
           </div>
 
           <div className="max-h-[800px] space-y-4 overflow-y-auto pr-1">
@@ -321,9 +386,16 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                         👤
                       </span>
                       <div>
-                        <p className="text-sm font-bold text-slate-950">
-                          {r.respondentName}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-slate-950">
+                            {r.respondentName}
+                          </p>
+                          {r.user_id && (
+                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                              Student
+                            </span>
+                          )}
+                        </div>
                         {r.user_id ? (
                           <span className="text-[11px] font-semibold text-emerald-700">
                             ✓ Registered Student Account
@@ -340,20 +412,49 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                     </span>
                   </div>
 
-                  {(r.respondentContact || r.respondentEmail) && (
-                    <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200/60 pt-2.5 text-xs">
-                      {r.respondentContact && (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50/80 px-2.5 py-1 font-semibold text-teal-900">
-                          📱 Contact / Mobile: {r.respondentContact}
-                        </span>
-                      )}
-                      {r.respondentEmail && (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700">
-                          ✉️ Email: {r.respondentEmail}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  {(() => {
+                    const phone =
+                      r.respondentPhone ||
+                      (r.respondentContact && !r.respondentContact.includes("@") ? r.respondentContact : null);
+                    const email =
+                      r.respondentEmail ||
+                      (r.respondentContact && r.respondentContact.includes("@") ? r.respondentContact : null);
+                    const extraContact =
+                      r.respondentContact && r.respondentContact !== phone && r.respondentContact !== email
+                        ? r.respondentContact
+                        : null;
+
+                    return (
+                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-200/60 pt-2.5 text-xs">
+                        {phone && (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50/90 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                            📱 Mobile: {phone.startsWith("+") ? phone : `+91 ${phone}`}
+                          </span>
+                        )}
+                        {email && (
+                          <a
+                            href={`mailto:${email}`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700 shadow-2xs hover:border-slate-300 hover:text-teal-700 transition"
+                            title="Click to send email"
+                          >
+                            ✉️ Email: {email}
+                          </a>
+                        )}
+                        {extraContact && (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
+                            📝 Note: {extraContact}
+                          </span>
+                        )}
+                        {!phone && !email && (
+                          <span className="text-[11px] text-slate-400 italic">
+                            {r.user_id
+                              ? "Mobile and email not available on student profile"
+                              : "No contact info provided by visitor"}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Question Answers */}
