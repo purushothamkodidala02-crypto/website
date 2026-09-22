@@ -34,9 +34,13 @@ export function SearchableSelect({
 
   useEffect(() => {
     if (!open) {
-      setQuery(selected?.label ?? "");
+      if (selected?.label) {
+        setQuery(selected.label);
+      } else if (!value) {
+        setQuery("");
+      }
     }
-  }, [selected?.label, open]);
+  }, [selected?.label, open, value]);
 
   const matches = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -80,6 +84,8 @@ export function SearchableSelect({
       ?.scrollIntoView({ block: "nearest" });
   }, [activeIndex, matches]);
 
+  const displayValue = open ? query : (selected?.label ?? (value ? query : ""));
+
   return (
     <div ref={containerRef} className="relative mt-2">
       <input type="hidden" name={name} value={value} />
@@ -93,17 +99,27 @@ export function SearchableSelect({
           activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
         }
         disabled={disabled}
-        value={open ? query : selected?.label ?? ""}
+        value={displayValue}
         onFocus={() => {
           setOpen(true);
           setQuery(selected?.label ?? "");
           setActiveIndex(-1);
         }}
+        onClick={() => {
+          if (!open) {
+            setOpen(true);
+            setQuery(selected?.label ?? "");
+            setActiveIndex(-1);
+          }
+        }}
         onChange={(event) => {
-          setQuery(event.target.value);
+          const nextVal = event.target.value;
+          setQuery(nextVal);
           setOpen(true);
           setActiveIndex(0);
-          if (value && event.target.value !== selected?.label) onChange("");
+          if (!nextVal.trim() && value) {
+            onChange("");
+          }
         }}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
@@ -128,10 +144,10 @@ export function SearchableSelect({
             return;
           }
 
-          if (event.key === "Enter" && showList && activeIndex >= 0) {
-            const activeOption = matches[activeIndex];
+          if (event.key === "Enter" && showList) {
+            event.preventDefault();
+            const activeOption = activeIndex >= 0 ? matches[activeIndex] : matches[0];
             if (activeOption) {
-              event.preventDefault();
               selectOption(activeOption);
             }
           }

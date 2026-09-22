@@ -122,10 +122,10 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
     .map((item) => item.seriesNumber);
   const nextSeries = currentNumbers.length ? Math.max(...currentNumbers) + 1 : 1;
 
-  function resetAfterState(value: string) { setStateId(value); setCategoryId(""); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
-  function resetAfterCategory(value: string) { setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
-  function resetAfterExam(value: string) { setExamId(value); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
-  function resetAfterSpecialization(value: string) { setSpecializationId(value); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterState(value: string) { if (value === stateId) return; setStateId(value); setCategoryId(""); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterCategory(value: string) { if (value === categoryId) return; setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterExam(value: string) { if (value === examId) return; setExamId(value); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
+  function resetAfterSpecialization(value: string) { if (value === specializationId) return; setSpecializationId(value); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
 
   return <section className="mt-6 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
     <div className="border-b bg-gradient-to-r from-slate-950 to-teal-950 px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-300 text-slate-950"><MockSymbol /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Guided test creator</p><h2 className="font-display mt-1 text-2xl">Create the next mock in its correct series</h2></div></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Select the location from left to right. Varadhi generates the test number, full name and URL automatically.</p></div>

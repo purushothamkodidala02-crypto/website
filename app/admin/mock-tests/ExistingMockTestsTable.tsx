@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   LocationFilters,
@@ -154,26 +154,81 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   }, [location, search, stateId, status, scope]);
 
   const router = useRouter();
-  
+
+  const prevInitialStateRef = useRef(initialStateId);
   useEffect(() => {
-    setStateId(initialStateId);
+    if (prevInitialStateRef.current !== initialStateId) {
+      prevInitialStateRef.current = initialStateId;
+      setStateId(initialStateId);
+    }
   }, [initialStateId]);
 
+  const prevInitialLocationRef = useRef(initialLocation);
   useEffect(() => {
-    setLocation(initialLocation);
+    const prev = prevInitialLocationRef.current;
+    if (
+      prev.categoryId !== initialLocation.categoryId ||
+      prev.examId !== initialLocation.examId ||
+      prev.specializationId !== initialLocation.specializationId ||
+      prev.paperId !== initialLocation.paperId
+    ) {
+      prevInitialLocationRef.current = initialLocation;
+      setLocation(initialLocation);
+    }
   }, [initialLocation.categoryId, initialLocation.examId, initialLocation.specializationId, initialLocation.paperId]);
 
+  const prevInitialSearchRef = useRef(initialSearch);
   useEffect(() => {
-    setSearch(initialSearch);
+    if (prevInitialSearchRef.current !== initialSearch) {
+      prevInitialSearchRef.current = initialSearch;
+      setSearch(initialSearch);
+    }
   }, [initialSearch]);
 
+  const prevInitialStatusRef = useRef(initialStatus);
   useEffect(() => {
-    setStatus(initialStatus);
+    if (prevInitialStatusRef.current !== initialStatus) {
+      prevInitialStatusRef.current = initialStatus;
+      setStatus(initialStatus);
+    }
   }, [initialStatus]);
 
+  const prevInitialScopeRef = useRef(initialScope);
   useEffect(() => {
-    setScope(initialScope);
+    if (prevInitialScopeRef.current !== initialScope) {
+      prevInitialScopeRef.current = initialScope;
+      setScope(initialScope);
+    }
   }, [initialScope]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlState = searchParams.get("state") || "";
+      const urlCategory = searchParams.get("category") || "";
+      const urlExam = searchParams.get("exam") || "";
+      const urlSpecialization = searchParams.get("specialization") || "";
+      const urlPaper = searchParams.get("paper") || "";
+      const urlStatus = (searchParams.get("status") as MockTestStatus) || "all";
+      const urlScope = (searchParams.get("scope") as "all" | "paper" | "subject") || "all";
+      const urlQ = searchParams.get("q") || "";
+
+      setStateId(urlState);
+      setLocation({
+        categoryId: urlCategory,
+        examId: urlExam,
+        specializationId: urlSpecialization,
+        paperId: urlPaper,
+        subjectId: "",
+      });
+      setStatus(["draft", "published", "archived"].includes(urlStatus) ? urlStatus : "all");
+      setScope(["paper", "subject"].includes(urlScope) ? urlScope : "all");
+      setSearch(urlQ);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
