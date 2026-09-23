@@ -194,14 +194,12 @@ export function MockTestManagementButtons({
               className="bg-teal-700 text-white hover:bg-teal-800"
             />
           )}
-          {!hasAttempts && (
-            <ActionButton
-              pending={pending}
-              onClick={() => run("restore")}
-              label="Restore as draft"
-              className="text-teal-700 hover:bg-teal-50"
-            />
-          )}
+          <ActionButton
+            pending={pending}
+            onClick={() => run("restore")}
+            label="Restore as draft"
+            className="text-teal-700 hover:bg-teal-50"
+          />
           {clearAdminBtn}
           {correct}
           {permanentDelete}

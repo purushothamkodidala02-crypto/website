@@ -303,6 +303,24 @@ export async function createCorrectedMockTestVersion(mockTestId: string): Promis
     requested_mock_test_id: mockTestId,
   });
   if (error || typeof data !== "string") {
+    // If the database unique index on subject series collided, restore directly as editable draft
+    if (error?.message?.includes("uq_mock_tests_subject") || error?.message?.includes("duplicate key")) {
+      await clearAdminTestAttempts(mockTestId);
+      const { error: restoreErr } = await result.supabase
+        .from("mock_tests")
+        .update({ status: "draft", published_at: null })
+        .eq("id", mockTestId);
+
+      if (!restoreErr) {
+        revalidateMockTestPages(mockTestId);
+        return {
+          success: true,
+          message: `“${result.mockTest.title}” is restored as an editable draft.`,
+          replacementId: mockTestId,
+        };
+      }
+    }
+
     const knownMessage = [
       "A corrected version already exists for this Mock Test.",
       "This Mock Test has no student attempts. Edit the existing draft instead.",
