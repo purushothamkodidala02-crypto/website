@@ -57,7 +57,11 @@ export async function getMockTestNotificationPreviewAction(
 }
 
 export async function sendMockTestNotificationAction(
-  mockTestId: string
+  mockTestId: string,
+  options?: {
+    selectedEmails?: string[];
+    customEmails?: string[];
+  }
 ): Promise<SendNotificationResult> {
   const { user, error } = await verifyAdminUser();
   if (!user) {
@@ -74,6 +78,8 @@ export async function sendMockTestNotificationAction(
     const result = await sendMockTestNotifications({
       mockTestId,
       adminUserId: user.id,
+      selectedEmails: options?.selectedEmails,
+      customEmails: options?.customEmails,
     });
 
     revalidatePath("/admin/mock-tests");

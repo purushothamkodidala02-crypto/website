@@ -254,9 +254,13 @@ export async function previewMockTestNotification(mockTestId: string): Promise<M
 export async function sendMockTestNotifications({
   mockTestId,
   adminUserId,
+  selectedEmails,
+  customEmails,
 }: {
   mockTestId: string;
   adminUserId?: string;
+  selectedEmails?: string[];
+  customEmails?: string[];
 }): Promise<SendNotificationResult> {
   const apiKey = getBrevoApiKey();
   if (!apiKey) {
@@ -264,12 +268,36 @@ export async function sendMockTestNotifications({
   }
 
   const details = await fetchMockTestWithDetails(mockTestId);
-  const recipients = await fetchEligibleStudentsForMockTest(mockTestId);
+  const eligible = await fetchEligibleStudentsForMockTest(mockTestId);
+
+  let recipients: CandidateRecipient[];
+  if (selectedEmails !== undefined) {
+    const selectedSet = new Set(selectedEmails.map((e) => e.trim().toLowerCase()));
+    recipients = eligible.filter((r) => selectedSet.has(r.email.trim().toLowerCase()));
+  } else {
+    recipients = [...eligible];
+  }
+
+  const existingEmails = new Set(recipients.map((r) => r.email.trim().toLowerCase()));
+  for (const raw of customEmails ?? []) {
+    const email = raw.trim().toLowerCase();
+    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !existingEmails.has(email)) {
+      existingEmails.add(email);
+      recipients.push({
+        user_id: "",
+        email,
+        full_name: email.split("@")[0] || "Student",
+      });
+    }
+  }
 
   if (recipients.length === 0) {
     return {
-      success: true,
-      message: `No previous test-takers found for ${details.group.name}.`,
+      success: false,
+      message:
+        selectedEmails !== undefined || (customEmails && customEmails.length > 0)
+          ? "No valid recipient emails were selected or specified."
+          : `No previous test-takers found for ${details.group.name}.`,
       recipientCount: 0,
       sentCount: 0,
       failedCount: 0,

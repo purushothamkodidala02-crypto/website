@@ -34,18 +34,32 @@ export function NotifyStudentsModal({
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
+  const [customEmailsInput, setCustomEmailsInput] = useState("");
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validCustomEmails = Array.from(
+    new Set(
+      customEmailsInput
+        .split(/[\s,;\n\r]+/)
+        .map((e) => e.trim().toLowerCase())
+        .filter((e) => emailRegex.test(e) && !selectedEmails.has(e))
+    )
+  );
 
   async function handleOpen() {
     setIsOpen(true);
     setLoadingPreview(true);
     setErrorMessage("");
     setSuccessMessage("");
+    setCustomEmailsInput("");
 
     const result = await getMockTestNotificationPreviewAction(mockTestId);
     setLoadingPreview(false);
 
     if (result.success && result.preview) {
       setPreview(result.preview);
+      setSelectedEmails(new Set(result.preview.recipients.map((r) => r.email.toLowerCase())));
     } else {
       setErrorMessage(result.message ?? "Could not load audience preview.");
     }
@@ -59,13 +73,40 @@ export function NotifyStudentsModal({
     }
   }
 
+  function toggleStudent(email: string) {
+    const normalized = email.toLowerCase();
+    setSelectedEmails((prev) => {
+      const next = new Set(prev);
+      if (next.has(normalized)) {
+        next.delete(normalized);
+      } else {
+        next.add(normalized);
+      }
+      return next;
+    });
+  }
+
+  function selectAllStudents(select: boolean) {
+    if (!preview) return;
+    if (select) {
+      setSelectedEmails(new Set(preview.recipients.map((r) => r.email.toLowerCase())));
+    } else {
+      setSelectedEmails(new Set());
+    }
+  }
+
+  const totalRecipients = selectedEmails.size + validCustomEmails.length;
+
   async function handleSend() {
-    if (!preview || preview.recipientCount === 0) return;
+    if (totalRecipients === 0) return;
     setSending(true);
     setErrorMessage("");
     setSuccessMessage("");
 
-    const result = await sendMockTestNotificationAction(mockTestId);
+    const result = await sendMockTestNotificationAction(mockTestId, {
+      selectedEmails: Array.from(selectedEmails),
+      customEmails: validCustomEmails,
+    });
     setSending(false);
 
     if (result.success) {
@@ -170,38 +211,61 @@ export function NotifyStudentsModal({
               {preview && !loadingPreview && !successMessage && (
                 <>
                   <div className="rounded-xl border border-teal-100 bg-teal-50/70 p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
-                      Target Audience
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                        Target Audience
+                      </p>
+                      <span className="rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-bold text-teal-900">
+                        {totalRecipients} selected
+                      </span>
+                    </div>
                     <p className="mt-1 text-2xl font-black text-slate-950">
-                      {preview.recipientCount}{" "}
+                      {totalRecipients}{" "}
                       <span className="text-sm font-normal text-slate-600">
-                        students eligible
+                        total {totalRecipients === 1 ? "recipient" : "recipients"}
                       </span>
                     </p>
                     <p className="mt-1 text-xs text-slate-600">
-                      Students who previously took or started any test in{" "}
-                      <strong>{preview.examName}</strong> on Varadhi Prep and have a confirmed email.
+                      Select specific previous test-takers below and/or enter any user email addresses manually.
                     </p>
 
                     {preview.recipients && preview.recipients.length > 0 && (
                       <div className="mt-3 border-t border-teal-100 pt-3">
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <p className="text-[11px] font-bold text-teal-950 uppercase tracking-wider">
-                            Student Email List ({preview.recipients.length})
-                          </p>
-                          {preview.recipients.length > 5 && (
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <p className="text-[11px] font-bold text-teal-950 uppercase tracking-wider">
+                              Eligible Students ({selectedEmails.size}/{preview.recipients.length})
+                            </p>
+                            <span className="text-slate-300">·</span>
+                            <button
+                              type="button"
+                              onClick={() => selectAllStudents(true)}
+                              className="text-[11px] font-semibold text-teal-700 hover:underline"
+                            >
+                              Select all
+                            </button>
+                            <span className="text-slate-300">|</span>
+                            <button
+                              type="button"
+                              onClick={() => selectAllStudents(false)}
+                              className="text-[11px] font-semibold text-slate-500 hover:underline"
+                            >
+                              Deselect all
+                            </button>
+                          </div>
+
+                          {preview.recipients.length > 4 && (
                             <input
                               type="text"
-                              placeholder="Search student or email…"
+                              placeholder="Search list…"
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
-                              className="rounded-lg border border-teal-200 bg-white px-2.5 py-1 text-xs text-slate-800 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
+                              className="rounded-lg border border-teal-200 bg-white px-2 py-0.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
                             />
                           )}
                         </div>
 
-                        <div className="max-h-44 overflow-y-auto rounded-lg border border-teal-200/60 bg-white divide-y divide-slate-100 shadow-2xs">
+                        <div className="max-h-48 overflow-y-auto rounded-lg border border-teal-200/60 bg-white divide-y divide-slate-100 shadow-2xs">
                           {(searchQuery.trim()
                             ? preview.recipients.filter(
                                 (r) =>
@@ -209,25 +273,90 @@ export function NotifyStudentsModal({
                                   r.email.toLowerCase().includes(searchQuery.toLowerCase())
                               )
                             : preview.recipients
-                          ).map((student) => (
-                            <div
-                              key={student.email}
-                              className="flex items-center justify-between px-3 py-2 text-xs hover:bg-slate-50"
-                            >
-                              <div className="truncate pr-2">
-                                <p className="font-bold text-slate-900 truncate">
-                                  {student.name}
-                                </p>
-                                <p className="font-mono text-[11px] text-slate-500 truncate">
-                                  {student.email}
-                                </p>
-                              </div>
-                              <span className="shrink-0 rounded bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700">
-                                Exam Student
-                              </span>
-                            </div>
-                          ))}
+                          ).map((student) => {
+                            const isSelected = selectedEmails.has(student.email.toLowerCase());
+                            return (
+                              <label
+                                key={student.email}
+                                className={`flex cursor-pointer items-center justify-between px-3 py-2 text-xs transition ${
+                                  isSelected ? "bg-teal-50/40 hover:bg-teal-50/80" : "hover:bg-slate-50"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 truncate pr-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => toggleStudent(student.email)}
+                                    className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                                  />
+                                  <div className="truncate">
+                                    <p className="font-bold text-slate-900 truncate">
+                                      {student.name}
+                                    </p>
+                                    <p className="font-mono text-[11px] text-slate-500 truncate">
+                                      {student.email}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                  {isSelected ? "Selected" : "Excluded"}
+                                </span>
+                              </label>
+                            );
+                          })}
                         </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Custom User Email Entry Section */}
+                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor="custom-user-emails"
+                        className="text-xs font-bold text-slate-900 uppercase tracking-wider"
+                      >
+                        ✉️ Enter Specific User Email(s)
+                      </label>
+                      {validCustomEmails.length > 0 && (
+                        <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold text-teal-800">
+                          {validCustomEmails.length} custom {validCustomEmails.length === 1 ? "email" : "emails"}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      Want to send to a specific student or user? Type or paste their email addresses below (separate multiple emails with commas, spaces, or new lines):
+                    </p>
+                    <textarea
+                      id="custom-user-emails"
+                      rows={2}
+                      placeholder="e.g. student@gmail.com, candidate@yahoo.com"
+                      value={customEmailsInput}
+                      onChange={(e) => setCustomEmailsInput(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                    />
+
+                    {validCustomEmails.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {validCustomEmails.map((email) => (
+                          <span
+                            key={email}
+                            className="inline-flex items-center gap-1 rounded-md bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-800 border border-teal-200/80"
+                          >
+                            <span>{email}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const remaining = validCustomEmails.filter((e) => e !== email);
+                                setCustomEmailsInput(remaining.join(", "));
+                              }}
+                              className="text-teal-600 hover:text-teal-950 font-bold ml-0.5"
+                              title="Remove"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -277,14 +406,14 @@ export function NotifyStudentsModal({
                     sending ||
                     loadingPreview ||
                     !preview ||
-                    preview.recipientCount === 0
+                    totalRecipients === 0
                   }
                   className="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-800 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <PendingButtonContent pending={sending} pendingLabel="Sending emails…">
-                    {preview && preview.recipientCount > 0
-                      ? `Send Email to ${preview.recipientCount} Students`
-                      : "Send Notifications"}
+                    {totalRecipients > 0
+                      ? `Send Email to ${totalRecipients} ${totalRecipients === 1 ? "Recipient" : "Recipients"}`
+                      : "Select or Enter Recipient Emails"}
                   </PendingButtonContent>
                 </button>
               )}

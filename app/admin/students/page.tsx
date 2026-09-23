@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { SendUserEmailModal } from "./SendUserEmailModal";
 
 type PaidOrder = { id: string; user_id: string; product_id: string; amount_paise: number; created_at: string };
 type ActiveEntitlement = { user_id: string; product_id: string };
@@ -106,7 +107,10 @@ export default async function AdminStudentsPage() {
       <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Registrations</p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <div><h1 className="text-3xl font-black text-slate-950">Registration and purchase overview</h1><p className="mt-2 max-w-3xl text-slate-600">See how many students registered, which Exam Series they purchased, active access, and payment status.</p></div>
-        <Link href="/admin/access" className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">Manage Exam Series</Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <SendUserEmailModal triggerLabel="Compose Email" />
+          <Link href="/admin/access" className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">Manage Exam Series</Link>
+        </div>
       </div>
 
       {hasError && <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">Some student or payment information could not be loaded. Refresh this page to try again.</p>}
@@ -134,8 +138,14 @@ export default async function AdminStudentsPage() {
 
       <section className="mt-8 grid gap-8 xl:grid-cols-2">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-950">Recent registrations</h2><p className="mt-1 text-sm text-slate-600">Latest student accounts and their successful purchase count.</p>
-          <div className="mt-5 divide-y divide-slate-100">{students.slice(0, 20).map((student) => <div key={student.id} className="flex items-center justify-between gap-4 py-4 first:pt-0"><div className="min-w-0"><p className="truncate font-bold text-slate-950">{student.full_name?.trim() || "Student"}</p><p className="mt-1 truncate text-xs text-slate-500">{emails.get(student.id) || "Email unavailable"}</p><p className="mt-1 text-xs font-semibold text-slate-600">{student.phone ? `+91 ${student.phone}` : "Mobile number unavailable"}</p><p className="mt-1 text-xs text-slate-500">Joined {dateFormatter.format(new Date(student.created_at))}</p></div><span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{paymentsByStudent.get(student.id) ?? 0} paid</span></div>)}{!students.length && <p className="py-8 text-center text-sm text-slate-500">No students have registered yet.</p>}</div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-black text-slate-950">Recent registrations</h2>
+              <p className="mt-1 text-sm text-slate-600">Latest student accounts and their successful purchase count.</p>
+            </div>
+            <SendUserEmailModal triggerLabel="Email Any User" triggerClassName="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-900 transition hover:bg-teal-100" />
+          </div>
+          <div className="mt-5 divide-y divide-slate-100">{students.slice(0, 20).map((student) => <div key={student.id} className="flex items-center justify-between gap-4 py-4 first:pt-0"><div className="min-w-0"><p className="truncate font-bold text-slate-950">{student.full_name?.trim() || "Student"}</p><p className="mt-1 truncate text-xs text-slate-500">{emails.get(student.id) || "Email unavailable"}</p><p className="mt-1 text-xs font-semibold text-slate-600">{student.phone ? `+91 ${student.phone}` : "Mobile number unavailable"}</p><p className="mt-1 text-xs text-slate-500">Joined {dateFormatter.format(new Date(student.created_at))}</p></div><div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{paymentsByStudent.get(student.id) ?? 0} paid</span><SendUserEmailModal initialEmail={emails.get(student.id) || ""} initialName={student.full_name?.trim() || "Student"} triggerVariant="row-action" triggerLabel="Mail" /></div></div>)}{!students.length && <p className="py-8 text-center text-sm text-slate-500">No students have registered yet.</p>}</div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
