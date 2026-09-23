@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { mockTestHasStudentAttempts } from "@/lib/admin-mock-test-exemptions";
 export type AssignmentState = { success: boolean; message: string };
 function revalidateMockTestQuestions(mockTestId: string) {
   revalidatePath(`/admin/mock-tests/${mockTestId}/edit`);
@@ -17,7 +18,12 @@ async function draft(mockTestId: string, allowPublishedWithoutAttempts = false) 
   const { data: mockTest } = await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count").eq("id", mockTestId).maybeSingle();
   if (!mockTest) return { supabase, error: "Mock Test not found." };
   const { count } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId);
-  if ((count ?? 0) > 0) return { supabase, error: "This Mock Test has student attempts and its Questions are locked." };
+  if ((count ?? 0) > 0) {
+    const hasStudents = await mockTestHasStudentAttempts(mockTestId);
+    if (hasStudents) {
+      return { supabase, error: "This Mock Test has student attempts and its Questions are locked." };
+    }
+  }
   if (mockTest.status !== "draft" && !allowPublishedWithoutAttempts) return { supabase, error: "Only draft Mock Tests can be changed." };
   return { supabase, mockTest };
 }

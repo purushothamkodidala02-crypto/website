@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 
-export default function LogoutButton() {
+export default function LogoutButton({ className }: { className?: string } = {}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +30,10 @@ export default function LogoutButton() {
       onClick={handleLogout}
       disabled={loading}
       aria-busy={loading}
-      className="rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-950 disabled:opacity-50"
+      className={
+        className ??
+        "rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-950 disabled:opacity-50"
+      }
     >
       <PendingButtonContent pending={loading} pendingLabel="Logging out…">Logout</PendingButtonContent>
     </button>

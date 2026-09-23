@@ -6,6 +6,7 @@ import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { sendMockTestNotifications } from "@/lib/notifications/mock-test-alerts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { clearAdminTestAttempts, mockTestHasStudentAttempts } from "@/lib/admin-mock-test-exemptions";
 
 export type MockTestManagementResult = {
   success: boolean;
@@ -191,7 +192,12 @@ export async function deleteDraftMockTest(mockTestId: string): Promise<MockTestM
   if (attemptsError) return { success: false, message: "Unable to check student attempts for this Mock Test." };
 
   if ((count ?? 0) > 0) {
-    return { success: false, message: "This Mock Test has student attempts and cannot be deleted. Archive it instead." };
+    const hasStudents = await mockTestHasStudentAttempts(mockTestId);
+    if (hasStudents) {
+      return { success: false, message: "This Mock Test has student attempts and cannot be deleted. Archive it instead." };
+    }
+    // Only kodidalanani@gmail.com or admin attempts exist; clean them up so on delete restrict doesn't block
+    await clearAdminTestAttempts(mockTestId);
   }
 
   const admin = createAdminClient();
@@ -399,5 +405,23 @@ export async function syncAllMockTestTitles(): Promise<SyncMockTestTitlesResult>
       ? `Successfully synchronized ${updatedCount} mock test title(s) to the canonical standard.`
       : "All mock test titles are already up to date with the canonical naming standard.",
     updatedCount,
+  };
+}
+
+export async function clearAdminMockTestAttemptsAction(mockTestId: string): Promise<MockTestManagementResult> {
+  const result = await getManagedMockTest(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to clear admin test attempts." };
+
+  const res = await clearAdminTestAttempts(mockTestId);
+  if (!res.success) {
+    return { success: false, message: "Failed to clear admin test attempts." };
+  }
+
+  revalidateMockTestPages(mockTestId);
+  return {
+    success: true,
+    message: res.clearedCount > 0
+      ? `Cleared ${res.clearedCount} admin test attempt(s) from “${result.mockTest.title}”.`
+      : `No admin test attempts found for “${result.mockTest.title}”.`,
   };
 }

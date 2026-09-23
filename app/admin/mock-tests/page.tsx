@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateMockTestForm } from "./CreateMockTestForm";
 import { ExistingMockTestsTable } from "./ExistingMockTestsTable";
 import type { MockTestStatus } from "@/types/mock-test";
+import { getAdminAttemptCountsByMockTestId } from "@/lib/admin-mock-test-exemptions";
 
 type MockTestSearchParams = {
   state?: string;
@@ -31,7 +32,7 @@ export default async function MockTestsPage({
 }) {
   const query = await searchParams;
   const supabase = await createClient();
-  const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult, summariesResult, notificationsResult] = await Promise.all([
+  const [statesResult, testsResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult, summariesResult, notificationsResult, attemptExemptions] = await Promise.all([
     supabase.from("exam_states").select("id, name, code, slug").order("display_order"),
     supabase.from("mock_tests").select("id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, slug, duration_minutes, target_question_count, status, access_type, display_order, created_at, replaces_mock_test_id, superseded_by_mock_test_id").order("series_number"),
     supabase.from("subjects").select("id, paper_id, name"),
@@ -42,6 +43,7 @@ export default async function MockTestsPage({
     supabase.from("subject_sections").select("id, subject_id, name, slug").eq("is_active", true).order("display_order"),
     supabase.rpc("get_admin_mock_test_summaries"),
     supabase.from("mock_test_notifications").select("mock_test_id, recipient_count, sent_at").order("sent_at", { ascending: false }),
+    getAdminAttemptCountsByMockTestId(),
   ]);
   const states = statesResult.data ?? [];
   const categories = categoriesResult.data ?? [];
@@ -94,6 +96,9 @@ export default async function MockTestsPage({
     const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
     const summary = summaryByTestId.get(test.id);
     const notification = notificationMap.get(test.id);
+    const exemption = attemptExemptions.get(test.id);
+    const studentAttempts = exemption ? exemption.studentAttempts : Number(summary?.attempt_count ?? 0);
+    const adminAttempts = exemption ? exemption.adminAttempts : 0;
     return {
       id: test.id,
       stateId: state?.id ?? "",
@@ -120,7 +125,8 @@ export default async function MockTestsPage({
       targetQuestionCount: Number(test.target_question_count),
       usableQuestionCount: Number(summary?.usable_question_count ?? 0),
       totalMarks: Number(summary?.total_marks ?? 0),
-      attemptCount: Number(summary?.attempt_count ?? 0),
+      attemptCount: studentAttempts,
+      adminAttemptCount: adminAttempts,
       replacesMockTestId: test.replaces_mock_test_id,
       supersededByMockTestId: test.superseded_by_mock_test_id,
       correctedVersionStatus: test.superseded_by_mock_test_id ? mockTestStatusById.get(test.superseded_by_mock_test_id) ?? null : null,

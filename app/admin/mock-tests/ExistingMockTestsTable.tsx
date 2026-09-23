@@ -46,6 +46,7 @@ type ExistingMockTest = {
   usableQuestionCount: number;
   totalMarks: number;
   attemptCount: number;
+  adminAttemptCount?: number;
   replacesMockTestId: string | null;
   supersededByMockTestId: string | null;
   correctedVersionStatus: MockTestStatus | null;
@@ -335,7 +336,16 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       {test.status === "published" && <Link href={mockTestUrl(test.stateSlug, test.examSlug, test.paperSlug, test.slug)} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}
                       <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
                       <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
-                      <MockTestManagementButtons mockTestId={test.id} mockTestTitle={test.title} status={test.status} ready={ready} hasAttempts={test.attemptCount > 0} hasCorrectedVersion={Boolean(test.supersededByMockTestId)} canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"} />
+                      <MockTestManagementButtons
+                        mockTestId={test.id}
+                        mockTestTitle={test.title}
+                        status={test.status}
+                        ready={ready}
+                        hasAttempts={test.attemptCount > 0}
+                        hasCorrectedVersion={Boolean(test.supersededByMockTestId)}
+                        canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"}
+                        adminAttemptCount={test.adminAttemptCount}
+                      />
                       <NotifyStudentsModal
                         mockTestId={test.id}
                         mockTestTitle={studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
@@ -352,7 +362,14 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     <Metric label="Usable" value={`${test.usableQuestionCount} / ${test.questionCount}`} warning={unavailableCount > 0} />
                     <Metric label="Total marks" value={test.totalMarks.toFixed(2).replace(/\.00$/, "")} />
                     <Metric label="Duration" value={`${test.durationMinutes} min`} />
-                    <Metric label="Attempts" value={String(test.attemptCount)} />
+                    <Metric
+                      label="Attempts"
+                      value={
+                        test.adminAttemptCount && test.attemptCount === 0
+                          ? `0 (${test.adminAttemptCount} admin test)`
+                          : String(test.attemptCount)
+                      }
+                    />
                   </div>
 
                   {!ready && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">{unavailableCount > 0 ? `${unavailableCount} assigned question${unavailableCount === 1 ? " is" : "s are"} unavailable. Fix the questions before publishing.` : `${test.questionCount} of ${test.targetQuestionCount} questions are assigned. The exact target is required before publishing.`}</p>}
