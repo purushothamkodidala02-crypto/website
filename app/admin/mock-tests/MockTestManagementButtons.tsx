@@ -239,9 +239,11 @@ export function MockTestManagementButtons({
       )}
 
       {message && (
-        <p aria-live="polite" className="mt-2 w-full text-right text-xs font-semibold text-red-700">
-          {message}
-        </p>
+        <div className="basis-full py-1">
+          <p aria-live="polite" className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 shadow-xs">
+            {message}
+          </p>
+        </div>
       )}
 
       {/* Publish Dialog with Send Mail Option */}

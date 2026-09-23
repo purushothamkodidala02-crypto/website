@@ -322,39 +322,51 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               const statusDetail = statusDetails[test.status];
               return (
                 <article key={test.id} className="p-6 transition hover:bg-teal-50/25 sm:p-7">
-                  <div className="flex flex-wrap items-start justify-between gap-5">
+                  {/* Badges Row */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusDetail.className}`}>{statusDetail.label}</span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{test.scope === "paper" ? "Paper-wise" : "Subject-wise"}</span>
+                    {test.supersededByMockTestId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Correction in progress</span>}
+                    {test.replacesMockTestId && <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Corrected version</span>}
+                  </div>
+
+                  {/* Full-width Title & Paper info */}
+                  <div className="mt-3 flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200">
+                      <MockSymbol className="h-5 w-5" />
+                    </span>
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusDetail.className}`}>{statusDetail.label}</span>
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{test.scope === "paper" ? "Paper-wise" : "Subject-wise"}</span>
-                        {test.supersededByMockTestId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Correction in progress</span>}
-                        {test.replacesMockTestId && <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Corrected version</span>}
-                      </div>
-                      <div className="mt-3 flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200"><MockSymbol className="h-5 w-5" /></span><div><p className="text-[10px] font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p><h3 className="font-display mt-1 text-xl text-slate-950">{studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}</h3><p className="mt-1 text-xs text-slate-500">{test.stateCode} · {test.paperName}</p></div></div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p>
+                      <h3 className="font-display mt-0.5 text-xl font-bold text-slate-950 leading-snug">
+                        {studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-500">{test.stateCode} · {test.paperName}</p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                      {test.status === "published" && <Link href={mockTestUrl(test.stateSlug, test.examSlug, test.paperSlug, test.slug)} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}
-                      <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
-                      <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
-                      <MockTestManagementButtons
-                        mockTestId={test.id}
-                        mockTestTitle={test.title}
-                        status={test.status}
-                        ready={ready}
-                        hasAttempts={test.attemptCount > 0}
-                        hasCorrectedVersion={Boolean(test.supersededByMockTestId)}
-                        canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"}
-                        adminAttemptCount={test.adminAttemptCount}
-                      />
-                      <NotifyStudentsModal
-                        mockTestId={test.id}
-                        mockTestTitle={studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
-                        isDraft={test.status === "draft"}
-                        hasNotificationHistory={Boolean(test.lastNotifiedAt)}
-                        lastNotifiedAt={test.lastNotifiedAt}
-                        notificationCount={test.notificationCount}
-                      />
-                    </div>
+                  </div>
+
+                  {/* Action Buttons Toolbar */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                    {test.status === "published" && <Link href={mockTestUrl(test.stateSlug, test.examSlug, test.paperSlug, test.slug)} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}
+                    <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
+                    <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
+                    <MockTestManagementButtons
+                      mockTestId={test.id}
+                      mockTestTitle={test.title}
+                      status={test.status}
+                      ready={ready}
+                      hasAttempts={test.attemptCount > 0}
+                      hasCorrectedVersion={Boolean(test.supersededByMockTestId)}
+                      canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"}
+                      adminAttemptCount={test.adminAttemptCount}
+                    />
+                    <NotifyStudentsModal
+                      mockTestId={test.id}
+                      mockTestTitle={studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
+                      isDraft={test.status === "draft"}
+                      hasNotificationHistory={Boolean(test.lastNotifiedAt)}
+                      lastNotifiedAt={test.lastNotifiedAt}
+                      notificationCount={test.notificationCount}
+                    />
                   </div>
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
