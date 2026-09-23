@@ -165,6 +165,9 @@ export async function restoreMockTestAsDraft(mockTestId: string): Promise<MockTe
     return { success: false, message: "Only archived Mock Tests can be restored." };
   }
 
+  // Clear admin testing attempts so the restored draft has 0 attempts and can be edited freely
+  await clearAdminTestAttempts(mockTestId);
+
   const { error } = await result.supabase
     .from("mock_tests")
     .update({ status: "draft", published_at: null })
@@ -200,7 +203,7 @@ export async function deleteDraftMockTest(mockTestId: string): Promise<MockTestM
     await clearAdminTestAttempts(mockTestId);
   }
 
-  const admin = createAdminClient();
+  const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : result.supabase;
 
   // Find any questions assigned to this draft so we can clean them up if they were cloned
   const { data: assignments } = await admin

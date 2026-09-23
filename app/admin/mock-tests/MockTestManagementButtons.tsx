@@ -146,7 +146,6 @@ export function MockTestManagementButtons({
         onClick={() => run("correct")}
         label="Create corrected version"
         className="text-teal-800 hover:bg-teal-50"
-        message={message}
       />
     ) : null;
 
@@ -156,7 +155,6 @@ export function MockTestManagementButtons({
       onClick={() => run("permanent-delete")}
       label="Delete permanently"
       className="text-red-700 hover:bg-red-50"
-      message={message}
     />
   ) : null;
 
@@ -167,7 +165,6 @@ export function MockTestManagementButtons({
         onClick={() => run("clear-admin-attempts")}
         label="Clear my attempt"
         className="text-amber-800 hover:bg-amber-50"
-        message={message}
       />
     ) : null;
 
@@ -180,7 +177,6 @@ export function MockTestManagementButtons({
             onClick={() => run("hide")}
             label="Hide"
             className="text-amber-800 hover:bg-amber-50"
-            message={message}
           />
           {clearAdminBtn}
           {correct}
@@ -196,7 +192,6 @@ export function MockTestManagementButtons({
               onClick={() => openPublishDialog("republish")}
               label={ready ? "Publish again" : "Not ready"}
               className="bg-teal-700 text-white hover:bg-teal-800"
-              message={message}
             />
           )}
           {!hasAttempts && (
@@ -205,7 +200,6 @@ export function MockTestManagementButtons({
               onClick={() => run("restore")}
               label="Restore as draft"
               className="text-teal-700 hover:bg-teal-50"
-              message={message}
             />
           )}
           {clearAdminBtn}
@@ -222,7 +216,6 @@ export function MockTestManagementButtons({
             onClick={() => openPublishDialog("publish")}
             label={ready ? "Publish" : "Not ready"}
             className="bg-teal-700 text-white hover:bg-teal-800"
-            message={message}
           />
           {clearAdminBtn}
           {!hasAttempts ? (
@@ -239,6 +232,12 @@ export function MockTestManagementButtons({
             </>
           )}
         </div>
+      )}
+
+      {message && (
+        <p aria-live="polite" className="mt-2 w-full text-right text-xs font-semibold text-red-700">
+          {message}
+        </p>
       )}
 
       {/* Publish Dialog with Send Mail Option */}
@@ -337,33 +336,24 @@ function ActionButton({
   onClick,
   label,
   className,
-  message,
 }: {
   pending: boolean;
   disabled?: boolean;
   onClick: () => void;
   label: string;
   className: string;
-  message?: string;
 }) {
   return (
-    <div>
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={pending || disabled}
-        aria-busy={pending}
-        className={`rounded-lg px-3 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45 ${className}`}
-      >
-        <PendingButtonContent pending={pending} pendingLabel="Working…">
-          {label}
-        </PendingButtonContent>
-      </button>
-      {message && (
-        <p aria-live="polite" className="mt-2 max-w-64 text-xs text-red-700">
-          {message}
-        </p>
-      )}
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={pending || disabled}
+      aria-busy={pending}
+      className={`rounded-lg px-3 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45 ${className}`}
+    >
+      <PendingButtonContent pending={pending} pendingLabel="Working…">
+        {label}
+      </PendingButtonContent>
+    </button>
   );
 }
