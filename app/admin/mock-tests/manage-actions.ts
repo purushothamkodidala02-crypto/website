@@ -161,16 +161,21 @@ export async function restoreMockTestAsDraft(mockTestId: string): Promise<MockTe
   const result = await getManagedMockTest(mockTestId);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to restore the Mock Test." };
 
-  if (result.mockTest.status !== "archived") {
-    return { success: false, message: "Only archived Mock Tests can be restored." };
-  }
-
-  // Clear admin testing attempts so the restored draft has 0 attempts and can be edited freely
+  // Clear admin testing attempts so the draft has 0 attempts and can be edited freely
   await clearAdminTestAttempts(mockTestId);
+
+  if (result.mockTest.status === "draft") {
+    revalidateMockTestPages(mockTestId);
+    return { success: true, message: `“${result.mockTest.title}” is already a draft and open for editing.` };
+  }
 
   const { error } = await result.supabase
     .from("mock_tests")
-    .update({ status: "draft", published_at: null })
+    .update({
+      status: "draft",
+      published_at: null,
+      superseded_by_mock_test_id: null,
+    })
     .eq("id", mockTestId);
 
   if (error) return { success: false, message: error.message };

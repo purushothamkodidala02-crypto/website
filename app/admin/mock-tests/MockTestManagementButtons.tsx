@@ -178,6 +178,12 @@ export function MockTestManagementButtons({
             label="Hide"
             className="text-amber-800 hover:bg-amber-50"
           />
+          <ActionButton
+            pending={pending}
+            onClick={() => run("restore")}
+            label="Restore as draft"
+            className="text-teal-700 hover:bg-teal-50"
+          />
           {clearAdminBtn}
           {correct}
         </div>
