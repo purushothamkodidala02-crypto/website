@@ -30,6 +30,52 @@ async function getExemptionClient() {
   return await createClient();
 }
 
+async function getAdminUserIds(client: any, userIds: string[]): Promise<Set<string>> {
+  const adminUserIds = new Set<string>();
+
+  // 1. Current logged-in user check
+  try {
+    const { data: { user } } = await client.auth.getUser();
+    if (user?.id) {
+      if (isExemptAdminEmail(user.email)) {
+        adminUserIds.add(user.id);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  if (!userIds || userIds.length === 0) {
+    return adminUserIds;
+  }
+
+  // 2. Query profiles for 'admin' role
+  try {
+    const { data: profiles } = await client.from("profiles").select("id, role").in("id", userIds);
+    for (const p of profiles ?? []) {
+      if (p.role === "admin") {
+        adminUserIds.add(p.id);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Query get_admin_user_emails RPC
+  try {
+    const { data: emailRows } = await client.rpc("get_admin_user_emails", { requested_user_ids: userIds });
+    for (const u of (emailRows ?? []) as Array<{ user_id: string; email: string }>) {
+      if (isExemptAdminEmail(u.email)) {
+        adminUserIds.add(u.user_id);
+      }
+    }
+  } catch {
+    // ignore RPC error
+  }
+
+  return adminUserIds;
+}
+
 /**
  * Returns a map of mock_test_id -> { studentAttempts, adminAttempts }
  * Attempts by kodidalanani@gmail.com or users with profile role 'admin' are counted as adminAttempts,
@@ -46,38 +92,8 @@ export async function getAdminAttemptCountsByMockTestId(): Promise<Map<string, M
       return new Map();
     }
 
-    const adminUserIds = new Set<string>();
-
-    // Add currently logged-in user if their email or role matches
-    try {
-      const { data: { user } } = await client.auth.getUser();
-      if (user?.id) {
-        if (isExemptAdminEmail(user.email)) {
-          adminUserIds.add(user.id);
-        }
-      }
-    } catch {
-      // ignore
-    }
-
     const userIds = [...new Set(attempts.map((a) => a.user_id))];
-    const [{ data: profiles }, emailRes] = await Promise.all([
-      client.from("profiles").select("id, role").in("id", userIds),
-      client.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
-    ]);
-
-    for (const p of profiles ?? []) {
-      if (p.role === "admin") {
-        adminUserIds.add(p.id);
-      }
-    }
-
-    const emailRows = (emailRes?.data ?? []) as Array<{ user_id: string; email: string }>;
-    for (const u of emailRows) {
-      if (isExemptAdminEmail(u.email)) {
-        adminUserIds.add(u.user_id);
-      }
-    }
+    const adminUserIds = await getAdminUserIds(client, userIds);
 
     const map = new Map<string, MockTestAttemptBreakdown>();
     for (const a of attempts) {
@@ -112,35 +128,8 @@ export async function mockTestHasStudentAttempts(mockTestId: string): Promise<bo
       return false;
     }
 
-    const adminUserIds = new Set<string>();
-    try {
-      const { data: { user } } = await client.auth.getUser();
-      if (user?.id) {
-        if (isExemptAdminEmail(user.email)) {
-          adminUserIds.add(user.id);
-        }
-      }
-    } catch {
-      // ignore
-    }
-
     const userIds = [...new Set(attempts.map((a) => a.user_id))];
-    const [{ data: profiles }, emailRes] = await Promise.all([
-      client.from("profiles").select("id, role").in("id", userIds),
-      client.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
-    ]);
-
-    for (const p of profiles ?? []) {
-      if (p.role === "admin") {
-        adminUserIds.add(p.id);
-      }
-    }
-    const emailRows = (emailRes?.data ?? []) as Array<{ user_id: string; email: string }>;
-    for (const u of emailRows) {
-      if (isExemptAdminEmail(u.email)) {
-        adminUserIds.add(u.user_id);
-      }
-    }
+    const adminUserIds = await getAdminUserIds(client, userIds);
 
     return attempts.some((a) => !adminUserIds.has(a.user_id));
   } catch (err) {
@@ -164,35 +153,8 @@ export async function clearAdminTestAttempts(mockTestId: string): Promise<{ succ
       return { success: true, clearedCount: 0 };
     }
 
-    const adminUserIds = new Set<string>();
-    try {
-      const { data: { user } } = await client.auth.getUser();
-      if (user?.id) {
-        if (isExemptAdminEmail(user.email)) {
-          adminUserIds.add(user.id);
-        }
-      }
-    } catch {
-      // ignore
-    }
-
     const userIds = [...new Set(attempts.map((a) => a.user_id))];
-    const [{ data: profiles }, emailRes] = await Promise.all([
-      client.from("profiles").select("id, role").in("id", userIds),
-      client.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
-    ]);
-
-    for (const p of profiles ?? []) {
-      if (p.role === "admin") {
-        adminUserIds.add(p.id);
-      }
-    }
-    const emailRows = (emailRes?.data ?? []) as Array<{ user_id: string; email: string }>;
-    for (const u of emailRows) {
-      if (isExemptAdminEmail(u.email)) {
-        adminUserIds.add(u.user_id);
-      }
-    }
+    const adminUserIds = await getAdminUserIds(client, userIds);
 
     const adminAttemptIds = attempts.filter((a) => adminUserIds.has(a.user_id)).map((a) => a.id);
     if (adminAttemptIds.length === 0) {

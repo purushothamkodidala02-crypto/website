@@ -276,6 +276,29 @@ export async function createCorrectedMockTestVersion(mockTestId: string): Promis
   const result = await getManagedMockTest(mockTestId);
   if ("error" in result) return { success: false, message: result.error ?? "Unable to create a corrected version." };
 
+  if (result.mockTest.superseded_by_mock_test_id) {
+    return { success: false, message: "This is a previous version kept for student result history and cannot be restored." };
+  }
+
+  // If this test only has admin attempts (e.g. by kodidalanani@gmail.com), clear the admin attempt and restore to editable draft
+  const hasStudents = await mockTestHasStudentAttempts(mockTestId);
+  if (!hasStudents) {
+    await clearAdminTestAttempts(mockTestId);
+    const { error: restoreErr } = await result.supabase
+      .from("mock_tests")
+      .update({ status: "draft", published_at: null })
+      .eq("id", mockTestId);
+
+    if (!restoreErr) {
+      revalidateMockTestPages(mockTestId);
+      return {
+        success: true,
+        message: `Cleared your test attempt! “${result.mockTest.title}” is restored as a draft and ready for editing.`,
+        replacementId: mockTestId,
+      };
+    }
+  }
+
   const { data, error } = await result.supabase.rpc("create_corrected_mock_test_version", {
     requested_mock_test_id: mockTestId,
   });
@@ -284,10 +307,7 @@ export async function createCorrectedMockTestVersion(mockTestId: string): Promis
       "A corrected version already exists for this Mock Test.",
       "This Mock Test has no student attempts. Edit the existing draft instead.",
     ].find((message) => error?.message.includes(message));
-    return { success: false, message: knownMessage ?? "The corrected version could not be created. Please try again." };
-  }
-  if (result.mockTest.superseded_by_mock_test_id) {
-    return { success: false, message: "This is a previous version kept for student result history and cannot be restored." };
+    return { success: false, message: knownMessage ?? error?.message ?? "The corrected version could not be created. Please try again." };
   }
 
   revalidateMockTestPages(mockTestId);
