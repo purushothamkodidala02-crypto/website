@@ -56,3 +56,32 @@ test("functional payment and authentication scripts are not loaded globally", as
   assert.match(turnstile, /strategy="afterInteractive"/);
   assert.match(cashfree, /strategy="afterInteractive"/);
 });
+
+test("review answers and dashboard navigation use prefetched client links and optimized parallel queries", async () => {
+  const [submissionResult, attemptPage, attemptLoading, dashboardPage] = await Promise.all([
+    read("app/mock-tests/[id]/SubmissionResult.tsx"),
+    read("app/dashboard/attempts/[id]/page.tsx"),
+    read("app/dashboard/attempts/[id]/loading.tsx"),
+    read("app/dashboard/page.tsx"),
+  ]);
+
+  // 1. SubmissionResult uses prefetched Next.js Link instead of hard page-reload anchor tags
+  assert.match(submissionResult, /<Link[\s\S]*?href=\{`\/dashboard\/attempts\/\$\{result\.attemptId\}`\}[\s\S]*?prefetch=\{true\}/);
+  assert.match(submissionResult, /<Link[\s\S]*?href="\/dashboard"[\s\S]*?prefetch=\{true\}/);
+  assert.doesNotMatch(submissionResult, /<a[\s\S]*?href=\{`\/dashboard\/attempts\//);
+
+  // 2. Attempt review does not query 9-table catalog or sequential waterfall
+  assert.doesNotMatch(attemptPage, /getMockTestPublicContextById/);
+  assert.match(attemptPage, /rawRows\[0\]\?\.mock_test_title/);
+  assert.match(attemptPage, /Promise\.all\(\[\s*attempt\.session_id[\s\S]*?student_question_bookmarks/);
+
+  // 3. Attempt review has a dedicated instant loading skeleton
+  assert.match(attemptLoading, /AttemptReviewLoading/);
+  assert.match(attemptLoading, /PublicHeader/);
+
+  // 4. Dashboard batches missing mock test titles and avoids forced cache bypass
+  assert.doesNotMatch(dashboardPage, /fetchCache = "force-no-store"/);
+  assert.match(dashboardPage, /\.select\("id, title"\)[\s\S]*?\.in\("id", Array\.from\(missingTestIds\)\)/);
+  assert.doesNotMatch(dashboardPage, /for \(const test of missingTests[\s\S]*?from\("papers"\)/);
+});
+

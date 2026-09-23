@@ -78,25 +78,27 @@ export function SubmissionResult({
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {result.attemptId && (
-                <a
+                <Link
                   href={`/dashboard/attempts/${result.attemptId}`}
+                  prefetch={true}
                   onClick={() => {
                     void exitFullscreenSafely();
                   }}
                   className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
                 >
                   Review answers
-                </a>
+                </Link>
               )}
-              <a
+              <Link
                 href="/dashboard"
+                prefetch={true}
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
                 className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
               >
                 Go to dashboard
-              </a>
+              </Link>
             </div>
           </>
         ) : (
@@ -108,15 +110,16 @@ export function SubmissionResult({
               Check your result in the dashboard.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
-              <a
+              <Link
                 href="/dashboard"
+                prefetch={true}
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
                 className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
               >
                 Check your result in the dashboard
-              </a>
+              </Link>
               <Link
                 href="/"
                 onClick={() => {

@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
-import { buildMockTestTitle } from "@/lib/exam-catalog";
-import { getMockTestPublicContextById } from "@/lib/public-route-data";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AttemptReviewNavigator, type ReviewRow } from "./AttemptReviewNavigator";
@@ -45,61 +43,32 @@ export default async function AttemptReviewPage({
   const attempt = attemptResult.data as AttemptSummary | null;
   if (!attempt || attempt.user_id !== user.id) notFound();
 
-  const publicContext = await getMockTestPublicContextById(attempt.mock_test_id);
-  let resolvedTitle = publicContext?.mockTest.title;
+  const { data: reviewData } = reviewResult;
+  const rawRows = (reviewData ?? []) as Omit<ReviewRow, "question_id">[];
+
+  let resolvedTitle = rawRows[0]?.mock_test_title;
   if (!resolvedTitle) {
-    const { data: rawTest } = await admin
+    const { data: testData } = await admin
       .from("mock_tests")
-      .select("paper_id, subject_id, series_number, title")
+      .select("title")
       .eq("id", attempt.mock_test_id)
       .maybeSingle();
-    if (rawTest) {
-      const { data: paper } = await admin
-        .from("papers")
-        .select("exam_group_id, specialization_id, name")
-        .eq("id", rawTest.paper_id)
-        .maybeSingle();
-      const { data: specialization } = paper?.specialization_id
-        ? await admin.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
-        : { data: null };
-      const { data: group } = paper
-        ? await admin.from("exam_groups").select("exam_id, name").eq("id", paper.exam_group_id).maybeSingle()
-        : { data: null };
-      const { data: exam } = group
-        ? await admin.from("exams").select("state_id, name").eq("id", group.exam_id).maybeSingle()
-        : { data: null };
-      const { data: state } = exam
-        ? await admin.from("exam_states").select("code").eq("id", exam.state_id).maybeSingle()
-        : { data: null };
-      const { data: subject } = rawTest.subject_id
-        ? await admin.from("subjects").select("name").eq("id", rawTest.subject_id).maybeSingle()
-        : { data: null };
-
-      if (state && group && paper) {
-        resolvedTitle = buildMockTestTitle({
-          stateCode: state.code,
-          examName: group.name,
-          paperName: specialization?.name ?? paper.name,
-          subjectName: subject?.name,
-          seriesNumber: Number(rawTest.series_number ?? 1),
-        });
-      } else {
-        resolvedTitle = rawTest.title;
-      }
-    }
+    resolvedTitle = testData?.title ?? "Mock test";
   }
 
   if (!attempt.detailed_review_available) {
-    return <ExpiredAttemptReview attempt={attempt} title={resolvedTitle ?? "Mock test"} />;
+    return <ExpiredAttemptReview attempt={attempt} title={resolvedTitle} />;
   }
 
-  const { data } = reviewResult;
-  const rawRows = (data ?? []) as Omit<ReviewRow, "question_id">[];
-  const questionOrderResult = attempt.session_id
-    ? await admin.from("test_attempt_session_questions").select("question_id").eq("session_id", attempt.session_id).order("question_order")
-    : await admin.from("mock_test_questions").select("question_id").eq("mock_test_id", attempt.mock_test_id).order("question_order");
-  const questionIds = (questionOrderResult.data ?? []).map((item) => item.question_id);
+  // Parallelize question IDs resolution and student bookmarks
+  const [questionOrderResult, bookmarksResult] = await Promise.all([
+    attempt.session_id
+      ? admin.from("test_attempt_session_questions").select("question_id").eq("session_id", attempt.session_id).order("question_order")
+      : admin.from("mock_test_questions").select("question_id").eq("mock_test_id", attempt.mock_test_id).order("question_order"),
+    supabase.from("student_question_bookmarks").select("question_id").eq("user_id", user.id),
+  ]);
 
+  const questionIds = (questionOrderResult.data ?? []).map((item) => item.question_id);
   let rows: ReviewRow[] = [];
 
   if (rawRows.length > 0) {
@@ -129,7 +98,7 @@ export default async function AttemptReviewPage({
       const resp = responsesByQuestion.get(sq.question_id);
       return {
         question_id: sq.question_id,
-        mock_test_title: resolvedTitle ?? "Mock test",
+        mock_test_title: resolvedTitle,
         score: attempt.score,
         total_marks: attempt.total_marks,
         correct_answers: attempt.correct_answers,
@@ -160,17 +129,10 @@ export default async function AttemptReviewPage({
 
   if (rows.length === 0) notFound();
 
-  const validQuestionIds = rows
+  const userBookmarkSet = new Set((bookmarksResult.data ?? []).map((b) => b.question_id));
+  const bookmarkedQuestionIds = rows
     .map((item) => item.question_id)
-    .filter((qid) => /^[0-9a-f-]{36}$/i.test(qid));
-
-  const { data: bookmarks } = validQuestionIds.length > 0
-    ? await supabase
-        .from("student_question_bookmarks")
-        .select("question_id")
-        .eq("user_id", user.id)
-        .in("question_id", validQuestionIds)
-    : { data: [] };
+    .filter((qid) => userBookmarkSet.has(qid));
 
   const summary = rows[0];
   const percentage =
@@ -243,7 +205,7 @@ export default async function AttemptReviewPage({
           />
         </section>
 
-        <AttemptReviewNavigator attemptId={id} rows={rows} bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)} />
+        <AttemptReviewNavigator attemptId={id} rows={rows} bookmarkedQuestionIds={bookmarkedQuestionIds} />
 
         <section className="mt-10 flex flex-wrap items-center justify-between gap-5 rounded-3xl bg-teal-50 p-6 sm:p-8">
           <div>

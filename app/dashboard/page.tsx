@@ -1,12 +1,10 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
-import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { mockTestUrl } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
@@ -74,7 +72,6 @@ export default async function Dashboard({
       .from("test_attempts")
       .select(
         "id, mock_test_id, detailed_review_available, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
-        { count: "exact" },
       )
       .eq("user_id", user.id)
       .order("submitted_at", { ascending: false })
@@ -94,13 +91,13 @@ export default async function Dashboard({
   const attempts = (attemptsResult.data ?? []) as Attempt[];
   const latestAttempts = page === 1 ? attempts.slice(0, 5) : []; // we only show latest attempts card on page 1 usually, or we can just use slice
   const attemptSummary = (attemptSummaryResult.data?.[0] ?? {
-    completed_attempts: attemptsResult.count ?? 0,
+    completed_attempts: attempts.length,
     average_score: 0,
     latest_score: null,
     latest_total_marks: null,
     latest_mock_test_id: null,
   }) as AttemptHistorySummary;
-  const totalAttempts = Number(attemptSummary.completed_attempts ?? attemptsResult.count ?? 0);
+  const totalAttempts = Number(attemptSummary.completed_attempts ?? attempts.length);
   const totalPages = Math.max(1, Math.ceil(totalAttempts / attemptsPerPage));
   if (totalAttempts > 0 && page > totalPages) redirect(`/dashboard?page=${totalPages}`);
   const subjectAnalytics = (subjectAnalyticsResult.data ?? []) as SubjectAnalytics[];
@@ -111,8 +108,6 @@ export default async function Dashboard({
   const catalogExamById = new Map(catalog.exams.map((item) => [item.id, item]));
   const catalogCategoryById = new Map(catalog.categories.map((item) => [item.id, item]));
   const catalogStateById = new Map(catalog.states.map((item) => [item.id, item]));
-  const catalogSpecializationById = new Map((catalog.specializations ?? []).map((item) => [item.id, item]));
-  const catalogSubjectById = new Map((catalog.subjects ?? []).map((item) => [item.id, item]));
 
   const missingTestIds = new Set<string>();
   if (attemptSummary.latest_mock_test_id && !testTitles.has(attemptSummary.latest_mock_test_id)) {
@@ -127,77 +122,11 @@ export default async function Dashboard({
   if (missingTestIds.size > 0) {
     const { data: missingTests } = await supabase
       .from("mock_tests")
-      .select("id, paper_id, subject_id, series_number, title")
+      .select("id, title")
       .in("id", Array.from(missingTestIds));
 
     for (const test of missingTests ?? []) {
-      let paper = catalogPaperById.get(test.paper_id);
-      if (!paper) {
-        const { data: fetchedPaper } = await supabase
-          .from("papers")
-          .select("id, exam_group_id, specialization_id, name")
-          .eq("id", test.paper_id)
-          .maybeSingle();
-        if (fetchedPaper) paper = fetchedPaper as any;
-      }
-      let exam = paper ? catalogExamById.get(paper.exam_group_id) : undefined;
-      if (paper && !exam) {
-        const { data: fetchedExam } = await supabase
-          .from("exam_groups")
-          .select("id, exam_id, name")
-          .eq("id", paper.exam_group_id)
-          .maybeSingle();
-        if (fetchedExam) exam = fetchedExam as any;
-      }
-      let category = exam ? catalogCategoryById.get(exam.exam_id) : undefined;
-      if (exam && !category) {
-        const { data: fetchedCategory } = await supabase
-          .from("exams")
-          .select("id, state_id, name")
-          .eq("id", exam.exam_id)
-          .maybeSingle();
-        if (fetchedCategory) category = fetchedCategory as any;
-      }
-      let state = category ? catalogStateById.get(category.state_id) : undefined;
-      if (category && !state) {
-        const { data: fetchedState } = await supabase
-          .from("exam_states")
-          .select("id, code, name")
-          .eq("id", category.state_id)
-          .maybeSingle();
-        if (fetchedState) state = fetchedState as any;
-      }
-      let specialization = paper?.specialization_id ? catalogSpecializationById.get(paper.specialization_id) : undefined;
-      if (paper?.specialization_id && !specialization) {
-        const { data: fetchedSpecialization } = await supabase
-          .from("exam_specializations")
-          .select("id, name")
-          .eq("id", paper.specialization_id)
-          .maybeSingle();
-        if (fetchedSpecialization) specialization = fetchedSpecialization as any;
-      }
-      let subject = test.subject_id ? catalogSubjectById.get(test.subject_id) : undefined;
-      if (test.subject_id && !subject) {
-        const { data: fetchedSubject } = await supabase
-          .from("subjects")
-          .select("id, name")
-          .eq("id", test.subject_id)
-          .maybeSingle();
-        if (fetchedSubject) subject = fetchedSubject as any;
-      }
-
-      if (state && exam && paper) {
-        testTitles.set(
-          test.id,
-          buildMockTestTitle({
-            stateCode: state.code,
-            examName: exam.name,
-            paperName: specialization?.name ?? paper.name,
-            subjectName: subject?.name,
-            seriesNumber: Number(test.series_number ?? 1),
-          }),
-        );
-      } else if (test.title) {
+      if (test.title) {
         testTitles.set(test.id, test.title);
       }
     }
