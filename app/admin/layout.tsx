@@ -15,16 +15,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { data: assurance, error: assuranceError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single(),
+      supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+    ]);
 
   if (!profile || profile.role !== "admin") redirect("/dashboard");
-
-  const { data: assurance, error: assuranceError } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
   if (assuranceError || assurance?.currentLevel !== "aal2") {
     redirect("/admin-mfa");

@@ -268,6 +268,8 @@ test("match questions clean imported markdown and support A-D with I-IV lists", 
   assert.match(formatter, /romanListItem/);
   assert.match(formatter, /\{ left: alphabeticListItem, right: romanListItem \}/);
   assert.match(formatter, /replace\(\/\^;\+\|;\+\$\/g, ""\)/);
+  assert.match(formatter, /renderListItem/);
+  assert.match(formatter, /ఎ\|బి\|సి\|డి\|ఈ\|ఎఫ్\|జి\|హెచ్/);
 });
 
 test("ratio expressions in English and Telugu question texts are not split into numbered list items", async () => {

@@ -42,8 +42,8 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
         </div>
         <label className="mt-6 block rounded-2xl border border-dashed bg-slate-50 p-5 text-sm font-bold">
           Excel or CSV file
-          <input name="questions_file" type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required disabled={!paperId} className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-slate-950 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white disabled:cursor-not-allowed" />
-          <span className="mt-3 block text-xs font-normal leading-5 text-slate-600">Use .xlsx for the speed option, or CSV as a fallback. Up to 500 Questions or 2.5 MB.</span>
+          <input name="questions_file" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" required disabled={!paperId} className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-slate-950 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white disabled:cursor-not-allowed" />
+          <span className="mt-3 block text-xs font-normal leading-5 text-slate-600">Use .xlsx or .xls for the speed option, or CSV as a fallback. Up to 500 Questions or 2.5 MB.</span>
         </label>
         <details className="mt-5 rounded-xl border bg-slate-50 p-4">
           <summary className="cursor-pointer text-sm font-bold">Excel headings and language rules</summary>

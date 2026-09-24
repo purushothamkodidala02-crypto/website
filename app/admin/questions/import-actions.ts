@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import ExcelJS from "exceljs";
+import * as XLSX from "xlsx";
 import { createClient } from "@/lib/supabase/server";
 import { QUESTION_IMPORT_REQUIRED_HEADERS } from "@/lib/questions/import-format";
 import { normalizeQuestionImageUrl, questionMediaPath, removeQuestionImage, uploadQuestionImage } from "@/lib/questions/media";
@@ -96,7 +97,22 @@ function parseCsv(source: string): CsvRow[] {
 
 async function parseExcel(file: File): Promise<ParsedQuestionFile> {
   const workbook = new ExcelJS.Workbook();
-  const fileBuffer = Buffer.from(await file.arrayBuffer()) as unknown as Parameters<typeof workbook.xlsx.load>[0];
+  const rawBuffer = Buffer.from(await file.arrayBuffer());
+  const isBiff8Xls = rawBuffer.length >= 8 && rawBuffer.subarray(0, 8).toString("hex") === "d0cf11e0a1b11ae1";
+  const extension = file.name.toLowerCase().split(".").pop();
+
+  let fileBuffer: Parameters<typeof workbook.xlsx.load>[0];
+  if (isBiff8Xls || extension === "xls") {
+    try {
+      const readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
+      fileBuffer = XLSX.write(readWb, { bookType: "xlsx", type: "buffer" }) as unknown as Parameters<typeof workbook.xlsx.load>[0];
+    } catch {
+      throw new Error("The Excel 97-2003 (.xls) file could not be read. Please ensure it is a valid Excel workbook.");
+    }
+  } else {
+    fileBuffer = rawBuffer as unknown as Parameters<typeof workbook.xlsx.load>[0];
+  }
+
   await workbook.xlsx.load(fileBuffer);
   const worksheet = workbook.getWorksheet("Varadhi Import") ?? workbook.worksheets[0];
   if (!worksheet) throw new Error("The Excel file does not contain a worksheet.");
@@ -142,14 +158,14 @@ async function parseExcel(file: File): Promise<ParsedQuestionFile> {
 
 async function parseQuestionFile(file: File): Promise<ParsedQuestionFile> {
   const extension = file.name.toLowerCase().split(".").pop();
-  if (extension === "xlsx") return parseExcel(file);
+  if (extension === "xlsx" || extension === "xls") return parseExcel(file);
   if (extension === "csv") {
     return {
       rows: parseCsv(await file.text()).map((values, index) => ({ values, rowNumber: index + 2 })),
       embeddedImages: new Map(),
     };
   }
-  throw new Error("Choose an Excel (.xlsx) or CSV (.csv) file.");
+  throw new Error("Choose an Excel (.xlsx, .xls) or CSV (.csv) file.");
 }
 
 function languageValues(row: CsvRow, suffix: "en" | "te"): QuestionLanguageValues {

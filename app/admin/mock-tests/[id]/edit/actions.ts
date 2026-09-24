@@ -69,7 +69,41 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
   const categoryResult = await supabase.from("exams").select("id, state_id").eq("id", group.exam_id).maybeSingle();
   const stateResult = categoryResult.data ? await supabase.from("exam_states").select("id, code").eq("id", categoryResult.data.state_id).maybeSingle() : { data: null };
   if (!categoryResult.data || !stateResult.data) return { success: false, message: "The exam location is incomplete. Fix it in Exam Structure first." };
-  const seriesNumber = Number(current.series_number ?? 1);
+  const requestedSeries = formData.get("series_number");
+  const parsedSeries = requestedSeries ? Number(requestedSeries) : NaN;
+  const seriesNumber = Number.isInteger(parsedSeries) && parsedSeries > 0
+    ? parsedSeries
+    : Number(current.series_number ?? 1);
+
+  if (seriesNumber !== current.series_number) {
+    let checkQuery = supabase
+      .from("mock_tests")
+      .select("id")
+      .eq("paper_id", paperId)
+      .eq("test_scope", scope)
+      .eq("series_number", seriesNumber)
+      .neq("id", mockTestId)
+      .is("superseded_by_mock_test_id", null);
+
+    if (scope === "subject") {
+      checkQuery = checkQuery.eq("subject_id", submittedSubjectId);
+      if (subjectSectionId) {
+        checkQuery = checkQuery.eq("subject_section_id", subjectSectionId);
+      } else {
+        checkQuery = checkQuery.is("subject_section_id", null);
+      }
+    } else {
+      checkQuery = checkQuery.is("subject_id", null);
+    }
+    const { data: conflict } = await checkQuery.maybeSingle();
+    if (conflict) {
+      return {
+        success: false,
+        message: `Mock Test ${String(seriesNumber).padStart(2, "0")} already exists in this series. Please choose an unused number.`,
+      };
+    }
+  }
+
   const { data: specialization } = paper.specialization_id
     ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
     : { data: null };
@@ -79,6 +113,7 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
     test_scope: scope,
     subject_id: submittedSubjectId,
     subject_section_id: scope === "subject" && submittedSubjectId ? subjectSectionId : null,
+    series_number: seriesNumber,
     title,
     slug,
     description: String(formData.get("description") ?? "").trim() || null,

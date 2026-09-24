@@ -46,56 +46,47 @@ export async function getAdminNavBadges(
 
     const admin = createAdminClient();
 
-    // 1. Fetch Question Reports badge data
-    const [reportsCountRes, latestReportRes] = await Promise.all([
-      admin
-        .from("question_reports")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "open"),
-      admin
-        .from("question_reports")
-        .select("created_at")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+    const newCountQuery = lastSeenSurveysTime
+      ? admin
+          .from("dynamic_survey_responses")
+          .select("id", { count: "exact", head: true })
+          .gt("submitted_at", lastSeenSurveysTime)
+      : admin
+          .from("dynamic_survey_responses")
+          .select("id", { count: "exact", head: true })
+          .gte("submitted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    // Fetch Question Reports and Survey Responses badge data in parallel
+    const [reportsCountRes, latestReportRes, surveysTotalRes, latestSurveyRes, newCountRes] =
+      await Promise.all([
+        admin
+          .from("question_reports")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "open"),
+        admin
+          .from("question_reports")
+          .select("created_at")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        admin
+          .from("dynamic_survey_responses")
+          .select("id", { count: "exact", head: true }),
+        admin
+          .from("dynamic_survey_responses")
+          .select("submitted_at")
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        newCountQuery,
+      ]);
 
     const openCount = reportsCountRes.count ?? 0;
     const latestCreatedAt = latestReportRes.data?.created_at ?? null;
-
-    // 2. Fetch Survey Responses badge data
-    const [surveysTotalRes, latestSurveyRes] = await Promise.all([
-      admin
-        .from("dynamic_survey_responses")
-        .select("id", { count: "exact", head: true }),
-      admin
-        .from("dynamic_survey_responses")
-        .select("submitted_at")
-        .order("submitted_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
     const totalCount = surveysTotalRes.count ?? 0;
     const latestSubmittedAt = latestSurveyRes.data?.submitted_at ?? null;
-
-    let newCount = 0;
-    if (lastSeenSurveysTime) {
-      const { count } = await admin
-        .from("dynamic_survey_responses")
-        .select("id", { count: "exact", head: true })
-        .gt("submitted_at", lastSeenSurveysTime);
-      newCount = count ?? 0;
-    } else {
-      // If admin hasn't recorded a seen timestamp, treat responses from past 24 hours as new
-      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { count } = await admin
-        .from("dynamic_survey_responses")
-        .select("id", { count: "exact", head: true })
-        .gte("submitted_at", dayAgo);
-      newCount = count ?? 0;
-    }
+    const newCount = newCountRes.count ?? 0;
 
     return {
       reports: {

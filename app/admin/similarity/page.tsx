@@ -3,26 +3,34 @@ import { QuestionSimilarityScanner } from "../QuestionSimilarityScanner";
 
 async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createClient>>) {
   const pageSize = 1000;
-  let from = 0;
-  let all: Array<{ mock_test_id: string; question_id: string }> = [];
-  let hasMore = true;
+  const { count } = await supabase
+    .from("mock_test_questions")
+    .select("id", { count: "exact", head: true });
 
-  while (hasMore) {
-    const { data, error } = await supabase
+  const total = count ?? 0;
+  if (total === 0) return [];
+
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages === 1) {
+    const { data } = await supabase
+      .from("mock_test_questions")
+      .select("mock_test_id, question_id")
+      .range(0, pageSize - 1);
+    return data ?? [];
+  }
+
+  const chunkPromises = Array.from({ length: totalPages }, (_, i) => {
+    const from = i * pageSize;
+    return supabase
       .from("mock_test_questions")
       .select("mock_test_id, question_id")
       .range(from, from + pageSize - 1);
+  });
 
-    if (error || !data || data.length === 0) {
-      hasMore = false;
-    } else {
-      all = all.concat(data);
-      if (data.length < pageSize) {
-        hasMore = false;
-      } else {
-        from += pageSize;
-      }
-    }
+  const results = await Promise.all(chunkPromises);
+  const all: Array<{ mock_test_id: string; question_id: string }> = [];
+  for (const res of results) {
+    if (res.data) all.push(...res.data);
   }
   return all;
 }

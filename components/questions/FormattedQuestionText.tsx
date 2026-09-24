@@ -10,7 +10,7 @@ const instructionStart =
   /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick|Identify|In\s+the\s+light\s+of)\b|(?:సరైన|సరికాని|కింది|క్రింది|పై|ఇచ్చిన).*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/i;
 
 const numberedSection =
-  /^((?:\((?:[a-hA-H]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[a-hA-H]|[ఎ-హ])[.)]))\s+(.*)$/i;
+  /^((?:\((?:[a-hA-H]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[a-hA-H]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)]))\s+(.*)$/i;
 
 const sectionHeading =
   /^(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:?$/i;
@@ -183,11 +183,11 @@ function questionLines(rawText: string) {
       "\n",
     )
     .replace(
-      /[ \t]*;+[ \t]*(?=(?:Assertion|Reason|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|కారణం|కారణము|హేతువు|Statement|Conclusion|List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\b|(?:\((?:[A-Za-z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|[ఎ-హ])[.)])\s)/gi,
+      /[ \t]*;+[ \t]*(?=(?:Assertion|Reason|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|కారణం|కారణము|హేతువు|Statement|Conclusion|List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\b|(?:\((?:[A-Za-z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s)/gi,
       "\n",
     )
     .replace(
-      /[ \t]*;+[ \t]*(?=(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])[.)])\s)/gi,
+      /[ \t]*;+[ \t]*(?=(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s)/gi,
       "\n",
     )
     .replace(
@@ -232,7 +232,7 @@ function questionLines(rawText: string) {
       "\n",
     )
     .replace(
-      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s+(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|[ఎ-హ])\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|[ఎ-హ])[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s+(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -243,12 +243,12 @@ function questionLines(rawText: string) {
 
   return lines
     .reduce<string[]>((merged, line) => {
-      if (/^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[ఎ-హ])[.)])$/i.test(line)) {
+      if (/^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])$/i.test(line)) {
         merged.push(line);
         return merged;
       }
       const previous = merged.at(-1);
-      if (previous && /^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[ఎ-హ])[.)])$/i.test(previous)) {
+      if (previous && /^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])$/i.test(previous)) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else if (previous && /\b(?:Rs|Re|రూ)\.?$/i.test(previous) && /^(\d{1,2})[.)]\s*(.*)$/.test(line)) {
         merged[merged.length - 1] = `${previous.replace(/\.?$/, ".")} ${line}`;
@@ -284,7 +284,7 @@ const romanListItem = /^(?:\([ivxIVX]{1,5}\)\s*|(?:I|II|III|IV|V|VI|VII|VIII|i|i
 
 function renderListItem(line: string) {
   const match = line.match(
-    /^(\((?:[a-zA-Z\d\u0c00-\u0c7f]+|[ivxIVX]{1,5})\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|[a-zA-Z]|[ivxIVX]{1,5}|[ఎ-హ])[.)])\s*(.*)$/,
+    /^(\((?:[a-zA-Z\d\u0c00-\u0c7f]+|[ivxIVX]{1,5})\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|[a-zA-Z]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s*(.*)$/,
   );
   if (match) {
     return (
@@ -306,7 +306,7 @@ function matchingListLayout(lines: string[]) {
 
   // Approach 1: Paired Rows on each line (e.g. 1. Item — A. Item)
   const pairRowRegex =
-    /^((?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|[a-hA-H]|ఎ|బి|సి|డి)[.)])\s*.*?)\s*[—–-]\s*((?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|[ఎ-హ])\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|[a-hA-H]|ఎ|బి|సి|డి)[.)])\s*.*)$/;
+    /^((?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|[a-hA-H]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s*.*?)\s*[—–-]\s*((?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|[a-hA-H]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s*.*)$/;
 
   const pairedIndices: number[] = [];
   const leftPairs: string[] = [];

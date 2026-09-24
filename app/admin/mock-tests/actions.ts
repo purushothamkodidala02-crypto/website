@@ -51,7 +51,12 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   if (!state || !category || !group || !paper || category.state_id !== state.id || group.exam_id !== category.id || paper.exam_group_id !== group.id || (scope === "subject" && (!subject || subject.paper_id !== paper.id)) || (scope === "subject" && subjectSectionId && (!section || section.subject_id !== subjectId))) {
     return { success: false, message: "The selected state, board, exam, paper, subject and sub-section do not belong together." };
   }
-  let existingSeriesQuery = supabase.from("mock_tests").select("series_number").eq("paper_id", paperId).eq("test_scope", scope).order("series_number", { ascending: false }).limit(1);
+  let existingSeriesQuery = supabase
+    .from("mock_tests")
+    .select("series_number")
+    .eq("paper_id", paperId)
+    .eq("test_scope", scope)
+    .is("superseded_by_mock_test_id", null);
   if (scope === "subject") {
     existingSeriesQuery = existingSeriesQuery.eq("subject_id", subjectId);
     if (subjectSectionId) {
@@ -64,7 +69,27 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   }
   const { data: existingSeries, error: seriesError } = await existingSeriesQuery;
   if (seriesError) return { success: false, message: seriesError.message };
-  const seriesNumber = Number(existingSeries?.[0]?.series_number ?? 0) + 1;
+
+  const existingSet = new Set((existingSeries ?? []).map((item) => Number(item.series_number)));
+
+  // Lowest missing positive integer from 1 upwards (gap filling)
+  let firstAvailableNumber = 1;
+  while (existingSet.has(firstAvailableNumber)) {
+    firstAvailableNumber++;
+  }
+
+  const requestedSeriesRaw = formData.get("series_number") ?? formData.get("expected_series_number");
+  const parsedRequested = requestedSeriesRaw ? Number(requestedSeriesRaw) : NaN;
+  const seriesNumber = Number.isInteger(parsedRequested) && parsedRequested > 0
+    ? parsedRequested
+    : firstAvailableNumber;
+
+  if (existingSet.has(seriesNumber)) {
+    return {
+      success: false,
+      message: `Mock Test ${String(seriesNumber).padStart(2, "0")} already exists in this series. Please choose an unused number.`,
+    };
+  }
   const { data: specialization } = paper.specialization_id
     ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
     : { data: null };

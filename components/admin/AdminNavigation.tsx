@@ -330,25 +330,35 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
     };
   }, [mobileOpen]);
 
+  // Update seen states when visiting report/survey pages without re-fetching badges over network
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (pathname.startsWith("/admin/surveys")) {
         localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
-        setBadges((prev) => ({ ...prev, newSurveys: 0 }));
+        window.setTimeout(() => {
+          setBadges((prev) => ({ ...prev, newSurveys: 0 }));
+        }, 0);
       }
       if (pathname.startsWith("/admin/question-reports")) {
         localStorage.setItem("varadhi_admin_reports_last_seen", new Date().toISOString());
-        setBadges((prev) => ({ ...prev, hasNewReport: false }));
+        window.setTimeout(() => {
+          setBadges((prev) => ({ ...prev, hasNewReport: false }));
+        }, 0);
       }
     }
+  }, [pathname]);
 
-    fetchBadges();
+  // Fetch badges on mount, window focus, visibility change, or periodic interval
+  useEffect(() => {
+    const initialTimer = window.setTimeout(() => {
+      void fetchBadges();
+    }, 0);
 
-    const handleFocus = () => fetchBadges();
+    const handleFocus = () => void fetchBadges();
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") fetchBadges();
+      if (document.visibilityState === "visible") void fetchBadges();
     };
-    const handleBadgeRefresh = () => fetchBadges();
+    const handleBadgeRefresh = () => void fetchBadges();
 
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibility);
@@ -356,17 +366,18 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
 
     const interval = setInterval(() => {
       if (document.visibilityState === "visible") {
-        fetchBadges();
+        void fetchBadges();
       }
-    }, 20000);
+    }, 45000);
 
     return () => {
+      window.clearTimeout(initialTimer);
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("admin-badge-refresh", handleBadgeRefresh);
       clearInterval(interval);
     };
-  }, [fetchBadges, pathname]);
+  }, [fetchBadges]);
 
   const hasAnyUpdate = badges.openReports > 0 || badges.newSurveys > 0;
 

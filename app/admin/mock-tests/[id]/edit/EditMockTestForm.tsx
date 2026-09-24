@@ -40,6 +40,7 @@ export function EditMockTestForm({
   const [newSectionName, setNewSectionName] = useState("");
   const [isAddingSectionPending, setIsAddingSectionPending] = useState(false);
   const [addSectionError, setAddSectionError] = useState<string | null>(null);
+  const [seriesNumber, setSeriesNumber] = useState<number | string>(mockTest.series_number ?? 1);
 
   useEffect(() => {
     setAllSections(sections);
@@ -90,7 +91,8 @@ export function EditMockTestForm({
       )}
       <form action={action} className="grid gap-5 md:grid-cols-2">
         <div className="rounded-2xl border border-teal-200 bg-teal-50 p-5 md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p><h2 className="font-display mt-1 text-2xl">{studentTitle}</h2><p className="mt-1 text-sm text-slate-600">Generated automatically from the selected Exam, Paper, optional Subject, and series number.</p></div>
-        <label className="block text-sm font-bold md:col-span-2">Permanent URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={mockTest.slug} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Changing this keeps the previous URL as a permanent redirect.</span></label>
+        <label className="block text-sm font-bold">Mock test number (Series #)<input name="series_number" type="number" min="1" max="999" required value={seriesNumber} onChange={(e) => setSeriesNumber(e.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">E.g. 7 or 8. Updates the test number in title and ordering.</span></label>
+        <label className="block text-sm font-bold">Permanent URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={mockTest.slug} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Changing this keeps the previous URL as a permanent redirect.</span></label>
         <label className="block text-sm font-bold md:col-span-2">
           Paper
           <SearchableSelect

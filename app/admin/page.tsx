@@ -4,67 +4,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { indiaDateKey } from "@/lib/date";
 import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
-import { QuestionSimilarityScanner } from "./QuestionSimilarityScanner";
-
-async function fetchAllMockTestQuestions(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const pageSize = 1000;
-  let from = 0;
-  let all: Array<{ mock_test_id: string; question_id: string; marks: number; negative_marks: number }> = [];
-  let hasMore = true;
-
-  while (hasMore) {
-    const { data, error } = await supabase
-      .from("mock_test_questions")
-      .select("mock_test_id, question_id, marks, negative_marks")
-      .range(from, from + pageSize - 1);
-
-    if (error || !data || data.length === 0) {
-      hasMore = false;
-    } else {
-      all = all.concat(data);
-      if (data.length < pageSize) {
-        hasMore = false;
-      } else {
-        from += pageSize;
-      }
-    }
-  }
-  return all;
-}
-
-async function fetchAllQuestionsSummary(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const pageSize = 1000;
-  let from = 0;
-  let all: Array<{ id: string; is_active: boolean; expires_on: string | null; content_lifecycle: string | null }> = [];
-  let hasMore = true;
-
-  while (hasMore) {
-    const { data, error } = await supabase
-      .from("questions")
-      .select("id, is_active, expires_on, content_lifecycle")
-      .range(from, from + pageSize - 1);
-
-    if (error || !data || data.length === 0) {
-      hasMore = false;
-    } else {
-      all = all.concat(data);
-      if (data.length < pageSize) {
-        hasMore = false;
-      } else {
-        from += pageSize;
-      }
-    }
-  }
-  return all;
-}
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const admin = createAdminClient();
+  const today = indiaDateKey();
+  const future30Date = new Date();
+  future30Date.setDate(future30Date.getDate() + 30);
+  const future30Key = indiaDateKey(future30Date);
+
   const [
     testsResult,
-    assignments,
-    questions,
     attemptsResult,
     reportsResult,
     papersResult,
@@ -72,13 +22,13 @@ export default async function AdminDashboard() {
     subjectsResult,
     specializationsResult,
     totalQuestionsCountResult,
+    usableQuestionsCountResult,
+    expiringSoonCountResult,
   ] = await Promise.all([
     supabase
       .from("mock_tests")
       .select("id, title, status, updated_at, paper_id, subject_id, series_number")
       .order("updated_at", { ascending: false }),
-    fetchAllMockTestQuestions(supabase),
-    fetchAllQuestionsSummary(supabase),
     admin.from("test_attempts").select("id", { count: "exact", head: true }),
     admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
@@ -86,6 +36,18 @@ export default async function AdminDashboard() {
     supabase.from("subjects").select("id, name"),
     supabase.from("exam_specializations").select("id, exam_group_id, name, slug"),
     supabase.from("questions").select("id", { count: "exact", head: true }),
+    supabase
+      .from("questions")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .or(`expires_on.is.null,expires_on.gte.${today}`),
+    supabase
+      .from("questions")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .eq("content_lifecycle", "expires")
+      .gte("expires_on", today)
+      .lte("expires_on", future30Key),
   ]);
 
   const tests = testsResult.data ?? [];
@@ -107,50 +69,53 @@ export default async function AdminDashboard() {
     });
   };
 
-  const today = indiaDateKey();
-  const usableIds = new Set(
-    questions
-      .filter(
-        (item) =>
-          item.is_active && (!item.expires_on || item.expires_on >= today),
-      )
-      .map((item) => item.id),
-  );
-  type Assignment = (typeof assignments)[number];
-  const assignmentsByTest = new Map<string, Assignment[]>();
-  for (const assignment of assignments) {
-    const current = assignmentsByTest.get(assignment.mock_test_id) ?? [];
-    current.push(assignment);
-    assignmentsByTest.set(assignment.mock_test_id, current);
-  }
-
   const drafts = tests.filter((test) => test.status === "draft");
   const published = tests.filter((test) => test.status === "published");
   const hidden = tests.filter((test) => test.status === "archived");
-  const draftsNeedingWork = drafts.filter((test) => {
-    const assignments = assignmentsByTest.get(test.id) ?? [];
-    return (
-      assignments.length === 0 ||
-      assignments.some(
-        (item) =>
-          !usableIds.has(item.question_id) ||
-          Number(item.marks) <= 0 ||
-          Number(item.negative_marks) < 0,
-      )
-    );
-  });
 
-  const future30Date = new Date();
-  future30Date.setDate(future30Date.getDate() + 30);
-  const future30Key = indiaDateKey(future30Date);
-  const expiringSoonCount = questions.filter(
-    (item) =>
-      item.is_active &&
-      item.content_lifecycle === "expires" &&
-      item.expires_on &&
-      item.expires_on >= today &&
-      item.expires_on <= future30Key,
-  ).length;
+  // Only check assignments for draft tests if any exist (fast scoped check)
+  let draftsNeedingWork = drafts;
+  if (drafts.length > 0) {
+    const draftIds = drafts.map((d) => d.id);
+    const { data: draftAssignments } = await supabase
+      .from("mock_test_questions")
+      .select("mock_test_id, question_id, marks, negative_marks")
+      .in("mock_test_id", draftIds);
+
+    const draftQuestionIds = [...new Set((draftAssignments ?? []).map((a) => a.question_id))];
+    const { data: usableDraftQuestions } = draftQuestionIds.length > 0
+      ? await supabase
+          .from("questions")
+          .select("id")
+          .in("id", draftQuestionIds)
+          .eq("is_active", true)
+          .or(`expires_on.is.null,expires_on.gte.${today}`)
+      : { data: [] };
+
+    const usableDraftQuestionSet = new Set((usableDraftQuestions ?? []).map((q) => q.id));
+    const assignmentsByDraft = new Map<string, typeof draftAssignments>();
+    for (const a of draftAssignments ?? []) {
+      const current = assignmentsByDraft.get(a.mock_test_id) ?? [];
+      current.push(a);
+      assignmentsByDraft.set(a.mock_test_id, current);
+    }
+
+    draftsNeedingWork = drafts.filter((test) => {
+      const assignments = assignmentsByDraft.get(test.id) ?? [];
+      return (
+        assignments.length === 0 ||
+        assignments.some(
+          (item) =>
+            !usableDraftQuestionSet.has(item.question_id) ||
+            Number(item.marks) <= 0 ||
+            Number(item.negative_marks) < 0,
+        )
+      );
+    });
+  }
+
+  const usableQuestionsCount = usableQuestionsCountResult.count ?? 0;
+  const expiringSoonCount = expiringSoonCountResult.count ?? 0;
 
   const metrics = [
     {
@@ -171,8 +136,8 @@ export default async function AdminDashboard() {
     },
     {
       label: "Available questions",
-      value: usableIds.size,
-      detail: `${totalQuestionsCountResult.count ?? questions.length} total in the Question Bank`,
+      value: usableQuestionsCount,
+      detail: `${totalQuestionsCountResult.count ?? 0} total in the Question Bank`,
       href: "/admin/questions",
       accent: "teal",
       short: "BANK",
@@ -330,14 +295,29 @@ export default async function AdminDashboard() {
       </section>
 
       {/* Question Similarity & Overlap Intelligence */}
-      <QuestionSimilarityScanner
-        tests={tests}
-        assignments={assignments}
-        papers={papers}
-        exams={groupsResult.data ?? []}
-        specializations={specializationsResult.data ?? []}
-        subjects={subjectsResult.data ?? []}
-      />
+      <section className="relative overflow-hidden rounded-3xl border border-teal-100 bg-gradient-to-r from-teal-50/60 via-white to-white p-6 shadow-sm sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/60 bg-teal-100/60 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+              Exam Intelligence
+            </span>
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              Question Similarity & Overlap Scanner
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              Audit question overlaps across exams, specialisations (such as TG TET Paper 2), and subject practice tests with automated syllabus intent recognition and bulk duplicate resolution.
+            </p>
+          </div>
+          <div>
+            <Link
+              href="/admin/similarity"
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-black text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800"
+            >
+              Launch Similarity Scanner &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-950 via-slate-950 to-slate-900 p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-teal-300/10 blur-3xl" />

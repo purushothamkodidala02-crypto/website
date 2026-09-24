@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
-import { mockTestLabel } from "@/lib/exam-catalog";
+import { formatMockNumber, mockTestLabel } from "@/lib/exam-catalog";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { quickCreateSubjectSection } from "@/app/admin/subjects/sections/actions";
 import { createMockTest, type CreateMockTestState } from "./actions";
@@ -49,6 +49,8 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [targetQuestionCount, setTargetQuestionCount] = useState<number | string>(1);
   const [isDurationCustom, setIsDurationCustom] = useState(false);
   const [isTargetCountCustom, setIsTargetCountCustom] = useState(false);
+  const [selectedSeriesNumber, setSelectedSeriesNumber] = useState<number | string>("");
+  const [isSeriesCustom, setIsSeriesCustom] = useState(false);
 
   useEffect(() => {
     setAllSections(sections);
@@ -108,19 +110,48 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
     }
   }
 
-  const currentNumbers = existingSeries
-    .filter(
-      (item) =>
-        item.paperId === paperId &&
-        item.scope === scope &&
-        (scope === "paper" ||
-          (item.subjectId === subjectId &&
-            (subjectSectionId
-              ? item.subjectSectionId === subjectSectionId
-              : !item.subjectSectionId))),
-    )
-    .map((item) => item.seriesNumber);
-  const nextSeries = currentNumbers.length ? Math.max(...currentNumbers) + 1 : 1;
+  const currentNumbers = useMemo(() => {
+    return existingSeries
+      .filter(
+        (item) =>
+          item.paperId === paperId &&
+          item.scope === scope &&
+          (scope === "paper" ||
+            (item.subjectId === subjectId &&
+              (subjectSectionId
+                ? item.subjectSectionId === subjectSectionId
+                : !item.subjectSectionId))),
+      )
+      .map((item) => item.seriesNumber);
+  }, [existingSeries, paperId, scope, subjectId, subjectSectionId]);
+
+  const existingNumbersSet = useMemo(() => new Set(currentNumbers), [currentNumbers]);
+  const maxSeries = useMemo(() => (currentNumbers.length ? Math.max(...currentNumbers) : 0), [currentNumbers]);
+  const appendSeries = maxSeries + 1;
+
+  // Find lowest missing positive integer from 1 upwards (gap filling, e.g. deleted Mock Test 7)
+  const firstAvailableSeries = useMemo(() => {
+    let num = 1;
+    while (existingNumbersSet.has(num)) {
+      num++;
+    }
+    return num;
+  }, [existingNumbersSet]);
+
+  const hasGap = firstAvailableSeries < appendSeries;
+
+  useEffect(() => {
+    setIsSeriesCustom(false);
+  }, [paperId, scope, subjectId, subjectSectionId]);
+
+  useEffect(() => {
+    if (!isSeriesCustom) {
+      setSelectedSeriesNumber(firstAvailableSeries);
+    }
+  }, [firstAvailableSeries, isSeriesCustom]);
+
+  const effectiveSeries = Number(selectedSeriesNumber) || firstAvailableSeries;
+  const isSeriesTaken = existingNumbersSet.has(Number(selectedSeriesNumber));
 
   function resetAfterState(value: string) { if (value === stateId) return; setStateId(value); setCategoryId(""); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
   function resetAfterCategory(value: string) { if (value === categoryId) return; setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
@@ -252,8 +283,113 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       )}
 
       <div className="md:col-span-2 rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-50 to-white p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex gap-4">{state && <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} className="h-5 w-5" /></span>}<div><p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name preview</p><h3 className="font-display mt-1 text-xl">{paper ? mockTestLabel(nextSeries) : "Choose a paper to generate the name"}</h3>{paper && <p className="mt-1 text-sm font-semibold text-slate-600">{state?.code} · {exam?.name} · {paperSpecialization?.name ?? paper.name}{subject ? ` · ${subject.name}${section ? ` (${section.name})` : ""}` : ""}</p>}</div></div>{paper && <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-teal-800 shadow-sm">Next in series: {nextSeries}</span>}</div>
-        <input type="hidden" name="expected_series_number" value={nextSeries} />
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex gap-4">
+            {state && (
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-teal-200">
+                <StateSymbol slug={state.slug} className="h-5 w-5" />
+              </span>
+            )}
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name preview</p>
+              <h3 className="font-display mt-1 text-xl">
+                {paper ? mockTestLabel(effectiveSeries) : "Choose a paper to generate the name"}
+              </h3>
+              {paper && (
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  {state?.code} · {exam?.name} · {paperSpecialization?.name ?? paper.name}
+                  {subject ? ` · ${subject.name}${section ? ` (${section.name})` : ""}` : ""}
+                </p>
+              )}
+            </div>
+          </div>
+          {paper && (
+            <div className="flex flex-col items-end gap-1">
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-teal-800 shadow-sm">
+                {hasGap
+                  ? `Gap filled: Mock Test ${formatMockNumber(firstAvailableSeries)}`
+                  : `Next in series: ${firstAvailableSeries}`}
+              </span>
+              {hasGap && (
+                <span className="text-[11px] font-semibold text-amber-700">
+                  (Slot {firstAvailableSeries} was deleted; slot {maxSeries} exists)
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {paper && hasGap && (
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p>
+                <strong>Series Gap Detected:</strong> Mock Test {formatMockNumber(firstAvailableSeries)} is missing in this series (e.g. was deleted). We defaulted to Mock Test {formatMockNumber(firstAvailableSeries)} to fill the slot.
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSeriesNumber(firstAvailableSeries);
+                    setIsSeriesCustom(true);
+                  }}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                    Number(selectedSeriesNumber) === firstAvailableSeries
+                      ? "bg-amber-800 text-white"
+                      : "border border-amber-300 bg-white text-amber-900 hover:bg-amber-100"
+                  }`}
+                >
+                  Use {formatMockNumber(firstAvailableSeries)} (Fill gap)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSeriesNumber(appendSeries);
+                    setIsSeriesCustom(true);
+                  }}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                    Number(selectedSeriesNumber) === appendSeries
+                      ? "bg-amber-800 text-white"
+                      : "border border-amber-300 bg-white text-amber-900 hover:bg-amber-100"
+                  }`}
+                >
+                  Use {formatMockNumber(appendSeries)} (After {formatMockNumber(maxSeries)})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {paper && (
+          <div className="mt-4 pt-3 border-t border-teal-100 flex flex-wrap items-center gap-3">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-2">
+              Mock test number (Series #):
+              <input
+                name="series_number"
+                type="number"
+                min="1"
+                max="999"
+                required
+                value={selectedSeriesNumber}
+                onChange={(e) => {
+                  setSelectedSeriesNumber(e.target.value);
+                  setIsSeriesCustom(true);
+                }}
+                className="w-20 rounded-lg border bg-white px-2.5 py-1 text-xs font-black text-slate-900 focus:border-teal-600 focus:ring-1 focus:ring-teal-200"
+              />
+            </label>
+            <input type="hidden" name="expected_series_number" value={effectiveSeries} />
+            {isSeriesTaken && (
+              <span className="text-xs font-bold text-red-600">
+                ⚠️ Mock Test {formatMockNumber(Number(selectedSeriesNumber))} already exists! Please choose an unused number.
+              </span>
+            )}
+            {!isSeriesTaken && (
+              <span className="text-xs text-slate-500">
+                Defaults to first available slot. You can edit this number if desired.
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <label className="block text-sm font-bold md:col-span-2">Description <span className="font-normal text-slate-500">(optional)</span><textarea name="description" rows={3} placeholder="Tell students what this mock covers" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
@@ -279,7 +415,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
           Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam Passes.
         </p>
       </div>
-      <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId)} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(nextSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
+      <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId) || isSeriesTaken} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(effectiveSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
     </form>
   </section>;
 }

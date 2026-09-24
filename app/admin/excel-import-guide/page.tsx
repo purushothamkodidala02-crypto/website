@@ -64,7 +64,7 @@ export default function ExcelImportGuidePage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <InfoCard title="File type" detail="Excel .xlsx is recommended. CSV .csv also works." />
+        <InfoCard title="File type" detail="Excel (.xlsx, .xls) is recommended. CSV .csv also works." />
         <InfoCard title="Sheet name" detail="Use Varadhi Import, or the first worksheet in the file." />
         <InfoCard title="Import limit" detail="Up to 500 Questions and 2.5 MB per upload." />
       </section>
@@ -141,7 +141,7 @@ export default function ExcelImportGuidePage() {
         <div className="rounded-3xl border border-amber-100 bg-amber-50 p-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Display note</p><h2 className="mt-2 text-xl font-black text-amber-950">All imported Questions use MCQ options</h2><p className="mt-4 text-sm leading-6 text-amber-900">Excel can import Match the Following and Statement–Reason in the four-option format shown above. Use Question Bank only when you need a different custom or interactive display.</p></div>
       </section>
 
-      <section className="rounded-3xl border border-teal-100 bg-teal-50 p-6 sm:p-8"><h2 className="text-xl font-black text-teal-950">Before you upload</h2><ol className="mt-4 grid gap-3 text-sm leading-6 text-teal-950 sm:grid-cols-2"><li><strong>1.</strong> Select Recruiting Board, Exam, and Paper.</li><li><strong>2.</strong> Confirm the Subject names already exist in that Paper.</li><li><strong>3.</strong> Keep the headings in row 1 and save as .xlsx.</li><li><strong>4.</strong> Import into Question Bank, or open a draft Mock Test to import and assign Questions directly.</li></ol></section>
+      <section className="rounded-3xl border border-teal-100 bg-teal-50 p-6 sm:p-8"><h2 className="text-xl font-black text-teal-950">Before you upload</h2><ol className="mt-4 grid gap-3 text-sm leading-6 text-teal-950 sm:grid-cols-2"><li><strong>1.</strong> Select Recruiting Board, Exam, and Paper.</li><li><strong>2.</strong> Confirm the Subject names already exist in that Paper.</li><li><strong>3.</strong> Keep the headings in row 1 and save as .xlsx or .xls.</li><li><strong>4.</strong> Import into Question Bank, or open a draft Mock Test to import and assign Questions directly.</li></ol></section>
     </div>
   );
 }

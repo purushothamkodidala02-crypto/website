@@ -32,7 +32,9 @@ async function getExemptionClient() {
   return await createClient();
 }
 
-async function getAdminUserIds(client: any, userIds: string[]): Promise<Set<string>> {
+type ExemptionDbClient = ReturnType<typeof createAdminClient> | Awaited<ReturnType<typeof createClient>>;
+
+async function getAdminUserIds(client: ExemptionDbClient, userIds: string[]): Promise<Set<string>> {
   const adminUserIds = new Set<string>();
 
   // 1. Current logged-in user: query via server createClient() so we always get the session user!
@@ -40,10 +42,19 @@ async function getAdminUserIds(client: any, userIds: string[]): Promise<Set<stri
     const serverClient = await createClient();
     const { data: { user } } = await serverClient.auth.getUser();
     if (user?.id) {
-      adminUserIds.add(user.id);
       if (isExemptAdminEmail(user.email)) {
         adminUserIds.add(user.id);
       }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 2. Query profiles with 'admin' role in one fast indexed query
+  try {
+    const { data: profiles } = await client.from("profiles").select("id").eq("role", "admin");
+    for (const p of profiles ?? []) {
+      adminUserIds.add(p.id);
     }
   } catch {
     // ignore
@@ -53,33 +64,7 @@ async function getAdminUserIds(client: any, userIds: string[]): Promise<Set<stri
     return adminUserIds;
   }
 
-  // 2. Query profiles for 'admin' role
-  try {
-    const { data: profiles } = await client.from("profiles").select("id, role").in("id", userIds);
-    for (const p of profiles ?? []) {
-      if (p.role === "admin") {
-        adminUserIds.add(p.id);
-      }
-    }
-  } catch {
-    // ignore
-  }
-
-  // 3. Query auth.users via admin client if available
-  if (client.auth?.admin?.getUserById) {
-    for (const uid of userIds) {
-      try {
-        const { data: u } = await client.auth.admin.getUserById(uid);
-        if (isExemptAdminEmail(u?.user?.email)) {
-          adminUserIds.add(uid);
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  // 4. Query get_admin_user_emails RPC
+  // 3. Batch query get_admin_user_emails RPC in ONE call to check for any exempt emails
   try {
     const { data: emailRows } = await client.rpc("get_admin_user_emails", { requested_user_ids: userIds });
     for (const u of (emailRows ?? []) as Array<{ user_id: string; email: string }>) {

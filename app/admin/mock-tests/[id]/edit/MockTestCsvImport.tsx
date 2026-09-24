@@ -57,12 +57,12 @@ export function MockTestCsvImport({
             <input
               name="questions_file"
               type="file"
-              accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+              accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
               required
               className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-slate-950 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white"
             />
             <span className="mt-3 block text-xs font-normal leading-5 text-slate-600">
-              Use .xlsx for the speed option, or CSV as a fallback. Up to 500 Questions or 2.5 MB.
+              Use .xlsx or .xls for the speed option, or CSV as a fallback. Up to 500 Questions or 2.5 MB.
             </span>
           </label>
 
@@ -118,7 +118,7 @@ export function MockTestCsvImport({
               <p className="text-xs font-black uppercase tracking-[0.13em] text-red-700">Destructive draft action</p>
               <h3 className="mt-2 text-lg font-black text-slate-950">Replace all Questions from Excel or CSV</h3>
               <p className="mt-2 text-sm leading-6 text-slate-700">The complete file is checked first. It must contain exactly <strong>{targetQuestionCount}</strong> valid Questions with unique order numbers. Any error rolls back the entire replacement.</p>
-              <label className="mt-4 block text-sm font-bold">Replacement file<input name="questions_file" type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required className="mt-2 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-red-700 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white" /></label>
+              <label className="mt-4 block text-sm font-bold">Replacement file<input name="questions_file" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" required className="mt-2 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-red-700 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white" /></label>
               <button disabled={replacePending} aria-busy={replacePending} className="mt-4 rounded-xl bg-red-700 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"><PendingButtonContent pending={replacePending} pendingLabel="Validating and replacing…">Validate and replace all</PendingButtonContent></button>
               <LongPendingNotice pending={replacePending} />
               {replaceState.message && <p aria-live="polite" className={`mt-4 rounded-xl border px-4 py-3 text-sm font-semibold ${replaceState.success ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-white text-red-700"}`}>{replaceState.message}</p>}
