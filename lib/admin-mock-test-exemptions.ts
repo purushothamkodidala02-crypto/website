@@ -34,17 +34,15 @@ async function getExemptionClient() {
 
 type ExemptionDbClient = ReturnType<typeof createAdminClient> | Awaited<ReturnType<typeof createClient>>;
 
-async function getAdminUserIds(client: ExemptionDbClient, userIds: string[]): Promise<Set<string>> {
+async function resolveAllAdminUserIds(client: ExemptionDbClient): Promise<Set<string>> {
   const adminUserIds = new Set<string>();
 
-  // 1. Current logged-in user: query via server createClient() so we always get the session user!
+  // 1. Current logged-in user if exempt email
   try {
     const serverClient = await createClient();
     const { data: { user } } = await serverClient.auth.getUser();
-    if (user?.id) {
-      if (isExemptAdminEmail(user.email)) {
-        adminUserIds.add(user.id);
-      }
+    if (user?.id && isExemptAdminEmail(user.email)) {
+      adminUserIds.add(user.id);
     }
   } catch {
     // ignore
@@ -60,22 +58,6 @@ async function getAdminUserIds(client: ExemptionDbClient, userIds: string[]): Pr
     // ignore
   }
 
-  if (!userIds || userIds.length === 0) {
-    return adminUserIds;
-  }
-
-  // 3. Batch query get_admin_user_emails RPC in ONE call to check for any exempt emails
-  try {
-    const { data: emailRows } = await client.rpc("get_admin_user_emails", { requested_user_ids: userIds });
-    for (const u of (emailRows ?? []) as Array<{ user_id: string; email: string }>) {
-      if (isExemptAdminEmail(u.email)) {
-        adminUserIds.add(u.user_id);
-      }
-    }
-  } catch {
-    // ignore RPC error
-  }
-
   return adminUserIds;
 }
 
@@ -87,25 +69,25 @@ async function getAdminUserIds(client: ExemptionDbClient, userIds: string[]): Pr
 export async function getAdminAttemptCountsByMockTestId(): Promise<Map<string, MockTestAttemptBreakdown>> {
   try {
     const client = await getExemptionClient();
+    const adminUserIds = await resolveAllAdminUserIds(client);
+
+    if (adminUserIds.size === 0) {
+      return new Map();
+    }
+
     const { data: attempts, error: attemptsError } = await client
       .from("test_attempts")
-      .select("id, mock_test_id, user_id");
+      .select("mock_test_id")
+      .in("user_id", Array.from(adminUserIds));
 
     if (attemptsError || !attempts || attempts.length === 0) {
       return new Map();
     }
 
-    const userIds = [...new Set(attempts.map((a) => a.user_id))];
-    const adminUserIds = await getAdminUserIds(client, userIds);
-
     const map = new Map<string, MockTestAttemptBreakdown>();
     for (const a of attempts) {
       const entry = map.get(a.mock_test_id) ?? { studentAttempts: 0, adminAttempts: 0 };
-      if (adminUserIds.has(a.user_id)) {
-        entry.adminAttempts += 1;
-      } else {
-        entry.studentAttempts += 1;
-      }
+      entry.adminAttempts += 1;
       map.set(a.mock_test_id, entry);
     }
 
@@ -122,19 +104,28 @@ export async function getAdminAttemptCountsByMockTestId(): Promise<Map<string, M
 export async function mockTestHasStudentAttempts(mockTestId: string): Promise<boolean> {
   try {
     const client = await getExemptionClient();
-    const { data: attempts, error } = await client
-      .from("test_attempts")
-      .select("id, user_id")
-      .eq("mock_test_id", mockTestId);
+    // Fast path: use PostgreSQL database function directly
+    const { data: hasAttempts, error } = await client.rpc("mock_test_has_student_attempts", {
+      target_mock_test_id: mockTestId,
+    });
 
-    if (error || !attempts || attempts.length === 0) {
-      return false;
+    if (!error && typeof hasAttempts === "boolean") {
+      return hasAttempts;
     }
 
-    const userIds = [...new Set(attempts.map((a) => a.user_id))];
-    const adminUserIds = await getAdminUserIds(client, userIds);
+    // Fallback: fast indexed head count excluding admin IDs
+    const adminUserIds = await resolveAllAdminUserIds(client);
+    let query = client
+      .from("test_attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("mock_test_id", mockTestId);
 
-    return attempts.some((a) => !adminUserIds.has(a.user_id));
+    if (adminUserIds.size > 0) {
+      query = query.not("user_id", "in", `(${Array.from(adminUserIds).join(",")})`);
+    }
+
+    const { count } = await query;
+    return (count ?? 0) > 0;
   } catch (err) {
     console.error("Failed to check student attempts:", err);
     return false;
@@ -147,19 +138,22 @@ export async function mockTestHasStudentAttempts(mockTestId: string): Promise<bo
 export async function clearAdminTestAttempts(mockTestId: string): Promise<{ success: boolean; clearedCount: number }> {
   try {
     const client = await getExemptionClient();
+    const adminUserIds = await resolveAllAdminUserIds(client);
+    if (adminUserIds.size === 0) {
+      return { success: true, clearedCount: 0 };
+    }
+
     const { data: attempts, error } = await client
       .from("test_attempts")
       .select("id, user_id")
-      .eq("mock_test_id", mockTestId);
+      .eq("mock_test_id", mockTestId)
+      .in("user_id", Array.from(adminUserIds));
 
     if (error || !attempts || attempts.length === 0) {
       return { success: true, clearedCount: 0 };
     }
 
-    const userIds = [...new Set(attempts.map((a) => a.user_id))];
-    const adminUserIds = await getAdminUserIds(client, userIds);
-
-    const adminAttemptIds = attempts.filter((a) => adminUserIds.has(a.user_id)).map((a) => a.id);
+    const adminAttemptIds = attempts.map((a) => a.id);
     if (adminAttemptIds.length === 0) {
       return { success: true, clearedCount: 0 };
     }

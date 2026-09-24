@@ -97,8 +97,8 @@ export default async function MockTestsPage({
     const summary = summaryByTestId.get(test.id);
     const notification = notificationMap.get(test.id);
     const exemption = attemptExemptions.get(test.id);
-    const studentAttempts = exemption ? exemption.studentAttempts : Number(summary?.attempt_count ?? 0);
-    const adminAttempts = exemption ? exemption.adminAttempts : 0;
+    const studentAttempts = Number(summary?.attempt_count ?? 0);
+    const adminAttempts = exemption?.adminAttempts ?? 0;
     return {
       id: test.id,
       stateId: state?.id ?? "",

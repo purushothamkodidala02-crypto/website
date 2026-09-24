@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { revalidatePath } from "next/cache";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { readMockTestAccess } from "@/lib/mock-test-access";
 import { mockTestSlug } from "@/lib/public-urls";
@@ -14,9 +13,6 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, message: "You must be logged in." };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin") return { success: false, message: "You are not authorized to create mock tests." };
-
   const stateId = String(formData.get("state_id") ?? "").trim();
   const categoryId = String(formData.get("exam_id") ?? "").trim();
   const examId = String(formData.get("exam_group_id") ?? "").trim();
@@ -34,23 +30,6 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   if (scope === "subject" && !subjectId) return { success: false, message: "Choose a subject for a subject-only mock." };
   if (pricing.error) return { success: false, message: pricing.error };
 
-  const [stateResult, categoryResult, groupResult, paperResult, subjectResult, sectionResult] = await Promise.all([
-    supabase.from("exam_states").select("id, name, code, slug").eq("id", stateId).maybeSingle(),
-    supabase.from("exams").select("id, state_id, name").eq("id", categoryId).maybeSingle(),
-    supabase.from("exam_groups").select("id, exam_id, name, slug").eq("id", examId).maybeSingle(),
-    supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order, question_count").eq("id", paperId).maybeSingle(),
-    subjectId ? supabase.from("subjects").select("id, paper_id, name, slug").eq("id", subjectId).maybeSingle() : Promise.resolve({ data: null, error: null }),
-    subjectSectionId ? supabase.from("subject_sections").select("id, subject_id, name, slug").eq("id", subjectSectionId).maybeSingle() : Promise.resolve({ data: null, error: null }),
-  ]);
-  const state = stateResult.data;
-  const category = categoryResult.data;
-  const group = groupResult.data;
-  const paper = paperResult.data;
-  const subject = subjectResult.data;
-  const section = sectionResult.data;
-  if (!state || !category || !group || !paper || category.state_id !== state.id || group.exam_id !== category.id || paper.exam_group_id !== group.id || (scope === "subject" && (!subject || subject.paper_id !== paper.id)) || (scope === "subject" && subjectSectionId && (!section || section.subject_id !== subjectId))) {
-    return { success: false, message: "The selected state, board, exam, paper, subject and sub-section do not belong together." };
-  }
   let existingSeriesQuery = supabase
     .from("mock_tests")
     .select("series_number")
@@ -67,7 +46,42 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   } else {
     existingSeriesQuery = existingSeriesQuery.is("subject_id", null);
   }
-  const { data: existingSeries, error: seriesError } = await existingSeriesQuery;
+
+  const [
+    profileResult,
+    stateResult,
+    categoryResult,
+    groupResult,
+    paperResult,
+    subjectResult,
+    sectionResult,
+    seriesResult,
+  ] = await Promise.all([
+    supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+    supabase.from("exam_states").select("id, name, code, slug").eq("id", stateId).maybeSingle(),
+    supabase.from("exams").select("id, state_id, name").eq("id", categoryId).maybeSingle(),
+    supabase.from("exam_groups").select("id, exam_id, name, slug").eq("id", examId).maybeSingle(),
+    supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order, question_count").eq("id", paperId).maybeSingle(),
+    subjectId ? supabase.from("subjects").select("id, paper_id, name, slug").eq("id", subjectId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    subjectSectionId ? supabase.from("subject_sections").select("id, subject_id, name, slug").eq("id", subjectSectionId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    existingSeriesQuery,
+  ]);
+
+  if (profileResult.data?.role !== "admin") {
+    return { success: false, message: "You are not authorized to create mock tests." };
+  }
+
+  const state = stateResult.data;
+  const category = categoryResult.data;
+  const group = groupResult.data;
+  const paper = paperResult.data;
+  const subject = subjectResult.data;
+  const section = sectionResult.data;
+  if (!state || !category || !group || !paper || category.state_id !== state.id || group.exam_id !== category.id || paper.exam_group_id !== group.id || (scope === "subject" && (!subject || subject.paper_id !== paper.id)) || (scope === "subject" && subjectSectionId && (!section || section.subject_id !== subjectId))) {
+    return { success: false, message: "The selected state, board, exam, paper, subject and sub-section do not belong together." };
+  }
+
+  const { data: existingSeries, error: seriesError } = seriesResult;
   if (seriesError) return { success: false, message: seriesError.message };
 
   const existingSet = new Set((existingSeries ?? []).map((item) => Number(item.series_number)));
@@ -127,8 +141,5 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
   }
   if (error) return { success: false, message: error.message };
   revalidatePath("/admin/mock-tests");
-  revalidatePath("/mock-tests");
-  revalidatePath("/");
-  revalidateTag(PUBLIC_CATALOG_TAG, "max");
   return { success: true, message: `${title} was created as a draft.` };
 }
