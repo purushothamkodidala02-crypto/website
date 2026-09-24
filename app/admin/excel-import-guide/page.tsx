@@ -72,7 +72,7 @@ export default function ExcelImportGuidePage() {
       <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Step 1</p>
         <h2 className="mt-2 text-2xl font-black">Keep these headings in row 1</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Headings are case-insensitive, but each heading must appear only once. Do not remove a required heading, even if a language subject uses only one language.</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Headings are case-insensitive, but each heading must appear only once. For bilingual subjects, all 13 columns are required. For English-only or Telugu-only subjects, you can omit the other language’s columns.</p>
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <code className="block min-w-[68rem] whitespace-nowrap text-sm font-semibold leading-7 text-slate-800">{QUESTION_IMPORT_REQUIRED_HEADERS.join(", ")}</code>
         </div>
@@ -88,7 +88,7 @@ export default function ExcelImportGuidePage() {
             <tbody><tr className="align-top bg-white text-slate-700">{bilingualExample.map((value, index) => <td key={`${value}-${index}`} className="max-w-52 border-t border-slate-200 px-3 py-3 leading-5">{value}</td>)}</tr></tbody>
           </table>
         </div>
-        <p className="mt-4 text-xs leading-5 text-slate-500">For a bilingual subject, fill all English and Telugu fields. For an English-only or Telugu-only subject, fill only that subject’s language columns; keep the other required-language columns blank.</p>
+        <p className="mt-4 text-xs leading-5 text-slate-500">For a bilingual subject, fill all English and Telugu fields. For an English-only or Telugu-only subject, you only need your subject’s language columns (the other language’s columns can be omitted entirely or left blank).</p>
         <div className="mt-8 border-t border-slate-200 pt-7">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">More required-field examples</p>
         <h2 className="mt-2 text-2xl font-black">Match the Following and Statement–Reason</h2>

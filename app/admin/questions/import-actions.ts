@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import { createClient } from "@/lib/supabase/server";
-import { QUESTION_IMPORT_REQUIRED_HEADERS } from "@/lib/questions/import-format";
+import {
+  QUESTION_IMPORT_REQUIRED_HEADERS,
+  getRequiredHeadersForLanguageMode,
+} from "@/lib/questions/import-format";
 import { normalizeQuestionImageUrl, questionMediaPath, removeQuestionImage, uploadQuestionImage } from "@/lib/questions/media";
 import type { CorrectAnswer, QuestionLifecycle } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
@@ -18,6 +21,7 @@ type EmbeddedQuestionImage = {
   fileName: string;
 };
 type ParsedQuestionFile = {
+  headers: string[];
   rows: Array<{ values: CsvRow; rowNumber: number }>;
   embeddedImages: Map<number, EmbeddedQuestionImage>;
 };
@@ -49,13 +53,79 @@ const cleanCellValue = (value: string) => value.replace(/\u00A0/g, " ").replace(
 const normalizeHeader = (value: string) => cleanCellValue(value).replace(/^\uFEFF/, "").toLowerCase().replace(/[\s-]+/g, "_");
 const normalizeLookup = (value: string) => cleanCellValue(value).replace(/\s+/g, " ").toLocaleLowerCase();
 
-function validateHeaders(headers: string[]) {
+function validateHeaders(
+  headers: string[],
+  requiredHeaders: readonly string[] = QUESTION_IMPORT_REQUIRED_HEADERS,
+) {
   if (new Set(headers).size !== headers.length) throw new Error("Each file column heading must be unique.");
-  const missingHeaders = QUESTION_IMPORT_REQUIRED_HEADERS.filter((header) => !headers.includes(header));
+  const missingHeaders = requiredHeaders.filter((header) => !headers.includes(header));
   if (missingHeaders.length) throw new Error(`Missing file column${missingHeaders.length === 1 ? "" : "s"}: ${missingHeaders.join(", ")}.`);
 }
 
-function parseCsv(source: string): CsvRow[] {
+function determineRequiredHeaders(options: {
+  headers: string[];
+  rows: ParsedQuestionFile["rows"];
+  subjects: Array<{ id: string; name: string; content_language_mode: string }>;
+  subjectByName: Map<string, { id: string; name: string; content_language_mode: string }>;
+  mockTest: MockImportTarget | null;
+}): readonly string[] {
+  const { headers, rows, subjects, subjectByName, mockTest } = options;
+
+  // 1. If this is a subject-scoped mock test, the mock test target subject is the primary source of truth
+  if (mockTest?.test_scope === "subject" && mockTest.subject_id) {
+    const targetSubject = subjects.find((s) => s.id === mockTest.subject_id);
+    const mode = targetSubject?.content_language_mode;
+    if (mode === "english") return getRequiredHeadersForLanguageMode("english");
+    if (mode === "telugu") return getRequiredHeadersForLanguageMode("telugu");
+    return QUESTION_IMPORT_REQUIRED_HEADERS;
+  }
+
+  // 2. If subject column is missing from headers:
+  if (!headers.includes("subject")) {
+    if (subjects.length > 0 && subjects.every((s) => s.content_language_mode === "english")) {
+      return getRequiredHeadersForLanguageMode("english");
+    }
+    if (subjects.length > 0 && subjects.every((s) => s.content_language_mode === "telugu")) {
+      return getRequiredHeadersForLanguageMode("telugu");
+    }
+    return QUESTION_IMPORT_REQUIRED_HEADERS;
+  }
+
+  // 3. Inspect subjects referenced in the rows
+  const referencedSubjectNames = Array.from(
+    new Set(
+      rows
+        .map((r) => normalizeLookup(r.values.subject ?? ""))
+        .filter(Boolean),
+    ),
+  );
+
+  const matchedSubjects = referencedSubjectNames
+    .map((name) => subjectByName.get(name))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
+
+  if (matchedSubjects.length > 0) {
+    const allEnglish = matchedSubjects.every((s) => s.content_language_mode === "english");
+    const allTelugu = matchedSubjects.every((s) => s.content_language_mode === "telugu");
+
+    if (allEnglish) return getRequiredHeadersForLanguageMode("english");
+    if (allTelugu) return getRequiredHeadersForLanguageMode("telugu");
+    return QUESTION_IMPORT_REQUIRED_HEADERS;
+  }
+
+  // 4. Fallback if no row subject matched an existing subject in the paper:
+  if (subjects.length > 0) {
+    const allPaperEnglish = subjects.every((s) => s.content_language_mode === "english");
+    const allPaperTelugu = subjects.every((s) => s.content_language_mode === "telugu");
+
+    if (allPaperEnglish) return getRequiredHeadersForLanguageMode("english");
+    if (allPaperTelugu) return getRequiredHeadersForLanguageMode("telugu");
+  }
+
+  return QUESTION_IMPORT_REQUIRED_HEADERS;
+}
+
+function parseCsv(source: string): ParsedQuestionFile {
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -90,9 +160,16 @@ function parseCsv(source: string): CsvRow[] {
   if (rows.length < 2) throw new Error("The CSV needs a header row and at least one Question.");
 
   const headers = rows.shift()!.map(normalizeHeader);
-  validateHeaders(headers);
+  if (new Set(headers).size !== headers.length) throw new Error("Each file column heading must be unique.");
 
-  return rows.map((values) => Object.fromEntries(headers.map((header, index) => [header, cleanCellValue(values[index] ?? "")])));
+  return {
+    headers,
+    rows: rows.map((values, index) => ({
+      values: Object.fromEntries(headers.map((header, colIndex) => [header, cleanCellValue(values[colIndex] ?? "")])),
+      rowNumber: index + 2,
+    })),
+    embeddedImages: new Map(),
+  };
 }
 
 async function parseExcel(file: File): Promise<ParsedQuestionFile> {
@@ -117,8 +194,13 @@ async function parseExcel(file: File): Promise<ParsedQuestionFile> {
   const worksheet = workbook.getWorksheet("Varadhi Import") ?? workbook.worksheets[0];
   if (!worksheet) throw new Error("The Excel file does not contain a worksheet.");
 
-  const headers = Array.from({ length: worksheet.columnCount }, (_, index) => normalizeHeader(worksheet.getCell(1, index + 1).text));
-  validateHeaders(headers);
+  let lastCol = worksheet.columnCount;
+  while (lastCol > 0 && !worksheet.getCell(1, lastCol).text.trim()) {
+    lastCol -= 1;
+  }
+  const headers = Array.from({ length: lastCol }, (_, index) => normalizeHeader(worksheet.getCell(1, index + 1).text));
+  if (new Set(headers).size !== headers.length) throw new Error("Each file column heading must be unique.");
+
   const embeddedImages = new Map<number, EmbeddedQuestionImage>();
   for (const placement of worksheet.getImages()) {
     const rowNumber = placement.range.tl.nativeRow + 1;
@@ -153,18 +235,13 @@ async function parseExcel(file: File): Promise<ParsedQuestionFile> {
     if (values.some(([, value]) => value) || embeddedImages.has(rowNumber)) rows.push({ values: Object.fromEntries(values), rowNumber });
   }
   if (!rows.length) throw new Error("The Excel sheet needs headings and at least one Question.");
-  return { rows, embeddedImages };
+  return { headers, rows, embeddedImages };
 }
 
 async function parseQuestionFile(file: File): Promise<ParsedQuestionFile> {
   const extension = file.name.toLowerCase().split(".").pop();
   if (extension === "xlsx" || extension === "xls") return parseExcel(file);
-  if (extension === "csv") {
-    return {
-      rows: parseCsv(await file.text()).map((values, index) => ({ values, rowNumber: index + 2 })),
-      embeddedImages: new Map(),
-    };
-  }
+  if (extension === "csv") return parseCsv(await file.text());
   throw new Error("Choose an Excel (.xlsx, .xls) or CSV (.csv) file.");
 }
 
@@ -276,6 +353,19 @@ async function importQuestions(
     .order("display_order");
   if (subjectsError) return { success: false, message: subjectsError.message };
   const subjectByName = new Map((subjects ?? []).map((subject) => [normalizeLookup(subject.name), subject]));
+
+  try {
+    const requiredHeaders = determineRequiredHeaders({
+      headers: parsedFile.headers,
+      rows: parsedFile.rows,
+      subjects: subjects ?? [],
+      subjectByName,
+      mockTest,
+    });
+    validateHeaders(parsedFile.headers, requiredHeaders);
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : "The Question file could not be read." };
+  }
 
   // Pre-fetch active questions in this paper to check for duplicates
   const subjectIds = (subjects ?? []).map((subject) => subject.id);

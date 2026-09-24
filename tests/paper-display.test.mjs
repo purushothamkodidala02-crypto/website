@@ -171,4 +171,14 @@ test("buildPaperDisplayMap correctly coordinates stage-based exams (Screening & 
   assert.equal(directMap.get("dsp-2")?.shortLabel, "Paper 2");
   assert.equal(directMap.get("dsp-3")?.shortLabel, "Paper 1");
   assert.equal(directMap.get("dsp-4")?.shortLabel, "Paper 2");
+
+  // 5. HMWSSB / AEE case with display_order 1 stored on both common paper and specialization paper
+  const hmwssbPapers = [
+    { id: "hm-p1", exam_group_id: "hmwssb", name: "General Studies & General Abilities", display_order: 1 },
+    { id: "hm-ece", exam_group_id: "hmwssb", specialization_id: "spec-ece", name: "ECE", display_order: 1 },
+  ];
+  const hmwssbMap = buildPaperDisplayMap(hmwssbPapers);
+  assert.equal(hmwssbMap.get("hm-p1")?.shortLabel, "Paper 1");
+  assert.equal(hmwssbMap.get("hm-ece")?.shortLabel, "Paper 2");
+  assert.equal(hmwssbMap.get("hm-ece")?.label, "Paper 2 · ECE");
 });
