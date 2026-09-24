@@ -320,7 +320,7 @@ async function importQuestions(
       if (qError || !data || data.length === 0) {
         hasMore = false;
       } else {
-        existingPaperQuestions = existingPaperQuestions.concat(data as any);
+        existingPaperQuestions = existingPaperQuestions.concat(data as unknown as typeof existingPaperQuestions);
         if (data.length < pageSize) {
           hasMore = false;
         } else {
