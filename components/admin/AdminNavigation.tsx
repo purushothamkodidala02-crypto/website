@@ -287,13 +287,13 @@ function NavigationLinks({
 
 function Brand({ linked = true, collapsed = false }: { linked?: boolean; collapsed?: boolean }) {
   const content = collapsed
-    ? <BrandMark preload className="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />
-    : <BrandLockup context="admin" markClassName="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />;
+    ? <BrandMark preload className="h-9 w-9 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />
+    : <BrandLockup context="admin" markClassName="h-9 w-9 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />;
 
-  if (!linked) return <div className="flex min-w-0 items-center gap-3">{content}</div>;
+  if (!linked) return <div className="flex min-w-0 items-center">{content}</div>;
 
   return (
-    <Link href="/admin" className="flex min-w-0 items-center gap-3">
+    <Link href="/admin" className="flex min-w-0 items-center">
       {content}
     </Link>
   );
@@ -410,7 +410,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
 
   return (
     <>
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-5"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-4"}`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
           <Brand collapsed={collapsed} />
           {!collapsed && (

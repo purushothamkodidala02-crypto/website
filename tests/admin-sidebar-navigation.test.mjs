@@ -5,9 +5,10 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("admin navigation sidebar maintains correct active state isolation and distinct route icons", async () => {
-  const [navContent, shellContent] = await Promise.all([
+  const [navContent, shellContent, brandContent] = await Promise.all([
     read("components/admin/AdminNavigation.tsx"),
     read("components/admin/AdminShell.tsx"),
+    read("components/brand/VaradhiBrand.tsx"),
   ]);
 
   // 1. /admin/subjects is decoupled from /admin/exams to prevent double-highlighting
@@ -39,4 +40,8 @@ test("admin navigation sidebar maintains correct active state isolation and dist
   // 6. Bottom portal link provides clean icon and tooltip in collapsed mode
   assert.match(navContent, /NavIcon name="portal"/);
   assert.match(navContent, /Student portal \(Open in new tab\)/);
+
+  // 7. BrandLockup does not truncate Varadhi Prep to ellipsis
+  assert.match(brandContent, /whitespace-nowrap[\s\S]*?Varadhi Prep/);
+  assert.doesNotMatch(brandContent, /truncate[\s\S]*?Varadhi Prep/);
 });
