@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -170,7 +169,7 @@ export function StudentTestRunner({
       setSubmitting(false);
       void exitFullscreenSafely();
     }
-  }, [answers, flushSaves, sessionId, submission, submitting]);
+  }, [answers, flushSaves, router, sessionId, submission, submitting]);
 
   useEffect(() => {
     if (submission || paused) return;
@@ -254,6 +253,27 @@ export function StudentTestRunner({
     };
   }, []);
 
+  const handleToggleFullscreen = useCallback(async (event?: React.MouseEvent) => {
+    event?.preventDefault();
+    setFullscreenFeedback("");
+    const success = await toggleFullscreenSafely(containerRef.current);
+    const active = isCurrentlyFullscreen();
+    setIsFullscreen(active);
+    if (!success && !active) {
+      const status = getLastFullscreenStatus();
+      if (status.isBlockedByBrowser) {
+        setFullscreenFeedback("Browser permissions blocked automatic full screen. You can press F11 on keyboard or continue in normal / split screen.");
+      } else {
+        setFullscreenFeedback("Fullscreen could not be enabled in this window. You can press F11 on keyboard or continue in normal screen.");
+      }
+    } else {
+      setFullscreenFeedback("");
+      if (active) {
+        setShowFullscreenNotice(false);
+      }
+    }
+  }, []);
+
   if (submission) {
     return (
       <SubmissionResult
@@ -319,27 +339,6 @@ export function StudentTestRunner({
     }
     setPausing(false);
   }
-
-  const handleToggleFullscreen = useCallback(async (event?: React.MouseEvent) => {
-    event?.preventDefault();
-    setFullscreenFeedback("");
-    const success = await toggleFullscreenSafely(containerRef.current);
-    const active = isCurrentlyFullscreen();
-    setIsFullscreen(active);
-    if (!success && !active) {
-      const status = getLastFullscreenStatus();
-      if (status.isBlockedByBrowser) {
-        setFullscreenFeedback("Browser permissions blocked automatic full screen. You can press F11 on keyboard or continue in normal / split screen.");
-      } else {
-        setFullscreenFeedback("Fullscreen could not be enabled in this window. You can press F11 on keyboard or continue in normal screen.");
-      }
-    } else {
-      setFullscreenFeedback("");
-      if (active) {
-        setShowFullscreenNotice(false);
-      }
-    }
-  }, []);
 
   const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
@@ -702,7 +701,7 @@ export function StudentTestRunner({
       </div>
     )}
 
-    {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} questions={questions} answers={answers as any} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
+    {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} questions={questions} answers={answers} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
   </main>;
 }
 

@@ -24,8 +24,8 @@ export function EmailOtpLoginForm({ nextPath, onUsePassword }: { nextPath: strin
     setSending(true); setNotice(null);
     
     // Log the attempt to PostHog so admins can see which email was used
-    if (typeof window !== "undefined" && (window as any).posthog) {
-      (window as any).posthog.capture("otp_requested", { email: normalizedEmail });
+    if (typeof window !== "undefined" && window.posthog) {
+      window.posthog.capture("otp_requested", { email: normalizedEmail });
     }
 
     const result = await postOtp("/api/auth/email-otp/request", { email: normalizedEmail, captchaToken });

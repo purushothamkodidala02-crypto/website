@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
@@ -58,13 +58,13 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
   const showTelugu = effectiveLanguage === "telugu" && hasTelugu;
   const questionText = showTelugu ? row.question_text_te ?? row.question_text : row.question_text;
 
-  function showQuestion(nextIndex: number, scrollToCard = true) {
+  const showQuestion = useCallback((nextIndex: number, scrollToCard = true) => {
     const safeIndex = Math.max(0, Math.min(rows.length - 1, nextIndex));
     setIndex(safeIndex);
     if (scrollToCard) {
       requestAnimationFrame(() => questionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     }
-  }
+  }, [rows.length]);
 
   useEffect(() => {
     activeNumberRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
@@ -96,7 +96,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [index, rows.length]);
+  }, [index, rows.length, showQuestion]);
 
   const options = [
     ["A", showTelugu ? row.option_a_te ?? row.option_a : row.option_a],

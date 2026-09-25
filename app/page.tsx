@@ -104,7 +104,7 @@ export default async function Home() {
     <main className="student-page min-h-screen bg-white text-slate-950">
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
-      <SurveyPopup survey={activeSurvey as any} />
+      <SurveyPopup survey={activeSurvey} />
 
       <section className="border-b bg-[#f4f7f8]">
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">

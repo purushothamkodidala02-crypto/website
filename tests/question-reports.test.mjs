@@ -29,6 +29,7 @@ test("question reporting is private, rate-limited, and connected from students t
   assert.match(studentAction, /error\?\.code === "23505"/);
   assert.match(studentDialog, /role="dialog"/);
   assert.match(studentDialog, /aria-busy=\{pending\}/);
+  assert.match(studentButton, /Report issue/);
   assert.match(runner, /ReportQuestionButton/);
   assert.match(studyBook, /ReportQuestionButton/);
   assert.match(review, /attemptId=\{attemptId\}/);

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
 import { verifySubmittedAttempt, type SubmitAttemptResult } from "../attempt-actions";
@@ -62,20 +63,20 @@ export default function AttemptErrorPage({
         </p>
 
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <a
+          <Link
             href="/dashboard"
             onClick={() => void exitFullscreenSafely()}
             className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
           >
             Check your result in the dashboard
-          </a>
-          <a
+          </Link>
+          <Link
             href="/"
             onClick={() => void exitFullscreenSafely()}
             className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
           >
             Return home
-          </a>
+          </Link>
         </div>
       </section>
     </main>

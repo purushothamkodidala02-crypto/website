@@ -9,8 +9,8 @@ type SubmissionDialogProps = {
   submitting: boolean;
   onCancel: () => void;
   onSubmit: () => void;
-  questions: any[];
-  answers: Record<string, string>;
+  questions: Array<{ question_id: string }>;
+  answers: Record<string, string | undefined>;
   reviewIds: Set<string>;
   onGoToQuestion: (index: number) => void;
 };

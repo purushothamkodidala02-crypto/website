@@ -39,3 +39,29 @@ test("mobile authentication cards can shrink within the single-column grid", asy
 
   for (const source of files) assert.match(source, /min-w-0/);
 });
+
+test("student test runner and error pages follow React rules of hooks and Next.js routing conventions", async () => {
+  const [runner, errorPage, studyViewer] = await Promise.all([
+    read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+    read("app/mock-tests/[id]/attempt/error.tsx"),
+    read("components/study/StudyViewer.tsx"),
+  ]);
+
+  // handleToggleFullscreen hook must appear BEFORE if (submission) conditional return
+  const fullscreenHookIndex = runner.indexOf("handleToggleFullscreen = useCallback");
+  const submissionReturnIndex = runner.indexOf("if (submission) {");
+  assert.ok(fullscreenHookIndex !== -1, "handleToggleFullscreen should be defined");
+  assert.ok(submissionReturnIndex !== -1, "submission check should exist");
+  assert.ok(fullscreenHookIndex < submissionReturnIndex, "handleToggleFullscreen hook must be called unconditionally before early return");
+
+  // attempt error page must use Next.js <Link> instead of <a> for client-side navigation
+  assert.match(errorPage, /import Link from "next\/link"/);
+  assert.match(errorPage, /<Link\s+href="\/dashboard"/);
+  assert.match(errorPage, /<Link\s+href="\/"/);
+  assert.doesNotMatch(errorPage, /<a\s+href=/);
+
+  // StudyViewer handleNavigate must be wrapped in useCallback and use functional state update
+  assert.match(studyViewer, /useCallback\(\s*\(\w+Index:\s*number\)/);
+  assert.match(studyViewer, /setCurrentIndex\(\(prev\)\s*=>/);
+});
+

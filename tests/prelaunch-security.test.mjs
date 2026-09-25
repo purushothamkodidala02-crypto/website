@@ -357,6 +357,7 @@ test("loading feedback is accessible and prevents duplicate operations", async (
   assert.match(routeLoading, /motion-reduce:animate-none/);
   assert.match(testStartActions, /pendingLabel="Starting test…"/);
   assert.match(testStartActions, /pendingLabel="Resuming test…"/);
+  assert.match(testRunner, /submitting/);
   assert.match(submissionDialog, /aria-busy=\{submitting\}/);
   assert.match(submissionDialog, /PendingButtonContent/);
   assert.match(downloadQuestions, /if \(pending\) return/);

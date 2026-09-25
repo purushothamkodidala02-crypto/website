@@ -5,6 +5,12 @@ import { usePathname, useSearchParams } from "next/navigation";
 import type { PostHog } from "posthog-js";
 import type { Session } from "@supabase/supabase-js";
 
+declare global {
+  interface Window {
+    posthog?: PostHog;
+  }
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const [phState, setPhState] = useState<{
     client: PostHog;

@@ -130,6 +130,7 @@ export default async function TakeMockTestPage({
   }
 
   // 3. If the session has reached or passed deadline, finalize submission immediately and show results
+  // eslint-disable-next-line react-hooks/purity -- Server component evaluating expiration timestamp dynamically at request time
   const isExpired = new Date(session.expires_at).getTime() <= Date.now();
   if (isExpired) {
     const { data: submitData } = await supabase.rpc("submit_mock_test_attempt", {

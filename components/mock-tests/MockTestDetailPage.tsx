@@ -21,11 +21,59 @@ type MockTestDetailsProps = {
   backLabel?: string;
 };
 
-type MockTestStats = {
-  mock_test_id: string;
-  question_count: number;
-  total_marks: number;
-  maximum_negative_marks: number;
+type MockTestDetailPaper = {
+  id: string;
+  exam_group_id: string;
+  specialization_id: string | null;
+  name: string;
+  slug: string;
+  display_order: number;
+  question_count: number | null;
+  default_correct_marks: number | null;
+  default_negative_marks: number | null;
+  specialization?: { id: string; name: string } | { id: string; name: string }[] | null;
+  exam_group?: {
+    id: string;
+    exam_id: string;
+    name: string;
+    slug: string;
+    exam?: {
+      id: string;
+      state_id: string;
+      name: string;
+      slug: string;
+      state?: { id: string; name: string; code: string; slug: string } | { id: string; name: string; code: string; slug: string }[] | null;
+    } | {
+      id: string;
+      state_id: string;
+      name: string;
+      slug: string;
+      state?: { id: string; name: string; code: string; slug: string } | { id: string; name: string; code: string; slug: string }[] | null;
+    }[] | null;
+  } | {
+    id: string;
+    exam_id: string;
+    name: string;
+    slug: string;
+    exam?: unknown;
+  }[] | null;
+};
+
+type MockTestDetailData = {
+  id: string;
+  paper_id: string;
+  subject_id: string | null;
+  test_scope: string;
+  series_number: number | null;
+  title: string;
+  description: string | null;
+  instructions: string | null;
+  duration_minutes: number;
+  status: string;
+  access_type: string;
+  target_question_count: number | null;
+  subject: { id: string; name: string; content_language_mode?: string } | { id: string; name: string; content_language_mode?: string }[] | null;
+  paper: MockTestDetailPaper | MockTestDetailPaper[] | null;
 };
 
 export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDetailsProps): Promise<Metadata> {
@@ -262,7 +310,7 @@ export async function MockTestDetailsPage({
       .eq("mock_test_id", id)
   ]);
 
-  const test = testResult.data as any;
+  const test = testResult.data as unknown as MockTestDetailData | null;
 
   if (!test) {
     notFound();

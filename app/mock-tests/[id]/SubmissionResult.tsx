@@ -110,24 +110,35 @@ export function SubmissionResult({
               Check your result in the dashboard.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
+                >
+                  Try submitting again
+                </button>
+              )}
               <Link
                 href="/dashboard"
                 prefetch={true}
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
-                className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
+                className={`rounded-xl px-6 py-3.5 text-sm font-bold text-white shadow-sm transition ${
+                  onRetry ? "bg-slate-900 hover:bg-slate-800" : "bg-teal-700 hover:bg-teal-600"
+                }`}
               >
-                Check your result in the dashboard
+                Check dashboard
               </Link>
               <Link
-                href="/"
+                href={publicTestPath}
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
                 className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
               >
-                Return home
+                View test details
               </Link>
             </div>
           </>

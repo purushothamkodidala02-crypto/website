@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, TouchEvent } from "react";
+import { useState, useEffect, useCallback, TouchEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
@@ -49,20 +49,18 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   // Sync state if URL changes externally
   useEffect(() => {
     const item = Number(searchParams.get("item") ?? 1);
-    const newIndex = Number.isInteger(item) ? Math.min(Math.max(item - 1, 0), Math.max(rows.length - 1, 0)) : 0;
-    if (newIndex !== currentIndex) {
-      setCurrentIndex(newIndex);
-    }
+    const targetIndex = Number.isInteger(item) ? Math.min(Math.max(item - 1, 0), Math.max(rows.length - 1, 0)) : 0;
+    setCurrentIndex((prev) => (prev !== targetIndex ? targetIndex : prev));
   }, [searchParams, rows.length]);
 
-  const handleNavigate = (newIndex: number) => {
+  const handleNavigate = useCallback((newIndex: number) => {
     setCurrentIndex(newIndex);
     
     // Update the URL without triggering a server fetch
     const params = new URLSearchParams(searchParams.toString());
     params.set("item", String(newIndex + 1));
     router.replace(`?${params.toString()}`, { scroll: false });
-  };
+  }, [router, searchParams]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -90,7 +88,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex, rows.length]);
+  }, [currentIndex, rows.length, handleNavigate]);
 
   const onTouchStart = (e: TouchEvent) => {
     setTouchEnd(null);

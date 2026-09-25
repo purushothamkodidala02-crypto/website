@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { submitDynamicSurvey } from "@/app/actions/surveys";
+import { submitDynamicSurvey, type DynamicSurveyData } from "@/app/actions/surveys";
 
 export type SurveyQuestion = {
   id: string;
   question_text: string;
   question_type: string; // 'text', 'radio', 'textarea'
   options: string[] | null;
-  is_required: boolean;
+  is_required?: boolean;
 };
 
 export type ActiveSurvey = {
@@ -18,7 +18,7 @@ export type ActiveSurvey = {
   questions: SurveyQuestion[];
 };
 
-export function SurveyPopup({ survey }: { survey: ActiveSurvey | null }) {
+export function SurveyPopup({ survey }: { survey: DynamicSurveyData | ActiveSurvey | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
