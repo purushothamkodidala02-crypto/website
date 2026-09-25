@@ -29,14 +29,14 @@ const sections = [
     label: "Content and publishing",
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
-      { href: "/admin/similarity", label: "Similarity scanner", icon: "questions" as const },
+      { href: "/admin/similarity", label: "Similarity scanner", icon: "similarity" as const },
       { href: "/admin/excel-import-guide", label: "Excel import guide", icon: "guide" as const },
       { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
       { href: "/admin/access", label: "Exam series", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations", icon: "students" as const },
       { href: "/admin/results", label: "Results", icon: "results" as const },
-      { href: "/admin/surveys", label: "Surveys", icon: "reports" as const },
+      { href: "/admin/surveys", label: "Surveys", icon: "surveys" as const },
     ],
   },
 ];
@@ -47,12 +47,15 @@ type NavIconName =
   | "exams"
   | "subjects"
   | "questions"
+  | "similarity"
   | "tests"
   | "results"
   | "passes"
   | "students"
   | "reports"
-  | "guide";
+  | "surveys"
+  | "guide"
+  | "portal";
 
 function NavIcon({ name }: { name: NavIconName }) {
   const common = {
@@ -100,6 +103,13 @@ function NavIcon({ name }: { name: NavIconName }) {
           <circle cx="12" cy="12" r="9" />
         </>
       )}
+      {name === "similarity" && (
+        <>
+          <rect x="3.5" y="4.5" width="11" height="11" rx="2" />
+          <path d="M9.5 9.5h10a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 8 19" />
+          <path d="m7 10 2 2 4-4" />
+        </>
+      )}
       {name === "tests" && (
         <>
           <rect x="5" y="4.5" width="14" height="17" rx="2" />
@@ -118,7 +128,22 @@ function NavIcon({ name }: { name: NavIconName }) {
       {name === "passes" && <><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7Z" /><path d="M12 4v16M4 8.5l8 4.5 8-4.5" /></>}
       {name === "students" && <><circle cx="9" cy="8" r="3" /><path d="M3.5 20v-2.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V20" /><path d="M15 5.5a3 3 0 0 1 0 5.8M16 14a4.5 4.5 0 0 1 4.5 4.5V20" /></>}
       {name === "reports" && <><path d="M5 4h14v16H5z" /><path d="M8 8h8M8 12h5M8 16h4" /><path d="m15 15 1.5 1.5L19 14" /></>}
+      {name === "surveys" && (
+        <>
+          <path d="M9 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
+          <rect x="9" y="2" width="6" height="3" rx="1" />
+          <path d="m9 12 2 2 4-4" />
+          <path d="M9 17h6" />
+        </>
+      )}
       {name === "guide" && <><path d="M6 3.5h10l3 3V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" /><path d="M13 3.5V7h3" /><path d="M8 11h8M8 14.5h8M8 18h5" /></>}
+      {name === "portal" && (
+        <>
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          <path d="M15 3h6v6" />
+          <path d="m10 14 11-11" />
+        </>
+      )}
     </svg>
   );
 }
@@ -129,11 +154,13 @@ function isActive(pathname: string, href: string) {
       "/admin/exams",
       "/admin/groups",
       "/admin/papers",
-      "/admin/subjects",
       "/admin/specializations",
-    ].some((path) => pathname.startsWith(path));
+    ].some((path) => pathname === path || pathname.startsWith(path + "/"));
   }
-  return href === "/admin" ? pathname === href : pathname.startsWith(href);
+  if (href === "/admin") {
+    return pathname === href;
+  }
+  return pathname === href || pathname.startsWith(href + "/");
 }
 
 type BadgeState = {
@@ -263,10 +290,10 @@ function Brand({ linked = true, collapsed = false }: { linked?: boolean; collaps
     ? <BrandMark preload className="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />
     : <BrandLockup context="admin" markClassName="h-10 w-10 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />;
 
-  if (!linked) return <div className="flex items-center gap-3">{content}</div>;
+  if (!linked) return <div className="flex min-w-0 items-center gap-3">{content}</div>;
 
   return (
-    <Link href="/admin" className="flex items-center gap-3">
+    <Link href="/admin" className="flex min-w-0 items-center gap-3">
       {content}
     </Link>
   );
@@ -386,10 +413,30 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
       <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-5"}`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
           <Brand collapsed={collapsed} />
-          {!collapsed && <button type="button" onClick={onToggle} aria-label="Collapse sidebar" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            >
+              <MenuIcon />
+            </button>
+          )}
         </div>
-        {collapsed && <button type="button" onClick={onToggle} aria-label="Expand sidebar" className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white"><MenuIcon /></button>}
-        <div className="mt-6 flex-1 overflow-y-auto pb-4 pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {collapsed && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
+            className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+          >
+            <MenuIcon />
+          </button>
+        )}
+        <div className="mt-6 flex-1 overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800 hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
           <NavigationLinks collapsed={collapsed} badges={badges} />
         </div>
         <div className="mt-auto border-t border-slate-800 pt-5">
@@ -398,11 +445,24 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             target="_blank"
             rel="noreferrer"
             aria-label="Student"
-            title={collapsed ? "Student" : undefined}
+            title={collapsed ? "Student portal (Open in new tab)" : undefined}
             className={`flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : ""}`}
           >
-            <span>{collapsed ? "S" : "Student"}</span>
-            {!collapsed && <span className="text-[10px] tracking-wider text-teal-200">Open</span>}
+            {collapsed ? (
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-teal-200" title="Student portal (Open in new tab)">
+                <NavIcon name="portal" />
+              </span>
+            ) : (
+              <>
+                <span className="flex items-center gap-2.5">
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-white/10 text-teal-200">
+                    <NavIcon name="portal" />
+                  </span>
+                  <span>Student</span>
+                </span>
+                <span className="text-[10px] tracking-wider text-teal-200">Open ↗</span>
+              </>
+            )}
           </Link>
         </div>
       </aside>
@@ -473,7 +533,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               </div>
 
               {/* Drawer Navigation Links */}
-              <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800">
                 <NavigationLinks
                   badges={badges}
                   onLinkClick={() => setMobileOpen(false)}
