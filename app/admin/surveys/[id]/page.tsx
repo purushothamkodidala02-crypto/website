@@ -177,28 +177,28 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
   if (!survey) return <div className="p-8 text-slate-500">Loading survey details...</div>;
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
+    <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
       <BackButton
         fallbackHref="/admin/surveys"
         label="← Back to Surveys"
-        className="mb-4 inline-block text-sm font-bold text-teal-600 hover:underline"
+        className="inline-flex items-center py-1 text-sm font-bold text-teal-600 hover:underline touch-manipulation"
       />
 
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900">{survey.title}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-black text-slate-900 sm:text-3xl break-words">{survey.title}</h1>
           {survey.description && (
-            <p className="mt-1 text-sm text-slate-600">{survey.description}</p>
+            <p className="mt-1 text-sm text-slate-600 break-words">{survey.description}</p>
           )}
         </div>
-        <div>
+        <div className="shrink-0">
           {survey.is_active ? (
-            <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">
+            <span className="inline-flex items-center rounded-full bg-emerald-100 px-3.5 py-1.5 text-xs font-bold text-emerald-800 sm:px-4 sm:py-2 sm:text-sm">
               Active (Live on /survey & Dashboard)
             </span>
           ) : (
-            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-3.5 py-1.5 text-xs font-bold text-slate-600 sm:px-4 sm:py-2 sm:text-sm">
               Draft Status
             </span>
           )}
@@ -206,13 +206,13 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Shareable Link Box */}
-      <div className="mb-8 rounded-2xl border border-teal-200 bg-teal-50/60 p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-teal-900">
+      <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-teal-900 sm:text-sm">
               Shareable Public Survey Link
             </h2>
-            <p className="mt-1 font-mono text-xs text-teal-950 sm:text-sm break-all">
+            <p className="mt-1 font-mono text-xs sm:text-sm text-teal-950 break-all select-all">
               {getSurveyUrl()}
             </p>
             <p className="mt-1 text-xs text-teal-700">
@@ -221,11 +221,11 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                 : "This survey is currently in draft. Use this link with ?id= to test or share directly."}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto shrink-0">
             <button
               type="button"
               onClick={handleCopyLink}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition active:scale-95 touch-manipulation"
             >
               {copiedLink ? "✓ Copied Link!" : "📋 Copy Survey Link"}
             </button>
@@ -233,7 +233,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
               href={survey.is_active ? "/survey" : `/survey?id=${surveyId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-xl border border-teal-300 bg-white px-3.5 py-2.5 text-xs font-bold text-teal-900 shadow-sm hover:bg-teal-50 transition"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded-xl border border-teal-300 bg-white px-3.5 py-2.5 text-xs font-bold text-teal-900 shadow-sm hover:bg-teal-50 transition active:scale-95 touch-manipulation"
             >
               Open Survey ↗
             </a>
@@ -241,11 +241,11 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 min-w-0">
         {/* Editor Side: Questions */}
-        <section>
+        <section className="min-w-0">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
               Survey Questions ({questions.length})
             </h2>
           </div>
@@ -254,33 +254,34 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             {questions.map((q, i) => (
               <div
                 key={q.id}
-                className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="relative rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm"
               >
                 <button
                   type="button"
                   onClick={() => handleDelete(q.id)}
-                  className="absolute right-4 top-4 text-slate-400 hover:text-red-500 font-bold transition"
+                  className="absolute right-2 top-2 sm:right-3 sm:top-3 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 font-bold transition active:scale-95 touch-manipulation"
                   title="Delete Question"
+                  aria-label={`Delete question ${i + 1}`}
                 >
                   ✕
                 </button>
-                <p className="font-bold text-slate-900 pr-8">
+                <p className="font-bold text-slate-900 pr-8 break-words text-sm sm:text-base">
                   {i + 1}. {q.question_text}
                 </p>
                 <p className="mt-1 text-xs uppercase tracking-wider text-slate-500">
                   Type: {q.question_type}
                 </p>
                 {q.options && q.options.length > 0 && (
-                  <ul className="mt-2 list-inside list-disc text-sm text-slate-600">
+                  <ul className="mt-2 list-inside list-disc text-xs sm:text-sm text-slate-600 space-y-1">
                     {q.options.map((opt: string, idx: number) => (
-                      <li key={idx}>{opt}</li>
+                      <li key={idx} className="break-words">{opt}</li>
                     ))}
                   </ul>
                 )}
               </div>
             ))}
             {questions.length === 0 && (
-              <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+              <p className="rounded-xl border border-dashed border-slate-300 p-6 sm:p-8 text-center text-sm text-slate-500">
                 No questions added yet. Add your first question below!
               </p>
             )}
@@ -289,12 +290,12 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
           {/* Add Question Form */}
           <form
             onSubmit={handleAddQuestion}
-            className="mt-8 rounded-2xl border border-teal-100 bg-teal-50 p-6"
+            className="mt-6 sm:mt-8 rounded-2xl border border-teal-100 bg-teal-50 p-4 sm:p-6"
           >
-            <h3 className="mb-4 font-bold text-teal-900">Add New Question</h3>
+            <h3 className="mb-4 font-bold text-teal-900 text-base sm:text-lg">Add New Question</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-teal-900">Question Text</label>
+                <label className="block text-xs sm:text-sm font-bold text-teal-900">Question Text</label>
                 <input
                   required
                   type="text"
@@ -306,7 +307,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-teal-900">Input Type</label>
+                <label className="block text-xs sm:text-sm font-bold text-teal-900">Input Type</label>
                 <select
                   value={qType}
                   onChange={(e) => setQType(e.target.value)}
@@ -320,7 +321,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
 
               {qType === "radio" && (
                 <div>
-                  <label className="block text-sm font-bold text-teal-900">
+                  <label className="block text-xs sm:text-sm font-bold text-teal-900">
                     Options (comma separated)
                   </label>
                   <input
@@ -340,7 +341,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
               <button
                 type="submit"
                 disabled={isSavingQuestion}
-                className="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-70 transition"
+                className="w-full sm:w-auto rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-70 transition active:scale-95 touch-manipulation inline-flex items-center justify-center"
               >
                 {isSavingQuestion ? "Saving..." : "Add Question"}
               </button>
@@ -349,17 +350,17 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
         </section>
 
         {/* Responses Side */}
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900">
+        <section className="min-w-0">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
               Collected Responses ({responses.length})
             </h2>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               {responses.length > 0 && (
                 <button
                   type="button"
                   onClick={handleExportCSV}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition active:scale-95 touch-manipulation"
                   title="Download all responses as a CSV spreadsheet"
                 >
                   📥 Export CSV
@@ -369,7 +370,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                 type="button"
                 onClick={loadResponses}
                 disabled={loadingResponses}
-                className="text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline"
+                className="inline-flex items-center py-1 text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline touch-manipulation"
               >
                 {loadingResponses ? "Refreshing..." : "↻ Refresh"}
               </button>
@@ -380,38 +381,38 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             {responses.map((r) => (
               <div
                 key={r.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4"
+                className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm space-y-3 sm:space-y-4 min-w-0"
               >
                 {/* Respondent Info Header */}
-                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 text-base font-bold text-teal-800">
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 sm:p-3.5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-100 text-base font-bold text-teal-800">
                         👤
                       </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-slate-950">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="text-sm font-bold text-slate-950 break-words">
                             {r.respondentName}
                           </p>
                           {r.user_id && (
-                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                            <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
                               Student
                             </span>
                           )}
                         </div>
                         {r.user_id ? (
-                          <span className="text-[11px] font-semibold text-emerald-700">
+                          <span className="block text-[11px] font-semibold text-emerald-700">
                             ✓ Registered Student Account
                           </span>
                         ) : (
-                          <span className="text-[11px] font-medium text-slate-500">
+                          <span className="block text-[11px] font-medium text-slate-500">
                             Public Link Submission
                           </span>
                         )}
                       </div>
                     </div>
-                    <span className="text-xs text-slate-500 font-medium">
+                    <span className="text-xs text-slate-500 font-medium shrink-0 self-start sm:self-auto">
                       {new Date(r.submitted_at).toLocaleString()}
                     </span>
                   </div>
@@ -431,21 +432,21 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                     return (
                       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-200/60 pt-2.5 text-xs">
                         {phone && (
-                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50/90 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                          <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50/90 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs break-all">
                             📱 Mobile: {phone.startsWith("+") ? phone : `+91 ${phone}`}
                           </span>
                         )}
                         {email && (
                           <a
                             href={`mailto:${email}`}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700 shadow-2xs hover:border-slate-300 hover:text-teal-700 transition"
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700 shadow-2xs hover:border-slate-300 hover:text-teal-700 transition break-all"
                             title="Click to send email"
                           >
                             ✉️ Email: {email}
                           </a>
                         )}
                         {extraContact && (
-                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
+                          <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 font-medium text-slate-700 break-all">
                             📝 Note: {extraContact}
                           </span>
                         )}
@@ -470,10 +471,10 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                     const q = questions.find((item) => item.id === ans.question_id);
                     return (
                       <div key={ans.question_id} className="text-sm">
-                        <p className="font-semibold text-slate-700">
+                        <p className="font-semibold text-slate-700 break-words">
                           {q?.question_text || "Question"}:
                         </p>
-                        <p className="mt-1 rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 font-medium text-slate-900 whitespace-pre-wrap">
+                        <p className="mt-1 rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 font-medium text-slate-900 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                           {ans.answer_text}
                         </p>
                       </div>
@@ -484,7 +485,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             ))}
 
             {responses.length === 0 && (
-              <div className="rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
+              <div className="rounded-xl border border-dashed border-slate-300 p-6 sm:p-10 text-center text-slate-500">
                 <p className="text-base font-semibold text-slate-700">No responses yet</p>
                 <p className="mt-1 text-xs text-slate-500">
                   Share the public survey link above with students to collect responses. They will appear here in real time.

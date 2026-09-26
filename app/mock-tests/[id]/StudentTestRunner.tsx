@@ -344,7 +344,7 @@ export function StudentTestRunner({
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
-  return <main ref={containerRef} className="student-page relative flex h-screen max-h-screen w-full flex-col overflow-hidden bg-slate-100">
+  return <main ref={containerRef} className="student-page relative flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden bg-slate-100">
     <ScreenWatermark text={watermarkText} />
     <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
@@ -461,6 +461,16 @@ export function StudentTestRunner({
               disabled={pauseControlDisabled}
               onToggle={() => void togglePause()}
             />
+
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              disabled={locked}
+              className="flex items-center gap-1 rounded-xl sm:rounded-2xl bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-black shadow-xs transition disabled:opacity-50"
+              title="Submit test"
+            >
+              Submit
+            </button>
           </div>
         </div>
       </div>
@@ -641,9 +651,12 @@ export function StudentTestRunner({
     </div>
 
     {/* Fixed Bottom Navigation (Lower part) */}
-    <footer className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 p-2.5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3">
-      <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-3">
-        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
+    <footer
+      className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 p-2.5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3"
+      style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom, 0px))" }}
+    >
+      <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-2 sm:gap-3">
+        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
           <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white lg:inline-block">←</kbd>
           Previous
         </button>
@@ -674,8 +687,8 @@ export function StudentTestRunner({
         </div>
 
         {index === questions.length - 1 ? (
-          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
-            Review & finish
+          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-4 py-2 text-xs sm:text-sm font-black text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
+            Submit test
           </button>
         ) : (
           <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50 sm:px-5 sm:py-2.5">
@@ -688,15 +701,28 @@ export function StudentTestRunner({
 
     {/* Mobile Navigator Overlay */}
     {navigatorOpen && (
-      <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/50 backdrop-blur-sm lg:hidden">
-        <div className="mt-auto max-h-[85vh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl">
-          <div className="flex items-center justify-between border-b px-5 py-4">
-            <h2 className="text-lg font-black text-slate-900">Questions</h2>
-            <button type="button" onClick={() => setNavigatorOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+      <div className="fixed inset-0 z-50 flex flex-col justify-end bg-slate-950/60 backdrop-blur-sm lg:hidden" onClick={() => setNavigatorOpen(false)}>
+        <div
+          className="flex flex-col max-h-[88vh] max-h-[88dvh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3.5">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Questions Palette</h2>
+              <p className="text-[11px] font-semibold text-slate-500">Tap to jump • Submit test anytime</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNavigatorOpen(false)}
+              className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200 transition"
+              aria-label="Close questions palette"
+            >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           </div>
-          <div className="p-5">{navigator}</div>
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-5">
+            {navigator}
+          </div>
         </div>
       </div>
     )}
@@ -723,7 +749,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
         </div>
       </div>
 
-      <div className="mt-4 max-h-[45vh] min-h-0 overflow-y-auto overscroll-contain pr-1 lg:max-h-none lg:flex-1">
+      <div className="mt-4 max-h-[42vh] lg:max-h-none min-h-0 overflow-y-auto overscroll-contain pr-1 lg:flex-1">
         <div className="grid grid-cols-5 xl:grid-cols-6 gap-2">
           {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);
@@ -751,14 +777,19 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
         </div>
       </div>
 
-      <div className="mt-4 shrink-0 border-t pt-4">
-        <div className="space-y-2 text-xs text-slate-600">
+      <div className="mt-4 shrink-0 border-t border-slate-100 pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
           <Legend color="bg-emerald-100" label="Answered" />
           <Legend color="bg-amber-100" label="Marked for review" />
           <Legend color="bg-slate-100" label="Not answered" />
         </div>
-        <button type="button" onClick={onFinish} disabled={locked} className="mt-4 w-full rounded-xl border px-4 py-3 text-sm font-bold disabled:opacity-50">
-          Finish test
+        <button
+          type="button"
+          onClick={onFinish}
+          disabled={locked}
+          className="mt-3 w-full rounded-xl bg-teal-700 hover:bg-teal-800 text-white px-4 py-3 text-sm font-black shadow-sm transition disabled:opacity-50"
+        >
+          Submit / Finish test
         </button>
       </div>
     </div>
