@@ -41,6 +41,31 @@ test("question reporting is private, rate-limited, and connected from students t
   assert.match(overview, /Student question reports are open/);
 });
 
+test("admin can see where reported questions are assigned in mock tests and their question numbers", async () => {
+  const [adminPage, editPage, migration, runner, action, button, dialog] = await Promise.all([
+    read("app/admin/question-reports/page.tsx"),
+    read("app/admin/questions/[id]/edit/page.tsx"),
+    read("supabase/migrations/20260926140000_add_mock_test_to_question_reports.sql"),
+    read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+    read("lib/actions/question-reports.ts"),
+    read("components/questions/ReportQuestionButton.tsx"),
+    read("components/questions/ReportQuestionDialog.tsx"),
+  ]);
+
+  assert.match(adminPage, /from\("mock_test_questions"\)/);
+  assert.match(adminPage, /question_order/);
+  assert.match(adminPage, /Assigned in Mock Tests/);
+  assert.match(adminPage, /Question #\{assignment\.questionOrder\}/);
+  assert.match(adminPage, /Reported in:/);
+  assert.match(editPage, /from\("mock_test_questions"\)/);
+  assert.match(editPage, /Assigned in.*Mock Test/);
+  assert.match(migration, /add column if not exists mock_test_id/);
+  assert.match(runner, /mockTestId=\{mockTestId\}/);
+  assert.match(button, /mockTestId/);
+  assert.match(dialog, /mockTestId/);
+  assert.match(action, /mockTestId/);
+});
+
 test("optional catalogue statistics cannot hide the public mock-test library", async () => {
   const [catalog, cataloguePage] = await Promise.all([
     read("lib/catalog-data.ts"),

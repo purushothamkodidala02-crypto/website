@@ -256,8 +256,12 @@ test("assertion-reason questions accept short labels and render standard labels"
 
   assert.match(formatter, /Assertion\(\?:\\s\*\\\(\[A-Za-z\\d\]\+\\\)\)\?/);
   assert.match(formatter, /Reason\(\?:\\s\*\\\(\[A-Za-z\\d\]\+\\\)\)\?/);
+  assert.match(formatter, /ప్రతిపాదన/);
+  assert.match(formatter, /సమర్థన/);
   assert.match(formatter, /return "Assertion \(A\)"/);
   assert.match(formatter, /return "Reason \(R\)"/);
+  assert.match(formatter, /return "ప్రతిపాదన \(A\)"/);
+  assert.match(formatter, /return "సమర్థన \(R\)"/);
 });
 
 test("match questions clean imported markdown and support A-D with I-IV lists", async () => {

@@ -583,7 +583,7 @@ export function StudentTestRunner({
             <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 sm:pt-4">
               <button type="button" onClick={clearAnswer} disabled={!answers[current.question_id] || locked} className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-red-700 disabled:opacity-40">Clear answer</button>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                <ReportQuestionButton key={`report-${current.question_id}`} questionId={current.question_id} />
+                <ReportQuestionButton key={`report-${current.question_id}`} questionId={current.question_id} mockTestId={mockTestId} />
                 <BookmarkButton key={current.question_id} questionId={current.question_id} initialBookmarked={bookmarkedQuestionIds.includes(current.question_id)} />
                 <button type="button" onClick={toggleReview} disabled={locked} className={`rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold transition ${reviewIds.has(current.question_id) ? "bg-amber-100 text-amber-900 border border-amber-300" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
                   {reviewIds.has(current.question_id) ? "Marked for review" : "Mark for review"}

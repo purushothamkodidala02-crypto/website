@@ -4,7 +4,7 @@ type FormattedQuestionTextProps = {
 };
 
 const labelledSection =
-  /^(Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-]\s*(.+)$/i;
+  /^(Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-]\s*(.+)$/i;
 
 const instructionStart =
   /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick|Identify|In\s+the\s+light\s+of)\b|(?:సరైన|సరికాని|కింది|క్రింది|పై|ఇచ్చిన).*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/i;
@@ -119,7 +119,7 @@ function findValidListIndices(matches: RegExpMatchArray[]): Set<number> {
 }
 
 function splitInlineLists(text: string): string {
-  const inlineListRegex = /(?<![\d౦-౯]\s*:[ \t]*)(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|కారణం|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
+  const inlineListRegex = /(?<![\d౦-౯]\s*:[ \t]*)(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
   const matches = Array.from(text.matchAll(inlineListRegex));
   if (matches.length === 0) return text;
@@ -179,11 +179,11 @@ function questionLines(rawText: string) {
       "$1\n",
     )
     .replace(
-      /(?<=[.?!;:\)])[ \t]*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-])/gi,
+      /(?<=[.?!;:\)])[ \t]*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-])/gi,
       "\n",
     )
     .replace(
-      /[ \t]*;+[ \t]*(?=(?:Assertion|Reason|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|కారణం|కారణము|హేతువు|Statement|Conclusion|List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\b|(?:\((?:[A-Za-z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s)/gi,
+      /[ \t]*;+[ \t]*(?=(?:Assertion|Reason|నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|Statement|Conclusion|List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\b|(?:\((?:[A-Za-z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s)/gi,
       "\n",
     )
     .replace(
@@ -232,7 +232,7 @@ function questionLines(rawText: string) {
       "\n",
     )
     .replace(
-      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s+(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s+(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -271,8 +271,15 @@ function normalizedSectionLabel(label: string) {
   if (/^వాదన$/i.test(trimmed)) return "వాదన (A)";
   if (/^నిశ్చితార్థం$/i.test(trimmed)) return "నిశ్చితార్థం (A)";
   if (/^నిశ్చితార్థము$/i.test(trimmed)) return "నిశ్చితార్థము (A)";
+  if (/^నిశ్చితం$/i.test(trimmed)) return "నిశ్చితం (A)";
+  if (/^ప్రతిపాదన$/i.test(trimmed)) return "ప్రతిపాదన (A)";
+  if (/^దృఢ\s*ప్రకటన$/i.test(trimmed)) return "దృఢ ప్రకటన (A)";
   if (/^కారణం$/i.test(trimmed)) return "కారణం (R)";
   if (/^కారణము$/i.test(trimmed)) return "కారణము (R)";
+  if (/^హేతువు$/i.test(trimmed)) return "హేతువు (R)";
+  if (/^సమర్థన$/i.test(trimmed)) return "సమర్థన (R)";
+  if (/^సమర్థనము$/i.test(trimmed)) return "సమర్థనము (R)";
+  if (/^వివరణ$/i.test(trimmed)) return "వివరణ (R)";
   return trimmed;
 }
 
@@ -595,7 +602,7 @@ export function FormattedQuestionText({
 
         const isAssertionOrReason =
           labelled &&
-          /^(?:Assertion(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రతిపాదన|కారణం|కారణము|హేతువు)(?:\s*\([A-Za-z\d]+\))?)$/i.test(
+          /^(?:Assertion(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?)$/i.test(
             labelled[1].trim(),
           );
 

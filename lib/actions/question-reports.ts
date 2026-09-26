@@ -13,6 +13,7 @@ export async function submitQuestionReport(
   attemptId: string | null,
   category: string,
   details: string,
+  mockTestId?: string | null,
 ): Promise<QuestionReportResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -20,6 +21,7 @@ export async function submitQuestionReport(
   if (!user) return { success: false, message: "Sign in to report a question." };
   if (!UUID_PATTERN.test(questionId) || !CATEGORIES.has(category)) return { success: false, message: "Choose a valid report reason." };
   if (attemptId && !UUID_PATTERN.test(attemptId)) return { success: false, message: "This attempt could not be verified." };
+  if (mockTestId && !UUID_PATTERN.test(mockTestId)) return { success: false, message: "This mock test could not be verified." };
   if (cleanDetails.length > 1000) return { success: false, message: "Keep the description within 1,000 characters." };
   if (category === "other" && cleanDetails.length < 10) return { success: false, message: "Briefly describe the problem." };
 
@@ -27,14 +29,24 @@ export async function submitQuestionReport(
   const { count } = await supabase.from("question_reports").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since);
   if ((count ?? 0) >= 10) return { success: false, message: "You have submitted several reports recently. Please try again later." };
 
-  const { error } = await supabase.from("question_reports").insert({
+  const insertData: Record<string, unknown> = {
     user_id: user.id,
     question_id: questionId,
     attempt_id: attemptId,
     category,
     details: cleanDetails || null,
     status: "open",
-  });
+  };
+  if (mockTestId && UUID_PATTERN.test(mockTestId)) {
+    insertData.mock_test_id = mockTestId;
+  }
+
+  let { error } = await supabase.from("question_reports").insert(insertData);
+  if (error && mockTestId && (error.message?.includes("mock_test_id") || error.code === "PGRST204" || error.code === "42703")) {
+    delete insertData.mock_test_id;
+    const retry = await supabase.from("question_reports").insert(insertData);
+    error = retry.error;
+  }
   if (error?.code === "23505") return { success: true, message: "You already reported this issue. It is awaiting review." };
   if (error) return { success: false, message: "The report could not be submitted. Please try again." };
   revalidatePath("/admin/question-reports");

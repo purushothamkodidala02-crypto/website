@@ -20,7 +20,7 @@ export default async function EditQuestionPage({
       ? returnTo
       : "/admin/questions";
   const supabase = await createClient();
-  const [questionResult, subjectsResult, papersResult, groupsResult, categoriesResult, sessionResult] =
+  const [questionResult, subjectsResult, papersResult, groupsResult, categoriesResult, sessionResult, assignmentsResult] =
     await Promise.all([
       supabase
         .from("questions")
@@ -40,6 +40,11 @@ export default async function EditQuestionPage({
         .from("test_attempt_session_questions")
         .select("session_id", { count: "exact", head: true })
         .eq("question_id", id),
+      supabase
+        .from("mock_test_questions")
+        .select("mock_test_id, question_order, mock_tests(id, title, status)")
+        .eq("question_id", id)
+        .order("question_order", { ascending: true }),
     ]);
 
   if (!questionResult.data) notFound();
@@ -69,6 +74,32 @@ export default async function EditQuestionPage({
         ← Back to Question Bank
       </Link>
       <h1 className="mt-5 text-3xl font-black">Edit Question</h1>
+      {assignmentsResult.data && assignmentsResult.data.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-teal-200 bg-teal-50/70 p-4">
+          <p className="text-xs font-black uppercase tracking-wider text-teal-900">
+            Assigned in {assignmentsResult.data.length} Mock Test{assignmentsResult.data.length > 1 ? "s" : ""}:
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {assignmentsResult.data.map((assignment) => {
+              const mockTest = Array.isArray(assignment.mock_tests)
+                ? assignment.mock_tests[0]
+                : assignment.mock_tests;
+              return (
+                <Link
+                  key={assignment.mock_test_id}
+                  href={`/admin/mock-tests/${assignment.mock_test_id}/questions/${id}/edit`}
+                  className="inline-flex items-center gap-2 rounded-xl border border-teal-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-xs transition hover:border-teal-500 hover:bg-teal-50"
+                >
+                  <span>{mockTest?.title ?? "Mock Test"}</span>
+                  <span className="rounded-md bg-teal-700 px-1.5 py-0.5 text-[11px] font-black text-white">
+                    Question #{assignment.question_order}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <EditQuestionForm
         question={questionResult.data as Question}
         subjects={options}

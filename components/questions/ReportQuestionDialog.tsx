@@ -12,7 +12,17 @@ const reasons = [
   ["other", "Other problem"],
 ] as const;
 
-export function ReportQuestionDialog({ questionId, attemptId, onClose }: { questionId: string; attemptId: string | null; onClose: () => void }) {
+export function ReportQuestionDialog({
+  questionId,
+  attemptId,
+  mockTestId = null,
+  onClose,
+}: {
+  questionId: string;
+  attemptId: string | null;
+  mockTestId?: string | null;
+  onClose: () => void;
+}) {
   const [category, setCategory] = useState("wrong_answer");
   const [details, setDetails] = useState("");
   const [result, setResult] = useState<QuestionReportResult | null>(null);
@@ -25,7 +35,7 @@ export function ReportQuestionDialog({ questionId, attemptId, onClose }: { quest
   function submit() {
     setResult(null);
     startTransition(async () => {
-      const next = await submitQuestionReport(questionId, attemptId, category, details);
+      const next = await submitQuestionReport(questionId, attemptId, category, details, mockTestId);
       setResult(next);
       if (next.success) setDetails("");
     });
