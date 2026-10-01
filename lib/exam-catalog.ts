@@ -110,6 +110,8 @@ export function formatExamFallbackDescription(examName: string, stateName?: stri
 
 export type ParsedMockTestTitle = {
   breadcrumb: string[];
+  primaryTitle: string;
+  testLabel: string;
   title: string;
   topic?: string;
   rawTitle: string;
@@ -117,7 +119,13 @@ export type ParsedMockTestTitle = {
 
 export function parseMockTestTitle(rawTitle: string): ParsedMockTestTitle {
   if (!rawTitle) {
-    return { breadcrumb: [], title: "Mock Test", rawTitle: "" };
+    return {
+      breadcrumb: [],
+      primaryTitle: "Mock Test",
+      testLabel: "",
+      title: "Mock Test",
+      rawTitle: "",
+    };
   }
 
   const parts = rawTitle
@@ -126,32 +134,46 @@ export function parseMockTestTitle(rawTitle: string): ParsedMockTestTitle {
     .filter(Boolean);
 
   if (parts.length >= 4) {
+    const testLabel = parts[parts.length - 1];
+    const topic = parts[parts.length - 2];
     return {
       breadcrumb: parts.slice(0, parts.length - 2),
-      topic: parts[parts.length - 2],
-      title: parts[parts.length - 1],
+      primaryTitle: topic,
+      testLabel,
+      topic,
+      title: testLabel,
       rawTitle,
     };
   }
 
   if (parts.length === 3) {
+    const testLabel = parts[2];
+    const paperOrSubject = parts[1];
     return {
-      breadcrumb: [parts[0], parts[1]],
-      title: parts[2],
+      breadcrumb: [parts[0]],
+      primaryTitle: paperOrSubject,
+      testLabel,
+      title: testLabel,
       rawTitle,
     };
   }
 
   if (parts.length === 2) {
+    const testLabel = parts[1];
+    const subjectOrExam = parts[0];
     return {
-      breadcrumb: [parts[0]],
-      title: parts[1],
+      breadcrumb: [],
+      primaryTitle: subjectOrExam,
+      testLabel,
+      title: testLabel,
       rawTitle,
     };
   }
 
   return {
     breadcrumb: [],
+    primaryTitle: rawTitle,
+    testLabel: "",
     title: rawTitle,
     rawTitle,
   };

@@ -10,6 +10,8 @@ test("parseMockTestTitle parses 4-level mock test titles with bullets or middle 
     "AP Endowment Officer",
     "Hindu Philosophy & Temple System",
   ]);
+  assert.equal(result.primaryTitle, "Philosophies & Gurus");
+  assert.equal(result.testLabel, "Mock Test 02");
   assert.equal(result.topic, "Philosophies & Gurus");
   assert.equal(result.title, "Mock Test 02");
 });
@@ -22,8 +24,8 @@ test("parseMockTestTitle parses titles with middle dots (·)", () => {
     "AP Endowment Officer",
     "Hindu Philosophy & Temple System",
   ]);
-  assert.equal(result.topic, "Philosophies & Gurus");
-  assert.equal(result.title, "Mock Test 02");
+  assert.equal(result.primaryTitle, "Philosophies & Gurus");
+  assert.equal(result.testLabel, "Mock Test 02");
 });
 
 test("parseMockTestTitle parses 3-level mock test titles without subject (paper mock)", () => {
@@ -32,21 +34,23 @@ test("parseMockTestTitle parses 3-level mock test titles without subject (paper 
 
   assert.deepEqual(result.breadcrumb, [
     "TGPSC Group 2",
-    "Paper 1 - General Studies",
   ]);
-  assert.equal(result.topic, undefined);
-  assert.equal(result.title, "Mock Test 05");
+  assert.equal(result.primaryTitle, "Paper 1 - General Studies");
+  assert.equal(result.testLabel, "Mock Test 05");
 });
 
 test("parseMockTestTitle handles 2-level or 1-level fallback titles gracefully", () => {
   const twoLevel = parseMockTestTitle("AP Police SI · Mock Test 01");
-  assert.deepEqual(twoLevel.breadcrumb, ["AP Police SI"]);
-  assert.equal(twoLevel.title, "Mock Test 01");
+  assert.deepEqual(twoLevel.breadcrumb, []);
+  assert.equal(twoLevel.primaryTitle, "AP Police SI");
+  assert.equal(twoLevel.testLabel, "Mock Test 01");
 
   const single = parseMockTestTitle("Custom Scholarship Test 2026");
   assert.deepEqual(single.breadcrumb, []);
-  assert.equal(single.title, "Custom Scholarship Test 2026");
+  assert.equal(single.primaryTitle, "Custom Scholarship Test 2026");
+  assert.equal(single.testLabel, "");
 
   const empty = parseMockTestTitle("");
-  assert.equal(empty.title, "Mock Test");
+  assert.equal(empty.primaryTitle, "Mock Test");
+  assert.equal(empty.testLabel, "");
 });

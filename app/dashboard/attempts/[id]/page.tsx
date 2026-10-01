@@ -174,18 +174,14 @@ export default async function AttemptReviewPage({
                 </p>
               )}
 
-              <h1 className="mt-2 max-w-4xl text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
-                {parsedTitle.title}
-              </h1>
-
-              {parsedTitle.topic && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-400/20 bg-teal-400/10 px-3 py-1 text-xs sm:text-sm font-semibold text-teal-200">
-                    <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
-                    {parsedTitle.topic}
+              <h1 className="mt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
+                <span>{parsedTitle.primaryTitle}</span>
+                {parsedTitle.testLabel && (
+                  <span className="inline-flex items-center rounded-xl border border-teal-400/30 bg-teal-400/15 px-3 py-1 text-sm sm:text-base font-bold text-teal-200">
+                    {parsedTitle.testLabel}
                   </span>
-                </div>
-              )}
+                )}
+              </h1>
 
               <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base">
                 Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))} · Review every answer and use the explanations to plan your next
@@ -272,15 +268,14 @@ function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; tit
               ))}
             </p>
           )}
-          <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl text-white">{parsedTitle.title}</h1>
-          {parsedTitle.topic && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-400/20 bg-teal-400/10 px-3 py-1 text-xs sm:text-sm font-semibold text-teal-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
-                {parsedTitle.topic}
+          <h1 className="mt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-2xl font-black tracking-tight sm:text-3xl text-white">
+            <span>{parsedTitle.primaryTitle}</span>
+            {parsedTitle.testLabel && (
+              <span className="inline-flex items-center rounded-xl border border-teal-400/30 bg-teal-400/15 px-3 py-1 text-sm sm:text-base font-bold text-teal-200">
+                {parsedTitle.testLabel}
               </span>
-            </div>
-          )}
+            )}
+          </h1>
           <p className="mt-3 text-sm text-slate-300">Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))}</p>
         </section>
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -319,8 +319,8 @@ export default async function Dashboard({
                         <div className="mb-2 flex items-start justify-between gap-4 text-sm">
                           <div className="min-w-0">
                             <span className="block truncate font-bold text-slate-850" title={rawTitle}>
-                              {parsed.title}
-                              {parsed.topic && <span className="ml-1.5 font-normal text-slate-500">· {parsed.topic}</span>}
+                              {parsed.primaryTitle}
+                              {parsed.testLabel && <span className="ml-1.5 font-semibold text-teal-700">({parsed.testLabel})</span>}
                             </span>
                             {parsed.breadcrumb.length > 0 && (
                               <span className="block truncate text-[11px] font-semibold text-slate-400">
@@ -430,10 +430,10 @@ export default async function Dashboard({
                                 </p>
                               )}
                               <h3 className="mt-1 flex flex-wrap items-center gap-2 text-lg font-black text-slate-950">
-                                <span>{parsed.title}</span>
-                                {parsed.topic && (
+                                <span>{parsed.primaryTitle}</span>
+                                {parsed.testLabel && (
                                   <span className="rounded-md border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-800">
-                                    {parsed.topic}
+                                    {parsed.testLabel}
                                   </span>
                                 )}
                               </h3>

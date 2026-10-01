@@ -54,15 +54,14 @@ export function SubmissionResult({
           </p>
         )}
 
-        <h1 className="mt-1.5 text-2xl font-black text-slate-900 sm:text-3xl">{parsedTitle.title}</h1>
-
-        {parsedTitle.topic && (
-          <div className="mt-2.5 flex justify-center">
-            <span className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-1 text-xs sm:text-sm font-semibold text-teal-800">
-              {parsedTitle.topic}
+        <h1 className="mt-1.5 flex flex-wrap items-center justify-center gap-2.5 text-2xl font-black text-slate-900 sm:text-3xl">
+          <span>{parsedTitle.primaryTitle}</span>
+          {parsedTitle.testLabel && (
+            <span className="inline-flex items-center rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-sm sm:text-base font-bold text-teal-800">
+              {parsedTitle.testLabel}
             </span>
-          </div>
-        )}
+          )}
+        </h1>
 
         {result.success || typeof result.score === "number" ? (
           <>
