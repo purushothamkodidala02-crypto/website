@@ -654,7 +654,7 @@ async function importQuestions(
   let atomicAssignments: Array<{
     subject_id: string;
     import_key: string;
-    question_order: number;
+    question_order: number | null;
     marks: number;
     negative_marks: number;
   }> = [];
@@ -676,7 +676,7 @@ async function importQuestions(
       return {
         subject_id: preference.key.slice(0, separator),
         import_key: preference.key.slice(separator + 1),
-        question_order: mode === "replace" ? index + 1 : preference.questionOrder ?? (index + 1),
+        question_order: mode === "replace" ? index + 1 : preference.questionOrder,
         marks: preference.marks ?? paper.default_correct_marks ?? 1,
         negative_marks: preference.negativeMarks ?? paper.default_negative_marks ?? 0,
       };

@@ -300,3 +300,9 @@ test("Excel workbook with Telugu-only headers parses and extracts cleanly", asyn
   assert.equal(loadedSheet.getCell(2, 3).text, "క్రింది వాటిలో సరైన పదాన్ని గుర్తించండి:");
   assert.equal(loadedSheet.getCell(2, 8).text, "A");
 });
+
+test("import-actions passes null question_order in add mode when preference is not set", async () => {
+  const importer = await read("app/admin/questions/import-actions.ts");
+  assert.match(importer, /question_order:\s*mode === "replace" \? index \+ 1 : preference\.questionOrder,/);
+});
+
