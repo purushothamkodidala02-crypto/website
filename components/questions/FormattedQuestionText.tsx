@@ -546,7 +546,7 @@ export function FormattedQuestionText({
             <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{rightItems.map((line) => renderListItem(line))}</div>
           </div>
         </div>
-        {instruction.length > 0 && <div className="mt-4 space-y-1.5 font-semibold text-slate-900">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
+        {instruction.length > 0 && <div className="mt-4 space-y-1.5 leading-relaxed text-slate-900">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
       </div>
     );
   }
@@ -578,7 +578,7 @@ export function FormattedQuestionText({
           </div>
         </div>
         {questionPrompt.length > 0 && (
-          <div className="mt-4 space-y-1.5 font-bold text-slate-950 text-base sm:text-lg">
+          <div className="mt-4 space-y-1.5 leading-relaxed text-slate-950 text-base sm:text-lg">
             {questionPrompt.map((line, idx) => (
               <p key={idx}>{line}</p>
             ))}
@@ -674,8 +674,8 @@ export function FormattedQuestionText({
           <p
             key={`${index}-${line}`}
             className={
-              isInstruction
-                ? "pt-2 font-semibold text-slate-800"
+              isInstruction && index > 0
+                ? "pt-2 leading-relaxed text-slate-950"
                 : "leading-relaxed text-slate-950"
             }
           >

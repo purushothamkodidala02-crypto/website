@@ -298,6 +298,13 @@ test("currency and reference abbreviations like Rs. 2 or Re. 1 are not split int
   assert.match(formatter, /\\b\(\?:Rs\|Re\|రూ\)\\\.\?\$/);
 });
 
+test("question text and instruction prompts do not use font-semibold or font-bold so questions show in normal text", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.doesNotMatch(formatter, /isInstruction\s*\?\s*["'][^"']*font-semibold/);
+  assert.doesNotMatch(formatter, /questionPrompt\.length\s*>\s*0\s*&&[\s\S]{1,120}font-bold/);
+});
+
 test("admins can export mock-test questions in the accepted import format", async () => {
   const [importer, format, exportRoute, testList, questionsPage] = await Promise.all([
     read("app/admin/questions/import-actions.ts"),
