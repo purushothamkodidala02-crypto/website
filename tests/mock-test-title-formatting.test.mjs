@@ -54,3 +54,13 @@ test("parseMockTestTitle handles 2-level or 1-level fallback titles gracefully",
   assert.equal(empty.primaryTitle, "Mock Test");
   assert.equal(empty.testLabel, "");
 });
+
+test("admin mock test edit page resolves recruiting board directly from categories map", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const editPage = await readFile(new URL("../app/admin/mock-tests/[id]/edit/page.tsx", import.meta.url), "utf8");
+
+  // Ensure it doesn't do categories.get(...)?.name which returns undefined on string maps
+  assert.doesNotMatch(editPage, /categories\.get\(group\?\.exam_id\s*\?\?\s*""\)\?\.name/);
+  assert.match(editPage, /categories\.get\(group\?\.exam_id\s*\?\?\s*""\)\s*\?\?\s*"Unknown Recruiting Board"/);
+});
+
