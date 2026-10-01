@@ -33,8 +33,11 @@ export function resolveSeoFields(
   entity: SeoFields,
   fallback: { title: string; description: string },
 ) {
+  const isLegacyTitle = entity.seo_title?.trim() === "Telangana Police Constable Mock Test 2026 – Free Online Tests";
+  const isLegacyDesc = entity.seo_description?.trim()?.startsWith("Take free Telangana Police Constable mock tests online for preliminary");
+
   return {
-    title: entity.seo_title?.trim() || fallback.title,
-    description: entity.seo_description?.trim() || fallback.description,
+    title: (isLegacyTitle ? null : entity.seo_title?.trim()) || fallback.title,
+    description: (isLegacyDesc ? null : entity.seo_description?.trim()) || fallback.description,
   };
 }

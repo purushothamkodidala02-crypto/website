@@ -16,19 +16,24 @@ export function publicCollectionMetadata({
 }): Metadata {
   const brand = " | Varadhi Prep";
   let metadataTitle: Metadata["title"] = title;
-  if (title.endsWith("Varadhi Prep")) {
+  if (title.includes("Varadhi Prep")) {
     metadataTitle = { absolute: title };
-  } else if (title.length + brand.length > 60) {
-    const firstPart = title.split("|")[0].trim();
-    if (firstPart && firstPart.length + brand.length <= 60) {
-      metadataTitle = { absolute: `${firstPart}${brand}` };
+  } else if (title.includes("|")) {
+    // Multi-part or bilingual title (e.g. English | Telugu).
+    // Preserve all segments so search engines index both languages and keyphrases.
+    if (title.length + brand.length <= 90) {
+      metadataTitle = { absolute: `${title}${brand}` };
     } else {
-      const trimmed = title.slice(0, 60 - brand.length).trim().replace(/[|,\-–]$/, "").trim();
-      metadataTitle = { absolute: `${trimmed}${brand}` };
+      metadataTitle = { absolute: title };
     }
+  } else if (title.length + brand.length <= 65) {
+    metadataTitle = { absolute: `${title}${brand}` };
+  } else {
+    const trimmed = title.slice(0, 65 - brand.length).trim().replace(/[|,\-–]$/, "").trim();
+    metadataTitle = { absolute: `${trimmed}${brand}` };
   }
 
-  const safeDescription = trimMetaDescription(description, 155);
+  const safeDescription = trimMetaDescription(description, 160);
 
   return {
     title: metadataTitle,
@@ -41,15 +46,20 @@ export function publicCollectionMetadata({
   };
 }
 
-export function trimMetaDescription(desc: string, max = 155): string {
+export function trimMetaDescription(desc: string, max = 160): string {
   if (!desc || desc.length <= max) return desc;
   const sliced = desc.slice(0, max);
-  const lastPunctuation = Math.max(sliced.lastIndexOf(". "), sliced.lastIndexOf("! "), sliced.lastIndexOf("? "));
-  if (lastPunctuation > 60) {
+  const minPunctuationIndex = Math.floor(max * 0.7);
+  const lastPunctuation = Math.max(
+    sliced.lastIndexOf(". "),
+    sliced.lastIndexOf("! "),
+    sliced.lastIndexOf("? ")
+  );
+  if (lastPunctuation >= minPunctuationIndex) {
     return sliced.slice(0, lastPunctuation + 1).trim();
   }
   const lastSpace = sliced.lastIndexOf(" ");
-  return (lastSpace > 50 ? sliced.slice(0, lastSpace) : sliced).trim() + "...";
+  return (lastSpace > minPunctuationIndex ? sliced.slice(0, lastSpace) : sliced).trim() + "...";
 }
 
 export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string; view?: string }) {

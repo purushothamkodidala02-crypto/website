@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { getExamTeluguMetadata } from "../lib/telugu-seo.ts";
+import { resolveSeoFields } from "../lib/seo-fields.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -81,4 +82,17 @@ test("Telugu script SEO metadata generates bilingual titles, descriptions, and F
   const examRoute = await read("app/mock-tests/[id]/[exam]/page.tsx");
   assert.match(examRoute, /getExamTeluguMetadata/);
   assert.match(examRoute, /teluguData\.teluguTitle/);
+});
+
+test("publicCollectionMetadata preserves bilingual titles and descriptions without dropping Telugu script", async () => {
+  const publicSeo = await read("lib/public-seo.ts");
+  assert.match(publicSeo, /title\.includes\("\|"\)/);
+  assert.match(publicSeo, /minPunctuationIndex/);
+
+  const resolved = resolveSeoFields(
+    { seo_title: "Telangana Police Constable Mock Test 2026 – Free Online Tests", seo_description: "Take free Telangana Police Constable mock tests online for preliminary..." },
+    { title: "Fallback Title", description: "Fallback Description" }
+  );
+  assert.equal(resolved.title, "Fallback Title");
+  assert.equal(resolved.description, "Fallback Description");
 });

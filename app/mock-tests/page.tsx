@@ -243,6 +243,21 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       (!query || searchable.includes(query))
     );
   });
+
+  matchingTests.sort((a, b) => {
+    if (selectedSubject || selectedSection) {
+      const diff = Number(a.series_number ?? 0) - Number(b.series_number ?? 0);
+      if (diff !== 0) return diff;
+      const timeA = new Date(a.published_at || a.created_at || a.updated_at || 0).getTime();
+      const timeB = new Date(b.published_at || b.created_at || b.updated_at || 0).getTime();
+      return timeB - timeA;
+    }
+    const timeA = new Date(a.published_at || a.created_at || a.updated_at || 0).getTime();
+    const timeB = new Date(b.published_at || b.created_at || b.updated_at || 0).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    return Number(b.series_number ?? 0) - Number(a.series_number ?? 0);
+  });
+
   const pageSize = 24;
   const requestedPage = Number.parseInt(filters.page ?? "1", 10);
   const totalPages = Math.max(1, Math.ceil(matchingTests.length / pageSize));
