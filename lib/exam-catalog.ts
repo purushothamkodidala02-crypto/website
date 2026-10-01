@@ -108,3 +108,52 @@ export function formatExamFallbackDescription(examName: string, stateName?: stri
   return `Practise free ${target}${location} on Varadhi Prep. Take timed online practice tests, review comprehensive explanations, and improve your score.`;
 }
 
+export type ParsedMockTestTitle = {
+  breadcrumb: string[];
+  title: string;
+  topic?: string;
+  rawTitle: string;
+};
+
+export function parseMockTestTitle(rawTitle: string): ParsedMockTestTitle {
+  if (!rawTitle) {
+    return { breadcrumb: [], title: "Mock Test", rawTitle: "" };
+  }
+
+  const parts = rawTitle
+    .split(/\s*[•·]\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length >= 4) {
+    return {
+      breadcrumb: parts.slice(0, parts.length - 2),
+      topic: parts[parts.length - 2],
+      title: parts[parts.length - 1],
+      rawTitle,
+    };
+  }
+
+  if (parts.length === 3) {
+    return {
+      breadcrumb: [parts[0], parts[1]],
+      title: parts[2],
+      rawTitle,
+    };
+  }
+
+  if (parts.length === 2) {
+    return {
+      breadcrumb: [parts[0]],
+      title: parts[1],
+      rawTitle,
+    };
+  }
+
+  return {
+    breadcrumb: [],
+    title: rawTitle,
+    rawTitle,
+  };
+}
+

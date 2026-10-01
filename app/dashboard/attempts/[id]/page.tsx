@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
+import { parseMockTestTitle } from "@/lib/exam-catalog";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AttemptReviewNavigator, type ReviewRow } from "./AttemptReviewNavigator";
@@ -140,6 +141,8 @@ export default async function AttemptReviewPage({
       ? 0
       : (summary.score / summary.total_marks) * 100;
 
+  const parsedTitle = parseMockTestTitle(resolvedTitle ?? summary.mock_test_title);
+
   return (
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
@@ -159,9 +162,31 @@ export default async function AttemptReviewPage({
                 <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
                 Attempt review
               </p>
-              <h1 className="mt-4 max-w-4xl text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl">
-                {resolvedTitle ?? summary.mock_test_title}
+
+              {parsedTitle.breadcrumb.length > 0 && (
+                <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-300/90 sm:text-sm">
+                  {parsedTitle.breadcrumb.map((crumb, idx) => (
+                    <span key={idx} className="inline-flex items-center gap-1.5">
+                      {idx > 0 && <span className="text-slate-500 font-normal" aria-hidden="true">›</span>}
+                      <span>{crumb}</span>
+                    </span>
+                  ))}
+                </p>
+              )}
+
+              <h1 className="mt-2 max-w-4xl text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
+                {parsedTitle.title}
               </h1>
+
+              {parsedTitle.topic && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-400/20 bg-teal-400/10 px-3 py-1 text-xs sm:text-sm font-semibold text-teal-200">
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
+                    {parsedTitle.topic}
+                  </span>
+                </div>
+              )}
+
               <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base">
                 Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))} · Review every answer and use the explanations to plan your next
                 practice session.
@@ -229,6 +254,7 @@ export default async function AttemptReviewPage({
 }
 
 function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; title: string }) {
+  const parsedTitle = parseMockTestTitle(title);
   return (
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
@@ -236,7 +262,25 @@ function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; tit
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800">Back to dashboard</Link>
         <section className="mt-6 rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-200">Attempt summary</p>
-          <h1 className="mt-4 text-3xl font-black tracking-tight">{title}</h1>
+          {parsedTitle.breadcrumb.length > 0 && (
+            <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-300/90 sm:text-sm">
+              {parsedTitle.breadcrumb.map((crumb, idx) => (
+                <span key={idx} className="inline-flex items-center gap-1.5">
+                  {idx > 0 && <span className="text-slate-500 font-normal" aria-hidden="true">›</span>}
+                  <span>{crumb}</span>
+                </span>
+              ))}
+            </p>
+          )}
+          <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl text-white">{parsedTitle.title}</h1>
+          {parsedTitle.topic && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-400/20 bg-teal-400/10 px-3 py-1 text-xs sm:text-sm font-semibold text-teal-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
+                {parsedTitle.topic}
+              </span>
+            </div>
+          )}
           <p className="mt-3 text-sm text-slate-300">Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))}</p>
         </section>
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">

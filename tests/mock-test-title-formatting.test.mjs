@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { parseMockTestTitle } from "../lib/exam-catalog.ts";
+
+test("parseMockTestTitle parses 4-level mock test titles with bullets or middle dots", () => {
+  const input = "AP Endowment Officer • Hindu Philosophy & Temple System • Philosophies & Gurus • Mock Test 02";
+  const result = parseMockTestTitle(input);
+
+  assert.deepEqual(result.breadcrumb, [
+    "AP Endowment Officer",
+    "Hindu Philosophy & Temple System",
+  ]);
+  assert.equal(result.topic, "Philosophies & Gurus");
+  assert.equal(result.title, "Mock Test 02");
+});
+
+test("parseMockTestTitle parses titles with middle dots (·)", () => {
+  const input = "AP Endowment Officer · Hindu Philosophy & Temple System · Philosophies & Gurus · Mock Test 02";
+  const result = parseMockTestTitle(input);
+
+  assert.deepEqual(result.breadcrumb, [
+    "AP Endowment Officer",
+    "Hindu Philosophy & Temple System",
+  ]);
+  assert.equal(result.topic, "Philosophies & Gurus");
+  assert.equal(result.title, "Mock Test 02");
+});
+
+test("parseMockTestTitle parses 3-level mock test titles without subject (paper mock)", () => {
+  const input = "TGPSC Group 2 · Paper 1 - General Studies · Mock Test 05";
+  const result = parseMockTestTitle(input);
+
+  assert.deepEqual(result.breadcrumb, [
+    "TGPSC Group 2",
+    "Paper 1 - General Studies",
+  ]);
+  assert.equal(result.topic, undefined);
+  assert.equal(result.title, "Mock Test 05");
+});
+
+test("parseMockTestTitle handles 2-level or 1-level fallback titles gracefully", () => {
+  const twoLevel = parseMockTestTitle("AP Police SI · Mock Test 01");
+  assert.deepEqual(twoLevel.breadcrumb, ["AP Police SI"]);
+  assert.equal(twoLevel.title, "Mock Test 01");
+
+  const single = parseMockTestTitle("Custom Scholarship Test 2026");
+  assert.deepEqual(single.breadcrumb, []);
+  assert.equal(single.title, "Custom Scholarship Test 2026");
+
+  const empty = parseMockTestTitle("");
+  assert.equal(empty.title, "Mock Test");
+});

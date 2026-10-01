@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
+import { parseMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { mockTestUrl } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
@@ -311,13 +312,23 @@ export default async function Dashboard({
                               (attempt.score / attempt.total_marks) * 100,
                             ),
                           );
+                    const rawTitle = testTitles.get(attempt.mock_test_id) ?? "Mock test";
+                    const parsed = parseMockTestTitle(rawTitle);
                     return (
                       <div key={attempt.id}>
-                        <div className="mb-2 flex justify-between gap-4 text-sm">
-                          <span className="truncate font-semibold text-slate-700">
-                            {testTitles.get(attempt.mock_test_id) ?? "Mock test"}
-                          </span>
-                          <span className="font-black text-slate-950">
+                        <div className="mb-2 flex items-start justify-between gap-4 text-sm">
+                          <div className="min-w-0">
+                            <span className="block truncate font-bold text-slate-850" title={rawTitle}>
+                              {parsed.title}
+                              {parsed.topic && <span className="ml-1.5 font-normal text-slate-500">· {parsed.topic}</span>}
+                            </span>
+                            {parsed.breadcrumb.length > 0 && (
+                              <span className="block truncate text-[11px] font-semibold text-slate-400">
+                                {parsed.breadcrumb.join(" · ")}
+                              </span>
+                            )}
+                          </div>
+                          <span className="shrink-0 font-black text-slate-950">
                             {percentage.toFixed(0)}%
                           </span>
                         </div>
@@ -403,9 +414,32 @@ export default async function Dashboard({
                             timeZone: "Asia/Kolkata",
                           }).format(new Date(attempt.submitted_at))}
                         </p>
-                        <h3 className="mt-2 text-lg font-black text-slate-950">
-                          {testTitles.get(attempt.mock_test_id) ?? "Mock test"}
-                        </h3>
+                        {(() => {
+                          const rawTitle = testTitles.get(attempt.mock_test_id) ?? "Mock test";
+                          const parsed = parseMockTestTitle(rawTitle);
+                          return (
+                            <div className="mt-2">
+                              {parsed.breadcrumb.length > 0 && (
+                                <p className="flex flex-wrap items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-teal-700">
+                                  {parsed.breadcrumb.map((crumb, idx) => (
+                                    <span key={idx} className="inline-flex items-center gap-1">
+                                      {idx > 0 && <span className="text-slate-400 font-normal" aria-hidden="true">›</span>}
+                                      <span>{crumb}</span>
+                                    </span>
+                                  ))}
+                                </p>
+                              )}
+                              <h3 className="mt-1 flex flex-wrap items-center gap-2 text-lg font-black text-slate-950">
+                                <span>{parsed.title}</span>
+                                {parsed.topic && (
+                                  <span className="rounded-md border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-800">
+                                    {parsed.topic}
+                                  </span>
+                                )}
+                              </h3>
+                            </div>
+                          );
+                        })()}
                         <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
                           <ResultBadge
                             label={`${attempt.correct_answers} correct`}

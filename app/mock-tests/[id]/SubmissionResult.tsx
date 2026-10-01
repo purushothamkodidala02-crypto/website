@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
+import { parseMockTestTitle } from "@/lib/exam-catalog";
 import type { SubmitAttemptResult } from "./attempt-actions";
 
 type SubmissionResultProps = {
@@ -22,6 +23,8 @@ export function SubmissionResult({
     void exitFullscreenSafely();
   }, []);
 
+  const parsedTitle = parseMockTestTitle(title);
+
   const percentage =
     result.totalMarks && result.totalMarks > 0 && typeof result.score === "number"
       ? Math.round((result.score / result.totalMarks) * 100)
@@ -39,7 +42,27 @@ export function SubmissionResult({
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
           {result.success || typeof result.score === "number" ? "Test submitted successfully" : "Answers safely recorded"}
         </p>
-        <h1 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">{title}</h1>
+
+        {parsedTitle.breadcrumb.length > 0 && (
+          <p className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700">
+            {parsedTitle.breadcrumb.map((crumb, idx) => (
+              <span key={idx} className="inline-flex items-center gap-1.5">
+                {idx > 0 && <span className="text-slate-400 font-normal" aria-hidden="true">›</span>}
+                <span>{crumb}</span>
+              </span>
+            ))}
+          </p>
+        )}
+
+        <h1 className="mt-1.5 text-2xl font-black text-slate-900 sm:text-3xl">{parsedTitle.title}</h1>
+
+        {parsedTitle.topic && (
+          <div className="mt-2.5 flex justify-center">
+            <span className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-1 text-xs sm:text-sm font-semibold text-teal-800">
+              {parsedTitle.topic}
+            </span>
+          </div>
+        )}
 
         {result.success || typeof result.score === "number" ? (
           <>
