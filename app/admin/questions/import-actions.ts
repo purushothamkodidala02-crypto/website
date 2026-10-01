@@ -37,6 +37,7 @@ type MockImportTarget = {
   test_scope: "paper" | "subject";
   status: string;
   target_question_count: number;
+  replaces_mock_test_id: string | null;
 };
 
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
@@ -312,7 +313,7 @@ async function importQuestions(
   if (mockTestId) {
     const { data } = await supabase
       .from("mock_tests")
-      .select("id, paper_id, subject_id, test_scope, status, target_question_count")
+      .select("id, paper_id, subject_id, test_scope, status, target_question_count, replaces_mock_test_id")
       .eq("id", mockTestId)
       .maybeSingle();
     mockTest = data as MockImportTarget | null;
@@ -451,7 +452,10 @@ async function importQuestions(
       if (
         mtq.mock_tests?.title &&
         mtq.mock_tests.status !== "archived" &&
-        !mtq.mock_tests.superseded_by_mock_test_id
+        !mtq.mock_tests.superseded_by_mock_test_id &&
+        mtq.mock_tests.id !== mockTest?.replaces_mock_test_id &&
+        mtq.mock_test_id !== mockTest?.replaces_mock_test_id &&
+        mtq.mock_tests.superseded_by_mock_test_id !== mockTest?.id
       ) {
         assignedMockTests.push({
           id: mtq.mock_tests.id,
