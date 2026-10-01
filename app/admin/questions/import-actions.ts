@@ -399,7 +399,9 @@ async function importQuestions(
             mock_tests (
               id,
               title,
-              paper_id
+              paper_id,
+              status,
+              superseded_by_mock_test_id
             )
           )
         `)
@@ -442,8 +444,15 @@ async function importQuestions(
     const subjName = (subjects ?? []).find((s) => s.id === q.subject_id)?.name ?? "Subject";
     const assignedMockTests: Array<{ id: string; title: string }> = [];
 
-    for (const mtq of q.mock_test_questions ?? []) {
-      if (mtq.mock_tests?.title) {
+    for (const mtq of (q.mock_test_questions as unknown as Array<{
+      mock_test_id: string;
+      mock_tests: { id: string; title: string; paper_id: string; status: string; superseded_by_mock_test_id: string | null } | null;
+    }>) ?? []) {
+      if (
+        mtq.mock_tests?.title &&
+        mtq.mock_tests.status !== "archived" &&
+        !mtq.mock_tests.superseded_by_mock_test_id
+      ) {
         assignedMockTests.push({
           id: mtq.mock_tests.id,
           title: mtq.mock_tests.title,
@@ -582,9 +591,9 @@ async function importQuestions(
                 `Row ${rowNumber}: This question is already assigned to this Mock Test.`
               );
             }
-          } else if (existingMatch.importKey !== storedImportKey) {
+          } else if (subject && existingMatch.subjectId !== subject.id) {
             errors.push(
-              `Row ${rowNumber}: Duplicate question! An identical question already exists in the Question Bank for this paper (Subject: ${existingMatch.subjectName}).`
+              `Row ${rowNumber}: Duplicate question! An identical question already exists under ${existingMatch.subjectName}.`
             );
           }
         } else {
