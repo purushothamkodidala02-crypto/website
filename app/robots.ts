@@ -17,9 +17,15 @@ export default function robots(): MetadataRoute.Robots {
         "/reset-password",
         "/auth/",
         "/mock-tests/*/attempt",
+        "/*?*q=",
+        "/*?*type=",
+        "/*?*page=",
+        "/*?*view=",
+        "/*?*section=",
       ],
     },
     sitemap: absoluteUrl("/sitemap.xml"),
     host: absoluteUrl("/"),
   };
 }
+

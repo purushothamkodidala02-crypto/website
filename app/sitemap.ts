@@ -3,7 +3,8 @@ import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { absoluteUrl } from "@/lib/site";
 import { categoryUrl, examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl } from "@/lib/public-urls";
 
-export const dynamic = "force-dynamic";
+// Cache sitemap on Edge CDN and revalidate once per hour
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const catalog = await getMockTestCatalogData();
