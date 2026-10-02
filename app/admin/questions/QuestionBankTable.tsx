@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { indiaDateKey } from "@/lib/date";
 import {
@@ -130,6 +130,11 @@ export function QuestionBankTable({
     return subjects.filter((subject) => paperIds.has(subject.paperId) && (!location.subjectId || subject.id === location.subjectId)).map((subject) => subject.id);
   }, [exams, location, papers, subjects]);
 
+  const subjectById = useMemo(() => new Map(subjects.map((subject) => [subject.id, subject])), [subjects]);
+  const paperById = useMemo(() => new Map(papers.map((paper) => [paper.id, paper])), [papers]);
+  const examById = useMemo(() => new Map(exams.map((exam) => [exam.id, exam])), [exams]);
+  const specializationById = useMemo(() => new Map(specializations.map((item) => [item.id, item.name])), [specializations]);
+
   useEffect(() => {
     let active = true;
     const timer = window.setTimeout(() => {
@@ -182,10 +187,6 @@ export function QuestionBankTable({
           return;
         }
 
-        const subjectById = new Map(subjects.map((subject) => [subject.id, subject]));
-        const paperById = new Map(papers.map((paper) => [paper.id, paper]));
-        const examById = new Map(exams.map((exam) => [exam.id, exam]));
-        const specializationById = new Map(specializations.map((item) => [item.id, item.name]));
         setQuestions((data ?? []).map((question) => {
           const subject = subjectById.get(question.subject_id);
           const paper = subject ? paperById.get(subject.paperId) : undefined;
@@ -217,7 +218,7 @@ export function QuestionBankTable({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [exams, location.categoryId, page, papers, refreshKey, search, specializations, statusFilter, subjects, visibleSubjectIds]);
+  }, [examById, location.categoryId, page, paperById, refreshKey, search, specializationById, statusFilter, subjectById, visibleSubjectIds]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const questionBankUrl = useMemo(() => {
@@ -241,6 +242,13 @@ export function QuestionBankTable({
   const visibleIds = useMemo(() => questions.map((q) => q.id), [questions]);
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
   const someVisibleSelected = visibleIds.some((id) => selectedIds.has(id));
+  const selectAllCheckboxRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      selectAllCheckboxRef.current.indeterminate = someVisibleSelected && !allVisibleSelected;
+    }
+  }, [someVisibleSelected, allVisibleSelected]);
 
   const toggleSelectAll = () => {
     setSelectedIds((prev) => {
@@ -478,11 +486,7 @@ export function QuestionBankTable({
                     <input
                       type="checkbox"
                       checked={questions.length > 0 && allVisibleSelected}
-                      ref={(el) => {
-                        if (el) {
-                          el.indeterminate = someVisibleSelected && !allVisibleSelected;
-                        }
-                      }}
+                      ref={selectAllCheckboxRef}
                       onChange={toggleSelectAll}
                       disabled={loading || questions.length === 0}
                       aria-label="Select all visible questions"

@@ -204,8 +204,8 @@ function NavigationLinks({
                 const active = isActive(pathname, link.href);
                 const isReportsLink = link.href === "/admin/question-reports";
                 const isSurveysLink = link.href === "/admin/surveys";
-                const reportCount = isReportsLink ? badges.openReports : 0;
-                const surveyCount = isSurveysLink ? badges.newSurveys : 0;
+                const reportCount = isReportsLink ? (pathname.startsWith("/admin/question-reports") ? 0 : badges.openReports) : 0;
+                const surveyCount = isSurveysLink ? (pathname.startsWith("/admin/surveys") ? 0 : badges.newSurveys) : 0;
                 const showBadge = reportCount > 0 || surveyCount > 0;
                 const badgeCount = reportCount || surveyCount;
                 const isReport = isReportsLink;
@@ -338,9 +338,13 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
     }
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  }
 
   // Lock body scroll and close on Escape key when mobile drawer is open
   useEffect(() => {
@@ -357,20 +361,18 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
     };
   }, [mobileOpen]);
 
-  // Update seen states when visiting report/survey pages without re-fetching badges over network
+  // Update seen states in localStorage when visiting report/survey pages
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (pathname.startsWith("/admin/surveys")) {
-        localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
-        window.setTimeout(() => {
-          setBadges((prev) => ({ ...prev, newSurveys: 0 }));
-        }, 0);
+        try {
+          localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
+        } catch {}
       }
       if (pathname.startsWith("/admin/question-reports")) {
-        localStorage.setItem("varadhi_admin_reports_last_seen", new Date().toISOString());
-        window.setTimeout(() => {
-          setBadges((prev) => ({ ...prev, hasNewReport: false }));
-        }, 0);
+        try {
+          localStorage.setItem("varadhi_admin_reports_last_seen", new Date().toISOString());
+        } catch {}
       }
     }
   }, [pathname]);

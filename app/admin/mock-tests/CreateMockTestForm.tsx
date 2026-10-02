@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { formatMockNumber, mockTestLabel } from "@/lib/exam-catalog";
@@ -40,7 +40,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [subjectSectionId, setSubjectSectionId] = useState("");
   const [scope, setScope] = useState<"paper" | "subject">("paper");
   const [accessType, setAccessType] = useState<MockTestAccessType>("free");
-  const [allSections, setAllSections] = useState<SubjectSectionOption[]>(sections);
+  const [extraSections, setExtraSections] = useState<SubjectSectionOption[]>([]);
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [isAddingSectionPending, setIsAddingSectionPending] = useState(false);
@@ -52,9 +52,15 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [selectedSeriesNumber, setSelectedSeriesNumber] = useState<number | string>("");
   const [isSeriesCustom, setIsSeriesCustom] = useState(false);
 
-  useEffect(() => {
-    setAllSections(sections);
-  }, [sections]);
+  const allSections = useMemo(() => {
+    const combined = [...sections];
+    for (const extra of extraSections) {
+      if (!combined.some((s) => s.id === extra.id)) {
+        combined.push(extra);
+      }
+    }
+    return combined;
+  }, [sections, extraSections]);
 
   const state = states.find((item) => item.id === stateId);
   const availableCategories = useMemo(() => categories.filter((item) => item.stateId === stateId), [categories, stateId]);
@@ -69,21 +75,19 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const subject = subjects.find((item) => item.id === subjectId);
   const section = availableSections.find((item) => item.id === subjectSectionId);
 
-  useEffect(() => {
-    if (paper?.duration && !isDurationCustom) {
+  const selectionKey = `${paperId}:${scope}:${subjectId}:${subjectSectionId}`;
+  const [prevSelectionKey, setPrevSelectionKey] = useState(selectionKey);
+
+  if (selectionKey !== prevSelectionKey) {
+    setPrevSelectionKey(selectionKey);
+    if (!isDurationCustom && paper?.duration) {
       setDurationMinutes(paper.duration);
     }
-  }, [paper?.duration, isDurationCustom]);
-
-  useEffect(() => {
     if (!isTargetCountCustom) {
-      if (scope === "paper") {
-        setTargetQuestionCount(paper?.questionCount ?? 1);
-      } else {
-        setTargetQuestionCount(25);
-      }
+      setTargetQuestionCount(scope === "paper" ? (paper?.questionCount ?? 1) : 25);
     }
-  }, [paper?.questionCount, scope, isTargetCountCustom]);
+    setIsSeriesCustom(false);
+  }
 
   async function handleQuickAddSection() {
     if (!subjectId || !newSectionName.trim()) return;
@@ -93,7 +97,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       const res = await quickCreateSubjectSection(subjectId, newSectionName.trim());
       if (res.success && res.section) {
         const created = res.section;
-        setAllSections((prev) => {
+        setExtraSections((prev) => {
           if (prev.some((s) => s.id === created.id)) return prev;
           return [...prev, created];
         });
@@ -140,18 +144,12 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
 
   const hasGap = firstAvailableSeries < appendSeries;
 
-  useEffect(() => {
-    setIsSeriesCustom(false);
-  }, [paperId, scope, subjectId, subjectSectionId]);
-
-  useEffect(() => {
-    if (!isSeriesCustom) {
-      setSelectedSeriesNumber(firstAvailableSeries);
-    }
-  }, [firstAvailableSeries, isSeriesCustom]);
-
-  const effectiveSeries = Number(selectedSeriesNumber) || firstAvailableSeries;
-  const isSeriesTaken = existingNumbersSet.has(Number(selectedSeriesNumber));
+  const effectiveSeries = isSeriesCustom && selectedSeriesNumber !== ""
+    ? (Number(selectedSeriesNumber) || firstAvailableSeries)
+    : firstAvailableSeries;
+  const isSeriesTaken = isSeriesCustom && selectedSeriesNumber !== ""
+    ? existingNumbersSet.has(Number(selectedSeriesNumber))
+    : false;
 
   function resetAfterState(value: string) { if (value === stateId) return; setStateId(value); setCategoryId(""); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
   function resetAfterCategory(value: string) { if (value === categoryId) return; setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
@@ -369,7 +367,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
                 min="1"
                 max="999"
                 required
-                value={selectedSeriesNumber}
+                value={isSeriesCustom ? selectedSeriesNumber : firstAvailableSeries}
                 onChange={(e) => {
                   setSelectedSeriesNumber(e.target.value);
                   setIsSeriesCustom(true);

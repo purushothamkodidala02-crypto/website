@@ -1,33 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import { AdminNavigation } from "@/components/admin/AdminNavigation";
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+const STORAGE_KEY = "varadhi_admin_sidebar_collapsed";
 
-  useEffect(() => {
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener("admin_sidebar_toggle", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("admin_sidebar_toggle", callback);
+  };
+}
+
+function getSnapshot() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
+export function AdminShell({ children }: { children: React.ReactNode }) {
+  const sidebarCollapsed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const handleToggle = useCallback(() => {
     try {
-      const stored = localStorage.getItem("varadhi_admin_sidebar_collapsed");
-      if (stored !== null) {
-        setSidebarCollapsed(stored === "true");
-      }
+      const next = !getSnapshot();
+      localStorage.setItem(STORAGE_KEY, String(next));
+      window.dispatchEvent(new Event("admin_sidebar_toggle"));
     } catch {
       // ignore
     }
   }, []);
-
-  const handleToggle = () => {
-    setSidebarCollapsed((current) => {
-      const next = !current;
-      try {
-        localStorage.setItem("varadhi_admin_sidebar_collapsed", String(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
-  };
 
   return (
     <>

@@ -112,8 +112,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       const res = await syncAllMockTestTitles();
       setSyncMessage(res.message);
       router.refresh();
-    } catch (err: any) {
-      setSyncMessage(err?.message ?? "An error occurred while synchronizing titles.");
+    } catch (err: unknown) {
+      setSyncMessage(err instanceof Error ? err.message : "An error occurred while synchronizing titles.");
     } finally {
       setIsSyncing(false);
     }
@@ -157,50 +157,44 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const router = useRouter();
 
   const prevInitialStateRef = useRef(initialStateId);
-  useEffect(() => {
-    if (prevInitialStateRef.current !== initialStateId) {
-      prevInitialStateRef.current = initialStateId;
-      setStateId(initialStateId);
-    }
-  }, [initialStateId]);
-
   const prevInitialLocationRef = useRef(initialLocation);
-  useEffect(() => {
-    const prev = prevInitialLocationRef.current;
-    if (
-      prev.categoryId !== initialLocation.categoryId ||
-      prev.examId !== initialLocation.examId ||
-      prev.specializationId !== initialLocation.specializationId ||
-      prev.paperId !== initialLocation.paperId
-    ) {
-      prevInitialLocationRef.current = initialLocation;
-      setLocation(initialLocation);
-    }
-  }, [initialLocation.categoryId, initialLocation.examId, initialLocation.specializationId, initialLocation.paperId]);
 
-  const prevInitialSearchRef = useRef(initialSearch);
   useEffect(() => {
-    if (prevInitialSearchRef.current !== initialSearch) {
-      prevInitialSearchRef.current = initialSearch;
-      setSearch(initialSearch);
-    }
-  }, [initialSearch]);
+    prevInitialStateRef.current = initialStateId;
+    prevInitialLocationRef.current = initialLocation;
+  }, [initialStateId, initialLocation]);
 
-  const prevInitialStatusRef = useRef(initialStatus);
-  useEffect(() => {
-    if (prevInitialStatusRef.current !== initialStatus) {
-      prevInitialStatusRef.current = initialStatus;
-      setStatus(initialStatus);
-    }
-  }, [initialStatus]);
+  const [prevInitials, setPrevInitials] = useState({
+    stateId: initialStateId,
+    location: initialLocation,
+    search: initialSearch,
+    status: initialStatus,
+    scope: initialScope,
+  });
 
-  const prevInitialScopeRef = useRef(initialScope);
-  useEffect(() => {
-    if (prevInitialScopeRef.current !== initialScope) {
-      prevInitialScopeRef.current = initialScope;
-      setScope(initialScope);
-    }
-  }, [initialScope]);
+  if (
+    prevInitials.stateId !== initialStateId ||
+    prevInitials.location.categoryId !== initialLocation.categoryId ||
+    prevInitials.location.examId !== initialLocation.examId ||
+    prevInitials.location.specializationId !== initialLocation.specializationId ||
+    prevInitials.location.paperId !== initialLocation.paperId ||
+    prevInitials.search !== initialSearch ||
+    prevInitials.status !== initialStatus ||
+    prevInitials.scope !== initialScope
+  ) {
+    setPrevInitials({
+      stateId: initialStateId,
+      location: initialLocation,
+      search: initialSearch,
+      status: initialStatus,
+      scope: initialScope,
+    });
+    setStateId(initialStateId);
+    setLocation(initialLocation);
+    setSearch(initialSearch);
+    setStatus(initialStatus);
+    setScope(initialScope);
+  }
 
   useEffect(() => {
     const handlePopState = () => {
@@ -240,10 +234,13 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
 
   const [page, setPage] = useState(1);
   const pageSize = 6;
+  const filterKey = `${stateId}:${location.categoryId}:${location.examId}:${location.specializationId}:${location.paperId}:${search}:${status}:${scope}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
 
-  useEffect(() => {
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setPage(1);
-  }, [stateId, location, search, status, scope]);
+  }
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);

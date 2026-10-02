@@ -46,15 +46,20 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
-  // Sync state if URL changes externally
-  useEffect(() => {
-    const item = Number(searchParams.get("item") ?? 1);
+  // Reconcile index at render time when item query parameter changes
+  const itemParam = searchParams.get("item");
+  const [prevItemParam, setPrevItemParam] = useState(itemParam);
+  if (prevItemParam !== itemParam) {
+    setPrevItemParam(itemParam);
+    const item = Number(itemParam ?? 1);
     const targetIndex = Number.isInteger(item) ? Math.min(Math.max(item - 1, 0), Math.max(rows.length - 1, 0)) : 0;
-    setCurrentIndex((prev) => (prev !== targetIndex ? targetIndex : prev));
-  }, [searchParams, rows.length]);
+    if (currentIndex !== targetIndex) {
+      setCurrentIndex(targetIndex);
+    }
+  }
 
   const handleNavigate = useCallback((newIndex: number) => {
-    setCurrentIndex(newIndex);
+    setCurrentIndex((prev) => (prev !== newIndex ? newIndex : prev));
     
     // Update the URL without triggering a server fetch
     const params = new URLSearchParams(searchParams.toString());

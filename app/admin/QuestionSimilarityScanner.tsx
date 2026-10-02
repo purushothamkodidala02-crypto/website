@@ -454,7 +454,7 @@ export function QuestionSimilarityScanner({
       } else {
         setActionNotice({ type: "error", text: res.message });
       }
-    } catch (e) {
+    } catch {
       setActionNotice({ type: "error", text: "Failed to delete question." });
     } finally {
       setDeletingId(null);
@@ -511,7 +511,7 @@ export function QuestionSimilarityScanner({
       } else {
         setActionNotice({ type: "error", text: res.message });
       }
-    } catch (e) {
+    } catch {
       setActionNotice({ type: "error", text: "Failed to perform bulk cleanup." });
     } finally {
       setBulkDeleting(false);
@@ -1153,7 +1153,6 @@ export function QuestionSimilarityScanner({
                         })
                         .map((group, idx) => {
                         const isGroupOptionsExpanded = expandedOptionGroups.has(group.normalizedKey);
-                        const sample = group.items[0];
 
                         return (
                           <div

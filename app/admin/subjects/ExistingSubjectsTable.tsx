@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DeleteSubjectButton } from "./DeleteSubjectButton";
 import { bulkDeleteSubjects } from "./deleteAction";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
@@ -62,6 +62,13 @@ export function ExistingSubjectsTable({
   const visibleSubjectIds = useMemo(() => visibleSubjects.map((s) => s.id), [visibleSubjects]);
   const allVisibleSelected = visibleSubjectIds.length > 0 && visibleSubjectIds.every((id) => selectedIds.has(id));
   const someVisibleSelected = visibleSubjectIds.some((id) => selectedIds.has(id));
+  const selectAllCheckboxRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      selectAllCheckboxRef.current.indeterminate = someVisibleSelected && !allVisibleSelected;
+    }
+  }, [someVisibleSelected, allVisibleSelected]);
 
   const toggleSelectAll = () => {
     setSelectedIds((prev) => {
@@ -238,9 +245,7 @@ export function ExistingSubjectsTable({
                       <input
                         type="checkbox"
                         checked={visibleSubjects.length > 0 && allVisibleSelected}
-                        ref={(el) => {
-                          if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
-                        }}
+                        ref={selectAllCheckboxRef}
                         onChange={toggleSelectAll}
                         disabled={visibleSubjects.length === 0}
                         aria-label="Select all visible subjects"

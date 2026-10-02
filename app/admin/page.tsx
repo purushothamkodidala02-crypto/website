@@ -20,7 +20,6 @@ export default async function AdminDashboard() {
     papersResult,
     groupsResult,
     subjectsResult,
-    specializationsResult,
     totalQuestionsCountResult,
     usableQuestionsCountResult,
     expiringSoonCountResult,
@@ -34,7 +33,6 @@ export default async function AdminDashboard() {
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, display_order"),
     supabase.from("exam_groups").select("id, name"),
     supabase.from("subjects").select("id, name"),
-    supabase.from("exam_specializations").select("id, exam_group_id, name, slug"),
     supabase.from("questions").select("id", { count: "exact", head: true }),
     supabase
       .from("questions")

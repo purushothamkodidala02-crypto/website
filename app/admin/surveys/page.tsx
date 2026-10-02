@@ -26,7 +26,7 @@ export default function AdminSurveysList() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const router = useRouter();
 
-  const loadSurveys = useCallback(async () => {
+  const refreshSurveys = useCallback(async () => {
     setLoading(true);
     const data = await getAdminSurveysWithCounts();
     setSurveys(data || []);
@@ -39,12 +39,13 @@ export default function AdminSurveysList() {
       localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
       window.dispatchEvent(new Event("admin-badge-refresh"));
     }
-    getAdminSurveysWithCounts().then((data) => {
+    void (async () => {
+      const data = await getAdminSurveysWithCounts();
       if (!ignore) {
         setSurveys(data || []);
         setLoading(false);
       }
-    });
+    })();
     return () => {
       ignore = true;
     };
@@ -64,7 +65,7 @@ export default function AdminSurveysList() {
 
   const handleToggle = async (id: string, currentlyActive: boolean) => {
     await toggleSurveyStatus(id, !currentlyActive);
-    loadSurveys();
+    refreshSurveys();
   };
 
   const handleCopyLink = (surveyId: string, isActive: boolean) => {

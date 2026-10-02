@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import type { MockTest, MockTestAccessType } from "@/types/mock-test";
@@ -35,16 +35,22 @@ export function EditMockTestForm({
   const [subjectSectionId, setSubjectSectionId] = useState(mockTest.subject_section_id ?? "");
   const [scope, setScope] = useState(mockTest.test_scope);
   const [accessType, setAccessType] = useState<MockTestAccessType>(mockTest.access_type);
-  const [allSections, setAllSections] = useState<SubjectSection[]>(sections);
+  const [extraSections, setExtraSections] = useState<SubjectSection[]>([]);
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [isAddingSectionPending, setIsAddingSectionPending] = useState(false);
   const [addSectionError, setAddSectionError] = useState<string | null>(null);
   const [seriesNumber, setSeriesNumber] = useState<number | string>(mockTest.series_number ?? 1);
 
-  useEffect(() => {
-    setAllSections(sections);
-  }, [sections]);
+  const allSections = useMemo(() => {
+    const combined = [...sections];
+    for (const extra of extraSections) {
+      if (!combined.some((s) => s.id === extra.id)) {
+        combined.push(extra);
+      }
+    }
+    return combined;
+  }, [sections, extraSections]);
 
   const availableSubjects = useMemo(
     () => subjects.filter((subject) => subject.paperId === paperId),
@@ -63,7 +69,7 @@ export function EditMockTestForm({
       const res = await quickCreateSubjectSection(subjectId, newSectionName.trim());
       if (res.success && res.section) {
         const created = res.section;
-        setAllSections((prev) => {
+        setExtraSections((prev) => {
           if (prev.some((s) => s.id === created.id)) return prev;
           return [...prev, created];
         });

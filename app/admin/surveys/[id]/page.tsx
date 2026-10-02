@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useMemo, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   saveSurveyQuestion,
@@ -41,7 +41,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
   const [qOptions, setQOptions] = useState("");
   const [isSavingQuestion, setIsSavingQuestion] = useState(false);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const loadResponses = useCallback(async () => {
     setLoadingResponses(true);
@@ -120,17 +120,18 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
       localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
       window.dispatchEvent(new Event("admin-badge-refresh"));
     }
-    Promise.all([
-      supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single(),
-      supabase.from("dynamic_survey_questions").select("*").eq("survey_id", surveyId).order("display_order"),
-      getAdminSurveyResponses(surveyId),
-    ]).then(([sRes, qRes, rData]) => {
+    void (async () => {
+      const [sRes, qRes, rData] = await Promise.all([
+        supabase.from("dynamic_surveys").select("*").eq("id", surveyId).single(),
+        supabase.from("dynamic_survey_questions").select("*").eq("survey_id", surveyId).order("display_order"),
+        getAdminSurveyResponses(surveyId),
+      ]);
       if (!ignore) {
         setSurvey(sRes.data);
         setQuestions(qRes.data || []);
         setResponses(rData || []);
       }
-    });
+    })();
     return () => {
       ignore = true;
     };

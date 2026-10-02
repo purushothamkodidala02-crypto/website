@@ -197,7 +197,20 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
           await Promise.allSettled(
             missingUserIds.map(async (uid) => {
               try {
-                const { data: authData } = await (dbClient.auth as any).admin.getUserById(uid);
+                const adminAuth = dbClient.auth as unknown as {
+                  admin: {
+                    getUserById: (id: string) => Promise<{
+                      data: {
+                        user?: {
+                          email?: string;
+                          phone?: string;
+                          user_metadata?: Record<string, string>;
+                        };
+                      } | null;
+                    }>;
+                  };
+                };
+                const { data: authData } = await adminAuth.admin.getUserById(uid);
                 const userObj = authData?.user;
                 if (!userObj) return;
 

@@ -38,15 +38,18 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
   const attempts = (attemptsResult.data ?? []) as Attempt[];
   const userIds = [...new Set(attempts.map((a) => a.user_id))];
   
+  type ProfileSummary = { id: string; full_name: string | null; phone: string | null };
+
   const [{ data: visibleProfiles }, emailResult] = userIds.length > 0
     ? await Promise.all([
         admin.from("profiles").select("id, full_name, phone").in("id", userIds),
         admin.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
       ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] as ProfileSummary[] }, { data: [] as { user_id: string; email: string }[] }];
 
-  const names = new Map((visibleProfiles ?? []).map((item: any) => [item.id, item.full_name?.trim() || "Student"]));
-  const phones = new Map((visibleProfiles ?? []).map((item: any) => [item.id, item.phone?.trim() || ""]));
+  const profilesList = (visibleProfiles ?? []) as ProfileSummary[];
+  const names = new Map(profilesList.map((item) => [item.id, item.full_name?.trim() || "Student"]));
+  const phones = new Map(profilesList.map((item) => [item.id, item.phone?.trim() || ""]));
   const emails = new Map(((emailResult.data ?? []) as { user_id: string; email: string }[]).map((item) => [item.user_id, item.email ?? ""]));
 
   const mockTestTitles = new Map(

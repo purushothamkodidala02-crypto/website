@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 export type SearchableSelectOption = { value: string; label: string };
 
@@ -30,17 +30,15 @@ export function SearchableSelect({
   const selected = options.find((option) => option.value === value);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(selected?.label ?? "");
+  const [prevValue, setPrevValue] = useState(value);
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (!open) {
-      if (selected?.label) {
-        setQuery(selected.label);
-      } else if (!value) {
-        setQuery("");
-      }
+      setQuery(selected?.label ?? "");
     }
-  }, [selected?.label, open, value]);
+  }
 
   const matches = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -53,11 +51,11 @@ export function SearchableSelect({
   }, [options, query, selected]);
   const showList = open && !disabled;
 
-  function closeList(customQuery?: string) {
+  const closeList = useCallback((customQuery?: string) => {
     setOpen(false);
     setQuery(customQuery !== undefined ? customQuery : (selected?.label ?? ""));
     setActiveIndex(-1);
-  }
+  }, [selected?.label]);
 
   function selectOption(option: SearchableSelectOption) {
     onChange(option.value);
@@ -65,17 +63,17 @@ export function SearchableSelect({
   }
 
   useEffect(() => {
+    if (!open) return;
+
     function closeWhenClickingAway(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setOpen(false);
-        setQuery(selected?.label ?? "");
-        setActiveIndex(-1);
+        closeList();
       }
     }
 
     document.addEventListener("mousedown", closeWhenClickingAway);
     return () => document.removeEventListener("mousedown", closeWhenClickingAway);
-  }, [selected?.label]);
+  }, [open, closeList]);
 
   useEffect(() => {
     if (activeIndex < 0 || !listRef.current) return;
@@ -186,7 +184,6 @@ export function SearchableSelect({
 
       {showList && (
         <div
-          ref={listRef}
           id={listboxId}
           role="listbox"
           className="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border bg-white shadow-xl shadow-slate-950/10"

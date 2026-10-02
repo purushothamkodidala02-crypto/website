@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
@@ -88,10 +88,26 @@ export function StudentTestRunner({
   const [paused, setPaused] = useState(false);
   const [pauseError, setPauseError] = useState("");
   const [submission, setSubmission] = useState<SubmitAttemptResult | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
-  const [isBigDisplay, setIsBigDisplay] = useState(false);
-  const [showFullscreenNotice, setShowFullscreenNotice] = useState(true);
+  const isFullscreen = useSyncExternalStore(
+    subscribeToFullscreenChange,
+    isCurrentlyFullscreen,
+    () => false,
+  );
+  const fullscreenAvailable = useSyncExternalStore(
+    () => () => {},
+    isFullscreenSupported,
+    () => false,
+  );
+  const isBigDisplay = useSyncExternalStore(
+    (callback) => {
+      window.addEventListener("resize", callback);
+      return () => window.removeEventListener("resize", callback);
+    },
+    isBigScreen,
+    () => false,
+  );
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const showFullscreenNotice = !noticeDismissed && !isFullscreen;
   const [fullscreenFeedback, setFullscreenFeedback] = useState("");
   const containerRef = useRef<HTMLElement | null>(null);
   const saveChains = useRef(new Map<string, Promise<void>>());
@@ -230,35 +246,11 @@ export function StudentTestRunner({
     return () => window.removeEventListener("keydown", navigateWithKeyboard);
   }, [confirming, locked, questions.length]);
 
-  useEffect(() => {
-    setIsFullscreen(isCurrentlyFullscreen());
-    setFullscreenAvailable(isFullscreenSupported());
-    setIsBigDisplay(isBigScreen());
-
-    const unsubscribe = subscribeToFullscreenChange((active) => {
-      setIsFullscreen(active);
-      if (active) {
-        setShowFullscreenNotice(false);
-      }
-    });
-
-    const handleResize = () => {
-      setIsBigDisplay(isBigScreen());
-    };
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      unsubscribe();
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   const handleToggleFullscreen = useCallback(async (event?: React.MouseEvent) => {
     event?.preventDefault();
     setFullscreenFeedback("");
     const success = await toggleFullscreenSafely(containerRef.current);
     const active = isCurrentlyFullscreen();
-    setIsFullscreen(active);
     if (!success && !active) {
       const status = getLastFullscreenStatus();
       if (status.isBlockedByBrowser) {
@@ -268,9 +260,6 @@ export function StudentTestRunner({
       }
     } else {
       setFullscreenFeedback("");
-      if (active) {
-        setShowFullscreenNotice(false);
-      }
     }
   }, []);
 
@@ -515,7 +504,7 @@ export function StudentTestRunner({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowFullscreenNotice(false)}
+                    onClick={() => setNoticeDismissed(true)}
                     className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
                     title="Keep using normal or split screen"
                   >
