@@ -174,7 +174,7 @@ function parseCsv(source: string): ParsedQuestionFile {
 }
 
 async function parseExcel(file: File): Promise<ParsedQuestionFile> {
-  const workbook = new ExcelJS.Workbook();
+  let workbook = new ExcelJS.Workbook();
   const rawBuffer = Buffer.from(await file.arrayBuffer());
   const isBiff8Xls = rawBuffer.length >= 8 && rawBuffer.subarray(0, 8).toString("hex") === "d0cf11e0a1b11ae1";
   const extension = file.name.toLowerCase().split(".").pop();
@@ -191,7 +191,24 @@ async function parseExcel(file: File): Promise<ParsedQuestionFile> {
     fileBuffer = rawBuffer as unknown as Parameters<typeof workbook.xlsx.load>[0];
   }
 
-  await workbook.xlsx.load(fileBuffer);
+  try {
+    await workbook.xlsx.load(fileBuffer);
+  } catch (loadError) {
+    try {
+      const readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
+      const normalizedBuffer = XLSX.write(readWb, { bookType: "xlsx", type: "buffer" }) as unknown as Parameters<typeof workbook.xlsx.load>[0];
+      const fallbackWorkbook = new ExcelJS.Workbook();
+      await fallbackWorkbook.xlsx.load(normalizedBuffer);
+      workbook = fallbackWorkbook;
+    } catch {
+      throw new Error(
+        loadError instanceof Error && loadError.message.includes("sheets")
+          ? "The Excel file format could not be parsed by ExcelJS. Please ensure the worksheet is valid or import as a CSV file."
+          : (loadError instanceof Error ? loadError.message : "The Excel file could not be read.")
+      );
+    }
+  }
+
   const worksheet = workbook.getWorksheet("Varadhi Import") ?? workbook.worksheets[0];
   if (!worksheet) throw new Error("The Excel file does not contain a worksheet.");
 
