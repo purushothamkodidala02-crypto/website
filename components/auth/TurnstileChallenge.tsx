@@ -4,6 +4,7 @@ import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
 const DEVELOPMENT_SITE_KEY = "1x00000000000000000000AA";
+const PRODUCTION_SITE_KEY = "0x4AAAAAAEM7znlSiOllBU-j";
 
 type TurnstileApi = {
   render: (
@@ -38,8 +39,8 @@ export function TurnstileChallenge({
   const [ready, setReady] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const siteKey =
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ??
-    (process.env.NODE_ENV === "development" ? DEVELOPMENT_SITE_KEY : "");
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+    (process.env.NODE_ENV === "development" ? DEVELOPMENT_SITE_KEY : PRODUCTION_SITE_KEY);
 
   useEffect(() => {
     if (!ready || !siteKey || !containerRef.current || !window.turnstile) return;
@@ -63,7 +64,7 @@ export function TurnstileChallenge({
         onToken(null);
         setErrorMessage(
           errorCode === "110200"
-            ? "This address is not authorized in Cloudflare Turnstile. Add localhost to the widget hostnames."
+            ? `This address (${typeof window !== "undefined" ? window.location.hostname : "hostname"}) is not authorized in Cloudflare Turnstile. Add it to your Turnstile widget hostnames in Cloudflare.`
             : "Security verification could not load. Refresh the page and try again.",
         );
         return true;
