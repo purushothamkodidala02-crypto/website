@@ -31,7 +31,7 @@ export default async function AttemptReviewPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(`/dashboard/attempts/${id}`)}`);
 
-  const admin = createAdminClient();
+  const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
 
   const [attemptResult, reviewResult] = await Promise.all([
     admin

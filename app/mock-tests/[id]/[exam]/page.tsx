@@ -20,7 +20,7 @@ import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl } from "@/l
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createPublicClient } from "@/lib/supabase/public";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
@@ -51,9 +51,18 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 const getCachedFaqs = unstable_cache(
   async (examId: string) => {
-    const admin = createAdminClient();
-    const { data } = await admin.from("exam_page_faqs").select("id, question, answer, display_order").eq("exam_group_id", examId).order("display_order");
-    return data;
+    try {
+      const publicClient = createPublicClient();
+      const { data } = await publicClient
+        .from("exam_page_faqs")
+        .select("id, question, answer, display_order")
+        .eq("exam_group_id", examId)
+        .order("display_order");
+      return data ?? [];
+    } catch (err) {
+      console.error("Failed to fetch exam page faqs:", err);
+      return [];
+    }
   },
   ["exam-faqs"],
   { revalidate: 300 }
