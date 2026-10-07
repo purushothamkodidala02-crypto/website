@@ -130,7 +130,7 @@ export default async function Home() {
                   ? state.description.slice(prefix.length)
                   : state.description ?? "State recruitment and eligibility examinations.";
                 return (
-                  <Link key={state.id} href={stateUrl(state.slug)} className="student-card group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
+                  <Link key={state.id} href={stateUrl(state.slug)} prefetch={false} className="student-card group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
                     <div className="flex items-start justify-between">
                       <span className={`grid h-12 w-12 place-items-center rounded-2xl ${color}`}><StateSymbol slug={state.slug} /></span>
                       <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">State</span>
@@ -161,7 +161,7 @@ export default async function Home() {
                   const state = states.find((item) => item.id === category?.state_id);
                   const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
                   return state ? (
-                    <Link key={exam.id} href={examUrl(state.slug, exam.slug)} className="student-card group rounded-2xl border bg-white p-5 hover:border-teal-300 hover:shadow-lg">
+                    <Link key={exam.id} href={examUrl(state.slug, exam.slug)} prefetch={false} className="student-card group rounded-2xl border bg-white p-5 hover:border-teal-300 hover:shadow-lg">
                       <div className="flex items-center justify-between">
                         <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ExamSymbol name={exam.name} className="h-5 w-5" /></span>
                         <span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.name}</span>

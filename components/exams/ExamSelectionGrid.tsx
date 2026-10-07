@@ -21,7 +21,7 @@ function ExamCards({ exams }: { exams: ExamSelectionItem[] }) {
   return (
     <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {exams.map((exam) => (
-        <Link key={exam.id} href={exam.href} className="student-card group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
+        <Link key={exam.id} href={exam.href} prefetch={false} className="student-card group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
           <span className="flex items-center justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800"><ExamSymbol name={exam.name} /></span><span className="max-w-[62%] truncate rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">{exam.boardName}</span></span>
           <h3 className="font-display mt-5 text-xl leading-7 text-slate-950">{exam.name}</h3>
           <p className="mt-2 text-sm text-slate-500">{exam.contextLabel}</p>

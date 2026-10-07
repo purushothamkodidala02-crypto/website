@@ -3,6 +3,7 @@ import { ImageResponse } from "next/og";
 export const alt = "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 604800; // Cache 7 days on Edge CDN
 
 export default function OpenGraphImage() {
   return new ImageResponse(

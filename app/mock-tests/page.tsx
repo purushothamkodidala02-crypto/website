@@ -359,7 +359,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               {states.map((state, index) => {
                 const stats = stateStats.get(state.id) ?? { exams: 0 };
                 const tones = ["from-teal-50 to-white border-teal-200", "from-amber-50 to-white border-amber-200", "from-indigo-50 to-white border-indigo-200"];
-                return <Link key={state.id} href={stateUrl(state.slug)} className={`student-card group rounded-3xl border bg-gradient-to-br p-6 shadow-sm hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
+                return <Link key={state.id} href={stateUrl(state.slug)} prefetch={false} className={`student-card group rounded-3xl border bg-gradient-to-br p-6 shadow-sm hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
                   <span className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} /></span><span className="rounded-full border bg-white/80 px-3 py-1 text-xs font-black tracking-wide text-slate-600">{state.code}</span></span>
                   <h2 className="font-display mt-6 text-2xl">{state.name}</h2>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
@@ -378,7 +378,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               const display = paperDisplayById.get(paper.id);
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
-              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} className="student-card group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
+              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
                 <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-slate-950 text-teal-200"><PaperSymbol /></span>
                 <span className="min-w-0 flex-1"><span className="text-xs font-black uppercase tracking-[0.12em] text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-1 block text-lg leading-6">{paper.name}</strong><span className="mt-2 block text-sm font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
                 <span className="text-xl font-black text-teal-800 transition group-hover:translate-x-1">→</span>
@@ -728,6 +728,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
               </span>
               <Link
                 href={testHref}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-black text-white transition hover:bg-teal-700 group-hover:bg-teal-700"
               >
                 <span>Start test</span>
@@ -748,9 +749,9 @@ function CatalogPagination({ filters, page, totalPages, basePath }: { filters: F
     return withQuery(basePath, nextFilters);
   };
   return <nav aria-label="Mock-test pages" className="mt-8 flex items-center justify-center gap-3">
-    <Link href={pageHref(page - 1)} aria-disabled={page === 1} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Previous</Link>
+    <Link href={pageHref(page - 1)} prefetch={false} aria-disabled={page === 1} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Previous</Link>
     <span className="text-sm font-semibold text-slate-600">Page {page} of {totalPages}</span>
-    <Link href={pageHref(Math.min(totalPages, page + 1))} aria-disabled={page === totalPages} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === totalPages ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Next</Link>
+    <Link href={pageHref(Math.min(totalPages, page + 1))} prefetch={false} aria-disabled={page === totalPages} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === totalPages ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Next</Link>
   </nav>;
 }
 

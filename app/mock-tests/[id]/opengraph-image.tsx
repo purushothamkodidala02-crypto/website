@@ -4,6 +4,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 export const alt = "Varadhi Prep competitive exam mock test";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 604800; // Cache 7 days on Edge CDN
 
 type ShareDetails = {
   examName: string;

@@ -34,7 +34,34 @@ function buildContentSecurityPolicy(nonce?: string) {
   ].join("; ");
 }
 
+const BLOCKED_BOT_REGEX =
+  /\b(bytespider|petalbot|gptbot|claudebot|anthropic-ai|semrushbot|ahrefsbot|dotbot|mj12bot|ccbot|amazonbot|dataforseobool|dataforseobot|megaindex|blexbot|screaming frog|zoominfobot|turnitin|cohere-ai|yandexbot|seekport|serpstat)\b/i;
+
+const SUSPICIOUS_PATH_REGEX =
+  /\.(php|env|git|asp|aspx|jsp|cgi|bak|sql|config|yml|yaml)$|wp-(login|admin|content|includes)|\/(phpmyadmin|pma|adminer|alfa|setup|actuator)/i;
+
 export async function proxy(request: NextRequest) {
+  const userAgent = request.headers.get("user-agent") || "";
+  if (BLOCKED_BOT_REGEX.test(userAgent)) {
+    return new NextResponse("Forbidden", {
+      status: 403,
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      },
+    });
+  }
+
+  if (SUSPICIOUS_PATH_REGEX.test(request.nextUrl.pathname)) {
+    return new NextResponse("Not Found", {
+      status: 404,
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      },
+    });
+  }
+
   const permanentDestination = await resolvePublicPermanentRedirect(request);
   if (permanentDestination === "not-found") {
     return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });

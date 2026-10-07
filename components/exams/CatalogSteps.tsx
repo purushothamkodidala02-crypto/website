@@ -37,7 +37,7 @@ export function CatalogSteps({
         return (
           <li key={step.label} className={`relative text-center ${index > 0 ? "border-l" : ""} ${index === activeIndex ? "bg-teal-50" : ""}`}>
             {step.href ? (
-              <Link href={step.href} aria-label={`Change ${step.label.toLowerCase()}`} className="group block h-full px-3 py-4 transition hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700 sm:px-5" title={`Change ${step.label.toLowerCase()}`}>
+              <Link href={step.href} prefetch={false} aria-label={`Change ${step.label.toLowerCase()}`} className="group block h-full px-3 py-4 transition hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700 sm:px-5" title={`Change ${step.label.toLowerCase()}`}>
                 {content}
               </Link>
             ) : (
