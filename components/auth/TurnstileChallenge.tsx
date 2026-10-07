@@ -38,9 +38,10 @@ export function TurnstileChallenge({
   const widgetIdRef = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const siteKey =
+  const rawSiteKey =
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
     (process.env.NODE_ENV === "development" ? DEVELOPMENT_SITE_KEY : PRODUCTION_SITE_KEY);
+  const siteKey = rawSiteKey.trim();
 
   useEffect(() => {
     if (!ready || !siteKey || !containerRef.current || !window.turnstile) return;
