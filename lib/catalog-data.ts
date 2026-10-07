@@ -3,11 +3,22 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createPublicClient } from "@/lib/supabase/public";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
 
 function hasCatalogSupabaseEnv() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  );
+}
+
+function getCatalogSupabaseClient() {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return createAdminClient();
+  }
+  return createPublicClient();
 }
 
 export const getHomeCatalogData = unstable_cache(
@@ -23,7 +34,7 @@ export const getHomeCatalogData = unstable_cache(
       };
     }
 
-    const supabase = createAdminClient();
+    const supabase = getCatalogSupabaseClient();
     const [statesResult, categoriesResult, examsResult, papersResult, testsResult] =
       await Promise.all([
         supabase.from("exam_states").select("id, name, code, slug, description, seo_title, seo_description, display_order, is_active").order("display_order"),
@@ -74,7 +85,7 @@ export const getMockTestCatalogData = unstable_cache(
       };
     }
 
-    const supabase = createAdminClient();
+    const supabase = getCatalogSupabaseClient();
     const [statesResult, categoriesResult, examsResult, specializationsResult, papersResult, subjectsResult, sectionsResult, testsResult, statsResult] = await Promise.all([
       supabase.from("exam_states").select("id, name, code, slug, description, seo_title, seo_description, display_order, is_active").order("display_order"),
       supabase.from("exams").select("id, state_id, name, slug, seo_title, seo_description, is_active").order("display_order"),
