@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ReportAdminForm } from "./ReportAdminForm";
+import { QuestionPreviewDrawer } from "./QuestionPreviewDrawer";
+import { ExportReportsButton, type ExportReportRow } from "./ExportReportsButton";
+import { QuestionReportsFilterBar } from "./QuestionReportsFilterBar";
 
 type ReportRow = {
   id: string;
@@ -12,8 +15,22 @@ type ReportRow = {
   details: string | null;
   status: string;
   admin_notes: string | null;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
   created_at: string;
-  questions: { question_text: string; subjects: { name: string } | null } | null;
+  questions: {
+    id: string;
+    question_text: string;
+    option_a?: string | null;
+    option_b?: string | null;
+    option_c?: string | null;
+    option_d?: string | null;
+    correct_answer?: string | null;
+    explanation?: string | null;
+    image_url?: string | null;
+    difficulty?: string | null;
+    subjects: { name: string } | null;
+  } | null;
 };
 
 type MockAssignment = {
@@ -31,30 +48,88 @@ const categoryLabels: Record<string, string> = {
   duplicate: "Duplicate question",
   other: "Other problem",
 };
-const statusStyles: Record<string, string> = {
-  open: "bg-red-100 text-red-800",
-  reviewing: "bg-amber-100 text-amber-900",
-  resolved: "bg-emerald-100 text-emerald-800",
-  dismissed: "bg-slate-200 text-slate-700",
+
+const categoryBadges: Record<string, { label: string; badge: string; icon: string }> = {
+  wrong_answer: { label: "Answer appears incorrect", badge: "bg-rose-50 text-rose-800 border-rose-200", icon: "🎯" },
+  unclear_wording: { label: "Unclear wording", badge: "bg-amber-50 text-amber-800 border-amber-200", icon: "📝" },
+  translation: { label: "Translation issue", badge: "bg-blue-50 text-blue-800 border-blue-200", icon: "🌐" },
+  broken_image: { label: "Broken image", badge: "bg-purple-50 text-purple-800 border-purple-200", icon: "🖼️" },
+  duplicate: { label: "Duplicate question", badge: "bg-slate-100 text-slate-800 border-slate-300", icon: "📑" },
+  other: { label: "Other problem", badge: "bg-gray-100 text-gray-800 border-gray-300", icon: "💬" },
 };
+
+const statusStyles: Record<string, { badge: string; dot: string; label: string }> = {
+  open: { badge: "bg-red-50 text-red-800 border-red-200 ring-1 ring-red-500/20", dot: "bg-red-500", label: "Open" },
+  reviewing: { badge: "bg-amber-50 text-amber-800 border-amber-200 ring-1 ring-amber-500/20", dot: "bg-amber-500", label: "Reviewing" },
+  resolved: { badge: "bg-emerald-50 text-emerald-800 border-emerald-200 ring-1 ring-emerald-500/20", dot: "bg-emerald-500", label: "Resolved" },
+  dismissed: { badge: "bg-slate-100 text-slate-700 border-slate-200", dot: "bg-slate-400", label: "Dismissed" },
+};
+
 const dateFormatter = new Intl.DateTimeFormat("en-IN", {
   dateStyle: "medium",
   timeStyle: "short",
   timeZone: "Asia/Kolkata",
 });
 
+function formatRelativeTime(isoString: string): string {
+  try {
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return "just now";
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDay = Math.floor(diffHr / 24);
+    if (diffDay < 7) return `${diffDay}d ago`;
+    return dateFormatter.format(new Date(isoString));
+  } catch {
+    return isoString;
+  }
+}
+
 export default async function AdminQuestionReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; category?: string }>;
+  searchParams: Promise<{ status?: string; category?: string; q?: string; sort?: string }>;
 }) {
   const query = await searchParams;
   const admin = createAdminClient();
+  const sortAsc = query.sort === "oldest";
 
+  // 1. Fetch system-wide status counts for KPIs and Tab Badges in parallel
+  const [
+    totalCountRes,
+    openCountRes,
+    reviewingCountRes,
+    resolvedCountRes,
+    dismissedCountRes,
+  ] = await Promise.all([
+    admin.from("question_reports").select("id", { count: "exact", head: true }),
+    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "reviewing"),
+    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "resolved"),
+    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "dismissed"),
+  ]);
+
+  const counts = {
+    total: totalCountRes.count ?? 0,
+    open: openCountRes.count ?? 0,
+    reviewing: reviewingCountRes.count ?? 0,
+    resolved: resolvedCountRes.count ?? 0,
+    dismissed: dismissedCountRes.count ?? 0,
+  };
+
+  const closedCount = counts.resolved + counts.dismissed;
+  const resolutionRate = counts.total > 0 ? Math.round((closedCount / counts.total) * 100) : 100;
+
+  // 2. Build filtered report query
   let request = admin
     .from("question_reports")
-    .select("id, user_id, question_id, attempt_id, mock_test_id, category, details, status, admin_notes, created_at, questions(question_text, subjects(name))")
-    .order("created_at", { ascending: false })
+    .select(
+      "id, user_id, question_id, attempt_id, mock_test_id, category, details, status, admin_notes, created_at, resolved_at, resolved_by, questions(id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, difficulty, subjects(name))"
+    )
+    .order("created_at", { ascending: sortAsc })
     .limit(100);
 
   if (["open", "reviewing", "resolved", "dismissed"].includes(query.status ?? "")) {
@@ -72,8 +147,10 @@ export default async function AdminQuestionReportsPage({
   if (error && (error.message?.includes("mock_test_id") || error.code === "PGRST204" || error.code === "42703")) {
     let fallbackRequest = admin
       .from("question_reports")
-      .select("id, user_id, question_id, attempt_id, category, details, status, admin_notes, created_at, questions(question_text, subjects(name))")
-      .order("created_at", { ascending: false })
+      .select(
+        "id, user_id, question_id, attempt_id, category, details, status, admin_notes, created_at, resolved_at, resolved_by, questions(id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, difficulty, subjects(name))"
+      )
+      .order("created_at", { ascending: sortAsc })
       .limit(100);
 
     if (["open", "reviewing", "resolved", "dismissed"].includes(query.status ?? "")) {
@@ -87,11 +164,15 @@ export default async function AdminQuestionReportsPage({
     error = fallback.error;
   }
 
-  const reports = (data ?? []) as unknown as ReportRow[];
-  const userIds = [...new Set(reports.map((report) => report.user_id))];
-  const questionIds = [...new Set(reports.map((report) => report.question_id))];
-  const attemptIds = [...new Set(reports.map((report) => report.attempt_id).filter(Boolean))] as string[];
-  const directMockTestIds = [...new Set(reports.map((report) => report.mock_test_id).filter(Boolean))] as string[];
+  const rawReports = (data ?? []) as unknown as ReportRow[];
+
+  // 3. Resolve student and admin identities, mock assignments, and attempt answers
+  const studentUserIds = [...new Set(rawReports.map((report) => report.user_id))];
+  const resolverIds = [...new Set(rawReports.map((r) => r.resolved_by).filter(Boolean))] as string[];
+  const allUserIds = [...new Set([...studentUserIds, ...resolverIds])];
+  const questionIds = [...new Set(rawReports.map((report) => report.question_id))];
+  const attemptIds = [...new Set(rawReports.map((report) => report.attempt_id).filter(Boolean))] as string[];
+  const directMockTestIds = [...new Set(rawReports.map((report) => report.mock_test_id).filter(Boolean))] as string[];
 
   type MockTestSummary = { id: string; title: string | null; status: string | null };
   type RawAssignment = {
@@ -110,35 +191,71 @@ export default async function AdminQuestionReportsPage({
     title: string | null;
     status: string | null;
   };
+  type RawAttemptAnswer = {
+    attempt_id: string;
+    question_id: string;
+    selected_answer: string;
+    is_correct: boolean;
+  };
 
-  const [profilesResult, assignmentsResult, attemptsResult, extraMocksResult] = await Promise.all([
-    userIds.length
-      ? admin.from("profiles").select("id, full_name").in("id", userIds)
-      : Promise.resolve({ data: [] as { id: string; full_name: string | null }[] }),
+  type ProfileSummary = { id: string; full_name: string | null; phone: string | null };
+  type EmailSummary = { user_id: string; email: string };
+
+  const [
+    profilesResult,
+    assignmentsResult,
+    attemptsResult,
+    extraMocksResult,
+    attemptAnswersResult,
+    emailResult,
+  ] = await Promise.all([
+    allUserIds.length
+      ? admin.from("profiles").select("id, full_name, phone").in("id", allUserIds)
+      : Promise.resolve({ data: [] as ProfileSummary[], error: null }),
     questionIds.length
       ? admin
           .from("mock_test_questions")
           .select("mock_test_id, question_id, question_order, mock_tests(id, title, status)")
           .in("question_id", questionIds)
           .order("question_order", { ascending: true })
-      : Promise.resolve({ data: [] as RawAssignment[] }),
+      : Promise.resolve({ data: [] as RawAssignment[], error: null }),
     attemptIds.length
       ? admin
           .from("test_attempts")
           .select("id, mock_test_id, mock_tests(id, title, status)")
           .in("id", attemptIds)
-      : Promise.resolve({ data: [] as RawAttempt[] }),
+      : Promise.resolve({ data: [] as RawAttempt[], error: null }),
     directMockTestIds.length
       ? admin
           .from("mock_tests")
           .select("id, title, status")
           .in("id", directMockTestIds)
-      : Promise.resolve({ data: [] as RawMock[] }),
+      : Promise.resolve({ data: [] as RawMock[], error: null }),
+    attemptIds.length
+      ? admin
+          .from("attempt_responses")
+          .select("attempt_id, question_id, selected_answer, is_correct")
+          .in("attempt_id", attemptIds)
+      : Promise.resolve({ data: [] as RawAttemptAnswer[], error: null }),
+    allUserIds.length
+      ? admin.rpc("get_admin_user_emails", { requested_user_ids: allUserIds.slice(0, 200) })
+      : Promise.resolve({ data: [] as EmailSummary[], error: null }),
   ]);
 
-  const studentNames = new Map(
-    (profilesResult.data ?? []).map((profile) => [profile.id, profile.full_name?.trim() || "Student"]),
+  const profileList = (profilesResult.data ?? []) as ProfileSummary[];
+  const userNames = new Map<string, string>(
+    profileList.map((profile: ProfileSummary) => [profile.id, profile.full_name?.trim() || "Student"]),
   );
+  const userPhones = new Map<string, string | null>(
+    profileList.map((profile: ProfileSummary) => [profile.id, profile.phone?.trim() || null]),
+  );
+  const emailList = (emailResult.data ?? []) as EmailSummary[];
+  const userEmails = new Map<string, string>();
+  for (const row of emailList) {
+    if (row.user_id && row.email) {
+      userEmails.set(row.user_id, row.email);
+    }
+  }
 
   const assignmentsByQuestion = new Map<string, MockAssignment[]>();
   for (const row of assignmentsResult.data ?? []) {
@@ -176,71 +293,217 @@ export default async function AdminQuestionReportsPage({
     }
   }
 
-  const openCount = reports.filter((report) => report.status === "open").length;
+  const attemptResponsesMap = new Map<string, { selectedAnswer: string; isCorrect: boolean }>();
+  for (const row of (attemptAnswersResult.data ?? []) as RawAttemptAnswer[]) {
+    attemptResponsesMap.set(`${row.attempt_id}:${row.question_id}`, {
+      selectedAnswer: row.selected_answer,
+      isCorrect: row.is_correct,
+    });
+  }
+
+  // 4. In-memory search filter (if search query "q" provided)
+  const searchQuery = String(query.q ?? "").trim().toLowerCase();
+  const reports = rawReports.filter((report) => {
+    if (!searchQuery) return true;
+    const studentName = (userNames.get(report.user_id) ?? "").toLowerCase();
+    const studentEmail = (userEmails.get(report.user_id) ?? "").toLowerCase();
+    const qText = (report.questions?.question_text ?? "").toLowerCase();
+    const notes = (report.admin_notes ?? "").toLowerCase();
+    const details = (report.details ?? "").toLowerCase();
+    const cat = (categoryLabels[report.category] ?? "").toLowerCase();
+    const qid = report.question_id.toLowerCase();
+    const rid = report.id.toLowerCase();
+
+    return (
+      studentName.includes(searchQuery) ||
+      studentEmail.includes(searchQuery) ||
+      qText.includes(searchQuery) ||
+      notes.includes(searchQuery) ||
+      details.includes(searchQuery) ||
+      cat.includes(searchQuery) ||
+      qid.includes(searchQuery) ||
+      rid.includes(searchQuery)
+    );
+  });
+
+  // 5. Build CSV Export rows
+  const exportRows: ExportReportRow[] = reports.map((report) => ({
+    id: report.id,
+    createdAt: dateFormatter.format(new Date(report.created_at)),
+    status: report.status,
+    category: report.category,
+    categoryLabel: categoryLabels[report.category] ?? report.category,
+    subject: report.questions?.subjects?.name ?? "Question Bank",
+    questionId: report.question_id,
+    questionText: report.questions?.question_text ?? "Content unavailable",
+    correctAnswer: report.questions?.correct_answer ?? "",
+    studentName: userNames.get(report.user_id) ?? "Student",
+    studentEmail: userEmails.get(report.user_id) ?? "",
+    studentDetails: report.details ?? "",
+    adminNotes: report.admin_notes ?? "",
+    resolvedAt: report.resolved_at ? dateFormatter.format(new Date(report.resolved_at)) : "",
+    resolvedByName: report.resolved_by ? userNames.get(report.resolved_by) ?? "Admin" : "",
+  }));
+
+  const openCountInView = reports.filter((r) => r.status === "open").length;
 
   return (
-    <div>
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Content quality</p>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+    <div className="space-y-6">
+      {/* Header section with brand context and top actions */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-950">Question reports</h1>
-          <p className="mt-2 max-w-3xl text-slate-600">
-            Review issues reported by students, inspect assigned mock tests and question numbers, correct Question Bank content, and record resolutions.
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-teal-500" />
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Quality assurance & feedback</p>
+          </div>
+          <h1 className="mt-2 text-3xl font-black text-slate-950">Question reports</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
+            Review and triage issues reported by students, inspect assigned mock tests and question numbers, verify question content and answer keys, and record resolutions.
           </p>
         </div>
-        <div className="rounded-2xl bg-red-50 px-5 py-3 text-center">
-          <p className="text-2xl font-black text-red-800">{openCount}</p>
-          <p className="text-xs font-bold text-red-700">Open in this view</p>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <ExportReportsButton reports={exportRows} />
+          <Link
+            href="/admin/questions"
+            className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-black text-slate-800 shadow-sm transition hover:border-teal-400 hover:text-teal-900"
+          >
+            Question Bank
+          </Link>
+          <Link
+            href="/admin/similarity"
+            className="rounded-xl border border-teal-200 bg-teal-50 px-3.5 py-2.5 text-xs font-black text-teal-900 shadow-sm transition hover:bg-teal-100"
+          >
+            Similarity scanner
+          </Link>
         </div>
       </div>
 
-      <form
-        method="get"
-        className="mt-7 grid gap-3 rounded-2xl border bg-white p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
-      >
-        <label className="text-sm font-bold">
-          Status
-          <select
-            name="status"
-            defaultValue={query.status ?? ""}
-            className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal"
-          >
-            <option value="">All statuses</option>
-            <option value="open">Open</option>
-            <option value="reviewing">Reviewing</option>
-            <option value="resolved">Resolved</option>
-            <option value="dismissed">Dismissed</option>
-          </select>
-        </label>
-        <label className="text-sm font-bold">
-          Problem type
-          <select
-            name="category"
-            defaultValue={query.category ?? ""}
-            className="mt-1.5 w-full rounded-xl border px-3 py-2.5 font-normal"
-          >
-            <option value="">All problem types</option>
-            {Object.entries(categoryLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-black text-white">Apply filters</button>
-      </form>
+      {/* KPI Metric summary cards */}
+      <section aria-label="Question report metrics" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Open Reports Card */}
+        <Link
+          href="/admin/question-reports?status=open"
+          className="group rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50/80 via-white to-rose-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-rose-800">Action Required</p>
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 text-xs text-rose-700">
+              ⚡
+            </span>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <p className="text-3xl font-black text-rose-950">{counts.open}</p>
+            <span className="text-xs font-semibold text-rose-700">open reports</span>
+          </div>
+          <p className="mt-1 text-[11px] font-medium text-slate-500">
+            {openCountInView} open in current filtered view
+          </p>
+        </Link>
 
+        {/* Reviewing Card */}
+        <Link
+          href="/admin/question-reports?status=reviewing"
+          className="group rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Under Review</p>
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-xs text-amber-700">
+              🔍
+            </span>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <p className="text-3xl font-black text-amber-950">{counts.reviewing}</p>
+            <span className="text-xs font-semibold text-amber-700">in triage</span>
+          </div>
+          <p className="mt-1 text-[11px] font-medium text-slate-500">Subject matter expert review ongoing</p>
+        </Link>
+
+        {/* Resolved Card */}
+        <Link
+          href="/admin/question-reports?status=resolved"
+          className="group rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Resolved</p>
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-xs text-emerald-700">
+              ✓
+            </span>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <p className="text-3xl font-black text-emerald-950">{counts.resolved}</p>
+            <span className="text-xs font-semibold text-emerald-700">corrected</span>
+          </div>
+          <p className="mt-1 text-[11px] font-medium text-slate-500">Fixes applied to Question Bank</p>
+        </Link>
+
+        {/* Total & Resolution Rate */}
+        <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50/80 via-white to-teal-50/20 p-4 shadow-xs">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Resolution Health</p>
+            <span className="rounded-md bg-teal-100 px-2 py-0.5 text-[10px] font-black uppercase text-teal-900">
+              {resolutionRate}% Closed
+            </span>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <p className="text-3xl font-black text-teal-950">{counts.total}</p>
+            <span className="text-xs font-semibold text-teal-700">total reports</span>
+          </div>
+          <p className="mt-1 text-[11px] font-medium text-slate-500">
+            {closedCount} resolved or dismissed
+          </p>
+        </div>
+      </section>
+
+      {/* Interactive Filter Bar */}
+      <QuestionReportsFilterBar
+        counts={counts}
+        categoryLabels={categoryLabels}
+        initialCategory={query.category}
+        initialStatus={query.status}
+        initialSearch={query.q}
+        initialSort={query.sort}
+      />
+
+      {/* Report results list */}
       {error ? (
-        <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-semibold text-red-800">
-          Question reports could not be loaded. Refresh and try again.
-        </p>
+        <div role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-semibold text-red-800">
+          <p className="font-black">Question reports could not be loaded.</p>
+          <p className="mt-1 text-xs opacity-90">Please refresh this page or try again in a few moments.</p>
+        </div>
       ) : reports.length === 0 ? (
-        <section className="mt-6 rounded-3xl border border-dashed bg-white p-10 text-center">
-          <h2 className="text-xl font-black">No matching reports</h2>
-          <p className="mt-2 text-sm text-slate-600">New student reports will appear here.</p>
+        <section className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-600">
+            📋
+          </div>
+          <h2 className="mt-4 text-xl font-black text-slate-950">No matching reports</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            {query.status || query.category || query.q
+              ? "No reports match your selected filters. Try broadening your criteria."
+              : "All student question reports have been processed. New reports will appear here."}
+          </p>
+          {(query.status || query.category || query.q) && (
+            <div className="mt-5">
+              <Link
+                href="/admin/question-reports"
+                className="inline-flex rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white hover:bg-teal-700"
+              >
+                Clear all filters
+              </Link>
+            </div>
+          )}
         </section>
       ) : (
         <section className="mt-6 grid gap-5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+            <span>
+              Showing <strong>{reports.length}</strong> {reports.length === 1 ? "report" : "reports"}
+              {query.status ? ` with status '${query.status}'` : ""}
+              {query.category ? ` for '${categoryLabels[query.category]}'` : ""}
+            </span>
+            <span>Sorted by {sortAsc ? "oldest first" : "most recent"}</span>
+          </div>
+
           {reports.map((report) => {
             const assignments = assignmentsByQuestion.get(report.question_id) ?? [];
             const reportedMock =
@@ -251,39 +514,107 @@ export default async function AdminQuestionReportsPage({
               : null;
             const reportedOrder = reportedAssignment ? reportedAssignment.questionOrder : null;
 
+            const studentName = userNames.get(report.user_id) ?? "Student";
+            const studentEmail = userEmails.get(report.user_id);
+            const studentPhone = userPhones.get(report.user_id);
+            const resolverName = report.resolved_by ? userNames.get(report.resolved_by) ?? "Admin" : null;
+
+            const categoryInfo = categoryBadges[report.category] ?? {
+              label: categoryLabels[report.category] ?? report.category,
+              badge: "bg-slate-100 text-slate-800 border-slate-200",
+              icon: "📌",
+            };
+            const currentStatusStyle = statusStyles[report.status] ?? statusStyles.open;
+
+            const studentAttemptAnswer = report.attempt_id
+              ? attemptResponsesMap.get(`${report.attempt_id}:${report.question_id}`)
+              : null;
+
             return (
-              <article key={report.id} className="rounded-3xl border bg-white p-5 shadow-sm sm:p-6">
+              <article
+                key={report.id}
+                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-slate-300 sm:p-6"
+              >
+                {/* Top card bar: Badges, subject, relative time, open action */}
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-3 py-1 text-xs font-black ${statusStyles[report.status]}`}>
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${currentStatusStyle.badge}`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${currentStatusStyle.dot}`} />
                         {report.status}
                       </span>
+
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${categoryInfo.badge}`}
+                      >
+                        <span>{categoryInfo.icon}</span>
+                        <span>{categoryInfo.label}</span>
+                      </span>
+
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
-                        {categoryLabels[report.category]}
+                        {report.questions?.subjects?.name ?? "Question Bank"}
                       </span>
                     </div>
 
-                    <p className="mt-4 text-xs font-black uppercase tracking-wide text-teal-700">
-                      {report.questions?.subjects?.name ?? "Question Bank"}
-                    </p>
-                    <h2 className="mt-2 line-clamp-3 text-lg font-black leading-7 text-slate-950">
+                    {/* Question text headline */}
+                    <h2 className="mt-3.5 text-base font-bold leading-relaxed text-slate-950 sm:text-lg">
                       {report.questions?.question_text ?? "Question content unavailable"}
                     </h2>
 
-                    <p className="mt-3 text-sm text-slate-600">
-                      Reported by {studentNames.get(report.user_id) ?? "Student"} ·{" "}
-                      {dateFormatter.format(new Date(report.created_at))}
-                    </p>
+                    {/* Reporter metadata */}
+                    <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                      <span className="font-semibold text-slate-700">
+                        Reported by <strong>{studentName}</strong>
+                      </span>
+                      {studentEmail && (
+                        <>
+                          <span>·</span>
+                          <span className="text-slate-500">{studentEmail}</span>
+                        </>
+                      )}
+                      {studentPhone && (
+                        <>
+                          <span>·</span>
+                          <span className="text-slate-500">{studentPhone}</span>
+                        </>
+                      )}
+                      <span>·</span>
+                      <span title={dateFormatter.format(new Date(report.created_at))}>
+                        {formatRelativeTime(report.created_at)} ({dateFormatter.format(new Date(report.created_at))})
+                      </span>
+                    </div>
 
+                    {/* Student problem details */}
                     {report.details && (
-                      <p className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-                        <strong>Student details:</strong> {report.details}
-                      </p>
+                      <div className="mt-3.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs leading-5 text-amber-950">
+                        <p className="font-black uppercase tracking-wider text-[11px] text-amber-800">
+                          Student Reported Details
+                        </p>
+                        <p className="mt-1 font-medium">{report.details}</p>
+                      </div>
+                    )}
+
+                    {/* Deep Question content, MCQ options, Correct key & explanation */}
+                    {report.questions && (
+                      <QuestionPreviewDrawer
+                        questionId={report.question_id}
+                        reportId={report.id}
+                        optionA={report.questions.option_a}
+                        optionB={report.questions.option_b}
+                        optionC={report.questions.option_c}
+                        optionD={report.questions.option_d}
+                        correctAnswer={report.questions.correct_answer}
+                        explanation={report.questions.explanation}
+                        imageUrl={report.questions.image_url}
+                        difficulty={report.questions.difficulty}
+                        studentAttemptAnswer={studentAttemptAnswer}
+                      />
                     )}
 
                     {/* Where the question is assigned in mock tests and question number */}
-                    <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/50 p-4">
+                    <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/40 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-xs font-black uppercase tracking-wider text-teal-900">
                           Assigned in Mock Tests ({assignments.length})
@@ -318,14 +649,12 @@ export default async function AdminQuestionReportsPage({
                                   <span className="inline-grid min-w-14 place-items-center rounded-lg bg-teal-700 px-2.5 py-1 text-xs font-black text-white">
                                     Question #{assignment.questionOrder}
                                   </span>
-                                  <span className="font-bold text-slate-950">
-                                    {assignment.mockTestTitle}
-                                  </span>
+                                  <span className="font-bold text-slate-950">{assignment.mockTestTitle}</span>
                                   <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
                                     {assignment.mockTestStatus}
                                   </span>
                                   {isReportSource && (
-                                    <span className="rounded-md bg-amber-200 px-2 py-0.5 text-[10px] font-black text-amber-900 uppercase">
+                                    <span className="rounded-md bg-amber-200 px-2 py-0.5 text-[10px] font-black uppercase text-amber-900">
                                       Reported in this mock
                                     </span>
                                   )}
@@ -352,15 +681,23 @@ export default async function AdminQuestionReportsPage({
                     </div>
                   </div>
 
+                  {/* Primary question edit action button */}
                   <Link
                     href={`/admin/questions/${report.question_id}/edit`}
-                    className="shrink-0 rounded-xl bg-teal-700 px-4 py-3 text-sm font-black text-white"
+                    className="shrink-0 rounded-xl bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-teal-800"
                   >
                     Open question
                   </Link>
                 </div>
 
-                <ReportAdminForm reportId={report.id} status={report.status} notes={report.admin_notes} />
+                {/* Resolution & internal notes editor */}
+                <ReportAdminForm
+                  reportId={report.id}
+                  status={report.status}
+                  notes={report.admin_notes}
+                  resolvedAt={report.resolved_at}
+                  resolvedByName={resolverName}
+                />
               </article>
             );
           })}
