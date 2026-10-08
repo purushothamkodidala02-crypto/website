@@ -88,6 +88,15 @@ function formatRelativeTime(isoString: string): string {
   }
 }
 
+function getRetentionCutoff(days = 15) {
+  const target = new Date();
+  target.setDate(target.getDate() - days);
+  return {
+    cutoffDate: target.toISOString(),
+    cutoffMs: target.getTime(),
+  };
+}
+
 export default async function AdminQuestionReportsPage({
   searchParams,
 }: {
@@ -97,33 +106,53 @@ export default async function AdminQuestionReportsPage({
   const admin = createAdminClient();
   const sortAsc = query.sort === "oldest";
 
+  const { cutoffDate, cutoffMs } = getRetentionCutoff(15);
+  const isArchiveView = query.status === "archived";
+
   // 1. Fetch system-wide status counts for KPIs and Tab Badges in parallel
   const [
-    totalCountRes,
     openCountRes,
     reviewingCountRes,
-    resolvedCountRes,
-    dismissedCountRes,
+    resolvedRecentRes,
+    dismissedRecentRes,
+    archivedCountRes,
   ] = await Promise.all([
-    admin.from("question_reports").select("id", { count: "exact", head: true }),
     admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "reviewing"),
-    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "resolved"),
-    admin.from("question_reports").select("id", { count: "exact", head: true }).eq("status", "dismissed"),
+    admin
+      .from("question_reports")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "resolved")
+      .gte("resolved_at", cutoffDate),
+    admin
+      .from("question_reports")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "dismissed")
+      .gte("resolved_at", cutoffDate),
+    admin
+      .from("question_reports")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["resolved", "dismissed"])
+      .lt("resolved_at", cutoffDate),
   ]);
 
   const counts = {
-    total: totalCountRes.count ?? 0,
     open: openCountRes.count ?? 0,
     reviewing: reviewingCountRes.count ?? 0,
-    resolved: resolvedCountRes.count ?? 0,
-    dismissed: dismissedCountRes.count ?? 0,
+    resolved: resolvedRecentRes.count ?? 0,
+    dismissed: dismissedRecentRes.count ?? 0,
+    archived: archivedCountRes.count ?? 0,
+    total:
+      (openCountRes.count ?? 0) +
+      (reviewingCountRes.count ?? 0) +
+      (resolvedRecentRes.count ?? 0) +
+      (dismissedRecentRes.count ?? 0),
   };
 
-  const closedCount = counts.resolved + counts.dismissed;
-  const resolutionRate = counts.total > 0 ? Math.round((closedCount / counts.total) * 100) : 100;
+  const closedActiveCount = counts.resolved + counts.dismissed;
+  const resolutionRate = counts.total > 0 ? Math.round((closedActiveCount / counts.total) * 100) : 100;
 
-  // 2. Build filtered report query
+  // 2. Build filtered report query (Resolved issues older than 15 days do not appear in active views)
   let request = admin
     .from("question_reports")
     .select(
@@ -132,9 +161,19 @@ export default async function AdminQuestionReportsPage({
     .order("created_at", { ascending: sortAsc })
     .limit(100);
 
-  if (["open", "reviewing", "resolved", "dismissed"].includes(query.status ?? "")) {
-    request = request.eq("status", query.status!);
+  if (query.status === "open" || query.status === "reviewing") {
+    request = request.eq("status", query.status);
+  } else if (query.status === "resolved") {
+    request = request.eq("status", "resolved").gte("resolved_at", cutoffDate);
+  } else if (query.status === "dismissed") {
+    request = request.eq("status", "dismissed").gte("resolved_at", cutoffDate);
+  } else if (isArchiveView) {
+    request = request.in("status", ["resolved", "dismissed"]).lt("resolved_at", cutoffDate);
+  } else {
+    // Default active queue: open, reviewing, or resolved/dismissed within last 15 days
+    request = request.or(`status.in.(open,reviewing),resolved_at.gte.${cutoffDate}`);
   }
+
   if (Object.hasOwn(categoryLabels, query.category ?? "")) {
     request = request.eq("category", query.category!);
   }
@@ -153,9 +192,18 @@ export default async function AdminQuestionReportsPage({
       .order("created_at", { ascending: sortAsc })
       .limit(100);
 
-    if (["open", "reviewing", "resolved", "dismissed"].includes(query.status ?? "")) {
-      fallbackRequest = fallbackRequest.eq("status", query.status!);
+    if (query.status === "open" || query.status === "reviewing") {
+      fallbackRequest = fallbackRequest.eq("status", query.status);
+    } else if (query.status === "resolved") {
+      fallbackRequest = fallbackRequest.eq("status", "resolved").gte("resolved_at", cutoffDate);
+    } else if (query.status === "dismissed") {
+      fallbackRequest = fallbackRequest.eq("status", "dismissed").gte("resolved_at", cutoffDate);
+    } else if (isArchiveView) {
+      fallbackRequest = fallbackRequest.in("status", ["resolved", "dismissed"]).lt("resolved_at", cutoffDate);
+    } else {
+      fallbackRequest = fallbackRequest.or(`status.in.(open,reviewing),resolved_at.gte.${cutoffDate}`);
     }
+
     if (Object.hasOwn(categoryLabels, query.category ?? "")) {
       fallbackRequest = fallbackRequest.eq("category", query.category!);
     }
@@ -301,9 +349,22 @@ export default async function AdminQuestionReportsPage({
     });
   }
 
-  // 4. In-memory search filter (if search query "q" provided)
+  // 4. Exclude resolved/dismissed reports older than 15 days unless specifically viewing the archive
+  const isOlderResolved = (report: ReportRow) => {
+    if (report.status !== "resolved" && report.status !== "dismissed") return false;
+    const resTime = report.resolved_at
+      ? new Date(report.resolved_at).getTime()
+      : new Date(report.created_at).getTime();
+    return resTime < cutoffMs;
+  };
+
+  const activeReports = isArchiveView
+    ? rawReports.filter((r) => isOlderResolved(r))
+    : rawReports.filter((r) => !isOlderResolved(r));
+
+  // 5. In-memory search filter (if search query "q" provided)
   const searchQuery = String(query.q ?? "").trim().toLowerCase();
-  const reports = rawReports.filter((report) => {
+  const reports = activeReports.filter((report) => {
     if (!searchQuery) return true;
     const studentName = (userNames.get(report.user_id) ?? "").toLowerCase();
     const studentEmail = (userEmails.get(report.user_id) ?? "").toLowerCase();
@@ -326,7 +387,7 @@ export default async function AdminQuestionReportsPage({
     );
   });
 
-  // 5. Build CSV Export rows
+  // 6. Build CSV Export rows
   const exportRows: ExportReportRow[] = reports.map((report) => ({
     id: report.id,
     createdAt: dateFormatter.format(new Date(report.created_at)),
@@ -419,38 +480,40 @@ export default async function AdminQuestionReportsPage({
           <p className="mt-1 text-[11px] font-medium text-slate-500">Subject matter expert review ongoing</p>
         </Link>
 
-        {/* Resolved Card */}
+        {/* Resolved Card (15-day active retention window) */}
         <Link
           href="/admin/question-reports?status=resolved"
           className="group rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Resolved</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Resolved (≤15d)</p>
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-xs text-emerald-700">
               ✓
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <p className="text-3xl font-black text-emerald-950">{counts.resolved}</p>
-            <span className="text-xs font-semibold text-emerald-700">corrected</span>
+            <span className="text-xs font-semibold text-emerald-700">last 15 days</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500">Fixes applied to Question Bank</p>
+          <p className="mt-1 text-[11px] font-medium text-slate-500">
+            {counts.archived > 0 ? `${counts.archived} older resolved archived` : "Older resolved auto-archived"}
+          </p>
         </Link>
 
         {/* Total & Resolution Rate */}
         <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50/80 via-white to-teal-50/20 p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Resolution Health</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Active Queue</p>
             <span className="rounded-md bg-teal-100 px-2 py-0.5 text-[10px] font-black uppercase text-teal-900">
               {resolutionRate}% Closed
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <p className="text-3xl font-black text-teal-950">{counts.total}</p>
-            <span className="text-xs font-semibold text-teal-700">total reports</span>
+            <span className="text-xs font-semibold text-teal-700">active reports</span>
           </div>
           <p className="mt-1 text-[11px] font-medium text-slate-500">
-            {closedCount} resolved or dismissed
+            {counts.archived > 0 ? `${counts.archived} resolved older than 15d archived` : "Resolved clear after 15 days"}
           </p>
         </div>
       </section>
@@ -465,6 +528,46 @@ export default async function AdminQuestionReportsPage({
         initialSort={query.sort}
       />
 
+      {/* 15-day auto-retention policy info banner */}
+      {isArchiveView ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs text-amber-950">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-amber-800 text-[11px] font-black">
+              📦
+            </span>
+            <span>
+              <strong>Archive View:</strong> Showing resolved issues older than 15 days. These are automatically hidden from the active triage queue.
+            </span>
+          </div>
+          <Link
+            href="/admin/question-reports"
+            className="inline-flex items-center gap-1 font-black text-amber-900 hover:underline"
+          >
+            ← Back to active queue
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-teal-50/50 px-4 py-2.5 text-xs text-teal-950">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 text-teal-800 text-[10px] font-black">
+              ℹ
+            </span>
+            <span>
+              <strong>15-day retention policy:</strong> Resolved and dismissed issues automatically clear and stop appearing after 15 days.
+            </span>
+          </div>
+          {counts.archived > 0 && (
+            <Link
+              href="/admin/question-reports?status=archived"
+              className="inline-flex items-center gap-1 font-bold text-teal-800 hover:text-teal-950 hover:underline"
+            >
+              <span>View archived ({counts.archived})</span>
+              <span>→</span>
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* Report results list */}
       {error ? (
         <div role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-semibold text-red-800">
@@ -476,11 +579,15 @@ export default async function AdminQuestionReportsPage({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-600">
             📋
           </div>
-          <h2 className="mt-4 text-xl font-black text-slate-950">No matching reports</h2>
+          <h2 className="mt-4 text-xl font-black text-slate-950">
+            {isArchiveView ? "No archived reports" : "No matching reports"}
+          </h2>
           <p className="mt-2 text-sm text-slate-600">
-            {query.status || query.category || query.q
-              ? "No reports match your selected filters. Try broadening your criteria."
-              : "All student question reports have been processed. New reports will appear here."}
+            {isArchiveView
+              ? "No resolved question reports older than 15 days were found."
+              : query.status || query.category || query.q
+                ? "No active reports match your selected filters. (Resolved issues older than 15 days are automatically archived)."
+                : "All student question reports in the active 15-day window have been addressed. New reports will appear here."}
           </p>
           {(query.status || query.category || query.q) && (
             <div className="mt-5">

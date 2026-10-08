@@ -9,6 +9,7 @@ type FilterCounts = {
   reviewing: number;
   resolved: number;
   dismissed: number;
+  archived?: number;
 };
 
 export function QuestionReportsFilterBar({
@@ -74,11 +75,14 @@ export function QuestionReportsFilterBar({
   const hasActiveFilters = Boolean(currentStatus || currentCategory || (searchParams.get("q") ?? "") || currentSort !== "newest");
 
   const statusTabs = [
-    { id: "", label: "All Reports", count: counts.total, dot: null },
+    { id: "", label: "All Active", count: counts.total, dot: null },
     { id: "open", label: "Open", count: counts.open, dot: "bg-red-500" },
     { id: "reviewing", label: "Reviewing", count: counts.reviewing, dot: "bg-amber-500" },
     { id: "resolved", label: "Resolved", count: counts.resolved, dot: "bg-emerald-500" },
     { id: "dismissed", label: "Dismissed", count: counts.dismissed, dot: "bg-slate-400" },
+    ...(counts.archived !== undefined && counts.archived > 0
+      ? [{ id: "archived", label: "Archived >15d", count: counts.archived, dot: "bg-slate-400" }]
+      : []),
   ];
 
   return (
