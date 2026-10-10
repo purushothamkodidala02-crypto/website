@@ -216,14 +216,14 @@ function NavigationLinks({
                     href={link.href}
                     onClick={onLinkClick}
                     title={collapsed ? link.label : undefined}
-                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
+                    className={`group relative flex min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
                       active
                         ? "bg-teal-300 text-slate-950 shadow-lg shadow-teal-950/20"
                         : "text-slate-300 hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     <span
-                      className={`relative grid h-8 w-8 place-items-center rounded-lg ${
+                      className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
                         active
                           ? "bg-slate-950 text-teal-200"
                           : "bg-white/10 text-slate-300"
@@ -245,7 +245,7 @@ function NavigationLinks({
                     </span>
                     {!collapsed && (
                       <>
-                        <span className="flex-1 truncate">{link.label}</span>
+                        <span className="flex-1 min-w-0 truncate">{link.label}</span>
                         {showBadge && (
                           <span
                             aria-label={
@@ -253,7 +253,7 @@ function NavigationLinks({
                                 ? `${reportCount} open question ${reportCount === 1 ? "report" : "reports"}`
                                 : `${surveyCount} new survey ${surveyCount === 1 ? "response" : "responses"}`
                             }
-                            className={`ml-auto flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
+                            className={`ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
                               isReport
                                 ? active
                                   ? "bg-slate-950 text-amber-300 ring-1 ring-amber-400/50"
@@ -438,7 +438,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             <MenuIcon />
           </button>
         )}
-        <div className="mt-6 flex-1 overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800 hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
+        <div className="mt-6 flex-1 overflow-x-hidden overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800 hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
           <NavigationLinks collapsed={collapsed} badges={badges} />
         </div>
         <div className="mt-auto border-t border-slate-800 pt-5">
@@ -535,7 +535,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               </div>
 
               {/* Drawer Navigation Links */}
-              <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800">
+              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800">
                 <NavigationLinks
                   badges={badges}
                   onLinkClick={() => setMobileOpen(false)}
