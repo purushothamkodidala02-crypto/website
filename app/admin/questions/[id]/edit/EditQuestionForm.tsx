@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
@@ -17,6 +17,29 @@ type SubjectOption = {
 };
 
 const initialState: UpdateQuestionState = { success: false, message: "" };
+
+const QUESTION_NAV_STORAGE_KEY = "varadhi_admin_question_navigator_hidden";
+
+function subscribeQuestionNav(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener("question_navigator_toggle", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("question_navigator_toggle", callback);
+  };
+}
+
+function getQuestionNavSnapshot() {
+  try {
+    return localStorage.getItem(QUESTION_NAV_STORAGE_KEY) !== "true";
+  } catch {
+    return true;
+  }
+}
+
+function getQuestionNavServerSnapshot() {
+  return true;
+}
 
 export function EditQuestionForm({
   question,
@@ -49,6 +72,22 @@ export function EditQuestionForm({
   const [isDirty, setIsDirty] = useState(false);
   const [showMobilePalette, setShowMobilePalette] = useState(false);
   const [submitIntent, setSubmitIntent] = useState<"save" | "save_and_next" | "save_and_return">("save");
+
+  const showQuestionNavigator = useSyncExternalStore(
+    subscribeQuestionNav,
+    getQuestionNavSnapshot,
+    getQuestionNavServerSnapshot,
+  );
+
+  const toggleQuestionNavigator = useCallback(() => {
+    try {
+      const isVisible = getQuestionNavSnapshot();
+      localStorage.setItem(QUESTION_NAV_STORAGE_KEY, String(isVisible));
+      window.dispatchEvent(new Event("question_navigator_toggle"));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const hasUnsavedChanges = isDirty && !state.success;
 
@@ -124,11 +163,14 @@ export function EditQuestionForm({
       } else if (e.altKey && e.key === "ArrowLeft" && navigation?.prevHref) {
         e.preventDefault();
         confirmNavigation(navigation.prevHref);
+      } else if (e.altKey && (e.key === "n" || e.key === "N")) {
+        e.preventDefault();
+        toggleQuestionNavigator();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigation, confirmNavigation]);
+  }, [navigation, confirmNavigation, toggleQuestionNavigator]);
 
   const languageMode = useMemo(
     () =>
@@ -199,6 +241,20 @@ export function EditQuestionForm({
           </span>
         )}
 
+        {/* Desktop Toggle Button for Question Navigator */}
+        <button
+          type="button"
+          onClick={toggleQuestionNavigator}
+          title={showQuestionNavigator ? "Hide Question Navigator (Alt+N)" : "Show Question Navigator (Alt+N)"}
+          className={`hidden lg:inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition shadow-2xs ${
+            showQuestionNavigator
+              ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+              : "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 ring-1 ring-teal-200"
+          }`}
+        >
+          <span>{showQuestionNavigator ? "Hide Navigator ✕" : "Show Navigator 🧭"}</span>
+        </button>
+
         <button
           type="button"
           onClick={() => setShowMobilePalette((v) => !v)}
@@ -256,7 +312,7 @@ export function EditQuestionForm({
     </div>
   );
 
-  const desktopSidebar = navigation && (
+  const desktopSidebar = navigation && showQuestionNavigator && (
     <aside className="hidden lg:block lg:w-72 shrink-0">
       <div className="sticky top-24 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
@@ -264,9 +320,20 @@ export function EditQuestionForm({
             <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Question Navigator</p>
             <p className="mt-1 text-sm font-black text-slate-900 line-clamp-1">{navigation.mockTestTitle}</p>
           </div>
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-700">
-            {navigation.currentQuestionNumber} of {navigation.totalCount}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-700">
+              {navigation.currentQuestionNumber} of {navigation.totalCount}
+            </span>
+            <button
+              type="button"
+              onClick={toggleQuestionNavigator}
+              title="Hide Question Navigator (Alt+N)"
+              aria-label="Hide Question Navigator"
+              className="grid h-7 w-7 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition text-xs font-black"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
@@ -345,7 +412,7 @@ export function EditQuestionForm({
     <div className={navigation ? "mt-4" : ""}>
       {topNavBar}
       {mobilePalette}
-      <div className={navigation ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
+      <div className={navigation && showQuestionNavigator ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
         <div className="min-w-0">
           <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-7">
             <form
@@ -547,7 +614,8 @@ export function EditQuestionForm({
             💡 <span className="font-bold">Shortcuts:</span>{" "}
             <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Ctrl+Enter</kbd> Save & Next ·{" "}
             <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Ctrl+S</kbd> Save ·{" "}
-            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Alt+← / Alt+→</kbd> Prev/Next
+            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Alt+← / Alt+→</kbd> Prev/Next ·{" "}
+            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Alt+N</kbd> Toggle Navigator
           </p>
         )}
 
