@@ -140,32 +140,66 @@ export function EditQuestionForm({
     }
   }, [state.success, submitIntent, navigation, router]);
 
-  // Keyboard shortcuts: Ctrl+Enter (Save & Next), Ctrl+S (Save), Alt+ArrowLeft/Right (Prev/Next)
+  // Keyboard navigation and shortcuts:
+  // - Right / Left arrow keys: Navigate to Next / Prev question (when not editing text)
+  // - Alt + Right / Left arrow keys: Navigate to Next / Prev question from anywhere
+  // - Ctrl+S / Ctrl+Enter: Save Question
+  // - Alt+N: Toggle Question Navigator
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        if (navigation?.nextHref) {
-          setSubmitIntent("save_and_next");
-        } else if (navigation?.backHref) {
-          setSubmitIntent("save_and_return");
-        } else {
-          setSubmitIntent("save");
-        }
+        setSubmitIntent("save");
         formRef.current?.requestSubmit();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
         setSubmitIntent("save");
         formRef.current?.requestSubmit();
-      } else if (e.altKey && e.key === "ArrowRight" && navigation?.nextHref) {
-        e.preventDefault();
-        confirmNavigation(navigation.nextHref);
-      } else if (e.altKey && e.key === "ArrowLeft" && navigation?.prevHref) {
-        e.preventDefault();
-        confirmNavigation(navigation.prevHref);
-      } else if (e.altKey && (e.key === "n" || e.key === "N")) {
+        return;
+      }
+      if (e.altKey && (e.key === "n" || e.key === "N")) {
         e.preventDefault();
         toggleQuestionNavigator();
+        return;
+      }
+
+      // Alt + Arrow navigation (always works, even when typing)
+      if (e.altKey && e.key === "ArrowRight" && navigation?.nextHref) {
+        e.preventDefault();
+        confirmNavigation(navigation.nextHref);
+        return;
+      }
+      if (e.altKey && e.key === "ArrowLeft" && navigation?.prevHref) {
+        e.preventDefault();
+        confirmNavigation(navigation.prevHref);
+        return;
+      }
+
+      // Direct Left / Right arrow buttons on keyboard
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        const target = e.target as HTMLElement | null;
+        if (target?.isContentEditable) return;
+        if (target) {
+          const tag = target.tagName.toLowerCase();
+          if (tag === "textarea" || tag === "select") return;
+          if (tag === "input") {
+            const type = (target as HTMLInputElement).type?.toLowerCase();
+            if (!["radio", "checkbox", "button", "submit", "reset"].includes(type)) return;
+          }
+        }
+
+        if (e.key === "ArrowRight" && navigation?.nextHref) {
+          e.preventDefault();
+          target?.blur();
+          confirmNavigation(navigation.nextHref);
+        } else if (e.key === "ArrowLeft" && navigation?.prevHref) {
+          e.preventDefault();
+          target?.blur();
+          confirmNavigation(navigation.prevHref);
+        }
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -530,81 +564,13 @@ export function EditQuestionForm({
             onClick={() => setSubmitIntent("save")}
             disabled={pending}
             aria-busy={pending && submitIntent === "save"}
-            className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-2xs hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:opacity-50 transition"
           >
             <PendingButtonContent pending={pending && submitIntent === "save"} pendingLabel="Saving…">
               Save Question
             </PendingButtonContent>
           </button>
-
-          {navigation?.nextHref ? (
-            <button
-              type="submit"
-              onClick={() => setSubmitIntent("save_and_next")}
-              disabled={pending}
-              aria-busy={pending && submitIntent === "save_and_next"}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:opacity-50 transition"
-            >
-              <PendingButtonContent
-                pending={pending && submitIntent === "save_and_next"}
-                pendingLabel="Saving & Advancing…"
-              >
-                Save & Next Question (Q{navigation.nextQuestionNumber}) →
-              </PendingButtonContent>
-            </button>
-          ) : navigation ? (
-            <button
-              type="submit"
-              onClick={() => setSubmitIntent("save_and_return")}
-              disabled={pending}
-              aria-busy={pending && submitIntent === "save_and_return"}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:opacity-50 transition"
-            >
-              <PendingButtonContent
-                pending={pending && submitIntent === "save_and_return"}
-                pendingLabel="Saving & Returning…"
-              >
-                Save & Finish (Return) ✓
-              </PendingButtonContent>
-            </button>
-          ) : null}
-
-          {navigation?.prevHref && (
-            <Link
-              href={navigation.prevHref}
-              onClick={(e) => {
-                const allowed = confirmNavigation(navigation.prevHref!);
-                if (!allowed) e.preventDefault();
-              }}
-              className="rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition sm:text-sm"
-            >
-              ← Skip to Q{navigation.prevQuestionNumber}
-            </Link>
-          )}
-
-          {navigation?.nextHref && (
-            <Link
-              href={navigation.nextHref}
-              onClick={(e) => {
-                const allowed = confirmNavigation(navigation.nextHref!);
-                if (!allowed) e.preventDefault();
-              }}
-              className="rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition sm:text-sm"
-            >
-              Skip to Q{navigation.nextQuestionNumber} →
-            </Link>
-          )}
         </div>
-
-        {navigation && (
-          <p className="text-xs font-medium text-slate-500">
-            💡 <span className="font-bold">Shortcuts:</span>{" "}
-            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Ctrl+Enter</kbd> Save & Next ·{" "}
-            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Ctrl+S</kbd> Save ·{" "}
-            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Alt+← / Alt+→</kbd> Prev/Next ·{" "}
-            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Alt+N</kbd> Toggle Navigator
-          </p>
-        )}
 
         {state.message && (
           <p className={`text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>
