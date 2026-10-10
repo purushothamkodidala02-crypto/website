@@ -4,7 +4,7 @@ export const revalidate = 0;
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
-import { getMockTestCatalogData } from "@/lib/catalog-data";
+import { getDashboardCatalogData } from "@/lib/catalog-data";
 import { parseMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { mockTestUrl } from "@/lib/public-urls";
@@ -85,7 +85,7 @@ export default async function Dashboard({
       .eq("status", "published")
       .order("display_order", { ascending: true })
       .limit(4),
-    getMockTestCatalogData(),
+    getDashboardCatalogData(),
   ]);
 
 

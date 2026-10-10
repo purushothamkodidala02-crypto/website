@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { EditQuestionForm } from "@/app/admin/questions/[id]/edit/EditQuestionForm";
+import { getAdminTaxonomy } from "@/lib/admin/taxonomy";
 import { createClient } from "@/lib/supabase/server";
 import { indiaDateKey } from "@/lib/date";
 import type { Question, MockTestQuestionNav } from "@/types/question";
@@ -27,11 +28,8 @@ export default async function EditMockTestQuestionPage({
     mockTestResult,
     assignmentsResult,
     questionResult,
-    subjectsResult,
-    papersResult,
-    groupsResult,
-    categoriesResult,
     attemptsResult,
+    taxonomy,
   ] = await Promise.all([
     supabase
       .from("mock_tests")
@@ -40,7 +38,7 @@ export default async function EditMockTestQuestionPage({
       .maybeSingle(),
     supabase
       .from("mock_test_questions")
-      .select("id, question_id, question_order, marks, negative_marks")
+      .select("id, question_id, question_order, marks, negative_marks, questions(id, subject_id, question_text, is_active, expires_on)")
       .eq("mock_test_id", mockTestId)
       .order("question_order", { ascending: true }),
     supabase
@@ -51,16 +49,10 @@ export default async function EditMockTestQuestionPage({
       .eq("id", questionId)
       .maybeSingle(),
     supabase
-      .from("subjects")
-      .select("id, paper_id, name, content_language_mode, display_order")
-      .order("display_order"),
-    supabase.from("papers").select("id, exam_group_id, name"),
-    supabase.from("exam_groups").select("id, exam_id, name"),
-    supabase.from("exams").select("id, name"),
-    supabase
       .from("test_attempts")
       .select("id", { count: "exact", head: true })
       .eq("mock_test_id", mockTestId),
+    getAdminTaxonomy(),
   ]);
 
   if (!mockTestResult.data || !assignmentsResult.data || !questionResult.data) {
@@ -72,24 +64,38 @@ export default async function EditMockTestQuestionPage({
   if (!currentAssignment) notFound();
 
   const questionIds = assignments.map((a) => a.question_id);
-  const questionsSummaryResult = questionIds.length
-    ? await supabase
-        .from("questions")
-        .select("id, subject_id, question_text, is_active, expires_on")
-        .in("id", questionIds)
-    : { data: [], error: null };
-  const questionSummaryById = new Map(
-    (questionsSummaryResult.data ?? []).map((q) => [q.id, q]),
-  );
+  const questionSummaryById = new Map<
+    string,
+    { id: string; subject_id: string; question_text: string; is_active: boolean; expires_on: string | null }
+  >();
+  for (const item of assignments as unknown as { question_id: string; questions: unknown }[]) {
+    const q = Array.isArray(item.questions) ? item.questions[0] : item.questions;
+    if (q && typeof q === "object" && "id" in q) {
+      questionSummaryById.set(
+        item.question_id,
+        q as { id: string; subject_id: string; question_text: string; is_active: boolean; expires_on: string | null },
+      );
+    }
+  }
+
+  if (questionSummaryById.size === 0 && questionIds.length > 0) {
+    const questionsSummaryResult = await supabase
+      .from("questions")
+      .select("id, subject_id, question_text, is_active, expires_on")
+      .in("id", questionIds);
+    for (const q of questionsSummaryResult.data ?? []) {
+      questionSummaryById.set(q.id, q);
+    }
+  }
 
   const isDraft = mockTestResult.data.status === "draft";
   const hasAttempts = (attemptsResult.count ?? 0) > 0 || !isDraft;
 
-  const subjects = subjectsResult.data ?? [];
-  const papers = new Map((papersResult.data ?? []).map((item) => [item.id, item]));
-  const groups = new Map((groupsResult.data ?? []).map((item) => [item.id, item]));
+  const subjects = taxonomy.subjects;
+  const papers = new Map(taxonomy.papers.map((item) => [item.id, item]));
+  const groups = new Map(taxonomy.groups.map((item) => [item.id, item]));
   const categories = new Map(
-    (categoriesResult.data ?? []).map((item) => [item.id, item]),
+    taxonomy.categories.map((item) => [item.id, item]),
   );
 
   const subjectOptions = subjects.map((subject) => {

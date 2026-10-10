@@ -169,3 +169,37 @@ export const getMockTestCatalogData = unstable_cache(
   ["mock-test-catalog-v9"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
+
+export const getDashboardCatalogData = unstable_cache(
+  async () => {
+    if (!hasCatalogSupabaseEnv()) {
+      return {
+        states: [],
+        categories: [],
+        exams: [],
+        papers: [],
+        tests: [],
+      };
+    }
+
+    const supabase = getCatalogSupabaseClient();
+    const [statesResult, categoriesResult, examsResult, papersResult, testsResult] = await Promise.all([
+      supabase.from("exam_states").select("id, name, code, slug, display_order, is_active").order("display_order"),
+      supabase.from("exams").select("id, state_id, name, slug, is_active").order("display_order"),
+      supabase.from("exam_groups").select("id, exam_id, name, slug, is_active").order("display_order"),
+      supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, display_order, is_active").order("display_order"),
+      supabase.from("mock_tests").select("id, paper_id, title, slug").eq("status", "published"),
+    ]);
+
+    return {
+      states: statesResult.data ?? [],
+      categories: categoriesResult.data ?? [],
+      exams: examsResult.data ?? [],
+      papers: papersResult.data ?? [],
+      tests: testsResult.data ?? [],
+    };
+  },
+  ["dashboard-catalog-v1"],
+  { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
+);
+

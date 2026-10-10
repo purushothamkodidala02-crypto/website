@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getAdminTaxonomy } from "@/lib/admin/taxonomy";
 import { createClient } from "@/lib/supabase/server";
 import type { Question } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
@@ -20,7 +21,7 @@ export default async function EditQuestionPage({
       ? returnTo
       : "/admin/questions";
   const supabase = await createClient();
-  const [questionResult, subjectsResult, papersResult, groupsResult, categoriesResult, sessionResult, assignmentsResult] =
+  const [questionResult, sessionResult, assignmentsResult, taxonomy] =
     await Promise.all([
       supabase
         .from("questions")
@@ -30,13 +31,6 @@ export default async function EditQuestionPage({
         .eq("id", id)
         .maybeSingle(),
       supabase
-        .from("subjects")
-        .select("id, paper_id, name, content_language_mode")
-        .order("display_order"),
-      supabase.from("papers").select("id, exam_group_id, name"),
-      supabase.from("exam_groups").select("id, exam_id, name"),
-      supabase.from("exams").select("id, name"),
-      supabase
         .from("test_attempt_session_questions")
         .select("session_id", { count: "exact", head: true })
         .eq("question_id", id),
@@ -45,15 +39,16 @@ export default async function EditQuestionPage({
         .select("mock_test_id, question_order, mock_tests(id, title, status)")
         .eq("question_id", id)
         .order("question_order", { ascending: true }),
+      getAdminTaxonomy(),
     ]);
 
   if (!questionResult.data) notFound();
   const hasAttempts = (sessionResult.count ?? 0) > 0;
 
-  const papers = new Map((papersResult.data ?? []).map((item) => [item.id, item]));
-  const groups = new Map((groupsResult.data ?? []).map((item) => [item.id, item]));
-  const categories = new Map((categoriesResult.data ?? []).map((item) => [item.id, item]));
-  const options = (subjectsResult.data ?? []).map((subject) => {
+  const papers = new Map(taxonomy.papers.map((item) => [item.id, item]));
+  const groups = new Map(taxonomy.groups.map((item) => [item.id, item]));
+  const categories = new Map(taxonomy.categories.map((item) => [item.id, item]));
+  const options = taxonomy.subjects.map((subject) => {
     const paper = papers.get(subject.paper_id);
     const group = paper ? groups.get(paper.exam_group_id) : undefined;
     const category = group ? categories.get(group.exam_id) : undefined;
