@@ -412,34 +412,47 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
 
   return (
     <>
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-4"}`}>
-        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
-          <Brand collapsed={collapsed} />
-          {!collapsed && (
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-label="Collapse sidebar"
-              title="Collapse sidebar"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
-            >
-              <MenuIcon />
-            </button>
+      {/* Floating expand toggle button when sidebar is collapsed/hidden on desktop */}
+      {collapsed && (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Expand sidebar"
+          title="Expand sidebar (Ctrl+B)"
+          className="fixed top-3.5 left-4 z-40 hidden md:inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-950/95 px-3 py-2 text-xs font-bold text-slate-200 shadow-md backdrop-blur hover:border-slate-600 hover:bg-slate-900 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+        >
+          <MenuIcon />
+          <span>Menu</span>
+          {hasAnyUpdate && (
+            <span
+              title="Updates available in question reports or surveys"
+              className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse"
+            />
           )}
-        </div>
-        {collapsed && (
+        </button>
+      )}
+
+      {/* Desktop Main Admin Sidebar Navigation */}
+      <aside
+        aria-hidden={collapsed ? "true" : undefined}
+        className={`fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-800 bg-slate-950 px-4 py-6 text-white shadow-xl transition-transform duration-200 ease-in-out md:flex ${
+          collapsed ? "-translate-x-full pointer-events-none shadow-none" : "translate-x-0"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <Brand collapsed={false} />
           <button
             type="button"
             onClick={onToggle}
-            aria-label="Expand sidebar"
-            title="Expand sidebar"
-            className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            aria-label="Collapse sidebar"
+            title="Collapse sidebar (Ctrl+B)"
+            className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
             <MenuIcon />
           </button>
-        )}
+        </div>
         <div className="mt-6 flex-1 overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800 hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
-          <NavigationLinks collapsed={collapsed} badges={badges} />
+          <NavigationLinks collapsed={false} badges={badges} />
         </div>
         <div className="mt-auto border-t border-slate-800 pt-5">
           <Link
@@ -448,7 +461,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             rel="noreferrer"
             aria-label="Student"
             title={collapsed ? "Student portal (Open in new tab)" : undefined}
-            className={`flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : ""}`}
+            className="flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white"
           >
             {collapsed ? (
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-teal-200" title="Student portal (Open in new tab)">
