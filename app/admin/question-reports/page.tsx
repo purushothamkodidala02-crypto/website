@@ -4,6 +4,7 @@ import { ReportAdminForm } from "./ReportAdminForm";
 import { QuestionPreviewDrawer } from "./QuestionPreviewDrawer";
 import { ExportReportsButton, type ExportReportRow } from "./ExportReportsButton";
 import { QuestionReportsFilterBar } from "./QuestionReportsFilterBar";
+import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 
 type ReportRow = {
   id: string;
@@ -411,29 +412,29 @@ export default async function AdminQuestionReportsPage({
   return (
     <div className="space-y-6">
       {/* Header section with brand context and top actions */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-teal-500" />
             <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Quality assurance & feedback</p>
           </div>
-          <h1 className="mt-2 text-3xl font-black text-slate-950">Question reports</h1>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-black text-slate-950">Question reports</h1>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
             Review and triage issues reported by students, inspect assigned mock tests and question numbers, verify question content and answer keys, and record resolutions.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <ExportReportsButton reports={exportRows} />
           <Link
             href="/admin/questions"
-            className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-black text-slate-800 shadow-sm transition hover:border-teal-400 hover:text-teal-900"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs font-black text-slate-800 shadow-xs transition hover:border-teal-400 hover:text-teal-900 text-center whitespace-nowrap"
           >
             Question Bank
           </Link>
           <Link
             href="/admin/similarity"
-            className="rounded-xl border border-teal-200 bg-teal-50 px-3.5 py-2.5 text-xs font-black text-teal-900 shadow-sm transition hover:bg-teal-100"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs font-black text-teal-900 shadow-xs transition hover:bg-teal-100 text-center whitespace-nowrap"
           >
             Similarity scanner
           </Link>
@@ -441,23 +442,23 @@ export default async function AdminQuestionReportsPage({
       </div>
 
       {/* KPI Metric summary cards */}
-      <section aria-label="Question report metrics" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Question report metrics" className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         {/* Open Reports Card */}
         <Link
           href="/admin/question-reports?status=open"
-          className="group rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50/80 via-white to-rose-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+          className="group rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50/80 via-white to-rose-50/20 p-3 sm:p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md min-w-0"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-rose-800">Action Required</p>
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 text-xs text-rose-700">
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-rose-800 truncate">Action Required</p>
+            <span className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-[10px] sm:text-xs text-rose-700">
               ⚡
             </span>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-3xl font-black text-rose-950">{counts.open}</p>
-            <span className="text-xs font-semibold text-rose-700">open reports</span>
+          <div className="mt-2 sm:mt-3 flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <p className="text-2xl sm:text-3xl font-black text-rose-950">{counts.open}</p>
+            <span className="text-[11px] sm:text-xs font-semibold text-rose-700">open reports</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500">
+          <p className="mt-1 text-[10px] sm:text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
             {openCountInView} open in current filtered view
           </p>
         </Link>
@@ -465,55 +466,57 @@ export default async function AdminQuestionReportsPage({
         {/* Reviewing Card */}
         <Link
           href="/admin/question-reports?status=reviewing"
-          className="group rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+          className="group rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/20 p-3 sm:p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md min-w-0"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Under Review</p>
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-xs text-amber-700">
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-800 truncate">Under Review</p>
+            <span className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-[10px] sm:text-xs text-amber-700">
               🔍
             </span>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-3xl font-black text-amber-950">{counts.reviewing}</p>
-            <span className="text-xs font-semibold text-amber-700">in triage</span>
+          <div className="mt-2 sm:mt-3 flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <p className="text-2xl sm:text-3xl font-black text-amber-950">{counts.reviewing}</p>
+            <span className="text-[11px] sm:text-xs font-semibold text-amber-700">in triage</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500">Subject matter expert review ongoing</p>
+          <p className="mt-1 text-[10px] sm:text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
+            Subject matter expert review ongoing
+          </p>
         </Link>
 
         {/* Resolved Card (15-day active retention window) */}
         <Link
           href="/admin/question-reports?status=resolved"
-          className="group rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/20 p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+          className="group rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/20 p-3 sm:p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md min-w-0"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Resolved (≤15d)</p>
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-xs text-emerald-700">
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-800 truncate">Resolved (≤15d)</p>
+            <span className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-[10px] sm:text-xs text-emerald-700">
               ✓
             </span>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-3xl font-black text-emerald-950">{counts.resolved}</p>
-            <span className="text-xs font-semibold text-emerald-700">last 15 days</span>
+          <div className="mt-2 sm:mt-3 flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <p className="text-2xl sm:text-3xl font-black text-emerald-950">{counts.resolved}</p>
+            <span className="text-[11px] sm:text-xs font-semibold text-emerald-700">last 15 days</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500">
+          <p className="mt-1 text-[10px] sm:text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
             {counts.archived > 0 ? `${counts.archived} older resolved archived` : "Older resolved auto-archived"}
           </p>
         </Link>
 
         {/* Total & Resolution Rate */}
-        <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50/80 via-white to-teal-50/20 p-4 shadow-xs">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Active Queue</p>
-            <span className="rounded-md bg-teal-100 px-2 py-0.5 text-[10px] font-black uppercase text-teal-900">
+        <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50/80 via-white to-teal-50/20 p-3 sm:p-4 shadow-xs min-w-0">
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-teal-800 truncate">Active Queue</p>
+            <span className="shrink-0 rounded-md bg-teal-100 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase text-teal-900">
               {resolutionRate}% Closed
             </span>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-3xl font-black text-teal-950">{counts.total}</p>
-            <span className="text-xs font-semibold text-teal-700">active reports</span>
+          <div className="mt-2 sm:mt-3 flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <p className="text-2xl sm:text-3xl font-black text-teal-950">{counts.total}</p>
+            <span className="text-[11px] sm:text-xs font-semibold text-teal-700">active reports</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500">
-            {counts.archived > 0 ? `${counts.archived} resolved older than 15d archived` : "Resolved clear after 15 days"}
+          <p className="mt-1 text-[10px] sm:text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
+            {counts.archived > 0 ? `${counts.archived} older resolved archived` : "Resolved clear after 15 days"}
           </p>
         </div>
       </section>
@@ -530,36 +533,36 @@ export default async function AdminQuestionReportsPage({
 
       {/* 15-day auto-retention policy info banner */}
       {isArchiveView ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs text-amber-950">
-          <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-amber-800 text-[11px] font-black">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/80 p-3 sm:px-4 sm:py-3 text-xs text-amber-950">
+          <div className="flex items-start sm:items-center gap-2 min-w-0">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-200 text-amber-800 text-[11px] font-black mt-0.5 sm:mt-0">
               📦
             </span>
-            <span>
+            <span className="break-words">
               <strong>Archive View:</strong> Showing resolved issues older than 15 days. These are automatically hidden from the active triage queue.
             </span>
           </div>
           <Link
             href="/admin/question-reports"
-            className="inline-flex items-center gap-1 font-black text-amber-900 hover:underline"
+            className="inline-flex items-center gap-1 font-black text-amber-900 hover:underline shrink-0 text-xs pl-7 sm:pl-0"
           >
             ← Back to active queue
           </Link>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-teal-50/50 px-4 py-2.5 text-xs text-teal-950">
-          <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 text-teal-800 text-[10px] font-black">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-2xl border border-teal-100 bg-teal-50/50 p-3 sm:px-4 sm:py-2.5 text-xs text-teal-950">
+          <div className="flex items-start sm:items-center gap-2 min-w-0">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-800 text-[10px] font-black mt-0.5 sm:mt-0">
               ℹ
             </span>
-            <span>
+            <span className="break-words">
               <strong>15-day retention policy:</strong> Resolved and dismissed issues automatically clear and stop appearing after 15 days.
             </span>
           </div>
           {counts.archived > 0 && (
             <Link
               href="/admin/question-reports?status=archived"
-              className="inline-flex items-center gap-1 font-bold text-teal-800 hover:text-teal-950 hover:underline"
+              className="inline-flex items-center gap-1 font-bold text-teal-800 hover:text-teal-950 hover:underline shrink-0 text-xs pl-7 sm:pl-0"
             >
               <span>View archived ({counts.archived})</span>
               <span>→</span>
@@ -602,13 +605,13 @@ export default async function AdminQuestionReportsPage({
         </section>
       ) : (
         <section className="mt-6 grid gap-5">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs font-semibold text-slate-500">
+            <span className="break-words">
               Showing <strong>{reports.length}</strong> {reports.length === 1 ? "report" : "reports"}
               {query.status ? ` with status '${query.status}'` : ""}
               {query.category ? ` for '${categoryLabels[query.category]}'` : ""}
             </span>
-            <span>Sorted by {sortAsc ? "oldest first" : "most recent"}</span>
+            <span className="shrink-0">Sorted by {sortAsc ? "oldest first" : "most recent"}</span>
           </div>
 
           {reports.map((report) => {
@@ -640,161 +643,175 @@ export default async function AdminQuestionReportsPage({
             return (
               <article
                 key={report.id}
-                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-slate-300 sm:p-6"
+                className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs transition hover:border-slate-300"
               >
-                {/* Top card bar: Badges, subject, relative time, open action */}
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${currentStatusStyle.badge}`}
-                      >
-                        <span className={`h-1.5 w-1.5 rounded-full ${currentStatusStyle.dot}`} />
-                        {report.status}
-                      </span>
+                {/* Top card bar: Badges, subject, and Open question action */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3.5">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black uppercase tracking-wider ${currentStatusStyle.badge}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${currentStatusStyle.dot}`} />
+                      {report.status}
+                    </span>
 
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${categoryInfo.badge}`}
-                      >
-                        <span>{categoryInfo.icon}</span>
-                        <span>{categoryInfo.label}</span>
-                      </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${categoryInfo.badge}`}
+                    >
+                      <span className="shrink-0">{categoryInfo.icon}</span>
+                      <span className="break-words">{categoryInfo.label}</span>
+                    </span>
 
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
-                        {report.questions?.subjects?.name ?? "Question Bank"}
-                      </span>
-                    </div>
-
-                    {/* Question text headline */}
-                    <h2 className="mt-3.5 text-base font-bold leading-relaxed text-slate-950 sm:text-lg">
-                      {report.questions?.question_text ?? "Question content unavailable"}
-                    </h2>
-
-                    {/* Reporter metadata */}
-                    <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-                      <span className="font-semibold text-slate-700">
-                        Reported by <strong>{studentName}</strong>
-                      </span>
-                      {studentEmail && (
-                        <>
-                          <span>·</span>
-                          <span className="text-slate-500">{studentEmail}</span>
-                        </>
-                      )}
-                      {studentPhone && (
-                        <>
-                          <span>·</span>
-                          <span className="text-slate-500">{studentPhone}</span>
-                        </>
-                      )}
-                      <span>·</span>
-                      <span title={dateFormatter.format(new Date(report.created_at))}>
-                        {formatRelativeTime(report.created_at)} ({dateFormatter.format(new Date(report.created_at))})
-                      </span>
-                    </div>
-
-                    {/* Student problem details */}
-                    {report.details && (
-                      <div className="mt-3.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs leading-5 text-amber-950">
-                        <p className="font-black uppercase tracking-wider text-[11px] text-amber-800">
-                          Student Reported Details
-                        </p>
-                        <p className="mt-1 font-medium">{report.details}</p>
-                      </div>
-                    )}
-
-                    {/* Deep Question content, MCQ options, Correct key & explanation */}
-                    {report.questions && (
-                      <QuestionPreviewDrawer
-                        questionId={report.question_id}
-                        reportId={report.id}
-                        optionA={report.questions.option_a}
-                        optionB={report.questions.option_b}
-                        optionC={report.questions.option_c}
-                        optionD={report.questions.option_d}
-                        correctAnswer={report.questions.correct_answer}
-                        explanation={report.questions.explanation}
-                        imageUrl={report.questions.image_url}
-                        difficulty={report.questions.difficulty}
-                        studentAttemptAnswer={studentAttemptAnswer}
-                      />
-                    )}
-
-                    {/* Where the question is assigned in mock tests and question number */}
-                    <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/40 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-xs font-black uppercase tracking-wider text-teal-900">
-                          Assigned in Mock Tests ({assignments.length})
-                        </p>
-                        {reportedMock && (
-                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">
-                            <span className="h-2 w-2 rounded-full bg-amber-500" />
-                            Reported in: <strong>{reportedMock.mockTestTitle}</strong>
-                            {reportedOrder ? ` (Question #${reportedOrder})` : ""}
-                          </span>
-                        )}
-                      </div>
-
-                      {assignments.length === 0 ? (
-                        <p className="mt-2 text-xs font-medium text-slate-500">
-                          This question is not assigned to any mock test yet (available only in Question Bank).
-                        </p>
-                      ) : (
-                        <div className="mt-2.5 grid gap-2">
-                          {assignments.map((assignment) => {
-                            const isReportSource = reportedMock?.mockTestId === assignment.mockTestId;
-                            return (
-                              <div
-                                key={assignment.mockTestId}
-                                className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-2.5 text-xs transition ${
-                                  isReportSource
-                                    ? "border-amber-300 bg-amber-50/80 text-amber-950"
-                                    : "border-slate-200 bg-white text-slate-800"
-                                }`}
-                              >
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span className="inline-grid min-w-14 place-items-center rounded-lg bg-teal-700 px-2.5 py-1 text-xs font-black text-white">
-                                    Question #{assignment.questionOrder}
-                                  </span>
-                                  <span className="font-bold text-slate-950">{assignment.mockTestTitle}</span>
-                                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-                                    {assignment.mockTestStatus}
-                                  </span>
-                                  {isReportSource && (
-                                    <span className="rounded-md bg-amber-200 px-2 py-0.5 text-[10px] font-black uppercase text-amber-900">
-                                      Reported in this mock
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2.5">
-                                  <Link
-                                    href={`/admin/mock-tests/${assignment.mockTestId}/questions/${report.question_id}/edit`}
-                                    className="font-bold text-teal-700 hover:text-teal-900 hover:underline"
-                                  >
-                                    Edit in mock →
-                                  </Link>
-                                  <Link
-                                    href={`/admin/mock-tests/${assignment.mockTestId}/questions`}
-                                    className="text-slate-500 hover:text-slate-800 hover:underline"
-                                  >
-                                    All questions
-                                  </Link>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 max-w-full truncate">
+                      {report.questions?.subjects?.name ?? "Question Bank"}
+                    </span>
                   </div>
 
                   {/* Primary question edit action button */}
                   <Link
                     href={`/admin/questions/${report.question_id}/edit`}
-                    className="shrink-0 rounded-xl bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-teal-800"
+                    className="inline-flex items-center justify-center rounded-xl bg-teal-700 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-black text-white shadow-xs transition hover:bg-teal-800 w-full sm:w-auto shrink-0 text-center"
                   >
-                    Open question
+                    Open question →
                   </Link>
+                </div>
+
+                {/* Main card body with full width available */}
+                <div className="mt-3.5 w-full min-w-0">
+                  {/* Question text headline */}
+                  <div className="break-words [overflow-wrap:anywhere]">
+                    {report.questions?.question_text ? (
+                      <div className="text-sm sm:text-base leading-relaxed text-slate-950 font-medium">
+                        <FormattedQuestionText text={report.questions.question_text} />
+                      </div>
+                    ) : (
+                      <h2 className="text-sm sm:text-base font-bold leading-relaxed text-slate-500 italic">
+                        Question content unavailable
+                      </h2>
+                    )}
+                  </div>
+
+                  {/* Reporter metadata */}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 min-w-0">
+                    <span className="font-semibold text-slate-700">
+                      Reported by <strong>{studentName}</strong>
+                    </span>
+                    {studentEmail && (
+                      <span className="break-all text-slate-500">
+                        <span className="text-slate-300 mr-1 sm:mr-2">·</span>
+                        {studentEmail}
+                      </span>
+                    )}
+                    {studentPhone && (
+                      <span className="text-slate-500 whitespace-nowrap">
+                        <span className="text-slate-300 mr-1 sm:mr-2">·</span>
+                        {studentPhone}
+                      </span>
+                    )}
+                    <span className="text-slate-500" title={dateFormatter.format(new Date(report.created_at))}>
+                      <span className="text-slate-300 mr-1 sm:mr-2">·</span>
+                      {formatRelativeTime(report.created_at)}
+                      <span className="hidden sm:inline"> ({dateFormatter.format(new Date(report.created_at))})</span>
+                    </span>
+                  </div>
+
+                  {/* Student problem details */}
+                  {report.details && (
+                    <div className="mt-3.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3 sm:p-4 text-xs leading-5 text-amber-950 break-words [overflow-wrap:anywhere]">
+                      <p className="font-black uppercase tracking-wider text-[11px] text-amber-800">
+                        Student Reported Details
+                      </p>
+                      <p className="mt-1 font-medium whitespace-pre-wrap break-words">{report.details}</p>
+                    </div>
+                  )}
+
+                  {/* Deep Question content, MCQ options, Correct key & explanation */}
+                  {report.questions && (
+                    <QuestionPreviewDrawer
+                      questionId={report.question_id}
+                      reportId={report.id}
+                      optionA={report.questions.option_a}
+                      optionB={report.questions.option_b}
+                      optionC={report.questions.option_c}
+                      optionD={report.questions.option_d}
+                      correctAnswer={report.questions.correct_answer}
+                      explanation={report.questions.explanation}
+                      imageUrl={report.questions.image_url}
+                      difficulty={report.questions.difficulty}
+                      studentAttemptAnswer={studentAttemptAnswer}
+                    />
+                  )}
+
+                  {/* Where the question is assigned in mock tests and question number */}
+                  <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/40 p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <p className="text-xs font-black uppercase tracking-wider text-teal-900">
+                        Assigned in Mock Tests ({assignments.length})
+                      </p>
+                      {reportedMock && (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900 break-words [overflow-wrap:anywhere]">
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                          <span className="break-words">
+                            Reported in: <strong>{reportedMock.mockTestTitle}</strong>
+                            {reportedOrder ? ` (Question #${reportedOrder})` : ""}
+                          </span>
+                        </span>
+                      )}
+                    </div>
+
+                    {assignments.length === 0 ? (
+                      <p className="mt-2 text-xs font-medium text-slate-500">
+                        This question is not assigned to any mock test yet (available only in Question Bank).
+                      </p>
+                    ) : (
+                      <div className="mt-2.5 grid gap-2">
+                        {assignments.map((assignment) => {
+                          const isReportSource = reportedMock?.mockTestId === assignment.mockTestId;
+                          return (
+                            <div
+                              key={assignment.mockTestId}
+                              className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 rounded-xl border p-2.5 sm:p-3 text-xs transition ${
+                                isReportSource
+                                  ? "border-amber-300 bg-amber-50/80 text-amber-950"
+                                  : "border-slate-200 bg-white text-slate-800"
+                              }`}
+                            >
+                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
+                                <span className="inline-grid shrink-0 min-w-14 place-items-center rounded-lg bg-teal-700 px-2.5 py-1 text-xs font-black text-white">
+                                  Question #{assignment.questionOrder}
+                                </span>
+                                <span className="font-bold text-slate-950 break-words [overflow-wrap:anywhere] min-w-0">
+                                  {assignment.mockTestTitle}
+                                </span>
+                                <span className="shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                                  {assignment.mockTestStatus}
+                                </span>
+                                {isReportSource && (
+                                  <span className="shrink-0 rounded-md bg-amber-200 px-2 py-0.5 text-[10px] font-black uppercase text-amber-900">
+                                    Reported in this mock
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                                <Link
+                                  href={`/admin/mock-tests/${assignment.mockTestId}/questions/${report.question_id}/edit`}
+                                  className="font-bold text-teal-700 hover:text-teal-900 hover:underline"
+                                >
+                                  Edit in mock →
+                                </Link>
+                                <Link
+                                  href={`/admin/mock-tests/${assignment.mockTestId}/questions`}
+                                  className="text-slate-500 hover:text-slate-800 hover:underline"
+                                >
+                                  All questions
+                                </Link>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Resolution & internal notes editor */}

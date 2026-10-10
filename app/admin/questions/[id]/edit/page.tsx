@@ -101,6 +101,7 @@ export default async function EditQuestionPage({
         </div>
       )}
       <EditQuestionForm
+        key={questionResult.data.id}
         question={questionResult.data as Question}
         subjects={options}
         hasAttempts={hasAttempts}

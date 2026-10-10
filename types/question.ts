@@ -55,3 +55,28 @@ export interface MockTestQuestion {
   negative_marks: number;
   created_at: string;
 }
+
+export interface QuestionNavItem {
+  questionId: string;
+  questionNumber: number;
+  isActive: boolean;
+  isScoreValid: boolean;
+  questionText: string;
+  href: string;
+}
+
+export interface MockTestQuestionNav {
+  mockTestId: string;
+  mockTestTitle: string;
+  currentIndex: number;
+  currentQuestionNumber: number;
+  totalCount: number;
+  prevHref?: string;
+  nextHref?: string;
+  prevQuestionNumber?: number;
+  nextQuestionNumber?: number;
+  backHref: string;
+  backLabel: string;
+  previewHref?: string;
+  items: QuestionNavItem[];
+}

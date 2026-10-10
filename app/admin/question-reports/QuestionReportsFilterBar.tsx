@@ -88,7 +88,7 @@ export function QuestionReportsFilterBar({
   return (
     <div className="mt-7 space-y-4">
       {/* Quick Status Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 pb-3">
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:flex-wrap border-b border-slate-200/80 [scrollbar-width:thin]">
         {statusTabs.map((tab) => {
           const isActive = currentStatus === tab.id;
           return (
@@ -96,13 +96,13 @@ export function QuestionReportsFilterBar({
               key={tab.id}
               type="button"
               onClick={() => updateFilters({ status: tab.id || null })}
-              className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition ${
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-black transition ${
                 isActive
-                  ? "bg-slate-900 text-white shadow-sm"
+                  ? "bg-slate-900 text-white shadow-xs"
                   : "bg-white text-slate-700 hover:bg-slate-100/80 border border-slate-200/80"
               }`}
             >
-              {tab.dot && <span className={`h-2 w-2 rounded-full ${tab.dot}`} />}
+              {tab.dot && <span className={`h-2 w-2 rounded-full shrink-0 ${tab.dot}`} />}
               <span>{tab.label}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
@@ -117,14 +117,14 @@ export function QuestionReportsFilterBar({
       </div>
 
       {/* Search and Secondary Filter Controls */}
-      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
+      <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-white p-3 sm:p-3.5 shadow-xs sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
         {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="relative min-w-0">
           <input
             type="text"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="Search question text, student name, email, or notes…"
+            placeholder="Search question, student, email, or notes…"
             className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pr-9 pl-9 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-teal-600"
           />
           <svg
@@ -159,7 +159,7 @@ export function QuestionReportsFilterBar({
         </form>
 
         {/* Category Filter */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
           <label htmlFor="category-select" className="sr-only">
             Problem Type
           </label>
@@ -179,7 +179,7 @@ export function QuestionReportsFilterBar({
         </div>
 
         {/* Sort Filter */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
           <label htmlFor="sort-select" className="sr-only">
             Sort Order
           </label>
@@ -199,7 +199,7 @@ export function QuestionReportsFilterBar({
           <button
             type="button"
             onClick={handleClearFilters}
-            className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-800 transition hover:bg-rose-100"
+            className="w-full sm:w-auto rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-800 transition hover:bg-rose-100 text-center"
           >
             Reset
           </button>

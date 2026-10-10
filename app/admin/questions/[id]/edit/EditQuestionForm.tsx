@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { QuestionImageField } from "@/components/admin/QuestionImageField";
-import type { Question, QuestionLifecycle } from "@/types/question";
+import type { Question, QuestionLifecycle, MockTestQuestionNav } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 import { updateQuestion, type UpdateQuestionState } from "./actions";
 
@@ -21,12 +23,19 @@ export function EditQuestionForm({
   subjects,
   mockTestId,
   hasAttempts,
+  navigation,
 }: {
   question: Question;
   subjects: SubjectOption[];
   mockTestId?: string;
   hasAttempts?: boolean;
+  navigation?: MockTestQuestionNav;
 }) {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const activePaletteItemRef = useRef<HTMLAnchorElement | null>(null);
+  const paletteContainerRef = useRef<HTMLDivElement | null>(null);
+
   const [state, action, pending] = useActionState(
     (previousState: UpdateQuestionState, formData: FormData) => updateQuestion(question.id, previousState, formData, mockTestId),
     initialState,
@@ -36,6 +45,91 @@ export function EditQuestionForm({
   const [lifecycle, setLifecycle] = useState<QuestionLifecycle>(
     question.content_lifecycle,
   );
+
+  const [isDirty, setIsDirty] = useState(false);
+  const [showMobilePalette, setShowMobilePalette] = useState(false);
+  const [submitIntent, setSubmitIntent] = useState<"save" | "save_and_next" | "save_and_return">("save");
+
+  const hasUnsavedChanges = isDirty && !state.success;
+
+  // Keep active question scrolled into view in palette
+  useEffect(() => {
+    if (activePaletteItemRef.current && paletteContainerRef.current) {
+      activePaletteItemRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "nearest",
+      });
+    }
+  }, []);
+
+  // Handle navigation with unsaved changes check
+  const confirmNavigation = useCallback(
+    (targetHref: string) => {
+      if (hasUnsavedChanges) {
+        const discard = window.confirm(
+          `You have unsaved changes on Question ${navigation ? navigation.currentQuestionNumber : ""}. Discard changes and leave this question?`,
+        );
+        if (!discard) return false;
+      }
+      router.push(targetHref);
+      return true;
+    },
+    [hasUnsavedChanges, navigation, router],
+  );
+
+  // Prevent accidental tab close or page reload when dirty
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Handle save success navigation
+  useEffect(() => {
+    if (state.success) {
+      if (submitIntent === "save_and_next" && navigation?.nextHref) {
+        router.push(navigation.nextHref);
+      } else if (submitIntent === "save_and_return" && navigation?.backHref) {
+        router.push(navigation.backHref);
+      }
+    }
+  }, [state.success, submitIntent, navigation, router]);
+
+  // Keyboard shortcuts: Ctrl+Enter (Save & Next), Ctrl+S (Save), Alt+ArrowLeft/Right (Prev/Next)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (navigation?.nextHref) {
+          setSubmitIntent("save_and_next");
+        } else if (navigation?.backHref) {
+          setSubmitIntent("save_and_return");
+        } else {
+          setSubmitIntent("save");
+        }
+        formRef.current?.requestSubmit();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        setSubmitIntent("save");
+        formRef.current?.requestSubmit();
+      } else if (e.altKey && e.key === "ArrowRight" && navigation?.nextHref) {
+        e.preventDefault();
+        confirmNavigation(navigation.nextHref);
+      } else if (e.altKey && e.key === "ArrowLeft" && navigation?.prevHref) {
+        e.preventDefault();
+        confirmNavigation(navigation.prevHref);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigation, confirmNavigation]);
+
   const languageMode = useMemo(
     () =>
       subjects.find((subject) => subject.id === subjectId)?.contentLanguageMode ??
@@ -46,31 +140,246 @@ export function EditQuestionForm({
   const showEnglish = languageMode !== "telugu";
   const showTelugu = languageMode !== "english";
 
-  return (
-    <section className="mt-8 rounded-3xl border bg-white p-6 shadow-sm sm:p-7">
-      <form action={action} className="space-y-6">
-        <label className="block text-sm font-bold">
-          Question classification
-          <SearchableSelect
-            name="subject_id"
-            value={subjectId}
-            onChange={setSubjectId}
-            options={subjects.map((subject) => ({
-              value: subject.id,
-              label: subject.label,
-            }))}
-            placeholder="Search for a subject"
-          />
-        </label>
+  const topNavBar = navigation && (
+    <div className="sticky top-16 z-30 mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          href={navigation.backHref}
+          onClick={(e) => {
+            const allowed = confirmNavigation(navigation.backHref);
+            if (!allowed) e.preventDefault();
+          }}
+          className="text-xs font-bold text-teal-700 hover:underline sm:text-sm"
+        >
+          ← Back to {navigation.backLabel}
+        </Link>
+        <span className="text-slate-300 hidden sm:inline" aria-hidden="true">·</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
+          Question {navigation.currentQuestionNumber} of {navigation.totalCount}
+        </span>
+        {hasUnsavedChanges && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900 animate-pulse">
+            ● Unsaved edits
+          </span>
+        )}
+      </div>
 
-        <div className="rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-950">
-          <span className="font-black">Question language: </span>
-          {languageMode === "bilingual"
-            ? "English + Telugu"
-            : languageMode === "telugu"
-              ? "Telugu only"
-              : "English only"}
+      <div className="flex items-center gap-2">
+        {navigation.prevHref ? (
+          <Link
+            href={navigation.prevHref}
+            onClick={(e) => {
+              const allowed = confirmNavigation(navigation.prevHref!);
+              if (!allowed) e.preventDefault();
+            }}
+            className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+          >
+            ← Prev (Q{navigation.prevQuestionNumber})
+          </Link>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-400 opacity-60">
+            ← Prev
+          </span>
+        )}
+
+        {navigation.nextHref ? (
+          <Link
+            href={navigation.nextHref}
+            onClick={(e) => {
+              const allowed = confirmNavigation(navigation.nextHref!);
+              if (!allowed) e.preventDefault();
+            }}
+            className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+          >
+            Next (Q{navigation.nextQuestionNumber}) →
+          </Link>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-400 opacity-60">
+            Next →
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setShowMobilePalette((v) => !v)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-900 hover:bg-teal-100 lg:hidden"
+        >
+          <span>🔢 Palette ({navigation.totalCount})</span>
+          <span>{showMobilePalette ? "▲" : "▼"}</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const mobilePalette = navigation && showMobilePalette && (
+    <div className="mb-6 rounded-2xl border border-teal-200 bg-teal-50/70 p-4 shadow-xs lg:hidden">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-black uppercase tracking-wider text-teal-900">
+          Jump to question ({navigation.totalCount} total)
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowMobilePalette(false)}
+          className="text-xs font-bold text-teal-800 underline"
+        >
+          Close
+        </button>
+      </div>
+      <div className="mt-3 grid max-h-60 grid-cols-[repeat(auto-fill,2.5rem)] gap-1.5 overflow-y-auto overscroll-contain pr-1">
+        {navigation.items.map((item) => {
+          const isCurrent = item.questionNumber === navigation.currentQuestionNumber;
+          return (
+            <Link
+              key={item.questionId}
+              href={item.href}
+              onClick={(e) => {
+                if (!isCurrent) {
+                  const allowed = confirmNavigation(item.href);
+                  if (!allowed) e.preventDefault();
+                } else {
+                  e.preventDefault();
+                }
+              }}
+              className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-black transition ${
+                isCurrent
+                  ? "bg-slate-950 text-white ring-2 ring-teal-400 ring-offset-2"
+                  : item.isActive && item.isScoreValid
+                  ? "bg-white text-slate-700 border border-slate-200 hover:bg-teal-50"
+                  : "bg-amber-100 text-amber-900 border border-amber-300"
+              }`}
+            >
+              {item.questionNumber}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const desktopSidebar = navigation && (
+    <aside className="hidden lg:block lg:w-72 shrink-0">
+      <div className="sticky top-24 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Question Navigator</p>
+            <p className="mt-1 text-sm font-black text-slate-900 line-clamp-1">{navigation.mockTestTitle}</p>
+          </div>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-700">
+            {navigation.currentQuestionNumber} of {navigation.totalCount}
+          </span>
         </div>
+
+        <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+          <span>Click to jump:</span>
+          <span className="text-[11px] font-semibold text-slate-400">Scroll for all</span>
+        </div>
+
+        <div
+          ref={paletteContainerRef}
+          aria-label="Mock test question palette"
+          className="mt-3 grid max-h-[calc(100vh-20rem)] grid-cols-5 gap-1.5 overflow-y-auto overscroll-contain pr-1 scroll-smooth"
+        >
+          {navigation.items.map((item) => {
+            const isCurrent = item.questionNumber === navigation.currentQuestionNumber;
+            return (
+              <Link
+                key={item.questionId}
+                href={item.href}
+                ref={isCurrent ? activePaletteItemRef : undefined}
+                onClick={(e) => {
+                  if (!isCurrent) {
+                    const allowed = confirmNavigation(item.href);
+                    if (!allowed) e.preventDefault();
+                  } else {
+                    e.preventDefault();
+                  }
+                }}
+                title={`Question ${item.questionNumber}: ${item.questionText.slice(0, 70)}`}
+                className={`group relative grid h-10 w-10 place-items-center rounded-xl text-xs font-black transition ${
+                  isCurrent
+                    ? "bg-slate-950 text-white shadow-md ring-2 ring-teal-400 ring-offset-2"
+                    : item.isActive && item.isScoreValid
+                    ? "bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-900 border border-transparent"
+                    : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100"
+                }`}
+              >
+                <span>{item.questionNumber}</span>
+                {(!item.isActive || !item.isScoreValid) && !isCurrent && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-500" title="Incomplete scoring or inactive" />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 border-t border-slate-100 pt-3 flex flex-col gap-2 text-[11px] font-medium text-slate-500">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm bg-slate-950" /> Current
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm bg-slate-100 border" /> Ready
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm bg-amber-200" /> Needs check
+            </span>
+          </div>
+          {navigation.previewHref && (
+            <Link
+              href={navigation.previewHref}
+              onClick={(e) => {
+                const allowed = confirmNavigation(navigation.previewHref!);
+                if (!allowed) e.preventDefault();
+              }}
+              className="mt-1 text-center font-bold text-teal-700 hover:underline"
+            >
+              👁️ Preview Question in Student View
+            </Link>
+          )}
+        </div>
+      </div>
+    </aside>
+  );
+
+  return (
+    <div className={navigation ? "mt-4" : ""}>
+      {topNavBar}
+      {mobilePalette}
+      <div className={navigation ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
+        <div className="min-w-0">
+          <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-7">
+            <form
+              ref={formRef}
+              action={action}
+              onChange={() => setIsDirty(true)}
+              onInput={() => setIsDirty(true)}
+              className="space-y-6"
+            >
+              <label className="block text-sm font-bold">
+                Question classification
+                <SearchableSelect
+                  name="subject_id"
+                  value={subjectId}
+                  onChange={(val) => {
+                    setSubjectId(val);
+                    setIsDirty(true);
+                  }}
+                  options={subjects.map((subject) => ({
+                    value: subject.id,
+                    label: subject.label,
+                  }))}
+                  placeholder="Search for a subject"
+                />
+              </label>
+
+              <div className="rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-950">
+                <span className="font-black">Question language: </span>
+                {languageMode === "bilingual"
+                  ? "English + Telugu"
+                  : languageMode === "telugu"
+                    ? "Telugu only"
+                    : "English only"}
+              </div>
 
         <div className={`grid gap-5 ${showEnglish && showTelugu ? "xl:grid-cols-2" : ""}`}>
           {showEnglish && (
@@ -161,9 +470,87 @@ export function EditQuestionForm({
             Student attempts exist for this question. Updates to text, diagram images, or explanations will automatically synchronize to student attempt reviews.
           </div>
         )}
-        <button disabled={pending} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">
-          <PendingButtonContent pending={pending} pendingLabel="Saving question…">Save Question</PendingButtonContent>
-        </button>
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <button
+            type="submit"
+            onClick={() => setSubmitIntent("save")}
+            disabled={pending}
+            aria-busy={pending && submitIntent === "save"}
+            className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-2xs hover:bg-slate-50 disabled:opacity-50"
+          >
+            <PendingButtonContent pending={pending && submitIntent === "save"} pendingLabel="Saving…">
+              Save Question
+            </PendingButtonContent>
+          </button>
+
+          {navigation?.nextHref ? (
+            <button
+              type="submit"
+              onClick={() => setSubmitIntent("save_and_next")}
+              disabled={pending}
+              aria-busy={pending && submitIntent === "save_and_next"}
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:opacity-50 transition"
+            >
+              <PendingButtonContent
+                pending={pending && submitIntent === "save_and_next"}
+                pendingLabel="Saving & Advancing…"
+              >
+                Save & Next Question (Q{navigation.nextQuestionNumber}) →
+              </PendingButtonContent>
+            </button>
+          ) : navigation ? (
+            <button
+              type="submit"
+              onClick={() => setSubmitIntent("save_and_return")}
+              disabled={pending}
+              aria-busy={pending && submitIntent === "save_and_return"}
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:opacity-50 transition"
+            >
+              <PendingButtonContent
+                pending={pending && submitIntent === "save_and_return"}
+                pendingLabel="Saving & Returning…"
+              >
+                Save & Finish (Return) ✓
+              </PendingButtonContent>
+            </button>
+          ) : null}
+
+          {navigation?.prevHref && (
+            <Link
+              href={navigation.prevHref}
+              onClick={(e) => {
+                const allowed = confirmNavigation(navigation.prevHref!);
+                if (!allowed) e.preventDefault();
+              }}
+              className="rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition sm:text-sm"
+            >
+              ← Skip to Q{navigation.prevQuestionNumber}
+            </Link>
+          )}
+
+          {navigation?.nextHref && (
+            <Link
+              href={navigation.nextHref}
+              onClick={(e) => {
+                const allowed = confirmNavigation(navigation.nextHref!);
+                if (!allowed) e.preventDefault();
+              }}
+              className="rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition sm:text-sm"
+            >
+              Skip to Q{navigation.nextQuestionNumber} →
+            </Link>
+          )}
+        </div>
+
+        {navigation && (
+          <p className="text-xs font-medium text-slate-500">
+            💡 <span className="font-bold">Shortcuts:</span>{" "}
+            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Ctrl+Enter</kbd> Save & Next ·{" "}
+            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Ctrl+S</kbd> Save ·{" "}
+            <kbd className="rounded border bg-slate-100 px-1.5 py-0.5 text-[11px] font-mono font-bold">Alt+← / Alt+→</kbd> Prev/Next
+          </p>
+        )}
+
         {state.message && (
           <p className={`text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>
             {state.message}
@@ -171,6 +558,10 @@ export function EditQuestionForm({
         )}
       </form>
     </section>
+  </div>
+  {desktopSidebar}
+</div>
+</div>
   );
 }
 

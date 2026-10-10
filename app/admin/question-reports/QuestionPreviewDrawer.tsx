@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 
 export type QuestionPreviewProps = {
   questionId: string;
@@ -55,9 +56,9 @@ export function QuestionPreviewDrawer({
   ].filter((opt) => opt.text !== null && opt.text !== undefined);
 
   return (
-    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 transition">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 transition">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
@@ -70,7 +71,7 @@ export function QuestionPreviewDrawer({
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+              className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
               aria-hidden="true"
             >
               <polyline points="9 18 15 12 9 6" />
@@ -86,7 +87,7 @@ export function QuestionPreviewDrawer({
 
           {correctAnswer && (
             <span className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-900">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="h-2.5 w-2.5 text-emerald-700">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="h-2.5 w-2.5 shrink-0 text-emerald-700">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               Key: Option {correctAnswer}
@@ -94,7 +95,7 @@ export function QuestionPreviewDrawer({
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+        <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500 shrink-0">
           <button
             type="button"
             onClick={() => copyToClipboard(questionId, "qid")}
@@ -133,7 +134,7 @@ export function QuestionPreviewDrawer({
       </div>
 
       {isExpanded && (
-        <div className="mt-3.5 space-y-3 pt-2 text-sm">
+        <div className="mt-3.5 space-y-3 pt-2 text-sm min-w-0">
           {imageUrl && (
             <div className="rounded-xl border border-slate-200 bg-white p-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Attached diagram / image</p>
@@ -176,8 +177,8 @@ export function QuestionPreviewDrawer({
                     >
                       {opt.key}
                     </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-slate-900">{opt.text}</p>
+                    <div className="min-w-0 flex-1 break-words [overflow-wrap:anywhere]">
+                      <p className="font-medium text-slate-900 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{opt.text}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {isCorrect && (
                           <span className="inline-flex items-center gap-1 font-bold text-[10px] uppercase text-emerald-800">
@@ -204,13 +205,13 @@ export function QuestionPreviewDrawer({
           )}
 
           {studentAttemptAnswer && (
-            <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2 text-xs font-semibold text-blue-950">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0 text-blue-700">
+            <div className="flex items-start sm:items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 p-3 text-xs font-semibold text-blue-950 break-words [overflow-wrap:anywhere]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0 text-blue-700 mt-0.5 sm:mt-0">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-              <span>
+              <span className="break-words">
                 In this test attempt, student selected <strong>Option {studentAttemptAnswer.selectedAnswer}</strong>{" "}
                 (marked {studentAttemptAnswer.isCorrect ? "Correct" : "Incorrect"}).
               </span>
@@ -218,9 +219,11 @@ export function QuestionPreviewDrawer({
           )}
 
           {explanation && (
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="rounded-xl border border-slate-200 bg-white p-3 break-words [overflow-wrap:anywhere]">
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Explanation in Question Bank</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-700">{explanation}</p>
+              <div className="mt-1 text-xs leading-relaxed text-slate-700 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
+                <FormattedQuestionText text={explanation} />
+              </div>
             </div>
           )}
         </div>

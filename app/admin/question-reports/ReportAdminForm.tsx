@@ -69,17 +69,17 @@ export function ReportAdminForm({
     : null;
 
   return (
-    <form action={formAction} className="mt-4 rounded-2xl border border-slate-200/90 bg-slate-50 p-4 transition-all sm:p-5">
+    <form action={formAction} className="mt-4 rounded-2xl border border-slate-200/90 bg-slate-50 p-3.5 transition-all sm:p-5">
       <input type="hidden" name="report_id" value={reportId} />
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 border-b border-slate-200/70 pb-3">
         <p className="text-xs font-black uppercase tracking-wider text-slate-700">Admin Triage & Resolution</p>
         {formattedResolvedAt && (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5 text-emerald-600">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 break-words">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5 text-emerald-600 shrink-0">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            Resolved on {formattedResolvedAt} {resolvedByName ? `by ${resolvedByName}` : ""}
+            <span>Resolved on {formattedResolvedAt} {resolvedByName ? `by ${resolvedByName}` : ""}</span>
           </span>
         )}
       </div>
@@ -98,14 +98,14 @@ export function ReportAdminForm({
                   key={opt.value}
                   type="button"
                   onClick={() => setSelectedStatus(opt.value)}
-                  className={`flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-black transition ${
+                  className={`flex items-center justify-center gap-1.5 rounded-xl border px-2.5 py-2 text-xs font-black transition ${
                     isSelected
                       ? opt.activeClass
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : opt.dotClass}`} />
-                  {opt.label}
+                  <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${isSelected ? "bg-white" : opt.dotClass}`} />
+                  <span>{opt.label}</span>
                 </button>
               );
             })}
@@ -127,13 +127,13 @@ export function ReportAdminForm({
         </div>
 
         {/* Notes & Actions */}
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center justify-between gap-2">
             <label htmlFor={`admin_notes-${reportId}`} className="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Internal Admin Notes
             </label>
-            <span className="text-[11px] font-semibold text-slate-400">
-              {notesValue.length} / 2,000 characters
+            <span className="text-[11px] font-semibold text-slate-400 shrink-0">
+              {notesValue.length} / 2,000
             </span>
           </div>
 
@@ -145,7 +145,7 @@ export function ReportAdminForm({
               maxLength={2000}
               value={notesValue}
               onChange={(e) => setNotesValue(e.target.value)}
-              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-hidden focus:ring-1 focus:ring-teal-600"
+              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-hidden focus:ring-1 focus:ring-teal-600 break-words"
               placeholder="Record actions taken, correction details, or reasons for resolving/dismissing this report..."
             />
           </div>
@@ -158,7 +158,7 @@ export function ReportAdminForm({
                 key={preset}
                 type="button"
                 onClick={() => handleApplyPreset(preset)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-900"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-900 break-words text-left"
               >
                 + {preset}
               </button>
@@ -167,34 +167,34 @@ export function ReportAdminForm({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/70 pt-3">
-        <div className="min-h-5">
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200/70 pt-3">
+        <div className="min-h-5 min-w-0">
           {state.message && (
             <p
               aria-live="polite"
-              className={`inline-flex items-center gap-1.5 text-xs font-bold ${
+              className={`inline-flex items-center gap-1.5 text-xs font-bold break-words ${
                 state.success ? "text-emerald-700" : "text-rose-700"
               }`}
             >
               {state.success ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5 shrink-0">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5 shrink-0">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
               )}
-              {state.message}
+              <span>{state.message}</span>
             </p>
           )}
         </div>
 
         <PendingSubmitButton
           pendingLabel="Saving…"
-          className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-60"
+          className="w-full sm:w-auto rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-black text-white shadow-xs transition hover:bg-teal-800 disabled:opacity-60 text-center justify-center"
         >
           Save Changes
         </PendingSubmitButton>
