@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback, useEffect } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import { AdminNavigation } from "@/components/admin/AdminNavigation";
 
 const STORAGE_KEY = "varadhi_admin_sidebar_collapsed";
@@ -39,32 +39,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-        const target = e.target as HTMLElement | null;
-        const isInput =
-          target &&
-          (target.tagName === "INPUT" ||
-            target.tagName === "TEXTAREA" ||
-            target.isContentEditable);
-        if (!isInput) {
-          e.preventDefault();
-          handleToggle();
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleToggle]);
-
   return (
     <>
       <AdminNavigation
         collapsed={sidebarCollapsed}
         onToggle={handleToggle}
       />
-      <div className={`min-w-0 transition-[padding] duration-200 ${sidebarCollapsed ? "md:pl-0 [&>header]:md:pl-32" : "md:pl-64"}`}>
+      <div className={`min-w-0 transition-[padding] duration-200 ${sidebarCollapsed ? "md:pl-20" : "md:pl-64"}`}>
         {children}
       </div>
     </>
