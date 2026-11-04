@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { EMAIL_INPUT_PATTERN, validateRegistrationEmail } from "@/lib/email-validation";
 
 type Notice = {
   tone: "error" | "success";
@@ -45,9 +46,19 @@ export function ForgotPasswordForm({
     setLoading(true);
     setNotice(null);
 
+    const emailValidation = validateRegistrationEmail(email);
+    if (!emailValidation.isValid) {
+      setNotice({
+        tone: "error",
+        message: emailValidation.error ?? "Enter a valid email address.",
+      });
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(
-      email.trim().toLowerCase(),
+      emailValidation.normalized,
       { redirectTo: recoveryRedirectUrl(), captchaToken: captchaToken ?? undefined },
     );
 
@@ -95,8 +106,13 @@ export function ForgotPasswordForm({
             type="email"
             required
             autoComplete="email"
+            pattern={EMAIL_INPUT_PATTERN}
+            title="Please enter a valid email address"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (notice?.tone === "error") setNotice(null);
+            }}
             placeholder="you@example.com"
             className="mt-2 w-full rounded-xl border px-4 py-3 font-normal"
           />

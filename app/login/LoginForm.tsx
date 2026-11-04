@@ -7,6 +7,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { EMAIL_INPUT_PATTERN } from "@/lib/email-validation";
 import { loginWithPassword, type LoginResult } from "./actions";
 import { EmailOtpLoginForm } from "./EmailOtpLoginForm";
 
@@ -167,7 +168,21 @@ export function LoginForm({
       <form onSubmit={handleLogin} className="mt-7 space-y-5">
         <label htmlFor="login_email" className="block text-sm font-bold text-slate-800">
           Email
-          <input id="login_email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
+          <input
+            id="login_email"
+            type="email"
+            required
+            autoComplete="email"
+            pattern={EMAIL_INPUT_PATTERN}
+            title="Please enter a valid email address"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (notice?.tone === "error") setNotice(null);
+            }}
+            placeholder="you@example.com"
+            className="mt-2 w-full rounded-xl border px-4 py-3 font-normal"
+          />
         </label>
         <div>
           <div className="flex items-center justify-between gap-4">

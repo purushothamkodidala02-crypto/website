@@ -8,6 +8,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { TurnstileChallenge } from "@/components/auth/TurnstileChallenge";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@/lib/auth/password-policy";
+import { EMAIL_INPUT_PATTERN, validateRegistrationEmail } from "@/lib/email-validation";
 import { normaliseIndianMobile } from "@/lib/phone";
 
 type Notice = {
@@ -77,7 +78,16 @@ export function RegisterForm({
     setNotice(null);
 
     const supabase = createClient();
-    const normalizedEmail = email.trim().toLowerCase();
+    const emailValidation = validateRegistrationEmail(email);
+    if (!emailValidation.isValid) {
+      setNotice({
+        tone: "error",
+        message: emailValidation.error ?? "Enter a valid email address.",
+      });
+      setLoading(false);
+      return;
+    }
+    const normalizedEmail = emailValidation.normalized;
     const normalizedPhone = normaliseIndianMobile(phone);
     if (!normalizedPhone) {
       setNotice({ tone: "error", message: "Enter a valid 10-digit Indian mobile number." });
@@ -244,7 +254,22 @@ export function RegisterForm({
           </label>
           <label htmlFor="register_email" className="block text-sm font-bold text-slate-800">
             Email
-            <input id="register_email" type="email" required maxLength={254} autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" />
+            <input
+              id="register_email"
+              type="email"
+              required
+              maxLength={254}
+              autoComplete="email"
+              pattern={EMAIL_INPUT_PATTERN}
+              title="Please enter a valid email address"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (notice?.tone === "error") setNotice(null);
+              }}
+              placeholder="you@example.com"
+              className="mt-2 w-full rounded-xl border px-4 py-3 font-normal"
+            />
           </label>
           <label htmlFor="register_phone" className="block text-sm font-bold text-slate-800">
             Mobile number
