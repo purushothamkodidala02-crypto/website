@@ -8,14 +8,14 @@ export default function AttemptReviewLoading() {
         <div className="h-5 w-36 animate-pulse rounded-lg bg-slate-200" />
 
         {/* Score header card skeleton */}
-        <section className="relative mt-6 overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
+        <section className="relative mt-6 overflow-hidden rounded-[2rem] bg-[#0a2922] p-7 text-white shadow-2xl shadow-emerald-950/20 sm:p-9">
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="space-y-4">
               <div className="h-6 w-32 animate-pulse rounded-full bg-slate-800" />
               <div className="h-9 w-72 sm:w-96 animate-pulse rounded-xl bg-slate-800" />
               <div className="h-4 w-60 sm:w-80 animate-pulse rounded-lg bg-slate-800/80" />
             </div>
-            <div className="h-28 w-44 animate-pulse rounded-2xl bg-slate-900 border border-slate-800" />
+            <div className="h-28 w-44 animate-pulse rounded-2xl bg-[#0e3a30] border border-emerald-900/50" />
           </div>
         </section>
 

@@ -154,7 +154,7 @@ export default async function AttemptReviewPage({
           <span aria-hidden="true">←</span> Back to dashboard
         </Link>
 
-        <section className="relative mt-6 overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
+        <section className="relative mt-6 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-9">
           <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
           <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
@@ -239,7 +239,7 @@ export default async function AttemptReviewPage({
           </div>
           <Link
             href="/mock-tests"
-            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800"
+            className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]"
           >
             Browse mock tests
           </Link>
@@ -256,7 +256,7 @@ function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; tit
       <PublicHeader />
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800">Back to dashboard</Link>
-        <section className="mt-6 rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
+        <section className="mt-6 rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-9">
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-200">Attempt summary</p>
           {parsedTitle.breadcrumb.length > 0 && (
             <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-300/90 sm:text-sm">

@@ -12,7 +12,7 @@ export default function NotFound() {
           The link may be old, or this mock test may no longer be published.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/mock-tests" className="rounded-xl bg-slate-950 px-5 py-3 font-bold text-white">Browse mock tests</Link>
+          <Link href="/mock-tests" className="rounded-xl bg-[#0a2922] px-5 py-3 font-bold text-white shadow-sm transition hover:bg-[#11382f]">Browse mock tests</Link>
           <Link href="/" className="rounded-xl border bg-white px-5 py-3 font-bold text-slate-800">Return home</Link>
         </div>
       </section>

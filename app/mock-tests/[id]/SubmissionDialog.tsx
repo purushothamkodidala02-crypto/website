@@ -17,7 +17,7 @@ type SubmissionDialogProps = {
 
 export function SubmissionDialog({ answered, review, unanswered, submitting, onCancel, onSubmit, questions, answers, reviewIds, onGoToQuestion }: SubmissionDialogProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/70 p-0 sm:p-4 md:p-6 overflow-y-auto overscroll-contain" role="dialog" aria-modal="true" aria-busy={submitting}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0a2922]/70 p-0 sm:p-4 md:p-6 overflow-y-auto overscroll-contain" role="dialog" aria-modal="true" aria-busy={submitting}>
       <section className="flex max-h-[92vh] max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl my-0 sm:my-auto">
         <div className="shrink-0 p-4 pb-3 sm:p-7 sm:pb-5">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Final review</p>

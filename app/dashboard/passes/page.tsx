@@ -93,7 +93,7 @@ export default async function ExamPassesPage({
           ← Back to dashboard
         </Link>
 
-        <section className="mt-7 overflow-hidden rounded-3xl bg-slate-950 p-7 text-white sm:p-10">
+        <section className="mt-7 overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-10">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-teal-300">My purchases</p>
           <div className="mt-3 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
@@ -142,7 +142,7 @@ export default async function ExamPassesPage({
                       {active ? "Access available until" : "Access expired on"} {dateFormatter.format(new Date(item.expires_at))}
                     </p>
                     {active && (
-                      <Link href="/mock-tests" className="mt-5 inline-flex rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white hover:bg-teal-700">
+                      <Link href="/mock-tests" className="mt-5 inline-flex rounded-xl bg-[#0a2922] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]">
                         View unlocked tests
                       </Link>
                     )}
@@ -195,7 +195,7 @@ export default async function ExamPassesPage({
                       </ul>
                     </div>
                     {active ? (
-                      <Link href="/mock-tests" className="mt-5 block rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-black text-white hover:bg-teal-700">
+                      <Link href="/mock-tests" className="mt-5 block rounded-xl bg-[#0a2922] px-4 py-3 text-center text-sm font-black text-white shadow-sm transition hover:bg-[#11382f]">
                         View unlocked tests
                       </Link>
                     ) : (

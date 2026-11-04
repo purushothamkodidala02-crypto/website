@@ -106,7 +106,7 @@ export function SubmissionResult({
                   onClick={() => {
                     void exitFullscreenSafely();
                   }}
-                  className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
+                  className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]"
                 >
                   Review answers
                 </Link>
@@ -117,7 +117,7 @@ export function SubmissionResult({
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
-                className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600"
+                className="rounded-xl bg-[#ea580c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#d94f08]"
               >
                 Go to dashboard
               </Link>
@@ -148,7 +148,7 @@ export function SubmissionResult({
                   void exitFullscreenSafely();
                 }}
                 className={`rounded-xl px-6 py-3.5 text-sm font-bold text-white shadow-sm transition ${
-                  onRetry ? "bg-slate-900 hover:bg-slate-800" : "bg-teal-700 hover:bg-teal-600"
+                  onRetry ? "bg-[#0a2922] hover:bg-[#11382f]" : "bg-[#047857] hover:bg-[#065f46]"
                 }`}
               >
                 Check dashboard

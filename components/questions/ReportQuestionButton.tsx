@@ -7,7 +7,7 @@ const ReportQuestionDialog = dynamic(
   () => import("@/components/questions/ReportQuestionDialog").then((module) => module.ReportQuestionDialog),
   {
     ssr: false,
-    loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-4"><p role="status" className="rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-xl">Preparing report form…</p></div>,
+    loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-[#0a2922]/70 px-4"><p role="status" className="rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-xl">Preparing report form…</p></div>,
   },
 );
 

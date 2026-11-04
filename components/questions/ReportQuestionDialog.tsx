@@ -42,7 +42,7 @@ export function ReportQuestionDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby={`report-title-${questionId}`}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[#0a2922]/70 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby={`report-title-${questionId}`}>
       <section className="max-h-full w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
         <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-wide text-amber-700">Content quality</p><h2 id={`report-title-${questionId}`} className="mt-2 text-2xl font-black text-slate-950">Report this question</h2></div><button type="button" onClick={close} disabled={pending} aria-label="Close report form" className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-xl text-slate-600 disabled:opacity-50">×</button></div>
         <p className="mt-3 text-sm leading-6 text-slate-600">Select the problem. An administrator will review the question and make corrections where required.</p>

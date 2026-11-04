@@ -82,7 +82,7 @@ export default function SupportPage() {
               {supportEmail}
             </a>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <a href={mailtoUrl} className="inline-flex justify-center rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-black text-white hover:bg-slate-800">
+              <a href={mailtoUrl} className="inline-flex justify-center rounded-xl bg-[#0a2922] px-5 py-3.5 text-sm font-black text-white shadow-sm transition hover:bg-[#11382f]">
                 Open email app
               </a>
               <a href={gmailUrl} target="_blank" rel="noreferrer" className="inline-flex justify-center rounded-xl border border-cyan-200 bg-cyan-50 px-5 py-3.5 text-sm font-black text-cyan-900 hover:bg-cyan-100">

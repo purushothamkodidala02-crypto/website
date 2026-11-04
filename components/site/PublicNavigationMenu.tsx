@@ -109,7 +109,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
           type="button"
           aria-label="Close navigation menu"
           onClick={closeMenu}
-          className={`absolute inset-0 bg-slate-950/45 backdrop-blur-[2px] transition-opacity ${open ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-[#0a2922]/50 backdrop-blur-[2px] transition-opacity ${open ? "opacity-100" : "opacity-0"}`}
           tabIndex={open ? 0 : -1}
         />
         <aside

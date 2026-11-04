@@ -5,7 +5,7 @@ import { RetryButton } from "@/components/feedback/RetryButton";
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="en">
-      <body className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white">
+      <body className="grid min-h-screen place-items-center bg-[#071f1a] px-5 text-white">
         <main className="max-w-xl text-center">
           <p className="text-sm font-black uppercase tracking-[0.16em] text-teal-300">Varadhi Prep</p>
           <h1 className="mt-4 text-3xl font-black">The site could not finish loading.</h1>

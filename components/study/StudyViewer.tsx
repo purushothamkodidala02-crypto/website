@@ -168,7 +168,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
               type="button"
               title="Next question (→ Arrow)"
               onClick={() => handleNavigate(currentIndex + 1)}
-              className="flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-black text-white shadow-xs transition hover:bg-teal-900"
+              className="flex items-center gap-1.5 rounded-xl bg-[#0a2922] px-3.5 py-2 text-xs font-black text-white shadow-xs transition hover:bg-[#11382f]"
             >
               <span>Next</span>
               <span aria-hidden="true">→</span>
@@ -251,7 +251,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
             <div className="flex flex-wrap items-center gap-3 font-bold text-slate-600">
               <span className="font-black text-slate-900">Question Palette</span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-950 ring-2 ring-teal-500" /> Current
+                <span className="h-2.5 w-2.5 rounded-full bg-[#0a2922] ring-2 ring-emerald-500" /> Current
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-700">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-500" /> Mistake
@@ -274,7 +274,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
               const isMistake = r.mistake_count > 0;
               let btnStyle = "border-slate-200 bg-white text-slate-700 hover:border-slate-400";
               if (isCurrent) {
-                btnStyle = "border-slate-950 bg-slate-950 text-white shadow-xs ring-2 ring-teal-500";
+                btnStyle = "border-[#0a2922] bg-[#0a2922] text-white shadow-xs ring-2 ring-emerald-500";
               } else if (isMistake) {
                 btnStyle = "border-red-200 bg-red-50 text-red-800 hover:bg-red-100";
               } else {
@@ -419,7 +419,7 @@ function StudyQuestionCard({
         <div className="lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto overscroll-contain">
           <div>
             <div className="flex items-start gap-3">
-              <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-xl bg-slate-950 text-xs font-black text-white">
+              <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-xl bg-[#0a2922] text-xs font-black text-white">
                 {index + 1}
               </span>
               <div className="min-w-0 flex-1" lang={showTelugu ? "te" : "en"}>

@@ -111,7 +111,7 @@ export function CashfreeCheckoutLauncher({ mode, paymentSessionId, returnTo, non
             )}
             <Link
               href={returnTo}
-              className="inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white"
+              className="inline-flex rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#11382f]"
             >
               Back to mock test
             </Link>

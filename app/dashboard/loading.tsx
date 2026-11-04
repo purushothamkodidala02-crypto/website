@@ -6,7 +6,7 @@ export default function DashboardLoading() {
     <main aria-busy="true" aria-label="Loading your dashboard" className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
-        <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
+        <section className="relative overflow-hidden rounded-[2rem] bg-[#0a2922] px-6 py-8 text-white shadow-2xl shadow-emerald-950/20 sm:px-9 sm:py-10">
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
           <div className="relative flex flex-wrap items-end justify-between gap-7">
             <div>

@@ -300,9 +300,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     : [];
 
   return (
-    <main className="student-page min-h-screen bg-[#f4f7f8] text-slate-950">
+    <main className="student-page min-h-screen bg-[#f6faf8] text-[#132621]">
       <PublicHeader />
-      <section className="relative overflow-hidden border-b bg-slate-950 text-white">
+      <section className="relative overflow-hidden border-b border-emerald-950 bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(45,212,191,0.16),transparent_30%)]" />
         <div className="relative mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1fr_0.72fr] lg:items-end">
           <div>
@@ -360,7 +360,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                 const stats = stateStats.get(state.id) ?? { exams: 0 };
                 const tones = ["from-teal-50 to-white border-teal-200", "from-amber-50 to-white border-amber-200", "from-indigo-50 to-white border-indigo-200"];
                 return <Link key={state.id} href={stateUrl(state.slug)} prefetch={false} className={`student-card group rounded-3xl border bg-gradient-to-br p-6 shadow-sm hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
-                  <span className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-teal-200"><StateSymbol slug={state.slug} /></span><span className="rounded-full border bg-white/80 px-3 py-1 text-xs font-black tracking-wide text-slate-600">{state.code}</span></span>
+                  <span className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#0a2922] text-emerald-300"><StateSymbol slug={state.slug} /></span><span className="rounded-full border bg-white/80 px-3 py-1 text-xs font-black tracking-wide text-slate-600">{state.code}</span></span>
                   <h2 className="font-display mt-6 text-2xl">{state.name}</h2>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
                   <span className="mt-6 flex items-center justify-between border-t border-slate-200/70 pt-4 text-sm"><span className="font-semibold text-slate-500">{stats.exams} exam{stats.exams === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Choose →</span></span>
@@ -379,7 +379,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
               return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-slate-950 text-teal-200"><PaperSymbol /></span>
+                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0a2922] text-emerald-300"><PaperSymbol /></span>
                 <span className="min-w-0 flex-1"><span className="text-xs font-black uppercase tracking-[0.12em] text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-1 block text-lg leading-6">{paper.name}</strong><span className="mt-2 block text-sm font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
                 <span className="text-xl font-black text-teal-800 transition group-hover:translate-x-1">→</span>
               </Link>;
@@ -414,7 +414,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             }
           >
             <div className="mb-4 flex flex-wrap gap-2">
-              {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-slate-950 text-white' : 'border bg-white text-slate-600'}`}>{label}</Link>)}
+              {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-[#0a2922] text-white shadow-xs' : 'border border-slate-200 bg-white text-slate-600 hover:border-emerald-200'}`}>{label}</Link>)}
             </div>
 
             {selectedType === "subject" && paperSubjects.length > 0 && (
@@ -729,7 +729,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
               <Link
                 href={testHref}
                 prefetch={false}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-black text-white transition hover:bg-teal-700 group-hover:bg-teal-700"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#ea580c] px-3.5 py-2 text-xs font-black text-white shadow-sm shadow-orange-950/15 transition hover:bg-[#d94f08] group-hover:bg-[#d94f08]"
               >
                 <span>Start test</span>
                 <span aria-hidden="true">→</span>

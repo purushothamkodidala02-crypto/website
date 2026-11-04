@@ -68,7 +68,7 @@ export default async function PaymentResultPage({
         </p>
         <Link
           href={success ? returnTo : "/dashboard/passes"}
-          className="mt-7 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white"
+          className="mt-7 inline-flex rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#11382f]"
         >
           {success ? "Continue" : "View Purchases"}
         </Link>

@@ -25,7 +25,7 @@ const SubmissionDialog = dynamic(
   () => import("./SubmissionDialog").then((module) => module.SubmissionDialog),
   {
     ssr: false,
-    loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-5"><p role="status" className="rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-xl">Preparing final review…</p></div>,
+    loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-[#0a2922]/70 px-5"><p role="status" className="rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-xl">Preparing final review…</p></div>,
   },
 );
 
@@ -680,7 +680,7 @@ export function StudentTestRunner({
             Submit test
           </button>
         ) : (
-          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-slate-900 disabled:opacity-50 sm:px-5 sm:py-2.5">
+          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#0a2922] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
             Save & next
             <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 lg:inline-block">→</kbd>
           </button>
@@ -690,7 +690,7 @@ export function StudentTestRunner({
 
     {/* Mobile Navigator Overlay */}
     {navigatorOpen && (
-      <div className="fixed inset-0 z-50 flex flex-col justify-end bg-slate-950/60 backdrop-blur-sm lg:hidden" onClick={() => setNavigatorOpen(false)}>
+      <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[#0a2922]/60 backdrop-blur-sm lg:hidden" onClick={() => setNavigatorOpen(false)}>
         <div
           className="flex flex-col max-h-[88vh] max-h-[88dvh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
@@ -751,7 +751,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
                 onClick={() => onSelect(index)}
                 className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-black transition-all ${
                   index === currentIndex
-                    ? "bg-slate-950 text-white shadow-md ring-2 ring-teal-300 ring-offset-2 scale-105"
+                    ? "bg-[#0a2922] text-white shadow-md ring-2 ring-emerald-400 ring-offset-2 scale-105"
                     : marked
                     ? "bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200"
                     : answered
@@ -888,7 +888,7 @@ function HorizontalQuestionScroller({ questions, currentIndex, answers, reviewId
                 type="button"
                 disabled={locked}
                 onClick={() => onSelect(index)}
-                className={`flex h-11 w-11 shrink-0 snap-center items-center justify-center rounded-lg text-xs font-black transition-colors ${index === currentIndex ? "bg-slate-950 text-white shadow-md ring-2 ring-teal-300 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"}`}
+                className={`flex h-11 w-11 shrink-0 snap-center items-center justify-center rounded-lg text-xs font-black transition-colors ${index === currentIndex ? "bg-[#0a2922] text-white shadow-md ring-2 ring-emerald-400 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"}`}
               >
                 {index + 1}
               </button>

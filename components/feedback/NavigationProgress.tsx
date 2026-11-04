@@ -84,5 +84,5 @@ function SlowNavigationMessage() {
     return () => window.clearTimeout(timeout);
   }, []);
   if (!visible) return null;
-  return <p role="status" aria-live="polite" className="mx-auto mt-2 w-fit max-w-[calc(100vw-2rem)] rounded-full bg-slate-950 px-4 py-2 text-center text-xs font-bold text-white shadow-lg">This is taking longer than expected. Please wait or try again.</p>;
+  return <p role="status" aria-live="polite" className="mx-auto mt-2 w-fit max-w-[calc(100vw-2rem)] rounded-full bg-[#0a2922] px-4 py-2 text-center text-xs font-bold text-white shadow-lg shadow-emerald-950/20">This is taking longer than expected. Please wait or try again.</p>;
 }

@@ -21,7 +21,7 @@ export function QuestionImageViewer({ src, alt, onClose }: { src: string; alt: s
   }, [onClose]);
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Enlarged Question image" aria-describedby="question-image-help" className="fixed inset-0 z-[100] flex flex-col bg-slate-950/95 text-white">
+    <div role="dialog" aria-modal="true" aria-label="Enlarged Question image" aria-describedby="question-image-help" className="fixed inset-0 z-[100] flex flex-col bg-[#071f1a]/95 text-white">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/15 px-3 py-3 sm:px-5">
         <p className="text-sm font-bold">Question image</p>
         <div className="flex items-center gap-2">

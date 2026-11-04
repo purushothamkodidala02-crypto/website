@@ -101,7 +101,7 @@ export default async function Home() {
   };
 
   return (
-    <main className="student-page min-h-screen bg-white text-slate-950">
+    <main className="student-page min-h-screen bg-white text-[#132621]">
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
       <SurveyPopup survey={activeSurvey} />
@@ -133,7 +133,7 @@ export default async function Home() {
                   <Link key={state.id} href={stateUrl(state.slug)} prefetch={false} className="student-card group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
                     <div className="flex items-start justify-between">
                       <span className={`grid h-12 w-12 place-items-center rounded-2xl ${color}`}><StateSymbol slug={state.slug} /></span>
-                      <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">State</span>
+                      <span className="rounded-full bg-[#0a2922] px-3 py-1 text-xs font-black text-white">State</span>
                     </div>
                     <h2 className="font-display mt-5 text-2xl">{state.name}</h2>
                     <p className="mt-2 min-h-12 text-sm leading-6 text-slate-700">{description}</p>
@@ -177,7 +177,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-slate-950 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] text-white">
         <div className="absolute -right-24 top-8 h-80 w-80 rounded-full bg-teal-400/10 blur-3xl" />
         <div className="mx-auto grid max-w-6xl gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
           <div className="relative">
@@ -185,10 +185,10 @@ export default async function Home() {
             <h2 className="font-display mt-6 text-4xl leading-[1.08] tracking-tight sm:text-6xl">Practise with purpose. Improve with every mock test.</h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Take focused tests in a clean exam workspace, pause when needed, and turn every result into a better study plan. Practise state-wise papers, review every answer after submission, track weak areas, and come back with a clearer plan for your next mock test.</p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/mock-tests" className="rounded-xl bg-teal-300 px-5 py-3.5 font-black text-slate-950 hover:bg-teal-200">Start a mock test</Link>
+              <Link href="/mock-tests" className="rounded-xl bg-[#ea580c] px-6 py-3.5 font-black text-white shadow-lg shadow-orange-950/25 hover:bg-[#d94f08]">Start a mock test</Link>
               <Link href="/register" className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">Create free account</Link>
             </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-slate-300">{["Clear test series", "Saved progress", "Detailed review"].map((item) => <span key={item} className="flex items-center gap-2"><span className="grid h-5 w-5 place-items-center rounded-full bg-teal-300 text-[10px] font-black text-slate-950">✓</span>{item}</span>)}</div>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-slate-300">{["Clear test series", "Saved progress", "Detailed review"].map((item) => <span key={item} className="flex items-center gap-2"><span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-400 text-[10px] font-black text-[#0a2922]">✓</span>{item}</span>)}</div>
           </div>
           <TestPreview />
         </div>
@@ -210,7 +210,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="border-t bg-slate-950 text-slate-200">
+      <footer className="border-t border-emerald-950 bg-[#071f1a] text-emerald-100/90">
         <div className="mx-auto grid max-w-6xl gap-7 px-5 py-9 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:items-start">
           <div className="max-w-xl">
             <div className="flex items-center gap-3">
@@ -240,7 +240,7 @@ export default async function Home() {
 
 function TestPreview() {
   return (
-    <aside className="relative rounded-[2rem] border border-slate-700 bg-slate-900/80 p-4 shadow-2xl shadow-black/30 sm:p-6">
+    <aside className="relative rounded-[2rem] border border-emerald-800/40 bg-[#071f1a]/90 p-4 shadow-2xl shadow-emerald-950/40 sm:p-6">
       <div className="flex items-center justify-between border-b border-slate-700 pb-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Practice workspace</p>
@@ -262,7 +262,7 @@ function TestPreview() {
             </div>
           ))}
         </div>
-        <div className="mt-6 flex justify-end border-t pt-5"><span className="rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-black text-white">Save & next</span></div>
+        <div className="mt-6 flex justify-end border-t pt-5"><span className="rounded-lg bg-[#0a2922] px-4 py-2.5 text-sm font-black text-white hover:bg-[#11382f]">Save & next</span></div>
       </div>
     </aside>
   );

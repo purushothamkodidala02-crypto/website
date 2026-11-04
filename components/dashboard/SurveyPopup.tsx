@@ -74,7 +74,7 @@ export function SurveyPopup({ survey }: { survey: DynamicSurveyData | ActiveSurv
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2922]/50 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         <button 
           onClick={handleClose}

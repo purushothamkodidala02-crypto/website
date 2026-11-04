@@ -53,7 +53,7 @@ export function CompleteProfileForm({
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl bg-[#0a2922] px-4 py-3 font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <PendingButtonContent pending={pending} pendingLabel="Saving your profile…">
           Save and continue

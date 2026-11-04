@@ -199,7 +199,7 @@ export function LoginForm({
           <PasswordInput id="current_password" required maxLength={72} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password" />
         </div>
         <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
-        <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+        <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-[#ea580c] px-4 py-3 font-bold text-white shadow-md shadow-orange-950/20 transition hover:bg-[#d94f08] disabled:cursor-not-allowed disabled:opacity-50">
           <PendingButtonContent pending={loading} pendingLabel="Signing in…">Sign in and continue</PendingButtonContent>
         </button>
         <LongPendingNotice pending={loading} />

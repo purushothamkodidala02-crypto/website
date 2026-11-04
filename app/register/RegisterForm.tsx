@@ -207,7 +207,7 @@ export function RegisterForm({
         <div className="mt-7">
           <ol className="space-y-3 text-sm leading-6 text-slate-700">
             <li className="flex gap-3 rounded-2xl bg-slate-50 p-4">
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-950 text-xs font-black text-white">1</span>
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#0a2922] text-xs font-black text-white">1</span>
               Open the Varadhi Prep confirmation email. Check the spam folder if it is not in your inbox.
             </li>
             <li className="flex gap-3 rounded-2xl bg-slate-50 p-4">
@@ -224,7 +224,7 @@ export function RegisterForm({
             <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Link href={loginHref} className="rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white hover:bg-slate-800">
+            <Link href={loginHref} className="rounded-xl bg-[#0a2922] px-4 py-3 text-center text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]">
               Go to sign in
             </Link>
             <button type="button" onClick={resendConfirmation} disabled={resending || !captchaToken} aria-busy={resending} className="rounded-xl border px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
@@ -282,7 +282,7 @@ export function RegisterForm({
             <span className="mt-2 block text-xs font-normal text-slate-500">Minimum {MIN_PASSWORD_LENGTH} characters. A longer password or short phrase is safer.</span>
           </label>
           <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
-          <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+          <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-[#ea580c] px-4 py-3 font-bold text-white shadow-md shadow-orange-950/20 transition hover:bg-[#d94f08] disabled:cursor-not-allowed disabled:opacity-50">
             <PendingButtonContent pending={loading} pendingLabel="Creating account…">Create free account</PendingButtonContent>
           </button>
           <LongPendingNotice pending={loading} />

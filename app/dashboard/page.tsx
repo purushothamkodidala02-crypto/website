@@ -168,10 +168,10 @@ export default async function Dashboard({
   ] as const;
 
   return (
-    <main className="student-page min-h-screen bg-[#f5f8f8] w-full max-w-full overflow-x-hidden">
+    <main className="student-page min-h-screen bg-[#f6faf8] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-12 w-full">
-        <section className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-slate-950 px-5 py-7 text-white shadow-2xl shadow-slate-950/15 sm:px-9 sm:py-10">
+        <section className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] px-5 py-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:px-9 sm:py-10">
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
           <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-5 sm:gap-7">
             <div>
@@ -265,7 +265,7 @@ export default async function Dashboard({
                     </span>
                     <Link
                       href={publicTestPath(test)}
-                      className="rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-teal-700"
+                      className="rounded-lg bg-[#ea580c] px-4 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#d94f08]"
                     >
                       View test
                     </Link>
@@ -287,7 +287,7 @@ export default async function Dashboard({
             </p>
             <Link
               href="/mock-tests"
-              className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800"
+              className="mt-6 inline-flex rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]"
             >
               Browse mock tests
             </Link>
@@ -467,7 +467,7 @@ export default async function Dashboard({
                         {attempt.detailed_review_available ? (
                           <Link
                             href={`/dashboard/attempts/${attempt.id}`}
-                            className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-teal-700"
+                            className="rounded-xl bg-[#0a2922] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]"
                           >
                             Review
                           </Link>

@@ -658,7 +658,7 @@ export async function MockTestDetailsPage({
             </section>
           </section>
 
-          <aside className="student-card rounded-3xl bg-slate-950 p-6 text-white shadow-xl lg:sticky lg:top-24">
+          <aside className="student-card rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-6 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 lg:sticky lg:top-24">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
               Ready to begin?
             </p>
@@ -699,11 +699,11 @@ export async function MockTestDetailsPage({
                 <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
               </>
             ) : paidSalesEnabled ? (
-              <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-4 text-sm leading-6 text-slate-300">
+              <div className="mt-6 rounded-2xl border border-emerald-800/40 bg-[#071f1a]/60 p-4 text-sm leading-6 text-emerald-100/90">
                 Purchases for this exam series are temporarily unavailable. Existing purchases remain valid. <Link href="/dashboard/passes" className="font-bold text-teal-300 underline">View My Purchases</Link>.
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-4 text-sm leading-6 text-slate-300">
+              <div className="mt-6 rounded-2xl border border-emerald-800/40 bg-[#071f1a]/60 p-4 text-sm leading-6 text-emerald-100/90">
                 This premium mock test is not currently available. Please check again later.
               </div>
             )}

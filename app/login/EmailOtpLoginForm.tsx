@@ -72,7 +72,7 @@ export function EmailOtpLoginForm({ nextPath, onUsePassword }: { nextPath: strin
           />
         </label>
         <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
-        <button type="submit" disabled={sending || !captchaToken} aria-busy={sending} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white disabled:cursor-wait disabled:opacity-50">
+        <button type="submit" disabled={sending || !captchaToken} aria-busy={sending} className="w-full rounded-xl bg-[#ea580c] px-4 py-3 font-bold text-white shadow-md shadow-orange-950/20 transition hover:bg-[#d94f08] disabled:cursor-wait disabled:opacity-50">
           <PendingButtonContent pending={sending} pendingLabel="Sending code…">Send sign-in code</PendingButtonContent>
         </button>
         <LongPendingNotice pending={sending} />

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f8fb;
-  --foreground: #0f172a;
+  --background: #f6faf8;
+  --foreground: #132621;
   --font-ui: var(--font-varadhi-ui), "Segoe UI Variable Text", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: var(--font-varadhi-ui), "Aptos Display", "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-brand: Georgia, "Times New Roman", serif;
@@ -11,6 +11,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-midnight-pine: #0a2922;
+  --color-deep-forest: #071f1a;
+  --color-spruce-jade: #047857;
+  --color-sunrise-persimmon: #ea580c;
+  --color-mint-growth: #10b981;
   --font-sans: var(--font-ui);
   --font-mono: "Courier New", Courier, monospace;
 }
@@ -50,7 +55,7 @@ body {
 }
 
 ::selection {
-  background: #99f6e4;
+  background: #a7f3d0;
   color: #0f172a;
 }
 
@@ -67,8 +72,8 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgb(20 184 166 / 0.15);
+  border-color: #047857;
+  box-shadow: 0 0 0 3px rgb(4 120 87 / 0.18);
 }
 
 button,
@@ -110,7 +115,7 @@ a {
 }
 
 .student-page :where(a, button, input, select, textarea):focus-visible {
-  outline: 3px solid rgb(20 184 166 / 0.32);
+  outline: 3px solid rgb(4 120 87 / 0.35);
   outline-offset: 3px;
 }
 

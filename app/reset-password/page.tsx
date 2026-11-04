@@ -38,7 +38,7 @@ export default async function ResetPasswordPage({
     <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader compact />
       <div className="mx-auto grid max-w-4xl gap-8 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-[0.85fr_1.15fr] md:items-start">
-        <aside className="rounded-3xl bg-slate-950 p-7 text-white md:sticky md:top-8">
+        <aside className="rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 md:sticky md:top-8">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
             Password protection
           </p>

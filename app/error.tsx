@@ -16,7 +16,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         <h1 className="font-display mt-3 text-3xl">Varadhi could not load this page.</h1>
         <p className="mt-4 leading-7 text-slate-600">Your account and saved answers are not changed. Try the page again.</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <RetryButton retry={reset} className="rounded-xl bg-slate-950 px-5 py-3 font-bold text-white disabled:cursor-wait disabled:opacity-70" />
+          <RetryButton retry={reset} className="rounded-xl bg-[#0a2922] px-5 py-3 font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:cursor-wait disabled:opacity-70" />
           <Link href="/" className="rounded-xl border px-5 py-3 font-bold text-slate-800">Return home</Link>
         </div>
       </section>

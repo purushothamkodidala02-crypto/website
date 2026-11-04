@@ -64,7 +64,7 @@ export default async function RecoverAccountPage({
             <input type="hidden" name="next" value={nextPath} />
             <button
               type="submit"
-              className="w-full rounded-xl bg-slate-950 px-4 py-3 font-bold text-white transition hover:bg-slate-800"
+              className="w-full rounded-xl bg-[#ea580c] px-4 py-3 font-bold text-white shadow-md shadow-orange-950/20 transition hover:bg-[#d94f08]"
             >
               Continue securely
             </button>

@@ -467,7 +467,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
         </div>
 
         {/* Compact revision banner */}
-        <section className="mt-3 rounded-2xl bg-slate-950 p-4 sm:p-5 text-white sm:rounded-3xl shadow-sm">
+        <section className="mt-3 rounded-2xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-4 sm:p-5 text-white sm:rounded-3xl shadow-sm border border-emerald-900/40">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] text-teal-300">Personal revision</p>
@@ -478,7 +478,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
                   : "Questions you answered incorrectly are collected here automatically with complete explanations."}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900/90 px-3.5 py-1.5 sm:py-2 text-center">
+            <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/90 px-3.5 py-1.5 sm:py-2 text-center">
               <span className="block text-lg sm:text-2xl font-black text-teal-300">{filteredRows.length}</span>
               <span className="block text-[10px] sm:text-[11px] font-bold text-slate-400">
                 {view === "bookmarks" ? "Bookmarks" : "Mistakes"}
@@ -514,7 +514,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
                 {(state || exam || paper || subject || search) && (
                   <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="inline-flex items-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50">Reset</Link>
                 )}
-                <button type="submit" className="rounded-xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-teal-900">Apply Filters</button>
+                <button type="submit" className="rounded-xl bg-[#0a2922] px-4 py-2 text-xs font-black text-white transition hover:bg-[#11382f]">Apply Filters</button>
               </div>
             </div>
           </form>
@@ -526,7 +526,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
           <section className="mt-6 rounded-3xl border border-dashed bg-white p-10 text-center">
             <h2 className="text-xl font-black text-slate-950">{state || exam || paper || subject || search ? "No matching questions" : view === "mistakes" ? "No active mistakes" : "No bookmarked questions"}</h2>
             <p className="mt-2 text-sm text-slate-600">{state || exam || paper || subject || search ? "Change or clear the search filters to see other saved questions." : view === "mistakes" ? "Incorrect answers will appear here automatically after you submit a test." : "Use the Bookmark button during a test or answer review."}</p>
-            <Link href="/mock-tests" className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse mock tests</Link>
+            <Link href="/mock-tests" className="mt-6 inline-flex rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]">Browse mock tests</Link>
           </section>
         ) : (
           <StudyViewer rows={filteredRows} initialIndex={currentIndex} view={view} />
