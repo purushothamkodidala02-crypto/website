@@ -25,27 +25,32 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
   const supabase = await createClient();
   const admin = createAdminClient();
   
-  const [attemptsResult, mockTestsResult, summaryResult] = await Promise.all([
+  const [attemptsResult, summaryResult] = await Promise.all([
     admin
       .from("test_attempts")
       .select("id, user_id, mock_test_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions", { count: "exact" })
       .order("submitted_at", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1),
-    admin.from("mock_tests").select("id, title"),
     supabase.rpc("get_admin_attempt_summary"),
   ]);
 
   const attempts = (attemptsResult.data ?? []) as Attempt[];
   const userIds = [...new Set(attempts.map((a) => a.user_id))];
+  const mockTestIds = [...new Set(attempts.map((a) => a.mock_test_id))];
   
   type ProfileSummary = { id: string; full_name: string | null; phone: string | null };
 
-  const [{ data: visibleProfiles }, emailResult] = userIds.length > 0
-    ? await Promise.all([
-        admin.from("profiles").select("id, full_name, phone").in("id", userIds),
-        admin.rpc("get_admin_user_emails", { requested_user_ids: userIds }),
-      ])
-    : [{ data: [] as ProfileSummary[] }, { data: [] as { user_id: string; email: string }[] }];
+  const [{ data: visibleProfiles }, emailResult, mockTestsResult] = await Promise.all([
+    userIds.length > 0
+      ? admin.from("profiles").select("id, full_name, phone").in("id", userIds)
+      : Promise.resolve({ data: [] as ProfileSummary[] }),
+    userIds.length > 0
+      ? admin.rpc("get_admin_user_emails", { requested_user_ids: userIds })
+      : Promise.resolve({ data: [] as { user_id: string; email: string }[] }),
+    mockTestIds.length > 0
+      ? admin.from("mock_tests").select("id, title").in("id", mockTestIds)
+      : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+  ]);
 
   const profilesList = (visibleProfiles ?? []) as ProfileSummary[];
   const names = new Map(profilesList.map((item) => [item.id, item.full_name?.trim() || "Student"]));

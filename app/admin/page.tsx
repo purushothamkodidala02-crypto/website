@@ -70,10 +70,10 @@ export default async function AdminDashboard() {
   const published = tests.filter((test) => test.status === "published");
   const hidden = tests.filter((test) => test.status === "archived");
 
-  // Only check assignments for draft tests if any exist (fast scoped check)
+  // Only check assignments for draft tests if any exist (fast scoped check, max 20 recent drafts)
   let draftsNeedingWork = drafts;
   if (drafts.length > 0) {
-    const draftIds = drafts.map((d) => d.id);
+    const draftIds = drafts.slice(0, 20).map((d) => d.id);
     const { data: draftAssignments } = await supabase
       .from("mock_test_questions")
       .select("mock_test_id, question_id, marks, negative_marks")
