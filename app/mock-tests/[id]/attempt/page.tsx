@@ -43,43 +43,56 @@ export default async function TakeMockTestPage({
   searchParams: Promise<{ session?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const publicContext = await getMockTestPublicContextById(id);
+  const requestedSessionId = typeof query.session === "string" ? query.session : "";
+  const isValidSession = /^[0-9a-f-]{36}$/i.test(requestedSessionId);
+
+  const supabase = await createClient();
+
+  // Eagerly initiate all primary data queries in parallel
+  const publicContextPromise = getMockTestPublicContextById(id);
+  const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
+  const mockTestPromise = supabase.from("mock_tests").select("id, title, status, access_type").eq("id", id).eq("status", "published").maybeSingle();
+  const sessionPromise = isValidSession
+    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
+    : Promise.resolve({ data: null });
+  const attemptPromise = isValidSession
+    ? supabase.from("test_attempts").select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions").eq("session_id", requestedSessionId).maybeSingle()
+    : Promise.resolve({ data: null });
+  const payloadPromise = isValidSession
+    ? supabase.rpc("get_mock_test_session_payload", { requested_session_id: requestedSessionId })
+    : Promise.resolve({ data: null, error: null });
+
+  const [publicContext, user, mockTestResult, sessionResult, attemptResult] = await Promise.all([
+    publicContextPromise,
+    userPromise,
+    mockTestPromise,
+    sessionPromise,
+    attemptPromise,
+  ]);
+
   if (!publicContext) notFound();
   const testPath = mockTestUrl(publicContext.state.slug, publicContext.exam.slug, publicContext.paper.slug, publicContext.mockTest.slug);
   const testTitle = publicContext.mockTest.title ?? "Mock Test";
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(testPath)}`);
 
-  const { data: mockTest } = await supabase.from("mock_tests").select("id, title, status, access_type").eq("id", id).eq("status", "published").maybeSingle();
+  const mockTest = mockTestResult.data;
   if (!mockTest) notFound();
-  const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
-  const hasAccess = Boolean(access);
-  if (!hasAccess) return <TestNotReady title={testTitle} testPath={testPath} message="This mock test needs an active exam-series purchase. Return to the test details page to unlock it there." />;
 
-  const requestedSessionId = typeof query.session === "string" ? query.session : "";
-  if (!/^[0-9a-f-]{36}$/i.test(requestedSessionId)) redirect(testPath);
+  if (mockTest.access_type === "paid") {
+    const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
+    if (!access) {
+      return <TestNotReady title={testTitle} testPath={testPath} message="This mock test needs an active exam-series purchase. Return to the test details page to unlock it there." />;
+    }
+  }
 
-  const { data: session } = await supabase
-    .from("test_attempt_sessions")
-    .select("id, expires_at, session_state, submitted_at")
-    .eq("id", requestedSessionId)
-    .eq("user_id", user.id)
-    .eq("mock_test_id", id)
-    .maybeSingle();
+  if (!isValidSession) redirect(testPath);
 
-  if (!session) redirect("/dashboard");
+  const session = sessionResult.data;
+  if (!session || session.user_id !== user.id) redirect("/dashboard");
 
   // 1. Check if an attempt record already exists in DB for this session
-  let { data: existingAttempt } = await supabase
-    .from("test_attempts")
-    .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-    .eq("session_id", session.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  // If session is submitted but attempt not found immediately, retry with delays
+  let existingAttempt = attemptResult.data;
   if (!existingAttempt && (session.submitted_at || session.session_state === "submitted")) {
     for (let i = 0; i < 3; i++) {
       await new Promise((r) => setTimeout(r, (i + 1) * 300));
@@ -181,9 +194,10 @@ export default async function TakeMockTestPage({
     );
   }
 
-  const { data, error } = await supabase.rpc("get_mock_test_session_payload", { requested_session_id: session.id });
+  const { data, error } = await payloadPromise;
   const questions = (data ?? []) as TestQuestion[];
   if (error || questions.length === 0) return <TestNotReady title={testTitle} testPath={testPath} message="This mock test does not have active questions available yet. Please try again later." />;
+
   const { data: bookmarks } = await supabase
     .from("student_question_bookmarks")
     .select("question_id")

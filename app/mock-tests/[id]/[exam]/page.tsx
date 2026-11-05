@@ -380,6 +380,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                         </span>
                         <Link
                           href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)}
+                          prefetch={true}
                           className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition"
                         >
                           <span>Start test</span>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
-import { mockTestLabel, displayMockTestHeading, formatFullMockTestTitle } from "@/lib/exam-catalog";
+import { displayMockTestHeading, formatFullMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { absoluteUrl } from "@/lib/site";
 import { paperUrl } from "@/lib/public-urls";
@@ -117,7 +117,6 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
     const paperDisplay = buildPaperDisplayMap(siblingPapers).get(paper.id);
     const subject = cachedTest.subject_id ? catalog.subjects.find((s) => s.id === cachedTest.subject_id) : null;
 
-    const testLabel = mockTestLabel(Number(cachedTest.series_number ?? 1));
     const paperLabel = paperDisplay?.shortLabel ?? paper.name ?? "Paper";
     const examName = exam?.name ?? cachedTest.title;
     const section = cachedTest.subject_section_id
@@ -313,7 +312,6 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
     }
   }
 
-  const testLabel = mockTestLabel(Number(test.series_number ?? 1));
   const paperLabel = paperDisplay?.shortLabel ?? paper.name ?? "Paper";
   const examName = exam?.name ?? test.title;
 
@@ -474,12 +472,12 @@ export async function MockTestDetailsPage({
 
   // Resolve sibling papers directly from the in-memory catalog cache (0ms)
   const catalog = await catalogPromise;
-  let siblingPapers: OrderedPaper[] = paper
+  const siblingPapers: OrderedPaper[] = paper
     ? (catalog.papers.filter((p) => p.exam_group_id === paper.exam_group_id && p.is_active) as OrderedPaper[])
     : [];
 
   // Await access verification and eager session/attempt queries
-  const [accessResult, resumableSessionResult, previousAttemptResult] = await Promise.all([
+  const [accessResult, resumableSessionResult, previousAttemptResult, fallbackPapers] = await Promise.all([
     test.access_type === "paid" && examGroup
       ? (async () => {
           const paidSalesEnabled = await isPaidSalesEnabled();
@@ -497,22 +495,19 @@ export async function MockTestDetailsPage({
     attemptPromise,
 
     // If sibling papers were empty in catalog cache for any reason, fetch as fallback
-    (async () => {
-      if (paper && siblingPapers.length === 0) {
-        const { data } = await supabase
+    paper && siblingPapers.length === 0
+      ? supabase
           .from("papers")
           .select("id, exam_group_id, specialization_id, name, display_order")
           .eq("exam_group_id", paper.exam_group_id)
-          .eq("is_active", true);
-        if (data && data.length > 0) {
-          siblingPapers = data as OrderedPaper[];
-        }
-      }
-    })(),
+          .eq("is_active", true)
+          .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
+      : Promise.resolve([] as OrderedPaper[]),
   ]);
 
+  const allSiblingPapers = siblingPapers.length > 0 ? siblingPapers : fallbackPapers;
   const paperDisplay = paper
-    ? buildPaperDisplayMap(siblingPapers).get(paper.id)
+    ? buildPaperDisplayMap(allSiblingPapers).get(paper.id)
     : undefined;
 
   const mq = mqResult.data ?? [];
@@ -564,7 +559,6 @@ export async function MockTestDetailsPage({
       : []),
   ];
 
-  const testLabel = mockTestLabel(Number(test.series_number ?? 1));
   const seriesNum = Number(test.series_number ?? 1);
   const section = test.subject_section_id
     ? (catalog.sections.find((s) => s.id === test.subject_section_id) ?? null)
