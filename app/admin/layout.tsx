@@ -32,16 +32,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-[#f6faf8] text-slate-900">
       <AdminShell>
-        <header className="sticky top-0 z-20 hidden min-h-18 items-center justify-between gap-4 border-b border-slate-200/80 bg-white/90 px-5 py-4 shadow-xs backdrop-blur md:flex sm:px-8">
+        <header className="sticky top-0 z-20 hidden min-h-18 items-center justify-between gap-4 border-b border-teal-100 bg-white/90 px-5 py-4 shadow-xs backdrop-blur-xl md:flex sm:px-8">
           <div>
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-800"><span className="h-2 w-2 rounded-full bg-slate-900" />Administration</p>
+            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-teal-800">
+              <span className="h-2 w-2 rounded-full bg-teal-600" />
+              Administration
+            </p>
             <p className="mt-1 hidden text-sm text-slate-500 sm:block">Manage exam content, tests, and student outcomes.</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-800 sm:inline-flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="hidden items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-teal-800 sm:inline-flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
               MFA verified
             </span>
             <p className="hidden max-w-56 truncate text-sm font-semibold text-slate-700 sm:block">{user.email}</p>

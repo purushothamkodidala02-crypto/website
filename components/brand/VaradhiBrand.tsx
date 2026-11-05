@@ -25,8 +25,8 @@ export function BrandLockup({ context = "public", markClassName }: BrandLockupPr
     <span className="flex min-w-0 items-center gap-2 sm:gap-2.5">
       <BrandMark preload className={markClassName ?? "h-9 w-9 sm:h-11 sm:w-11 shrink-0 drop-shadow-[0_8px_12px_rgba(7,18,37,0.18)]"} />
       <span className="min-w-0 leading-none">
-        <span className={`font-brand block whitespace-nowrap text-[1rem] font-bold tracking-[-0.035em] sm:text-[1.2rem] ${admin ? "text-slate-900" : "text-slate-950"}`}>Varadhi Prep</span>
-        <span className={`mt-1.5 hidden whitespace-nowrap text-[8px] font-black uppercase tracking-[0.18em] sm:block ${admin ? "text-slate-500" : "text-teal-700"}`}>{admin ? "Admin workspace" : "TG & AP Competitive Exams Free Mock Tests"}</span>
+        <span className="font-brand block whitespace-nowrap text-[1rem] font-bold tracking-[-0.035em] sm:text-[1.2rem] text-slate-950">Varadhi Prep</span>
+        <span className="mt-1.5 hidden whitespace-nowrap text-[8px] font-black uppercase tracking-[0.18em] text-teal-700 sm:block">{admin ? "Admin workspace" : "TG & AP Competitive Exams Free Mock Tests"}</span>
       </span>
     </span>
   );

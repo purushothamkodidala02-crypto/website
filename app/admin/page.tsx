@@ -42,7 +42,6 @@ export default async function AdminDashboard() {
     supabase
       .from("questions")
       .select("id", { count: "exact", head: true })
-      .eq("is_active", true)
       .eq("content_lifecycle", "expires")
       .gte("expires_on", today)
       .lte("expires_on", future30Key),
@@ -170,7 +169,7 @@ export default async function AdminDashboard() {
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/admin/mock-tests"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-teal-600 bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -179,18 +178,18 @@ export default async function AdminDashboard() {
           </Link>
           <Link
             href="/admin/questions"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
           >
-            <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <svg className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
             </svg>
             <span>Question Bank</span>
           </Link>
           <Link
             href="/admin/similarity"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
           >
-            <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <svg className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <span>Similarity Scanner</span>
@@ -208,8 +207,8 @@ export default async function AdminDashboard() {
       {/* Actionable Two-Column Operations Layout */}
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         {/* Needs attention Card */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
+        <div className="overflow-hidden rounded-2xl border border-teal-100 bg-white shadow-xs">
+          <div className="flex items-center justify-between gap-4 border-b border-teal-100 bg-teal-50/40 px-6 py-4">
             <div className="flex items-center gap-2.5">
               <h2 className="text-base font-black text-slate-900">Needs attention</h2>
               {hasAnyAttentionItem && (
@@ -220,7 +219,7 @@ export default async function AdminDashboard() {
             </div>
             <Link
               href="/admin/mock-tests"
-              className="text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+              className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
             >
               Review tests &rarr;
             </Link>
@@ -228,7 +227,7 @@ export default async function AdminDashboard() {
           <div className="p-6">
             {!hasAnyAttentionItem ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="grid h-11 w-11 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-teal-50 text-teal-700">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                   </svg>
@@ -291,12 +290,12 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recently updated Mock tests Card */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
+        <div className="overflow-hidden rounded-2xl border border-teal-100 bg-white shadow-xs">
+          <div className="flex items-center justify-between gap-4 border-b border-teal-100 bg-teal-50/40 px-6 py-4">
             <h2 className="text-base font-black text-slate-900">Recent Mock Tests</h2>
             <Link
               href="/admin/mock-tests"
-              className="text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+              className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
             >
               View all tests &rarr;
             </Link>
@@ -306,21 +305,21 @@ export default async function AdminDashboard() {
               <p className="text-sm text-slate-500">No mock tests have been created yet.</p>
               <Link
                 href="/admin/mock-tests"
-                className="mt-3 inline-block rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-800"
+                className="mt-3 inline-block rounded-xl border border-teal-600 bg-teal-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-900/15 hover:bg-teal-800"
               >
                 Create your first test
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-teal-50">
               {tests.slice(0, 5).map((test) => (
                 <Link
                   key={test.id}
                   href={`/admin/mock-tests/${test.id}/edit`}
-                  className="group flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-slate-50/80"
+                  className="group flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-teal-50/40"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900 group-hover:text-slate-950">
+                    <p className="truncate text-sm font-bold text-slate-900 group-hover:text-teal-950">
                       {visibleTestTitle(test)}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
@@ -333,7 +332,7 @@ export default async function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0">
                     <Status status={test.status as "draft" | "published" | "archived"} />
-                    <span className="text-slate-300 group-hover:text-slate-600 transition text-sm font-bold">
+                    <span className="text-teal-300 group-hover:text-teal-700 transition text-sm font-bold">
                       &rarr;
                     </span>
                   </div>
@@ -346,7 +345,7 @@ export default async function AdminDashboard() {
 
       {/* Quick Shortcuts Section */}
       <section className="pt-2">
-        <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500 mb-3 px-1">
+        <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-teal-800/80 mb-3 px-1">
           Quick Shortcuts
         </h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -397,11 +396,11 @@ function MetricCard({
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:border-slate-300 hover:shadow-sm"
+      className="group rounded-2xl border border-teal-100 bg-white p-5 shadow-xs transition hover:border-teal-200 hover:shadow-md"
     >
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">{label}</span>
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-slate-200/80 group-hover:text-slate-900">
+        <span className="text-sm font-bold text-slate-600 group-hover:text-teal-950 transition">{label}</span>
+        <span className="grid h-8 w-8 place-items-center rounded-lg border border-teal-100/80 bg-teal-50/80 text-teal-800 transition group-hover:bg-teal-100 group-hover:text-teal-900">
           {icon === "published" && (
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -452,23 +451,25 @@ function AttentionItem({
       className={`group flex items-center justify-between gap-4 rounded-xl border p-4 transition ${
         isAmber
           ? "border-amber-200/80 bg-amber-50/50 hover:bg-amber-50 hover:border-amber-300"
-          : "border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300"
+          : "border-teal-100 bg-teal-50/40 hover:bg-teal-50 hover:border-teal-200"
       }`}
     >
       <div className="flex items-center gap-3.5 min-w-0">
         <span
           className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-black shadow-2xs ${
-            isAmber ? "bg-amber-100 text-amber-900" : "bg-white text-slate-800 border border-slate-200"
+            isAmber
+              ? "bg-amber-100 text-amber-900 border border-amber-200"
+              : "bg-white text-teal-800 border border-teal-200/80"
           }`}
         >
           {count}
         </span>
         <div className="min-w-0">
-          <h4 className="truncate text-sm font-bold text-slate-900">{title}</h4>
+          <h4 className="truncate text-sm font-bold text-slate-900 group-hover:text-teal-950">{title}</h4>
           <p className="mt-0.5 truncate text-xs text-slate-500">{detail}</p>
         </div>
       </div>
-      <span className="shrink-0 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition font-bold text-sm">
+      <span className="shrink-0 text-teal-400 group-hover:text-teal-800 group-hover:translate-x-0.5 transition font-bold text-sm">
         &rarr;
       </span>
     </Link>
@@ -482,10 +483,10 @@ function Status({
 }) {
   const details =
     status === "published"
-      ? ["Published", "bg-emerald-100 text-emerald-800"]
+      ? ["Published", "bg-teal-100 text-teal-800 border border-teal-200"]
       : status === "archived"
-        ? ["Hidden", "bg-slate-200 text-slate-700"]
-        : ["Draft", "bg-amber-100 text-amber-800"];
+        ? ["Hidden", "bg-slate-100 text-slate-700 border border-slate-200"]
+        : ["Draft", "bg-amber-100 text-amber-800 border border-amber-200"];
   return (
     <span
       className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${details[1]}`}
@@ -511,10 +512,10 @@ function ShortcutCard({
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs transition hover:border-slate-300 hover:shadow-sm"
+      className="group flex items-center justify-between gap-3 rounded-xl border border-teal-100 bg-white p-4 shadow-xs transition hover:border-teal-200 hover:shadow-md"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-slate-900 group-hover:text-white">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-teal-100/80 bg-teal-50/80 text-teal-800 transition group-hover:border-teal-700 group-hover:bg-teal-700 group-hover:text-white">
           {icon === "catalogue" && (
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
@@ -537,7 +538,7 @@ function ShortcutCard({
           )}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-900 group-hover:text-slate-950">{title}</p>
+          <p className="truncate text-sm font-bold text-slate-900 group-hover:text-teal-950">{title}</p>
           <p className="truncate text-xs text-slate-500">{detail}</p>
         </div>
       </div>
@@ -546,7 +547,7 @@ function ShortcutCard({
           {badge}
         </span>
       ) : (
-        <span className="shrink-0 text-slate-300 group-hover:text-slate-600 transition font-bold text-sm">
+        <span className="shrink-0 text-teal-300 group-hover:text-teal-700 transition font-bold text-sm">
           &rarr;
         </span>
       )}
