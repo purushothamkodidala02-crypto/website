@@ -149,35 +149,35 @@ export default async function ExamPage({ params, searchParams }: Props) {
         }}
       />
       <PublicHeader />
-      <section className="relative overflow-hidden border-b border-emerald-900/60 bg-[#071f1a] text-white">
+      <section className="relative overflow-hidden border-b border-emerald-950/10 bg-gradient-to-b from-[#eef7f2] via-[#f4faf6] to-[#f6faf8] text-[#132621]">
         <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
-            <Link href="/" className="hover:text-white py-1 inline-flex items-center">Home</Link>
-            <span aria-hidden="true">/</span>
-            <Link href={stateUrl(context.state.slug)} className="hover:text-white py-1 inline-flex items-center">{context.state.name}</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-teal-200 py-1 inline-flex items-center">{context.exam.name}</span>
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+            <Link href="/" className="hover:text-teal-900 py-1 inline-flex items-center">Home</Link>
+            <span aria-hidden="true" className="text-slate-400">/</span>
+            <Link href={stateUrl(context.state.slug)} className="hover:text-teal-900 py-1 inline-flex items-center">{context.state.name}</Link>
+            <span aria-hidden="true" className="text-slate-400">/</span>
+            <span className="text-teal-900 py-1 inline-flex items-center">{context.exam.name}</span>
           </nav>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-900/50 px-3 py-1 text-xs font-bold text-teal-200">
-                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-300" /> {context.state.code} Exam Preparation
+              <p className="inline-flex items-center gap-2 rounded-full border border-teal-700/20 bg-teal-800/10 px-3 py-1 text-xs font-bold text-teal-900">
+                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-800" /> {context.state.code} Exam Preparation
               </p>
-              <h1 className="font-display mt-4 max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+              <h1 className="font-display mt-4 max-w-4xl text-3xl font-bold leading-tight tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
                 {examHeading}
               </h1>
               {teluguData && (
-                <p className="mt-2 text-base font-bold text-teal-300 sm:text-lg">
+                <p className="mt-2 text-base font-bold text-teal-900 sm:text-lg">
                   {teluguData.teluguTitle}
                 </p>
               )}
-              <p className="mt-3.5 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base sm:leading-7">
+              <p className="mt-3.5 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
                 {introduction}
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <a
                   href="#papers"
-                  className="inline-flex min-h-[44px] items-center rounded-xl bg-teal-400 hover:bg-teal-300 px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-950 transition shadow-sm"
+                  className="inline-flex min-h-[44px] items-center rounded-xl bg-teal-800 hover:bg-teal-900 px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition shadow-xs"
                 >
                   Choose a paper ↓
                 </a>

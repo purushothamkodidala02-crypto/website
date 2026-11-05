@@ -302,20 +302,20 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   return (
     <main className="student-page min-h-screen bg-[#f6faf8] text-[#132621]">
       <PublicHeader />
-      <section className="relative overflow-hidden border-b border-emerald-900/60 bg-[#071f1a] text-white">
+      <section className="relative overflow-hidden border-b border-emerald-950/10 bg-gradient-to-b from-[#eef7f2] via-[#f4faf6] to-[#f6faf8] text-[#132621]">
         <div className="relative mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[1fr_0.68fr] lg:items-center">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-900/50 px-3 py-1 text-xs font-bold text-teal-200">
-                <MockSymbol className="h-3.5 w-3.5 text-teal-300" /> Official Pattern Test Series
+              <span className="inline-flex items-center gap-2 rounded-full border border-teal-700/20 bg-teal-800/10 px-3 py-1 text-xs font-bold text-teal-900">
+                <MockSymbol className="h-3.5 w-3.5 text-teal-800" /> Official Pattern Test Series
               </span>
               {selectedState && (
-                <span className="rounded-full bg-teal-800/60 border border-teal-600/40 px-2.5 py-0.5 text-xs font-bold text-teal-200">
+                <span className="rounded-full bg-teal-100 border border-teal-200 px-2.5 py-0.5 text-xs font-bold text-teal-900">
                   {selectedState.name}
                 </span>
               )}
             </div>
-            <h1 className="font-display mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+            <h1 className="font-display mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
               {selectedExam && selectedState
                 ? hasMockTestSuffixOrMention(selectedExam.name)
                   ? selectedExam.name.toLowerCase().includes(selectedState.name.toLowerCase())
@@ -324,15 +324,15 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   : `${selectedExam.name} Mock Tests (${selectedState.code})`
                 : "State Competitive Exam Mock Tests"}
             </h1>
-            <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base sm:leading-7">
+            <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
               {selectedExam
                 ? `Practise timed ${selectedExam.name} papers designed to the latest official syllabus with bilingual questions, negative marking, and instant detailed solutions.`
                 : "Full-length papers and targeted subject practice for Telangana and Andhra Pradesh competitive exams with real exam timing and scoring."}
             </p>
           </div>
-          <form action="/mock-tests" method="get" className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm backdrop-blur-sm">
+          <form action="/mock-tests" method="get" className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
             {selectedState && <input type="hidden" name="state" value={selectedState.slug} />}
-            <p className="text-xs font-bold uppercase tracking-wider text-teal-300">Search Test Series</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-900">Search Test Series</p>
             <div className="mt-2.5 flex gap-2">
               <input
                 id="catalog-search"
@@ -340,11 +340,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                 type="search"
                 defaultValue={filters.q ?? ""}
                 placeholder="Search by exam, paper, or subject..."
-                className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-teal-400"
+                className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-slate-50/60 px-4 py-2.5 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:bg-white focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20 transition"
               />
               <button
                 type="submit"
-                className="inline-flex h-11 px-4 items-center justify-center rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-sm transition shadow-sm"
+                className="inline-flex h-11 px-4 items-center justify-center rounded-xl bg-teal-800 hover:bg-teal-900 text-white font-bold text-sm transition shadow-xs"
                 aria-label="Search mock tests"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
@@ -353,7 +353,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                 </svg>
               </button>
             </div>
-            <p className="mt-2 text-xs text-slate-400">e.g. Group 2, Constable, General Studies, Current Affairs</p>
+            <p className="mt-2 text-xs text-slate-500">e.g. Group 2, Constable, General Studies, Current Affairs</p>
           </form>
         </div>
       </section>
