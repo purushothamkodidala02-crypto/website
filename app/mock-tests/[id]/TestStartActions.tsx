@@ -26,9 +26,10 @@ export function TestStartActions({
     return (
       <Link
         href={`/login?next=${encodeURIComponent(testPath)}`}
-        className="mt-5 block w-full rounded-xl bg-teal-800 hover:bg-teal-900 text-white px-5 py-3.5 text-center text-sm font-semibold shadow-xs transition hover:shadow active:scale-[0.99]"
+        className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99]"
       >
-        Sign in to start
+        <span>Sign in to start</span>
+        <span className="transition-transform group-hover:translate-x-0.5">→</span>
       </Link>
     );
   }
@@ -36,13 +37,14 @@ export function TestStartActions({
   if (!hasResumableSession) {
     const startAction = beginMockTest.bind(null, testId, testPath, "resume");
     return (
-      <form action={startAction} className="mt-5">
+      <form action={startAction} className="mt-1">
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}
           pendingLabel="Starting test…"
-          className="block w-full rounded-xl bg-teal-800 hover:bg-teal-900 text-white px-5 py-3.5 text-center text-sm font-semibold shadow-xs transition hover:shadow active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+          className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
-          Start test
+          <span>Start test</span>
+          <span className="transition-transform group-hover:translate-x-0.5">→</span>
         </PendingSubmitButton>
       </form>
     );
@@ -52,14 +54,15 @@ export function TestStartActions({
   const restartAction = beginMockTest.bind(null, testId, testPath, "restart");
 
   return (
-    <div className="mt-5 grid gap-2.5">
+    <div className="mt-1 grid gap-2.5">
       <form action={resumeAction}>
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}
           pendingLabel="Resuming test…"
-          className="block w-full rounded-xl bg-teal-800 hover:bg-teal-900 text-white px-5 py-3.5 text-center text-sm font-semibold shadow-xs transition hover:shadow active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+          className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
-          Resume test
+          <span>Resume test</span>
+          <span className="transition-transform group-hover:translate-x-0.5">→</span>
         </PendingSubmitButton>
       </form>
       <form
@@ -78,7 +81,7 @@ export function TestStartActions({
       >
         <PendingSubmitButton
           pendingLabel="Restarting test…"
-          className="block w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-5 py-3 text-center text-xs sm:text-sm font-semibold shadow-2xs transition disabled:cursor-wait disabled:opacity-70"
+          className="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-5 py-3 text-center text-xs sm:text-sm font-semibold shadow-2xs transition hover:border-slate-400 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
           Restart test
         </PendingSubmitButton>

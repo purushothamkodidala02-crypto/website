@@ -802,131 +802,153 @@ export async function MockTestDetailsPage({
             )}
           </section>
 
-          {/* Clean Candidate Action Card */}
-          <aside className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs lg:sticky lg:top-24">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-semibold text-teal-900">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-600 animate-pulse" />
-                Candidate Portal
-              </span>
-              <span className="text-[11px] font-medium text-slate-500">
-                Official CBT Pattern
-              </span>
-            </div>
-
-            <h2 className="mt-3 text-xl font-bold tracking-tight text-slate-900">
-              Ready to begin?
-            </h2>
-
-            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600">
-              {hasResumableSession
-                ? "You have an ongoing attempt. Resume to continue with your saved time and answers."
-                : "Simulate real exam conditions. The countdown timer begins as soon as you select Start Test."}
-            </p>
-
-            <div className="mt-5 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 space-y-3">
-              <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-slate-500 font-medium">Questions</span>
-                <strong className="font-bold text-slate-900">{questionCount ?? "—"}</strong>
-              </div>
-              <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-slate-500 font-medium">Duration</span>
-                <strong className="font-bold text-slate-900">{test.duration_minutes} min</strong>
-              </div>
-              <div className="flex items-center justify-between text-xs sm:text-sm pt-2 border-t border-slate-200/60">
-                <span className="text-slate-500 font-medium">Access</span>
-                <span
-                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
-                    test.access_type === "free"
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                      : isUnlocked
-                        ? "bg-blue-50 text-blue-800 border border-blue-200"
-                        : "bg-amber-50 text-amber-800 border border-amber-200"
-                  }`}
-                >
-                  {test.access_type === "free"
-                    ? "Free"
-                    : isUnlocked
-                      ? "Series active"
-                      : "Paid series"}
+          {/* Candidate Assessment Station */}
+          <aside className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-md shadow-slate-200/50 overflow-hidden lg:sticky lg:top-24">
+            {/* Executive Header Banner */}
+            <div className="border-b border-teal-950/20 bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 px-6 py-5 text-white">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/20 border border-teal-400/30 px-2.5 py-0.5 text-[11px] font-semibold text-teal-200">
+                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
+                  Candidate Portal
+                </span>
+                <span className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-medium tracking-wide text-slate-300">
+                  CBT Simulation
                 </span>
               </div>
+
+              <h2 className="mt-3 text-xl font-bold tracking-tight text-white sm:text-2xl">
+                Ready to begin?
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-300 leading-relaxed">
+                {hasResumableSession
+                  ? "You have an ongoing attempt. Resume to continue with your saved time and answers."
+                  : "Simulate real exam conditions. The countdown timer begins as soon as you select Start Test."}
+              </p>
             </div>
 
-            <div className="mt-5">
-              {isUnlocked ? (
-                <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
-              ) : paidSalesEnabled && purchaseProduct ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                  <p className="text-sm font-bold text-slate-900">
-                    This mock test is part of <span className="text-teal-900">{purchaseProduct.name}</span>.
+            {/* Content & Parameter Grid */}
+            <div className="p-6 space-y-5">
+              {/* 2x2 Parameter Matrix */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Questions</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">{questionCount ?? "—"}</p>
+                  <p className="text-[10px] text-slate-500">Official syllabus</p>
+                </div>
+                <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Duration</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">{test.duration_minutes} min</p>
+                  <p className="text-[10px] text-slate-500">Timed countdown</p>
+                </div>
+                <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Marking</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {negativeMarks > 0 ? `+${defaultCorrectMarks || 1} / -${negativeMarks}` : `+${defaultCorrectMarks || 1} / None`}
                   </p>
-                  <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                    Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.
-                  </p>
-                  <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-emerald-700 font-bold">✓</span> Access every paid test under this exam
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-emerald-700 font-bold">✓</span> Start immediately after payment
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-emerald-700 font-bold">✓</span> Keep full answer review and result history
-                    </li>
-                  </ul>
-                  <div className="mt-4">
-                    <BuyExamPassForm
-                      productId={purchaseProduct.id}
-                      price={Number(purchaseProduct.price_inr)}
-                      returnTo={canonicalPath}
-                      phone={typeof user?.user_metadata?.phone === "string" ? user.user_metadata.phone : ""}
-                      buttonLabel="Proceed to secure payment"
-                      pendingLabel="Opening secure checkout..."
-                    />
+                  <p className="text-[10px] text-slate-500">Negative marking</p>
+                </div>
+                <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Access</p>
+                  <div className="mt-1">
+                    <span
+                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                        test.access_type === "free"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : isUnlocked
+                            ? "bg-blue-50 text-blue-800 border border-blue-200"
+                            : "bg-amber-50 text-amber-800 border border-amber-200"
+                      }`}
+                    >
+                      {test.access_type === "free"
+                        ? "Free Practice"
+                        : isUnlocked
+                          ? "Series active"
+                          : "Paid series"}
+                    </span>
                   </div>
+                  <p className="mt-1 text-[10px] text-slate-500">CBT portal</p>
                 </div>
-              ) : paidSalesEnabled ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
-                  Purchases for this exam series are temporarily unavailable. Existing purchases remain valid.{" "}
-                  <Link href="/dashboard/passes" className="font-semibold text-teal-800 underline hover:text-teal-950">
-                    View My Purchases
-                  </Link>.
-                </div>
-              ) : (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
-                  This premium mock test is not currently available. Please check again later.
-                </div>
-              )}
-            </div>
+              </div>
 
-            <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
-              {!isUnlocked
-                ? paidSalesEnabled
-                  ? "Buy the exam series here to unlock this test and every other paid mock test in the same exam."
-                  : "Paid enrolment is currently unavailable."
-                : !isLoggedIn
-                ? "Sign in or create an account, then return directly to this test."
-                : hasResumableSession
-                  ? "Resume to keep your progress, or restart after confirming that your unfinished answers can be cleared."
-                  : hasPreviousAttempt
-                    ? "Start a new attempt; your earlier submitted result remains saved."
-                    : "Select Start test when you are ready."}
-            </p>
+              {/* Assessment Assurance Strip */}
+              <div className="space-y-2 rounded-xl border border-teal-100 bg-teal-50/50 p-3 text-xs text-slate-700">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold text-white">✓</span>
+                  <span className="font-medium text-slate-800">Bilingual questions (English & తెలుగు)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold text-white">✓</span>
+                  <span className="font-medium text-slate-800">Auto-saves every selected answer</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold text-white">✓</span>
+                  <span className="font-medium text-slate-800">Instant detailed solutions upon submit</span>
+                </div>
+              </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-4 text-[11px] text-slate-400">
-              <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                Auto-saved
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                Instant solutions
-              </span>
+              {/* Action Area */}
+              <div>
+                {isUnlocked ? (
+                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
+                ) : paidSalesEnabled && purchaseProduct ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                    <p className="text-sm font-bold text-slate-900">
+                      This mock test is part of <span className="text-teal-900">{`${purchaseProduct.name}`}</span>.
+                    </p>
+                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                      Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.
+                    </p>
+                    <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-emerald-700 font-bold">✓</span> Access every paid test under this exam
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-emerald-700 font-bold">✓</span> Start immediately after payment
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-emerald-700 font-bold">✓</span> Keep full answer review and result history
+                      </li>
+                    </ul>
+                    <div className="mt-4">
+                      <BuyExamPassForm
+                        productId={purchaseProduct.id}
+                        price={Number(purchaseProduct.price_inr)}
+                        returnTo={canonicalPath}
+                        phone={typeof user?.user_metadata?.phone === "string" ? user.user_metadata.phone : ""}
+                        buttonLabel="Proceed to secure payment"
+                        pendingLabel="Opening secure checkout..."
+                      />
+                    </div>
+                  </div>
+                ) : paidSalesEnabled ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
+                    Purchases for this exam series are temporarily unavailable. Existing purchases remain valid.{" "}
+                    <Link href="/dashboard/passes" className="font-semibold text-teal-800 underline hover:text-teal-950">
+                      View My Purchases
+                    </Link>.
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
+                    This premium mock test is not currently available. Please check again later.
+                  </div>
+                )}
+              </div>
+
+              {/* Guiding Microcopy */}
+              <p className="text-center text-xs leading-relaxed text-slate-500">
+                {!isUnlocked
+                  ? paidSalesEnabled
+                    ? "Buy the exam series here to unlock this test and every other paid mock test in the same exam."
+                    : "Paid enrolment is currently unavailable."
+                  : !isLoggedIn
+                  ? "Sign in or create an account, then return directly to this test."
+                  : hasResumableSession
+                    ? "Resume to keep your progress, or restart after confirming that your unfinished answers can be cleared."
+                    : hasPreviousAttempt
+                      ? "Start a new attempt; your earlier submitted result remains saved."
+                      : "Select Start test when you are ready."}
+              </p>
             </div>
           </aside>
         </div>

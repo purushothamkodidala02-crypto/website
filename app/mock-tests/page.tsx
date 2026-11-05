@@ -807,11 +807,89 @@ function CatalogPagination({ filters, page, totalPages, basePath }: { filters: F
     const nextFilters = { ...filters, page: nextPage && nextPage > 1 ? String(nextPage) : undefined };
     return withQuery(basePath, nextFilters);
   };
-  return <nav aria-label="Mock-test pages" className="mt-8 flex items-center justify-center gap-3">
-    <Link href={pageHref(page - 1)} prefetch={false} aria-disabled={page === 1} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Previous</Link>
-    <span className="text-sm font-semibold text-slate-600">Page {page} of {totalPages}</span>
-    <Link href={pageHref(Math.min(totalPages, page + 1))} prefetch={false} aria-disabled={page === totalPages} className={`rounded-xl border bg-white px-4 py-2.5 text-sm font-bold ${page === totalPages ? "pointer-events-none opacity-40" : "hover:border-teal-300"}`}>Next</Link>
-  </nav>;
+
+  const getPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: (number | "ellipsis")[] = [];
+    pages.push(1);
+    if (page > 3) {
+      pages.push("ellipsis");
+    }
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (page < totalPages - 2) {
+      pages.push("ellipsis");
+    }
+    pages.push(totalPages);
+    return pages;
+  };
+
+  const pageItems = getPageNumbers();
+
+  return (
+    <nav aria-label="Mock-test pages" className="mt-8 flex flex-wrap items-center justify-center gap-2">
+      <Link
+        href={pageHref(page - 1)}
+        prefetch={false}
+        aria-disabled={page === 1}
+        className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition sm:text-sm ${
+          page === 1 ? "pointer-events-none opacity-40" : "hover:border-teal-400 hover:text-teal-900 hover:shadow-xs"
+        }`}
+      >
+        <span aria-hidden="true">←</span>
+        <span>Previous</span>
+      </Link>
+
+      <div className="flex items-center gap-1.5">
+        {pageItems.map((item, idx) => {
+          if (item === "ellipsis") {
+            return (
+              <span key={`ellipsis-${idx}`} className="px-1 text-xs font-bold text-slate-400 select-none sm:text-sm">
+                …
+              </span>
+            );
+          }
+          const isCurrent = item === page;
+          return isCurrent ? (
+            <span
+              key={item}
+              aria-current="page"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-teal-800 text-xs font-bold text-white shadow-2xs sm:h-9 sm:w-9 sm:text-sm"
+            >
+              {item}
+            </span>
+          ) : (
+            <Link
+              key={item}
+              href={pageHref(item)}
+              prefetch={false}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-2xs transition hover:border-teal-400 hover:text-teal-900 hover:shadow-xs sm:h-9 sm:w-9 sm:text-sm"
+              aria-label={`Go to page ${item}`}
+            >
+              {item}
+            </Link>
+          );
+        })}
+      </div>
+
+      <Link
+        href={pageHref(Math.min(totalPages, page + 1))}
+        prefetch={false}
+        aria-disabled={page === totalPages}
+        className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition sm:text-sm ${
+          page === totalPages ? "pointer-events-none opacity-40" : "hover:border-teal-400 hover:text-teal-900 hover:shadow-xs"
+        }`}
+      >
+        <span>Next</span>
+        <span aria-hidden="true">→</span>
+      </Link>
+    </nav>
+  );
 }
 
 function EmptyCatalog({ title, detail }: { title: string; detail: string }) {

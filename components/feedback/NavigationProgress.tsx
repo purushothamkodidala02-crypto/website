@@ -1,21 +1,42 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function NavigationProgress() {
+  const router = useRouter();
   const pathname = usePathname();
   const [navigation, setNavigation] = useState<{ sourceHref: string; id: number } | null>(null);
   const navigationId = useRef(0);
+  const prefetchedUrls = useRef<Set<string>>(new Set());
   const pending = navigation !== null;
 
   useEffect(() => {
+    function warmLink(event: Event) {
+      const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!(target instanceof HTMLAnchorElement) || target.target === "_blank" || target.hasAttribute("download")) return;
+      const rawHref = target.getAttribute("href");
+      if (!rawHref || rawHref.startsWith("#") || rawHref.startsWith("mailto:") || rawHref.startsWith("tel:") || rawHref.startsWith("javascript:")) return;
+      try {
+        const next = new URL(target.href, window.location.href);
+        if (next.origin === window.location.origin) {
+          if (next.pathname.endsWith("/questions-export")) return;
+          const pathAndQuery = next.pathname + next.search;
+          const currentPathAndQuery = window.location.pathname + window.location.search;
+          if (pathAndQuery !== currentPathAndQuery && !prefetchedUrls.current.has(pathAndQuery)) {
+            prefetchedUrls.current.add(pathAndQuery);
+            router.prefetch(pathAndQuery);
+          }
+        }
+      } catch {}
+    }
+
     function startForLink(event: MouseEvent) {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
       if (!(target instanceof HTMLAnchorElement) || target.target === "_blank" || target.hasAttribute("download")) return;
       const next = new URL(target.href, window.location.href);
-      if (next.origin !== window.location.origin || next.href === window.location.href || next.hash && next.pathname === window.location.pathname && next.search === window.location.search) return;
+      if (next.origin !== window.location.origin || next.href === window.location.href || (next.hash && next.pathname === window.location.pathname && next.search === window.location.search)) return;
       if (next.pathname.endsWith("/questions-export")) return;
       navigationId.current += 1;
       setNavigation({ sourceHref: window.location.href, id: navigationId.current });
@@ -40,13 +61,19 @@ export function NavigationProgress() {
       setNavigation({ sourceHref: window.location.href, id: navigationId.current });
     }
 
+    document.addEventListener("pointerover", warmLink, { passive: true, capture: true });
+    document.addEventListener("touchstart", warmLink, { passive: true, capture: true });
+    document.addEventListener("focusin", warmLink, { passive: true, capture: true });
     document.addEventListener("click", startForLink, true);
     document.addEventListener("submit", startForGetForm, true);
     return () => {
+      document.removeEventListener("pointerover", warmLink, { capture: true });
+      document.removeEventListener("touchstart", warmLink, { capture: true });
+      document.removeEventListener("focusin", warmLink, { capture: true });
       document.removeEventListener("click", startForLink, true);
       document.removeEventListener("submit", startForGetForm, true);
     };
-  }, [pathname]);
+  }, [pathname, router]);
 
   useEffect(() => {
     if (!pending) return;
@@ -67,9 +94,9 @@ export function NavigationProgress() {
   }, [navigation, pathname, pending]);
 
   return (
-    <div className={`pointer-events-none fixed inset-x-0 top-0 z-[200] transition-opacity ${pending ? "opacity-100" : "opacity-0"}`} aria-hidden={!pending}>
-      <div className="h-1 overflow-hidden bg-teal-100/80">
-        <span className="block h-full w-1/3 animate-[navigation-progress_1.1s_ease-in-out_infinite] bg-teal-500 motion-reduce:w-full motion-reduce:animate-none" />
+    <div className={`pointer-events-none fixed inset-x-0 top-0 z-[200] transition-opacity duration-150 ${pending ? "opacity-100" : "opacity-0"}`} aria-hidden={!pending}>
+      <div className="h-1.5 overflow-hidden bg-teal-950/20 shadow-[0_0_12px_rgba(20,184,166,0.85)]">
+        <span className="block h-full w-2/5 animate-[navigation-progress_0.9s_ease-in-out_infinite] bg-gradient-to-r from-teal-400 via-teal-300 to-emerald-400 shadow-[0_0_8px_rgba(45,212,191,0.9)] motion-reduce:w-full motion-reduce:animate-none" />
       </div>
       {pending && <SlowNavigationMessage />}
       <span className="sr-only" role="status" aria-live="polite">{pending ? "Loading the next page" : ""}</span>
