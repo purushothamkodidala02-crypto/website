@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { BrandLockup, BrandMark } from "@/components/brand/VaradhiBrand";
@@ -290,9 +290,14 @@ function Brand({ linked = true, collapsed = false }: { linked?: boolean; collaps
   );
 }
 
-export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
+export function AdminNavigation(props: {
+  collapsed?: boolean;
+  onToggle?: () => void;
+}) {
+  const { collapsed = false } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [badges, setBadges] = useState<BadgeState>({
     openReports: 0,
     newSurveys: 0,
@@ -302,8 +307,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
 
   const handleDrawerClose = useCallback(() => {
     setMobileOpen(false);
-    onToggle?.();
-  }, [onToggle]);
+  }, []);
 
   const fetchBadges = useCallback(async () => {
     try {
@@ -342,13 +346,10 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
     }
   }
 
-  // Listen to open/toggle events from desktop header or shortcuts
+  // Listen to open/toggle/close events from desktop header or shortcuts
   useEffect(() => {
     const handleOpen = () => setMobileOpen(true);
-    const handleClose = () => {
-      setMobileOpen(false);
-      onToggle?.();
-    };
+    const handleClose = () => setMobileOpen(false);
     const handleToggle = () => setMobileOpen((prev) => !prev);
 
     window.addEventListener("admin_sidebar_open", handleOpen);
@@ -360,13 +361,15 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
       window.removeEventListener("admin_sidebar_close", handleClose);
       window.removeEventListener("admin_sidebar_toggle", handleToggle);
     };
-  }, [onToggle]);
+  }, []);
 
   // Lock body scroll and close on Escape key when drawer is open
   useEffect(() => {
     if (!mobileOpen) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleDrawerClose();
     };
@@ -459,18 +462,20 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
         createPortal(
           <div
             id="admin-mobile-drawer"
-            className={`fixed inset-0 z-50 transition-opacity duration-300 ${
+            className={`fixed inset-0 z-[100] transition-opacity duration-300 ${
               mobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
             }`}
             aria-hidden={!mobileOpen}
           >
             {/* Backdrop overlay */}
-            <div
-              className={`absolute inset-0 bg-[#0a2922]/50 backdrop-blur-[2px] transition-opacity duration-300 ${
+            <button
+              type="button"
+              aria-label="Close admin side navigation"
+              onClick={handleDrawerClose}
+              className={`absolute inset-0 h-full w-full bg-[#0a2922]/50 backdrop-blur-[2px] transition-opacity duration-300 cursor-pointer ${
                 mobileOpen ? "opacity-100" : "opacity-0"
               }`}
-              onClick={handleDrawerClose}
-              aria-hidden="true"
+              tabIndex={mobileOpen ? 0 : -1}
             />
 
             {/* Slide-out Sidebar */}
@@ -486,6 +491,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-teal-100 px-5">
                 <Brand linked={true} />
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={handleDrawerClose}
                   aria-label="Close admin side navigation"
