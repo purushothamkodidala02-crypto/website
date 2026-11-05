@@ -3,13 +3,13 @@ import { QuestionSimilarityScanner } from "../QuestionSimilarityScanner";
 
 async function fetchAllAssignments(supabase: Awaited<ReturnType<typeof createClient>>) {
   const pageSize = 1000;
-  const { count } = await supabase
+  const { count, error } = await supabase
     .from("mock_test_questions")
     .select("id", { count: "exact", head: true });
 
-  const total = count ?? 0;
-  if (total === 0) return [];
+  if (error || !count || count === 0) return [];
 
+  const total = count;
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages === 1) {
     const { data } = await supabase
@@ -60,14 +60,17 @@ export default async function AdminSimilarityPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
-            Exam Intelligence
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-slate-950">
-            Question Similarity & Overlap Scanner
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-teal-600" />
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+              Content Quality & Exam Integrity
+            </p>
+          </div>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Test Integrity & Similarity Audit
           </h1>
-          <p className="mt-2 text-slate-600">
-            Audit question overlaps across exams, specialisations (such as TG TET Paper 2), and subject practice tests with automated syllabus intent recognition.
+          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate-600">
+            Audit mock test series for unintended question repetition, verify curriculum-aligned syllabus sharing (such as TG TET Paper 2 streams), and safely resolve duplicate content across the question bank.
           </p>
         </div>
       </div>

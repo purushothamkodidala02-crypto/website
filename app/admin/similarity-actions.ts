@@ -33,6 +33,7 @@ export type DuplicateQuestionItem = {
 export type DuplicateTextGroup = {
   normalizedKey: string;
   questionTextSample: string;
+  questionTextTeSample?: string | null;
   count: number;
   subjectNames: string[];
   items: DuplicateQuestionItem[];
@@ -47,57 +48,94 @@ export type ScanDuplicatesResult = {
   duplicateGroups: DuplicateTextGroup[];
 };
 
-async function fetchAllActiveQuestions(supabase: Awaited<ReturnType<typeof createClient>>) {
+function normalizeQuestionText(text: string): string {
+  if (!text) return "";
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "") // Zero-width spaces & markers
+    .replace(/[\r\n\t]+/g, " ") // Collapse whitespace
+    .replace(/[""''`]/g, '"') // Standardize quotes
+    .replace(/[.,!?:;—–\-()]/g, "") // Strip common punctuation marks
+    .replace(/\s+/g, " ") // Single space
+    .trim();
+}
+
+function normalizeOptionText(str: string | null | undefined): string {
+  if (!str) return "";
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/[""''`]/g, '"')
+    .replace(/[.,!?:;—–\-()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+type RawQuestion = {
+  id: string;
+  question_text: string;
+  question_text_te: string | null;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  option_a_te: string | null;
+  option_b_te: string | null;
+  option_c_te: string | null;
+  option_d_te: string | null;
+  correct_answer: string;
+  explanation: string | null;
+  explanation_te: string | null;
+  subject_id: string | null;
+  created_at: string;
+};
+
+const QUESTION_SELECT_FIELDS = `
+  id,
+  question_text,
+  question_text_te,
+  option_a,
+  option_b,
+  option_c,
+  option_d,
+  option_a_te,
+  option_b_te,
+  option_c_te,
+  option_d_te,
+  correct_answer,
+  explanation,
+  explanation_te,
+  subject_id,
+  created_at
+` as const;
+
+async function fetchQuestionsPaged(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  applyFilter?: (query: any) => any,
+): Promise<RawQuestion[]> {
   const pageSize = 1000;
   let from = 0;
-  let all: Array<{
-    id: string;
-    question_text: string;
-    question_text_te: string | null;
-    option_a: string;
-    option_b: string;
-    option_c: string;
-    option_d: string;
-    option_a_te: string | null;
-    option_b_te: string | null;
-    option_c_te: string | null;
-    option_d_te: string | null;
-    correct_answer: string;
-    explanation: string | null;
-    explanation_te: string | null;
-    subject_id: string | null;
-    created_at: string;
-  }> = [];
+  let all: RawQuestion[] = [];
   let hasMore = true;
 
   while (hasMore) {
-    const { data, error } = await supabase
+    let query = supabase
       .from("questions")
-      .select(`
-        id,
-        question_text,
-        question_text_te,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        option_a_te,
-        option_b_te,
-        option_c_te,
-        option_d_te,
-        correct_answer,
-        explanation,
-        explanation_te,
-        subject_id,
-        created_at
-      `)
-      .eq("is_active", true)
-      .range(from, from + pageSize - 1);
+      .select(QUESTION_SELECT_FIELDS)
+      .eq("is_active", true);
+
+    if (applyFilter) {
+      query = applyFilter(query);
+    }
+
+    const { data, error } = await query.range(from, from + pageSize - 1);
 
     if (error || !data || data.length === 0) {
       hasMore = false;
     } else {
-      all = all.concat(data);
+      all = all.concat(data as RawQuestion[]);
       if (data.length < pageSize) {
         hasMore = false;
       } else {
@@ -157,9 +195,12 @@ export async function scanQuestionTextDuplicates(scope?: {
     return { success: false, message: "Admin privileges required", totalQuestionsScanned: 0, duplicateGroups: [] };
   }
 
-  // Fetch all active questions, subjects, assignments, tests, papers, and exam groups with automatic pagination past 1000
-  const [questions, subjectsResult, assignments, testsResult, papersResult, groupsResult] = await Promise.all([
-    fetchAllActiveQuestions(supabase),
+  // Determine scope parameters
+  const targetPaperId = scope?.paperId && scope.paperId !== "all" ? scope.paperId : undefined;
+  const targetExamId = scope?.examGroupId && scope.examGroupId !== "all" ? scope.examGroupId : undefined;
+
+  // Fetch metadata in parallel
+  const [subjectsResult, assignments, testsResult, papersResult, groupsResult] = await Promise.all([
     supabase.from("subjects").select("id, name, paper_id"),
     fetchAllAssignments(supabase),
     supabase.from("mock_tests").select("id, title, paper_id"),
@@ -203,16 +244,78 @@ export async function scanQuestionTextDuplicates(scope?: {
     questionTestsMap.set(row.question_id, list);
   }
 
-  // Filter questions by scope if paperId or examGroupId is specified
-  const targetPaperId = scope?.paperId && scope.paperId !== "all" ? scope.paperId : undefined;
-  const targetExamId = scope?.examGroupId && scope.examGroupId !== "all" ? scope.examGroupId : undefined;
+  // Optimize question fetching by scope when a paper or exam is targeted
+  let scopedSubjectIds: string[] | undefined;
+  let scopedQuestionIds: string[] | undefined;
 
+  if (targetPaperId) {
+    scopedSubjectIds = rawSubjects.filter((s) => s.paper_id === targetPaperId).map((s) => s.id);
+    const paperTestIds = new Set(
+      (testsResult.data ?? []).filter((t) => t.paper_id === targetPaperId).map((t) => t.id),
+    );
+    scopedQuestionIds = assignments
+      .filter((a) => paperTestIds.has(a.mock_test_id))
+      .map((a) => a.question_id);
+  } else if (targetExamId) {
+    const examPaperIds = new Set(
+      rawPapers.filter((p) => p.exam_group_id === targetExamId).map((p) => p.id),
+    );
+    scopedSubjectIds = rawSubjects
+      .filter((s) => s.paper_id && examPaperIds.has(s.paper_id))
+      .map((s) => s.id);
+    const examTestIds = new Set(
+      (testsResult.data ?? []).filter((t) => t.paper_id && examPaperIds.has(t.paper_id)).map((t) => t.id),
+    );
+    scopedQuestionIds = assignments
+      .filter((a) => examTestIds.has(a.mock_test_id))
+      .map((a) => a.question_id);
+  }
+
+  let questions: RawQuestion[];
+
+  if (scopedSubjectIds !== undefined) {
+    // Targeted query for performance
+    const questionMap = new Map<string, RawQuestion>();
+
+    // 1. Fetch questions belonging to target subjects in chunks of up to 100 subject IDs
+    if (scopedSubjectIds.length > 0) {
+      const subjectChunkSize = 50;
+      for (let i = 0; i < scopedSubjectIds.length; i += subjectChunkSize) {
+        const chunk = scopedSubjectIds.slice(i, i + subjectChunkSize);
+        const subjectQuestions = await fetchQuestionsPaged(supabase, (q) =>
+          q.in("subject_id", chunk),
+        );
+        for (const q of subjectQuestions) {
+          questionMap.set(q.id, q);
+        }
+      }
+    }
+
+    // 2. Also fetch any questions assigned to tests in this paper/exam that might have null or other subject_id
+    if (scopedQuestionIds && scopedQuestionIds.length > 0) {
+      const missingIds = scopedQuestionIds.filter((id) => !questionMap.has(id));
+      const idChunkSize = 200;
+      for (let i = 0; i < missingIds.length; i += idChunkSize) {
+        const chunk = missingIds.slice(i, i + idChunkSize);
+        const extraQuestions = await fetchQuestionsPaged(supabase, (q) => q.in("id", chunk));
+        for (const q of extraQuestions) {
+          questionMap.set(q.id, q);
+        }
+      }
+    }
+
+    questions = Array.from(questionMap.values());
+  } else {
+    // Scoped to all exams: fetch full active question bank
+    questions = await fetchQuestionsPaged(supabase);
+  }
+
+  // Filter scoped questions
   const scopedQuestions = questions.filter((q) => {
     const assignedTests = questionTestsMap.get(q.id) ?? [];
     const qPaperId = q.subject_id ? subjectPaperMap.get(q.subject_id) : undefined;
 
     if (targetPaperId) {
-      // Must belong to this paper either via subject or assigned mock test
       const matchesSubject = qPaperId === targetPaperId;
       const matchesAssignment = assignedTests.some((t) => t.paperId === targetPaperId);
       if (!matchesSubject && !matchesAssignment) return false;
@@ -231,17 +334,12 @@ export async function scanQuestionTextDuplicates(scope?: {
     return true;
   });
 
-  // Group by normalized question text
+  // Group by normalized question text (with robust punctuation stripping)
   const groupsMap = new Map<string, DuplicateQuestionItem[]>();
 
   for (const q of scopedQuestions) {
     if (!q.question_text) continue;
-    // Normalize text: lowercase, remove excess whitespace and common punctuation
-    const normalized = q.question_text
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, " ")
-      .replace(/[\u200B-\u200D\uFEFF]/g, "");
+    const normalized = normalizeQuestionText(q.question_text);
 
     if (normalized.length < 10) continue; // Ignore very short fragments
 
@@ -276,24 +374,20 @@ export async function scanQuestionTextDuplicates(scope?: {
     if (items.length > 1) {
       const uniqueSubjects = Array.from(new Set(items.map((i) => i.subjectName)));
 
-      // Compare options across all items in this text group
-      const normalizeOption = (str: string | null | undefined) =>
-        (str ?? "").trim().toLowerCase().replace(/\s+/g, " ");
-
       const firstItem = items[0];
       const baseOptionsFingerprint = [
-        normalizeOption(firstItem.optionA),
-        normalizeOption(firstItem.optionB),
-        normalizeOption(firstItem.optionC),
-        normalizeOption(firstItem.optionD),
+        normalizeOptionText(firstItem.optionA),
+        normalizeOptionText(firstItem.optionB),
+        normalizeOptionText(firstItem.optionC),
+        normalizeOptionText(firstItem.optionD),
       ].sort().join("|||");
 
       const hasIdenticalOptions = items.every((it) => {
         const fp = [
-          normalizeOption(it.optionA),
-          normalizeOption(it.optionB),
-          normalizeOption(it.optionC),
-          normalizeOption(it.optionD),
+          normalizeOptionText(it.optionA),
+          normalizeOptionText(it.optionB),
+          normalizeOptionText(it.optionC),
+          normalizeOptionText(it.optionD),
         ].sort().join("|||");
         return fp === baseOptionsFingerprint;
       });
@@ -312,6 +406,7 @@ export async function scanQuestionTextDuplicates(scope?: {
       duplicateGroups.push({
         normalizedKey,
         questionTextSample: items[0].questionText,
+        questionTextTeSample: items.find((i) => i.questionTextTe)?.questionTextTe ?? null,
         count: items.length,
         subjectNames: uniqueSubjects,
         items,
