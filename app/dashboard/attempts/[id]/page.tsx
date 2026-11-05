@@ -156,49 +156,50 @@ export default async function AttemptReviewPage({
       <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
         <BackToDashboardButton />
 
-        <section className="relative mt-6 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-9">
-          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
-          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+        <section className="relative mt-6 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-teal-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
-                Attempt review
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+                  Attempt review
+                </span>
+              </div>
 
               {parsedTitle.breadcrumb.length > 0 && (
-                <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-300/90 sm:text-sm">
+                <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-800 sm:text-sm">
                   {parsedTitle.breadcrumb.map((crumb, idx) => (
                     <span key={idx} className="inline-flex items-center gap-1.5">
-                      {idx > 0 && <span className="text-slate-500 font-normal" aria-hidden="true">›</span>}
+                      {idx > 0 && <span className="text-slate-400 font-normal" aria-hidden="true">›</span>}
                       <span>{crumb}</span>
                     </span>
                   ))}
                 </p>
               )}
 
-              <h1 className="mt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
+              <h1 className="mt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-slate-950">
                 <span>{parsedTitle.primaryTitle}</span>
                 {parsedTitle.testLabel && (
-                  <span className="inline-flex items-center rounded-xl border border-teal-400/30 bg-teal-400/15 px-3 py-1 text-sm sm:text-base font-bold text-teal-200">
+                  <span className="inline-flex items-center rounded-xl border border-teal-200 bg-teal-50 px-3 py-1 text-sm sm:text-base font-bold text-teal-900">
                     {parsedTitle.testLabel}
                   </span>
                 )}
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base">
+              <p className="mt-2 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600 sm:text-base">
                 Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))} · Review every answer and use the explanations to plan your next
                 practice session.
               </p>
             </div>
-            <div className="rounded-2xl border border-slate-700 bg-white/5 px-6 py-5 text-center">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/80 px-6 py-5 text-center min-w-[160px]">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Final score
               </p>
-              <p className="mt-2 text-4xl font-black">
+              <p className="mt-1.5 text-3xl sm:text-4xl font-black text-slate-950">
                 {summary.score}
-                <span className="text-xl text-slate-400"> / {summary.total_marks}</span>
+                <span className="text-lg sm:text-xl font-bold text-slate-400"> / {summary.total_marks}</span>
               </p>
-              <p className="mt-2 text-sm font-bold text-teal-200">
+              <p className="mt-1.5 inline-flex items-center rounded-full bg-teal-100/70 px-2.5 py-0.5 text-xs font-bold text-teal-800">
                 {percentage.toFixed(1)}%
               </p>
             </div>
@@ -241,7 +242,7 @@ export default async function AttemptReviewPage({
           </div>
           <Link
             href="/mock-tests"
-            className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]"
+            className="rounded-xl bg-teal-800 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-900"
           >
             Browse mock tests
           </Link>
@@ -258,27 +259,30 @@ function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; tit
       <PublicHeader />
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         <BackToDashboardButton />
-        <section className="mt-6 rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-9">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-200">Attempt summary</p>
+        <section className="mt-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+            <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+            Attempt summary
+          </span>
           {parsedTitle.breadcrumb.length > 0 && (
-            <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-300/90 sm:text-sm">
+            <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-800 sm:text-sm">
               {parsedTitle.breadcrumb.map((crumb, idx) => (
                 <span key={idx} className="inline-flex items-center gap-1.5">
-                  {idx > 0 && <span className="text-slate-500 font-normal" aria-hidden="true">›</span>}
+                  {idx > 0 && <span className="text-slate-400 font-normal" aria-hidden="true">›</span>}
                   <span>{crumb}</span>
                 </span>
               ))}
             </p>
           )}
-          <h1 className="mt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-2xl font-black tracking-tight sm:text-3xl text-white">
+          <h1 className="mt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-2xl font-black tracking-tight sm:text-3xl text-slate-950">
             <span>{parsedTitle.primaryTitle}</span>
             {parsedTitle.testLabel && (
-              <span className="inline-flex items-center rounded-xl border border-teal-400/30 bg-teal-400/15 px-3 py-1 text-sm sm:text-base font-bold text-teal-200">
+              <span className="inline-flex items-center rounded-xl border border-teal-200 bg-teal-50 px-3 py-1 text-sm sm:text-base font-bold text-teal-900">
                 {parsedTitle.testLabel}
               </span>
             )}
           </h1>
-          <p className="mt-3 text-sm text-slate-300">Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))}</p>
+          <p className="mt-2 text-xs sm:text-sm text-slate-600">Submitted {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(attempt.submitted_at))}</p>
         </section>
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <SummaryMetric label="Score" value={`${attempt.score} / ${attempt.total_marks}`} tone="teal" />
