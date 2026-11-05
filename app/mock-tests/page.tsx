@@ -302,36 +302,58 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   return (
     <main className="student-page min-h-screen bg-[#f6faf8] text-[#132621]">
       <PublicHeader />
-      <section className="relative overflow-hidden border-b border-emerald-950 bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(45,212,191,0.16),transparent_30%)]" />
-        <div className="relative mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1fr_0.72fr] lg:items-end">
+      <section className="relative overflow-hidden border-b border-emerald-900/60 bg-[#071f1a] text-white">
+        <div className="relative mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[1fr_0.68fr] lg:items-center">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-teal-200">
-              <MockSymbol className="h-4 w-4" /> Smart mock-test catalogue
-            </p>
-            <h1 className="font-display mt-5 max-w-3xl text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-900/50 px-3 py-1 text-xs font-bold text-teal-200">
+                <MockSymbol className="h-3.5 w-3.5 text-teal-300" /> Official Pattern Test Series
+              </span>
+              {selectedState && (
+                <span className="rounded-full bg-teal-800/60 border border-teal-600/40 px-2.5 py-0.5 text-xs font-bold text-teal-200">
+                  {selectedState.name}
+                </span>
+              )}
+            </div>
+            <h1 className="font-display mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
               {selectedExam && selectedState
                 ? hasMockTestSuffixOrMention(selectedExam.name)
                   ? selectedExam.name.toLowerCase().includes(selectedState.name.toLowerCase())
                     ? selectedExam.name
                     : `${selectedExam.name} for ${selectedState.name}`
-                  : `${selectedExam.name} mock tests for ${selectedState.name}`
-                : "Your state. Your exam. The exact paper you need."}
+                  : `${selectedExam.name} Mock Tests (${selectedState.code})`
+                : "State Competitive Exam Mock Tests"}
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-              {selectedExam ? `Choose the correct ${selectedExam.name} paper, take a timed mock test and review every answer.` : "Move through four clear steps. No mixed AP and TG exams, no unrelated papers, and no confusing test names."}
+            <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base sm:leading-7">
+              {selectedExam
+                ? `Practise timed ${selectedExam.name} papers designed to the latest official syllabus with bilingual questions, negative marking, and instant detailed solutions.`
+                : "Full-length papers and targeted subject practice for Telangana and Andhra Pradesh competitive exams with real exam timing and scoring."}
             </p>
           </div>
-          <form action="/mock-tests" method="get" className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur">
+          <form action="/mock-tests" method="get" className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm backdrop-blur-sm">
             {selectedState && <input type="hidden" name="state" value={selectedState.slug} />}
-            <label htmlFor="catalog-search" className="px-1 text-xs font-bold uppercase tracking-[0.13em] text-teal-200">Know the exam name?</label>
-            <div className="mt-2 flex gap-2">
-              <input id="catalog-search" name="q" type="search" defaultValue={filters.q ?? ""} placeholder="Try EO, Group 2, TET, SI…" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white px-4 py-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-teal-300" />
-              <button className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-teal-300 text-slate-950 transition hover:bg-teal-200" aria-label="Search mock tests">
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" /></svg>
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-300">Search Test Series</p>
+            <div className="mt-2.5 flex gap-2">
+              <input
+                id="catalog-search"
+                name="q"
+                type="search"
+                defaultValue={filters.q ?? ""}
+                placeholder="Search by exam, paper, or subject..."
+                className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-teal-400"
+              />
+              <button
+                type="submit"
+                className="inline-flex h-11 px-4 items-center justify-center rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-sm transition shadow-sm"
+                aria-label="Search mock tests"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m16.5 16.5 4 4" />
+                </svg>
               </button>
             </div>
-            <p className="mt-2 px-1 text-xs leading-5 text-slate-400">Search by exam, board, paper, or subject.</p>
+            <p className="mt-2 text-xs text-slate-400">e.g. Group 2, Constable, General Studies, Current Affairs</p>
           </form>
         </div>
       </section>
@@ -354,42 +376,82 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             <CatalogPagination filters={filters} page={currentPage} totalPages={totalPages} basePath={selectedState && selectedExam ? examUrl(selectedState.slug, selectedExam.slug) : selectedState ? stateUrl(selectedState.slug) : "/mock-tests"} />
           </CatalogSection>
         ) : !selectedState ? (
-          <CatalogSection eyebrow="Step 1" title="Choose your exam location" description="TG and AP content stays completely separate. Central exams have their own space.">
+          <CatalogSection
+            eyebrow="Step 1"
+            title="Choose your target state"
+            description="Select your state to explore dedicated competitive exams, official syllabus papers, and practice series."
+          >
             <div className="student-stagger grid gap-4 md:grid-cols-3">
-              {states.map((state, index) => {
+              {states.map((state) => {
                 const stats = stateStats.get(state.id) ?? { exams: 0 };
-                const tones = ["from-teal-50 to-white border-teal-200", "from-amber-50 to-white border-amber-200", "from-indigo-50 to-white border-indigo-200"];
-                return <Link key={state.id} href={stateUrl(state.slug)} prefetch={false} className={`student-card group rounded-3xl border bg-gradient-to-br p-6 shadow-sm hover:shadow-xl hover:shadow-slate-950/5 ${tones[index % tones.length]}`}>
-                  <span className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#0a2922] text-emerald-300"><StateSymbol slug={state.slug} /></span><span className="rounded-full border bg-white/80 px-3 py-1 text-xs font-black tracking-wide text-slate-600">{state.code}</span></span>
-                  <h2 className="font-display mt-6 text-2xl">{state.name}</h2>
-                  <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{state.description}</p>
-                  <span className="mt-6 flex items-center justify-between border-t border-slate-200/70 pt-4 text-sm"><span className="font-semibold text-slate-500">{stats.exams} exam{stats.exams === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Choose →</span></span>
-                </Link>;
+                return (
+                  <Link
+                    key={state.id}
+                    href={stateUrl(state.slug)}
+                    prefetch={false}
+                    className="student-card group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-400 hover:shadow-md"
+                  >
+                    <div>
+                      <span className="flex items-start justify-between gap-4">
+                        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#071f1a] text-teal-300">
+                          <StateSymbol slug={state.slug} />
+                        </span>
+                        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black tracking-wide text-slate-700">
+                          {state.code}
+                        </span>
+                      </span>
+                      <h2 className="font-display mt-5 text-2xl font-bold text-slate-950 group-hover:text-teal-800 transition">
+                        {state.name}
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        {state.description}
+                      </p>
+                    </div>
+                    <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
+                      <span className="font-bold text-slate-600">
+                        {stats.exams} exam{stats.exams === 1 ? "" : "s"}
+                      </span>
+                      <span className="font-black text-teal-700 transition group-hover:translate-x-1">
+                        View exams →
+                      </span>
+                    </div>
+                  </Link>
+                );
               })}
             </div>
           </CatalogSection>
         ) : !selectedExam ? (
-          <CatalogSection eyebrow={`${selectedState.code} · Step 2`} title={`Choose an exam in ${selectedState.name}`} description="The recruiting board is shown as context, while the exam name stays easy to scan." action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">Change state</Link>}>
+          <CatalogSection
+            eyebrow={`${selectedState.code} · Step 2`}
+            title={`Select an exam in ${selectedState.name}`}
+            description="Choose your competitive exam to view available papers and mock test series."
+            action={<Link href="/mock-tests" className="text-sm font-bold text-teal-800">← Change state</Link>}
+          >
             {stateExams.length === 0 ? <EmptyCatalog title="No exams are available for this state yet" detail="Active exams will appear here after they are added to the catalogue." /> : <ExamSelectionGrid exams={examSelectionItems} />}
           </CatalogSection>
         ) : !selectedPaper ? (
-          <CatalogSection eyebrow={`${selectedState.code} · ${resolvedCategory?.name} · Step 3`} title={`Choose a paper for ${selectedExam.name}`} description="Paper numbers are generated consistently from the exam structure." action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">Change exam</Link>}>
+          <CatalogSection
+            eyebrow={`${selectedState.code} · ${resolvedCategory?.name} · Step 3`}
+            title={`Select a paper for ${selectedExam.name}`}
+            description="Choose a paper to practice full-length mock tests or targeted subject practice."
+            action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">← Change exam</Link>}
+          >
             {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="student-stagger grid gap-4 md:grid-cols-2">{examPapers.map((paper) => {
               const display = paperDisplayById.get(paper.id);
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
-              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-lg">
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0a2922] text-emerald-300"><PaperSymbol /></span>
-                <span className="min-w-0 flex-1"><span className="text-xs font-black uppercase tracking-[0.12em] text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-1 block text-lg leading-6">{paper.name}</strong><span className="mt-2 block text-sm font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
-                <span className="text-xl font-black text-teal-800 transition group-hover:translate-x-1">→</span>
+              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:shadow-md">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#071f1a] text-teal-300"><PaperSymbol /></span>
+                <span className="min-w-0 flex-1"><span className="text-xs font-bold uppercase tracking-wider text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-0.5 block text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition">{paper.name}</strong><span className="mt-1.5 block text-xs font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
+                <span className="text-lg font-black text-teal-700 transition group-hover:translate-x-1">→</span>
               </Link>;
             })}</div>}
           </CatalogSection>
         ) : (
           <CatalogSection
             eyebrow={`${selectedState.code} · ${selectedExam.name} · ${paperDisplayById.get(selectedPaper.id)?.shortLabel}`}
-            title="Choose a mock test"
-            description="Tests use one predictable series: Mock Test 01, Mock Test 02, Mock Test 03…"
+            title="Available Mock Tests"
+            description="Take timed tests simulating real examination conditions with instant scorecards and detailed bilingual answers."
             action={
               selectedSubject ? (
                 <div className="flex items-center gap-3">
@@ -407,7 +469,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   </Link>
                 </div>
               ) : (
-                <Link href={examUrl(selectedState.slug, selectedExam.slug)} className="text-sm font-bold text-teal-800">
+                <Link href={examUrl(selectedState.slug, selectedExam.slug)} className="text-sm font-bold text-teal-800 hover:text-teal-950">
                   Change paper
                 </Link>
               )
@@ -431,7 +493,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                         : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300"
                     }`}
                   >
-                    📁 All subjects overview ({paperSubjects.length})
+                    All subjects overview ({paperSubjects.length})
                   </Link>
                   {paperSubjects.map((sub) => {
                     const isSelected = selectedSubject?.id === sub.id;
@@ -670,14 +732,12 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
         return (
           <article
             key={test.id}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md sm:p-5"
+            className="group relative flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
           >
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-emerald-400 opacity-90" />
-
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-black text-teal-800 border border-teal-100/80">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-black text-teal-900 border border-teal-200/80">
                     {testNum}
                   </span>
                   <div className="min-w-0">
@@ -695,8 +755,8 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                     isFree
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-amber-50 text-amber-800 border border-amber-200"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      : "bg-amber-50 text-amber-900 border border-amber-200"
                   }`}
                 >
                   {isFree ? "Free" : "Paid series"}
@@ -705,31 +765,30 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
 
               <div className="mt-3.5 flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-2 text-xs border border-slate-100">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-slate-900">{test.questions ?? "—"}</span>
+                  <span className="font-black text-slate-900">{test.questions ?? "—"}</span>
                   <span className="text-[11px] font-medium text-slate-500">Questions</span>
                 </div>
                 <span className="text-slate-300 font-bold">•</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-slate-900">{test.duration_minutes}</span>
+                  <span className="font-black text-slate-900">{test.duration_minutes}</span>
                   <span className="text-[11px] font-medium text-slate-500">Mins</span>
                 </div>
                 <span className="text-slate-300 font-bold">•</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-slate-900">{marksDisplay}</span>
+                  <span className="font-black text-slate-900">{marksDisplay}</span>
                   <span className="text-[11px] font-medium text-slate-500">Marks</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-              <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                <MockSymbol className="h-3.5 w-3.5 shrink-0 text-teal-600" />
-                <span>Timer & solution</span>
+              <span className="text-xs font-semibold text-slate-500">
+                Timed CBT · Bilingual
               </span>
               <Link
                 href={testHref}
                 prefetch={false}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#ea580c] px-3.5 py-2 text-xs font-black text-white shadow-sm shadow-orange-950/15 transition hover:bg-[#d94f08] group-hover:bg-[#d94f08]"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition"
               >
                 <span>Start test</span>
                 <span aria-hidden="true">→</span>

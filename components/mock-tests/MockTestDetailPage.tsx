@@ -547,168 +547,203 @@ export async function MockTestDetailsPage({
 
         <Link
           href={resolvedBackHref}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-700 hover:text-teal-800"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-800 hover:text-teal-950 transition"
         >
           ← {resolvedBackLabel}
         </Link>
 
-        <div className="mt-7">
+        {/* Test Overview Hero Box */}
+        <section className="mt-5 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-              {test.access_type === "free" ? "Free" : "Premium series"}
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+              test.access_type === "free"
+                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                : "bg-amber-50 text-amber-900 border border-amber-200"
+            }`}>
+              {test.access_type === "free" ? "Free" : "Paid series"}
             </span>
 
-            <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+            <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
               {test.test_scope === "paper"
                 ? "Full-length Paper test"
                 : "Subject test"}
             </span>
+
+            {specialization && (
+              <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+                {specialization.name}
+              </span>
+            )}
+
+            {subject && (
+              <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-800">
+                {subject.name}
+              </span>
+            )}
           </div>
 
-          <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
+          <p className="mt-4 text-xs font-bold uppercase tracking-wider text-teal-800">
             {state?.code ?? "State"} ·{" "}
             {exam?.name ?? "Board"} ·{" "}
             {examGroup?.name ?? "Exam"} ·{" "}
             {paperDisplay?.shortLabel ?? "Paper"}
           </p>
 
-          <h1 className="font-display mt-3 text-3xl leading-tight tracking-tight text-slate-950 sm:text-5xl">
+          <h1 className="font-display mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-4xl">
             {resourceName}
           </h1>
 
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
             {test.description ??
-              "A focused Varadhi Prep mock test designed to strengthen your exam preparation."}
+              "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed CBT conditions with negative marking and instant detailed solutions."}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold text-slate-600 sm:mt-7 sm:text-sm">
-            {specialization && (
-              <span className="rounded-lg border bg-white px-3 py-2">
-                {specialization.name}
-              </span>
-            )}
-
-            <span className="rounded-lg border bg-white px-3 py-2">
-              {paperDisplay?.label ?? paper?.name ?? "Paper"}
-            </span>
-
-            {subject && (
-              <span className="rounded-lg border bg-white px-3 py-2">
-                {subject.name}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-8 flex flex-col-reverse gap-8 lg:grid lg:grid-cols-[1fr_22rem] lg:items-start">
-          <section className="space-y-6 sm:space-y-8">
-            <section className="student-card rounded-3xl border bg-white p-5 shadow-sm sm:p-8">
-              <h2 className="text-xl font-black sm:text-2xl">Before you begin</h2>
-
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Review the test rules now. The timer starts only after you
-                select the start button.
-              </p>
-
-              <div className="student-stagger mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:gap-4">
-                {testSummaryMetrics.map(([label, value]) => (
-                  <div key={label} className="rounded-2xl bg-slate-50 p-3 sm:p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">
-                      {label}
-                    </p>
-                    <p className="mt-1 text-sm font-black text-slate-950 sm:mt-2 sm:text-base">{value}</p>
-                  </div>
-                ))}
+          {/* Key Exam Specifications Strip */}
+          <div className="student-stagger mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3 border-t border-slate-100 pt-5">
+            {testSummaryMetrics.map(([label, value]) => (
+              <div key={label} className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center sm:text-left">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  {label}
+                </p>
+                <p className="mt-1 text-sm font-black text-slate-900 sm:text-base truncate">
+                  {value}
+                </p>
               </div>
-            </section>
+            ))}
+          </div>
+        </section>
 
-            <section className="student-card rounded-3xl border bg-white p-5 shadow-sm sm:p-8">
-              <h2 className="text-xl font-black sm:text-2xl">Instructions</h2>
-
-              {test.instructions ? (
-                <div className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700 sm:mt-5">
-                  {test.instructions}
-                </div>
-              ) : (
-                <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-700 sm:mt-5">
-                  <li className="flex gap-3">
-                    <span className="font-black text-teal-700">01</span>
-                    Answer each question before moving on, or return to it later
-                    during the attempt.
-                  </li>
-
-                  <li className="flex gap-3">
-                    <span className="font-black text-teal-700">02</span>
-                    Your answers and remaining time are saved automatically.
-                  </li>
-
-                  <li className="flex gap-3">
-                    <span className="font-black text-teal-700">03</span>
-                    Select Pause to stop the timer, then Resume whenever you are
-                    ready.
-                  </li>
-
-                  <li className="flex gap-3">
-                    <span className="font-black text-teal-700">04</span>
-                    After submission, review your result or retake the test for
-                    more practice.
-                  </li>
-                </ul>
-              )}
-            </section>
-          </section>
-
-          <aside className="student-card rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-6 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 lg:sticky lg:top-24">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
-              Ready to begin?
-            </p>
-
-            <h2 className="mt-2 text-xl font-black sm:mt-3 sm:text-2xl">
-              Take the test at your pace.
-            </h2>
-
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              Pause when needed, resume with your saved time, and start again
-              when you want a fresh attempt.
-            </p>
-
-            <div className="mt-6 space-y-3 border-y border-slate-700 py-5 text-sm">
-              <p className="flex justify-between gap-3">
-                <span className="text-slate-400">Questions</span>
-                <strong>{questionCount ?? "—"}</strong>
-              </p>
-
-              <p className="flex justify-between gap-3">
-                <span className="text-slate-400">Duration</span>
-                <strong>{test.duration_minutes} min</strong>
-              </p>
-
-              <p className="flex justify-between gap-3">
-                <span className="text-slate-400">Access</span>
-                <strong>{test.access_type === "free" ? "Free" : isUnlocked ? "Series active" : "Premium series"}</strong>
-              </p>
+        {/* Instructions and Start Action Station */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_21rem] lg:items-start">
+          <section className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Examination Instructions</h2>
+                <p className="mt-0.5 text-xs text-slate-500">Read guidelines carefully before beginning the mock test.</p>
+              </div>
+              <span className="rounded-lg bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800 border border-teal-100">
+                Official Pattern
+              </span>
             </div>
 
-            {isUnlocked ? (
-              <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
-            ) : paidSalesEnabled && purchaseProduct ? (
-              <>
-                <p className="mt-6 text-sm font-bold text-teal-100">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p>
-                <ul className="mt-4 space-y-2 text-sm text-slate-300"><li>• Access every paid test under this exam</li><li>• Start immediately after payment</li><li>• Keep full answer review and result history</li></ul>
-                <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
-              </>
-            ) : paidSalesEnabled ? (
-              <div className="mt-6 rounded-2xl border border-emerald-800/40 bg-[#071f1a]/60 p-4 text-sm leading-6 text-emerald-100/90">
-                Purchases for this exam series are temporarily unavailable. Existing purchases remain valid. <Link href="/dashboard/passes" className="font-bold text-teal-300 underline">View My Purchases</Link>.
+            {test.instructions ? (
+              <div className="mt-5 whitespace-pre-line text-sm leading-7 text-slate-700">
+                {test.instructions}
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl border border-emerald-800/40 bg-[#071f1a]/60 p-4 text-sm leading-6 text-emerald-100/90">
-                This premium mock test is not currently available. Please check again later.
+              <div className="mt-5 space-y-4 text-sm text-slate-700">
+                <div className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-900">
+                    1
+                  </span>
+                  <div>
+                    <strong className="text-slate-900">Timing & Countdown:</strong>
+                    <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
+                      The test duration is {test.duration_minutes} minutes. The timer begins the moment you click Start Test and cannot be reset once expired.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-900">
+                    2
+                  </span>
+                  <div>
+                    <strong className="text-slate-900">Automatic Save:</strong>
+                    <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
+                      Your answers and remaining time are saved automatically. If you pause, resume to keep your progress and complete your attempt.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-900">
+                    3
+                  </span>
+                  <div>
+                    <strong className="text-slate-900">Marking & Questions:</strong>
+                    <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
+                      Navigate freely using the Question Palette. Use &quot;Mark for review&quot; to flag questions for double-checking before final submission.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-900">
+                    4
+                  </span>
+                  <div>
+                    <strong className="text-slate-900">Scorecard & Review:</strong>
+                    <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
+                      After submission, review your instant scorecard, accuracy breakdown, and in-depth bilingual explanations for every question.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
+          </section>
 
-            <p className="mt-4 text-center text-xs leading-5 text-slate-400">
+          {/* Clean Candidate Action Card */}
+          <aside className="rounded-2xl sm:rounded-3xl border border-emerald-900/40 bg-[#071f1a] p-6 text-white shadow-sm lg:sticky lg:top-24">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-300">
+              Candidate Portal
+            </span>
+
+            <h2 className="mt-2 text-xl font-bold text-white">
+              Ready to begin?
+            </h2>
+
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-300">
+              {hasResumableSession
+                ? "You have an ongoing attempt. Resume to continue with your saved time and answers."
+                : "Simulate real exam conditions. The countdown timer begins as soon as you select Start Test."}
+            </p>
+
+            <div className="mt-5 space-y-2.5 border-y border-emerald-800/60 py-4 text-xs sm:text-sm">
+              <div className="flex justify-between items-center text-slate-300">
+                <span>Questions</span>
+                <strong className="text-white font-bold">{questionCount ?? "—"}</strong>
+              </div>
+              <div className="flex justify-between items-center text-slate-300">
+                <span>Duration</span>
+                <strong className="text-white font-bold">{test.duration_minutes} min</strong>
+              </div>
+              <div className="flex justify-between items-center text-slate-300">
+                <span>Access</span>
+                <strong className="text-teal-300 font-bold">
+                  {test.access_type === "free" ? "Free" : isUnlocked ? "Series active" : "Paid series"}
+                </strong>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              {isUnlocked ? (
+                <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
+              ) : paidSalesEnabled && purchaseProduct ? (
+                <>
+                  <p className="text-sm font-bold text-teal-200">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p>
+                  <p className="mt-2 text-xs sm:text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p>
+                  <ul className="mt-3 space-y-1.5 text-xs text-slate-300">
+                    <li>• Access every paid test under this exam</li>
+                    <li>• Start immediately after payment</li>
+                    <li>• Keep full answer review and result history</li>
+                  </ul>
+                  <div className="mt-4">
+                    <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
+                  </div>
+                </>
+              ) : paidSalesEnabled ? (
+                <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/80 p-3.5 text-xs sm:text-sm leading-6 text-emerald-100">
+                  Purchases for this exam series are temporarily unavailable. Existing purchases remain valid. <Link href="/dashboard/passes" className="font-bold text-teal-300 underline">View My Purchases</Link>.
+                </div>
+              ) : (
+                <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/80 p-3.5 text-xs sm:text-sm leading-6 text-emerald-100">
+                  This premium mock test is not currently available. Please check again later.
+                </div>
+              )}
+            </div>
+
+            <p className="mt-4 text-center text-xs leading-relaxed text-slate-400">
               {!isUnlocked
                 ? paidSalesEnabled
                   ? "Buy the exam series here to unlock this test and every other paid mock test in the same exam."

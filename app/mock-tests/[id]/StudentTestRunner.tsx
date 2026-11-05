@@ -481,39 +481,35 @@ export function StudentTestRunner({
           {!isFullscreen && isBigDisplay && showFullscreenNotice && (
             <aside
               aria-label="Exam display mode option"
-              className="mb-2.5 sm:mb-3 rounded-xl border border-teal-200/80 bg-teal-50/80 p-2.5 sm:px-3 sm:py-2 text-slate-800 shadow-sm"
+              className="mb-2 sm:mb-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-teal-200/70 bg-teal-50/80 px-3 py-1.5 text-xs text-slate-800 shadow-2xs"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-xs font-medium">
-                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-lg bg-teal-700 text-white shadow-sm">
-                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                    </svg>
-                  </span>
-                  <span>
-                    <strong>Exam Hall Mode:</strong> Switch to full screen for a focused test, or keep using normal / split screen.
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={handleToggleFullscreen}
-                    className="rounded-lg bg-teal-700 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition"
-                  >
-                    Enter Full Screen
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNoticeDismissed(true)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
-                    title="Keep using normal or split screen"
-                  >
-                    Normal / Split screen ✕
-                  </button>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="grid h-4 w-4 shrink-0 place-items-center rounded bg-teal-800 text-white text-[10px]">
+                  ✓
+                </span>
+                <span>
+                  <strong className="text-teal-950 font-bold">Exam Hall Mode:</strong> Switch to full screen for a focused test, or keep using normal / split screen.
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleToggleFullscreen}
+                  className="rounded-lg bg-teal-800 px-2.5 py-1 text-xs font-bold text-white shadow-2xs hover:bg-teal-900 transition"
+                >
+                  Enter Full Screen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNoticeDismissed(true)}
+                  className="rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition"
+                  title="Keep using normal or split screen"
+                >
+                  Normal / Split screen ✕
+                </button>
               </div>
               {fullscreenFeedback && (
-                <p className="mt-1.5 rounded-md bg-amber-100/90 px-2.5 py-1 text-[11px] font-semibold text-amber-900">
+                <p className="w-full mt-1 rounded bg-amber-100/90 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
                   ℹ️ {fullscreenFeedback}
                 </p>
               )}
@@ -527,7 +523,7 @@ export function StudentTestRunner({
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700">Multiple choice question</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Question {index + 1} of {questions.length}</p>
                   <p className="mt-0.5 text-xs font-semibold text-slate-500">
                     {current.marks} mark{Number(current.marks) === 1 ? "" : "s"}
                     {Number(current.negative_marks) > 0 ? ` · −${current.negative_marks} for a wrong answer` : ""}
