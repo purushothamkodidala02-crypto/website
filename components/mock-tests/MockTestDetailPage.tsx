@@ -803,35 +803,53 @@ export async function MockTestDetailsPage({
           </section>
 
           {/* Clean Candidate Action Card */}
-          <aside className="rounded-2xl sm:rounded-3xl border border-emerald-900/40 bg-[#071f1a] p-6 text-white shadow-sm lg:sticky lg:top-24">
-            <span className="text-xs font-bold uppercase tracking-wider text-teal-300">
-              Candidate Portal
-            </span>
+          <aside className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs lg:sticky lg:top-24">
+            <div className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-semibold text-teal-900">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-600 animate-pulse" />
+                Candidate Portal
+              </span>
+              <span className="text-[11px] font-medium text-slate-500">
+                Official CBT Pattern
+              </span>
+            </div>
 
-            <h2 className="mt-2 text-xl font-bold text-white">
+            <h2 className="mt-3 text-xl font-bold tracking-tight text-slate-900">
               Ready to begin?
             </h2>
 
-            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-300">
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600">
               {hasResumableSession
                 ? "You have an ongoing attempt. Resume to continue with your saved time and answers."
                 : "Simulate real exam conditions. The countdown timer begins as soon as you select Start Test."}
             </p>
 
-            <div className="mt-5 space-y-2.5 border-y border-emerald-800/60 py-4 text-xs sm:text-sm">
-              <div className="flex justify-between items-center text-slate-300">
-                <span>Questions</span>
-                <strong className="text-white font-bold">{questionCount ?? "—"}</strong>
+            <div className="mt-5 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 space-y-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Questions</span>
+                <strong className="font-bold text-slate-900">{questionCount ?? "—"}</strong>
               </div>
-              <div className="flex justify-between items-center text-slate-300">
-                <span>Duration</span>
-                <strong className="text-white font-bold">{test.duration_minutes} min</strong>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Duration</span>
+                <strong className="font-bold text-slate-900">{test.duration_minutes} min</strong>
               </div>
-              <div className="flex justify-between items-center text-slate-300">
-                <span>Access</span>
-                <strong className="text-teal-300 font-bold">
-                  {test.access_type === "free" ? "Free" : isUnlocked ? "Series active" : "Paid series"}
-                </strong>
+              <div className="flex items-center justify-between text-xs sm:text-sm pt-2 border-t border-slate-200/60">
+                <span className="text-slate-500 font-medium">Access</span>
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                    test.access_type === "free"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      : isUnlocked
+                        ? "bg-blue-50 text-blue-800 border border-blue-200"
+                        : "bg-amber-50 text-amber-800 border border-amber-200"
+                  }`}
+                >
+                  {test.access_type === "free"
+                    ? "Free"
+                    : isUnlocked
+                      ? "Series active"
+                      : "Paid series"}
+                </span>
               </div>
             </div>
 
@@ -839,30 +857,50 @@ export async function MockTestDetailsPage({
               {isUnlocked ? (
                 <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
               ) : paidSalesEnabled && purchaseProduct ? (
-                <>
-                  <p className="text-sm font-bold text-teal-200">This mock test is part of <span className="text-white">{purchaseProduct.name}</span>.</p>
-                  <p className="mt-2 text-xs sm:text-sm leading-6 text-slate-300">Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.</p>
-                  <ul className="mt-3 space-y-1.5 text-xs text-slate-300">
-                    <li>• Access every paid test under this exam</li>
-                    <li>• Start immediately after payment</li>
-                    <li>• Keep full answer review and result history</li>
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                  <p className="text-sm font-bold text-slate-900">
+                    This mock test is part of <span className="text-teal-900">{purchaseProduct.name}</span>.
+                  </p>
+                  <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                    Buy once to unlock all paid mock tests in this exam series for {purchaseProduct.duration_days} days.
+                  </p>
+                  <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
+                    <li className="flex items-center gap-1.5">
+                      <span className="text-emerald-700 font-bold">✓</span> Access every paid test under this exam
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="text-emerald-700 font-bold">✓</span> Start immediately after payment
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="text-emerald-700 font-bold">✓</span> Keep full answer review and result history
+                    </li>
                   </ul>
                   <div className="mt-4">
-                    <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof user?.user_metadata?.phone === "string" ? user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
+                    <BuyExamPassForm
+                      productId={purchaseProduct.id}
+                      price={Number(purchaseProduct.price_inr)}
+                      returnTo={canonicalPath}
+                      phone={typeof user?.user_metadata?.phone === "string" ? user.user_metadata.phone : ""}
+                      buttonLabel="Proceed to secure payment"
+                      pendingLabel="Opening secure checkout..."
+                    />
                   </div>
-                </>
+                </div>
               ) : paidSalesEnabled ? (
-                <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/80 p-3.5 text-xs sm:text-sm leading-6 text-emerald-100">
-                  Purchases for this exam series are temporarily unavailable. Existing purchases remain valid. <Link href="/dashboard/passes" className="font-bold text-teal-300 underline">View My Purchases</Link>.
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
+                  Purchases for this exam series are temporarily unavailable. Existing purchases remain valid.{" "}
+                  <Link href="/dashboard/passes" className="font-semibold text-teal-800 underline hover:text-teal-950">
+                    View My Purchases
+                  </Link>.
                 </div>
               ) : (
-                <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/80 p-3.5 text-xs sm:text-sm leading-6 text-emerald-100">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
                   This premium mock test is not currently available. Please check again later.
                 </div>
               )}
             </div>
 
-            <p className="mt-4 text-center text-xs leading-relaxed text-slate-400">
+            <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
               {!isUnlocked
                 ? paidSalesEnabled
                   ? "Buy the exam series here to unlock this test and every other paid mock test in the same exam."
@@ -875,6 +913,21 @@ export async function MockTestDetailsPage({
                     ? "Start a new attempt; your earlier submitted result remains saved."
                     : "Select Start test when you are ready."}
             </p>
+
+            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-4 text-[11px] text-slate-400">
+              <span className="inline-flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                Auto-saved
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                Instant solutions
+              </span>
+            </div>
           </aside>
         </div>
       </div>
