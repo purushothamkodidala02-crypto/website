@@ -114,166 +114,96 @@ export default async function Home() {
     },
   };
 
-  const tgState = states.find((s) => s.slug === "telangana" || s.code === "TG");
-  const apState = states.find((s) => s.slug === "andhra-pradesh" || s.code === "AP");
-
   return (
     <main className="student-page min-h-screen bg-[#f8fafc] text-slate-900">
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
       <SurveyPopup survey={activeSurvey} />
 
-      {/* Balanced, Human-Designed Hero Banner */}
+      {/* Clean, Focused Hero Banner */}
       <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f0f4f9] via-[#f5f8fc] to-[#f8fafc]">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-16">
-          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            {/* Left Column: Value Proposition & Search */}
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/90 px-3 py-1 text-xs font-semibold text-blue-900">
-                <MockSymbol className="h-3.5 w-3.5 text-blue-700" /> State Competitive Examination Portal
-              </span>
-              
-              <h1 className="font-display mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-                Full-Length Mock Tests for Telangana & Andhra Pradesh
-              </h1>
-              
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-                Practice under real exam conditions for TGPSC, APPSC, Police Recruitment (Constable/SI), and TET examinations. Timed bilingual papers with negative marking, official formats, and instant question solutions.
-              </p>
+        <div className="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-18 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/90 px-3.5 py-1 text-xs font-semibold text-blue-900 shadow-2xs">
+            <MockSymbol className="h-3.5 w-3.5 text-blue-700" /> State Competitive Examination Portal
+          </span>
+          
+          <h1 className="font-display mt-5 text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+            Full-Length Mock Tests for Telangana & Andhra Pradesh
+          </h1>
+          
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+            Practice under real exam conditions for TGPSC, APPSC, Police Recruitment (Constable/SI), and TET examinations. Timed bilingual papers with negative marking, official formats, and instant question solutions.
+          </p>
 
-              {/* Fast Exam Search */}
-              <form action="/mock-tests" method="GET" className="mt-6 max-w-xl">
-                <div className="relative flex items-center">
-                  <input
-                    type="search"
-                    name="q"
-                    placeholder="Search any exam (e.g. Group 2, Police Constable, TET, APPSC)..."
-                    aria-label="Search exams"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 pr-28 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition"
-                  >
-                    Search
-                  </button>
-                </div>
-              </form>
-
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-wrap items-center gap-3">
+          {/* Fast Exam Search */}
+          <form action="/mock-tests" method="GET" className="mx-auto mt-7 max-w-xl">
+            <div className="relative flex items-center shadow-xs">
+              <input
+                type="search"
+                name="q"
+                placeholder="Search any exam (e.g. Group 2, Police Constable, TET, APPSC)..."
+                aria-label="Search exams"
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 pr-28 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+              />
+              <button
+                type="submit"
+                className="absolute right-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition"
+              >
+                Search
+              </button>
+            </div>
+            
+            {/* Quick Filter Tags */}
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-500">
+              <span className="font-medium text-slate-600">Popular:</span>
+              {[
+                { label: "Group 2", q: "Group 2" },
+                { label: "Police Constable", q: "Constable" },
+                { label: "Sub-Inspector", q: "Sub-Inspector" },
+                { label: "TET 2026", q: "TET" },
+                { label: "TGPSC", q: "TGPSC" },
+                { label: "APPSC", q: "APPSC" },
+              ].map((tag) => (
                 <Link
-                  href="/mock-tests"
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:shadow"
+                  key={tag.label}
+                  href={`/mock-tests?q=${encodeURIComponent(tag.q)}`}
+                  className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-medium text-slate-700 transition hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50/50"
                 >
-                  Browse all mock tests <span aria-hidden="true">→</span>
+                  {tag.label}
                 </Link>
-                <HomeAuthAction
-                  className="inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition"
-                  loggedOutText="Create account"
-                  loggedInText="Go to my dashboard →"
-                />
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="mt-8 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600">
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
-                  <span className="text-emerald-700 font-bold">✓</span> Dual Medium (English & Telugu)
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
-                  <span className="text-emerald-700 font-bold">✓</span> Official Notification Negative Marking
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
-                  <span className="text-emerald-700 font-bold">✓</span> Instant Step-by-Step Solutions
-                </span>
-              </div>
+              ))}
             </div>
+          </form>
 
-            {/* Right Column: Quick State Portals Hub */}
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm">
-              <div className="border-b border-slate-100 pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Quick Access Hub</span>
-                    <h2 className="font-display mt-0.5 text-lg font-bold text-slate-900">Choose Your State Portal</h2>
-                  </div>
-                  <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-                    Active CBT
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  Select your state to instantly access current exam series, notification papers, and syllabus tests.
-                </p>
-              </div>
+          {/* Action Buttons */}
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/mock-tests"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:shadow"
+            >
+              Browse all mock tests <span aria-hidden="true">→</span>
+            </Link>
+            <HomeAuthAction
+              className="inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition"
+              loggedOutText="Create account"
+              loggedInText="Go to my dashboard →"
+            />
+          </div>
 
-              <div className="mt-5 space-y-3.5">
-                {/* Telangana Portal Card */}
-                {tgState && (
-                  <Link
-                    href={stateUrl(tgState.slug)}
-                    className="group block rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-blue-400 hover:bg-white hover:shadow-xs"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 place-items-center rounded-lg bg-blue-100/70 text-blue-800">
-                          <StateSymbol slug={tgState.slug} />
-                        </span>
-                        <div>
-                          <h3 className="font-display text-sm font-bold text-slate-900 group-hover:text-blue-700 transition">
-                            Telangana (TGPSC & TGPRB)
-                          </h3>
-                          <p className="text-xs text-slate-500">
-                            Group 1, 2, 3 · Police Constable · Sub-Inspector · TET
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold text-blue-700 group-hover:translate-x-0.5 transition">
-                        Open →
-                      </span>
-                    </div>
-                  </Link>
-                )}
-
-                {/* Andhra Pradesh Portal Card */}
-                {apState && (
-                  <Link
-                    href={stateUrl(apState.slug)}
-                    className="group block rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-blue-400 hover:bg-white hover:shadow-xs"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-100/70 text-emerald-800">
-                          <StateSymbol slug={apState.slug} />
-                        </span>
-                        <div>
-                          <h3 className="font-display text-sm font-bold text-slate-900 group-hover:text-blue-700 transition">
-                            Andhra Pradesh (APPSC & APPRB)
-                          </h3>
-                          <p className="text-xs text-slate-500">
-                            Group 2 · Police Constable · Sub-Inspector · AP TET · DSC
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold text-blue-700 group-hover:translate-x-0.5 transition">
-                        Open →
-                      </span>
-                    </div>
-                  </Link>
-                )}
-              </div>
-
-              {/* Free practice reassurance strip */}
-              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 p-3.5">
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-blue-700 text-[10px] font-bold text-white">
-                    i
-                  </div>
-                  <p className="text-xs leading-relaxed text-blue-950">
-                    <strong className="font-semibold">100% Free Practice Tests:</strong> Start immediately with official pattern full-length papers. No mandatory credit card or upfront subscription required.
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Trust Indicators */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+              <span className="text-emerald-700 font-bold">✓</span> 100% Free Practice Tests
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+              <span className="text-emerald-700 font-bold">✓</span> Dual Medium (English & Telugu)
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+              <span className="text-emerald-700 font-bold">✓</span> Official Notification Negative Marking
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+              <span className="text-emerald-700 font-bold">✓</span> Instant Step-by-Step Solutions
+            </span>
           </div>
         </div>
       </section>
