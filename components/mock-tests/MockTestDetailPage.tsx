@@ -673,49 +673,95 @@ export async function MockTestDetailsPage({
 
         {/* Test Overview Hero Box */}
         <section className="mt-5 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-              test.access_type === "free"
-                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                : "bg-amber-50 text-amber-900 border border-amber-200"
-            }`}>
-              {test.access_type === "free" ? "Free" : "Paid series"}
-            </span>
-
-            <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
-              {test.test_scope === "paper"
-                ? "Full-length Paper test"
-                : "Subject test"}
-            </span>
-
-            {specialization && (
-              <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
-                {specialization.name}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                test.access_type === "free"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  : "bg-amber-50 text-amber-900 border border-amber-200"
+              }`}>
+                {test.access_type === "free" ? "Free" : "Paid series"}
               </span>
-            )}
 
-            {subject && (
-              <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-800">
-                {subject.name}
+              <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+                {test.test_scope === "paper"
+                  ? "Full-length Paper test"
+                  : "Subject test"}
+              </span>
+
+              {specialization && (
+                <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+                  {specialization.name}
+                </span>
+              )}
+
+              {subject && (
+                <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-800">
+                  {subject.name}
+                </span>
+              )}
+            </div>
+
+            {hasResumableSession && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-900">
+                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                Attempt in progress
               </span>
             )}
           </div>
 
-          <p className="mt-4 text-xs font-bold uppercase tracking-wider text-teal-800">
-            {state?.code ?? "State"} ·{" "}
-            {exam?.name ?? "Board"} ·{" "}
-            {examGroup?.name ?? "Exam"} ·{" "}
-            {paperDisplay?.shortLabel ?? "Paper"}
-          </p>
+          <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                {state?.code ?? "State"} ·{" "}
+                {exam?.name ?? "Board"} ·{" "}
+                {examGroup?.name ?? "Exam"} ·{" "}
+                {paperDisplay?.shortLabel ?? "Paper"}
+              </p>
 
-          <h1 className="font-display mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            {resourceName}
-          </h1>
+              <h1 className="font-display mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
+                {resourceName}
+              </h1>
 
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
-            {test.description ??
-              "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed CBT conditions with negative marking and instant detailed solutions."}
-          </p>
+              <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
+                {test.description ??
+                  "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with negative marking and instant detailed solutions."}
+              </p>
+            </div>
+
+            {/* Top Primary Start Action (Appears on top of page) */}
+            <div className="w-full sm:w-auto sm:min-w-[220px] lg:min-w-[250px] shrink-0">
+              {isUnlocked ? (
+                <div className="space-y-1.5">
+                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
+                  <p className="text-center text-[11px] font-medium text-slate-500">
+                    {hasResumableSession
+                      ? "Resume to keep your saved progress"
+                      : "Official timing · Auto-saved"}
+                  </p>
+                </div>
+              ) : paidSalesEnabled && purchaseProduct ? (
+                <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-center">
+                  <p className="text-xs font-bold text-teal-950">{purchaseProduct.name}</p>
+                  <p className="mt-0.5 text-[11px] text-teal-800">₹{purchaseProduct.price_inr} · {purchaseProduct.duration_days} days</p>
+                  <div className="mt-2">
+                    <BuyExamPassForm
+                      productId={purchaseProduct.id}
+                      price={Number(purchaseProduct.price_inr)}
+                      returnTo={canonicalPath}
+                      phone={typeof user?.user_metadata?.phone === "string" ? user.user_metadata.phone : ""}
+                      buttonLabel="Unlock exam series"
+                      pendingLabel="Opening checkout..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-600">
+                  Temporarily unavailable
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Key Exam Specifications Strip */}
           <div className="student-stagger mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3 border-t border-slate-100 pt-5">
@@ -802,51 +848,34 @@ export async function MockTestDetailsPage({
             )}
           </section>
 
-          {/* Candidate Assessment Station */}
-          <aside className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-md shadow-slate-200/50 overflow-hidden lg:sticky lg:top-24">
-            {/* Executive Header Banner */}
-            <div className="border-b border-teal-950/20 bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 px-6 py-5 text-white">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/20 border border-teal-400/30 px-2.5 py-0.5 text-[11px] font-semibold text-teal-200">
-                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
-                  Candidate Portal
-                </span>
-                <span className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-medium tracking-wide text-slate-300">
-                  CBT Simulation
-                </span>
-              </div>
+          {/* Clean Action Card - Candidate Portal and CBT badges removed */}
+          <aside className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs lg:sticky lg:top-24">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              Ready to begin?
+            </h2>
 
-              <h2 className="mt-3 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                Ready to begin?
-              </h2>
-
-              <p className="mt-1 text-xs text-slate-300 leading-relaxed">
-                {hasResumableSession
-                  ? "You have an ongoing attempt. Resume to continue with your saved time and answers."
-                  : "Simulate real exam conditions. The countdown timer begins as soon as you select Start Test."}
-              </p>
-            </div>
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600">
+              {hasResumableSession
+                ? "You have an ongoing attempt. Resume to continue with your saved time and answers."
+                : "Simulate real exam conditions. The countdown timer begins as soon as you select Start Test."}
+            </p>
 
             {/* Content & Parameter Grid */}
-            <div className="p-6 space-y-5">
-              {/* 2x2 Parameter Matrix */}
+            <div className="mt-5 space-y-5">
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Questions</p>
                   <p className="mt-1 text-lg font-bold text-slate-900">{questionCount ?? "—"}</p>
-                  <p className="text-[10px] text-slate-500">Official syllabus</p>
                 </div>
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Duration</p>
                   <p className="mt-1 text-lg font-bold text-slate-900">{test.duration_minutes} min</p>
-                  <p className="text-[10px] text-slate-500">Timed countdown</p>
                 </div>
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Marking</p>
                   <p className="mt-1 text-sm font-bold text-slate-900">
                     {negativeMarks > 0 ? `+${defaultCorrectMarks || 1} / -${negativeMarks}` : `+${defaultCorrectMarks || 1} / None`}
                   </p>
-                  <p className="text-[10px] text-slate-500">Negative marking</p>
                 </div>
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Access</p>
@@ -861,13 +890,12 @@ export async function MockTestDetailsPage({
                       }`}
                     >
                       {test.access_type === "free"
-                        ? "Free Practice"
+                        ? "Free"
                         : isUnlocked
                           ? "Series active"
                           : "Paid series"}
                     </span>
                   </div>
-                  <p className="mt-1 text-[10px] text-slate-500">CBT portal</p>
                 </div>
               </div>
 
