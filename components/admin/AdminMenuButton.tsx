@@ -1,36 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAdminNavBadges } from "@/app/actions/admin-badges";
 
 export function AdminMenuButton() {
   const [hasAnyUpdate, setHasAnyUpdate] = useState(false);
 
   useEffect(() => {
-    let active = true;
-    const checkBadges = async () => {
-      try {
-        const lastSurveysSeen =
-          typeof window !== "undefined"
-            ? localStorage.getItem("varadhi_admin_surveys_last_seen")
-            : null;
-        const data = await getAdminNavBadges(lastSurveysSeen);
-        if (active) {
-          setHasAnyUpdate(data.reports.openCount > 0 || data.surveys.newCount > 0);
-        }
-      } catch {
-        // ignore
-      }
+    const handleUpdate = (e: Event) => {
+      const custom = e as CustomEvent<boolean>;
+      setHasAnyUpdate(Boolean(custom.detail));
     };
 
-    void checkBadges();
-    const handleRefresh = () => void checkBadges();
-    window.addEventListener("admin-badge-refresh", handleRefresh);
-    window.addEventListener("focus", handleRefresh);
+    window.addEventListener("admin_has_updates", handleUpdate);
     return () => {
-      active = false;
-      window.removeEventListener("admin-badge-refresh", handleRefresh);
-      window.removeEventListener("focus", handleRefresh);
+      window.removeEventListener("admin_has_updates", handleUpdate);
     };
   }, []);
 

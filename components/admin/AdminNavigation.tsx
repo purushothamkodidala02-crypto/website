@@ -328,11 +328,21 @@ export function AdminNavigation(props: {
             new Date(data.reports.latestCreatedAt) > new Date(lastSeenReports))
       );
 
+      const hasAny = data.reports.openCount > 0 || data.surveys.newCount > 0;
+
       setBadges({
         openReports: data.reports.openCount,
         newSurveys: data.surveys.newCount,
         hasNewReport,
       });
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("admin_has_updates", {
+            detail: hasAny,
+          })
+        );
+      }
     } catch (err) {
       console.error("Failed to fetch admin nav badges:", err);
     }

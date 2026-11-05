@@ -65,6 +65,7 @@ export default async function Dashboard({
 
   const [
     attemptsResult,
+    latestAttemptsResult,
     attemptSummaryResult,
     subjectAnalyticsResult,
     availableTestsResult,
@@ -81,6 +82,14 @@ export default async function Dashboard({
       .eq("user_id", user.id)
       .order("submitted_at", { ascending: false })
       .range((page - 1) * attemptsPerPage, page * attemptsPerPage - 1),
+    supabase
+      .from("test_attempts")
+      .select(
+        "id, mock_test_id, detailed_review_available, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
+      )
+      .eq("user_id", user.id)
+      .order("submitted_at", { ascending: false })
+      .limit(5),
     supabase.rpc("get_student_attempt_history_summary"),
     supabase.rpc("get_student_subject_analytics"),
     supabase
@@ -102,6 +111,7 @@ export default async function Dashboard({
   ]);
 
   const attempts = (attemptsResult.data ?? []) as Attempt[];
+  const latestAttempts = (latestAttemptsResult.data ?? []) as Attempt[];
   const attemptSummary = (attemptSummaryResult.data?.[0] ?? {
     completed_attempts: attempts.length,
     average_score: 0,
@@ -132,6 +142,11 @@ export default async function Dashboard({
       missingTestIds.add(attempt.mock_test_id);
     }
   }
+  for (const attempt of latestAttempts) {
+    if (attempt.mock_test_id && !testTitles.has(attempt.mock_test_id)) {
+      missingTestIds.add(attempt.mock_test_id);
+    }
+  }
 
   if (missingTestIds.size > 0) {
     const { data: missingTests } = await supabase
@@ -154,6 +169,7 @@ export default async function Dashboard({
       : "";
   const studentName = metadataName || (user.email ? user.email.split("@")[0] : "Student");
   const firstName = studentName.split(" ")[0];
+  const avatarLetter = (firstName[0] || "S").toUpperCase();
   const mistakesCount = mistakesCountResult.count ?? 0;
   const bookmarksCount = bookmarksCountResult.count ?? 0;
   const isPaidEnabled = paidSalesEnabled === true;
@@ -192,46 +208,63 @@ export default async function Dashboard({
     },
   ] as const;
 
-  // -------------------------------------------------------------
-  // Dedicated Exam History View for page > 1
-  // -------------------------------------------------------------
-  if (page > 1) {
-    return (
-      <main className="student-page min-h-screen bg-[#f6faf8] w-full max-w-full overflow-x-hidden">
-        <PublicHeader />
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10 w-full space-y-6">
-          {/* Breadcrumb back link */}
-          <div>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900 transition"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-              </svg>
-              <span>Back to Dashboard Overview</span>
-            </Link>
-          </div>
-
-          {/* Sleek Exam History Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
-                  Exam History
-                </h1>
-                <span className="rounded-full bg-teal-50 border border-teal-200/90 px-2.5 py-0.5 text-xs font-bold text-teal-800">
-                  Page {page} of {totalPages}
+  return (
+    <main className="student-page min-h-screen bg-[#f6faf8] w-full max-w-full overflow-x-hidden">
+      <PublicHeader />
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10 w-full space-y-6 sm:space-y-8">
+        
+        {/* Professional Student Dashboard Header Box */}
+        <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-900/60 bg-[#071f1a] p-6 text-white shadow-sm sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3">
+              {/* Candidate Info Bar */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-teal-800/80 border border-teal-600/40 text-sm font-black text-teal-200">
+                  {avatarLetter}
                 </span>
+                <span className="text-xs font-bold uppercase tracking-wider text-teal-300">
+                  Welcome, {studentName}
+                </span>
+                <span className="text-slate-500" aria-hidden="true">•</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-900/40 px-2.5 py-0.5 text-[11px] font-bold text-teal-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
+                  Candidate Portal
+                </span>
+                {page > 1 && (
+                  <span className="rounded-full bg-amber-400/15 border border-amber-400/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
+                    Exam History Page {page} of {totalPages}
+                  </span>
+                )}
               </div>
-              <p className="mt-1 text-sm text-slate-600">
-                Showing {((page - 1) * attemptsPerPage) + 1} to {Math.min(page * attemptsPerPage, totalAttempts)} of {totalAttempts} completed exams.
-              </p>
+
+              {/* Main Headline */}
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
+                  Student Dashboard
+                </h1>
+                <p className="mt-1.5 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-300">
+                  Real-time exam performance, mistake analytics, and focused mock tests for Telangana and Andhra Pradesh competitive exams.
+                </p>
+              </div>
+
+              {/* Page 2 notification */}
+              {page > 1 && (
+                <div className="pt-1">
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-teal-300 hover:text-white transition"
+                  >
+                    <span>&larr; Return to Overview (Page 1)</span>
+                  </Link>
+                </div>
+              )}
             </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2.5">
               <Link
                 href="/mock-tests"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-teal-600 bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm shadow-teal-950/15 transition hover:bg-teal-800"
+                className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-teal-500"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -240,142 +273,39 @@ export default async function Dashboard({
               </Link>
               <Link
                 href="/dashboard/study-book"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-red-300 hover:bg-red-50/50 hover:text-red-900"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/40 bg-red-950/40 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-red-200 transition hover:bg-red-900/50 hover:border-red-400"
               >
-                <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                </svg>
                 <span>Mistake Book</span>
                 {mistakesCount > 0 && (
-                  <span className="ml-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-red-800">
+                  <span className="rounded-full bg-red-500/30 px-1.5 py-0.2 text-[10px] font-black text-red-200">
                     {mistakesCount}
                   </span>
                 )}
               </Link>
               <Link
                 href="/dashboard/study-book?view=bookmarks"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-900"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/40 bg-teal-950/40 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-200 transition hover:bg-teal-900/50 hover:border-teal-400"
               >
-                <svg className="h-4 w-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-                </svg>
                 <span>Bookmarks</span>
                 {bookmarksCount > 0 && (
-                  <span className="ml-1 rounded-full bg-teal-100 px-1.5 py-0.5 text-[10px] font-black text-teal-800">
+                  <span className="rounded-full bg-teal-500/30 px-1.5 py-0.2 text-[10px] font-black text-teal-200">
                     {bookmarksCount}
                   </span>
                 )}
               </Link>
-            </div>
-          </div>
-
-          {/* High-level KPIs */}
-          <section className="grid gap-4 sm:grid-cols-3">
-            {metrics.map((metric) => (
-              <DashboardMetric key={metric.label} {...metric} />
-            ))}
-          </section>
-
-          {/* Paginated Exam History List */}
-          <section className="space-y-4 pt-2">
-            <div className="grid gap-4">
-              {attempts.map((attempt) => (
-                <AttemptCard
-                  key={attempt.id}
-                  attempt={attempt}
-                  testTitles={testTitles}
-                />
-              ))}
-            </div>
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <PaginationNav page={page} totalPages={totalPages} />
-            )}
-          </section>
-        </div>
-      </main>
-    );
-  }
-
-  // -------------------------------------------------------------
-  // Overview Dashboard for page === 1
-  // -------------------------------------------------------------
-  const latestAttempts = attempts.slice(0, 5);
-
-  return (
-    <main className="student-page min-h-screen bg-[#f6faf8] w-full max-w-full overflow-x-hidden">
-      <PublicHeader />
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10 w-full space-y-8">
-        {/* Sleek Dashboard Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
-                Student Dashboard
-              </h1>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200/90 bg-teal-50 px-2.5 py-0.5 text-xs font-bold text-teal-800">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                Active Prep
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-slate-600">
-              Welcome back, <span className="font-bold text-slate-900">{firstName}</span> • Track your mock test performance, review mistakes, and practice upcoming exams.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <Link
-              href="/mock-tests"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-teal-600 bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm shadow-teal-950/15 transition hover:bg-teal-800"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-              <span>Browse Mock Tests</span>
-            </Link>
-            <Link
-              href="/dashboard/study-book"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-red-300 hover:bg-red-50/50 hover:text-red-900"
-            >
-              <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-              </svg>
-              <span>Mistake Book</span>
-              {mistakesCount > 0 && (
-                <span className="ml-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-red-800">
-                  {mistakesCount}
-                </span>
+              {isPaidEnabled && (
+                <Link
+                  href="/dashboard/passes"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-amber-200 transition hover:bg-amber-900/50 hover:border-amber-400"
+                >
+                  <span>My Passes</span>
+                </Link>
               )}
-            </Link>
-            <Link
-              href="/dashboard/study-book?view=bookmarks"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-900"
-            >
-              <svg className="h-4 w-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-              </svg>
-              <span>Bookmarks</span>
-              {bookmarksCount > 0 && (
-                <span className="ml-1 rounded-full bg-teal-100 px-1.5 py-0.5 text-[10px] font-black text-teal-800">
-                  {bookmarksCount}
-                </span>
-              )}
-            </Link>
-            {isPaidEnabled && (
-              <Link
-                href="/dashboard/passes"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-amber-300 hover:bg-amber-50/50 hover:text-amber-900"
-              >
-                <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
-                </svg>
-                <span>My Passes</span>
-              </Link>
-            )}
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* KPIs */}
+        {/* High-Level Metrics */}
         <section className="grid gap-4 sm:grid-cols-3">
           {metrics.map((metric) => (
             <DashboardMetric key={metric.label} {...metric} />
@@ -617,7 +547,7 @@ export default async function Dashboard({
               </AnalyticsCard>
             </section>
 
-            {/* Recent Exam History */}
+            {/* Exam History Section */}
             <section className="space-y-4 pt-2">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
@@ -625,13 +555,13 @@ export default async function Dashboard({
                     History
                   </p>
                   <h2 className="mt-1 text-xl sm:text-2xl font-black text-slate-950">
-                    Recent Exam History
+                    Exam History
                   </h2>
                   <p className="mt-1 text-sm text-slate-600">
-                    Showing 1 to {Math.min(attemptsPerPage, totalAttempts)} of {totalAttempts} completed exams.
+                    Showing {((page - 1) * attemptsPerPage) + 1} to {Math.min(page * attemptsPerPage, totalAttempts)} of {totalAttempts} completed exams.
                   </p>
                 </div>
-                {totalPages > 1 && (
+                {page === 1 && totalPages > 1 && (
                   <Link
                     href="/dashboard?page=2"
                     className="text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900 transition"
