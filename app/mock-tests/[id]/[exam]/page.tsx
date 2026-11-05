@@ -149,92 +149,64 @@ export default async function ExamPage({ params, searchParams }: Props) {
         }}
       />
       <PublicHeader />
-      <section className="border-b border-slate-200/90 bg-white">
-        <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+      <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f1f5f9] via-[#f5f8fc] to-[#f8fafc]">
+        <div className="relative mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
-            <Link href="/" className="hover:text-slate-900 py-0.5 inline-flex items-center">Home</Link>
+            <Link href="/" className="hover:text-blue-700 py-0.5 inline-flex items-center">Home</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
-            <Link href={stateUrl(context.state.slug)} className="hover:text-slate-900 py-0.5 inline-flex items-center">{context.state.name}</Link>
+            <Link href={stateUrl(context.state.slug)} className="hover:text-blue-700 py-0.5 inline-flex items-center">{context.state.name}</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
-            <span className="text-slate-900 font-semibold py-0.5 inline-flex items-center">{context.exam.name}</span>
+            <span className="text-slate-800 font-semibold py-0.5 inline-flex items-center">{context.exam.name}</span>
           </nav>
 
-          <div className="mt-5 grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                  <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-slate-600" />
-                  {context.state.name} State Examination
-                </span>
-                <span className="rounded-full border border-blue-200/70 bg-blue-50/70 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
-                  {context.state.code}
-                </span>
-              </div>
-
-              <h1 className="font-display mt-3.5 max-w-3xl text-3xl font-bold leading-tight tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                {examHeading}
-              </h1>
-
-              {teluguData && (
-                <p className="mt-2 text-base font-semibold text-slate-700 sm:text-lg">
-                  {teluguData.teluguTitle}
-                </p>
-              )}
-
-              <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
-                {introduction}
-              </p>
-
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <a
-                  href="#papers"
-                  className="inline-flex min-h-[44px] items-center rounded-xl bg-slate-900 hover:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs"
-                >
-                  Choose a paper ↓
-                </a>
-                <AccountActionButton canonical={canonical} />
-              </div>
+          <div className="mt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-xs font-semibold text-blue-900">
+                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-blue-700" />
+                {context.state.name} State Examination
+              </span>
+              <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                Official Syllabus Pattern
+              </span>
             </div>
 
-            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-5 sm:p-6">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Examination Overview
-              </h2>
+            <h1 className="font-display mt-3.5 max-w-4xl text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+              {examHeading}
+            </h1>
 
-              <dl className="mt-4 divide-y divide-slate-200/80 text-xs sm:text-sm">
-                <div className="flex items-center justify-between py-2.5">
-                  <dt className="text-slate-500 font-medium">Exam Level</dt>
-                  <dd className="font-semibold text-slate-900">{context.state.name} ({context.state.code})</dd>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <dt className="text-slate-500 font-medium">Papers</dt>
-                  <dd className="font-semibold text-slate-900">{papers.length} {papers.length === 1 ? "Paper" : "Papers"}</dd>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <dt className="text-slate-500 font-medium">Test Format</dt>
-                  <dd className="font-semibold text-slate-900">Computer Based Test (CBT)</dd>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <dt className="text-slate-500 font-medium">Language Medium</dt>
-                  <dd className="font-semibold text-slate-900">Bilingual (English & Telugu)</dd>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <dt className="text-slate-500 font-medium">Published Mock Tests</dt>
-                  <dd className="font-semibold text-slate-900">{tests.length} Full Papers</dd>
-                </div>
-              </dl>
+            {teluguData && (
+              <p className="mt-2 text-base font-semibold text-blue-950 sm:text-lg">
+                {teluguData.teluguTitle}
+              </p>
+            )}
 
-              {papers.length > 0 && (
-                <div className="mt-4 pt-3.5 border-t border-slate-200/80">
-                  <a
-                    href="#papers"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 transition"
-                  >
-                    <span>View all {papers.length} paper syllabuses</span>
-                    <span aria-hidden="true">→</span>
-                  </a>
-                </div>
-              )}
+            <p className="mt-3.5 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
+              {introduction}
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+                <span className="font-semibold text-slate-900">{papers.length}</span> {papers.length === 1 ? "Paper" : "Papers"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+                <span className="font-semibold text-slate-900">{tests.length}</span> Practice Tests
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+                Bilingual (English & Telugu)
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
+                Online CBT Interface
+              </span>
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <a
+                href="#papers"
+                className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs"
+              >
+                Choose a paper ↓
+              </a>
+              <AccountActionButton canonical={canonical} />
             </div>
           </div>
         </div>

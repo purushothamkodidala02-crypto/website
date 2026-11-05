@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { ExamHistorySection } from "@/components/dashboard/ExamHistorySection";
+import { ViewTestLink } from "@/components/dashboard/ViewTestLink";
 import { getDashboardCatalogData } from "@/lib/catalog-data";
 import { parseMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
@@ -409,15 +410,7 @@ export default async function Dashboard({
                         <span className="text-xs font-semibold text-slate-500">
                           {test.duration_minutes} minutes
                         </span>
-                        <Link
-                          href={publicTestPath(test)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-[#ea580c] px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-2xs transition hover:bg-[#d94f08] min-h-[36px]"
-                        >
-                          <span>View test</span>
-                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                          </svg>
-                        </Link>
+                        <ViewTestLink href={publicTestPath(test)} />
                       </div>
                     </article>
                   ))}
