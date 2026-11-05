@@ -8,6 +8,7 @@ import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { absoluteUrl } from "@/lib/site";
 import { paperUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
+import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { isPaidSalesEnabled } from "@/lib/paid-sales";
@@ -77,6 +78,102 @@ type MockTestDetailData = {
 };
 
 export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDetailsProps): Promise<Metadata> {
+  const catalog = await getMockTestCatalogData();
+  const cachedTest = catalog.tests.find((t) => t.id === id);
+
+  if (cachedTest) {
+    const paper = catalog.papers.find((p) => p.id === cachedTest.paper_id);
+    if (!paper) {
+      const seo = resolveSeoFields(cachedTest, {
+        title: cachedTest.title,
+        description: cachedTest.description ?? "Take this free competitive exam mock test on Varadhi Prep.",
+      });
+
+      return {
+        ...seo,
+        alternates: {
+          canonical: canonicalPath,
+        },
+        openGraph: {
+          type: "website",
+          url: canonicalPath,
+          title: seo.title,
+          description: seo.description,
+          siteName: "Varadhi Prep",
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: seo.title,
+          description: seo.description,
+        },
+      };
+    }
+
+    const exam = catalog.exams.find((e) => e.id === paper.exam_group_id);
+    const category = exam ? catalog.categories.find((c) => c.id === exam.exam_id) : undefined;
+    const state = category ? catalog.states.find((s) => s.id === category.state_id) : undefined;
+    const siblingPapers = catalog.papers.filter((p) => p.exam_group_id === paper.exam_group_id);
+    const paperDisplay = buildPaperDisplayMap(siblingPapers).get(paper.id);
+    const subject = cachedTest.subject_id ? catalog.subjects.find((s) => s.id === cachedTest.subject_id) : null;
+
+    const testLabel = mockTestLabel(Number(cachedTest.series_number ?? 1));
+    const paperLabel = paperDisplay?.shortLabel ?? paper.name ?? "Paper";
+    const examName = exam?.name ?? cachedTest.title;
+    const statePrefix =
+      state?.code && !examName.toUpperCase().includes(state.code.toUpperCase())
+        ? `${state.code} `
+        : "";
+    const automaticTitle = `${statePrefix}${examName} ${paperLabel} ${testLabel}`;
+    const subjectText = subject?.name ? ` ${subject.name} practice included.` : "";
+
+    const seo = resolveSeoFields(cachedTest, {
+      title: automaticTitle,
+      description:
+        cachedTest.description ??
+        `Take the free ${automaticTitle} on Varadhi Prep.${subjectText} Practice for ${cachedTest.duration_minutes} minutes with exam-focused questions and detailed result review.`,
+    });
+
+    return {
+      title: seo.title,
+      description: seo.description,
+      alternates: {
+        canonical: canonicalPath,
+      },
+      openGraph: {
+        type: "website",
+        url: canonicalPath,
+        title: seo.title,
+        description: seo.description,
+        siteName: "Varadhi Prep",
+        images: [
+          {
+            url: "/opengraph-image",
+            width: 1200,
+            height: 630,
+            alt: `${seo.title} on Varadhi Prep`,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: seo.title,
+        description: seo.description,
+        images: ["/opengraph-image"],
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      },
+    };
+  }
+
   const supabase = createPublicClient();
 
   const { data: test } = await supabase
@@ -279,8 +376,41 @@ export async function MockTestDetailsPage({
   const query = await searchParams;
   const supabase = await createClient();
 
-  // Parallelize the primary data fetching
-  const [testResult, authResult, mqResult] = await Promise.all([
+  // Eagerly initiate catalog loading and user session checking in parallel
+  const catalogPromise = getMockTestCatalogData();
+  const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
+
+  // Eagerly chain session and attempt lookups to run concurrently with the mock test query
+  const sessionPromise = userPromise.then(async (user) => {
+    if (!user) return null;
+    const { data } = await supabase
+      .from("test_attempt_sessions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("mock_test_id", id)
+      .is("submitted_at", null)
+      .gt("remaining_seconds", 0)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data;
+  });
+
+  const attemptPromise = userPromise.then(async (user) => {
+    if (!user) return null;
+    const { data } = await supabase
+      .from("test_attempts")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("mock_test_id", id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data;
+  });
+
+  // Parallelize primary test data fetching alongside user session & attempt checks
+  const [testResult, user, mqResult] = await Promise.all([
     supabase
       .from("mock_tests")
       .select(`
@@ -302,12 +432,12 @@ export async function MockTestDetailsPage({
       .eq("status", "published")
       .maybeSingle(),
 
-    supabase.auth.getUser(),
-    
+    userPromise,
+
     supabase
       .from("mock_test_questions")
       .select("marks, negative_marks")
-      .eq("mock_test_id", id)
+      .eq("mock_test_id", id),
   ]);
 
   const test = testResult.data as unknown as MockTestDetailData | null;
@@ -323,18 +453,16 @@ export async function MockTestDetailsPage({
   const state = exam?.state ? (Array.isArray(exam.state) ? exam.state[0] : exam.state) : null;
   const specialization = paper?.specialization ? (Array.isArray(paper.specialization) ? paper.specialization[0] : paper.specialization) : null;
 
-  const isLoggedIn = Boolean(authResult.data.user);
-  
-  // Secondary parallel requests (siblings and access/session info)
-  const [siblingPapersResult, accessResult, resumableSessionResult, previousAttemptResult] = await Promise.all([
-    paper
-      ? supabase
-          .from("papers")
-          .select("id, exam_group_id, specialization_id, name, display_order")
-          .eq("exam_group_id", paper.exam_group_id)
-          .eq("is_active", true)
-      : Promise.resolve({ data: [] }),
+  const isLoggedIn = Boolean(user);
 
+  // Resolve sibling papers directly from the in-memory catalog cache (0ms)
+  const catalog = await catalogPromise;
+  let siblingPapers: OrderedPaper[] = paper
+    ? (catalog.papers.filter((p) => p.exam_group_id === paper.exam_group_id && p.is_active) as OrderedPaper[])
+    : [];
+
+  // Await access verification and eager session/attempt queries
+  const [accessResult, resumableSessionResult, previousAttemptResult] = await Promise.all([
     test.access_type === "paid" && examGroup
       ? (async () => {
           const paidSalesEnabled = await isPaidSalesEnabled();
@@ -348,35 +476,26 @@ export async function MockTestDetailsPage({
         })()
       : Promise.resolve({ products: { data: [] }, canAccess: { data: true } }),
 
-    isLoggedIn && authResult.data.user
-      ? supabase
-          .from("test_attempt_sessions")
-          .select("id")
-          .eq("user_id", authResult.data.user.id)
-          .eq("mock_test_id", id)
-          .is("submitted_at", null)
-          .gt("remaining_seconds", 0)
-          .order("started_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
+    sessionPromise,
+    attemptPromise,
 
-    isLoggedIn && authResult.data.user
-      ? supabase
-          .from("test_attempts")
-          .select("id")
-          .eq("user_id", authResult.data.user.id)
-          .eq("mock_test_id", id)
-          .order("submitted_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : Promise.resolve({ data: null })
+    // If sibling papers were empty in catalog cache for any reason, fetch as fallback
+    (async () => {
+      if (paper && siblingPapers.length === 0) {
+        const { data } = await supabase
+          .from("papers")
+          .select("id, exam_group_id, specialization_id, name, display_order")
+          .eq("exam_group_id", paper.exam_group_id)
+          .eq("is_active", true);
+        if (data && data.length > 0) {
+          siblingPapers = data as OrderedPaper[];
+        }
+      }
+    })(),
   ]);
 
   const paperDisplay = paper
-    ? buildPaperDisplayMap(
-        (siblingPapersResult.data ?? []) as OrderedPaper[],
-      ).get(paper.id)
+    ? buildPaperDisplayMap(siblingPapers).get(paper.id)
     : undefined;
 
   const mq = mqResult.data ?? [];
@@ -411,8 +530,8 @@ export async function MockTestDetailsPage({
   const isUnlocked = test.access_type === "free" || Boolean(accessResult.canAccess.data);
   const purchaseProduct = paidProducts[0] ?? null;
 
-  const hasResumableSession = Boolean(resumableSessionResult.data);
-  const hasPreviousAttempt = Boolean(previousAttemptResult.data);
+  const hasResumableSession = Boolean(resumableSessionResult);
+  const hasPreviousAttempt = Boolean(previousAttemptResult);
 
   const testSummaryMetrics = [
     ["Questions", questionCountLabel],
@@ -729,7 +848,7 @@ export async function MockTestDetailsPage({
                     <li>• Keep full answer review and result history</li>
                   </ul>
                   <div className="mt-4">
-                    <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof authResult.data.user?.user_metadata?.phone === "string" ? authResult.data.user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
+                    <BuyExamPassForm productId={purchaseProduct.id} price={Number(purchaseProduct.price_inr)} returnTo={canonicalPath} phone={typeof user?.user_metadata?.phone === "string" ? user.user_metadata.phone : ""} buttonLabel="Proceed to secure payment" pendingLabel="Opening secure checkout..." />
                   </div>
                 </>
               ) : paidSalesEnabled ? (
