@@ -141,7 +141,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                 onClick={() => showQuestion(questionIndex)}
                 aria-current={active ? "step" : undefined}
                 aria-label={`Review question ${item.question_order}`}
-                className={`grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl border text-xs sm:text-sm font-black transition ${active ? "border-[#0a2922] bg-[#0a2922] text-white ring-2 ring-emerald-400 ring-offset-2 shadow-sm" : tone}`}
+                className={`grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl border text-xs sm:text-sm font-black transition ${active ? "border-teal-800 bg-teal-800 text-white ring-2 ring-teal-500 ring-offset-2 shadow-sm" : tone}`}
               >
                 {item.question_order}
               </button>
@@ -190,7 +190,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
             <div className="lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between">
               <div>
                 <div className="flex items-start gap-3 sm:gap-4">
-                  <span className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-xl bg-[#0a2922] text-xs sm:text-sm font-black text-white">
+                  <span className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-xl bg-teal-800 text-xs sm:text-sm font-black text-white">
                     {row.question_order}
                   </span>
                   <div className="min-w-0 flex-1 pt-0.5" lang={showTelugu ? "te" : "en"}>
@@ -330,7 +330,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                   type="button"
                   onClick={() => showQuestion(index + 1)}
                   disabled={index === rows.length - 1}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#0a2922] px-4 py-2 text-xs font-black text-white shadow-2xs transition hover:bg-[#11382f] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-2 text-xs font-black text-white shadow-2xs transition hover:bg-teal-900 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <span>Next</span>
                   <span aria-hidden="true">→</span>
