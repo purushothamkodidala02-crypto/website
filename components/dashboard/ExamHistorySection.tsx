@@ -193,6 +193,15 @@ export function ExamHistorySection({
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  // Track active dashboard page for instant return navigation from review
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("varadhi_last_dashboard_url", window.location.href);
+    } catch {
+      // Ignore private browsing storage errors
+    }
+  }, [currentPage]);
+
   const goToPage = (pageNumber: number) => {
     if (pageNumber < 1 || pageNumber > totalPages || pageNumber === currentPage) return;
 

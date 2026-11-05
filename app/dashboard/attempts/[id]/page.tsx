@@ -4,6 +4,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { parseMockTestTitle } from "@/lib/exam-catalog";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { BackToDashboardButton } from "@/components/dashboard/BackToDashboardButton";
 import { AttemptReviewNavigator, type ReviewRow } from "./AttemptReviewNavigator";
 
 type AttemptSummary = {
@@ -153,12 +154,7 @@ export default async function AttemptReviewPage({
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800"
-        >
-          <span aria-hidden="true">←</span> Back to dashboard
-        </Link>
+        <BackToDashboardButton />
 
         <section className="relative mt-6 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-9">
           <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
@@ -261,7 +257,7 @@ function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; tit
     <main className="student-page min-h-screen bg-[#f5f8f8]">
       <PublicHeader />
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-800">Back to dashboard</Link>
+        <BackToDashboardButton />
         <section className="mt-6 rounded-[2rem] bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-2xl shadow-emerald-950/20 border border-emerald-900/40 sm:p-9">
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-200">Attempt summary</p>
           {parsedTitle.breadcrumb.length > 0 && (
