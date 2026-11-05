@@ -10,7 +10,7 @@ import { ExamSelectionGrid, type ExamSelectionItem } from "@/components/exams/Ex
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { CatalogSteps } from "@/components/exams/CatalogSteps";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
-import { hasMockTestSuffixOrMention, mockTestLabel } from "@/lib/exam-catalog";
+import { hasMockTestSuffixOrMention, mockTestLabel, displayMockTestHeading } from "@/lib/exam-catalog";
 import {
   categoryUrl,
   examUrl,
@@ -742,12 +742,15 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                   </span>
                   <div className="min-w-0">
                     <h3 className="font-display text-base font-bold text-slate-900 transition group-hover:text-teal-800 sm:text-lg truncate">
-                      {mockTestLabel(Number(test.series_number ?? 1))}
+                      {displayMockTestHeading({
+                        subjectName: test.subject?.name,
+                        sectionName: test.section?.name,
+                        testScope: test.test_scope,
+                        seriesNumber: Number(test.series_number ?? 1),
+                      })}
                     </h3>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700 truncate">
-                      {test.state.code} · {test.paperDisplay?.shortLabel ?? "Paper"}
-                      {test.subject && <span className="font-semibold text-slate-600 normal-case"> · {test.subject.name}</span>}
-                      {test.section && <span className="font-bold text-teal-800 normal-case"> ({test.section.name})</span>}
+                      {test.state.code} · {test.exam.name} · {test.paperDisplay?.shortLabel ?? "Paper"}
                     </p>
                   </div>
                 </div>

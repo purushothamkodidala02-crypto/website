@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
-import { mockTestLabel } from "@/lib/exam-catalog";
+import { mockTestLabel, displayMockTestHeading, formatFullMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { absoluteUrl } from "@/lib/site";
 import { paperUrl } from "@/lib/public-urls";
@@ -64,6 +64,7 @@ type MockTestDetailData = {
   id: string;
   paper_id: string;
   subject_id: string | null;
+  subject_section_id?: string | null;
   test_scope: string;
   series_number: number | null;
   title: string;
@@ -119,11 +120,19 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
     const testLabel = mockTestLabel(Number(cachedTest.series_number ?? 1));
     const paperLabel = paperDisplay?.shortLabel ?? paper.name ?? "Paper";
     const examName = exam?.name ?? cachedTest.title;
-    const statePrefix =
-      state?.code && !examName.toUpperCase().includes(state.code.toUpperCase())
-        ? `${state.code} `
-        : "";
-    const automaticTitle = `${statePrefix}${examName} ${paperLabel} ${testLabel}`;
+    const section = cachedTest.subject_section_id
+      ? catalog.sections.find((s) => s.id === cachedTest.subject_section_id)
+      : null;
+
+    const automaticTitle = formatFullMockTestTitle({
+      stateCode: state?.code,
+      examName,
+      paperLabel,
+      subjectName: subject?.name,
+      sectionName: section?.name,
+      testScope: cachedTest.test_scope,
+      seriesNumber: Number(cachedTest.series_number ?? 1),
+    });
     const subjectText = subject?.name ? ` ${subject.name} practice included.` : "";
 
     const seo = resolveSeoFields(cachedTest, {
@@ -179,7 +188,7 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
   const { data: test } = await supabase
     .from("mock_tests")
     .select(
-      "id, paper_id, series_number, title, description, seo_title, seo_description, duration_minutes, subject_id",
+      "id, paper_id, series_number, title, description, seo_title, seo_description, duration_minutes, subject_id, subject_section_id, test_scope",
     )
     .eq("id", id)
     .eq("status", "published")
@@ -229,7 +238,7 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
     };
   }
 
-  const [examResult, siblingPapersResult, subjectResult] = await Promise.all([
+  const [examResult, siblingPapersResult, subjectResult, sectionResult] = await Promise.all([
     supabase
       .from("exam_groups")
       .select("id, exam_id, name")
@@ -249,6 +258,14 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
           .from("subjects")
           .select("id, name")
           .eq("id", test.subject_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+
+    test.subject_section_id
+      ? supabase
+          .from("subject_sections")
+          .select("id, name")
+          .eq("id", test.subject_section_id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
@@ -297,18 +314,18 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
   }
 
   const testLabel = mockTestLabel(Number(test.series_number ?? 1));
-
   const paperLabel = paperDisplay?.shortLabel ?? paper.name ?? "Paper";
-
   const examName = exam?.name ?? test.title;
 
-  const statePrefix =
-    state?.code &&
-    !examName.toUpperCase().includes(state.code.toUpperCase())
-      ? `${state.code} `
-      : "";
-
-  const automaticTitle = `${statePrefix}${examName} ${paperLabel} ${testLabel}`;
+  const automaticTitle = formatFullMockTestTitle({
+    stateCode: state?.code,
+    examName,
+    paperLabel,
+    subjectName: subjectResult.data?.name,
+    sectionName: sectionResult.data?.name,
+    testScope: test.test_scope,
+    seriesNumber: Number(test.series_number ?? 1),
+  });
 
   const subjectText = subjectResult.data?.name
     ? ` ${subjectResult.data.name} practice included.`
@@ -414,7 +431,7 @@ export async function MockTestDetailsPage({
     supabase
       .from("mock_tests")
       .select(`
-        id, paper_id, subject_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
+        id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
         subject:subjects(id, name, content_language_mode),
         paper:papers(
           id, exam_group_id, specialization_id, name, slug, display_order, question_count, default_correct_marks, default_negative_marks,
@@ -548,10 +565,27 @@ export async function MockTestDetailsPage({
   ];
 
   const testLabel = mockTestLabel(Number(test.series_number ?? 1));
+  const seriesNum = Number(test.series_number ?? 1);
+  const section = test.subject_section_id
+    ? (catalog.sections.find((s) => s.id === test.subject_section_id) ?? null)
+    : null;
 
-  const resourceName = `${state?.code ?? "State"} ${
-    examGroup?.name ?? "Exam"
-  } ${paperDisplay?.shortLabel ?? "Paper"} ${testLabel}`;
+  const displayTitle = displayMockTestHeading({
+    subjectName: subject?.name,
+    sectionName: section?.name,
+    testScope: test.test_scope,
+    seriesNumber: seriesNum,
+  });
+
+  const resourceName = formatFullMockTestTitle({
+    stateCode: state?.code,
+    examName: examGroup?.name ?? "Exam",
+    paperLabel: paperDisplay?.shortLabel ?? "Paper",
+    subjectName: subject?.name,
+    sectionName: section?.name,
+    testScope: test.test_scope,
+    seriesNumber: seriesNum,
+  });
 
   const resourceDescription =
     test.description ??
@@ -700,6 +734,12 @@ export async function MockTestDetailsPage({
                   {subject.name}
                 </span>
               )}
+
+              {section && (
+                <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-800">
+                  {section.name}
+                </span>
+              )}
             </div>
 
             {hasResumableSession && (
@@ -720,12 +760,14 @@ export async function MockTestDetailsPage({
               </p>
 
               <h1 className="font-display mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
-                {resourceName}
+                {displayTitle}
               </h1>
 
               <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
                 {test.description ??
-                  "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with negative marking and instant detailed solutions."}
+                  (test.test_scope === "subject" && subject?.name
+                    ? `Dedicated ${subject.name} practice test aligned with the official examination pattern. Practise under timed conditions with instant scoring, bilingual solutions, and comprehensive analysis.`
+                    : "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with negative marking and instant detailed solutions.")}
               </p>
             </div>
 

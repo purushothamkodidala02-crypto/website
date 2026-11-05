@@ -6,6 +6,82 @@ export function mockTestLabel(seriesNumber: number) {
   return `Mock Test ${formatMockNumber(seriesNumber)}`;
 }
 
+export function displayMockTestHeading({
+  subjectName,
+  sectionName,
+  testScope,
+  seriesNumber,
+}: {
+  subjectName?: string | null;
+  sectionName?: string | null;
+  testScope?: string | null;
+  seriesNumber: number;
+}) {
+  const numberStr = formatMockNumber(seriesNumber);
+  if (subjectName) {
+    const sectionPart = sectionName ? ` (${sectionName})` : "";
+    return `${subjectName}${sectionPart}: Mock Test ${numberStr}`;
+  }
+  if (testScope === "paper") {
+    return `Full Length Mock Test ${numberStr}`;
+  }
+  return `Mock Test ${numberStr}`;
+}
+
+export function formatCardTitle({
+  subjectName,
+  sectionName,
+  testScope,
+  seriesNumber,
+}: {
+  subjectName?: string | null;
+  sectionName?: string | null;
+  testScope?: string | null;
+  seriesNumber: number;
+}) {
+  const numberStr = formatMockNumber(seriesNumber);
+  if (subjectName) {
+    const sectionPart = sectionName ? ` (${sectionName})` : "";
+    return `${subjectName}${sectionPart}: Mock ${numberStr}`;
+  }
+  if (testScope === "paper") {
+    return `Full Length Mock ${numberStr}`;
+  }
+  return `Mock Test ${numberStr}`;
+}
+
+export function formatFullMockTestTitle({
+  stateCode,
+  examName,
+  paperLabel,
+  subjectName,
+  sectionName,
+  testScope,
+  seriesNumber,
+}: {
+  stateCode?: string | null;
+  examName: string;
+  paperLabel: string;
+  subjectName?: string | null;
+  sectionName?: string | null;
+  testScope?: string | null;
+  seriesNumber: number;
+}) {
+  const statePrefix =
+    stateCode && !examName.toUpperCase().includes(stateCode.toUpperCase())
+      ? `${stateCode} `
+      : "";
+  const numberStr = formatMockNumber(seriesNumber);
+
+  if (subjectName) {
+    const sectionPart = sectionName ? ` (${sectionName})` : "";
+    return `${statePrefix}${examName} ${paperLabel} – ${subjectName}${sectionPart} Mock Test ${numberStr}`;
+  }
+
+  const scopePrefix = testScope === "paper" ? "Full Length " : "";
+    return `${statePrefix}${examName} ${paperLabel} – ${scopePrefix}Mock Test ${numberStr}`;
+}
+
 export function buildMockTestTitle({
   stateCode,
   examName,

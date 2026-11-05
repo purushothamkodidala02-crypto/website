@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
-import { formatMockNumber, mockTestLabel } from "@/lib/exam-catalog";
+import { formatMockNumber, mockTestLabel, displayMockTestHeading } from "@/lib/exam-catalog";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { quickCreateSubjectSection } from "@/app/admin/subjects/sections/actions";
 import { createMockTest, type CreateMockTestState } from "./actions";
@@ -291,12 +291,19 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
             <div>
               <p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name preview</p>
               <h3 className="font-display mt-1 text-xl">
-                {paper ? mockTestLabel(effectiveSeries) : "Choose a paper to generate the name"}
+                {paper
+                  ? displayMockTestHeading({
+                      subjectName: subject?.name,
+                      sectionName: section?.name,
+                      testScope: scope,
+                      seriesNumber: effectiveSeries,
+                    })
+                  : "Choose a paper to generate the name"}
               </h3>
               {paper && (
                 <p className="mt-1 text-sm font-semibold text-slate-600">
                   {state?.code} · {exam?.name} · {paperSpecialization?.name ?? paper.name}
-                  {subject ? ` · ${subject.name}${section ? ` (${section.name})` : ""}` : ""}
+                  {subject ? ` · ${subject.name}${section ? ` (${section.name})` : ""}` : " · Full Syllabus"}
                 </p>
               )}
             </div>

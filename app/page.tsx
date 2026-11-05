@@ -335,7 +335,7 @@ export default async function Home() {
                 <Link
                   key={state.id}
                   href={stateUrl(state.slug)}
-                  prefetch={false}
+                  prefetch={true}
                   className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:border-blue-400 hover:shadow-md transition"
                 >
                   <div>
@@ -388,7 +388,7 @@ export default async function Home() {
                   <Link
                     key={exam.id}
                     href={examUrl(state.slug, exam.slug)}
-                    prefetch={false}
+                    prefetch={true}
                     className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-blue-400 hover:shadow-xs transition"
                   >
                     <div>
