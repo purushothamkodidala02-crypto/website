@@ -152,19 +152,19 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
-        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
-        <div className="absolute bottom-0 right-1/3 h-32 w-32 rounded-full bg-violet-400/10 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-white p-7 text-slate-900 shadow-sm sm:p-9">
+
+
         <div className="relative flex flex-wrap items-end justify-between gap-7">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-teal-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
+            <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-slate-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-900" />
               Admin overview
             </p>
-            <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
               Content operations
             </h1>
-            <p className="mt-3 max-w-2xl leading-7 text-slate-300">
+            <p className="mt-3 max-w-2xl leading-7 text-slate-600">
               See what students can access, identify unfinished tests, and
               continue the most important admin work.
             </p>
@@ -172,19 +172,19 @@ export default async function AdminDashboard() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/similarity"
-              className="rounded-xl bg-teal-300 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/20 hover:bg-teal-200"
+              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
             >
               Similarity scanner
             </Link>
             <Link
               href="/admin/mock-tests"
-              className="rounded-xl border border-slate-700 bg-white/5 px-4 py-3 text-sm font-bold text-white hover:border-slate-500 hover:bg-white/10"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100"
             >
               Manage mock tests
             </Link>
             <Link
               href="/admin/questions"
-              className="rounded-xl border border-slate-700 bg-white/5 px-4 py-3 text-sm font-bold text-white hover:border-slate-500 hover:bg-white/10"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100"
             >
               Open Question Bank
             </Link>
@@ -223,7 +223,7 @@ export default async function AdminDashboard() {
                   ? "Review upcoming expiring questions in the Question Bank before they leave student exams."
                   : "All questions in your Question Bank are permanent or within safe expiration dates."
               }
-              tone={expiringSoonCount > 0 ? "amber" : "teal"}
+              tone={expiringSoonCount > 0 ? "amber" : "slate"}
               href="/admin/questions?status=expiring_soon"
             />
             <AttentionItem
@@ -242,7 +242,7 @@ export default async function AdminDashboard() {
               count={drafts.length - draftsNeedingWork.length}
               title="Draft tests are ready to review"
               detail="Preview these tests and publish them when approved."
-              tone="teal"
+              tone="slate"
             />
             <AttentionItem
               count={hidden.length}
@@ -253,9 +253,9 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
-          <div className="border-b border-teal-100 bg-gradient-to-r from-teal-50 to-white px-6 py-5">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
+        <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-sm">
+          <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
               Recently updated
             </p>
             <h2 className="mt-2 text-xl font-black">Mock tests</h2>
@@ -270,7 +270,7 @@ export default async function AdminDashboard() {
                 <Link
                   key={test.id}
                   href={`/admin/mock-tests/${test.id}/edit`}
-                  className="flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-teal-50/50"
+                  className="flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-slate-50"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold">{visibleTestTitle(test)}</p>
@@ -293,10 +293,10 @@ export default async function AdminDashboard() {
       </section>
 
       {/* Question Similarity & Overlap Intelligence */}
-      <section className="relative overflow-hidden rounded-3xl border border-teal-100 bg-gradient-to-r from-teal-50/60 via-white to-white p-6 shadow-sm sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/60 bg-teal-100/60 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-700">
               Exam Intelligence
             </span>
             <h2 className="mt-3 text-2xl font-black text-slate-950">
@@ -309,7 +309,7 @@ export default async function AdminDashboard() {
           <div>
             <Link
               href="/admin/similarity"
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-black text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
             >
               Launch Similarity Scanner &rarr;
             </Link>
@@ -317,14 +317,14 @@ export default async function AdminDashboard() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-950 via-slate-950 to-slate-900 p-6 text-white shadow-xl sm:p-8">
-        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-teal-300/10 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 text-slate-900 shadow-sm sm:p-8">
+
         <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
             Content setup
           </p>
-          <h2 className="mt-2 text-2xl font-black">Build in the right order</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+          <h2 className="mt-2 text-2xl font-black text-slate-950">Build in the right order</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
             Structure the Exam first, add reusable questions, then let Mock
             Tests control student visibility.
           </p>
@@ -356,24 +356,24 @@ export default async function AdminDashboard() {
 
 const metricStyles = {
   emerald: {
-    card: "border-emerald-100 bg-gradient-to-br from-emerald-50 to-white",
-    badge: "bg-emerald-100 text-emerald-800",
-    value: "text-emerald-950",
+    card: "border-slate-200/90 bg-white",
+    badge: "bg-slate-100 text-slate-700",
+    value: "text-slate-900",
   },
   amber: {
-    card: "border-amber-100 bg-gradient-to-br from-amber-50 to-white",
-    badge: "bg-amber-100 text-amber-800",
-    value: "text-amber-950",
+    card: "border-slate-200/90 bg-white",
+    badge: "bg-amber-50 text-amber-800 border border-amber-200/60",
+    value: "text-slate-900",
   },
   teal: {
-    card: "border-teal-100 bg-gradient-to-br from-teal-50 to-white",
-    badge: "bg-teal-100 text-teal-800",
-    value: "text-teal-950",
+    card: "border-slate-200/90 bg-white",
+    badge: "bg-slate-100 text-slate-700",
+    value: "text-slate-900",
   },
   violet: {
-    card: "border-violet-100 bg-gradient-to-br from-violet-50 to-white",
-    badge: "bg-violet-100 text-violet-800",
-    value: "text-violet-950",
+    card: "border-slate-200/90 bg-white",
+    badge: "bg-slate-100 text-slate-700",
+    value: "text-slate-900",
   },
 };
 
@@ -484,11 +484,11 @@ function WorkflowLink({
   return (
     <Link
       href={href}
-      className="rounded-2xl border border-slate-700 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:border-teal-300/50 hover:bg-white/10"
+      className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-100"
     >
-      <span className="text-xs font-black text-teal-200">{number}</span>
-      <h3 className="mt-3 font-black">{title}</h3>
-      <p className="mt-2 text-xs leading-5 text-slate-300">{detail}</p>
+      <span className="text-xs font-black text-slate-400">{number}</span>
+      <h3 className="mt-3 font-black text-slate-900">{title}</h3>
+      <p className="mt-2 text-xs leading-5 text-slate-600">{detail}</p>
     </Link>
   );
 }

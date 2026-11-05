@@ -51,15 +51,15 @@ const copyRequiredFields = (row: string[]) => QUESTION_IMPORT_REQUIRED_HEADERS.m
 export default function ExcelImportGuidePage() {
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
-        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal-300/15 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-white p-7 text-slate-900 shadow-sm sm:p-9">
+
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.15em] text-teal-200">Question bank</p>
-            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Excel import guide</h1>
-            <p className="mt-3 max-w-3xl leading-7 text-slate-300">Use this exact format when adding Questions through Excel or CSV. Every row is checked before anything is saved.</p>
+            <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-500">Question bank</p>
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Excel import guide</h1>
+            <p className="mt-3 max-w-3xl leading-7 text-slate-600">Use this exact format when adding Questions through Excel or CSV. Every row is checked before anything is saved.</p>
           </div>
-          <Link href="/admin/questions#import-questions" className="rounded-xl bg-teal-300 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-teal-200">Open Excel import →</Link>
+          <Link href="/admin/questions#import-questions" className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-slate-800">Open Excel import →</Link>
         </div>
       </section>
 
@@ -70,7 +70,7 @@ export default function ExcelImportGuidePage() {
       </section>
 
       <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Step 1</p>
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Step 1</p>
         <h2 className="mt-2 text-2xl font-black">Keep these headings in row 1</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">Headings are case-insensitive, but each heading must appear only once. For bilingual subjects, all 13 columns are required. For English-only or Telugu-only subjects, you can omit the other language’s columns.</p>
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -79,7 +79,7 @@ export default function ExcelImportGuidePage() {
       </section>
 
       <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Step 2</p>
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Step 2</p>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3"><h2 className="text-2xl font-black">Ready-to-copy bilingual examples</h2><CopyExampleButton text={copyRequiredFields(bilingualExample)} label="Copy standard MCQ required fields" /></div>
         <p className="mt-2 text-sm leading-6 text-slate-600">Use one row per Question. The Subject name must already exist in the selected Paper. Correct answer must be A, B, C, or D.</p>
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
@@ -90,28 +90,28 @@ export default function ExcelImportGuidePage() {
         </div>
         <p className="mt-4 text-xs leading-5 text-slate-500">For a bilingual subject, fill all English and Telugu fields. For an English-only or Telugu-only subject, you only need your subject’s language columns (the other language’s columns can be omitted entirely or left blank).</p>
         <div className="mt-8 border-t border-slate-200 pt-7">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">More required-field examples</p>
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">More required-field examples</p>
         <h2 className="mt-2 text-2xl font-black">Match the Following and Statement–Reason</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Use the same Excel columns as a standard MCQ. Put the matching lists or the statement and reason in the Question field, then put four answer combinations in options A–D. The student sees four answer choices, not a drag-and-match grid.</p>
         <div className="mt-6 grid gap-5 xl:grid-cols-2">
-          <article className="rounded-2xl border border-teal-100 bg-teal-50 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Match the Following</p><CopyExampleButton text={copyRequiredFields(matchExample)} label="Copy Match the Following required fields" /></div>
-            <h3 className="mt-2 font-black text-teal-950">Delhi Sultanate dynasties and founders</h3>
-            <p className="mt-2 text-xs leading-5 text-teal-800">The copy button includes every required field: import key, subject, English Question and options, Telugu Question and options, and correct answer.</p>
-            <div className="mt-4 rounded-xl border border-teal-200 bg-white p-4 text-sm leading-6 text-teal-950">
-              <p className="font-black">Copy this into the <code className="rounded bg-teal-50 px-1">question_en</code> cell</p>
+          <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Match the Following</p><CopyExampleButton text={copyRequiredFields(matchExample)} label="Copy Match the Following required fields" /></div>
+            <h3 className="mt-2 font-black text-slate-950">Delhi Sultanate dynasties and founders</h3>
+            <p className="mt-2 text-xs leading-5 text-slate-600">The copy button includes every required field: import key, subject, English Question and options, Telugu Question and options, and correct answer.</p>
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-900">
+              <p className="font-black">Copy this into the <code className="rounded bg-slate-100 px-1">question_en</code> cell</p>
               <pre className="mt-3 whitespace-pre-wrap font-sans text-sm">{`Match the following:
 1. Slave Dynasty; 2. Khilji Dynasty; 3. Tughlaq Dynasty; A. Jalaluddin Firuz Khilji; B. Ghiyasuddin Tughlaq; C. Qutbuddin Aibak`}</pre>
-              <p className="mt-3 font-black">Copy this into the <code className="rounded bg-teal-50 px-1">question_te</code> cell</p>
+              <p className="mt-3 font-black">Copy this into the <code className="rounded bg-slate-100 px-1">question_te</code> cell</p>
               <pre className="mt-3 whitespace-pre-wrap font-sans text-sm">{`జతపరచండి:
 1. బానిస వంశం; 2. ఖిల్జీ వంశం; 3. తుగ్లక్ వంశం; ఎ. జలాలుద్దీన్ ఫిరోజ్ ఖిల్జీ; బి. ఘియాసుద్దీన్ తుగ్లక్; సి. కుతుబుద్దీన్ ఐబక్`}</pre>
-              <p className="mt-3 text-xs text-teal-800">Start exactly with <strong>Match the following:</strong> in English and <strong>జతపరచండి:</strong> in Telugu. Semicolons separate every item; do not use commas. You may use <strong>Alt + Enter</strong> instead of a semicolon if you prefer separate Excel lines.</p>
+              <p className="mt-3 text-xs text-slate-600">Start exactly with <strong>Match the following:</strong> in English and <strong>జతపరచండి:</strong> in Telugu. Semicolons separate every item; do not use commas. You may use <strong>Alt + Enter</strong> instead of a semicolon if you prefer separate Excel lines.</p>
             </div>
-            <div className="mt-4 grid gap-4 text-sm leading-6 text-teal-950 sm:grid-cols-2">
+            <div className="mt-4 grid gap-4 text-sm leading-6 text-slate-900 sm:grid-cols-2">
               <div><p className="font-bold">English</p><p className="mt-1">Match the Delhi Sultanate dynasties with their founders.</p><p className="mt-2">1. Slave Dynasty<br />2. Khilji Dynasty<br />3. Tughlaq Dynasty</p><p className="mt-2">A. Jalaluddin Firuz Khilji<br />B. Ghiyasuddin Tughlaq<br />C. Qutbuddin Aibak</p></div>
               <div><p className="font-bold">Telugu</p><p className="mt-1">ఢిల్లీ సుల్తానేట్ వంశాలను వాటి స్థాపకులతో జతపరచండి.</p><p className="mt-2">1. బానిస వంశం<br />2. ఖిల్జీ వంశం<br />3. తుగ్లక్ వంశం</p><p className="mt-2">ఎ. జలాలుద్దీన్ ఫిరోజ్ ఖిల్జీ<br />బి. ఘియాసుద్దీన్ తుగ్లక్<br />సి. కుతుబుద్దీన్ ఐబక్</p></div>
             </div>
-            <div className="mt-4 rounded-xl bg-white p-3 text-sm text-teal-900"><p className="font-bold">Put these in the Excel option columns:</p><p className="mt-1">A: 1–C, 2–A, 3–B &nbsp; <strong>(correct_answer: A)</strong><br />B: 1–A, 2–B, 3–C<br />C: 1–B, 2–C, 3–A<br />D: 1–C, 2–B, 3–A</p></div>
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-800"><p className="font-bold">Put these in the Excel option columns:</p><p className="mt-1">A: 1–C, 2–A, 3–B &nbsp; <strong>(correct_answer: A)</strong><br />B: 1–A, 2–B, 3–C<br />C: 1–B, 2–C, 3–A<br />D: 1–C, 2–B, 3–A</p></div>
           </article>
           <article className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-[0.14em] text-indigo-700">Statement–Reason</p><CopyExampleButton text={copyRequiredFields(statementReasonExample)} label="Copy Statement Reason required fields" /></div>
@@ -128,10 +128,10 @@ export default function ExcelImportGuidePage() {
       </section>
 
       <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Optional columns</p>
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Optional columns</p>
         <h2 className="mt-2 text-2xl font-black">Add more details when needed</h2>
         <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
-          <table className="w-full text-left text-sm"><thead className="bg-slate-50 text-slate-700"><tr><th className="px-4 py-3 font-black">Column</th><th className="px-4 py-3 font-black">Accepted value</th></tr></thead><tbody className="divide-y divide-slate-200">{optionalColumns.map(([column, detail]) => <tr key={column}><td className="px-4 py-4 font-mono text-xs font-bold text-teal-800">{column}</td><td className="px-4 py-4 leading-6 text-slate-600">{detail}</td></tr>)}</tbody></table>
+          <table className="w-full text-left text-sm"><thead className="bg-slate-50 text-slate-700"><tr><th className="px-4 py-3 font-black">Column</th><th className="px-4 py-3 font-black">Accepted value</th></tr></thead><tbody className="divide-y divide-slate-200">{optionalColumns.map(([column, detail]) => <tr key={column}><td className="px-4 py-4 font-mono text-xs font-bold text-slate-900">{column}</td><td className="px-4 py-4 leading-6 text-slate-600">{detail}</td></tr>)}</tbody></table>
         </div>
         <p className="mt-4 text-xs text-slate-500">All columns the system can read: {QUESTION_IMPORT_EXPORT_HEADERS.join(", ")}.</p>
       </section>
@@ -141,11 +141,11 @@ export default function ExcelImportGuidePage() {
         <div className="rounded-3xl border border-amber-100 bg-amber-50 p-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Display note</p><h2 className="mt-2 text-xl font-black text-amber-950">All imported Questions use MCQ options</h2><p className="mt-4 text-sm leading-6 text-amber-900">Excel can import Match the Following and Statement–Reason in the four-option format shown above. Use Question Bank only when you need a different custom or interactive display.</p></div>
       </section>
 
-      <section className="rounded-3xl border border-teal-100 bg-teal-50 p-6 sm:p-8"><h2 className="text-xl font-black text-teal-950">Before you upload</h2><ol className="mt-4 grid gap-3 text-sm leading-6 text-teal-950 sm:grid-cols-2"><li><strong>1.</strong> Select Recruiting Board, Exam, and Paper.</li><li><strong>2.</strong> Confirm the Subject names already exist in that Paper.</li><li><strong>3.</strong> Keep the headings in row 1 and save as .xlsx or .xls.</li><li><strong>4.</strong> Import into Question Bank, or open a draft Mock Test to import and assign Questions directly.</li></ol></section>
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"><h2 className="text-xl font-black text-slate-950">Before you upload</h2><ol className="mt-4 grid gap-3 text-sm leading-6 text-slate-700 sm:grid-cols-2"><li><strong>1.</strong> Select Recruiting Board, Exam, and Paper.</li><li><strong>2.</strong> Confirm the Subject names already exist in that Paper.</li><li><strong>3.</strong> Keep the headings in row 1 and save as .xlsx or .xls.</li><li><strong>4.</strong> Import into Question Bank, or open a draft Mock Test to import and assign Questions directly.</li></ol></section>
     </div>
   );
 }
 
 function InfoCard({ title, detail }: { title: string; detail: string }) {
-  return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">{title}</p><p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{detail}</p></article>;
+  return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.13em] text-slate-500">{title}</p><p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{detail}</p></article>;
 }

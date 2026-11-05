@@ -218,25 +218,25 @@ function NavigationLinks({
                     title={collapsed ? link.label : undefined}
                     className={`group relative flex min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
                       active
-                        ? "bg-teal-300 text-slate-950 shadow-lg shadow-teal-950/20"
-                        : "text-slate-300 hover:bg-white/10 hover:text-white"
+                        ? "bg-slate-900 text-white shadow-xs"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
                     <span
                       className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
                         active
-                          ? "bg-slate-950 text-teal-200"
-                          : "bg-white/10 text-slate-300"
+                          ? "bg-white/15 text-white"
+                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-800"
                       }`}
                     >
                       <NavIcon name={link.icon} />
                       {collapsed && showBadge && (
                         <span
                           title={isReport ? `${reportCount} open question reports` : `${surveyCount} new survey responses`}
-                          className={`absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ring-slate-950 shadow-sm ${
+                          className={`absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ring-white shadow-xs ${
                             isReport
-                              ? "bg-amber-400 text-slate-950"
-                              : "bg-teal-300 text-slate-950"
+                              ? "bg-amber-500 text-white"
+                              : "bg-slate-900 text-white"
                           }`}
                         >
                           {badgeCount > 99 ? "99+" : badgeCount}
@@ -256,17 +256,17 @@ function NavigationLinks({
                             className={`ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
                               isReport
                                 ? active
-                                  ? "bg-slate-950 text-amber-300 ring-1 ring-amber-400/50"
-                                  : "bg-amber-400 text-slate-950 shadow-sm shadow-amber-400/30"
+                                  ? "bg-amber-400 text-slate-950 ring-1 ring-amber-400/50"
+                                  : "bg-amber-100 text-amber-900 border border-amber-200"
                                 : active
-                                  ? "bg-slate-950 text-teal-300 ring-1 ring-teal-300/50"
-                                  : "bg-teal-300 text-slate-950 shadow-sm shadow-teal-300/30"
+                                  ? "bg-white/20 text-white ring-1 ring-white/30"
+                                  : "bg-slate-100 text-slate-700 border border-slate-200"
                             }`}
                           >
                             {((isReport && badges.hasNewReport) || (!isReport && surveyCount > 0)) && (
                               <span className="relative flex h-2 w-2">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-900 opacity-75" />
-                                <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-950" />
+                                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isReport ? "bg-amber-400" : active ? "bg-white" : "bg-slate-400"}`} />
+                                <span className={`relative inline-flex h-2 w-2 rounded-full ${isReport ? "bg-amber-600" : active ? "bg-white" : "bg-slate-700"}`} />
                               </span>
                             )}
                             <span>{badgeCount > 99 ? "99+" : badgeCount}{!isReport ? " new" : ""}</span>
@@ -287,8 +287,8 @@ function NavigationLinks({
 
 function Brand({ linked = true, collapsed = false }: { linked?: boolean; collapsed?: boolean }) {
   const content = collapsed
-    ? <BrandMark preload className="h-9 w-9 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />
-    : <BrandLockup context="admin" markClassName="h-9 w-9 shrink-0 drop-shadow-[0_8px_14px_rgba(0,0,0,0.3)]" />;
+    ? <BrandMark preload className="h-9 w-9 shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.06)]" />
+    : <BrandLockup context="admin" markClassName="h-9 w-9 shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.06)]" />;
 
   if (!linked) return <div className="flex min-w-0 items-center">{content}</div>;
 
@@ -412,7 +412,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
 
   return (
     <>
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-4"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-200 bg-white py-6 text-slate-900 transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-4"}`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
           <Brand collapsed={collapsed} />
           {!collapsed && (
@@ -421,7 +421,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               onClick={onToggle}
               aria-label="Collapse sidebar"
               title="Collapse sidebar"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             >
               <MenuIcon />
             </button>
@@ -433,36 +433,36 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             onClick={onToggle}
             aria-label="Expand sidebar"
             title="Expand sidebar"
-            className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
           >
             <MenuIcon />
           </button>
         )}
-        <div className="mt-6 flex-1 overflow-x-hidden overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800 hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
+        <div className="mt-6 flex-1 overflow-x-hidden overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.200)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
           <NavigationLinks collapsed={collapsed} badges={badges} />
         </div>
-        <div className="mt-auto border-t border-slate-800 pt-5">
+        <div className="mt-auto border-t border-slate-200 pt-5">
           <Link
             href="/"
             target="_blank"
             rel="noreferrer"
             aria-label="Student"
             title={collapsed ? "Student portal (Open in new tab)" : undefined}
-            className={`flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : ""}`}
+            className={`flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 ${collapsed ? "justify-center" : ""}`}
           >
             {collapsed ? (
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-teal-200" title="Student portal (Open in new tab)">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-200 text-slate-800" title="Student portal (Open in new tab)">
                 <NavIcon name="portal" />
               </span>
             ) : (
               <>
                 <span className="flex items-center gap-2.5">
-                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-white/10 text-teal-200">
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-slate-200 text-slate-800">
                     <NavIcon name="portal" />
                   </span>
                   <span>Student</span>
                 </span>
-                <span className="text-[10px] tracking-wider text-teal-200">Open ↗</span>
+                <span className="text-[10px] font-bold tracking-wider text-slate-500">Open ↗</span>
               </>
             )}
           </Link>
@@ -470,7 +470,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
       </aside>
 
       {/* Mobile Sticky Top Navigation Bar */}
-      <div className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 text-white shadow-sm backdrop-blur md:hidden">
+      <div className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-slate-200 bg-white/95 px-4 text-slate-900 shadow-xs backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -478,20 +478,20 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             aria-label="Open admin side navigation"
             aria-expanded={mobileOpen}
             aria-controls="admin-mobile-drawer"
-            className="relative grid h-9 w-9 place-items-center rounded-lg border border-slate-700 bg-slate-900 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="relative grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
           >
             <MenuIcon />
             {hasAnyUpdate && (
               <span
                 title="Updates available in question reports or surveys"
-                className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-slate-950 animate-pulse"
+                className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white animate-pulse"
               />
             )}
           </button>
           <Brand linked={true} />
         </div>
         <div className="flex items-center gap-2">
-          <LogoutButton className="rounded-lg border border-slate-700 bg-slate-900/80 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white disabled:opacity-50" />
+          <LogoutButton className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50" />
         </div>
       </div>
 
@@ -507,7 +507,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
           >
             {/* Backdrop overlay */}
             <div
-              className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"
+              className="absolute inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity"
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
@@ -517,25 +517,25 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               role="dialog"
               aria-modal="true"
               aria-label="Admin side navigation"
-              className={`absolute inset-y-0 left-0 flex h-full w-[min(20rem,85vw)] flex-col border-r border-slate-800 bg-slate-950 text-white shadow-2xl transition-transform duration-300 ease-out ${
+              className={`absolute inset-y-0 left-0 flex h-full w-[min(20rem,85vw)] flex-col border-r border-slate-200 bg-white text-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
                 mobileOpen ? "translate-x-0" : "-translate-x-full"
               }`}
             >
               {/* Drawer Top Header */}
-              <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 px-4">
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4">
                 <Brand linked={true} />
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close admin side navigation"
-                  className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                 >
                   <span className="text-xl font-bold leading-none">✕</span>
                 </button>
               </div>
 
               {/* Drawer Navigation Links */}
-              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800">
+              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.200)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200">
                 <NavigationLinks
                   badges={badges}
                   onLinkClick={() => setMobileOpen(false)}
@@ -543,9 +543,9 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               </div>
 
               {/* Drawer Footer Actions */}
-              <div className="shrink-0 border-t border-slate-800 bg-slate-950/95 p-4 space-y-3">
-                <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <div className="shrink-0 border-t border-slate-200 bg-white/95 p-4 space-y-3">
+                <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-emerald-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
                   <span>MFA verified session</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -554,12 +554,12 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => setMobileOpen(false)}
-                    className="flex flex-1 items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-xs font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white"
+                    className="flex flex-1 items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900"
                   >
                     <span>Student portal</span>
-                    <span className="text-[10px] tracking-wider text-teal-200">Open ↗</span>
+                    <span className="text-[10px] font-bold tracking-wider text-slate-500">Open ↗</span>
                   </Link>
-                  <LogoutButton className="rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-xs font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white disabled:opacity-50" />
+                  <LogoutButton className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50" />
                 </div>
               </div>
             </aside>
