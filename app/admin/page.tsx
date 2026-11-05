@@ -114,6 +114,8 @@ export default async function AdminDashboard() {
 
   const usableQuestionsCount = usableQuestionsCountResult.count ?? 0;
   const expiringSoonCount = expiringSoonCountResult.count ?? 0;
+  const openReportsCount = reportsResult.count ?? 0;
+  const readyDraftsCount = drafts.length - draftsNeedingWork.length;
 
   const metrics = [
     {
@@ -121,159 +123,206 @@ export default async function AdminDashboard() {
       value: published.length,
       detail: "Visible to students",
       href: "/admin/mock-tests",
-      accent: "emerald",
-      short: "LIVE",
+      icon: "published" as const,
     },
     {
       label: "Draft tests",
       value: drafts.length,
-      detail: `${draftsNeedingWork.length} need attention`,
+      detail: `${draftsNeedingWork.length} need questions or marks`,
       href: "/admin/mock-tests",
-      accent: "amber",
-      short: "DRAFT",
+      icon: "draft" as const,
     },
     {
-      label: "Available questions",
+      label: "Question Bank",
       value: usableQuestionsCount,
-      detail: `${totalQuestionsCountResult.count ?? 0} total in the Question Bank`,
+      detail: `${totalQuestionsCountResult.count ?? 0} total questions`,
       href: "/admin/questions",
-      accent: "teal",
-      short: "BANK",
+      icon: "questions" as const,
     },
     {
       label: "Completed attempts",
       value: attemptsResult.count ?? 0,
       detail: "Student submissions",
       href: "/admin/results",
-      accent: "violet",
-      short: "DATA",
+      icon: "attempts" as const,
     },
   ] as const;
 
+  const hasAnyAttentionItem =
+    expiringSoonCount > 0 ||
+    openReportsCount > 0 ||
+    draftsNeedingWork.length > 0 ||
+    readyDraftsCount > 0 ||
+    hidden.length > 0;
+
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-white p-7 text-slate-900 shadow-sm sm:p-9">
-
-
-        <div className="relative flex flex-wrap items-end justify-between gap-7">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-slate-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-900" />
-              Admin overview
-            </p>
-            <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Content operations
-            </h1>
-            <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-              See what students can access, identify unfinished tests, and
-              continue the most important admin work.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/similarity"
-              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
-            >
-              Similarity scanner
-            </Link>
-            <Link
-              href="/admin/mock-tests"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100"
-            >
-              Manage mock tests
-            </Link>
-            <Link
-              href="/admin/questions"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100"
-            >
-              Open Question Bank
-            </Link>
-          </div>
+      {/* Sleek Dashboard Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            Overview
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Real-time status of exams, tests, questions, and student attempts.
+          </p>
         </div>
-      </section>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            href="/admin/mock-tests"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Manage Tests</span>
+          </Link>
+          <Link
+            href="/admin/questions"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900"
+          >
+            <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+            <span>Question Bank</span>
+          </Link>
+          <Link
+            href="/admin/similarity"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900"
+          >
+            <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <span>Similarity Scanner</span>
+          </Link>
+        </div>
+      </div>
 
+      {/* KPI Metrics */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => (
           <MetricCard key={metric.label} {...metric} />
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="overflow-hidden rounded-3xl border border-amber-100 bg-white shadow-sm">
-          <div className="flex items-center justify-between gap-4 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white px-6 py-5">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700">
-                Priority
-              </p>
-              <h2 className="mt-2 text-xl font-black">Needs attention</h2>
+      {/* Actionable Two-Column Operations Layout */}
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        {/* Needs attention Card */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-base font-black text-slate-900">Needs attention</h2>
+              {hasAnyAttentionItem && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black text-amber-800 border border-amber-200/80">
+                  Active
+                </span>
+              )}
             </div>
             <Link
               href="/admin/mock-tests"
-              className="rounded-lg bg-amber-100 px-3 py-2 text-sm font-bold text-amber-900 hover:bg-amber-200"
+              className="text-xs font-bold text-slate-600 hover:text-slate-900 transition"
             >
-              Review tests
+              Review tests &rarr;
             </Link>
           </div>
-          <div className="grid gap-3 p-6">
-            <AttentionItem
-              count={expiringSoonCount}
-              title={expiringSoonCount > 0 ? "Questions expiring soon (≤ 30 days)" : "No questions expiring soon"}
-              detail={
-                expiringSoonCount > 0
-                  ? "Review upcoming expiring questions in the Question Bank before they leave student exams."
-                  : "All questions in your Question Bank are permanent or within safe expiration dates."
-              }
-              tone={expiringSoonCount > 0 ? "amber" : "slate"}
-              href="/admin/questions?status=expiring_soon"
-            />
-            <AttentionItem
-              count={reportsResult.count ?? 0}
-              title="Student question reports are open"
-              detail="Review reported answers, wording, translations, and images."
-              tone="amber"
-            />
-            <AttentionItem
-              count={draftsNeedingWork.length}
-              title="Draft tests are not ready"
-              detail="Add usable questions and valid marks before publishing."
-              tone="amber"
-            />
-            <AttentionItem
-              count={drafts.length - draftsNeedingWork.length}
-              title="Draft tests are ready to review"
-              detail="Preview these tests and publish them when approved."
-              tone="slate"
-            />
-            <AttentionItem
-              count={hidden.length}
-              title="Tests are hidden"
-              detail="Existing results remain safe; restore a test if it should return."
-              tone="slate"
-            />
+          <div className="p-6">
+            {!hasAnyAttentionItem ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  </svg>
+                </div>
+                <h3 className="mt-3 text-sm font-bold text-slate-900">All systems clear</h3>
+                <p className="mt-1 max-w-sm text-xs text-slate-500">
+                  No open reports, expiring questions, or incomplete drafts currently require administrative action.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {expiringSoonCount > 0 && (
+                  <AttentionItem
+                    count={expiringSoonCount}
+                    title="Questions expiring soon (≤ 30 days)"
+                    detail="Review before questions leave active student mock tests."
+                    tone="amber"
+                    href="/admin/questions?status=expiring_soon"
+                  />
+                )}
+                {openReportsCount > 0 && (
+                  <AttentionItem
+                    count={openReportsCount}
+                    title="Student question reports are open"
+                    detail="Review reported questions, wording, translations, and answers."
+                    tone="amber"
+                    href="/admin/question-reports"
+                  />
+                )}
+                {draftsNeedingWork.length > 0 && (
+                  <AttentionItem
+                    count={draftsNeedingWork.length}
+                    title="Draft tests not ready"
+                    detail="Add usable questions and valid marks before publishing."
+                    tone="amber"
+                    href="/admin/mock-tests"
+                  />
+                )}
+                {readyDraftsCount > 0 && (
+                  <AttentionItem
+                    count={readyDraftsCount}
+                    title="Draft tests ready for review"
+                    detail="Preview test flow and publish when approved."
+                    tone="slate"
+                    href="/admin/mock-tests"
+                  />
+                )}
+                {hidden.length > 0 && (
+                  <AttentionItem
+                    count={hidden.length}
+                    title="Hidden or archived tests"
+                    detail="Results remain safe; unarchive if needed."
+                    tone="slate"
+                    href="/admin/mock-tests"
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-sm">
-          <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-              Recently updated
-            </p>
-            <h2 className="mt-2 text-xl font-black">Mock tests</h2>
+        {/* Recently updated Mock tests Card */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
+            <h2 className="text-base font-black text-slate-900">Recent Mock Tests</h2>
+            <Link
+              href="/admin/mock-tests"
+              className="text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+            >
+              View all tests &rarr;
+            </Link>
           </div>
           {tests.length === 0 ? (
-            <p className="p-6 text-sm text-slate-600">
-              No mock tests have been created.
-            </p>
+            <div className="p-8 text-center">
+              <p className="text-sm text-slate-500">No mock tests have been created yet.</p>
+              <Link
+                href="/admin/mock-tests"
+                className="mt-3 inline-block rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-800"
+              >
+                Create your first test
+              </Link>
+            </div>
           ) : (
             <div className="divide-y divide-slate-100">
               {tests.slice(0, 5).map((test) => (
                 <Link
                   key={test.id}
                   href={`/admin/mock-tests/${test.id}/edit`}
-                  className="flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-slate-50"
+                  className="group flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-slate-50/80"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{visibleTestTitle(test)}</p>
+                    <p className="truncate text-sm font-bold text-slate-900 group-hover:text-slate-950">
+                      {visibleTestTitle(test)}
+                    </p>
                     <p className="mt-1 text-xs text-slate-500">
                       Updated{" "}
                       {new Intl.DateTimeFormat("en-IN", {
@@ -282,9 +331,12 @@ export default async function AdminDashboard() {
                       }).format(new Date(test.updated_at))}
                     </p>
                   </div>
-                  <Status
-                    status={test.status as "draft" | "published" | "archived"}
-                  />
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <Status status={test.status as "draft" | "published" | "archived"} />
+                    <span className="text-slate-300 group-hover:text-slate-600 transition text-sm font-bold">
+                      &rarr;
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -292,66 +344,90 @@ export default async function AdminDashboard() {
         </div>
       </section>
 
+      {/* Quick Shortcuts Section */}
+      <section className="pt-2">
+        <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500 mb-3 px-1">
+          Quick Shortcuts
+        </h3>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ShortcutCard
+            title="Exam Catalogue"
+            detail="Recruiting boards, exams, papers"
+            href="/admin/exams"
+            icon="catalogue"
+          />
+          <ShortcutCard
+            title="Subjects"
+            detail="Syllabus & practice subjects"
+            href="/admin/subjects"
+            icon="subjects"
+          />
+          <ShortcutCard
+            title="Registrations"
+            detail="Student profiles & search"
+            href="/admin/students"
+            icon="students"
+          />
+          <ShortcutCard
+            title="Question Reports"
+            detail="Review flagged questions"
+            href="/admin/question-reports"
+            icon="reports"
+            badge={openReportsCount}
+          />
+        </div>
+      </section>
     </div>
   );
 }
-
-const metricStyles = {
-  emerald: {
-    card: "border-slate-200/90 bg-white",
-    badge: "bg-slate-100 text-slate-700",
-    value: "text-slate-900",
-  },
-  amber: {
-    card: "border-slate-200/90 bg-white",
-    badge: "bg-amber-50 text-amber-800 border border-amber-200/60",
-    value: "text-slate-900",
-  },
-  teal: {
-    card: "border-slate-200/90 bg-white",
-    badge: "bg-slate-100 text-slate-700",
-    value: "text-slate-900",
-  },
-  violet: {
-    card: "border-slate-200/90 bg-white",
-    badge: "bg-slate-100 text-slate-700",
-    value: "text-slate-900",
-  },
-};
 
 function MetricCard({
   label,
   value,
   detail,
   href,
-  accent,
-  short,
+  icon,
 }: {
   label: string;
   value: number;
   detail: string;
   href: string;
-  accent: keyof typeof metricStyles;
-  short: string;
+  icon: "published" | "draft" | "questions" | "attempts";
 }) {
-  const styles = metricStyles[accent];
   return (
     <Link
       href={href}
-      className={`rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-950/5 ${styles.card}`}
+      className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:border-slate-300 hover:shadow-sm"
     >
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-slate-600">{label}</p>
-        <span
-          className={`rounded-lg px-2 py-1 text-[9px] font-black tracking-wider ${styles.badge}`}
-        >
-          {short}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">{label}</span>
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-slate-200/80 group-hover:text-slate-900">
+          {icon === "published" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          )}
+          {icon === "draft" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+            </svg>
+          )}
+          {icon === "questions" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+            </svg>
+          )}
+          {icon === "attempts" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+            </svg>
+          )}
         </span>
       </div>
-      <p className={`mt-4 text-3xl font-black tracking-tight ${styles.value}`}>
+      <p className="mt-4 text-3xl font-black tracking-tight text-slate-900">
         {value}
       </p>
-      <p className="mt-3 text-xs font-semibold text-slate-500">{detail}</p>
+      <p className="mt-2 text-xs font-semibold text-slate-500">{detail}</p>
     </Link>
   );
 }
@@ -360,36 +436,43 @@ function AttentionItem({
   count,
   title,
   detail,
-  tone,
+  tone = "amber",
   href,
 }: {
   count: number;
   title: string;
   detail: string;
-  tone: "amber" | "teal" | "slate";
-  href?: string;
+  tone?: "amber" | "slate";
+  href: string;
 }) {
-  const colors = {
-    amber: "border-amber-100 bg-amber-50 text-amber-950",
-    teal: "border-teal-100 bg-teal-50 text-teal-950",
-    slate: "border-slate-200 bg-slate-50 text-slate-900",
-  };
-  const content = (
-    <div className={`flex gap-4 rounded-2xl border p-4 ${colors[tone]} ${href ? "transition hover:shadow-md hover:border-amber-300" : ""}`}>
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg font-black shadow-sm">
-        {count}
-      </span>
-      <div>
-        <h3 className="font-black">{title}</h3>
-        <p className="mt-1 text-xs leading-5 opacity-75">{detail}</p>
+  const isAmber = tone === "amber";
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center justify-between gap-4 rounded-xl border p-4 transition ${
+        isAmber
+          ? "border-amber-200/80 bg-amber-50/50 hover:bg-amber-50 hover:border-amber-300"
+          : "border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300"
+      }`}
+    >
+      <div className="flex items-center gap-3.5 min-w-0">
+        <span
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-black shadow-2xs ${
+            isAmber ? "bg-amber-100 text-amber-900" : "bg-white text-slate-800 border border-slate-200"
+          }`}
+        >
+          {count}
+        </span>
+        <div className="min-w-0">
+          <h4 className="truncate text-sm font-bold text-slate-900">{title}</h4>
+          <p className="mt-0.5 truncate text-xs text-slate-500">{detail}</p>
+        </div>
       </div>
-    </div>
+      <span className="shrink-0 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition font-bold text-sm">
+        &rarr;
+      </span>
+    </Link>
   );
-
-  if (href) {
-    return <Link href={href} className="block">{content}</Link>;
-  }
-  return content;
 }
 
 function Status({
@@ -409,5 +492,64 @@ function Status({
     >
       {details[0]}
     </span>
+  );
+}
+
+function ShortcutCard({
+  title,
+  detail,
+  href,
+  icon,
+  badge,
+}: {
+  title: string;
+  detail: string;
+  href: string;
+  icon: "catalogue" | "subjects" | "students" | "reports";
+  badge?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs transition hover:border-slate-300 hover:shadow-sm"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-slate-900 group-hover:text-white">
+          {icon === "catalogue" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+            </svg>
+          )}
+          {icon === "subjects" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+            </svg>
+          )}
+          {icon === "students" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+            </svg>
+          )}
+          {icon === "reports" && (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+            </svg>
+          )}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-slate-900 group-hover:text-slate-950">{title}</p>
+          <p className="truncate text-xs text-slate-500">{detail}</p>
+        </div>
+      </div>
+      {typeof badge === "number" && badge > 0 ? (
+        <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black text-amber-900 border border-amber-200">
+          {badge}
+        </span>
+      ) : (
+        <span className="shrink-0 text-slate-300 group-hover:text-slate-600 transition font-bold text-sm">
+          &rarr;
+        </span>
+      )}
+    </Link>
   );
 }
