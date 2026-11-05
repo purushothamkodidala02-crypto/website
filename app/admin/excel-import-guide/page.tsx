@@ -51,7 +51,7 @@ const copyRequiredFields = (row: string[]) => QUESTION_IMPORT_REQUIRED_HEADERS.m
 export default function ExcelImportGuidePage() {
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-teal-100/20 bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-xl shadow-teal-950/20 sm:p-9">
+      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
         <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal-300/15 blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -59,7 +59,7 @@ export default function ExcelImportGuidePage() {
             <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Excel import guide</h1>
             <p className="mt-3 max-w-3xl leading-7 text-slate-300">Use this exact format when adding Questions through Excel or CSV. Every row is checked before anything is saved.</p>
           </div>
-          <Link href="/admin/questions#import-questions" className="rounded-xl bg-teal-300 px-5 py-3 text-sm font-black text-[#071f1a] transition hover:bg-teal-200">Open Excel import →</Link>
+          <Link href="/admin/questions#import-questions" className="rounded-xl bg-teal-300 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-teal-200">Open Excel import →</Link>
         </div>
       </section>
 
@@ -84,7 +84,7 @@ export default function ExcelImportGuidePage() {
         <p className="mt-2 text-sm leading-6 text-slate-600">Use one row per Question. The Subject name must already exist in the selected Paper. Correct answer must be A, B, C, or D.</p>
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
           <table className="min-w-[104rem] text-left text-xs">
-            <thead className="bg-[#0a2922] text-white"><tr>{QUESTION_IMPORT_REQUIRED_HEADERS.map((heading) => <th key={heading} className="whitespace-nowrap px-3 py-3 font-black">{heading}</th>)}</tr></thead>
+            <thead className="bg-slate-950 text-white"><tr>{QUESTION_IMPORT_REQUIRED_HEADERS.map((heading) => <th key={heading} className="whitespace-nowrap px-3 py-3 font-black">{heading}</th>)}</tr></thead>
             <tbody><tr className="align-top bg-white text-slate-700">{bilingualExample.map((value, index) => <td key={`${value}-${index}`} className="max-w-52 border-t border-slate-200 px-3 py-3 leading-5">{value}</td>)}</tr></tbody>
           </table>
         </div>

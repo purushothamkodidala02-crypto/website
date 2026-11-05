@@ -150,7 +150,7 @@ export default function AdminSurveysList() {
           />
           <button
             type="submit"
-            className="w-full sm:w-auto rounded-xl bg-[#0a2922] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#11382f] transition active:scale-95 touch-manipulation text-center justify-center inline-flex items-center shrink-0"
+            className="w-full sm:w-auto rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800 transition active:scale-95 touch-manipulation text-center justify-center inline-flex items-center shrink-0"
           >
             Create Survey
           </button>
@@ -217,7 +217,7 @@ export default function AdminSurveysList() {
                 </button>
                 <Link
                   href={`/admin/surveys/${survey.id}`}
-                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#0a2922] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#11382f] transition active:scale-95 touch-manipulation text-center"
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition active:scale-95 touch-manipulation text-center"
                 >
                   Edit & View Responses ({survey.response_count || 0})
                 </Link>

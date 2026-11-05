@@ -49,7 +49,7 @@ export function CreateExamSeriesForm({ examGroups, product }: { examGroups: Exam
   return (
     <form action={action} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">{editing ? "Edit exam series" : "Step 2"}</p>
-      <h2 className="mt-1 text-xl font-black text-[#132621]">{editing ? "Update paid exam series" : "Create a paid exam series"}</h2>
+      <h2 className="mt-1 text-xl font-black text-slate-950">{editing ? "Update paid exam series" : "Create a paid exam series"}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">Students pay once and unlock every paid mock test under the selected exam or exams.</p>
 
       {product && <input type="hidden" name="product_id" value={product.id} />}
@@ -99,7 +99,7 @@ export function CreateExamSeriesForm({ examGroups, product }: { examGroups: Exam
         {!examGroups.length && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">Create an exam first in the catalogue before creating a paid series.</p>}
       </fieldset>
 
-      <div className="mt-6"><PendingSubmitButton pendingLabel={editing ? "Saving exam series…" : "Creating exam series…"} className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-black text-white transition hover:bg-[#11382f] disabled:opacity-60">{editing ? "Save changes" : "Create and activate series"}</PendingSubmitButton></div>
+      <div className="mt-6"><PendingSubmitButton pendingLabel={editing ? "Saving exam series…" : "Creating exam series…"} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-60">{editing ? "Save changes" : "Create and activate series"}</PendingSubmitButton></div>
       {state.message && <p role="status" aria-live="polite" className={`mt-4 rounded-xl px-4 py-3 text-sm font-semibold ${state.success ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>{state.message}</p>}
     </form>
   );

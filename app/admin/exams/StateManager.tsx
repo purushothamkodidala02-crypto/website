@@ -57,7 +57,7 @@ export function StateManager({ states }: { states: ManagedState[] }) {
           <strong className="font-display mt-1 block text-xl">Manage states and exam locations</strong>
           <span className="mt-1 block text-sm text-slate-600">Add AP, TG or another catalogue only once. Every board below must belong to one state.</span>
         </span>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#0a2922] text-xl text-teal-200">+</span>
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-xl text-teal-200">+</span>
       </summary>
       <div className="border-t bg-slate-50/70 p-5 sm:p-7">
         <div className="grid gap-3 xl:grid-cols-2">
@@ -91,7 +91,7 @@ export function StateManager({ states }: { states: ManagedState[] }) {
           <label className="text-sm font-bold">Display order<input name="display_order" type="number" min="0" defaultValue={states.length + 1} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
           <label className="text-sm font-bold md:col-span-2 lg:col-span-4">Student description<input name="description" placeholder="Short explanation shown on the student site" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
           <SeoFields className="md:col-span-2 lg:col-span-4" titlePlaceholder="State Mock Tests" descriptionPlaceholder="Browse free state exam mock tests by exam and paper." />
-          <div className="flex items-end"><PendingSubmitButton pendingLabel="Adding catalogue…" className="w-full rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-black text-white hover:bg-[#11382f]">Add catalogue</PendingSubmitButton></div>
+          <div className="flex items-end"><PendingSubmitButton pendingLabel="Adding catalogue…" className="w-full rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white">Add catalogue</PendingSubmitButton></div>
           {result.message && <p className={`text-sm font-semibold md:col-span-2 lg:col-span-4 ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}
         </form>
       </div>

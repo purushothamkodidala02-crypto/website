@@ -121,7 +121,7 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
                 setProcessing(false);
               }
             }}
-            className="mt-2 block w-full rounded-xl border bg-white p-2 text-sm font-normal file:mr-3 file:rounded-lg file:border-0 file:bg-[#0a2922] file:px-3 file:py-2 file:text-xs file:font-bold file:text-white"
+            className="mt-2 block w-full rounded-xl border bg-white p-2 text-sm font-normal file:mr-3 file:rounded-lg file:border-0 file:bg-slate-950 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white"
           />
           {processing && <span className="mt-2 block text-xs font-semibold text-teal-700">Optimizing the image…</span>}
           {!processing && fileMessage && <span className="mt-2 block text-xs font-semibold text-emerald-700">{fileMessage}</span>}

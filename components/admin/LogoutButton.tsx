@@ -32,7 +32,7 @@ export default function LogoutButton({ className }: { className?: string } = {})
       aria-busy={loading}
       className={
         className ??
-        "rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-[#132621] disabled:opacity-50"
+        "rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-950 disabled:opacity-50"
       }
     >
       <PendingButtonContent pending={loading} pendingLabel="Logging out…">Logout</PendingButtonContent>

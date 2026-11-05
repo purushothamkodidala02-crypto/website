@@ -190,7 +190,7 @@ function NavigationLinks({
           <section key={section.label}>
             {!collapsed && (
               <div className="flex items-center justify-between px-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.17em] text-teal-300/70">{section.label}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.17em] text-slate-500">{section.label}</p>
                 {sectionHasUpdates && (
                   <span
                     title="Updates available in this section"
@@ -218,25 +218,25 @@ function NavigationLinks({
                     title={collapsed ? link.label : undefined}
                     className={`group relative flex min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${collapsed ? "justify-center" : ""} ${
                       active
-                        ? "bg-teal-300 text-[#071f1a] shadow-lg shadow-teal-950/25"
-                        : "text-emerald-100/75 hover:bg-white/10 hover:text-white"
+                        ? "bg-teal-300 text-slate-950 shadow-lg shadow-teal-950/20"
+                        : "text-slate-300 hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     <span
                       className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
                         active
-                          ? "bg-[#071f1a] text-teal-200"
-                          : "bg-white/10 text-teal-200/90"
+                          ? "bg-slate-950 text-teal-200"
+                          : "bg-white/10 text-slate-300"
                       }`}
                     >
                       <NavIcon name={link.icon} />
                       {collapsed && showBadge && (
                         <span
                           title={isReport ? `${reportCount} open question reports` : `${surveyCount} new survey responses`}
-                          className={`absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ring-[#0a2922] shadow-sm ${
+                          className={`absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ring-slate-950 shadow-sm ${
                             isReport
-                              ? "bg-amber-400 text-[#071f1a]"
-                              : "bg-teal-300 text-[#071f1a]"
+                              ? "bg-amber-400 text-slate-950"
+                              : "bg-teal-300 text-slate-950"
                           }`}
                         >
                           {badgeCount > 99 ? "99+" : badgeCount}
@@ -256,17 +256,17 @@ function NavigationLinks({
                             className={`ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
                               isReport
                                 ? active
-                                  ? "bg-[#071f1a] text-amber-300 ring-1 ring-amber-400/50"
-                                  : "bg-amber-400 text-[#071f1a] shadow-sm shadow-amber-400/30"
+                                  ? "bg-slate-950 text-amber-300 ring-1 ring-amber-400/50"
+                                  : "bg-amber-400 text-slate-950 shadow-sm shadow-amber-400/30"
                                 : active
-                                  ? "bg-[#071f1a] text-teal-300 ring-1 ring-teal-300/50"
-                                  : "bg-teal-300 text-[#071f1a] shadow-sm shadow-teal-300/30"
+                                  ? "bg-slate-950 text-teal-300 ring-1 ring-teal-300/50"
+                                  : "bg-teal-300 text-slate-950 shadow-sm shadow-teal-300/30"
                             }`}
                           >
                             {((isReport && badges.hasNewReport) || (!isReport && surveyCount > 0)) && (
                               <span className="relative flex h-2 w-2">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#071f1a]" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-900 opacity-75" />
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-950" />
                               </span>
                             )}
                             <span>{badgeCount > 99 ? "99+" : badgeCount}{!isReport ? " new" : ""}</span>
@@ -412,7 +412,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
 
   return (
     <>
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-[#144237] bg-[#0a2922] py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-4"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-slate-800 bg-slate-950 py-6 text-white transition-[width] duration-200 md:flex ${collapsed ? "w-20 px-3" : "w-64 px-4"}`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
           <Brand collapsed={collapsed} />
           {!collapsed && (
@@ -421,7 +421,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               onClick={onToggle}
               aria-label="Collapse sidebar"
               title="Collapse sidebar"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-[#1b4d41] bg-[#071f1a]/50 text-teal-100 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
             >
               <MenuIcon />
             </button>
@@ -433,22 +433,22 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             onClick={onToggle}
             aria-label="Expand sidebar"
             title="Expand sidebar"
-            className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-[#1b4d41] bg-[#071f1a]/50 text-teal-100 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="mt-5 grid h-10 w-full place-items-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
             <MenuIcon />
           </button>
         )}
-        <div className="mt-6 flex-1 overflow-x-hidden overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.900/60)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#144237] hover:[&::-webkit-scrollbar-thumb]:bg-[#1b4d41]">
+        <div className="mt-6 flex-1 overflow-x-hidden overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800 hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
           <NavigationLinks collapsed={collapsed} badges={badges} />
         </div>
-        <div className="mt-auto border-t border-[#144237] pt-5">
+        <div className="mt-auto border-t border-slate-800 pt-5">
           <Link
             href="/"
             target="_blank"
             rel="noreferrer"
             aria-label="Student"
             title={collapsed ? "Student portal (Open in new tab)" : undefined}
-            className={`flex items-center justify-between rounded-xl border border-[#144237] bg-white/5 px-3 py-2.5 text-sm font-bold text-teal-100/90 hover:border-teal-700/60 hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : ""}`}
+            className={`flex items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-sm font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : ""}`}
           >
             {collapsed ? (
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-teal-200" title="Student portal (Open in new tab)">
@@ -470,7 +470,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
       </aside>
 
       {/* Mobile Sticky Top Navigation Bar */}
-      <div className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-[#144237] bg-[#0a2922]/95 px-4 text-white shadow-sm backdrop-blur md:hidden">
+      <div className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 text-white shadow-sm backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -478,20 +478,20 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
             aria-label="Open admin side navigation"
             aria-expanded={mobileOpen}
             aria-controls="admin-mobile-drawer"
-            className="relative grid h-9 w-9 place-items-center rounded-lg border border-[#1b4d41] bg-[#071f1a] text-teal-100 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="relative grid h-9 w-9 place-items-center rounded-lg border border-slate-700 bg-slate-900 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
             <MenuIcon />
             {hasAnyUpdate && (
               <span
                 title="Updates available in question reports or surveys"
-                className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-[#0a2922] animate-pulse"
+                className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-slate-950 animate-pulse"
               />
             )}
           </button>
           <Brand linked={true} />
         </div>
         <div className="flex items-center gap-2">
-          <LogoutButton className="rounded-lg border border-[#1b4d41] bg-[#071f1a]/80 px-2.5 py-1.5 text-xs font-bold text-teal-100 hover:bg-white/10 hover:text-white disabled:opacity-50" />
+          <LogoutButton className="rounded-lg border border-slate-700 bg-slate-900/80 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white disabled:opacity-50" />
         </div>
       </div>
 
@@ -507,7 +507,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
           >
             {/* Backdrop overlay */}
             <div
-              className="absolute inset-0 bg-[#071f1a]/80 backdrop-blur-sm transition-opacity"
+              className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
@@ -517,25 +517,25 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               role="dialog"
               aria-modal="true"
               aria-label="Admin side navigation"
-              className={`absolute inset-y-0 left-0 flex h-full w-[min(20rem,85vw)] flex-col border-r border-[#144237] bg-[#0a2922] text-white shadow-2xl transition-transform duration-300 ease-out ${
+              className={`absolute inset-y-0 left-0 flex h-full w-[min(20rem,85vw)] flex-col border-r border-slate-800 bg-slate-950 text-white shadow-2xl transition-transform duration-300 ease-out ${
                 mobileOpen ? "translate-x-0" : "-translate-x-full"
               }`}
             >
               {/* Drawer Top Header */}
-              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#144237] px-4">
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 px-4">
                 <Brand linked={true} />
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close admin side navigation"
-                  className="grid h-9 w-9 place-items-center rounded-lg border border-[#1b4d41] bg-[#071f1a] text-teal-100 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="grid h-9 w-9 place-items-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
                 >
                   <span className="text-xl font-bold leading-none">✕</span>
                 </button>
               </div>
 
               {/* Drawer Navigation Links */}
-              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.900/60)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#144237]">
+              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.800)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-800">
                 <NavigationLinks
                   badges={badges}
                   onLinkClick={() => setMobileOpen(false)}
@@ -543,7 +543,7 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
               </div>
 
               {/* Drawer Footer Actions */}
-              <div className="shrink-0 border-t border-[#144237] bg-[#071f1a]/95 p-4 space-y-3">
+              <div className="shrink-0 border-t border-slate-800 bg-slate-950/95 p-4 space-y-3">
                 <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-emerald-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   <span>MFA verified session</span>
@@ -554,12 +554,12 @@ export function AdminNavigation({ collapsed = false, onToggle }: { collapsed?: b
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => setMobileOpen(false)}
-                    className="flex flex-1 items-center justify-between rounded-xl border border-[#144237] bg-white/5 px-3 py-2.5 text-xs font-bold text-teal-100 hover:border-teal-700/60 hover:bg-white/10 hover:text-white"
+                    className="flex flex-1 items-center justify-between rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-xs font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white"
                   >
                     <span>Student portal</span>
                     <span className="text-[10px] tracking-wider text-teal-200">Open ↗</span>
                   </Link>
-                  <LogoutButton className="rounded-xl border border-[#144237] bg-white/5 px-3 py-2.5 text-xs font-bold text-teal-100 hover:border-teal-700/60 hover:bg-white/10 hover:text-white disabled:opacity-50" />
+                  <LogoutButton className="rounded-xl border border-slate-800 bg-white/5 px-3 py-2.5 text-xs font-bold text-slate-300 hover:border-slate-700 hover:bg-white/10 hover:text-white disabled:opacity-50" />
                 </div>
               </div>
             </aside>

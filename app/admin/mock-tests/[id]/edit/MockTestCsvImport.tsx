@@ -59,7 +59,7 @@ export function MockTestCsvImport({
               type="file"
               accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
               required
-              className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-[#0a2922] file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white"
+              className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-slate-950 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white"
             />
             <span className="mt-3 block text-xs font-normal leading-5 text-slate-600">
               Use .xlsx or .xls for the speed option, or CSV as a fallback. Up to 500 Questions or 2.5 MB.

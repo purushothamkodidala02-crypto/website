@@ -176,12 +176,12 @@ export default async function AdminStudentsPage() {
       <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Registrations</p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#132621]">Registration and purchase overview</h1>
+          <h1 className="text-3xl font-black text-slate-950">Registration and purchase overview</h1>
           <p className="mt-2 max-w-3xl text-slate-600">See how many students registered, which Exam Series they purchased, active access, and payment status.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SendUserEmailModal triggerLabel="Compose Email" />
-          <Link href="/admin/access" className="rounded-xl bg-[#0a2922] px-4 py-3 text-sm font-black text-white transition hover:bg-[#11382f]">Manage Exam Series</Link>
+          <Link href="/admin/access" className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">Manage Exam Series</Link>
         </div>
       </div>
 

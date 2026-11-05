@@ -152,9 +152,9 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-teal-100/20 bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-xl shadow-teal-950/20 sm:p-9">
+      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-950/15 sm:p-9">
         <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
-        <div className="absolute bottom-0 right-1/3 h-32 w-32 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="absolute bottom-0 right-1/3 h-32 w-32 rounded-full bg-violet-400/10 blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-7">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-teal-200">
@@ -172,19 +172,19 @@ export default async function AdminDashboard() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/similarity"
-              className="rounded-xl bg-teal-300 px-4 py-3 text-sm font-black text-[#071f1a] shadow-lg shadow-teal-950/20 hover:bg-teal-200"
+              className="rounded-xl bg-teal-300 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/20 hover:bg-teal-200"
             >
               Similarity scanner
             </Link>
             <Link
               href="/admin/mock-tests"
-              className="rounded-xl border border-teal-300/30 bg-white/10 px-4 py-3 text-sm font-bold text-white hover:bg-white/20"
+              className="rounded-xl border border-slate-700 bg-white/5 px-4 py-3 text-sm font-bold text-white hover:border-slate-500 hover:bg-white/10"
             >
               Manage mock tests
             </Link>
             <Link
               href="/admin/questions"
-              className="rounded-xl border border-teal-300/30 bg-white/10 px-4 py-3 text-sm font-bold text-white hover:bg-white/20"
+              className="rounded-xl border border-slate-700 bg-white/5 px-4 py-3 text-sm font-bold text-white hover:border-slate-500 hover:bg-white/10"
             >
               Open Question Bank
             </Link>
@@ -299,7 +299,7 @@ export default async function AdminDashboard() {
             <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/60 bg-teal-100/60 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
               Exam Intelligence
             </span>
-            <h2 className="mt-3 text-2xl font-black text-[#132621]">
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
               Question Similarity & Overlap Scanner
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
@@ -317,7 +317,7 @@ export default async function AdminDashboard() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden rounded-3xl border border-teal-900/40 bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-6 text-white shadow-xl shadow-teal-950/20 sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-950 via-slate-950 to-slate-900 p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-teal-300/10 blur-3xl" />
         <div className="relative">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
@@ -396,7 +396,7 @@ function MetricCard({
   return (
     <Link
       href={href}
-      className={`rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-teal-950/5 ${styles.card}`}
+      className={`rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-950/5 ${styles.card}`}
     >
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-bold text-slate-600">{label}</p>

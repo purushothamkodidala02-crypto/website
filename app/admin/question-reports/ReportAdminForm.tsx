@@ -194,7 +194,7 @@ export function ReportAdminForm({
 
         <PendingSubmitButton
           pendingLabel="Saving…"
-          className="w-full sm:w-auto rounded-xl bg-[#0a2922] px-5 py-2.5 text-xs font-black text-white shadow-xs transition hover:bg-[#11382f] disabled:opacity-60 text-center justify-center"
+          className="w-full sm:w-auto rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-black text-white shadow-xs transition hover:bg-teal-800 disabled:opacity-60 text-center justify-center"
         >
           Save Changes
         </PendingSubmitButton>

@@ -157,7 +157,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   function resetAfterSpecialization(value: string) { if (value === specializationId) return; setSpecializationId(value); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
 
   return <section className="mt-6 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
-    <div className="border-b bg-gradient-to-r from-[#0a2922] via-[#0e3a30] to-[#144d40] px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-300 text-[#071f1a]"><MockSymbol /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Guided test creator</p><h2 className="font-display mt-1 text-2xl">Create the next mock in its correct series</h2></div></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Select the location from left to right. Varadhi generates the test number, full name and URL automatically.</p></div>
+    <div className="border-b bg-gradient-to-r from-slate-950 to-teal-950 px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-300 text-slate-950"><MockSymbol /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Guided test creator</p><h2 className="font-display mt-1 text-2xl">Create the next mock in its correct series</h2></div></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Select the location from left to right. Varadhi generates the test number, full name and URL automatically.</p></div>
     <form action={action} className="grid gap-5 p-6 md:grid-cols-2 sm:p-7">
       <label className="block text-sm font-bold">1. State / catalogue
         <select name="state_id" value={stateId} onChange={(event) => resetAfterState(event.target.value)} className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal">
@@ -284,7 +284,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex gap-4">
             {state && (
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#0a2922] text-teal-200">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-teal-200">
                 <StateSymbol slug={state.slug} className="h-5 w-5" />
               </span>
             )}
@@ -413,7 +413,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
           Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam Passes.
         </p>
       </div>
-      <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId) || isSeriesTaken} aria-busy={pending} className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-[#11382f] disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(effectiveSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
+      <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId) || isSeriesTaken} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(effectiveSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
     </form>
   </section>;
 }

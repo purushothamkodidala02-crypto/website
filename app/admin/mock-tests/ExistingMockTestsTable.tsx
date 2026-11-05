@@ -64,7 +64,7 @@ const statusDetails: Record<MockTestStatus, { label: string; className: string }
 
 const filterStyles = {
   all: {
-    active: "border-[#0a2922] bg-[#0a2922] text-white ring-[#0a2922]",
+    active: "border-slate-950 bg-slate-950 text-white ring-slate-950",
     idle: "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50",
   },
   draft: {
@@ -249,7 +249,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   }, [filtered, currentPage, pageSize]);
 
   return (
-    <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-lg shadow-teal-950/[0.04]">
+    <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-lg shadow-slate-950/[0.04]">
       <div className="border-b border-teal-100 bg-gradient-to-br from-white via-white to-teal-50 px-6 py-6 sm:px-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -288,7 +288,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       </div>
 
       <div className="space-y-4 border-b border-teal-100 bg-gradient-to-r from-slate-50 to-teal-50/70 px-6 py-5 sm:px-7">
-        <div><p className="mb-3 text-xs font-black uppercase tracking-[0.13em] text-slate-500">Filter by state</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { setStateId(""); setLocation(emptyLocation); }} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${!stateId ? "border-[#0a2922] bg-[#0a2922] text-white" : "bg-white text-slate-600"}`}>All states</button>{states.map((state) => <button key={state.id} type="button" onClick={() => { setStateId(state.id); setLocation(emptyLocation); }} className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold ${stateId === state.id ? "border-teal-600 bg-teal-50 text-teal-900 ring-1 ring-teal-600" : "bg-white text-slate-600"}`}><StateSymbol slug={state.slug} className="h-4 w-4" />{state.code} · {state.name}</button>)}</div></div>
+        <div><p className="mb-3 text-xs font-black uppercase tracking-[0.13em] text-slate-500">Filter by state</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { setStateId(""); setLocation(emptyLocation); }} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${!stateId ? "border-slate-950 bg-slate-950 text-white" : "bg-white text-slate-600"}`}>All states</button>{states.map((state) => <button key={state.id} type="button" onClick={() => { setStateId(state.id); setLocation(emptyLocation); }} className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold ${stateId === state.id ? "border-teal-600 bg-teal-50 text-teal-900 ring-1 ring-teal-600" : "bg-white text-slate-600"}`}><StateSymbol slug={state.slug} className="h-4 w-4" />{state.code} · {state.name}</button>)}</div></div>
         <LocationFilters categories={categories.filter((category) => !stateId || category.stateId === stateId)} exams={exams} specializations={specializations} papers={papers} value={location} onChange={setLocation} />
         <div className="flex flex-wrap items-end gap-4">
           <label className="block flex-1 min-w-[240px] text-sm font-bold">Search mock tests
@@ -329,12 +329,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
 
                   {/* Full-width Title & Paper info */}
                   <div className="mt-3 flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#0a2922] text-teal-200">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200">
                       <MockSymbol className="h-5 w-5" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p>
-                      <h3 className="font-display mt-0.5 text-xl font-bold text-[#132621] leading-snug">
+                      <h3 className="font-display mt-0.5 text-xl font-bold text-slate-950 leading-snug">
                         {studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
                       </h3>
                       <p className="mt-1 text-xs text-slate-500">{test.stateCode} · {test.paperName}</p>

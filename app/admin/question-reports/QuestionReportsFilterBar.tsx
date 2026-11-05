@@ -98,7 +98,7 @@ export function QuestionReportsFilterBar({
               onClick={() => updateFilters({ status: tab.id || null })}
               className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-black transition ${
                 isActive
-                  ? "bg-[#0a2922] text-white shadow-xs"
+                  ? "bg-slate-900 text-white shadow-xs"
                   : "bg-white text-slate-700 hover:bg-slate-100/80 border border-slate-200/80"
               }`}
             >
