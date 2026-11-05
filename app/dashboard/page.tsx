@@ -58,6 +58,7 @@ export default async function Dashboard({
   const query = await searchParams;
   const requestedPage = Number(query.page ?? "1");
   const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const isFirstPage = page === 1;
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -82,13 +83,17 @@ export default async function Dashboard({
       .order("submitted_at", { ascending: false })
       .range((page - 1) * attemptsPerPage, page * attemptsPerPage - 1),
     supabase.rpc("get_student_attempt_history_summary"),
-    supabase.rpc("get_student_subject_analytics"),
-    supabase
-      .from("mock_tests")
-      .select("id, paper_id, title, duration_minutes, slug, access_type")
-      .eq("status", "published")
-      .order("display_order", { ascending: true })
-      .limit(4),
+    isFirstPage
+      ? supabase.rpc("get_student_subject_analytics")
+      : Promise.resolve({ data: [] as SubjectAnalytics[] }),
+    isFirstPage
+      ? supabase
+          .from("mock_tests")
+          .select("id, paper_id, title, duration_minutes, slug, access_type")
+          .eq("status", "published")
+          .order("display_order", { ascending: true })
+          .limit(4)
+      : Promise.resolve({ data: [] as AvailableMockTest[] }),
     supabase
       .from("student_question_mistakes")
       .select("question_id", { count: "exact", head: true })
@@ -557,6 +562,7 @@ export default async function Dashboard({
                 {page === 1 && totalPages > 1 && (
                   <Link
                     href="/dashboard?page=2"
+                    prefetch={true}
                     className="text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900 transition"
                   >
                     View next page &rarr;
@@ -737,6 +743,7 @@ function PaginationNav({
       {page > 1 ? (
         <Link
           href={page === 2 ? "/dashboard" : `/dashboard?page=${page - 1}`}
+          prefetch={true}
           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:text-teal-900 min-h-[38px]"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -758,6 +765,7 @@ function PaginationNav({
       {page < totalPages ? (
         <Link
           href={`/dashboard?page=${page + 1}`}
+          prefetch={true}
           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:text-teal-900 min-h-[38px]"
         >
           <span className="hidden xs:inline sm:inline">Next</span>
