@@ -292,64 +292,6 @@ export default async function AdminDashboard() {
         </div>
       </section>
 
-      {/* Question Similarity & Overlap Intelligence */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-700">
-              Exam Intelligence
-            </span>
-            <h2 className="mt-3 text-2xl font-black text-slate-950">
-              Question Similarity & Overlap Scanner
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Audit question overlaps across exams, specialisations (such as TG TET Paper 2), and subject practice tests with automated syllabus intent recognition and bulk duplicate resolution.
-            </p>
-          </div>
-          <div>
-            <Link
-              href="/admin/similarity"
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
-            >
-              Launch Similarity Scanner &rarr;
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 text-slate-900 shadow-sm sm:p-8">
-
-        <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-            Content setup
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-slate-950">Build in the right order</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Structure the Exam first, add reusable questions, then let Mock
-            Tests control student visibility.
-          </p>
-          <div className="mt-6 grid gap-3 md:grid-cols-3">
-            <WorkflowLink
-              number="01"
-              title="Exam catalogue"
-              detail="States, Recruiting Boards, Exams, Papers, and Subjects"
-              href="/admin/exams"
-            />
-            <WorkflowLink
-              number="02"
-              title="Question Bank"
-              detail="Create or import reusable questions"
-              href="/admin/questions"
-            />
-            <WorkflowLink
-              number="03"
-              title="Mock tests"
-              detail="Build, preview, and publish tests"
-              href="/admin/mock-tests"
-            />
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
@@ -467,28 +409,5 @@ function Status({
     >
       {details[0]}
     </span>
-  );
-}
-
-function WorkflowLink({
-  number,
-  title,
-  detail,
-  href,
-}: {
-  number: string;
-  title: string;
-  detail: string;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-100"
-    >
-      <span className="text-xs font-black text-slate-400">{number}</span>
-      <h3 className="mt-3 font-black text-slate-900">{title}</h3>
-      <p className="mt-2 text-xs leading-5 text-slate-600">{detail}</p>
-    </Link>
   );
 }
