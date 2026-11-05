@@ -51,9 +51,9 @@ export const metadata: Metadata = {
 };
 
 const benefits = [
-  { icon: "target", title: "Find the exact paper", description: "State, exam and paper are separated so unrelated tests never distract you." },
-  { icon: "timer", title: "Practise at your pace", description: "Pause and resume practice while your answers and remaining time stay safely saved." },
-  { icon: "review", title: "Learn after every test", description: "Review answers, explanations, scores and subject accuracy after submission." },
+  { icon: "target", title: "Targeted Paper Structure", description: "State, exam, and paper are structured according to official notifications so you only practice what's on the syllabus." },
+  { icon: "timer", title: "Pause & Resume Anytime", description: "Practice under real exam timers with the flexibility to pause and resume whenever your schedule demands." },
+  { icon: "review", title: "Comprehensive Review", description: "Review correct answers, explanations, scores, and subject accuracy immediately after every test submission." },
 ];
 
 export default async function Home() {
@@ -101,135 +101,286 @@ export default async function Home() {
   };
 
   return (
-    <main className="student-page min-h-screen bg-white text-[#132621]">
+    <main className="student-page min-h-screen bg-[#f8fafc] text-slate-900">
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
       <SurveyPopup survey={activeSurvey} />
 
-      <section className="border-b bg-[#f4f7f8]">
+      {/* Hero Section */}
+      <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f0f4f9] via-[#f5f8fc] to-[#f8fafc]">
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-teal-700">Start with what matters</p>
-              <h1 className="font-display mt-3 max-w-3xl text-4xl leading-[1.08] tracking-tight sm:text-5xl">Choose your state. We&apos;ll show only the right exams.</h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-700">Telangana, Andhra Pradesh and Central exam catalogues stay separate from the first click.</p>
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-xs font-semibold text-blue-900">
+              <MockSymbol className="h-3.5 w-3.5 text-blue-700" /> Free State Competitive Exam Practice
+            </span>
+            <h1 className="font-display mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+              Official Pattern Mock Tests for Telangana & Andhra Pradesh
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+              Prepare for TGPSC, APPSC, Police Constable, SI, and TET examinations with timed bilingual papers, official negative marking, and instant detailed solutions.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <Link
+                href="/mock-tests"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 px-6 py-3 text-sm font-semibold text-white shadow-xs transition"
+              >
+                Browse all mock tests <span aria-hidden="true">→</span>
+              </Link>
+              <a
+                href="#select-state"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 shadow-xs transition"
+              >
+                Select your state ↓
+              </a>
             </div>
-            <Link href="/mock-tests" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:border-teal-300">Browse complete catalogue <span aria-hidden="true">→</span></Link>
+
+            <div className="mt-8 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
+                Bilingual (English & Telugu)
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
+                Official Syllabus & Negative Marking
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
+                Instant Performance Analytics
+              </span>
+            </div>
           </div>
-
-          {hasStateError ? (
-            <div className="mt-8 rounded-3xl border border-dashed bg-white p-8 text-center text-sm text-slate-700">The new state catalogue will appear after its database update is applied.</div>
-          ) : (
-            <div className="student-stagger mt-8 grid gap-4 md:grid-cols-3">
-              {states.map((state, index) => {
-                const stateCategoryIds = new Set(categories.filter((category) => category.state_id === state.id).map((category) => category.id));
-                const stateExams = activeExams.filter((exam) => stateCategoryIds.has(exam.exam_id));
-                const color = index === 0 ? "bg-teal-50 text-teal-800" : index === 1 ? "bg-amber-50 text-amber-800" : "bg-indigo-50 text-indigo-800";
-                const prefix = `${state.name} `;
-                const description = state.description?.toLowerCase().startsWith(prefix.toLowerCase())
-                  ? state.description.slice(prefix.length)
-                  : state.description ?? "State recruitment and eligibility examinations.";
-                return (
-                  <Link key={state.id} href={stateUrl(state.slug)} prefetch={false} className="student-card group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
-                    <div className="flex items-start justify-between">
-                      <span className={`grid h-12 w-12 place-items-center rounded-2xl ${color}`}><StateSymbol slug={state.slug} /></span>
-                      <span className="rounded-full bg-[#0a2922] px-3 py-1 text-xs font-black text-white">State</span>
-                    </div>
-                    <h2 className="font-display mt-5 text-2xl">{state.name}</h2>
-                    <p className="mt-2 min-h-12 text-sm leading-6 text-slate-700">{description}</p>
-                    <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
-                      <span className="font-semibold text-slate-700">{stateExams.length} exam{stateExams.length === 1 ? "" : "s"}</span>
-                      <span className="font-black text-teal-800 transition group-hover:translate-x-1">Explore →</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-
-          {states.length > 0 && activeExams.length > 0 && (
-            <div className="mt-12">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-700">Popular exam collections</p>
-                  <h2 className="font-display mt-2 text-2xl">Continue directly to an exam</h2>
-                </div>
-              </div>
-              <div className="student-stagger mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {activeExams.slice(0, 8).map((exam) => {
-                  const category = categoryById.get(exam.exam_id);
-                  const state = states.find((item) => item.id === category?.state_id);
-                  const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
-                  return state ? (
-                    <Link key={exam.id} href={examUrl(state.slug, exam.slug)} prefetch={false} className="student-card group rounded-2xl border bg-white p-5 hover:border-teal-300 hover:shadow-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ExamSymbol name={exam.name} className="h-5 w-5" /></span>
-                        <span className="text-[10px] font-black uppercase tracking-wide text-teal-700">{state.name}</span>
-                      </div>
-                      <h3 className="font-display mt-4 leading-6">{exam.name}</h3>
-                      <p className="mt-2 text-xs font-semibold text-slate-700">{paperCount} paper{paperCount === 1 ? "" : "s"}</p>
-                    </Link>
-                  ) : null;
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] text-white">
-        <div className="absolute -right-24 top-8 h-80 w-80 rounded-full bg-teal-400/10 blur-3xl" />
-        <div className="mx-auto grid max-w-6xl gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
-          <div className="relative">
-            <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-teal-200"><MockSymbol className="h-4 w-4" /> English + Telugu practice</p>
-            <h2 className="font-display mt-6 text-4xl leading-[1.08] tracking-tight sm:text-6xl">Practise with purpose. Improve with every mock test.</h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Take focused tests in a clean exam workspace, pause when needed, and turn every result into a better study plan. Practise state-wise papers, review every answer after submission, track weak areas, and come back with a clearer plan for your next mock test.</p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/mock-tests" className="rounded-xl bg-[#ea580c] px-6 py-3.5 font-black text-white shadow-lg shadow-orange-950/25 hover:bg-[#d94f08]">Start a mock test</Link>
-              <Link href="/register" className="rounded-xl border border-slate-700 px-5 py-3.5 font-black text-white hover:bg-white/5">Create free account</Link>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-slate-300">{["Clear test series", "Saved progress", "Detailed review"].map((item) => <span key={item} className="flex items-center gap-2"><span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-400 text-[10px] font-black text-[#0a2922]">✓</span>{item}</span>)}</div>
+      {/* State Selection Section */}
+      <section id="select-state" className="scroll-mt-16 mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+        <div className="flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">State Exam Catalogues</p>
+            <h2 className="font-display mt-2 text-2xl font-bold sm:text-3xl text-slate-900">
+              Select your state to explore exams
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+              Choose Telangana or Andhra Pradesh to view dedicated recruitment papers and notifications.
+            </p>
           </div>
+          <Link
+            href="/mock-tests"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-xs transition"
+          >
+            Browse complete catalogue <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+
+        {hasStateError ? (
+          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-600">
+            The state catalogue will appear after its database update is applied.
+          </div>
+        ) : (
+          <div className="student-stagger mt-8 grid gap-5 md:grid-cols-3">
+            {states.map((state) => {
+              const stateCategoryIds = new Set(categories.filter((category) => category.state_id === state.id).map((category) => category.id));
+              const stateExams = activeExams.filter((exam) => stateCategoryIds.has(exam.exam_id));
+              const prefix = `${state.name} `;
+              const description = state.description?.toLowerCase().startsWith(prefix.toLowerCase())
+                ? state.description.slice(prefix.length)
+                : state.description ?? "State recruitment and eligibility examinations.";
+              return (
+                <Link
+                  key={state.id}
+                  href={stateUrl(state.slug)}
+                  prefetch={false}
+                  className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:border-blue-400 hover:shadow-md transition"
+                >
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <span className="grid h-12 w-12 place-items-center rounded-xl bg-slate-100 text-slate-800">
+                        <StateSymbol slug={state.slug} />
+                      </span>
+                      <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                        {state.code}
+                      </span>
+                    </div>
+                    <h3 className="font-display mt-4 text-xl font-bold text-slate-900 group-hover:text-blue-700 transition">
+                      {state.name}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {description}
+                    </p>
+                  </div>
+                  <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs">
+                    <span className="font-medium text-slate-500">
+                      {stateExams.length} exam{stateExams.length === 1 ? "" : "s"} available
+                    </span>
+                    <span className="font-semibold text-blue-700 group-hover:translate-x-1 transition">
+                      Explore exams →
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Popular Exam Collections */}
+        {states.length > 0 && activeExams.length > 0 && (
+          <div className="mt-14">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Popular test series</p>
+              <h3 className="font-display mt-1 text-2xl font-bold text-slate-900">
+                Continue directly to an exam
+              </h3>
+            </div>
+            <div className="student-stagger mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {activeExams.slice(0, 8).map((exam) => {
+                const category = categoryById.get(exam.exam_id);
+                const state = states.find((item) => item.id === category?.state_id);
+                const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
+                return state ? (
+                  <Link
+                    key={exam.id}
+                    href={examUrl(state.slug, exam.slug)}
+                    prefetch={false}
+                    className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-blue-400 hover:shadow-xs transition"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-700">
+                          <ExamSymbol name={exam.name} className="h-4 w-4" />
+                        </span>
+                        <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                          {state.code}
+                        </span>
+                      </div>
+                      <h4 className="font-display mt-3 text-base font-bold leading-snug text-slate-900 group-hover:text-blue-700 transition">
+                        {exam.name}
+                      </h4>
+                    </div>
+                    <div className="mt-4 border-t border-slate-100 pt-3">
+                      <p className="text-xs font-medium text-slate-500">
+                        {paperCount} paper{paperCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                  </Link>
+                ) : null;
+              })}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Real Computer Based Test (CBT) Experience */}
+      <section className="border-y border-slate-200/80 bg-white">
+        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-900">
+              <MockSymbol className="h-3.5 w-3.5 text-blue-700" /> Authentic CBT Experience
+            </span>
+            <h2 className="font-display mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+              Practise with exam-hall realism. Review with clarity.
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-slate-600">
+              Varadhi Prep reproduces the exact environment of state recruitment examinations—giving you timed papers, negative marking schemes, and immediate post-submission answer keys with explanations.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">1</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Bilingual Question Papers</h3>
+                  <p className="text-xs text-slate-600 mt-0.5">Toggle questions and options seamlessly between English and Telugu.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">2</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Official Negative Marking</h3>
+                  <p className="text-xs text-slate-600 mt-0.5">Scored under actual notification rules so you develop accurate answering habits.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">3</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Instant Detailed Solutions</h3>
+                  <p className="text-xs text-slate-600 mt-0.5">Review question explanations, subject breakdowns, and incorrect answers after submission.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href="/mock-tests"
+                className="inline-flex items-center rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition"
+              >
+                Start a mock test
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition"
+              >
+                Create account
+              </Link>
+            </div>
+          </div>
+
           <TestPreview />
         </div>
       </section>
 
-      <section id="how-it-works" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+      {/* Why Choose Varadhi Prep (Benefits) */}
+      <section id="how-it-works" className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
         <div className="max-w-2xl">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">A focused workflow</p>
-          <h2 className="font-display mt-3 text-3xl tracking-tight sm:text-4xl">Everything needed for serious practice. Nothing extra.</h2>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Focused exam workflow</p>
+          <h2 className="font-display mt-2 text-2xl font-bold sm:text-3xl text-slate-900">
+            Everything needed for serious practice
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            A clean, distraction-free environment built to help state competitive exam aspirants succeed.
+          </p>
         </div>
-        <div className="student-stagger mt-10 grid gap-5 md:grid-cols-3">
+        <div className="student-stagger mt-8 grid gap-5 md:grid-cols-3">
           {benefits.map((benefit, index) => (
-            <article key={benefit.title} className="student-card rounded-3xl border border-slate-200 p-6 hover:border-teal-200 hover:shadow-lg">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-sm font-black text-teal-800">0{index + 1}</span>
-              <h3 className="font-display mt-6 text-xl">{benefit.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{benefit.description}</p>
+            <article
+              key={benefit.title}
+              className="student-card rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-xs transition"
+            >
+              <span className="inline-block rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                0{index + 1}
+              </span>
+              <h3 className="font-display mt-4 text-lg font-bold text-slate-900">
+                {benefit.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                {benefit.description}
+              </p>
             </article>
           ))}
         </div>
       </section>
 
-      <footer className="border-t border-emerald-950 bg-[#071f1a] text-emerald-100/90">
-        <div className="mx-auto grid max-w-6xl gap-7 px-5 py-9 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:items-start">
-          <div className="max-w-xl">
+      {/* Clean Professional Footer */}
+      <footer className="border-t border-slate-800 bg-slate-900 text-slate-400">
+        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:px-8 sm:py-12 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+          <div className="max-w-md">
             <div className="flex items-center gap-3">
-              <BrandMark className="h-10 w-10" />
+              <BrandMark className="h-9 w-9 text-white" />
               <div>
-                <p className="font-display text-white">Varadhi Prep</p>
-                <p className="text-xs">TG and AP state exam mock tests</p>
+                <p className="font-display text-base font-bold text-white">Varadhi Prep</p>
+                <p className="text-xs text-slate-400">TG & AP State Competitive Exams Free Mock Tests</p>
               </div>
             </div>
+            <p className="mt-4 text-xs leading-relaxed text-slate-400">
+              Free, syllabus-aligned computer-based mock tests for competitive exam aspirants across Telangana and Andhra Pradesh.
+            </p>
+            <p className="mt-4 text-xs text-slate-500">
+              © {new Date().getFullYear()} Varadhi Prep. All rights reserved.
+            </p>
           </div>
-          <div className="grid gap-5">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Student help</p>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
-                <Link href="/support" className="hover:text-white">Support</Link>
-                <Link href="/login" className="hover:text-white">Sign in</Link>
-                <Link href="/register" className="hover:text-white">Create account</Link>
-                <Link href="/privacy-policy" className="hover:text-white">Privacy</Link>
-              </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <Link href="/support" className="hover:text-white transition">Support</Link>
+              <Link href="/login" className="hover:text-white transition">Sign in</Link>
+              <Link href="/register" className="hover:text-white transition">Create account</Link>
+              <Link href="/privacy-policy" className="hover:text-white transition">Privacy</Link>
+              <Link href="/terms-and-conditions" className="hover:text-white transition">Terms</Link>
             </div>
           </div>
         </div>
@@ -240,32 +391,63 @@ export default async function Home() {
 
 function TestPreview() {
   return (
-    <aside className="relative rounded-[2rem] border border-emerald-800/40 bg-[#071f1a]/90 p-4 shadow-2xl shadow-emerald-950/40 sm:p-6">
-      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+    <aside className="relative rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Practice workspace</p>
-          <p className="font-display mt-1">TG · Executive Officer · Paper 1</p>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">Practice interface</span>
+          <p className="font-display mt-0.5 text-sm font-bold text-slate-900">APPSC · Endowment Officer · Paper 1</p>
         </div>
-        <span className="rounded-lg bg-slate-800 px-3 py-2 font-mono text-sm font-bold text-teal-200">01:29:42</span>
+        <span className="rounded-lg bg-slate-100 border border-slate-200 px-2.5 py-1 font-mono text-xs font-bold text-slate-800">
+          01:29:42
+        </span>
       </div>
-      <div className="mt-5 rounded-2xl bg-white p-5 text-slate-950 sm:p-6">
+
+      <div className="mt-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-black uppercase tracking-wide text-teal-700">Question 12 of 100</p>
-          <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold">English · తెలుగు</span>
+          <span className="text-xs font-semibold text-slate-500">Question 12 of 150</span>
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+            English · తెలుగు
+          </span>
         </div>
-        <p className="mt-5 font-bold leading-7">Choose the option that best answers this practice question.</p>
-        <div className="mt-5 space-y-2.5">
-          {["Option A", "Option B", "Option C", "Option D"].map((option, index) => (
-            <div key={option} className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold ${index === 1 ? "border-teal-500 bg-teal-50 text-teal-900" : "text-slate-600"}`}>
-              <span className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-black ${index === 1 ? "bg-teal-700 text-white" : "bg-slate-100"}`}>{String.fromCharCode(65 + index)}</span>
-              {option}
+
+        <p className="mt-3 text-sm font-medium text-slate-900 leading-snug">
+          Which of the following bodies conducts recruitment examinations for state civil services in Andhra Pradesh?
+        </p>
+
+        <div className="mt-4 space-y-2">
+          {[
+            "Union Public Service Commission (UPSC)",
+            "Andhra Pradesh Public Service Commission (APPSC)",
+            "Staff Selection Commission (SSC)",
+            "State Selection Board (SSB)"
+          ].map((option, index) => (
+            <div
+              key={option}
+              className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-medium transition ${
+                index === 1
+                  ? "border-blue-400 bg-blue-50/70 text-blue-900 font-semibold"
+                  : "border-slate-200 text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              <span
+                className={`grid h-6 w-6 place-items-center rounded-lg text-xs font-bold ${
+                  index === 1 ? "bg-blue-700 text-white" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {String.fromCharCode(65 + index)}
+              </span>
+              <span className="truncate">{option}</span>
             </div>
           ))}
         </div>
-        <div className="mt-6 flex justify-end border-t pt-5"><span className="rounded-lg bg-[#0a2922] px-4 py-2.5 text-sm font-black text-white hover:bg-[#11382f]">Save & next</span></div>
+
+        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+          <span className="text-xs text-slate-500 font-medium">Auto-saved</span>
+          <span className="rounded-lg bg-blue-700 px-4 py-2 text-xs font-semibold text-white shadow-2xs">
+            Save & next →
+          </span>
+        </div>
       </div>
     </aside>
   );
 }
-
-

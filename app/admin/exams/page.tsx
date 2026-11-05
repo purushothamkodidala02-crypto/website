@@ -1,6 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { ExamStructureWorkspace } from "./ExamStructureWorkspace";
 
+function MetricPill({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="min-w-16 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-center shadow-xs">
+      <strong className="block text-base font-bold tracking-tight text-slate-900">{value}</strong>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
+    </div>
+  );
+}
+
 export default async function AdminExamStructurePage() {
   const supabase = await createClient();
   const [
@@ -59,34 +68,35 @@ export default async function AdminExamStructurePage() {
 
   return (
     <main className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800/60 bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 p-6 text-white shadow-xl shadow-slate-950/10 sm:p-7">
-        <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl pointer-events-none" />
-        <div className="relative flex flex-wrap items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-teal-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
-              Catalogue Manager
-            </div>
-            <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl text-white">
-              Exam Structure & Catalogue
-            </h1>
-            <p className="mt-1 max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Manage State workspaces, Recruiting Boards, Exams, Specialisations, Papers, and Subject display orders.
+      {/* Executive Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-teal-600" />
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+              Exam Catalogue & Content Architecture
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <SummaryCount value={states.length} label="States" tone="teal" />
-            <SummaryCount value={categories.length} label="Boards" tone="amber" />
-            <SummaryCount value={exams.length} label="Exams" tone="slate" />
-            <SummaryCount value={papers.length} label="Papers" tone="slate" />
-            <SummaryCount value={subjects.length} label="Subjects" tone="teal" />
-          </div>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Exam Structure & Catalogue
+          </h1>
+          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate-600">
+            Configure the educational taxonomy across States, Recruiting Boards, Exams, Specialisations, Papers, and Subject display hierarchies.
+          </p>
         </div>
-      </section>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <MetricPill value={states.length} label="States" />
+          <MetricPill value={categories.length} label="Boards" />
+          <MetricPill value={exams.length} label="Exams" />
+          <MetricPill value={papers.length} label="Papers" />
+          <MetricPill value={subjects.length} label="Subjects" />
+        </div>
+      </div>
 
       {errors.length > 0 && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-          Some Exam Structure data could not be loaded. {errors[0]?.message}
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800">
+          Some Exam Structure data could not be loaded: {errors[0]?.message}
         </div>
       )}
 
@@ -140,27 +150,5 @@ export default async function AdminExamStructurePage() {
         }))}
       />
     </main>
-  );
-}
-
-function SummaryCount({
-  value,
-  label,
-  tone,
-}: {
-  value: number;
-  label: string;
-  tone: "teal" | "amber" | "slate";
-}) {
-  const styles = {
-    teal: "bg-teal-400/10 text-teal-200 border-teal-400/20",
-    amber: "bg-amber-400/10 text-amber-200 border-amber-400/20",
-    slate: "bg-white/5 text-slate-300 border-white/10",
-  };
-  return (
-    <div className={`min-w-16 rounded-xl border px-3 py-1.5 text-center ${styles[tone]}`}>
-      <strong className="block text-base font-black text-white">{value}</strong>
-      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">{label}</span>
-    </div>
   );
 }
