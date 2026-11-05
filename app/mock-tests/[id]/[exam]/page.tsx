@@ -149,91 +149,236 @@ export default async function ExamPage({ params, searchParams }: Props) {
         }}
       />
       <PublicHeader />
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(45,212,191,0.2),transparent_34%)]" />
-        <div className="relative mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-18">
-          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400"><Link href="/" className="hover:text-white py-1 inline-flex items-center">Home</Link><span aria-hidden="true">/</span><Link href={stateUrl(context.state.slug)} className="hover:text-white py-1 inline-flex items-center">{context.state.name}</Link><span aria-hidden="true">/</span><span className="text-teal-200 py-1 inline-flex items-center">{context.exam.name}</span></nav>
-          <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="relative overflow-hidden border-b border-emerald-900/60 bg-[#071f1a] text-white">
+        <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+            <Link href="/" className="hover:text-white py-1 inline-flex items-center">Home</Link>
+            <span aria-hidden="true">/</span>
+            <Link href={stateUrl(context.state.slug)} className="hover:text-white py-1 inline-flex items-center">{context.state.name}</Link>
+            <span aria-hidden="true">/</span>
+            <span className="text-teal-200 py-1 inline-flex items-center">{context.exam.name}</span>
+          </nav>
+          <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><ExamSymbol name={context.exam.name} className="h-4 w-4" /> {context.state.code} exam preparation</p>
-              <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] tracking-tight sm:text-6xl">{examHeading}</h1>
+              <p className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-900/50 px-3 py-1 text-xs font-bold text-teal-200">
+                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-300" /> {context.state.code} Exam Preparation
+              </p>
+              <h1 className="font-display mt-4 max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                {examHeading}
+              </h1>
               {teluguData && (
-                <p className="mt-3 text-lg font-bold text-teal-300 sm:text-xl">
+                <p className="mt-2 text-base font-bold text-teal-300 sm:text-lg">
                   {teluguData.teluguTitle}
                 </p>
               )}
-              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{introduction}</p>
-              <div className="mt-8 flex flex-wrap gap-3"><a href="#papers" className="inline-flex min-h-[44px] items-center rounded-xl bg-teal-300 px-5 py-3 font-black text-slate-950 hover:bg-teal-200">Choose a paper</a><AccountActionButton canonical={canonical} /></div>
+              <p className="mt-3.5 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base sm:leading-7">
+                {introduction}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <a
+                  href="#papers"
+                  className="inline-flex min-h-[44px] items-center rounded-xl bg-teal-400 hover:bg-teal-300 px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-950 transition shadow-sm"
+                >
+                  Choose a paper ↓
+                </a>
+                <AccountActionButton canonical={canonical} />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl space-y-12 px-5 py-10 sm:px-8 sm:py-14">
+      <div className="mx-auto max-w-6xl space-y-10 px-5 py-8 sm:px-8 sm:py-12">
         <CatalogSteps
           state={{ value: context.state.name, href: "/mock-tests" }}
           exam={{ value: context.exam.name, href: stateUrl(context.state.slug) }}
         />
-        {specializations.length > 0 && <section aria-labelledby="specialisations-title"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Exam paths</p><h2 id="specialisations-title" className="font-display mt-2 text-3xl">Choose a specialisation</h2><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{specializations.map((item) => { return <Link key={item.id} href={specializationUrl(context.state.slug, context.exam!.slug, item.slug)} className="group flex flex-col justify-center rounded-3xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-lg"><h3 className="font-display text-xl">{item.name}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{item.description || `View papers and mock tests for ${item.name}.`}</p><span className="mt-5 inline-block text-sm font-black text-teal-800">Explore specialisation →</span></Link>; })}</div></section>}
+        {specializations.length > 0 && (
+          <section aria-labelledby="specialisations-title">
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Exam paths</p>
+            <h2 id="specialisations-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl">
+              Choose a specialisation
+            </h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {specializations.map((item) => (
+                <Link
+                  key={item.id}
+                  href={specializationUrl(context.state.slug, context.exam!.slug, item.slug)}
+                  className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+                >
+                  <div>
+                    <h3 className="font-display text-lg font-bold text-slate-900 group-hover:text-teal-800 transition">
+                      {item.name}
+                    </h3>
+                    <p className="mt-2 text-xs leading-5 text-slate-600">
+                      {item.description || `View papers and mock tests for ${item.name}.`}
+                    </p>
+                  </div>
+                  <span className="mt-4 text-xs font-bold text-teal-800 group-hover:translate-x-1 transition">
+                    Explore specialisation →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
+        {/* Papers Section - Clean Responsive Cards */}
         <section id="papers" aria-labelledby="papers-title" className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:auto_400px]">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Choose paper</p><h2 id="papers-title" className="font-display mt-2 text-3xl">{hasMockTestSuffixOrMention(context.exam.name) ? `${context.exam.name} papers` : `${context.exam.name} mock test papers`}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">Select a paper to view its mock tests, topic practice, and answer review.</p>
-          {papers.length === 0 ? <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." /> : <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full table-auto text-left"><thead className="bg-[#0a2922] text-white"><tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Paper name</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr></thead><tbody className="divide-y divide-slate-200">{papers.map((paper) => <tr key={paper.id} className="transition hover:bg-teal-50/60"><td className="px-4 py-5 sm:px-6"><span className="font-display block break-words text-base text-slate-950 sm:text-lg">{paper.name}</span></td><td className="px-4 py-5 text-right sm:px-6"><Link href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)} className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-lg bg-teal-100 px-3.5 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">Open paper →</Link></td></tr>)}</tbody></table></div>}
+          <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Choose paper</p>
+          <h2 id="papers-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-950">
+            {hasMockTestSuffixOrMention(context.exam.name) ? `${context.exam.name} papers` : `${context.exam.name} mock test papers`}
+          </h2>
+          <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-600">
+            Select a paper to practise its dedicated mock test series, review topic coverage, and check bilingual explanations.
+          </p>
+
+          {papers.length === 0 ? (
+            <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." />
+          ) : (
+            <div className="student-stagger mt-6 grid gap-4 md:grid-cols-2">
+              {papers.map((paper) => {
+                const display = paperDisplayById.get(paper.id);
+                const specialization = paper.specialization_id
+                  ? specializations.find((s) => s.id === paper.specialization_id)
+                  : undefined;
+                const paperTests = tests.filter((t) => t.paper_id === paper.id);
+
+                return (
+                  <Link
+                    key={paper.id}
+                    href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)}
+                    className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-xs font-bold text-teal-800">
+                          {display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}
+                        </span>
+                        <span className="text-xs font-bold text-slate-500">
+                          {paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      <h3 className="font-display mt-3 text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition">
+                        {paper.name}
+                      </h3>
+                      {paper.question_count && (
+                        <p className="mt-1.5 text-xs text-slate-500">
+                          {paper.question_count} questions per paper • {paper.default_correct_marks ?? 1} mark each
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                      <span className="font-semibold text-slate-500">Official Exam Syllabus</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-teal-800 group-hover:translate-x-1 transition">
+                        Open paper →
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </section>
 
+        {/* Latest Mock Tests Section - Clean Responsive Cards */}
         <section aria-labelledby="tests-title" className="[content-visibility:auto] [contain-intrinsic-size:auto_500px]">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Timed practice</p>
-              <h2 id="tests-title" className="font-display mt-2 text-3xl">Latest mock tests</h2>
+              <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Timed practice</p>
+              <h2 id="tests-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-950">
+                Latest mock tests
+              </h2>
             </div>
           </div>
-          {tests.length === 0 ? <EmptyState title="Mock tests are coming soon" detail="The exam page is active. Published mock tests will automatically appear here." /> : <>
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="max-h-[30rem] overflow-auto">
-                <table className="w-full table-auto text-left">
-                  <thead className="sticky top-0 bg-[#0a2922] text-white">
-                    <tr><th className="px-4 py-4 text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Mock test name</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] md:table-cell">Paper</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] sm:table-cell">Duration</th><th className="hidden px-4 py-4 text-xs font-black uppercase tracking-[0.12em] lg:table-cell">Access</th><th className="px-4 py-4 text-right text-xs font-black uppercase tracking-[0.08em] sm:px-6 sm:tracking-[0.12em]">Practice</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {tests.slice(0, 4).map((test) => {
-                      const paper = papers.find((item) => item.id === test.paper_id)!;
-                      const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
-                      const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
-                      const title = studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name);
-                      return (
-                        <tr key={test.id} className="transition hover:bg-teal-50/60">
-                          <td className="px-4 py-5 sm:px-6">
-                            <Link href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)} className="font-display block break-words text-base text-slate-950 hover:text-teal-800 sm:text-lg">
+
+          {tests.length === 0 ? (
+            <EmptyState title="Mock tests are coming soon" detail="The exam page is active. Published mock tests will automatically appear here." />
+          ) : (
+            <>
+              <div className="student-stagger mt-6 grid gap-3 sm:gap-4 md:grid-cols-2">
+                {tests.slice(0, 4).map((test) => {
+                  const paper = papers.find((item) => item.id === test.paper_id)!;
+                  const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
+                  const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
+                  const title = studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name);
+                  const isFree = test.access_type === "free";
+
+                  return (
+                    <article
+                      key={test.id}
+                      className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="min-w-0">
+                            <Link
+                              href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)}
+                              className="font-display block text-base font-bold text-slate-900 hover:text-teal-800 transition truncate"
+                            >
                               {title}
                             </Link>
-                            <p className="mt-1 text-xs text-slate-500 sm:hidden">{test.duration_minutes} minutes</p>
-                            <p className="mt-1 text-xs text-slate-500 md:hidden">{paper.name}{subject ? ` · ${subject.name}` : ""}</p>
-                          </td>
-                          <td className="hidden px-4 py-5 text-sm font-semibold text-slate-700 md:table-cell">
-                            <div>{paper.name}</div>
-                            {subject && <div className="text-xs font-normal text-slate-500">{subject.name}</div>}
-                          </td>
-                          <td className="hidden px-4 py-5 text-sm text-slate-600 sm:table-cell">{test.duration_minutes} minutes</td>
-                          <td className="hidden px-4 py-5 lg:table-cell">
-                            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${test.access_type === "free" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
-                              {test.access_type === "free" ? "Free" : "Included"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-5 text-right sm:px-6">
-                            <Link href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)} className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-lg bg-teal-100 px-3.5 py-2 text-xs font-black text-teal-900 transition hover:bg-teal-200 sm:px-4 sm:text-sm">
-                              Start →
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <p className="mt-1 text-xs text-slate-500 truncate">
+                              {paper.name}{subject ? ` · ${subject.name}` : ""}{section ? ` (${section.name})` : ""}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                              isFree
+                                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                : "bg-amber-50 text-amber-900 border border-amber-200"
+                            }`}
+                          >
+                            {isFree ? "Free" : "Included"}
+                          </span>
+                        </div>
+
+                        <div className="mt-3.5 flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-2 text-xs border border-slate-100">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-900">{test.target_question_count ?? paper.question_count ?? "—"}</span>
+                            <span className="text-[11px] font-medium text-slate-500">Qs</span>
+                          </div>
+                          <span className="text-slate-300 font-bold">•</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-900">{test.duration_minutes}</span>
+                            <span className="text-[11px] font-medium text-slate-500">Mins</span>
+                          </div>
+                          <span className="text-slate-300 font-bold">•</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-medium text-slate-600">Timed CBT</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+                        <span className="text-xs font-semibold text-slate-500">
+                          Bilingual Review
+                        </span>
+                        <Link
+                          href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition"
+                        >
+                          <span>Start test</span>
+                          <span aria-hidden="true">→</span>
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
-            </div>
-            {tests.length > 4 && <div className="mt-4 flex justify-center"><Link href={`${canonical}?view=all`} className="inline-flex min-h-[44px] items-center rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-sm font-black text-teal-900 transition hover:bg-teal-100">View more mock tests →</Link></div>}
-          </>}
+
+              {tests.length > 4 && (
+                <div className="mt-6 flex justify-center">
+                  <Link
+                    href={`${canonical}?view=all`}
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 transition hover:bg-teal-100 shadow-2xs"
+                  >
+                    View all {tests.length} mock tests →
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
         </section>
 
         <section aria-labelledby="faq-title" className="rounded-[2rem] bg-[#071f1a] p-6 text-white sm:p-9 border border-emerald-950 [content-visibility:auto] [contain-intrinsic-size:auto_600px]"><p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-300">Common questions</p><h2 id="faq-title" className="font-display mt-2 text-3xl">About {examHeading}</h2><div className="mt-6 divide-y divide-emerald-900/40">{questions.map((item) => <details key={item.question} className="group py-5"><summary className="cursor-pointer list-none font-bold marker:hidden">{item.question}<span className="float-right text-emerald-300 transition group-open:rotate-45" aria-hidden="true">+</span></summary><p className="mt-3 max-w-3xl text-sm leading-6 text-emerald-100/80">{item.answer}</p></details>)}</div></section>

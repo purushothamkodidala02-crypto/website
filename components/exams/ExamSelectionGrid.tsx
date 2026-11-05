@@ -19,13 +19,36 @@ export function ExamSelectionGrid({ exams }: { exams: ExamSelectionItem[] }) {
 
 function ExamCards({ exams }: { exams: ExamSelectionItem[] }) {
   return (
-    <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="student-stagger grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {exams.map((exam) => (
-        <Link key={exam.id} href={exam.href} prefetch={false} className="student-card group flex min-h-56 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5">
-          <span className="flex items-center justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800"><ExamSymbol name={exam.name} /></span><span className="max-w-[62%] truncate rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">{exam.boardName}</span></span>
-          <h3 className="font-display mt-5 text-xl leading-7 text-slate-950">{exam.name}</h3>
-          <p className="mt-2 text-sm text-slate-500">{exam.contextLabel}</p>
-          <span className="mt-auto flex items-center justify-between border-t pt-4 text-sm"><span className="font-semibold text-slate-500">{exam.paperCount} paper{exam.paperCount === 1 ? "" : "s"}</span><span className="font-black text-teal-800 transition group-hover:translate-x-1">Open →</span></span>
+        <Link
+          key={exam.id}
+          href={exam.href}
+          prefetch={false}
+          className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+        >
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#071f1a] text-teal-300">
+                <ExamSymbol name={exam.name} />
+              </span>
+              <span className="max-w-[65%] truncate rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
+                {exam.boardName}
+              </span>
+            </div>
+            <h3 className="font-display mt-3.5 text-lg font-bold leading-snug text-slate-950 group-hover:text-teal-800 transition">
+              {exam.name}
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">{exam.contextLabel}</p>
+          </div>
+          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+            <span className="font-bold text-slate-600">
+              {exam.paperCount} paper{exam.paperCount === 1 ? "" : "s"}
+            </span>
+            <span className="inline-flex items-center gap-1 font-bold text-teal-800 transition group-hover:translate-x-1">
+              Explore papers →
+            </span>
+          </div>
         </Link>
       ))}
     </div>
