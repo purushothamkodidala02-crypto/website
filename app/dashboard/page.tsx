@@ -237,21 +237,6 @@ export default async function Dashboard({
                     : "Real-time exam performance, mistake analytics, and focused mock tests for competitive exams."}
                 </p>
               </div>
-
-              {/* Return link for page > 1 */}
-              {page > 1 && (
-                <div className="pt-0.5">
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-900 transition"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                    </svg>
-                    <span>Return to Overview (Page 1)</span>
-                  </Link>
-                </div>
-              )}
             </div>
 
             {/* Quick Action Buttons (Optimized for Mobile Touch, Tablet, and Desktop) */}
