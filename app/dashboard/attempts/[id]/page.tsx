@@ -33,6 +33,12 @@ export default async function AttemptReviewPage({
 
   const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
 
+  // Eagerly prefetch student bookmarks concurrently with attempt and review RPC
+  const bookmarksPromise = supabase
+    .from("student_question_bookmarks")
+    .select("question_id")
+    .eq("user_id", user.id);
+
   const [attemptResult, reviewResult] = await Promise.all([
     admin
       .from("test_attempts")
@@ -66,7 +72,7 @@ export default async function AttemptReviewPage({
     attempt.session_id
       ? admin.from("test_attempt_session_questions").select("question_id").eq("session_id", attempt.session_id).order("question_order")
       : admin.from("mock_test_questions").select("question_id").eq("mock_test_id", attempt.mock_test_id).order("question_order"),
-    supabase.from("student_question_bookmarks").select("question_id").eq("user_id", user.id),
+    bookmarksPromise, // student_question_bookmarks
   ]);
 
   const questionIds = (questionOrderResult.data ?? []).map((item) => item.question_id);

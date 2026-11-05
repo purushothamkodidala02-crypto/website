@@ -149,46 +149,112 @@ export default async function ExamPage({ params, searchParams }: Props) {
         }}
       />
       <PublicHeader />
-      <section className="relative overflow-hidden border-b border-emerald-950/10 bg-gradient-to-b from-[#eef7f2] via-[#f4faf6] to-[#f6faf8] text-[#132621]">
-        <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-            <Link href="/" className="hover:text-teal-900 py-1 inline-flex items-center">Home</Link>
-            <span aria-hidden="true" className="text-slate-400">/</span>
-            <Link href={stateUrl(context.state.slug)} className="hover:text-teal-900 py-1 inline-flex items-center">{context.state.name}</Link>
-            <span aria-hidden="true" className="text-slate-400">/</span>
-            <span className="text-teal-900 py-1 inline-flex items-center">{context.exam.name}</span>
+      <section className="relative overflow-hidden border-b border-emerald-900/60 bg-[#071f1a] text-white">
+        <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+            <Link href="/" className="hover:text-white py-1 inline-flex items-center">Home</Link>
+            <span aria-hidden="true">/</span>
+            <Link href={stateUrl(context.state.slug)} className="hover:text-white py-1 inline-flex items-center">{context.state.name}</Link>
+            <span aria-hidden="true">/</span>
+            <span className="text-teal-200 py-1 inline-flex items-center">{context.exam.name}</span>
           </nav>
-          <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-teal-700/20 bg-teal-800/10 px-3 py-1 text-xs font-bold text-teal-900">
-                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-800" /> {context.state.code} Exam Preparation
+              <p className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-900/50 px-3 py-1 text-xs font-bold text-teal-200">
+                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-300" /> {context.state.code} Exam Preparation
               </p>
-              <h1 className="font-display mt-4 max-w-4xl text-3xl font-bold leading-tight tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
+              <h1 className="font-display mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
                 {examHeading}
               </h1>
               {teluguData && (
-                <p className="mt-2 text-base font-bold text-teal-900 sm:text-lg">
+                <p className="mt-2 text-base font-bold text-teal-300 sm:text-lg">
                   {teluguData.teluguTitle}
                 </p>
               )}
-              <p className="mt-3.5 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
+              <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base sm:leading-7">
                 {introduction}
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-700/50 bg-emerald-950/60 px-2.5 py-1 text-emerald-200">
+                  <svg className="h-3.5 w-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                  Bilingual: English & Telugu
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-700/50 bg-emerald-950/60 px-2.5 py-1 text-emerald-200">
+                  <svg className="h-3.5 w-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                  Official Syllabus Pattern
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-700/50 bg-emerald-950/60 px-2.5 py-1 text-emerald-200">
+                  <svg className="h-3.5 w-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                  Instant Rank & Analysis
+                </span>
+              </div>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <a
                   href="#papers"
-                  className="inline-flex min-h-[44px] items-center rounded-xl bg-teal-800 hover:bg-teal-900 px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition shadow-xs"
+                  className="inline-flex min-h-[44px] items-center rounded-xl bg-teal-400 hover:bg-teal-300 px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-950 transition shadow-sm"
                 >
                   Choose a paper ↓
                 </a>
                 <AccountActionButton canonical={canonical} />
               </div>
             </div>
+
+            <div className="rounded-2xl border border-emerald-800/60 bg-emerald-950/50 p-5 sm:p-6 backdrop-blur-md shadow-lg">
+              <div className="flex items-center justify-between border-b border-emerald-800/40 pb-3.5">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-teal-300">Test Series Overview</p>
+                  <p className="text-sm sm:text-base font-bold text-white mt-0.5 truncate">{context.exam.name}</p>
+                </div>
+                <span className="shrink-0 rounded-full bg-teal-400/10 border border-teal-400/30 px-2.5 py-1 text-xs font-bold text-teal-300">
+                  Free Practice
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+                <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/80 p-3">
+                  <span className="block text-2xl font-black text-teal-300">{papers.length}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">Paper{papers.length === 1 ? "" : "s"} Available</span>
+                </div>
+                <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/80 p-3">
+                  <span className="block text-2xl font-black text-emerald-300">{tests.length}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">Full Mock Tests</span>
+                </div>
+              </div>
+
+              {papers.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">Quick Paper Selector</p>
+                  <div className="grid gap-2">
+                    {papers.slice(0, 3).map((paper) => {
+                      const display = paperDisplayById.get(paper.id);
+                      const count = tests.filter((t) => t.paper_id === paper.id).length;
+                      return (
+                        <a
+                          key={paper.id}
+                          href="#papers"
+                          className="group flex items-center justify-between rounded-xl border border-emerald-800/40 bg-[#071f1a]/60 hover:bg-emerald-900/40 px-3.5 py-2.5 transition"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <p className="text-xs font-bold text-white truncate group-hover:text-teal-300 transition">
+                              {display?.shortLabel ?? paper.name}
+                            </p>
+                            <p className="text-[11px] text-slate-400 truncate">{paper.name}</p>
+                          </div>
+                          <span className="shrink-0 text-xs font-bold text-teal-300 group-hover:translate-x-1 transition">
+                            {count} test{count === 1 ? "" : "s"} →
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl space-y-10 px-5 py-8 sm:px-8 sm:py-12">
+      <div className="mx-auto max-w-7xl space-y-8 px-5 py-6 sm:px-8 sm:py-8">
         <CatalogSteps
           state={{ value: context.state.name, href: "/mock-tests" }}
           exam={{ value: context.exam.name, href: stateUrl(context.state.slug) }}
