@@ -230,7 +230,7 @@ export function EditQuestionForm({
           ← Back to {navigation.backLabel}
         </Link>
         <span className="text-slate-300 hidden sm:inline" aria-hidden="true">·</span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0a2922] px-3 py-1 text-xs font-black text-white">
           Question {navigation.currentQuestionNumber} of {navigation.totalCount}
         </span>
         {hasUnsavedChanges && (
@@ -332,7 +332,7 @@ export function EditQuestionForm({
               }}
               className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-black transition ${
                 isCurrent
-                  ? "bg-slate-950 text-white ring-2 ring-teal-400 ring-offset-2"
+                  ? "bg-[#0a2922] text-white ring-2 ring-teal-400 ring-offset-2"
                   : item.isActive && item.isScoreValid
                   ? "bg-white text-slate-700 border border-slate-200 hover:bg-teal-50"
                   : "bg-amber-100 text-amber-900 border border-amber-300"
@@ -385,7 +385,7 @@ export function EditQuestionForm({
                 title={`Question ${item.questionNumber}: ${item.questionText.slice(0, 70)}`}
                 className={`group relative grid h-10 w-10 place-items-center rounded-xl text-xs font-black transition ${
                   isCurrent
-                    ? "bg-slate-950 text-white shadow-md ring-2 ring-teal-400 ring-offset-2"
+                    ? "bg-[#0a2922] text-white shadow-md ring-2 ring-teal-400 ring-offset-2"
                     : item.isActive && item.isScoreValid
                     ? "bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-900 border border-transparent"
                     : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100"
@@ -403,7 +403,7 @@ export function EditQuestionForm({
         <div className="mt-4 border-t border-slate-100 pt-3 flex flex-col gap-2 text-[11px] font-medium text-slate-500">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-sm bg-slate-950" /> Current
+              <span className="h-2.5 w-2.5 rounded-sm bg-[#0a2922]" /> Current
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-sm bg-slate-100 border" /> Ready

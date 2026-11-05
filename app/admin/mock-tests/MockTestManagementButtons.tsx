@@ -251,7 +251,7 @@ export function MockTestManagementButtons({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#071f1a]/70 p-4 backdrop-blur-xs"
         >
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
@@ -259,7 +259,7 @@ export function MockTestManagementButtons({
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-teal-700">
                   {publishAction === "publish" ? "Publish Mock Test" : "Republish Mock Test"}
                 </p>
-                <h3 className="text-xl font-bold text-slate-950 mt-0.5">
+                <h3 className="text-xl font-bold text-[#132621] mt-0.5">
                   Publish “{mockTestTitle}”?
                 </h3>
               </div>

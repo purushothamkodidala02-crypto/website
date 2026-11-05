@@ -31,7 +31,7 @@ export default async function AdminMfaPage() {
   if (assurance?.currentLevel === "aal2") redirect("/admin");
 
   return (
-    <main className="min-h-screen bg-slate-950 px-5 py-10 text-slate-950 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-gradient-to-br from-[#071f1a] via-[#0a2922] to-[#0e3a30] px-5 py-10 text-[#132621] sm:px-8 sm:py-14">
       <div className="mx-auto max-w-5xl">
         <div className="flex justify-center">
           <BrandLockup

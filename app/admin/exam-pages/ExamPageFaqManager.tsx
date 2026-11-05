@@ -64,7 +64,7 @@ function ExamPageContentForm({ exam, state }: { exam: Exam; state: State }) {
           <span className="mt-1 block text-xs font-normal text-slate-500">Shown below “{formatExamHeading(exam.name)}” on the public exam landing page.</span>
         </label>
         <SeoFields title={exam.seoTitle} description={exam.seoDescription} titlePlaceholder={formatExamHeading(exam.name)} descriptionPlaceholder={`Practise ${formatExamHeading(exam.name).toLowerCase()}, papers, and detailed solutions on Varadhi Prep.`} />
-        <button disabled={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-50">
+        <button disabled={pending} className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-black text-white transition hover:bg-[#11382f] disabled:opacity-50">
           {pending ? "Saving public page…" : "Save public page content"}
         </button>
         <Message state={result} />
@@ -96,7 +96,7 @@ function FaqForm({ examId, faq, initial }: { examId: string; faq?: Faq; initial?
         <textarea name="answer" rows={5} required minLength={10} maxLength={3000} defaultValue={faq?.answer ?? initial?.answer ?? ""} placeholder="Write the full student-facing answer." className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal" />
       </label>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={pending} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white disabled:opacity-50">{pending ? "Saving…" : faq ? "Save question" : "Add question"}</button>
+        <button type="submit" disabled={pending} className="rounded-xl bg-[#0a2922] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#11382f] disabled:opacity-50">{pending ? "Saving…" : faq ? "Save question" : "Add question"}</button>
         {faq && <button formAction={deleteExamPageFaq} type="submit" name="faq_id" value={faq.id} className="rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-black text-red-700 hover:bg-red-50">Remove</button>}
       </div>
       <Message state={state} />

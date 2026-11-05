@@ -311,7 +311,7 @@ export function EditMockTestForm({
           <button
             disabled={pending}
             aria-busy={pending}
-            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"
+            className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#11382f] disabled:opacity-50"
           >
             <PendingButtonContent pending={pending} pendingLabel="Saving mock test…">Save Mock Test</PendingButtonContent>
           </button>

@@ -596,7 +596,7 @@ export default async function AdminQuestionReportsPage({
             <div className="mt-5">
               <Link
                 href="/admin/question-reports"
-                className="inline-flex rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white hover:bg-teal-700"
+                className="inline-flex rounded-xl bg-[#0a2922] px-4 py-2.5 text-xs font-black text-white transition hover:bg-[#11382f]"
               >
                 Clear all filters
               </Link>

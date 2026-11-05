@@ -93,7 +93,7 @@ export function CreateGroupForm({ categories, existingExams, initialCategoryId =
           </p>
         </div>
         <label className="flex items-center gap-3"><input name="is_active" type="checkbox" defaultChecked className="h-4 w-4" /><span className="text-sm font-medium">Available to students</span></label>
-        <button type="submit" disabled={pending || categories.length === 0 || !examId || duplicate} aria-busy={pending} className="rounded-lg bg-slate-950 px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating exam…">Create Exam</PendingButtonContent></button>
+        <button type="submit" disabled={pending || categories.length === 0 || !examId || duplicate} aria-busy={pending} className="rounded-lg bg-[#0a2922] px-5 py-3 font-bold text-white hover:bg-[#11382f] disabled:cursor-not-allowed disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating exam…">Create Exam</PendingButtonContent></button>
         {state.message && <p aria-live="polite" className={state.success ? "text-sm font-semibold text-green-700" : "text-sm font-semibold text-red-600"}>{state.message}</p>}
       </form>
     </section>

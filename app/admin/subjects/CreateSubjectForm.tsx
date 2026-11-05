@@ -108,7 +108,7 @@ export function CreateSubjectForm({
 
         <SubjectListInput key={subjectResetKey} />
 
-        <button disabled={pending || !paperId} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">
+        <button disabled={pending || !paperId} className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#11382f] disabled:opacity-50">
           <PendingButtonContent pending={pending} pendingLabel="Adding subjects…">Add subjects</PendingButtonContent>
         </button>
         {state.message && <p aria-live="polite" className={`text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}

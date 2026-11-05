@@ -159,7 +159,7 @@ export function NotifyStudentsModal({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#071f1a]/70 p-4 backdrop-blur-xs"
         >
           <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -167,7 +167,7 @@ export function NotifyStudentsModal({
                 <span className="text-[10px] font-black uppercase tracking-[0.14em] text-teal-700">
                   Email Alert
                 </span>
-                <h2 className="text-xl font-bold text-slate-950">
+                <h2 className="text-xl font-bold text-[#132621]">
                   Notify Previous Test-Takers
                 </h2>
               </div>

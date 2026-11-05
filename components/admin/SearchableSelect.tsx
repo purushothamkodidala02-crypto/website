@@ -186,7 +186,7 @@ export function SearchableSelect({
         <div
           id={listboxId}
           role="listbox"
-          className="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border bg-white shadow-xl shadow-slate-950/10"
+          className="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border bg-white shadow-xl shadow-emerald-950/10"
         >
           {matches.length === 0 ? (
             <p className="px-3 py-3 text-sm text-slate-500">{emptyMessage}</p>

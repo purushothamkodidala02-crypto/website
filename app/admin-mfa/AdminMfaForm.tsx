@@ -205,7 +205,7 @@ export function AdminMfaForm({ email }: { email: string }) {
             type="button"
             onClick={startEnrollment}
             disabled={loading}
-            className="mt-6 w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 w-full rounded-xl bg-[#0a2922] px-5 py-3.5 font-bold text-white transition hover:bg-[#11382f] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Creating secure setup…" : "Set up authenticator app"}
           </button>

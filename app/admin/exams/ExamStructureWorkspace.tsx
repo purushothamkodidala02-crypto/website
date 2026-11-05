@@ -140,7 +140,7 @@ export function ExamStructureWorkspace({
                 }}
                 className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
                   active
-                    ? "bg-slate-950 text-white shadow-md shadow-slate-950/20 ring-1 ring-slate-800"
+                    ? "bg-[#0a2922] text-white shadow-md shadow-teal-950/20 ring-1 ring-[#144237]"
                     : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60"
                 }`}
               >
@@ -207,7 +207,7 @@ export function ExamStructureWorkspace({
               }}
               className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition border shadow-sm ${
                 showAddBoard
-                  ? "bg-slate-900 text-white border-slate-900"
+                  ? "bg-[#0a2922] text-white border-[#0a2922]"
                   : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
               }`}
             >
@@ -323,7 +323,7 @@ export function ExamStructureWorkspace({
                 >
                   <span
                     className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition ${
-                      active ? "bg-slate-950 text-teal-300" : "bg-slate-100 text-slate-700"
+                      active ? "bg-[#0a2922] text-teal-300" : "bg-slate-100 text-slate-700"
                     }`}
                   >
                     <ExamSymbol name={category.name} className="h-5 w-5" />
@@ -737,7 +737,7 @@ function PaperBranch({
             </span>
             <Link
               href={subjectsHref}
-              className="rounded-lg bg-slate-950 px-2.5 py-1 text-xs font-bold text-white hover:bg-slate-800"
+              className="rounded-lg bg-[#0a2922] px-2.5 py-1 text-xs font-bold text-white hover:bg-[#11382f]"
             >
               + Add or manage Subjects
             </Link>

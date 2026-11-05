@@ -716,7 +716,7 @@ export function QuestionSimilarityScanner({
             <button
               type="button"
               onClick={() => setFilterMode("all")}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${filterMode === "all" ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${filterMode === "all" ? "bg-[#0a2922] text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}
             >
               All Tests
             </button>
@@ -931,7 +931,7 @@ export function QuestionSimilarityScanner({
       {/* Duplicate Question Text Scanner Modal */}
       {textScannerOpen && (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4"
+          className="fixed inset-0 z-50 grid place-items-center bg-[#071f1a]/70 p-4"
           role="dialog"
           aria-modal="true"
         >
@@ -1077,7 +1077,7 @@ export function QuestionSimilarityScanner({
                             onClick={() => setTextDuplicateFilter("all")}
                             className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
                               textDuplicateFilter === "all"
-                                ? "bg-slate-900 text-white"
+                                ? "bg-[#0a2922] text-white"
                                 : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                             }`}
                           >

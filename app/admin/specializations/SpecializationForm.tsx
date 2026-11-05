@@ -35,7 +35,7 @@ export function SpecializationForm({ exams, specialization }: { exams: Exam[]; s
         <SeoFields className="md:col-span-2" title={specialization?.seo_title} description={specialization?.seo_description} titlePlaceholder="Exam Specialisation Mock Tests" descriptionPlaceholder="Browse papers and free mock tests for this specialisation." />
         <label className="block text-sm font-bold">Display order<input name="display_order" type="number" min="0" required defaultValue={specialization?.display_order} placeholder="For example: 1" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
         <label className="flex items-center gap-3 self-end text-sm font-bold"><input name="is_active" type="checkbox" defaultChecked={specialization?.is_active ?? true} className="h-4 w-4" />Available to students</label>
-        <div className="md:col-span-2"><button disabled={pending || !examId} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{pending ? "Saving..." : specialization ? "Save Specialisation" : "Add Specialisation"}</button>{state.message && <p className={`mt-4 text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}</div>
+        <div className="md:col-span-2"><button disabled={pending || !examId} className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#11382f] disabled:opacity-50">{pending ? "Saving..." : specialization ? "Save Specialisation" : "Add Specialisation"}</button>{state.message && <p className={`mt-4 text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}</div>
       </form>
     </section>
   );
