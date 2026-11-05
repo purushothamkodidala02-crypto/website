@@ -217,7 +217,7 @@ export default async function Dashboard({
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/80 bg-teal-50 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-800 shrink-0">
                   <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                  Candidate Portal
+                  Active Prep
                 </span>
                 {page > 1 && (
                   <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-amber-800 shrink-0">
@@ -229,7 +229,7 @@ export default async function Dashboard({
               {/* Main Headline */}
               <div>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-950">
-                  {page > 1 ? "Exam History" : "Student Dashboard"}
+                  {page > 1 ? "Exam History" : "My Progress"}
                 </h1>
                 <p className="mt-1 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-600">
                   {page > 1
