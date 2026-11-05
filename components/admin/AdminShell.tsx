@@ -45,7 +45,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         collapsed={sidebarCollapsed}
         onToggle={handleToggle}
       />
-      <div className={`min-w-0 transition-[padding] duration-200 ${sidebarCollapsed ? "md:pl-20" : "md:pl-64"}`}>
+      <div className="min-w-0">
         {children}
       </div>
     </>
