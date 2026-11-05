@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +20,12 @@ const getServerSnapshot = () => false;
 
 export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [navigatingHref, setNavigatingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNavigatingHref(null);
+  }, [pathname]);
   const [open, setOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
   const [hasUser, setHasUser] = useState(false);
@@ -48,6 +54,9 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
         setHasAdminRole(false);
         return;
       }
+      try {
+        router.prefetch("/dashboard");
+      } catch {}
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -56,9 +65,19 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
       if (active) setHasAdminRole(profile?.role === "admin");
     };
     void supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user.id) {
+        try {
+          router.prefetch("/dashboard");
+        } catch {}
+      }
       void updateAccount(data.session?.user.id);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user.id) {
+        try {
+          router.prefetch("/dashboard");
+        } catch {}
+      }
       void updateAccount(session?.user.id);
     });
     return () => {
@@ -91,6 +110,16 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
       <button
         ref={triggerRef}
         type="button"
+        onMouseEnter={() => {
+          if (hasUser) {
+            try { router.prefetch("/dashboard"); } catch {}
+          }
+        }}
+        onTouchStart={() => {
+          if (hasUser) {
+            try { router.prefetch("/dashboard"); } catch {}
+          }
+        }}
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-controls={menuId}
@@ -142,11 +171,16 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
                 ? pathname === "/"
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
               const iconClass = isCurrentPage ? "bg-white text-teal-800" : tone;
+              const isNavigating = navigatingHref === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setOpen(false)}
+                  prefetch={true}
+                  onClick={() => {
+                    setNavigatingHref(item.href);
+                    setOpen(false);
+                  }}
                   aria-current={isCurrentPage ? "page" : undefined}
                   className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-black transition hover:translate-x-0.5 ${
                     isCurrentPage
@@ -158,7 +192,16 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
                     <NavigationIcon name={item.icon} />
                   </span>
                   <span>{item.label}</span>
-                  <span className="ml-auto text-lg opacity-50 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                  {isNavigating ? (
+                    <span className="ml-auto flex items-center gap-1.5 text-xs font-bold text-teal-700">
+                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    </span>
+                  ) : (
+                    <span className="ml-auto text-lg opacity-50 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                  )}
                 </Link>
               );
             })}

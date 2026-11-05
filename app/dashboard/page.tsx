@@ -63,27 +63,55 @@ export default async function Dashboard({
   const isFirstPage = page === 1;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/dashboard");
+  // Eagerly initiate auth and all independent queries simultaneously
+  const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
+  const paidSalesPromise = isPaidSalesEnabled();
+  const catalogPromise = getDashboardCatalogData();
 
-  const [
-    attemptsResult,
-    attemptSummaryResult,
-    subjectAnalyticsResult,
-    availableTestsResult,
-    mistakesCountResult,
-    bookmarksCountResult,
-    paidSalesEnabled,
-    catalog,
-  ] = await Promise.all([
-    supabase
+  const attemptsPromise = userPromise.then(async (user) => {
+    if (!user) return [] as Attempt[];
+    const { data } = await supabase
       .from("test_attempts")
       .select(
         "id, mock_test_id, detailed_review_available, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions",
       )
       .eq("user_id", user.id)
       .order("submitted_at", { ascending: false })
-      .range((page - 1) * attemptsPerPage, page * attemptsPerPage - 1),
+      .range((page - 1) * attemptsPerPage, page * attemptsPerPage - 1);
+    return (data ?? []) as Attempt[];
+  });
+
+  const mistakesCountPromise = userPromise.then(async (user) => {
+    if (!user) return 0;
+    const { count } = await supabase
+      .from("student_question_mistakes")
+      .select("question_id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    return count ?? 0;
+  });
+
+  const bookmarksCountPromise = userPromise.then(async (user) => {
+    if (!user) return 0;
+    const { count } = await supabase
+      .from("student_question_bookmarks")
+      .select("question_id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    return count ?? 0;
+  });
+
+  const [
+    user,
+    attempts,
+    attemptSummaryResult,
+    subjectAnalyticsResult,
+    availableTestsResult,
+    mistakesCount,
+    bookmarksCount,
+    paidSalesEnabled,
+    catalog,
+  ] = await Promise.all([
+    userPromise,
+    attemptsPromise,
     supabase.rpc("get_student_attempt_history_summary"),
     isFirstPage
       ? supabase.rpc("get_student_subject_analytics")
@@ -96,19 +124,13 @@ export default async function Dashboard({
           .order("display_order", { ascending: true })
           .limit(4)
       : Promise.resolve({ data: [] as AvailableMockTest[] }),
-    supabase
-      .from("student_question_mistakes")
-      .select("question_id", { count: "exact", head: true })
-      .eq("user_id", user.id),
-    supabase
-      .from("student_question_bookmarks")
-      .select("question_id", { count: "exact", head: true })
-      .eq("user_id", user.id),
-    isPaidSalesEnabled(),
-    getDashboardCatalogData(),
+    mistakesCountPromise,
+    bookmarksCountPromise,
+    paidSalesPromise,
+    catalogPromise,
   ]);
 
-  const attempts = (attemptsResult.data ?? []) as Attempt[];
+  if (!user) redirect("/login?next=/dashboard");
   const attemptSummary = (attemptSummaryResult.data?.[0] ?? {
     completed_attempts: attempts.length,
     average_score: 0,
@@ -162,8 +184,7 @@ export default async function Dashboard({
   const studentName = metadataName || (user.email ? user.email.split("@")[0] : "Student");
   const firstName = studentName.split(" ")[0];
   const avatarLetter = (firstName[0] || "S").toUpperCase();
-  const mistakesCount = mistakesCountResult.count ?? 0;
-  const bookmarksCount = bookmarksCountResult.count ?? 0;
+  // counts are resolved directly from promises above
   const isPaidEnabled = paidSalesEnabled === true;
 
   const publicTestPath = (test: AvailableMockTest) => {
