@@ -4,6 +4,7 @@ export const revalidate = 0;
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
+import { ExamHistorySection } from "@/components/dashboard/ExamHistorySection";
 import { getDashboardCatalogData } from "@/lib/catalog-data";
 import { parseMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
@@ -546,44 +547,13 @@ export default async function Dashboard({
             )}
 
             {/* Exam History Section */}
-            <section className="space-y-3 sm:space-y-4 pt-1 sm:pt-2">
-              <div className="flex flex-wrap items-end justify-between gap-2.5">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
-                    History
-                  </p>
-                  <h2 className="mt-0.5 text-lg sm:text-xl lg:text-2xl font-black text-slate-950">
-                    {page > 1 ? `Completed Exams (Page ${page})` : "Recent Exam History"}
-                  </h2>
-                  <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
-                    Showing {((page - 1) * attemptsPerPage) + 1} to {Math.min(page * attemptsPerPage, totalAttempts)} of {totalAttempts} completed exams.
-                  </p>
-                </div>
-                {page === 1 && totalPages > 1 && (
-                  <Link
-                    href="/dashboard?page=2"
-                    prefetch={true}
-                    className="text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900 transition"
-                  >
-                    View next page &rarr;
-                  </Link>
-                )}
-              </div>
-
-              <div className="grid gap-3 sm:gap-4">
-                {attempts.map((attempt) => (
-                  <AttemptCard
-                    key={attempt.id}
-                    attempt={attempt}
-                    testTitles={testTitles}
-                  />
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <PaginationNav page={page} totalPages={totalPages} />
-              )}
-            </section>
+            <ExamHistorySection
+              initialAttempts={attempts}
+              initialPage={page}
+              totalAttempts={totalAttempts}
+              attemptsPerPage={attemptsPerPage}
+              initialTestTitles={Object.fromEntries(testTitles)}
+            />
           </>
         )}
       </div>
