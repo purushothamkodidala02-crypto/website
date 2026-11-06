@@ -97,7 +97,7 @@ export function ExportReportsButton({ reports }: { reports: ExportReportRow[] })
       onClick={handleExport}
       disabled={isExporting || reports.length === 0}
       title="Export visible reports to CSV"
-      className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs font-black text-slate-800 shadow-xs transition hover:border-teal-400 hover:bg-slate-50 hover:text-teal-900 disabled:cursor-not-allowed disabled:opacity-50 text-center whitespace-nowrap"
+      className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 text-center whitespace-nowrap"
     >
       <svg
         viewBox="0 0 24 24"
@@ -106,7 +106,7 @@ export function ExportReportsButton({ reports }: { reports: ExportReportRow[] })
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="h-4 w-4 text-teal-700 shrink-0"
+        className="h-3.5 w-3.5 text-slate-500 shrink-0"
         aria-hidden="true"
       >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

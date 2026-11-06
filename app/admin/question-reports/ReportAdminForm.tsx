@@ -15,10 +15,10 @@ const PRESET_NOTES = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: "open", label: "Open", activeClass: "bg-red-600 text-white border-red-600", dotClass: "bg-red-500" },
-  { value: "reviewing", label: "Reviewing", activeClass: "bg-amber-600 text-white border-amber-600", dotClass: "bg-amber-500" },
-  { value: "resolved", label: "Resolved", activeClass: "bg-emerald-600 text-white border-emerald-600", dotClass: "bg-emerald-500" },
-  { value: "dismissed", label: "Dismissed", activeClass: "bg-slate-700 text-white border-slate-700", dotClass: "bg-slate-400" },
+  { value: "open", label: "Open", activeClass: "border-rose-700 bg-rose-700 text-white font-semibold" },
+  { value: "reviewing", label: "Reviewing", activeClass: "border-amber-700 bg-amber-700 text-white font-semibold" },
+  { value: "resolved", label: "Resolved", activeClass: "border-emerald-700 bg-emerald-700 text-white font-semibold" },
+  { value: "dismissed", label: "Dismissed", activeClass: "border-slate-800 bg-slate-800 text-white font-semibold" },
 ];
 
 export function ReportAdminForm({
@@ -98,13 +98,12 @@ export function ReportAdminForm({
                   key={opt.value}
                   type="button"
                   onClick={() => setSelectedStatus(opt.value)}
-                  className={`flex items-center justify-center gap-1.5 rounded-xl border px-2.5 py-2 text-xs font-black transition ${
+                  className={`flex items-center justify-center rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
                     isSelected
                       ? opt.activeClass
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${isSelected ? "bg-white" : opt.dotClass}`} />
                   <span>{opt.label}</span>
                 </button>
               );
@@ -145,7 +144,7 @@ export function ReportAdminForm({
               maxLength={2000}
               value={notesValue}
               onChange={(e) => setNotesValue(e.target.value)}
-              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-hidden focus:ring-1 focus:ring-teal-600 break-words"
+              className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-hidden focus:ring-1 focus:ring-slate-400 break-words"
               placeholder="Record actions taken, correction details, or reasons for resolving/dismissing this report..."
             />
           </div>
@@ -158,7 +157,7 @@ export function ReportAdminForm({
                 key={preset}
                 type="button"
                 onClick={() => handleApplyPreset(preset)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-900 break-words text-left"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 break-words text-left"
               >
                 + {preset}
               </button>

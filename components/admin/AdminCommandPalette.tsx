@@ -371,7 +371,6 @@ export function AdminCommandPalette({
   // Group commands by category
   const groupedCommands = useMemo(() => {
     const groups: { category: string; items: { command: CommandItem; index: number }[] }[] = [];
-    let currentIndex = 0;
 
     const categoryOrder: ("Quick Actions" | "Navigation" | "Tools & Support")[] = [
       "Quick Actions",

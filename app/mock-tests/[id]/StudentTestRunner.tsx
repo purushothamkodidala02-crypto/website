@@ -1,12 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
-import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, submitAttempt, syncAttemptTimer, verifySubmittedAttempt, type SubmitAttemptResult } from "./attempt-actions";
+import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, submitAttempt, syncAttemptTimer, verifySubmittedAttempt, checkAttemptDeviceStatus, type SubmitAttemptResult } from "./attempt-actions";
+import { getClientDeviceId } from "@/lib/auth/client-device";
+import { createClient } from "@/lib/supabase/client";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { SubmissionResult } from "./SubmissionResult";
@@ -124,24 +127,49 @@ export function StudentTestRunner({
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const showFullscreenNotice = !noticeDismissed && !isFullscreen;
   const [fullscreenFeedback, setFullscreenFeedback] = useState("");
+  const [isDisplaced, setIsDisplaced] = useState(false);
+  const isDisplacedRef = useRef(false);
+  const deviceIdRef = useRef("");
   const containerRef = useRef<HTMLElement | null>(null);
   const saveChains = useRef(new Map<string, Promise<void>>());
   const isFinishingRef = useRef(false);
   const hasAutoSubmittedRef = useRef(false);
 
+  useEffect(() => {
+    deviceIdRef.current = getClientDeviceId();
+  }, []);
+
+  const handleDisplaced = useCallback(async () => {
+    if (isDisplacedRef.current) return;
+    isDisplacedRef.current = true;
+    isFinishingRef.current = true;
+    setIsDisplaced(true);
+    void exitFullscreenSafely();
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore network failure during displacement sign-out
+    }
+  }, []);
+
   const current = questions[index];
   const answered = useMemo(() => Object.keys(answers).length, [answers]);
   const unanswered = questions.length - answered;
-  const locked = remaining === null || remaining === 0 || submitting || pausing || paused;
-  const pauseControlDisabled = remaining === null || remaining === 0 || submitting || pausing;
+  const locked = remaining === null || remaining === 0 || submitting || pausing || paused || isDisplaced;
+  const pauseControlDisabled = remaining === null || remaining === 0 || submitting || pausing || isDisplaced;
 
-  const queueSave = useCallback((key: string, operation: () => Promise<{ success: boolean }>) => {
+  const queueSave = useCallback((key: string, operation: () => Promise<{ success: boolean; displaced?: boolean }>) => {
     setSaveState("saving");
     const previous = saveChains.current.get(key) ?? Promise.resolve();
     const next = previous
       .then(operation)
       .then((result) => {
-        if (!result.success) setSaveState("error");
+        if (result?.displaced) {
+          void handleDisplaced();
+          return;
+        }
+        if (!result?.success) setSaveState("error");
       })
       .catch(() => setSaveState("error"))
       .then(() => {
@@ -151,7 +179,7 @@ export function StudentTestRunner({
         }
       });
     saveChains.current.set(key, next);
-  }, []);
+  }, [handleDisplaced]);
 
   const flushSaves = useCallback(async () => {
     await Promise.all([...saveChains.current.values()]);
@@ -220,16 +248,35 @@ export function StudentTestRunner({
   }, [deadline, finish, paused, submission, submitting]);
 
   useEffect(() => {
-    if (submission || paused || pausing || submitting) return;
+    if (submission || paused || pausing || submitting || isDisplaced) return;
     const sync = async () => {
-      const result = await syncAttemptTimer(sessionId);
+      if (!deviceIdRef.current) deviceIdRef.current = getClientDeviceId();
+      const result = await syncAttemptTimer(sessionId, deviceIdRef.current);
+      if (result.displaced) {
+        void handleDisplaced();
+        return;
+      }
       if (result.success && typeof result.remaining === "number") {
         setRemaining(result.remaining);
       }
     };
-    const timer = window.setInterval(() => void sync(), 30000);
+    const timer = window.setInterval(() => void sync(), 15000);
     return () => window.clearInterval(timer);
-  }, [paused, pausing, sessionId, submission, submitting]);
+  }, [handleDisplaced, isDisplaced, paused, pausing, sessionId, submission, submitting]);
+
+  // Fast device displacement heartbeat (detects when student resumes on mobile within ~4 seconds)
+  useEffect(() => {
+    if (submission || paused || pausing || submitting || isDisplaced) return;
+    const heartbeat = async () => {
+      if (!deviceIdRef.current) deviceIdRef.current = getClientDeviceId();
+      const status = await checkAttemptDeviceStatus(sessionId, deviceIdRef.current);
+      if (status.displaced) {
+        void handleDisplaced();
+      }
+    };
+    const timer = window.setInterval(() => void heartbeat(), 4000);
+    return () => window.clearInterval(timer);
+  }, [handleDisplaced, isDisplaced, paused, pausing, sessionId, submission, submitting]);
 
   useEffect(() => {
     function navigateWithKeyboard(event: KeyboardEvent) {
@@ -296,6 +343,39 @@ export function StudentTestRunner({
     }
   }, [mockTestId, title, publicTestPath, folderUrl, folderName, folderType, examName, paperName, subjectName, stateCode]);
 
+  if (isDisplaced) {
+    return (
+      <main className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-slate-900/90 p-5 backdrop-blur-sm">
+        <section className="mx-auto max-w-md w-full rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-2xl">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-8 ring-amber-50/50">
+            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-amber-700">Single device active</p>
+          <h1 className="mt-2 text-2xl font-black text-slate-950">Test Resumed on Another Device</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            You opened or resumed this mock test on your mobile device. To protect test integrity and prevent duplicate submissions, this PC session has been closed and signed out.
+          </p>
+          <div className="mt-6 flex flex-col gap-2.5">
+            <Link
+              href={`/login?next=${encodeURIComponent(publicTestPath)}`}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-teal-800 px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-900"
+            >
+              Sign in on this device
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Return to Home
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   if (submission) {
     return (
       <SubmissionResult
@@ -336,7 +416,7 @@ export function StudentTestRunner({
     setAnswers((value) => { const next = { ...value }; delete next[current.question_id]; return next; });
     queueSave(
       `answer:${current.question_id}`,
-      () => saveAttemptProgress(sessionId, current.question_id, null),
+      () => saveAttemptProgress(sessionId, current.question_id, null, deviceIdRef.current),
     );
   }
   async function togglePause() {
@@ -597,7 +677,7 @@ export function StudentTestRunner({
                         onChange={() => {
                           setSaveState("saving");
                           setAnswers((value) => ({ ...value, [current.question_id]: key }));
-                          queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key));
+                          queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key, deviceIdRef.current));
                         }}
                       />
                       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>

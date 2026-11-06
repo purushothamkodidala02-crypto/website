@@ -86,7 +86,7 @@ export function QuestionPreviewDrawer({
           )}
 
           {correctAnswer && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-900">
+            <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="h-2.5 w-2.5 shrink-0 text-emerald-700">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
@@ -156,23 +156,23 @@ export function QuestionPreviewDrawer({
 
                 let cardStyle = "border-slate-200 bg-white text-slate-800";
                 if (isCorrect) {
-                  cardStyle = "border-emerald-300 bg-emerald-50/70 text-emerald-950 ring-1 ring-emerald-500/20";
+                  cardStyle = "border-emerald-200/80 bg-emerald-50/50 text-emerald-950";
                 } else if (isStudentSelected && !studentAttemptAnswer?.isCorrect) {
-                  cardStyle = "border-rose-300 bg-rose-50/70 text-rose-950 ring-1 ring-rose-500/20";
+                  cardStyle = "border-rose-200/80 bg-rose-50/50 text-rose-950";
                 }
 
                 return (
                   <div
                     key={opt.key}
-                    className={`relative flex items-start gap-2.5 rounded-xl border p-3 text-xs leading-5 transition ${cardStyle}`}
+                    className={`relative flex items-start gap-2.5 rounded-lg border p-3 text-xs leading-5 transition ${cardStyle}`}
                   >
                     <span
-                      className={`inline-grid h-6 w-6 shrink-0 place-items-center rounded-lg font-black text-xs ${
+                      className={`inline-grid h-6 w-6 shrink-0 place-items-center rounded font-bold text-xs ${
                         isCorrect
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-emerald-700 text-white"
                           : isStudentSelected
-                            ? "bg-rose-600 text-white"
-                            : "bg-slate-200 text-slate-800"
+                            ? "bg-rose-700 text-white"
+                            : "bg-slate-100 text-slate-700"
                       }`}
                     >
                       {opt.key}
@@ -181,16 +181,16 @@ export function QuestionPreviewDrawer({
                       <p className="font-medium text-slate-900 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{opt.text}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {isCorrect && (
-                          <span className="inline-flex items-center gap-1 font-bold text-[10px] uppercase text-emerald-800">
+                          <span className="inline-flex items-center gap-1 font-semibold text-[10px] text-emerald-800">
                             ✓ Official key
                           </span>
                         )}
                         {isStudentSelected && (
                           <span
-                            className={`rounded-sm px-1.5 py-0.5 text-[10px] font-black uppercase ${
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
                               studentAttemptAnswer.isCorrect
-                                ? "bg-emerald-200 text-emerald-900"
-                                : "bg-rose-200 text-rose-900"
+                                ? "bg-emerald-100 text-emerald-900"
+                                : "bg-rose-100 text-rose-900"
                             }`}
                           >
                             Student answered {isStudentSelected && !studentAttemptAnswer.isCorrect ? "(Wrong)" : "(Correct)"}
@@ -205,8 +205,8 @@ export function QuestionPreviewDrawer({
           )}
 
           {studentAttemptAnswer && (
-            <div className="flex items-start sm:items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 p-3 text-xs font-semibold text-blue-950 break-words [overflow-wrap:anywhere]">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0 text-blue-700 mt-0.5 sm:mt-0">
+            <div className="flex items-start sm:items-center gap-2 rounded-lg border border-sky-200/80 bg-sky-50/40 p-3 text-xs font-medium text-sky-950 break-words [overflow-wrap:anywhere]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0 text-sky-700 mt-0.5 sm:mt-0">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />

@@ -75,13 +75,13 @@ export function QuestionReportsFilterBar({
   const hasActiveFilters = Boolean(currentStatus || currentCategory || (searchParams.get("q") ?? "") || currentSort !== "newest");
 
   const statusTabs = [
-    { id: "", label: "All Active", count: counts.total, dot: null },
-    { id: "open", label: "Open", count: counts.open, dot: "bg-red-500" },
-    { id: "reviewing", label: "Reviewing", count: counts.reviewing, dot: "bg-amber-500" },
-    { id: "resolved", label: "Resolved", count: counts.resolved, dot: "bg-emerald-500" },
-    { id: "dismissed", label: "Dismissed", count: counts.dismissed, dot: "bg-slate-400" },
+    { id: "", label: "All Active", count: counts.total },
+    { id: "open", label: "Open", count: counts.open },
+    { id: "reviewing", label: "Reviewing", count: counts.reviewing },
+    { id: "resolved", label: "Resolved", count: counts.resolved },
+    { id: "dismissed", label: "Dismissed", count: counts.dismissed },
     ...(counts.archived !== undefined && counts.archived > 0
-      ? [{ id: "archived", label: "Archived >15d", count: counts.archived, dot: "bg-slate-400" }]
+      ? [{ id: "archived", label: "Archived >15d", count: counts.archived }]
       : []),
   ];
 
@@ -96,17 +96,16 @@ export function QuestionReportsFilterBar({
               key={tab.id}
               type="button"
               onClick={() => updateFilters({ status: tab.id || null })}
-              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-black transition ${
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-semibold transition ${
                 isActive
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "bg-white text-slate-700 hover:bg-slate-100/80 border border-slate-200/80"
+                  ? "border border-slate-900 bg-slate-900 text-white shadow-2xs"
+                  : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
-              {tab.dot && <span className={`h-2 w-2 rounded-full shrink-0 ${tab.dot}`} />}
               <span>{tab.label}</span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                  isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
+                  isActive ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600"
                 }`}
               >
                 {tab.count}
@@ -117,7 +116,7 @@ export function QuestionReportsFilterBar({
       </div>
 
       {/* Search and Secondary Filter Controls */}
-      <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-white p-3 sm:p-3.5 shadow-xs sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
+      <div className="grid gap-2.5 rounded-xl border border-slate-200/90 bg-white p-3 shadow-2xs sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
         {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="relative min-w-0">
           <input
@@ -125,7 +124,7 @@ export function QuestionReportsFilterBar({
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search question, student, email, or notes…"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pr-9 pl-9 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-teal-600"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2 pr-9 pl-9 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-400"
           />
           <svg
             viewBox="0 0 24 24"

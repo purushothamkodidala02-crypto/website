@@ -4,6 +4,7 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { CopyProtection } from "@/components/site/CopyProtection";
+import { SingleDeviceWatcher } from "@/components/auth/SingleDeviceWatcher";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -103,6 +104,7 @@ export default async function RootLayout({
         <PostHogProvider>
           <NavigationProgress />
           <CopyProtection />
+          <SingleDeviceWatcher />
           {children}
           <GoogleAnalytics />
         </PostHogProvider>

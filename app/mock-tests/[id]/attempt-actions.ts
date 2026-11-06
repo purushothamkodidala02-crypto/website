@@ -16,6 +16,7 @@ export type SubmitAttemptResult = {
   correctAnswers?: number;
   incorrectAnswers?: number;
   unansweredQuestions?: number;
+  displaced?: boolean;
 };
 
 function cleanAnswers(answers: Record<string, Answer>) {
@@ -35,11 +36,65 @@ function cleanAnswers(answers: Record<string, Answer>) {
   return cleanedAnswers;
 }
 
+export async function checkAttemptDeviceStatus(
+  sessionId: string,
+  clientDeviceId: string,
+): Promise<{ active: boolean; displaced: boolean; remaining?: number }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !UUID_PATTERN.test(sessionId)) {
+      return { active: false, displaced: false };
+    }
+
+    const { data: session } = await supabase
+      .from("test_attempt_sessions")
+      .select("active_device_token, session_state, remaining_seconds, expires_at, submitted_at")
+      .eq("id", sessionId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!session) {
+      return { active: false, displaced: false };
+    }
+
+    if (session.submitted_at || session.session_state === "submitted") {
+      return { active: false, displaced: false };
+    }
+
+    // Check if another device has claimed this active test session
+    if (
+      session.active_device_token &&
+      clientDeviceId &&
+      session.active_device_token !== clientDeviceId
+    ) {
+      return { active: false, displaced: true };
+    }
+
+    const remaining = Math.max(
+      0,
+      Math.ceil((new Date(session.expires_at).getTime() - Date.now()) / 1000),
+    );
+
+    return {
+      active: session.session_state === "active",
+      displaced: false,
+      remaining,
+    };
+  } catch {
+    return { active: true, displaced: false };
+  }
+}
+
 export async function saveAttemptProgress(
   sessionId: string,
   questionId: string,
   answer: Answer | null,
-): Promise<{ success: boolean }> {
+  clientDeviceId?: string,
+): Promise<{ success: boolean; displaced?: boolean }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -54,11 +109,32 @@ export async function saveAttemptProgress(
     return { success: false };
   }
 
+  // Verify device ownership
+  if (clientDeviceId) {
+    const { data: session } = await supabase
+      .from("test_attempt_sessions")
+      .select("active_device_token")
+      .eq("id", sessionId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (
+      session?.active_device_token &&
+      session.active_device_token !== clientDeviceId
+    ) {
+      return { success: false, displaced: true };
+    }
+  }
+
   const { error } = await supabase.rpc("save_mock_test_answer_update", {
     requested_session_id: sessionId,
     requested_question_id: questionId,
     requested_answer: answer,
   });
+
+  if (error && error.message.includes("DISPLACED")) {
+    return { success: false, displaced: true };
+  }
 
   return { success: !error };
 }
@@ -82,13 +158,39 @@ export async function saveReviewState(
   return { success: !error };
 }
 
-export async function syncAttemptTimer(sessionId: string): Promise<{ success: boolean; remaining?: number }> {
+export async function syncAttemptTimer(
+  sessionId: string,
+  clientDeviceId?: string,
+): Promise<{ success: boolean; remaining?: number; displaced?: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user || !UUID_PATTERN.test(sessionId)) return { success: false };
+
+  // Fast check for device displacement before syncing timer
+  if (clientDeviceId) {
+    const { data: session } = await supabase
+      .from("test_attempt_sessions")
+      .select("active_device_token")
+      .eq("id", sessionId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (
+      session?.active_device_token &&
+      session.active_device_token !== clientDeviceId
+    ) {
+      return { success: false, displaced: true };
+    }
+  }
+
   const { data, error } = await supabase.rpc("sync_mock_test_session_timer", {
     requested_session_id: sessionId,
   });
+
+  if (error && error.message.includes("DISPLACED")) {
+    return { success: false, displaced: true };
+  }
+
   return error ? { success: false } : { success: true, remaining: Number(data) };
 }
 
@@ -241,4 +343,3 @@ export async function verifySubmittedAttempt(sessionId: string): Promise<{
     return { success: false };
   }
 }
-
