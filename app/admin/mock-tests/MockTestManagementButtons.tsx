@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { MockTestStatus } from "@/types/mock-test";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
@@ -46,6 +46,7 @@ export function MockTestManagementButtons({
   const [previewAudience, setPreviewAudience] = useState<{ count: number; examName: string } | null>(null);
 
   async function openPublishDialog(action: "publish" | "republish") {
+    if (pending) return;
     setPublishAction(action);
     setNotifyStudents(true);
     setPreviewLoading(true);
@@ -63,28 +64,35 @@ export function MockTestManagementButtons({
   }
 
   async function confirmPublish() {
-    if (!publishAction) return;
+    if (!publishAction || pending) return;
     const action = publishAction;
-    setPublishAction(null);
     setPending(true);
     setMessage("");
 
-    const result =
-      action === "publish"
-        ? await publishMockTest(mockTestId, { notifyStudents })
-        : await republishArchivedMockTest(mockTestId, { notifyStudents });
+    try {
+      const result =
+        action === "publish"
+          ? await publishMockTest(mockTestId, { notifyStudents })
+          : await republishArchivedMockTest(mockTestId, { notifyStudents });
 
-    setPending(false);
-    if (!result.success) {
-      setMessage(result.message);
-      return;
+      setPublishAction(null);
+      if (!result.success) {
+        setMessage(result.message);
+        return;
+      }
+      router.refresh();
+    } catch (err) {
+      setPublishAction(null);
+      setMessage(err instanceof Error ? err.message : "An unexpected error occurred while publishing.");
+    } finally {
+      setPending(false);
     }
-    router.refresh();
   }
 
   async function run(
     action: "hide" | "restore" | "delete" | "correct" | "permanent-delete" | "clear-admin-attempts"
   ) {
+    if (pending) return;
     const confirmations = {
       hide: `Hide “${mockTestTitle}”?\n\nNew attempts will stop, but existing results remain safe.`,
       restore: `Restore “${mockTestTitle}” as a draft?`,
@@ -265,8 +273,9 @@ export function MockTestManagementButtons({
               </div>
               <button
                 type="button"
-                onClick={() => setPublishAction(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                onClick={() => !pending && setPublishAction(null)}
+                disabled={pending}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-40"
               >
                 ✕
               </button>
@@ -283,7 +292,8 @@ export function MockTestManagementButtons({
                   type="checkbox"
                   checked={notifyStudents}
                   onChange={(e) => setNotifyStudents(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+                  disabled={pending}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600 disabled:opacity-50"
                 />
                 <div>
                   <span className="text-sm font-bold text-slate-950">
@@ -310,8 +320,9 @@ export function MockTestManagementButtons({
             <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
               <button
                 type="button"
-                onClick={() => setPublishAction(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                onClick={() => !pending && setPublishAction(null)}
+                disabled={pending}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -349,15 +360,31 @@ function ActionButton({
   label: string;
   className: string;
 }) {
+  const [clicked, setClicked] = useState(false);
+
+  useEffect(() => {
+    if (!pending) {
+      setClicked(false);
+    }
+  }, [pending]);
+
+  const isBusy = pending || clicked;
+
+  const handleClick = () => {
+    if (isBusy || disabled) return;
+    setClicked(true);
+    onClick();
+  };
+
   return (
     <button
       type="button"
-      onClick={onClick}
-      disabled={pending || disabled}
-      aria-busy={pending}
+      onClick={handleClick}
+      disabled={isBusy || disabled}
+      aria-busy={isBusy}
       className={`rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition disabled:cursor-not-allowed disabled:opacity-45 ${className}`}
     >
-      <PendingButtonContent pending={pending} pendingLabel="Working…">
+      <PendingButtonContent pending={isBusy} pendingLabel="Working…">
         {label}
       </PendingButtonContent>
     </button>

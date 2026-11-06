@@ -64,6 +64,7 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     subjectResult,
     sectionResult,
     seriesResult,
+    specializationsResult,
   ] = await Promise.all([
     supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
     supabase.from("exam_states").select("id, name, code, slug").eq("id", stateId).maybeSingle(),
@@ -73,6 +74,7 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     subjectId ? supabase.from("subjects").select("id, paper_id, name, slug").eq("id", subjectId).maybeSingle() : Promise.resolve({ data: null, error: null }),
     subjectSectionId ? supabase.from("subject_sections").select("id, subject_id, name, slug").eq("id", subjectSectionId).maybeSingle() : Promise.resolve({ data: null, error: null }),
     existingSeriesQuery,
+    supabase.from("exam_specializations").select("id, name"),
   ]);
 
   if (profileResult.data?.role !== "admin") {
@@ -112,9 +114,9 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
       message: `Mock Test ${String(seriesNumber).padStart(2, "0")} already exists in this series. Please choose an unused number.`,
     };
   }
-  const { data: specialization } = paper.specialization_id
-    ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
-    : { data: null };
+  const specialization = paper.specialization_id
+    ? (specializationsResult.data ?? []).find((item) => item.id === paper.specialization_id) ?? null
+    : null;
   const title = buildMockTestTitle({ stateCode: state.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, sectionName: section?.name, seriesNumber });
   const slug = mockTestSlug(seriesNumber, subject?.slug, section?.slug);
 

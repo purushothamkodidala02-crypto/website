@@ -31,6 +31,13 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   existingSeries: ExistingSeries[];
 }) {
   const [result, action, pending] = useActionState(createMockTest, initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!pending) {
+      setIsSubmitting(false);
+    }
+  }, [pending]);
   const [stateId, setStateId] = useState(states[0]?.id ?? "");
   const [categoryId, setCategoryId] = useState("");
   const [examId, setExamId] = useState("");
@@ -199,7 +206,17 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
 
   return <section className="mt-6 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
     <div className="border-b bg-gradient-to-r from-slate-950 to-teal-950 px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-300 text-slate-950"><MockSymbol /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Guided test creator</p><h2 className="font-display mt-1 text-2xl">Create the next mock in its correct series</h2></div></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Select the location from left to right. Varadhi generates the test number, full name and URL automatically.</p></div>
-    <form action={action} className="grid gap-5 p-6 md:grid-cols-2 sm:p-7">
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (pending || isSubmitting) {
+          e.preventDefault();
+          return;
+        }
+        setIsSubmitting(true);
+      }}
+      className="grid gap-5 p-6 md:grid-cols-2 sm:p-7"
+    >
       <label className="block text-sm font-bold">1. State / catalogue
         <select name="state_id" value={stateId} onChange={(event) => resetAfterState(event.target.value)} className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal">
           {states.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}
@@ -461,7 +478,25 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
           Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam Passes.
         </p>
       </div>
-      <div className="md:col-span-2"><button disabled={pending || !paperId || (scope === "subject" && !subjectId) || isSeriesTaken} aria-busy={pending} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Creating draft…">Create {paper ? mockTestLabel(effectiveSeries) : "mock test"}</PendingButtonContent></button>{result.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}>{result.message}</p>}</div>
+      <div className="md:col-span-2">
+        <button
+          disabled={pending || isSubmitting || !paperId || (scope === "subject" && !subjectId) || isSeriesTaken}
+          aria-busy={pending || isSubmitting}
+          className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"
+        >
+          <PendingButtonContent pending={pending || isSubmitting} pendingLabel="Creating draft…">
+            Create {paper ? mockTestLabel(effectiveSeries) : "mock test"}
+          </PendingButtonContent>
+        </button>
+        {result.message && (
+          <p
+            aria-live="polite"
+            className={`mt-4 text-sm font-semibold ${result.success ? "text-emerald-700" : "text-red-700"}`}
+          >
+            {result.message}
+          </p>
+        )}
+      </div>
     </form>
   </section>;
 }
