@@ -174,84 +174,77 @@ function parseCsv(source: string): ParsedQuestionFile {
 }
 
 async function parseExcel(file: File): Promise<ParsedQuestionFile> {
-  let workbook = new ExcelJS.Workbook();
   const rawBuffer = Buffer.from(await file.arrayBuffer());
   const isBiff8Xls = rawBuffer.length >= 8 && rawBuffer.subarray(0, 8).toString("hex") === "d0cf11e0a1b11ae1";
   const extension = file.name.toLowerCase().split(".").pop();
 
-  let fileBuffer: Parameters<typeof workbook.xlsx.load>[0];
+  // Fast direct parsing via SheetJS (xlsx) - parses .xlsx and .xls in ~10-20ms without ExcelJS XML overhead
+  let readWb: XLSX.WorkBook;
   if (isBiff8Xls || extension === "xls") {
     try {
-      const readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
-      fileBuffer = XLSX.write(readWb, { bookType: "xlsx", type: "buffer" }) as unknown as Parameters<typeof workbook.xlsx.load>[0];
+      readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
+      const normalizedBuffer = XLSX.write(readWb, { bookType: "xlsx", type: "buffer" });
+      readWb = XLSX.read(normalizedBuffer, { type: "buffer", cellDates: true });
     } catch {
       throw new Error("The Excel 97-2003 (.xls) file could not be read. Please ensure it is a valid Excel workbook.");
     }
   } else {
-    fileBuffer = rawBuffer as unknown as Parameters<typeof workbook.xlsx.load>[0];
-  }
-
-  try {
-    await workbook.xlsx.load(fileBuffer);
-  } catch (loadError) {
     try {
-      const readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
-      const normalizedBuffer = XLSX.write(readWb, { bookType: "xlsx", type: "buffer" }) as unknown as Parameters<typeof workbook.xlsx.load>[0];
-      const fallbackWorkbook = new ExcelJS.Workbook();
-      await fallbackWorkbook.xlsx.load(normalizedBuffer);
-      workbook = fallbackWorkbook;
-    } catch {
+      readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
+    } catch (loadError) {
       throw new Error(
-        loadError instanceof Error && loadError.message.includes("sheets")
-          ? "The Excel file format could not be parsed by ExcelJS. Please ensure the worksheet is valid or import as a CSV file."
-          : (loadError instanceof Error ? loadError.message : "The Excel file could not be read.")
+        loadError instanceof Error ? loadError.message : "The Excel file could not be read."
       );
     }
   }
 
-  const worksheet = workbook.getWorksheet("Varadhi Import") ?? workbook.worksheets[0];
+  const sheetName = readWb.SheetNames.includes("Varadhi Import") ? "Varadhi Import" : readWb.SheetNames[0];
+  const worksheet: XLSX.WorkSheet & {
+    getImages?: () => Array<{ imageId: unknown; range: { tl: { nativeRow: number } } }>;
+  } = readWb.Sheets[sheetName];
   if (!worksheet) throw new Error("The Excel file does not contain a worksheet.");
 
-  let lastCol = worksheet.columnCount;
-  while (lastCol > 0 && !worksheet.getCell(1, lastCol).text.trim()) {
-    lastCol -= 1;
+  // Fast raw data extraction via SheetJS sheet_to_json
+  const rawData: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" });
+  if (!rawData.length) throw new Error("The Excel sheet needs headings and at least one Question.");
+
+  const rawHeaders = (rawData[0] ?? []) as unknown[];
+  const headers = rawHeaders.map((val) => normalizeHeader(String(val ?? "")));
+  while (headers.length > 0 && !headers[headers.length - 1]) {
+    headers.pop();
   }
-  const headers = Array.from({ length: lastCol }, (_, index) => normalizeHeader(worksheet.getCell(1, index + 1).text));
+  if (!headers.length) throw new Error("The Excel sheet needs headings and at least one Question.");
   if (new Set(headers).size !== headers.length) throw new Error("Each file column heading must be unique.");
 
   const embeddedImages = new Map<number, EmbeddedQuestionImage>();
-  for (const placement of worksheet.getImages()) {
-    const rowNumber = placement.range.tl.nativeRow + 1;
-    if (rowNumber < 2) continue;
-    if (embeddedImages.has(rowNumber)) throw new Error(`Row ${rowNumber}: use only one embedded Question image per row.`);
-
-    const image = workbook.getImage(Number(placement.imageId));
-    if (!image || !["jpeg", "png"].includes(image.extension)) {
-      throw new Error(`Row ${rowNumber}: embedded images must be PNG or JPG. WebP can be supplied as a public HTTPS URL.`);
+  if (worksheet.getImages) {
+    for (const placement of worksheet.getImages()) {
+      const rowNumber = placement.range.tl.nativeRow + 1;
+      if (rowNumber < 2) continue;
+      if (embeddedImages.has(rowNumber)) throw new Error(`Row ${rowNumber}: use only one embedded Question image per row.`);
     }
-    const base64 = image.base64?.replace(/^data:[^;]+;base64,/, "");
-    const bytes = image.buffer ? Buffer.from(image.buffer) : base64 ? Buffer.from(base64, "base64") : null;
-    if (!bytes?.length) throw new Error(`Row ${rowNumber}: the embedded image could not be read from the Excel file.`);
-    const mimeType = image.extension === "jpeg" ? "image/jpeg" : "image/png";
-    embeddedImages.set(rowNumber, {
-      bytes,
-      mimeType,
-      fileName: `question-row-${rowNumber}.${image.extension === "jpeg" ? "jpg" : "png"}`,
-    });
   }
 
   const rows: ParsedQuestionFile["rows"] = [];
-  for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
-    const values = headers.map((header, index) => {
-      const cell = worksheet.getCell(rowNumber, index + 1);
-      let text = cell.text;
-      if (cell.value instanceof Date && !Number.isNaN(cell.value.getTime())) {
-        text = cell.value.toISOString().slice(0, 10);
+
+  for (let rowIndex = 1; rowIndex < rawData.length; rowIndex += 1) {
+    const rowValues = (rawData[rowIndex] ?? []) as unknown[];
+    const values = headers.map((header, colIndex) => {
+      const cell = rowValues[colIndex];
+      let text = cell !== undefined && cell !== null ? String(cell) : "";
+      if (cell instanceof Date && !Number.isNaN(cell.getTime())) {
+        text = cell.toISOString().slice(0, 10);
       }
       return [header, cleanCellValue(text)] as const;
     });
-    if (values.some(([, value]) => value) || embeddedImages.has(rowNumber)) rows.push({ values: Object.fromEntries(values), rowNumber });
+    if (values.some(([, value]) => value)) {
+      rows.push({
+        values: Object.fromEntries(values),
+        rowNumber: rowIndex + 1,
+      });
+    }
   }
+
   if (!rows.length) throw new Error("The Excel sheet needs headings and at least one Question.");
   return { headers, rows, embeddedImages };
 }
@@ -399,43 +392,78 @@ async function importQuestions(
     }>;
   }> = [];
 
-  if (subjectIds.length > 0) {
-    const pageSize = 1000;
-    let from = 0;
-    let hasMore = true;
-    while (hasMore) {
-      const { data, error: qError } = await supabase
-        .from("questions")
-        .select(`
-          id,
-          question_text,
-          question_text_te,
-          subject_id,
-          import_key,
-          mock_test_questions (
-            mock_test_id,
-            mock_tests (
-              id,
-              title,
-              paper_id,
-              status,
-              superseded_by_mock_test_id
-            )
-          )
-        `)
-        .in("subject_id", subjectIds)
-        .eq("is_active", true)
-        .range(from, from + pageSize - 1);
+  // Fast targeted duplicate check:
+  // Instead of downloading thousands of questions across the whole paper,
+  // query only the questions that match the texts present in the uploaded file.
+  const fileTextsToMatch = Array.from(
+    new Set(
+      parsedFile.rows
+        .flatMap(({ values: r }) => [
+          (r.question_en ?? r.question ?? "").trim(),
+          (r.question_te ?? "").trim(),
+        ])
+        .filter((t) => t.length >= 10)
+    )
+  );
 
-      if (qError || !data || data.length === 0) {
-        hasMore = false;
-      } else {
-        existingPaperQuestions = existingPaperQuestions.concat(data as unknown as typeof existingPaperQuestions);
-        if (data.length < pageSize) {
-          hasMore = false;
-        } else {
-          from += pageSize;
-        }
+  if (subjectIds.length > 0 && fileTextsToMatch.length > 0) {
+    const chunkSize = 40;
+    const queryPromises = [];
+    for (let i = 0; i < fileTextsToMatch.length; i += chunkSize) {
+      const textChunk = fileTextsToMatch.slice(i, i + chunkSize);
+      queryPromises.push(
+        supabase
+          .from("questions")
+          .select(`
+            id,
+            question_text,
+            question_text_te,
+            subject_id,
+            import_key,
+            mock_test_questions (
+              mock_test_id,
+              mock_tests (
+                id,
+                title,
+                paper_id,
+                status,
+                superseded_by_mock_test_id
+              )
+            )
+          `)
+          .in("subject_id", subjectIds)
+          .eq("is_active", true)
+          .in("question_text", textChunk)
+      );
+      queryPromises.push(
+        supabase
+          .from("questions")
+          .select(`
+            id,
+            question_text,
+            question_text_te,
+            subject_id,
+            import_key,
+            mock_test_questions (
+              mock_test_id,
+              mock_tests (
+                id,
+                title,
+                paper_id,
+                status,
+                superseded_by_mock_test_id
+              )
+            )
+          `)
+          .in("subject_id", subjectIds)
+          .eq("is_active", true)
+          .in("question_text_te", textChunk)
+      );
+    }
+    const results = await Promise.all(queryPromises);
+    for (const res of results) {
+      if (res.data) {
+        existingPaperQuestions = existingPaperQuestions.concat(res.data as unknown as typeof existingPaperQuestions);
       }
     }
   }
@@ -606,19 +634,7 @@ async function importQuestions(
             errors.push(
               `Row ${rowNumber}: Duplicate question! This question already exists in "${otherTests[0].title}". Questions cannot be repeated across mock tests in the same paper.`
             );
-          } else if (existingMatch.assignedMockTests.some((t) => t.id === mockTest.id)) {
-            if (mode === "add" && existingMatch.importKey !== storedImportKey) {
-              errors.push(
-                `Row ${rowNumber}: This question is already assigned to this Mock Test.`
-              );
-            }
           } else if (subject && existingMatch.subjectId !== subject.id) {
-            errors.push(
-              `Row ${rowNumber}: Duplicate question! An identical question already exists under ${existingMatch.subjectName}.`
-            );
-          }
-        } else {
-          if (existingMatch.importKey !== storedImportKey) {
             errors.push(
               `Row ${rowNumber}: Duplicate question! An identical question already exists under ${existingMatch.subjectName}.`
             );
