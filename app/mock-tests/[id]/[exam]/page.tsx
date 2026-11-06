@@ -22,10 +22,25 @@ import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
+import { StartTestCardButton } from "@/components/exams/StartTestCardButton";
+import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const catalog = await getMockTestCatalogData();
+  const params: { id: string; exam: string }[] = [];
+  for (const exam of catalog.exams) {
+    const category = catalog.categories.find((c) => c.id === exam.exam_id);
+    const state = category ? catalog.states.find((s) => s.id === category.state_id) : null;
+    if (state?.slug && exam.slug) {
+      params.push({ id: state.slug, exam: exam.slug });
+    }
+  }
+  return params;
+}
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
 
@@ -378,14 +393,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
                         <span className="text-xs font-semibold text-slate-500">
                           Bilingual Review
                         </span>
-                        <Link
+                        <StartTestCardButton
                           href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)}
-                          prefetch={true}
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition"
-                        >
-                          <span>Start test</span>
-                          <span aria-hidden="true">→</span>
-                        </Link>
+                        />
                       </div>
                     </article>
                   );

@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/server";
 import { isPaidSalesEnabled } from "@/lib/paid-sales";
 import { TestStartActions } from "@/app/mock-tests/[id]/TestStartActions";
 import { BuyExamPassForm } from "@/app/dashboard/passes/BuyExamPassForm";
+import { unstable_cache } from "next/cache";
+import { cookies } from "next/headers";
 
 type MockTestDetailsProps = {
   id: string;
@@ -379,6 +381,38 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
   };
 }
 
+const getCachedMockTestSupplementary = unstable_cache(
+  async (testId: string) => {
+    try {
+      const publicClient = createPublicClient();
+      const [testRes, mqRes] = await Promise.all([
+        publicClient
+          .from("mock_tests")
+          .select("instructions, status")
+          .eq("id", testId)
+          .maybeSingle(),
+        publicClient
+          .from("mock_test_questions")
+          .select("marks, negative_marks")
+          .eq("mock_test_id", testId),
+      ]);
+      return {
+        instructions: testRes.data?.instructions ?? null,
+        status: testRes.data?.status ?? "published",
+        mq: (mqRes.data ?? []) as { marks: number; negative_marks: number }[],
+      };
+    } catch {
+      return {
+        instructions: null,
+        status: "published",
+        mq: [],
+      };
+    }
+  },
+  ["mock-test-supplementary-v3"],
+  { revalidate: 300 }
+);
+
 export async function MockTestDetailsPage({
   id,
   canonicalPath,
@@ -389,73 +423,167 @@ export async function MockTestDetailsPage({
   searchParams: Promise<{ start_error?: string; payment_error?: string }>;
 }) {
   const query = await searchParams;
-  const supabase = await createClient();
+  const cookieStore = await cookies();
+  const hasAuthToken = cookieStore.getAll().some(
+    (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"),
+  );
 
-  // Eagerly initiate catalog loading and user session checking in parallel
   const catalogPromise = getMockTestCatalogData();
-  const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
+  const supplementaryPromise = getCachedMockTestSupplementary(id);
 
-  // Eagerly chain session and attempt lookups to run concurrently with the mock test query
-  const sessionPromise = userPromise.then(async (user) => {
-    if (!user) return null;
-    const { data } = await supabase
-      .from("test_attempt_sessions")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("mock_test_id", id)
-      .is("submitted_at", null)
-      .gt("remaining_seconds", 0)
-      .order("started_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return data;
-  });
+  let supabaseClient: Awaited<ReturnType<typeof createClient>> | null = null;
+  const getSupabase = async () => {
+    if (!supabaseClient) {
+      supabaseClient = await createClient();
+    }
+    return supabaseClient;
+  };
 
-  const attemptPromise = userPromise.then(async (user) => {
-    if (!user) return null;
-    const { data } = await supabase
-      .from("test_attempts")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("mock_test_id", id)
-      .order("submitted_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return data;
-  });
+  const userPromise = hasAuthToken
+    ? getSupabase().then((sb) => sb.auth.getUser().then(({ data }) => data.user ?? null))
+    : Promise.resolve(null);
 
-  // Parallelize primary test data fetching alongside user session & attempt checks
-  const [testResult, user, mqResult] = await Promise.all([
-    supabase
-      .from("mock_tests")
-      .select(`
-        id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
-        subject:subjects(id, name, content_language_mode),
-        paper:papers(
-          id, exam_group_id, specialization_id, name, slug, display_order, question_count, default_correct_marks, default_negative_marks,
-          specialization:exam_specializations(id, name),
-          exam_group:exam_groups(
-            id, exam_id, name, slug,
-            exam:exams(
-              id, state_id, name, slug,
-              state:exam_states(id, name, code, slug)
-            )
-          )
-        )
-      `)
-      .eq("id", id)
-      .eq("status", "published")
-      .maybeSingle(),
+  const sessionPromise = hasAuthToken
+    ? userPromise.then(async (user) => {
+        if (!user) return null;
+        const sb = await getSupabase();
+        const { data } = await sb
+          .from("test_attempt_sessions")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("mock_test_id", id)
+          .is("submitted_at", null)
+          .gt("remaining_seconds", 0)
+          .order("started_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        return data;
+      })
+    : Promise.resolve(null);
 
+  const attemptPromise = hasAuthToken
+    ? userPromise.then(async (user) => {
+        if (!user) return null;
+        const sb = await getSupabase();
+        const { data } = await sb
+          .from("test_attempts")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("mock_test_id", id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        return data;
+      })
+    : Promise.resolve(null);
+
+  const [catalog, supplementary, user] = await Promise.all([
+    catalogPromise,
+    supplementaryPromise,
     userPromise,
-
-    supabase
-      .from("mock_test_questions")
-      .select("marks, negative_marks")
-      .eq("mock_test_id", id),
   ]);
 
-  const test = testResult.data as unknown as MockTestDetailData | null;
+  const cachedTest = catalog.tests.find((t) => t.id === id);
+
+  let test: MockTestDetailData | null = null;
+  let mq = supplementary.mq;
+
+  if (cachedTest) {
+    const paperItem = catalog.papers.find((p) => p.id === cachedTest.paper_id);
+    const specItem = paperItem?.specialization_id
+      ? (catalog.specializations.find((s) => s.id === paperItem.specialization_id) ?? null)
+      : null;
+    const examItem = paperItem
+      ? catalog.exams.find((e) => e.id === paperItem.exam_group_id)
+      : null;
+    const catItem = examItem
+      ? catalog.categories.find((c) => c.id === examItem.exam_id)
+      : null;
+    const stateItem = catItem
+      ? catalog.states.find((s) => s.id === catItem.state_id)
+      : null;
+    const subjectItem = cachedTest.subject_id
+      ? (catalog.subjects.find((s) => s.id === cachedTest.subject_id) ?? null)
+      : null;
+
+    test = {
+      id: cachedTest.id,
+      paper_id: cachedTest.paper_id,
+      subject_id: cachedTest.subject_id,
+      subject_section_id: cachedTest.subject_section_id,
+      test_scope: cachedTest.test_scope,
+      series_number: cachedTest.series_number,
+      title: cachedTest.title,
+      description: cachedTest.description,
+      instructions: supplementary.instructions,
+      duration_minutes: cachedTest.duration_minutes,
+      status: supplementary.status,
+      access_type: cachedTest.access_type,
+      target_question_count: cachedTest.target_question_count,
+      subject: subjectItem,
+      paper: paperItem
+        ? {
+            id: paperItem.id,
+            exam_group_id: paperItem.exam_group_id,
+            specialization_id: paperItem.specialization_id,
+            name: paperItem.name,
+            slug: paperItem.slug,
+            display_order: paperItem.display_order,
+            question_count: paperItem.question_count,
+            default_correct_marks: paperItem.default_correct_marks,
+            default_negative_marks: (paperItem as { default_negative_marks?: number | null }).default_negative_marks ?? null,
+            specialization: specItem,
+            exam_group: examItem
+              ? {
+                  id: examItem.id,
+                  exam_id: examItem.exam_id,
+                  name: examItem.name,
+                  slug: examItem.slug,
+                  exam: catItem
+                    ? {
+                        id: catItem.id,
+                        state_id: catItem.state_id,
+                        name: catItem.name,
+                        slug: catItem.slug,
+                        state: stateItem,
+                      }
+                    : null,
+                }
+              : null,
+          }
+        : null,
+    };
+  } else {
+    const sb = await getSupabase();
+    const [testResult, mqResult] = await Promise.all([
+      sb
+        .from("mock_tests")
+        .select(`
+          id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
+          subject:subjects(id, name, content_language_mode),
+          paper:papers(
+            id, exam_group_id, specialization_id, name, slug, display_order, question_count, default_correct_marks, default_negative_marks,
+            specialization:exam_specializations(id, name),
+            exam_group:exam_groups(
+              id, exam_id, name, slug,
+              exam:exams(
+                id, state_id, name, slug,
+                state:exam_states(id, name, code, slug)
+              )
+            )
+          )
+        `)
+        .eq("id", id)
+        .eq("status", "published")
+        .maybeSingle(),
+      sb
+        .from("mock_test_questions")
+        .select("marks, negative_marks")
+        .eq("mock_test_id", id),
+    ]);
+    test = testResult.data as unknown as MockTestDetailData | null;
+    mq = mqResult.data ?? [];
+  }
 
   if (!test) {
     notFound();
@@ -470,22 +598,22 @@ export async function MockTestDetailsPage({
 
   const isLoggedIn = Boolean(user);
 
-  // Resolve sibling papers directly from the in-memory catalog cache (0ms)
-  const catalog = await catalogPromise;
   const siblingPapers: OrderedPaper[] = paper
     ? (catalog.papers.filter((p) => p.exam_group_id === paper.exam_group_id && p.is_active) as OrderedPaper[])
     : [];
 
-  // Await access verification and eager session/attempt queries
+  const paidSalesStatus = await isPaidSalesEnabled();
+  const paidSalesEnabled = paidSalesStatus;
+
   const [accessResult, resumableSessionResult, previousAttemptResult, fallbackPapers] = await Promise.all([
     test.access_type === "paid" && examGroup
       ? (async () => {
-          const paidSalesEnabled = await isPaidSalesEnabled();
+          const sb = await getSupabase();
           const [products, canAccess] = await Promise.all([
             paidSalesEnabled
-              ? supabase.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", examGroup.id).eq("access_products.is_active", true)
+              ? sb.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", examGroup.id).eq("access_products.is_active", true)
               : Promise.resolve({ data: [] }),
-            isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
+            isLoggedIn ? sb.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
           ]);
           return { products, canAccess };
         })()
@@ -494,14 +622,15 @@ export async function MockTestDetailsPage({
     sessionPromise,
     attemptPromise,
 
-    // If sibling papers were empty in catalog cache for any reason, fetch as fallback
     paper && siblingPapers.length === 0
-      ? supabase
-          .from("papers")
-          .select("id, exam_group_id, specialization_id, name, display_order")
-          .eq("exam_group_id", paper.exam_group_id)
-          .eq("is_active", true)
-          .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
+      ? getSupabase().then((sb) =>
+          sb
+            .from("papers")
+            .select("id, exam_group_id, specialization_id, name, display_order")
+            .eq("exam_group_id", paper.exam_group_id)
+            .eq("is_active", true)
+            .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
+        )
       : Promise.resolve([] as OrderedPaper[]),
   ]);
 
@@ -510,7 +639,6 @@ export async function MockTestDetailsPage({
     ? buildPaperDisplayMap(allSiblingPapers).get(paper.id)
     : undefined;
 
-  const mq = mqResult.data ?? [];
   const configuredQuestionCount = Number(test.target_question_count ?? paper?.question_count ?? 0);
   const questionCount = mq.length > 0 ? mq.length : (configuredQuestionCount > 0 ? configuredQuestionCount : null);
   
@@ -535,7 +663,6 @@ export async function MockTestDetailsPage({
         ? "Telugu"
         : "English";
 
-  const paidSalesEnabled = true; // handlded inside accessResult logic but we keep it true here to unblock UI if needed
   const paidProducts = ((accessResult.products.data ?? []) as unknown as { access_products: { id: string; name: string; price_inr: number; duration_days: number } | null }[])
     .map((item) => item.access_products).filter((product): product is { id: string; name: string; price_inr: number; duration_days: number } => Boolean(product));
   

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { beginMockTest } from "./start-actions";
 import { isBigScreen, isCurrentlyFullscreen, isFullscreenSupported, requestFullscreenSafely } from "@/lib/fullscreen";
+import { createClient } from "@/lib/supabase/client";
 
 export function TestStartActions({
   testId,
@@ -16,13 +18,52 @@ export function TestStartActions({
   isLoggedIn: boolean;
   hasResumableSession: boolean;
 }) {
+  const [signedIn, setSignedIn] = useState(isLoggedIn);
+  const [resumable, setResumable] = useState(hasResumableSession);
+
+  useEffect(() => {
+    setSignedIn(isLoggedIn);
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    setResumable(hasResumableSession);
+  }, [hasResumableSession]);
+
+  useEffect(() => {
+    if (isLoggedIn) return;
+    let active = true;
+    const supabase = createClient();
+    void supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!active || !session?.user) return;
+      setSignedIn(true);
+      const { data: activeSession } = await supabase
+        .from("test_attempt_sessions")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .eq("mock_test_id", testId)
+        .is("submitted_at", null)
+        .gt("remaining_seconds", 0)
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (active && activeSession) {
+        setResumable(true);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [isLoggedIn, testId]);
+
   const handleFullscreenOnStart = () => {
     if (isBigScreen() && isFullscreenSupported() && !isCurrentlyFullscreen()) {
       void requestFullscreenSafely();
     }
   };
 
-  if (!isLoggedIn) {
+  if (!signedIn) {
     return (
       <Link
         href={`/login?next=${encodeURIComponent(testPath)}`}
@@ -34,7 +75,7 @@ export function TestStartActions({
     );
   }
 
-  if (!hasResumableSession) {
+  if (!resumable) {
     const startAction = beginMockTest.bind(null, testId, testPath, "resume");
     return (
       <form action={startAction} className="mt-1">

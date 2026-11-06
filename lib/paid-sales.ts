@@ -1,12 +1,21 @@
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicClient } from "@/lib/supabase/public";
 
-export async function isPaidSalesEnabled() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("site_settings")
-    .select("enabled")
-    .eq("key", "paid_sales")
-    .maybeSingle();
+export const isPaidSalesEnabled = unstable_cache(
+  async () => {
+    try {
+      const supabase = createPublicClient();
+      const { data } = await supabase
+        .from("site_settings")
+        .select("enabled")
+        .eq("key", "paid_sales")
+        .maybeSingle();
 
-  return data?.enabled === true;
-}
+      return data?.enabled === true;
+    } catch {
+      return false;
+    }
+  },
+  ["site-setting-paid-sales-v1"],
+  { revalidate: 60 },
+);
