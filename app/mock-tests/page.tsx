@@ -279,6 +279,13 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   }));
 
   const dataError = catalog.hasError;
+    const currentPaperTests = selectedPaper
+    ? tests.filter((t) => (!selectedState || t.state.id === selectedState.id) && (!selectedExam || t.exam.id === selectedExam.id) && (!selectedSpecialization || t.specialization?.id === selectedSpecialization.id || !t.specialization) && t.paper.id === selectedPaper.id)
+    : [];
+  const currentPaperAllCount = currentPaperTests.length;
+  const currentPaperOnlyCount = currentPaperTests.filter((t) => t.test_scope === "paper").length;
+  const currentSubjectOnlyCount = currentPaperTests.filter((t) => t.test_scope === "subject").length;
+
   const paperSubjects = selectedPaper
     ? subjects.filter((subject) => {
         if (subject.paper_id !== selectedPaper.id || !subject.is_active) return false;
@@ -479,8 +486,38 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               )
             }
           >
-            <div className="mb-4 flex flex-wrap gap-2">
-              {([['all', 'All tests'], ['paper', 'Full paper'], ['subject', 'Subject practice']] as const).map(([value, label]) => <Link key={value} href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)} className={`rounded-full px-4 py-2 text-xs font-black ${selectedType === value ? 'bg-[#0a2922] text-white shadow-xs' : 'border border-slate-200 bg-white text-slate-600 hover:border-emerald-200'}`}>{label}</Link>)}
+            <div className="mb-6 inline-flex max-w-full flex-wrap items-center gap-1 sm:gap-1.5 rounded-2xl border border-slate-200/90 bg-slate-100/90 p-1 sm:p-1.5 shadow-2xs">
+              {([
+                ['all', 'All Tests', currentPaperAllCount],
+                ['paper', 'Full-Length Tests', currentPaperOnlyCount],
+                ['subject', 'Subject Practice', currentSubjectOnlyCount],
+              ] as const).map(([value, label, count]) => {
+                const isActive = selectedType === value;
+                return (
+                  <Link
+                    key={value}
+                    href={testTypeUrl(value, selectedState.slug, selectedExam.slug, selectedPaper.slug, selectedSubject?.slug)}
+                    className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold transition-all duration-150 ${
+                      isActive
+                        ? "bg-teal-800 text-white shadow-xs"
+                        : "text-slate-700 hover:text-slate-950 hover:bg-white/80"
+                    }`}
+                  >
+                    <span>{label}</span>
+                    {count > 0 && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] sm:text-[11px] font-bold ${
+                          isActive
+                            ? "bg-teal-900/70 text-teal-100"
+                            : "bg-slate-200/90 text-slate-700"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
 
             {selectedType === "subject" && paperSubjects.length > 0 && (
@@ -493,7 +530,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                     href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
                     className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
                       !selectedSubject
-                        ? "bg-teal-800 text-white shadow-sm font-black border border-teal-800"
+                        ? "bg-teal-800 text-white shadow-sm font-bold border border-teal-800"
                         : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300"
                     }`}
                   >
@@ -508,13 +545,13 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
                         className={`rounded-xl px-3.5 py-1.5 text-xs transition ${
                           isSelected
-                            ? "bg-teal-800 text-white shadow-sm font-black border border-teal-800"
+                            ? "bg-teal-800 text-white shadow-sm font-bold border border-teal-800"
                             : "border border-slate-200 bg-slate-50 text-slate-700 font-bold hover:border-teal-300"
                         }`}
                       >
                         {isSelected ? "✓ " : ""}{sub.name}{" "}
                         <span
-                          className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                          className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
                             isSelected ? "bg-teal-900/60 text-teal-100" : "bg-slate-200/80 text-slate-600"
                           }`}
                         >

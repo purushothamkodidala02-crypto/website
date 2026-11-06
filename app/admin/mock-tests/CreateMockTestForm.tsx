@@ -74,6 +74,11 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const paperSpecialization = paper?.specializationId ? specializations.find((item) => item.id === paper.specializationId) : undefined;
   const subject = subjects.find((item) => item.id === subjectId);
   const section = availableSections.find((item) => item.id === subjectSectionId);
+  const isCurrentAffairs = Boolean(subject?.name?.toLowerCase().includes("current affairs"));
+  const sectionKind = isCurrentAffairs ? "month" : "topic";
+  const SectionKind = isCurrentAffairs ? "Month" : "Topic";
+  const exampleSectionPlaceholder = isCurrentAffairs ? "e.g. June" : "e.g. Time and Distance";
+  const exampleSectionNames = isCurrentAffairs ? "June, July" : "Time and Distance, Percentages";
 
   const selectionKey = `${paperId}:${scope}:${subjectId}:${subjectSectionId}`;
   const [prevSelectionKey, setPrevSelectionKey] = useState(selectionKey);
@@ -188,7 +193,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="block text-sm font-bold">
-                Sub-section / Month <span className="font-normal text-slate-500">(optional)</span>
+                {SectionKind} / Sub-section <span className="font-normal text-slate-500">(optional)</span>
               </label>
               {subjectId && (
                 <button
@@ -199,7 +204,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
                   }}
                   className="text-xs font-semibold text-teal-700 hover:text-teal-900 underline"
                 >
-                  {isAddingSection ? "Cancel" : "+ Add month / sub-section"}
+                  {isAddingSection ? "Cancel" : `+ Add ${sectionKind} / sub-section`}
                 </button>
               )}
             </div>
@@ -208,15 +213,15 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
               value={subjectSectionId}
               onChange={setSubjectSectionId}
               options={[
-                { value: "", label: "None (Common Subject Mock Test)" },
+                { value: "", label: `None (Common / Full ${subject?.name ?? "Subject"} Mock Test)` },
                 ...availableSections.map((item) => ({ value: item.id, label: item.name })),
               ]}
-              placeholder={availableSections.length > 0 ? "Choose month or leave as Common" : "None (Common Subject Mock Test)"}
+              placeholder={availableSections.length > 0 ? `Choose ${sectionKind} or leave as Common` : `None (Common / Full ${subject?.name ?? "Subject"} Mock Test)`}
               disabled={!subjectId}
             />
             {isAddingSection && (
               <div className="mt-2 rounded-xl border border-teal-200 bg-teal-50/70 p-3">
-                <p className="text-xs font-bold text-teal-950">Add new month / sub-section (e.g. June, July)</p>
+                <p className="text-xs font-bold text-teal-950">Add new {sectionKind} / sub-section (e.g. {exampleSectionNames})</p>
                 <div className="mt-2 flex gap-2">
                   <input
                     type="text"
@@ -228,7 +233,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
                         handleQuickAddSection();
                       }
                     }}
-                    placeholder="e.g. June"
+                    placeholder={exampleSectionPlaceholder}
                     className="flex-1 rounded-lg border bg-white px-3 py-1.5 text-xs outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-200"
                     disabled={isAddingSectionPending}
                     autoFocus
@@ -260,15 +265,15 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
             )}
             {subjectId && availableSections.length === 0 && !isAddingSection && (
               <p className="mt-1 text-xs text-slate-500">
-                No months or sub-sections exist for {subject?.name ?? "this subject"} yet. Click{" "}
+                No {sectionKind}s or sub-sections exist for {subject?.name ?? "this subject"} yet. Click{" "}
                 <button
                   type="button"
                   onClick={() => setIsAddingSection(true)}
                   className="font-bold text-teal-700 underline"
                 >
-                  + Add month / sub-section
+                  + Add {sectionKind} / sub-section
                 </button>{" "}
-                to create June, July, etc., or leave as Common.
+                to create {exampleSectionNames}, etc., or leave as Common.
               </p>
             )}
           </div>

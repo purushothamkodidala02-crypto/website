@@ -109,6 +109,28 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     : { data: null };
   const title = buildMockTestTitle({ stateCode: state.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, sectionName: section?.name, seriesNumber });
   const slug = mockTestSlug(seriesNumber, subject?.slug, section?.slug);
+
+  const { data: existingSlugTest } = await supabase
+    .from("mock_tests")
+    .select("id, title, slug, series_number")
+    .eq("paper_id", paperId)
+    .eq("slug", slug)
+    .is("superseded_by_mock_test_id", null)
+    .maybeSingle();
+
+  if (existingSlugTest) {
+    if (scope === "subject" && !subjectSectionId) {
+      return {
+        success: false,
+        message: `The slug "${slug}" is already in use by "${existingSlugTest.title}". If you are creating a topic test (e.g. Time and Distance), please select or add that topic/sub-section so it receives its own unique slug.`,
+      };
+    }
+    return {
+      success: false,
+      message: `A mock test with slug "${slug}" already exists on this paper ("${existingSlugTest.title}"). Please choose an unused series number.`,
+    };
+  }
+
   const targetQuestionCount = scope === "paper" ? Number(paper.question_count ?? requestedTarget) : requestedTarget;
   const { error } = await supabase.from("mock_tests").insert({
     paper_id: paperId,
@@ -135,6 +157,12 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
       return {
         success: false,
         message: "Database index update required: Please execute migration 20260920130000_fix_subject_series_unique_index.sql in Supabase SQL Editor so sub-sections can start from Mock Test 01.",
+      };
+    }
+    if (error.message?.includes("uq_mock_tests_current_paper_slug") || error.message?.includes("mock_tests_paper_id_slug_key")) {
+      return {
+        success: false,
+        message: `The URL slug "${slug}" is already taken on this paper. Please select a topic/sub-section or choose an unused series number.`,
       };
     }
     return { success: false, message: "This series number or slug is already taken. Refresh and try again." };
