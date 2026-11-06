@@ -97,7 +97,7 @@ export function AdminShell({
 
   return (
     <div className="min-h-screen bg-[#f6faf8] text-slate-900 select-text">
-      {/* Sidebar (Desktop docked + Mobile drawer) */}
+      {/* Sidebar (Desktop full drawer/docked + Mobile drawer) */}
       <AdminNavigation
         collapsed={sidebarCollapsed}
         onToggle={handleToggleSidebar}
@@ -105,10 +105,10 @@ export function AdminShell({
         adminName={adminName}
       />
 
-      {/* Main Content Area - dynamically adjusted for sidebar width */}
+      {/* Main Content Area - closes fully when collapsed (md:pl-0), no leftover rail */}
       <div
         className={`min-w-0 flex flex-col transition-[padding] duration-200 ease-in-out ${
-          sidebarCollapsed ? "md:pl-20" : "md:pl-72"
+          sidebarCollapsed ? "md:pl-0" : "md:pl-72"
         }`}
       >
         {/* Desktop Sticky Header */}

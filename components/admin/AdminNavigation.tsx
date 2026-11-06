@@ -203,13 +203,12 @@ export type BadgeState = {
 };
 
 export function NavigationLinks({
-  collapsed = false,
   badges,
   onLinkClick,
 }: {
-  collapsed?: boolean;
   badges: BadgeState;
   onLinkClick?: () => void;
+  collapsed?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -226,21 +225,17 @@ export function NavigationLinks({
 
         return (
           <section key={section.label} className="space-y-1">
-            {!collapsed ? (
-              <div className="flex items-center justify-between px-3 py-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
-                  {section.label}
-                </p>
-                {sectionHasUpdates && (
-                  <span
-                    title="Updates available in this section"
-                    className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="my-1 border-t border-slate-100" />
-            )}
+            <div className="flex items-center justify-between px-3 py-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
+                {section.label}
+              </p>
+              {sectionHasUpdates && (
+                <span
+                  title="Updates available in this section"
+                  className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
+                />
+              )}
+            </div>
 
             <div className="space-y-0.5">
               {section.links.map((link) => {
@@ -266,18 +261,13 @@ export function NavigationLinks({
                     href={link.href}
                     prefetch={true}
                     onClick={onLinkClick}
-                    title={collapsed ? `${link.label}${showBadge ? ` (${badgeCount})` : ""}` : undefined}
-                    className={`group relative flex items-center rounded-xl transition duration-150 ${
-                      collapsed
-                        ? "h-10 w-full justify-center px-0"
-                        : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
-                    } ${
+                    className={`group relative flex items-center justify-between rounded-xl px-3 py-2 text-xs sm:text-sm font-bold transition duration-150 ${
                       active
                         ? "bg-teal-700 text-white shadow-xs font-bold"
                         : "text-slate-700 hover:bg-teal-50 hover:text-teal-950"
                     }`}
                   >
-                    <div className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-3"}`}>
+                    <div className="flex items-center gap-3 min-w-0">
                       <span
                         className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition ${
                           active
@@ -288,13 +278,10 @@ export function NavigationLinks({
                         <NavIcon name={link.icon} />
                       </span>
 
-                      {!collapsed && (
-                        <span className="truncate">{link.label}</span>
-                      )}
+                      <span className="truncate">{link.label}</span>
                     </div>
 
-                    {/* Badges in expanded mode */}
-                    {!collapsed && showBadge && (
+                    {showBadge && (
                       <span
                         className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black tracking-tight ${
                           isReportsLink
@@ -308,14 +295,6 @@ export function NavigationLinks({
                       >
                         {badgeCount > 99 ? "99+" : badgeCount}
                       </span>
-                    )}
-
-                    {/* Unread indicator dot in collapsed mode */}
-                    {collapsed && showBadge && (
-                      <span
-                        title={`${badgeCount} update${badgeCount === 1 ? "" : "s"}`}
-                        className="absolute top-1.5 right-2 flex h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white animate-pulse"
-                      />
                     )}
                   </Link>
                 );
@@ -492,133 +471,90 @@ export function AdminNavigation(props: {
     <>
       {/* ========================================================
           1. PERSISTENT DESKTOP SIDEBAR (Visible md: and up)
+             Closes fully with -translate-x-full (no lingering icon bar)
       ======================================================== */}
       <aside
         aria-label="Admin desktop navigation"
-        className={`fixed inset-y-0 left-0 z-30 hidden md:flex flex-col border-r border-teal-100 bg-white text-slate-900 shadow-[1px_0_4px_rgba(0,0,0,0.02)] transition-[width] duration-200 ease-in-out ${
-          collapsed ? "w-20" : "w-72"
+        className={`fixed inset-y-0 left-0 z-30 hidden md:flex flex-col border-r border-teal-100 bg-white text-slate-900 shadow-xl transition-transform duration-200 ease-in-out w-72 ${
+          collapsed ? "-translate-x-full pointer-events-none" : "translate-x-0"
         }`}
       >
         {/* Sidebar Header Brand Lockup */}
-        <div
-          className={`flex h-16 shrink-0 items-center border-b border-teal-100 px-4 transition-all ${
-            collapsed ? "justify-center" : "justify-between"
-          }`}
-        >
-          {collapsed ? (
-            <Link
-              href="/admin"
-              title="Varadhi Administration"
-              className="grid h-10 w-10 place-items-center transition hover:opacity-90"
-            >
-              <BrandMark preload className="h-8 w-8 drop-shadow-xs" />
-            </Link>
-          ) : (
-            <Link href="/admin" className="flex items-center gap-2.5 min-w-0">
-              <BrandLockup
-                context="admin"
-                markClassName="h-8 w-8 shrink-0 drop-shadow-xs"
-              />
-            </Link>
-          )}
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-teal-100 px-4">
+          <Link href="/admin" className="flex items-center gap-2.5 min-w-0">
+            <BrandLockup
+              context="admin"
+              markClassName="h-8 w-8 shrink-0 drop-shadow-xs"
+            />
+          </Link>
 
-          {!collapsed && (
-            <button
-              type="button"
-              onClick={onToggle}
-              title="Collapse sidebar ( [ )"
-              aria-label="Collapse sidebar"
-              className="grid h-7 w-7 place-items-center rounded-lg border border-teal-100 bg-teal-50/50 text-teal-800 transition hover:bg-teal-100 hover:text-teal-950 focus:outline-none"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onToggle}
+            title="Collapse sidebar ( [ )"
+            aria-label="Close sidebar"
+            className="grid h-8 w-8 place-items-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-900 focus:outline-none"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Scrollable Navigation Links */}
         <div className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 space-y-5 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.100)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-teal-100 hover:[&::-webkit-scrollbar-thumb]:bg-teal-200">
           <NavigationLinks
-            collapsed={collapsed}
             badges={badges}
+            collapsed={collapsed}
           />
         </div>
 
         {/* Sidebar Bottom Actions */}
         <div className="shrink-0 border-t border-teal-100 bg-slate-50/50 p-3 space-y-2">
-          {!collapsed ? (
-            <>
-              {/* Student Portal shortcut */}
-              <Link
-                href="/"
-                target="_blank"
-                rel="noreferrer"
-                title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
-                className="flex items-center justify-between rounded-xl border border-teal-200/80 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 transition"
-              >
-                <span className="flex items-center gap-2">
-                  <span className="grid h-5 w-5 place-items-center rounded bg-teal-50 text-teal-800">
-                    <NavIcon name="portal" />
-                  </span>
-                  <span>Student Portal</span>
-                </span>
-                <span className="text-[10px] font-bold text-teal-700">↗</span>
-              </Link>
-
-              {/* Admin identity & status */}
-              <div className="flex items-center justify-between gap-2 pt-1 px-1">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-teal-700 text-[10px] font-black text-white">
-                    {initials}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-bold text-slate-900 leading-tight">
-                      {userEmail ?? adminName}
-                    </p>
-                    <p className="flex items-center gap-1 text-[10px] font-semibold text-teal-800">
-                      <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                      <span>MFA Active</span>
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onToggle}
-                  title="Collapse sidebar ( [ )"
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                  </svg>
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Link
-                href="/"
-                target="_blank"
-                rel="noreferrer"
-                title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
-                className="grid h-9 w-9 place-items-center rounded-xl border border-teal-200/80 bg-white text-teal-800 shadow-2xs hover:bg-teal-50 transition"
-              >
+          {/* Student Portal shortcut */}
+          <Link
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
+            className="flex items-center justify-between rounded-xl border border-teal-200/80 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 transition"
+          >
+            <span className="flex items-center gap-2">
+              <span className="grid h-5 w-5 place-items-center rounded bg-teal-50 text-teal-800">
                 <NavIcon name="portal" />
-              </Link>
+              </span>
+              <span>Student Portal</span>
+            </span>
+            <span className="text-[10px] font-bold text-teal-700">↗</span>
+          </Link>
 
-              <button
-                type="button"
-                onClick={onToggle}
-                title="Expand sidebar ( [ )"
-                className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-2xs hover:bg-slate-50 transition"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
+          {/* Admin identity & status */}
+          <div className="flex items-center justify-between gap-2 pt-1 px-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-teal-700 text-[10px] font-black text-white">
+                {initials}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-bold text-slate-900 leading-tight">
+                  {userEmail ?? adminName}
+                </p>
+                <p className="flex items-center gap-1 text-[10px] font-semibold text-teal-800">
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+                  <span>MFA Active</span>
+                </p>
+              </div>
             </div>
-          )}
+
+            <button
+              type="button"
+              onClick={onToggle}
+              title="Collapse sidebar ( [ )"
+              aria-label="Collapse sidebar"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -716,7 +652,6 @@ export function AdminNavigation(props: {
                 <NavigationLinks
                   badges={badges}
                   onLinkClick={handleDrawerClose}
-                  collapsed={false}
                 />
               </div>
 

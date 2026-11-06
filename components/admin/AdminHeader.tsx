@@ -88,19 +88,19 @@ export function AdminHeader({
         <button
           type="button"
           onClick={onToggleSidebar}
-          aria-label={collapsed ? "Expand sidebar ( [ )" : "Collapse sidebar ( [ )"}
-          title={collapsed ? "Expand sidebar ( [ )" : "Collapse sidebar ( [ )"}
+          aria-label={collapsed ? "Open navigation ( [ )" : "Close navigation ( [ )"}
+          title={collapsed ? "Open navigation ( [ )" : "Close navigation ( [ )"}
           className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-teal-200 bg-white text-teal-800 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
         >
-          <svg
-            className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
-          </svg>
+          {collapsed ? (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+            </svg>
+          )}
         </button>
 
         {/* Dynamic Breadcrumbs */}
