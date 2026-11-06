@@ -35,7 +35,7 @@ test("database migration locks sessions and makes submission idempotent", async 
 });
 
 test("production CSP keeps public pages cacheable and payment pages nonce-protected", async () => {
-  const [proxy, config, layout] = await Promise.all([read("proxy.ts"), read("next.config.ts"), read("app/layout.tsx")]);
+  const [proxy, config, layout] = await Promise.all([read("middleware.ts"), read("next.config.ts"), read("app/layout.tsx")]);
 
   assert.match(proxy, /needsNonce = request\.nextUrl\.pathname\.startsWith\("\/billing\/cashfree"\)/);
   assert.match(proxy, /'nonce-\$\{nonce\}'/);
@@ -148,7 +148,7 @@ test("permanent public slugs cover every catalogue level and legacy URLs redirec
     read("lib/public-urls.ts"),
     read("lib/public-route-data.ts"),
     read("lib/public-redirect.ts"),
-    read("proxy.ts"),
+    read("middleware.ts"),
     read("app/sitemap.ts"),
     read("supabase/migrations/20260821193000_add_permanent_public_slug_history.sql"),
   ]);

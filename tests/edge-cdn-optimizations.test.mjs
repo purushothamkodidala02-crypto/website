@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("proxy drops aggressive bots and probe paths early to conserve CDN bandwidth", async () => {
-  const proxy = await read("proxy.ts");
+  const proxy = await read("middleware.ts");
 
   assert.match(proxy, /BLOCKED_BOT_REGEX/);
   assert.match(proxy, /bytespider/i);
