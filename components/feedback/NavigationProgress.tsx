@@ -8,8 +8,76 @@ export function NavigationProgress() {
   const pathname = usePathname();
   const [navigation, setNavigation] = useState<{ sourceHref: string; id: number } | null>(null);
   const navigationId = useRef(0);
-  const prefetchedUrls = useRef<Set<string>>(new Set());
+  const prefetchedUrls = useRef<Map<string, number>>(new Map());
   const pending = navigation !== null;
+
+  // Background context-sensitive route warming during idle time
+  useEffect(() => {
+    const prefetchRoutes = (routes: string[]) => {
+      const currentPathAndQuery = window.location.pathname + window.location.search;
+      for (const route of routes) {
+        if (route === currentPathAndQuery) continue;
+        const now = Date.now();
+        const lastPrefetched = prefetchedUrls.current.get(route) ?? 0;
+        if (now - lastPrefetched > 25000) {
+          prefetchedUrls.current.set(route, now);
+          router.prefetch(route);
+          try {
+            (router as unknown as { prefetch: (href: string, opts?: { kind?: string }) => void }).prefetch(route, { kind: "full" });
+          } catch {}
+        }
+      }
+    };
+
+    const runWarm = () => {
+      if (pathname === "/dashboard") {
+        prefetchRoutes([
+          "/dashboard/study-book",
+          "/dashboard/study-book?view=bookmarks",
+          "/mock-tests",
+          "/dashboard/passes",
+        ]);
+      } else if (pathname === "/dashboard/study-book") {
+        const isBookmarks = typeof window !== "undefined" && window.location.search.includes("view=bookmarks");
+        prefetchRoutes([
+          isBookmarks ? "/dashboard/study-book" : "/dashboard/study-book?view=bookmarks",
+          "/dashboard",
+          "/mock-tests",
+        ]);
+      } else if (pathname.startsWith("/admin")) {
+        prefetchRoutes([
+          "/admin/mock-tests",
+          "/admin/questions",
+          "/admin/results",
+          "/admin/access",
+          "/admin/question-reports",
+          "/admin/exams",
+        ]);
+      } else if (pathname === "/" || pathname === "/mock-tests") {
+        prefetchRoutes(["/mock-tests", "/dashboard"]);
+      }
+    };
+
+    let idleId: number | undefined;
+    let timerId: ReturnType<typeof setTimeout> | undefined;
+
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(runWarm, { timeout: 1500 });
+      } else {
+        timerId = setTimeout(runWarm, 250);
+      }
+    }
+
+    return () => {
+      if (idleId !== undefined && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      }
+      if (timerId !== undefined) {
+        clearTimeout(timerId);
+      }
+    };
+  }, [pathname, router]);
 
   useEffect(() => {
     function warmLink(event: Event) {
@@ -23,9 +91,16 @@ export function NavigationProgress() {
           if (next.pathname.endsWith("/questions-export")) return;
           const pathAndQuery = next.pathname + next.search;
           const currentPathAndQuery = window.location.pathname + window.location.search;
-          if (pathAndQuery !== currentPathAndQuery && !prefetchedUrls.current.has(pathAndQuery)) {
-            prefetchedUrls.current.add(pathAndQuery);
+          if (pathAndQuery === currentPathAndQuery) return;
+
+          const now = Date.now();
+          const lastPrefetched = prefetchedUrls.current.get(pathAndQuery) ?? 0;
+          if (now - lastPrefetched > 25000) {
+            prefetchedUrls.current.set(pathAndQuery, now);
             router.prefetch(pathAndQuery);
+            try {
+              (router as unknown as { prefetch: (href: string, opts?: { kind?: string }) => void }).prefetch(pathAndQuery, { kind: "full" });
+            } catch {}
           }
         }
       } catch {}
@@ -62,14 +137,20 @@ export function NavigationProgress() {
     }
 
     document.addEventListener("pointerover", warmLink, { passive: true, capture: true });
+    document.addEventListener("pointerenter", warmLink, { passive: true, capture: true });
     document.addEventListener("touchstart", warmLink, { passive: true, capture: true });
     document.addEventListener("focusin", warmLink, { passive: true, capture: true });
+    document.addEventListener("pointerdown", warmLink, { passive: true, capture: true });
+    document.addEventListener("mousedown", warmLink, { passive: true, capture: true });
     document.addEventListener("click", startForLink, true);
     document.addEventListener("submit", startForGetForm, true);
     return () => {
       document.removeEventListener("pointerover", warmLink, { capture: true });
+      document.removeEventListener("pointerenter", warmLink, { capture: true });
       document.removeEventListener("touchstart", warmLink, { capture: true });
       document.removeEventListener("focusin", warmLink, { capture: true });
+      document.removeEventListener("pointerdown", warmLink, { capture: true });
+      document.removeEventListener("mousedown", warmLink, { capture: true });
       document.removeEventListener("click", startForLink, true);
       document.removeEventListener("submit", startForGetForm, true);
     };

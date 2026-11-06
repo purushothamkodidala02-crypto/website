@@ -29,7 +29,7 @@ export function CatalogSteps({
         const content = (
           <>
             <span className={`mx-auto grid h-6 w-6 place-items-center rounded-full text-[11px] font-bold ${completed[index] ? "bg-slate-900 text-white" : index === activeIndex ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400"}`}>{completed[index] ? "✓" : index + 1}</span>
-            <span className="mt-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:text-xs">{step.label}</span>
+            <span className="mt-1.5 block text-[9.5px] sm:text-xs font-bold uppercase tracking-tight sm:tracking-wider text-slate-500 whitespace-nowrap">{step.label}</span>
             {step.value && <span className="mt-0.5 hidden truncate text-xs font-semibold text-slate-900 sm:block">{step.value}</span>}
           </>
         );
@@ -37,11 +37,11 @@ export function CatalogSteps({
         return (
           <li key={step.label} className={`relative text-center ${index > 0 ? "border-l border-slate-200" : ""} ${index === activeIndex ? "bg-slate-50" : ""}`}>
             {step.href ? (
-              <Link href={step.href} prefetch={false} aria-label={`Change ${step.label.toLowerCase()}`} className="group block h-full px-3 py-3.5 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-slate-700 sm:px-5" title={`Change ${step.label.toLowerCase()}`}>
+              <Link href={step.href} prefetch={false} aria-label={`Change ${step.label.toLowerCase()}`} className="group block h-full px-1.5 py-2.5 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-slate-700 sm:px-5 sm:py-3.5" title={`Change ${step.label.toLowerCase()}`}>
                 {content}
               </Link>
             ) : (
-              <div className="h-full px-3 py-3.5 sm:px-5">{content}</div>
+              <div className="h-full px-1.5 py-2.5 sm:px-5 sm:py-3.5">{content}</div>
             )}
           </li>
         );

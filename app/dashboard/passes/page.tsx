@@ -89,7 +89,7 @@ export default async function ExamPassesPage({
     <main className="student-page min-h-screen bg-slate-50">
       <PublicHeader />
       <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-        <Link href="/dashboard" className="text-sm font-bold text-teal-700 hover:underline">
+        <Link href="/dashboard" prefetch={true} className="text-sm font-bold text-teal-700 hover:underline">
           ← Back to dashboard
         </Link>
 
@@ -195,7 +195,7 @@ export default async function ExamPassesPage({
                       </ul>
                     </div>
                     {active ? (
-                      <Link href="/mock-tests" className="mt-5 block rounded-xl bg-[#0a2922] px-4 py-3 text-center text-sm font-black text-white shadow-sm transition hover:bg-[#11382f]">
+                      <Link href="/mock-tests" prefetch={true} className="mt-5 block rounded-xl bg-[#0a2922] px-4 py-3 text-center text-sm font-black text-white shadow-sm transition hover:bg-[#11382f]">
                         View unlocked tests
                       </Link>
                     ) : (

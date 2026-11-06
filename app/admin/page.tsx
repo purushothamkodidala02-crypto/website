@@ -169,6 +169,7 @@ export default async function AdminDashboard() {
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/admin/mock-tests"
+            prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl border border-teal-600 bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -178,6 +179,7 @@ export default async function AdminDashboard() {
           </Link>
           <Link
             href="/admin/questions"
+            prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
           >
             <svg className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -187,6 +189,7 @@ export default async function AdminDashboard() {
           </Link>
           <Link
             href="/admin/similarity"
+            prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
           >
             <svg className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -219,6 +222,7 @@ export default async function AdminDashboard() {
             </div>
             <Link
               href="/admin/mock-tests"
+            prefetch={true}
               className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
             >
               Review tests &rarr;
@@ -295,6 +299,7 @@ export default async function AdminDashboard() {
             <h2 className="text-base font-black text-slate-900">Recent Mock Tests</h2>
             <Link
               href="/admin/mock-tests"
+            prefetch={true}
               className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
             >
               View all tests &rarr;
@@ -305,6 +310,7 @@ export default async function AdminDashboard() {
               <p className="text-sm text-slate-500">No mock tests have been created yet.</p>
               <Link
                 href="/admin/mock-tests"
+            prefetch={true}
                 className="mt-3 inline-block rounded-xl border border-teal-600 bg-teal-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-900/15 hover:bg-teal-800"
               >
                 Create your first test
@@ -316,6 +322,7 @@ export default async function AdminDashboard() {
                 <Link
                   key={test.id}
                   href={`/admin/mock-tests/${test.id}/edit`}
+                  prefetch={true}
                   className="group flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-teal-50/40"
                 >
                   <div className="min-w-0">
@@ -396,6 +403,7 @@ function MetricCard({
   return (
     <Link
       href={href}
+      prefetch={true}
       className="group rounded-2xl border border-teal-100 bg-white p-5 shadow-xs transition hover:border-teal-200 hover:shadow-md"
     >
       <div className="flex items-center justify-between">
@@ -448,6 +456,7 @@ function AttentionItem({
   return (
     <Link
       href={href}
+      prefetch={true}
       className={`group flex items-center justify-between gap-4 rounded-xl border p-4 transition ${
         isAmber
           ? "border-amber-200/80 bg-amber-50/50 hover:bg-amber-50 hover:border-amber-300"
@@ -512,6 +521,7 @@ function ShortcutCard({
   return (
     <Link
       href={href}
+      prefetch={true}
       className="group flex items-center justify-between gap-3 rounded-xl border border-teal-100 bg-white p-4 shadow-xs transition hover:border-teal-200 hover:shadow-md"
     >
       <div className="flex items-center gap-3 min-w-0">

@@ -68,7 +68,7 @@ export function MockTestCardAction({
         </span>
         <Link
           href={testHref}
-          prefetch={false}
+          prefetch={true}
           onClick={handleClick}
           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3.5 py-2 text-xs font-bold text-slate-800 shadow-2xs transition active:scale-[0.98]"
         >
@@ -82,7 +82,7 @@ export function MockTestCardAction({
   return (
     <Link
       href={testHref}
-      prefetch={false}
+      prefetch={true}
       onClick={handleClick}
       className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition active:scale-[0.98]"
     >

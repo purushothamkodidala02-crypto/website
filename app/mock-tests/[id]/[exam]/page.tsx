@@ -151,13 +151,13 @@ export default async function ExamPage({ params, searchParams }: Props) {
       />
       <PublicHeader />
       <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f1f5f9] via-[#f5f8fc] to-[#f8fafc]">
-        <div className="relative mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
+        <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-12">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
             <Link href="/" className="hover:text-blue-700 py-0.5 inline-flex items-center">Home</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
             <Link href={stateUrl(context.state.slug)} className="hover:text-blue-700 py-0.5 inline-flex items-center">{context.state.name}</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
-            <span className="text-slate-800 font-semibold py-0.5 inline-flex items-center">{context.exam.name}</span>
+            <span className="text-slate-800 font-semibold py-0.5 inline-flex items-center truncate max-w-[200px] sm:max-w-none">{context.exam.name}</span>
           </nav>
 
           <div className="mt-4">
@@ -171,7 +171,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </span>
             </div>
 
-            <h1 className="font-display mt-3.5 max-w-4xl text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+            <h1 className="font-display mt-3.5 max-w-4xl text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl break-words">
               {examHeading}
             </h1>
 
@@ -200,10 +200,10 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </span>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
               <a
                 href="#papers"
-                className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs"
+                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs text-center"
               >
                 Choose a paper ↓
               </a>
@@ -213,7 +213,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl space-y-10 px-5 py-8 sm:px-8 sm:py-10">
+      <div className="mx-auto max-w-7xl space-y-8 sm:space-y-10 px-4 py-6 sm:px-8 sm:py-10">
         <CatalogSteps
           state={{ value: context.state.name, href: "/mock-tests" }}
           exam={{ value: context.exam.name, href: stateUrl(context.state.slug) }}
@@ -251,7 +251,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         {/* Papers Section - Clean Responsive Cards */}
         <section id="papers" aria-labelledby="papers-title" className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:auto_400px]">
           <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Choose paper</p>
-          <h2 id="papers-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-950">
+          <h2 id="papers-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-950 break-words">
             {hasMockTestSuffixOrMention(context.exam.name) ? `${context.exam.name} papers` : `${context.exam.name} mock test papers`}
           </h2>
           <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-600">
@@ -261,7 +261,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           {papers.length === 0 ? (
             <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." />
           ) : (
-            <div className="student-stagger mt-6 grid gap-4 md:grid-cols-2">
+            <div className="student-stagger mt-5 sm:mt-6 grid gap-3 sm:gap-4 md:grid-cols-2">
               {papers.map((paper) => {
                 const display = paperDisplayById.get(paper.id);
                 const specialization = paper.specialization_id
@@ -273,18 +273,18 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   <Link
                     key={paper.id}
                     href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)}
-                    className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+                    className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-xs font-bold text-teal-800">
+                      <div className="flex items-center justify-between gap-2 sm:gap-3">
+                        <span className="min-w-0 max-w-[65%] sm:max-w-[70%] truncate rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[11px] sm:text-xs font-bold text-teal-800" title={`${display?.shortLabel ?? "Paper"}${specialization ? ` · ${specialization.name}` : ""}`}>
                           {display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}
                         </span>
-                        <span className="text-xs font-bold text-slate-500">
+                        <span className="shrink-0 text-xs font-bold text-slate-500">
                           {paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}
                         </span>
                       </div>
-                      <h3 className="font-display mt-3 text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition">
+                      <h3 className="font-display mt-2.5 sm:mt-3 text-base sm:text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition break-words">
                         {paper.name}
                       </h3>
                       {paper.question_count && (
@@ -293,9 +293,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
                         </p>
                       )}
                     </div>
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-                      <span className="font-semibold text-slate-500">Official Exam Syllabus</span>
-                      <span className="inline-flex items-center gap-1 font-bold text-teal-800 group-hover:translate-x-1 transition">
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs gap-2">
+                      <span className="font-semibold text-slate-500 truncate">Official Exam Syllabus</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-teal-800 group-hover:translate-x-1 transition shrink-0">
                         Open paper →
                       </span>
                     </div>

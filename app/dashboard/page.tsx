@@ -271,6 +271,7 @@ export default async function Dashboard({
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5 w-full md:w-auto shrink-0">
               <Link
                 href="/mock-tests"
+                prefetch={true}
                 className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-2 rounded-xl border border-teal-600 bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-teal-800 min-h-[40px] sm:min-h-[42px]"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -280,6 +281,7 @@ export default async function Dashboard({
               </Link>
               <Link
                 href="/dashboard/study-book"
+                prefetch={true}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-red-300 hover:bg-red-50/50 hover:text-red-900 min-h-[40px] sm:min-h-[42px]"
               >
                 <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -294,6 +296,7 @@ export default async function Dashboard({
               </Link>
               <Link
                 href="/dashboard/study-book?view=bookmarks"
+                prefetch={true}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-900 min-h-[40px] sm:min-h-[42px]"
               >
                 <svg className="h-4 w-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -309,6 +312,7 @@ export default async function Dashboard({
               {isPaidEnabled && (
                 <Link
                   href="/dashboard/passes"
+                  prefetch={true}
                   className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-amber-300 hover:bg-amber-50/50 hover:text-amber-900 min-h-[40px] sm:min-h-[42px]"
                 >
                   <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -334,6 +338,7 @@ export default async function Dashboard({
             <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Link
                 href="/dashboard/study-book"
+                prefetch={true}
                 className="group rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-red-200 hover:shadow-sm"
               >
                 <div className="flex items-center justify-between">
@@ -358,6 +363,7 @@ export default async function Dashboard({
               </Link>
               <Link
                 href="/dashboard/study-book?view=bookmarks"
+                prefetch={true}
                 className="group rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-teal-200 hover:shadow-sm"
               >
                 <div className="flex items-center justify-between">
@@ -395,6 +401,7 @@ export default async function Dashboard({
                 </div>
                 <Link
                   href="/mock-tests"
+                  prefetch={true}
                   className="text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900 transition"
                 >
                   Browse all tests &rarr;
@@ -457,6 +464,7 @@ export default async function Dashboard({
             </p>
             <Link
               href="/mock-tests"
+              prefetch={true}
               className="mt-5 inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 min-h-[40px]"
             >
               Browse mock tests &rarr;

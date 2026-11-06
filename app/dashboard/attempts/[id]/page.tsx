@@ -242,6 +242,7 @@ export default async function AttemptReviewPage({
           </div>
           <Link
             href="/mock-tests"
+            prefetch={true}
             className="rounded-xl bg-teal-800 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-900"
           >
             Browse mock tests

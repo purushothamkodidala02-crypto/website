@@ -219,6 +219,7 @@ function NavigationLinks({
                   <Link
                     key={link.href}
                     href={link.href}
+                    prefetch={true}
                     onClick={onLinkClick}
                     title={collapsed ? link.label : undefined}
                     className={`group flex items-center justify-between gap-3 rounded-2xl border px-3.5 py-3 text-sm font-black transition hover:translate-x-0.5 ${
@@ -284,7 +285,7 @@ function Brand({ linked = true, collapsed = false }: { linked?: boolean; collaps
   if (!linked) return <div className="flex min-w-0 items-center">{content}</div>;
 
   return (
-    <Link href="/admin" className="flex min-w-0 items-center">
+    <Link href="/admin" prefetch={true} className="flex min-w-0 items-center">
       {content}
     </Link>
   );

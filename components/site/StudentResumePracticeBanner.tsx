@@ -83,7 +83,7 @@ export function StudentResumePracticeBanner({
           </Link>
           <Link
             href={lastPractice.testPath}
-            prefetch={false}
+            prefetch={true}
             className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition"
           >
             Retake test

@@ -808,6 +808,7 @@ export async function MockTestDetailsPage({
 
         <Link
           href={resolvedBackHref}
+          prefetch={true}
           className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-800 hover:text-teal-950 transition"
         >
           ← {resolvedBackLabel}
@@ -1102,7 +1103,8 @@ export async function MockTestDetailsPage({
                 ) : paidSalesEnabled ? (
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm leading-6 text-slate-700">
                     Purchases for this exam series are temporarily unavailable. Existing purchases remain valid.{" "}
-                    <Link href="/dashboard/passes" className="font-semibold text-teal-800 underline hover:text-teal-950">
+                    <Link href="/dashboard/passes"
+                      prefetch={true} className="font-semibold text-teal-800 underline hover:text-teal-950">
                       View My Purchases
                     </Link>.
                   </div>

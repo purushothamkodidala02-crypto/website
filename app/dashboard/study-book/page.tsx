@@ -456,7 +456,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
       <div className="mx-auto max-w-7xl 2xl:max-w-[90rem] px-4 py-4 sm:px-6 lg:py-6">
         {/* Top bar: Back link and View Switcher Tabs */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900">
+          <Link href="/dashboard" prefetch={true} className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-900">
             <span aria-hidden="true">←</span>
             <span>Back to dashboard</span>
           </Link>
@@ -512,7 +512,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
               <label className="block text-xs font-bold text-slate-700">Search questions<input name="q" type="search" defaultValue={search} maxLength={120} placeholder="Search question text, exam, paper or subject..." className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal" /></label>
               <div className="flex items-center gap-2">
                 {(state || exam || paper || subject || search) && (
-                  <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="inline-flex items-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50">Reset</Link>
+                  <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} prefetch={true} className="inline-flex items-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50">Reset</Link>
                 )}
                 <button type="submit" className="rounded-xl bg-[#0a2922] px-4 py-2 text-xs font-black text-white transition hover:bg-[#11382f]">Apply Filters</button>
               </div>
@@ -526,7 +526,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
           <section className="mt-6 rounded-3xl border border-dashed bg-white p-10 text-center">
             <h2 className="text-xl font-black text-slate-950">{state || exam || paper || subject || search ? "No matching questions" : view === "mistakes" ? "No active mistakes" : "No bookmarked questions"}</h2>
             <p className="mt-2 text-sm text-slate-600">{state || exam || paper || subject || search ? "Change or clear the search filters to see other saved questions." : view === "mistakes" ? "Incorrect answers will appear here automatically after you submit a test." : "Use the Bookmark button during a test or answer review."}</p>
-            <Link href="/mock-tests" className="mt-6 inline-flex rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]">Browse mock tests</Link>
+            <Link href="/mock-tests" prefetch={true} className="mt-6 inline-flex rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]">Browse mock tests</Link>
           </section>
         ) : (
           <StudyViewer rows={filteredRows} initialIndex={currentIndex} view={view} />
@@ -537,5 +537,5 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
 }
 
 function StudyTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return <Link href={href} aria-current={active ? "page" : undefined} className={`rounded-lg px-3.5 py-1.5 text-center text-xs font-black transition ${active ? "bg-white text-slate-950 shadow-xs" : "text-slate-600 hover:text-slate-950"}`}>{children}</Link>;
+  return <Link href={href} prefetch={true} aria-current={active ? "page" : undefined} className={`rounded-lg px-3.5 py-1.5 text-center text-xs font-black transition ${active ? "bg-white text-slate-950 shadow-xs" : "text-slate-600 hover:text-slate-950"}`}>{children}</Link>;
 }

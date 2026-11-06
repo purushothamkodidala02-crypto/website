@@ -360,7 +360,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
         <CatalogSteps
           state={selectedState ? { value: selectedState.name, href: "/mock-tests" } : undefined}
           exam={selectedState && selectedExam ? { value: selectedExam.name, href: stateUrl(selectedState.slug) } : undefined}
@@ -440,14 +440,14 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             description="Choose a paper to practice full-length mock tests or targeted subject practice."
             action={<Link href={stateUrl(selectedState.slug)} className="text-sm font-bold text-teal-800">← Change exam</Link>}
           >
-            {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="student-stagger grid gap-4 md:grid-cols-2">{examPapers.map((paper) => {
+            {examPapers.length === 0 ? <EmptyCatalog title="No papers are available yet" detail="The admin can add papers from the Exam Structure workspace." /> : <div className="student-stagger grid gap-3 sm:gap-4 md:grid-cols-2">{examPapers.map((paper) => {
               const display = paperDisplayById.get(paper.id);
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
-              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:shadow-md">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900"><PaperSymbol className="h-6 w-6" /></span>
-                <span className="min-w-0 flex-1"><span className="text-xs font-bold uppercase tracking-wider text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-0.5 block text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition">{paper.name}</strong><span className="mt-1.5 block text-xs font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
-                <span className="text-lg font-black text-teal-700 transition group-hover:translate-x-1">→</span>
+              return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-3.5 sm:gap-5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition hover:border-teal-400 hover:shadow-md">
+                <span className="grid h-10 w-10 sm:h-12 sm:w-12 shrink-0 place-items-center rounded-xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900"><PaperSymbol className="h-5 w-5 sm:h-6 sm:w-6" /></span>
+                <span className="min-w-0 flex-1"><span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-teal-700 truncate max-w-full block">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-0.5 block text-base sm:text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition break-words">{paper.name}</strong><span className="mt-1 sm:mt-1.5 block text-xs font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
+                <span className="text-base sm:text-lg font-black text-teal-700 transition group-hover:translate-x-1 shrink-0 ml-1">→</span>
               </Link>;
             })}</div>}
           </CatalogSection>
@@ -720,7 +720,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
 }
 
 function CatalogSection({ eyebrow, title, description, action, children }: { eyebrow: string; title: string; description?: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return <section className="mt-8"><div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.15em] text-teal-700">{eyebrow}</p><h2 className="font-display mt-2 text-2xl tracking-tight sm:text-3xl">{title}</h2>{description && <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>}</div>{action}</div>{children}</section>;
+  return <section className="mt-6 sm:mt-8"><div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4"><div><p className="text-xs font-black uppercase tracking-[0.15em] text-teal-700">{eyebrow}</p><h2 className="font-display mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl tracking-tight break-words">{title}</h2>{description && <p className="mt-1.5 sm:mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed sm:leading-6 text-slate-600">{description}</p>}</div>{action}</div>{children}</section>;
 }
 
 function TestGrid({ tests }: { tests: CatalogTest[] }) {

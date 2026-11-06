@@ -25,7 +25,7 @@ function ExamCards({ exams }: { exams: ExamSelectionItem[] }) {
           key={exam.id}
           href={exam.href}
           prefetch={false}
-          className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/8 hover:-translate-y-0.5"
+          className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/8 hover:-translate-y-0.5"
         >
           <div>
             <div className="flex items-center justify-between gap-3">

@@ -325,7 +325,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           <span className="hidden md:inline text-slate-300">·</span>
           <span className="hidden md:inline font-medium">Use <kbd className="rounded bg-slate-100 px-1 py-0.5 font-semibold text-slate-700">←</kbd> and <kbd className="rounded bg-slate-100 px-1 py-0.5 font-semibold text-slate-700">→</kbd> to navigate</span>
         </div>
-        <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-700 transition hover:border-teal-400 hover:text-teal-900">Clear search and filters</Link>
+        <Link href={view === "bookmarks" ? "/dashboard/study-book?view=bookmarks" : "/dashboard/study-book"} prefetch={true} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-700 transition hover:border-teal-400 hover:text-teal-900">Clear search and filters</Link>
       </div>
     </section>
   );

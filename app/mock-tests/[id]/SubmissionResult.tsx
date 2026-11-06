@@ -186,6 +186,7 @@ export function SubmissionResult({
               </Link>
               <Link
                 href={publicTestPath}
+                prefetch={true}
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}

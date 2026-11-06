@@ -86,6 +86,7 @@ export function TestStartActions({
     return (
       <Link
         href={`/login?next=${encodeURIComponent(testPath)}`}
+        prefetch={true}
         className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99]"
       >
         <span>Sign in to start</span>
