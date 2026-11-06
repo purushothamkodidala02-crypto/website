@@ -7,11 +7,24 @@ export function NavigationProgress() {
   const router = useRouter();
   const pathname = usePathname();
   const [navigation, setNavigation] = useState<{ sourceHref: string; id: number } | null>(null);
+  const [visiblePending, setVisiblePending] = useState(false);
   const navigationId = useRef(0);
   const prefetchedUrls = useRef<Map<string, number>>(new Map());
   const pending = navigation !== null;
 
-  // Background context-sensitive route warming during idle time
+  // 150ms grace period before showing progress bar so fast/prefetched transitions don't flash
+  useEffect(() => {
+    if (!navigation) return;
+    const timer = window.setTimeout(() => {
+      setVisiblePending(true);
+    }, 150);
+    return () => {
+      window.clearTimeout(timer);
+      setVisiblePending(false);
+    };
+  }, [navigation]);
+
+  // Background context-sensitive route warming during idle time and recurring keep-alive
   useEffect(() => {
     const prefetchRoutes = (routes: string[]) => {
       const currentPathAndQuery = window.location.pathname + window.location.search;
@@ -19,7 +32,8 @@ export function NavigationProgress() {
         if (route === currentPathAndQuery) continue;
         const now = Date.now();
         const lastPrefetched = prefetchedUrls.current.get(route) ?? 0;
-        if (now - lastPrefetched > 25000) {
+        // Refresh every 18 seconds to beat Next.js 30-second client cache expiration
+        if (now - lastPrefetched > 18000) {
           prefetchedUrls.current.set(route, now);
           router.prefetch(route);
           try {
@@ -56,6 +70,28 @@ export function NavigationProgress() {
       } else if (pathname === "/" || pathname === "/mock-tests") {
         prefetchRoutes(["/mock-tests", "/dashboard"]);
       }
+
+      // On mobile & desktop: warm top 6 visible internal navigation links on the page during idle
+      if (typeof document !== "undefined") {
+        const pageLinks = document.querySelectorAll<HTMLAnchorElement>("a[href^='/']");
+        let count = 0;
+        for (const link of pageLinks) {
+          if (count >= 6) break;
+          const rawHref = link.getAttribute("href");
+          if (!rawHref || rawHref.startsWith("/_") || rawHref.includes("?") || rawHref.endsWith("/questions-export")) continue;
+          if (rawHref === window.location.pathname) continue;
+          const now = Date.now();
+          const lastPrefetched = prefetchedUrls.current.get(rawHref) ?? 0;
+          if (now - lastPrefetched > 18000) {
+            prefetchedUrls.current.set(rawHref, now);
+            router.prefetch(rawHref);
+            try {
+              (router as unknown as { prefetch: (href: string, opts?: { kind?: string }) => void }).prefetch(rawHref, { kind: "full" });
+            } catch {}
+            count++;
+          }
+        }
+      }
     };
 
     let idleId: number | undefined;
@@ -69,6 +105,13 @@ export function NavigationProgress() {
       }
     }
 
+    // Keep dynamic routes warm every 20 seconds while student is active on page
+    const intervalId = window.setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        runWarm();
+      }
+    }, 20000);
+
     return () => {
       if (idleId !== undefined && typeof window !== "undefined" && "cancelIdleCallback" in window) {
         (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
@@ -76,6 +119,7 @@ export function NavigationProgress() {
       if (timerId !== undefined) {
         clearTimeout(timerId);
       }
+      window.clearInterval(intervalId);
     };
   }, [pathname, router]);
 
@@ -95,7 +139,7 @@ export function NavigationProgress() {
 
           const now = Date.now();
           const lastPrefetched = prefetchedUrls.current.get(pathAndQuery) ?? 0;
-          if (now - lastPrefetched > 25000) {
+          if (now - lastPrefetched > 18000) {
             prefetchedUrls.current.set(pathAndQuery, now);
             router.prefetch(pathAndQuery);
             try {
@@ -175,11 +219,11 @@ export function NavigationProgress() {
   }, [navigation, pathname, pending]);
 
   return (
-    <div className={`pointer-events-none fixed inset-x-0 top-0 z-[200] transition-opacity duration-150 ${pending ? "opacity-100" : "opacity-0"}`} aria-hidden={!pending}>
+    <div className={`pointer-events-none fixed inset-x-0 top-0 z-[200] transition-opacity duration-150 ${visiblePending ? "opacity-100" : "opacity-0"}`} aria-hidden={!visiblePending}>
       <div className="h-1.5 overflow-hidden bg-teal-950/20 shadow-[0_0_12px_rgba(20,184,166,0.85)]">
         <span className="block h-full w-2/5 animate-[navigation-progress_0.9s_ease-in-out_infinite] bg-gradient-to-r from-teal-400 via-teal-300 to-emerald-400 shadow-[0_0_8px_rgba(45,212,191,0.9)] motion-reduce:w-full motion-reduce:animate-none" />
       </div>
-      {pending && <SlowNavigationMessage />}
+      {visiblePending && <SlowNavigationMessage />}
       <span className="sr-only" role="status" aria-live="polite">{pending ? "Loading the next page" : ""}</span>
     </div>
   );
