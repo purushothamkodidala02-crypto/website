@@ -168,19 +168,19 @@ export default async function MockTestsPage({
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-slate-100">
           <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
             <span className="text-xs font-medium text-slate-500">Total Mock Tests</span>
-            <p className="mt-1 text-2xl font-bold text-slate-900">{tests.length}</p>
+            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-slate-900">{tests.length}</p>
           </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
-            <span className="text-xs font-medium text-slate-500">Published (Live)</span>
-            <p className="mt-1 text-2xl font-bold text-slate-900">{publishedCount}</p>
+          <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/30 p-3.5">
+            <span className="text-xs font-medium text-emerald-800/90">Published (Live)</span>
+            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-emerald-950">{publishedCount}</p>
           </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
-            <span className="text-xs font-medium text-slate-500">Drafts</span>
-            <p className="mt-1 text-2xl font-bold text-slate-900">{draftCount}</p>
+          <div className="rounded-xl border border-amber-200/70 bg-amber-50/30 p-3.5">
+            <span className="text-xs font-medium text-amber-800/90">Drafts</span>
+            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-amber-950">{draftCount}</p>
           </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
-            <span className="text-xs font-medium text-slate-500">States Covered</span>
-            <p className="mt-1 text-2xl font-bold text-slate-900">{states.length}</p>
+          <div className="rounded-xl border border-sky-200/70 bg-sky-50/30 p-3.5">
+            <span className="text-xs font-medium text-sky-800/90">States Covered</span>
+            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-sky-950">{states.length}</p>
           </div>
         </div>
       </section>

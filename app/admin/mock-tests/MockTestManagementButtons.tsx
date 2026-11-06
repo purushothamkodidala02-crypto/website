@@ -145,7 +145,7 @@ export function MockTestManagementButtons({
         pending={pending}
         onClick={() => run("correct")}
         label="Create corrected version"
-        className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+        className="border border-slate-200 bg-white text-slate-700 hover:border-indigo-300/80 hover:bg-indigo-50/50 hover:text-indigo-800"
       />
     ) : null;
 
@@ -154,7 +154,7 @@ export function MockTestManagementButtons({
       pending={pending}
       onClick={() => run("permanent-delete")}
       label="Delete permanently"
-      className="border border-slate-200 bg-white text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50/50"
+      className="border border-slate-200 bg-white text-slate-600 hover:border-rose-300/80 hover:bg-rose-50/50 hover:text-rose-700"
     />
   ) : null;
 
@@ -164,7 +164,7 @@ export function MockTestManagementButtons({
         pending={pending}
         onClick={() => run("clear-admin-attempts")}
         label="Clear my attempt"
-        className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+        className="border border-slate-200 bg-white text-slate-700 hover:border-amber-300/80 hover:bg-amber-50/50 hover:text-amber-800"
       />
     ) : null;
 
@@ -176,13 +176,13 @@ export function MockTestManagementButtons({
             pending={pending}
             onClick={() => run("hide")}
             label="Hide"
-            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+            className="border border-slate-200 bg-white text-slate-700 hover:border-amber-300/80 hover:bg-amber-50/50 hover:text-amber-800"
           />
           <ActionButton
             pending={pending}
             onClick={() => run("restore")}
             label="Restore as draft"
-            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+            className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
           {correct}
@@ -197,14 +197,14 @@ export function MockTestManagementButtons({
               disabled={!ready}
               onClick={() => openPublishDialog("republish")}
               label={ready ? "Publish again" : "Not ready"}
-              className="bg-slate-900 text-white hover:bg-slate-800 border border-slate-900"
+              className="border border-emerald-700/90 bg-emerald-700 text-white hover:bg-emerald-800 active:bg-emerald-900"
             />
           )}
           <ActionButton
             pending={pending}
             onClick={() => run("restore")}
             label="Restore as draft"
-            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+            className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
           {correct}
@@ -219,7 +219,7 @@ export function MockTestManagementButtons({
             disabled={!ready}
             onClick={() => openPublishDialog("publish")}
             label={ready ? "Publish" : "Not ready"}
-            className="bg-slate-900 text-white hover:bg-slate-800 border border-slate-900"
+            className="border border-emerald-700/90 bg-emerald-700 text-white hover:bg-emerald-800 active:bg-emerald-900"
           />
           {clearAdminBtn}
           {!hasAttempts ? (
@@ -227,7 +227,7 @@ export function MockTestManagementButtons({
               pending={pending}
               onClick={() => run("delete")}
               label="Delete"
-              className="border border-slate-200 bg-white text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50/50"
+              className="border border-slate-200 bg-white text-slate-600 hover:border-rose-300/80 hover:bg-rose-50/50 hover:text-rose-700"
             />
           ) : (
             <>
