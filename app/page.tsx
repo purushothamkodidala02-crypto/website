@@ -120,78 +120,11 @@ export default async function Home() {
       <PublicHeader />
       <SurveyPopup survey={activeSurvey} />
 
-      {/* State Portals & Search */}
-      <section className="border-b border-slate-200/80 bg-white">
-        <div className="mx-auto max-w-7xl px-4 pt-6 pb-6 sm:px-6 sm:pt-8 sm:pb-7 lg:px-8">
-          {hasStateError ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
-              The state catalogue will appear after its database update is applied.
-            </div>
-          ) : (
-            <div className="grid gap-3.5 sm:grid-cols-2 sm:gap-4">
-              {states.map((state) => {
-                const stateCategoryIds = new Set(
-                  categories
-                    .filter((category) => category.state_id === state.id)
-                    .map((category) => category.id)
-                );
-                const stateExams = activeExams.filter((exam) =>
-                  stateCategoryIds.has(exam.exam_id)
-                );
-                const isTG = state.code.toUpperCase() === "TG";
-
-                return (
-                  <Link
-                    key={state.id}
-                    href={stateUrl(state.slug)}
-                    prefetch={true}
-                    className={`student-card group flex items-center justify-between rounded-2xl border p-4 sm:p-5 shadow-2xs transition hover:shadow-xs ${
-                      isTG
-                        ? "border-blue-200/90 bg-gradient-to-r from-blue-50/60 via-white to-white hover:border-blue-400"
-                        : "border-emerald-200/90 bg-gradient-to-r from-emerald-50/60 via-white to-white hover:border-emerald-400"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <span
-                        className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl transition ${
-                          isTG
-                            ? "bg-blue-100/80 text-blue-800 group-hover:bg-blue-200/80"
-                            : "bg-emerald-100/80 text-emerald-800 group-hover:bg-emerald-200/80"
-                        }`}
-                      >
-                        <StateSymbol slug={state.slug} className="h-6 w-6" />
-                      </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h2 className="font-display text-base sm:text-lg font-bold text-slate-900 group-hover:text-blue-700 transition">
-                            {state.name}
-                          </h2>
-                          <span
-                            className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${
-                              isTG
-                                ? "border-blue-200 bg-blue-50 text-blue-900"
-                                : "border-emerald-200 bg-emerald-50 text-emerald-900"
-                            }`}
-                          >
-                            {state.code}
-                          </span>
-                        </div>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {stateExams.length} exam series available
-                        </p>
-                      </div>
-                    </div>
-                    <span className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-blue-700 group-hover:translate-x-1 transition">
-                      Explore <span>→</span>
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Quick Search */}
-          <form action="/mock-tests" method="GET" className="mx-auto mt-4 max-w-2xl">
+      {/* Main Content Area */}
+      <section className="mx-auto max-w-7xl px-4 pt-6 pb-12 sm:px-6 sm:pt-8 sm:pb-16 lg:px-8">
+        {/* Quick Search - Top Left */}
+        <div className="max-w-xl">
+          <form action="/mock-tests" method="GET">
             <div className="relative flex items-center rounded-xl border border-slate-300 bg-white p-1.5 shadow-2xs transition focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100">
               <svg
                 className="ml-2.5 h-4 w-4 shrink-0 text-slate-400"
@@ -210,7 +143,7 @@ export default async function Home() {
               <input
                 type="search"
                 name="q"
-                placeholder="Search any exam (e.g. Group 2, Police Constable, TET, APPSC)..."
+                placeholder="Search exam (e.g. Group 2, Police Constable, TET, APPSC)..."
                 aria-label="Search exams"
                 className="w-full border-none bg-transparent px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-0"
               />
@@ -223,7 +156,7 @@ export default async function Home() {
             </div>
 
             {/* Popular Exam Shortcuts */}
-            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5 text-xs">
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
               <span className="font-medium text-slate-500">Popular:</span>
               {[
                 { label: "Group 2", q: "Group 2" },
@@ -244,67 +177,136 @@ export default async function Home() {
             </div>
           </form>
         </div>
-      </section>
 
-      {/* Available Exams Grid Section */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-lg sm:text-xl font-bold text-slate-900">
-            Available Exams
-          </h2>
-          <Link
-            href="/mock-tests"
-            className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 transition"
-          >
-            Browse all mock tests <span aria-hidden="true">→</span>
-          </Link>
-        </div>
+        {/* States Section - Styled like Exam Cards */}
+        {hasStateError ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
+            The state catalogue will appear after its database update is applied.
+          </div>
+        ) : (
+          <div className="mt-6 sm:mt-7">
+            <h2 className="font-display text-xs font-bold uppercase tracking-wider text-slate-500">
+              Select State
+            </h2>
+            <div className="student-stagger mt-2.5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+              {states.map((state) => {
+                const stateCategoryIds = new Set(
+                  categories
+                    .filter((category) => category.state_id === state.id)
+                    .map((category) => category.id)
+                );
+                const stateExams = activeExams.filter((exam) =>
+                  stateCategoryIds.has(exam.exam_id)
+                );
+                const isTG = state.code.toUpperCase() === "TG";
 
-        <div className="student-stagger mt-5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
-          {activeExams.map((exam) => {
-            const category = categoryById.get(exam.exam_id);
-            const state = states.find((item) => item.id === category?.state_id);
-            const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
-            if (!state) return null;
-            const isTG = state.code.toUpperCase() === "TG";
+                return (
+                  <Link
+                    key={state.id}
+                    href={stateUrl(state.slug)}
+                    prefetch={true}
+                    className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:border-blue-400 hover:shadow-xs transition"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`grid h-10 w-10 place-items-center rounded-xl transition ${
+                            isTG
+                              ? "bg-blue-50 text-blue-700 group-hover:bg-blue-100"
+                              : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100"
+                          }`}
+                        >
+                          <StateSymbol slug={state.slug} className="h-5 w-5" />
+                        </span>
+                        <span
+                          className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${
+                            isTG
+                              ? "border-blue-200 bg-blue-50 text-blue-800"
+                              : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                          }`}
+                        >
+                          {state.code}
+                        </span>
+                      </div>
+                      <h3 className="font-display mt-3 text-sm sm:text-base font-bold leading-snug text-slate-900 group-hover:text-blue-700 transition">
+                        {state.name}
+                      </h3>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                      <span className="font-medium text-slate-500">
+                        {stateExams.length} exam series available
+                      </span>
+                      <span className="font-semibold text-blue-700 group-hover:translate-x-0.5 transition">
+                        Explore →
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-            return (
-              <Link
-                key={exam.id}
-                href={examUrl(state.slug, exam.slug)}
-                prefetch={true}
-                className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:border-blue-400 hover:shadow-xs transition"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700 group-hover:bg-blue-50 group-hover:text-blue-700 transition">
-                      <ExamSymbol name={exam.name} className="h-5 w-5" />
+        {/* Available Exams Section */}
+        <div className="mt-8 sm:mt-10">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-base sm:text-lg font-bold text-slate-900">
+              Available Exams
+            </h2>
+            <Link
+              href="/mock-tests"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 transition"
+            >
+              Browse all ({activeExams.length}) <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          <div className="student-stagger mt-3.5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+            {activeExams.map((exam) => {
+              const category = categoryById.get(exam.exam_id);
+              const state = states.find((item) => item.id === category?.state_id);
+              const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
+              if (!state) return null;
+              const isTG = state.code.toUpperCase() === "TG";
+
+              return (
+                <Link
+                  key={exam.id}
+                  href={examUrl(state.slug, exam.slug)}
+                  prefetch={true}
+                  className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:border-blue-400 hover:shadow-xs transition"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700 group-hover:bg-blue-50 group-hover:text-blue-700 transition">
+                        <ExamSymbol name={exam.name} className="h-5 w-5" />
+                      </span>
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${
+                          isTG
+                            ? "border-blue-200 bg-blue-50 text-blue-800"
+                            : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        }`}
+                      >
+                        {state.code}
+                      </span>
+                    </div>
+                    <h3 className="font-display mt-3 text-sm sm:text-base font-bold leading-snug text-slate-900 group-hover:text-blue-700 transition">
+                      {exam.name}
+                    </h3>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                    <span className="font-medium text-slate-500">
+                      {paperCount} paper{paperCount === 1 ? "" : "s"} available
                     </span>
-                    <span
-                      className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${
-                        isTG
-                          ? "border-blue-200 bg-blue-50 text-blue-800"
-                          : "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      }`}
-                    >
-                      {state.code}
+                    <span className="font-semibold text-blue-700 group-hover:translate-x-0.5 transition">
+                      Practice →
                     </span>
                   </div>
-                  <h3 className="font-display mt-3 text-sm sm:text-base font-bold leading-snug text-slate-900 group-hover:text-blue-700 transition">
-                    {exam.name}
-                  </h3>
-                </div>
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-                  <span className="font-medium text-slate-500">
-                    {paperCount} paper{paperCount === 1 ? "" : "s"} available
-                  </span>
-                  <span className="font-semibold text-blue-700 group-hover:translate-x-0.5 transition">
-                    Practice →
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
