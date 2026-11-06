@@ -135,24 +135,110 @@ export default async function MockTestsPage({
     };
   });
 
-  return <main>
-    <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-teal-900 via-teal-950 to-slate-950 p-7 text-white shadow-xl shadow-teal-950/15 sm:p-9"><div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-teal-300/15 blur-3xl" /><div className="relative flex flex-wrap items-end justify-between gap-6"><div><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.15em] text-teal-200"><MockSymbol className="h-4 w-4" /> Publishing workspace</p><h1 className="font-display mt-3 text-4xl">Mock-test control centre</h1><p className="mt-3 max-w-2xl leading-7 text-slate-300">Manage every TG, AP and Central test in one place. Names and series numbers stay consistent automatically.</p></div><div className="grid grid-cols-3 gap-2 text-center text-xs"><Summary value={states.length} label="States" /><Summary value={tests.length} label="Tests" /><Summary value={mappedTests.filter((test) => test.status === "published").length} label="Live" /></div></div></section>
-    <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5" aria-label="Mock-test publishing workflow">
-      <WorkflowStep number="1" title="Create draft" detail="Choose the exact State, Board, Exam and Paper." />
-      <WorkflowStep number="2" title="Add questions" detail="Reach the exact target with active questions." />
-      <WorkflowStep number="3" title="Preview" detail="Check wording, images, answers and mobile layout." />
-      <WorkflowStep number="4" title="Choose access" detail="Set the test to Free or Paid series." />
-      <WorkflowStep number="5" title="Publish" detail="Publishing is the final student visibility control." />
-    </section>
-    {testsResult.error || statesResult.error || summariesResult.error ? <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{testsResult.error?.message ?? statesResult.error?.message ?? summariesResult.error?.message}</p> : <ExistingMockTestsTable states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} tests={mappedTests} initialStateId={stateId} initialLocation={initialLocation} initialSearch={initialSearch} initialStatus={initialStatus} initialScope={initialScope} />}
-    <details className="mt-8 overflow-hidden rounded-3xl border border-teal-200 bg-gradient-to-br from-white to-teal-50 shadow-sm"><summary className="cursor-pointer list-none px-7 py-6"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Create</p><h2 className="font-display mt-2 text-xl">+ Create the next mock test</h2><p className="mt-1 text-sm text-slate-600">A guided workflow keeps the state, exam, paper and test series correct.</p></summary><div className="border-t border-teal-100 px-4 pb-7 sm:px-7"><CreateMockTestForm states={states} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))} sections={sections.map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))} existingSeries={tests.filter((test) => !test.superseded_by_mock_test_id).map((test) => ({ paperId: test.paper_id, subjectId: test.subject_id, subjectSectionId: test.subject_section_id, scope: test.test_scope as "paper" | "subject", seriesNumber: Number(test.series_number ?? 1) }))} /></div></details>
+  const publishedCount = mappedTests.filter((test) => test.status === "published").length;
+  const draftCount = mappedTests.filter((test) => test.status === "draft").length;
+
+  return <main className="space-y-6">
+      {/* Professional Executive Header */}
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-700">
+              <MockSymbol className="h-4 w-4" />
+              <span>Assessment Operations</span>
+            </div>
+            <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              Mock Tests
+            </h1>
+            <p className="mt-1 text-sm text-slate-600 max-w-2xl">
+              Create, configure questions, and publish state competitive examination practice papers for students across Telangana and Andhra Pradesh.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <a
+              href="#create-mock-test"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-teal-800 active:bg-teal-900"
+            >
+              <span className="text-base leading-none">+</span> Create Mock Test
+            </a>
+          </div>
+        </div>
+
+        {/* Executive KPI Stats Bar */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-slate-100">
+          <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+            <span className="text-xs font-medium text-slate-500">Total Mock Tests</span>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{tests.length}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3.5">
+            <span className="text-xs font-medium text-emerald-800">Published (Live)</span>
+            <p className="mt-1 text-2xl font-bold text-emerald-950">{publishedCount}</p>
+          </div>
+          <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-3.5">
+            <span className="text-xs font-medium text-amber-800">Drafts</span>
+            <p className="mt-1 text-2xl font-bold text-amber-950">{draftCount}</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+            <span className="text-xs font-medium text-slate-500">States Covered</span>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{states.length}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Existing Mock Tests Workspace */}
+      {testsResult.error || statesResult.error || summariesResult.error ? (
+        <p className="rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700">
+          {testsResult.error?.message ?? statesResult.error?.message ?? summariesResult.error?.message}
+        </p>
+      ) : (
+        <ExistingMockTestsTable
+          states={states}
+          categories={categoryOptions}
+          exams={examOptions}
+          specializations={specializationOptions}
+          papers={paperOptions}
+          tests={mappedTests}
+          initialStateId={stateId}
+          initialLocation={initialLocation}
+          initialSearch={initialSearch}
+          initialStatus={initialStatus}
+          initialScope={initialScope}
+        />
+      )}
+
+      {/* Create New Mock Test Section */}
+      <section id="create-mock-test" className="scroll-mt-20 rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="border-b border-slate-100 px-6 py-5 bg-slate-50/60">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-700">
+            <span>New Test Series</span>
+          </div>
+          <h2 className="mt-1 text-lg sm:text-xl font-bold text-slate-900">
+            Create Mock Test
+          </h2>
+          <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
+            Select the state, exam, and paper to automatically calculate the next series number and configure duration and question targets.
+          </p>
+        </div>
+        <div className="px-6 py-6 sm:px-8 sm:py-7">
+          <CreateMockTestForm
+            states={states}
+            categories={categoryOptions}
+            exams={examOptions}
+            specializations={specializationOptions}
+            papers={paperOptions}
+            subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))}
+            sections={sections.map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))}
+            existingSeries={tests
+              .filter((test) => !test.superseded_by_mock_test_id)
+              .map((test) => ({
+                paperId: test.paper_id,
+                subjectId: test.subject_id,
+                subjectSectionId: test.subject_section_id,
+                scope: test.test_scope as "paper" | "subject",
+                seriesNumber: Number(test.series_number ?? 1),
+              }))}
+          />
+        </div>
+      </section>
   </main>;
-}
-
-function Summary({ value, label }: { value: number; label: string }) {
-  return <span className="min-w-20 rounded-xl bg-white/10 px-3 py-3"><strong className="block text-lg text-white">{value}</strong><span className="text-slate-300">{label}</span></span>;
-}
-
-function WorkflowStep({ number, title, detail }: { number: string; title: string; detail: string }) {
-  return <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><span className="grid h-7 w-7 place-items-center rounded-lg bg-teal-100 text-xs font-black text-teal-900">{number}</span><h2 className="mt-3 text-sm font-black text-slate-950">{title}</h2><p className="mt-1 text-xs leading-5 text-slate-600">{detail}</p></div>;
 }

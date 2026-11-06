@@ -62,25 +62,6 @@ const statusDetails: Record<MockTestStatus, { label: string; className: string }
   archived: { label: "Hidden", className: "bg-slate-200 text-slate-700" },
 };
 
-const filterStyles = {
-  all: {
-    active: "border-slate-950 bg-slate-950 text-white ring-slate-950",
-    idle: "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50",
-  },
-  draft: {
-    active: "border-amber-400 bg-amber-50 text-amber-950 ring-amber-400",
-    idle: "border-amber-100 bg-amber-50/40 hover:border-amber-300 hover:bg-amber-50",
-  },
-  published: {
-    active: "border-emerald-500 bg-emerald-50 text-emerald-950 ring-emerald-500",
-    idle: "border-emerald-100 bg-emerald-50/40 hover:border-emerald-300 hover:bg-emerald-50",
-  },
-  archived: {
-    active: "border-slate-500 bg-slate-100 text-slate-950 ring-slate-500",
-    idle: "border-slate-200 bg-slate-50/60 hover:border-slate-400 hover:bg-slate-100",
-  },
-};
-
 export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialStatus, initialScope = "all" }: {
   states: Array<{ id: string; name: string; code: string; slug: string }>;
   categories: Array<LocationCategory & { stateId: string }>;
@@ -249,67 +230,176 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   }, [filtered, currentPage, pageSize]);
 
   return (
-    <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-lg shadow-slate-950/[0.04]">
-      <div className="border-b border-teal-100 bg-gradient-to-br from-white via-white to-teal-50 px-6 py-6 sm:px-7">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+    <section className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+      {/* Header & Status Segmented Tabs */}
+      <div className="border-b border-slate-200/80 bg-slate-50/50 px-5 py-5 sm:px-7">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Student visibility</p>
-            <h2 className="mt-2 text-2xl font-black">Manage all mock tests</h2>
-            <p className="mt-2 text-sm text-slate-600">Mock tests are the single publishing control. Questions and Subjects remain reusable building blocks.</p>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-700">
+              <span>Test Directory</span>
+            </div>
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900">
+              All Mock Tests
+            </h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
+              Filter by examination hierarchy, manage question assignments, and control student access.
+            </p>
           </div>
-          <button
-            type="button"
-            disabled={isSyncing}
-            onClick={handleSyncTitles}
-            className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-900 transition hover:bg-teal-100 disabled:opacity-50"
-            title="Update all mock test titles in the database to the canonical standard format"
-          >
-            {isSyncing ? "Syncing titles…" : "Standardize all test titles"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isSyncing}
+              onClick={handleSyncTitles}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
+              title="Update all mock test titles in the database to the canonical standard format"
+            >
+              <span>⚙</span>
+              <span>{isSyncing ? "Syncing titles…" : "Standardize all test titles"}</span>
+            </button>
+          </div>
         </div>
+
         {syncMessage && (
-          <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50/80 px-4 py-2.5 text-xs font-semibold text-teal-900">
+          <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-semibold text-teal-900">
             {syncMessage}
           </p>
         )}
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+
+        {/* Clean Status Tabs */}
+        <div className="mt-5 flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-200/60 border border-slate-200">
           {([
-            ["all", "All tests", counts.all],
-            ["draft", "Draft", counts.draft],
+            ["all", "All Tests", counts.all],
             ["published", "Published", counts.published],
+            ["draft", "Drafts", counts.draft],
             ["archived", "Hidden", counts.archived],
-          ] as const).map(([value, label, count]) => (
-            <button key={value} type="button" onClick={() => setStatus(value)} className={`rounded-2xl border px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 ${status === value ? `ring-1 ${filterStyles[value].active}` : filterStyles[value].idle}`}>
-              <span className="block text-2xl font-black">{count}</span>
-              <span className={`mt-1 block text-sm font-semibold ${status === value && value === "all" ? "text-slate-300" : "text-slate-600"}`}>{label}</span>
-            </button>
-          ))}
+          ] as const).map(([value, label, count]) => {
+            const isActive = status === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setStatus(value)}
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                  isActive
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                }`}
+              >
+                <span>{label}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0.2 text-[11px] font-bold ${
+                    isActive
+                      ? "bg-slate-100 text-slate-800"
+                      : "bg-slate-200/80 text-slate-600"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="space-y-4 border-b border-teal-100 bg-gradient-to-r from-slate-50 to-teal-50/70 px-6 py-5 sm:px-7">
-        <div><p className="mb-3 text-xs font-black uppercase tracking-[0.13em] text-slate-500">Filter by state</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { setStateId(""); setLocation(emptyLocation); }} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${!stateId ? "border-slate-950 bg-slate-950 text-white" : "bg-white text-slate-600"}`}>All states</button>{states.map((state) => <button key={state.id} type="button" onClick={() => { setStateId(state.id); setLocation(emptyLocation); }} className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold ${stateId === state.id ? "border-teal-600 bg-teal-50 text-teal-900 ring-1 ring-teal-600" : "bg-white text-slate-600"}`}><StateSymbol slug={state.slug} className="h-4 w-4" />{state.code} · {state.name}</button>)}</div></div>
-        <LocationFilters categories={categories.filter((category) => !stateId || category.stateId === stateId)} exams={exams} specializations={specializations} papers={papers} value={location} onChange={setLocation} />
-        <div className="flex flex-wrap items-end gap-4">
-          <label className="block flex-1 min-w-[240px] text-sm font-bold">Search mock tests
-            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by test, Exam, or Paper" className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal" />
-          </label>
-          <label className="block w-full sm:w-64 text-sm font-bold">Test scope
+      {/* Filter Controls Bar */}
+      <div className="border-b border-slate-200/80 bg-white px-5 py-5 sm:px-7 space-y-4">
+        {/* State Selection */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-slate-500 mr-1">State:</span>
+          <button
+            type="button"
+            onClick={() => {
+              setStateId("");
+              setLocation(emptyLocation);
+            }}
+            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              !stateId
+                ? "border-teal-700 bg-teal-50 text-teal-900 font-bold"
+                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+            }`}
+          >
+            All States
+          </button>
+          {states.map((state) => {
+            const isSelected = stateId === state.id;
+            return (
+              <button
+                key={state.id}
+                type="button"
+                onClick={() => {
+                  setStateId(state.id);
+                  setLocation(emptyLocation);
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                  isSelected
+                    ? "border-teal-700 bg-teal-50 text-teal-900 font-bold"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <StateSymbol slug={state.slug} className="h-3.5 w-3.5" />
+                <span>{state.code}</span>
+                <span className="text-slate-400">·</span>
+                <span>{state.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Location Cascades */}
+        <LocationFilters
+          categories={categories.filter((category) => !stateId || category.stateId === stateId)}
+          exams={exams}
+          specializations={specializations}
+          papers={papers}
+          value={location}
+          onChange={setLocation}
+        />
+
+        {/* Search & Scope Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+          <div className="relative flex-1">
+            <svg
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by test title, exam name, paper, or subject..."
+              className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
+            />
+          </div>
+          <div className="w-full sm:w-56 shrink-0">
             <select
               value={scope}
               onChange={(event) => setScope(event.target.value as "all" | "paper" | "subject")}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
             >
-              <option value="all">Both (Paper &amp; Subject wise)</option>
+              <option value="all">All scopes (Paper &amp; Subject)</option>
               <option value="paper">Paper-wise only</option>
               <option value="subject">Subject-wise only</option>
             </select>
-          </label>
+          </div>
         </div>
       </div>
 
+      {/* Tests List */}
       {filtered.length === 0 ? (
-        <div className="p-10 text-center"><h3 className="font-bold text-slate-900">No matching mock tests</h3><p className="mt-2 text-sm text-slate-600">Change the visibility, scope, location, or search filters.</p></div>
+        <div className="p-12 text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+            <MockSymbol className="h-6 w-6" />
+          </div>
+          <h3 className="mt-3 font-semibold text-slate-900">No mock tests found</h3>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
+            No mock tests match the selected filters or search query. Try resetting your search or state filters.
+          </p>
+        </div>
       ) : (
         <>
           <div className="divide-y divide-slate-100">
@@ -317,35 +407,158 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               const unavailableCount = test.questionCount - test.usableQuestionCount;
               const ready = test.questionCount === test.targetQuestionCount && unavailableCount === 0;
               const statusDetail = statusDetails[test.status];
-              return (
-                <article key={test.id} className="p-6 transition hover:bg-teal-50/25 sm:p-7">
-                  {/* Badges Row */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusDetail.className}`}>{statusDetail.label}</span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{test.scope === "paper" ? "Paper-wise" : "Subject-wise"}</span>
-                    {test.supersededByMockTestId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Correction in progress</span>}
-                    {test.replacesMockTestId && <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Corrected version</span>}
-                  </div>
+              const isTG = test.stateCode.toUpperCase() === "TG";
 
-                  {/* Full-width Title & Paper info */}
-                  <div className="mt-3 flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200">
-                      <MockSymbol className="h-5 w-5" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name</p>
-                      <h3 className="font-display mt-0.5 text-xl font-bold text-slate-950 leading-snug">
-                        {studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-500">{test.stateCode} · {test.paperName}</p>
+              return (
+                <article
+                  key={test.id}
+                  className="p-5 sm:p-6 transition hover:bg-slate-50/60"
+                >
+                  {/* Top Metadata Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${
+                          isTG
+                            ? "border-blue-200 bg-blue-50 text-blue-800"
+                            : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        }`}
+                      >
+                        {test.stateCode}
+                      </span>
+                      <span className="text-xs font-medium text-slate-500">
+                        {test.examName} · {test.paperName}
+                        {test.subjectName && ` · ${test.subjectName}`}
+                      </span>
+                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        {test.scope === "paper" ? "Paper-wise" : "Subject-wise"}
+                      </span>
+                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        Series #{test.seriesNumber}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {test.supersededByMockTestId && (
+                        <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                          Correction in progress
+                        </span>
+                      )}
+                      {test.replacesMockTestId && (
+                        <span className="rounded-full bg-violet-50 border border-violet-200 px-2.5 py-0.5 text-xs font-semibold text-violet-800">
+                          Corrected version
+                        </span>
+                      )}
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${statusDetail.className}`}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {statusDetail.label}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Action Buttons Toolbar */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-                    {test.status === "published" && <Link href={mockTestUrl(test.stateSlug, test.examSlug, test.paperSlug, test.slug)} target="_blank" className="rounded-lg border px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">View live</Link>}
-                    <Link href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg border border-teal-200 px-3 py-2 text-sm font-bold text-teal-800 hover:bg-teal-50">Questions</Link>
-                    <Link href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`} className="rounded-lg bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-teal-800">Manage test</Link>
+                  {/* Test Title & Description */}
+                  <div className="mt-2.5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                      {studentFacingMockTestTitle({
+                        examName: test.examName,
+                        paperLabel: test.paperLabel,
+                        seriesNumber: test.seriesNumber,
+                        subjectName: test.subjectName,
+                      })}
+                    </h3>
+                  </div>
+
+                  {/* Clean Metric Indicators Strip */}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-400">Questions:</span>
+                      <span
+                        className={`font-semibold ${
+                          ready ? "text-emerald-700" : "text-amber-700"
+                        }`}
+                      >
+                        {test.questionCount} / {test.targetQuestionCount} target
+                      </span>
+                      {unavailableCount > 0 && (
+                        <span className="text-rose-600 font-medium">
+                          ({unavailableCount} unavailable)
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <span className="text-slate-400">Marks:</span>
+                      <span className="font-semibold text-slate-800">
+                        {test.totalMarks.toFixed(2).replace(/\.00$/, "")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <span className="text-slate-400">Duration:</span>
+                      <span className="font-semibold text-slate-800">
+                        {test.durationMinutes} mins
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <span className="text-slate-400">Attempts:</span>
+                      <span className="font-semibold text-slate-800">
+                        {test.adminAttemptCount && test.attemptCount === 0
+                          ? `0 (${test.adminAttemptCount} admin test)`
+                          : test.attemptCount}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <span className="text-slate-400">Notification:</span>
+                      <span className="font-semibold text-slate-700">
+                        {test.lastNotifiedAt
+                          ? `Sent (${test.notificationCount})`
+                          : "Not sent"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Incomplete / Warning Notice */}
+                  {!ready && (
+                    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 px-3.5 py-2.5 text-xs font-medium text-amber-900">
+                      {unavailableCount > 0
+                        ? `${unavailableCount} assigned question${
+                            unavailableCount === 1 ? " is" : "s are"
+                          } unavailable. Fix the questions before publishing.`
+                        : `${test.questionCount} of ${test.targetQuestionCount} questions are assigned. The exact target is required before publishing.`}
+                    </div>
+                  )}
+
+                  {/* Clean Action Toolbar */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3.5">
+                    <Link
+                      href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`}
+                      className="inline-flex items-center gap-1 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition"
+                    >
+                      Manage test
+                    </Link>
+
+                    <Link
+                      href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition"
+                    >
+                      Questions ({test.questionCount})
+                    </Link>
+
+                    {test.status === "published" && (
+                      <Link
+                        href={mockTestUrl(
+                          test.stateSlug,
+                          test.examSlug,
+                          test.paperSlug,
+                          test.slug
+                        )}
+                        target="_blank"
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition"
+                      >
+                        View live ↗
+                      </Link>
+                    )}
+
                     <MockTestManagementButtons
                       mockTestId={test.id}
                       mockTestTitle={test.title}
@@ -353,62 +566,67 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       ready={ready}
                       hasAttempts={test.attemptCount > 0}
                       hasCorrectedVersion={Boolean(test.supersededByMockTestId)}
-                      canRepublish={!test.supersededByMockTestId || test.correctedVersionStatus === "draft"}
+                      canRepublish={
+                        !test.supersededByMockTestId ||
+                        test.correctedVersionStatus === "draft"
+                      }
                       adminAttemptCount={test.adminAttemptCount}
                     />
+
                     <NotifyStudentsModal
                       mockTestId={test.id}
-                      mockTestTitle={studentFacingMockTestTitle({ examName: test.examName, paperLabel: test.paperLabel, seriesNumber: test.seriesNumber, subjectName: test.subjectName })}
+                      mockTestTitle={studentFacingMockTestTitle({
+                        examName: test.examName,
+                        paperLabel: test.paperLabel,
+                        seriesNumber: test.seriesNumber,
+                        subjectName: test.subjectName,
+                      })}
                       isDraft={test.status === "draft"}
                       hasNotificationHistory={Boolean(test.lastNotifiedAt)}
                       lastNotifiedAt={test.lastNotifiedAt}
                       notificationCount={test.notificationCount}
                     />
                   </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                    <Metric label="Questions" value={`${test.questionCount} / ${test.targetQuestionCount}`} warning={test.questionCount !== test.targetQuestionCount} />
-                    <Metric label="Usable" value={`${test.usableQuestionCount} / ${test.questionCount}`} warning={unavailableCount > 0} />
-                    <Metric label="Total marks" value={test.totalMarks.toFixed(2).replace(/\.00$/, "")} />
-                    <Metric label="Duration" value={`${test.durationMinutes} min`} />
-                    <Metric
-                      label="Attempts"
-                      value={
-                        test.adminAttemptCount && test.attemptCount === 0
-                          ? `0 (${test.adminAttemptCount} admin test)`
-                          : String(test.attemptCount)
-                      }
-                    />
-                  </div>
-
-                  {!ready && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">{unavailableCount > 0 ? `${unavailableCount} assigned question${unavailableCount === 1 ? " is" : "s are"} unavailable. Fix the questions before publishing.` : `${test.questionCount} of ${test.targetQuestionCount} questions are assigned. The exact target is required before publishing.`}</p>}
                 </article>
               );
             })}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-slate-50 px-6 py-4">
-            <p className="text-sm font-semibold text-slate-600">
-              Showing <span className="font-bold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold text-slate-900">{Math.min(currentPage * pageSize, filtered.length)}</span> of <span className="font-bold text-slate-900">{filtered.length}</span> mock tests
+          {/* Clean Pagination Footer */}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-slate-50/70 px-5 py-3.5 sm:px-7">
+            <p className="text-xs sm:text-sm text-slate-600">
+              Showing{" "}
+              <span className="font-semibold text-slate-900">
+                {(currentPage - 1) * pageSize + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-semibold text-slate-900">
+                {Math.min(currentPage * pageSize, filtered.length)}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-slate-900">
+                {filtered.length}
+              </span>{" "}
+              mock tests
             </p>
             {totalPages > 1 && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white"
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
                 >
                   ← Previous
                 </button>
-                <span className="text-sm font-bold text-slate-800">
+                <span className="px-2 text-xs font-semibold text-slate-700">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
                   type="button"
                   disabled={currentPage >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white"
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
                 >
                   Next →
                 </button>
@@ -419,8 +637,4 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       )}
     </section>
   );
-}
-
-function Metric({ label, value, warning = false }: { label: string; value: string; warning?: boolean }) {
-  return <div className={`rounded-xl border px-4 py-3 ${warning ? "border-amber-200 bg-amber-50" : "bg-slate-50"}`}><p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p><p className={`mt-1 text-lg font-black ${warning ? "text-amber-900" : "text-slate-950"}`}>{value}</p></div>;
 }

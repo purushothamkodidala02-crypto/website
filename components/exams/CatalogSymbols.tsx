@@ -13,7 +13,9 @@ const svgProps = {
 };
 
 export function StateSymbol({ slug, className = "h-6 w-6" }: SymbolProps & { slug: string }) {
-  if (slug === "central") {
+  const normalized = (slug || "").toLowerCase().replace(/_/g, "-");
+
+  if (normalized === "central") {
     return (
       <svg {...svgProps} className={className}>
         <circle cx="12" cy="12" r="9" />
@@ -22,10 +24,56 @@ export function StateSymbol({ slug, className = "h-6 w-6" }: SymbolProps & { slu
     );
   }
 
+  if (normalized === "telangana" || normalized === "tg") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        fillOpacity="0.2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        aria-hidden="true"
+      >
+        <path d="M4.1 20.1L4 18.6L4.4 18.4L3 17.8L3.9 17L4 15.4L3.4 14.8L4.1 13.6L4.8 13.5L3.8 13L4.6 11.5L4.1 9.4L5.8 7.7L5.1 7L5.5 5.7L6.7 6L7.3 5L7.3 3L9.5 3.7L9.9 4.6L10.9 5L11.1 4.3L12 4.8L13.3 4.4L14.1 5.2L13.6 6.5L13.9 7.9L16.8 9L17.2 10.5L18.2 10.5L18.5 12.2L21.5 11.9L20.6 12.4L20 14L18 14.6L17.6 15.4L16.5 14.9L15.8 15.2L15.8 15.7L16.6 15.8L16.5 16.5L14.9 15.3L14.2 15.9L14.5 16.3L14 17.1L13.2 16.7L11.2 17.4L11 18.8L10.2 18.7L9.2 19.7L7.7 19.4L6.6 20.5L4.1 20.1Z" />
+      </svg>
+    );
+  }
+
+  if (normalized === "andhra-pradesh" || normalized === "ap") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        fillOpacity="0.2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        aria-hidden="true"
+      >
+        <path d="M3.9 12.5L5.5 12.7L5.7 12.2L7 12.2L8.2 11.6L8.3 10.8L10 10.6L10.6 9.5L11.5 10.3L11 9.5L12.2 9.6L13.7 8.7L14.6 7.2L15.8 7.1L16.3 5.6L16.6 6.4L17 5.9L17.7 6.1L17.6 5.4L19.2 4L20.3 5.1L22 4.2L20.3 6.3L15.9 9.5L15.7 10.9L13.3 11.5L12.4 13L11.5 12.6L10.8 13.1L10.2 14.8L10.9 18.9L10.5 18.2L10.2 18.5L10.9 19.1L10.1 18.6L9.5 19.5L8.5 19.2L8.5 19.7L6.7 20L6 21L5.7 20.4L6.2 20.4L6.5 19.3L6 19.1L6.1 18.5L5.3 18.4L5.4 17.8L4.6 17.6L3.7 18.3L3 17.7L2.6 18.1L2.3 17L3.7 17.7L3.4 17.4L3.9 16.8L2.4 16.8L2 14.7L3 14.6L2.7 12.6L3.9 12.5Z" />
+      </svg>
+    );
+  }
+
   return (
-    <svg {...svgProps} className={className}>
-      <path d="M12 21s6.5-5.7 6.5-11.5a6.5 6.5 0 1 0-13 0C5.5 15.3 12 21 12 21Z" />
-      <circle cx="12" cy="9.5" r="2.2" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      fillOpacity="0.2"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z" />
+      <path d="M9 3v15M15 6v15" />
     </svg>
   );
 }
