@@ -52,8 +52,8 @@ export function MockTestCardAction({
 
   if (isAttempted) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 border border-slate-200">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold text-slate-700 border border-slate-200">
           <svg
             className="h-3 w-3 text-emerald-600"
             fill="none"
@@ -70,7 +70,7 @@ export function MockTestCardAction({
           href={testHref}
           prefetch={true}
           onClick={handleClick}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3.5 py-2 text-xs font-bold text-slate-800 shadow-2xs transition active:scale-[0.98]"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-slate-800 shadow-2xs transition active:scale-[0.98] whitespace-nowrap"
         >
           <span>Retake</span>
           <span aria-hidden="true">→</span>
@@ -84,7 +84,7 @@ export function MockTestCardAction({
       href={testHref}
       prefetch={true}
       onClick={handleClick}
-      className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition active:scale-[0.98]"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-white shadow-xs transition active:scale-[0.98] whitespace-nowrap"
     >
       <span>Start test</span>
       <span aria-hidden="true">→</span>
