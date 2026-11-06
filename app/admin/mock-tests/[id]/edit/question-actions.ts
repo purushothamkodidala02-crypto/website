@@ -65,11 +65,16 @@ export async function assignQuestion(mockTestId: string, _previous: AssignmentSt
   // Prevent assigning questions that are already in any mock test of the same paper
   const { data: siblingMockTests } = await result.supabase
     .from("mock_tests")
-    .select("id, title")
+    .select("id, title, test_scope")
     .eq("paper_id", result.mockTest.paper_id);
 
-  const siblingTestIds = (siblingMockTests ?? []).map((t) => t.id);
-  const siblingTestMap = new Map((siblingMockTests ?? []).map((t) => [t.id, t.title]));
+  const currentScope = result.mockTest.test_scope;
+  const filteredSiblings = (siblingMockTests ?? []).filter((t) => {
+    // Allow questions to repeat between subject tests and full paper mocks
+    return (t.test_scope as string) === currentScope;
+  });
+  const siblingTestIds = filteredSiblings.map((t) => t.id);
+  const siblingTestMap = new Map(filteredSiblings.map((t) => [t.id, t.title]));
 
   if (siblingTestIds.length > 0) {
     // 1. Direct question_id duplicate check across all mock tests of this paper

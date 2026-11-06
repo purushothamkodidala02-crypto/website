@@ -109,7 +109,18 @@ export async function checkQuestionDuplicate(
   }
 
   if (mockTestId) {
-    const otherTest = assignedTests.find((t) => t.id !== mockTestId);
+    const currentTestScope = mockTest?.test_scope ?? "paper";
+    const otherTest = assignedTests.find((t) => {
+      if (t.id === mockTestId) return false;
+      const rawMtq = (match.mock_test_questions ?? []).find(
+        (m: any) => m.mock_test_id === t.id
+      ) as any;
+      const otherScope = rawMtq?.mock_tests?.test_scope ?? "paper";
+      // Allow questions to repeat between subject tests and full paper mocks
+      if (currentTestScope === "paper" && otherScope === "subject") return false;
+      if (currentTestScope === "subject" && otherScope === "paper") return false;
+      return true;
+    });
     if (otherTest) {
       return {
         isDuplicate: true,

@@ -427,7 +427,8 @@ async function importQuestions(
                 title,
                 paper_id,
                 status,
-                superseded_by_mock_test_id
+                superseded_by_mock_test_id,
+                test_scope
               )
             )
           `)
@@ -451,7 +452,8 @@ async function importQuestions(
                 title,
                 paper_id,
                 status,
-                superseded_by_mock_test_id
+                superseded_by_mock_test_id,
+                test_scope
               )
             )
           `)
@@ -480,7 +482,7 @@ async function importQuestions(
     importKey: string | null;
     subjectId: string;
     subjectName: string;
-    assignedMockTests: Array<{ id: string; title: string }>;
+    assignedMockTests: Array<{ id: string; title: string; testScope: "paper" | "subject" }>;
   };
 
   const existingByText = new Map<string, ExistingDbQuestion>();
@@ -505,6 +507,7 @@ async function importQuestions(
         assignedMockTests.push({
           id: mtq.mock_tests.id,
           title: mtq.mock_tests.title,
+          testScope: (mtq.mock_tests.test_scope as "paper" | "subject") ?? "paper",
         });
       }
     }
@@ -630,9 +633,15 @@ async function importQuestions(
       if (existingMatch) {
         if (mockTest) {
           const otherTests = existingMatch.assignedMockTests.filter((t) => t.id !== mockTest.id);
-          if (otherTests.length > 0) {
+          // Questions are allowed to repeat between a subject-wise test and a full paper mock test
+          const conflictingTests = otherTests.filter((t) => {
+            if (mockTest.test_scope === "paper" && t.testScope === "subject") return false;
+            if (mockTest.test_scope === "subject" && t.testScope === "paper") return false;
+            return true;
+          });
+          if (conflictingTests.length > 0) {
             errors.push(
-              `Row ${rowNumber}: Duplicate question! This question already exists in "${otherTests[0].title}". Questions cannot be repeated across mock tests in the same paper.`
+              `Row ${rowNumber}: Duplicate question! This question already exists in "${conflictingTests[0].title}". Questions cannot be repeated across mock tests with the same scope in this paper.`
             );
           } else if (subject && existingMatch.subjectId !== subject.id) {
             errors.push(
