@@ -4,6 +4,7 @@ import { BrandMark } from "@/components/brand/VaradhiBrand";
 import { ExamSymbol, MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
+import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
 import { HomeAuthAction } from "@/components/site/HomeAuthAction";
 import { getHomeCatalogData } from "@/lib/catalog-data";
 import { examUrl, stateUrl } from "@/lib/public-urls";
@@ -180,6 +181,9 @@ export default async function Home() {
             </form>
           </div>
         </div>
+
+        {/* Continue Recent Practice Progress Banner */}
+        <StudentResumePracticeBanner className="mt-6" />
 
         {/* States Section */}
         {hasStateError ? (

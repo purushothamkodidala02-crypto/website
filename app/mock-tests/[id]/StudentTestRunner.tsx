@@ -10,6 +10,7 @@ import { pauseAttempt, resumeAttempt, saveAttemptProgress, saveReviewState, subm
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { SubmissionResult } from "./SubmissionResult";
+import { setLocalRecentPractice } from "@/lib/storage/student-practice-storage";
 import { ScreenWatermark } from "@/components/mock-tests/ScreenWatermark";
 import {
   exitFullscreenSafely,
@@ -47,6 +48,13 @@ type Props = {
   questions: TestQuestion[];
   bookmarkedQuestionIds: string[];
   studentEmail?: string;
+  folderUrl?: string;
+  folderName?: string;
+  folderType?: "subject" | "paper";
+  examName?: string;
+  paperName?: string;
+  subjectName?: string;
+  stateCode?: string;
 };
 
 function secondsLeft(expiresAt: string) { return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)); }
@@ -66,6 +74,13 @@ export function StudentTestRunner({
   questions,
   bookmarkedQuestionIds,
   studentEmail,
+  folderUrl,
+  folderName,
+  folderType = "paper",
+  examName,
+  paperName,
+  subjectName,
+  stateCode,
 }: Props) {
   const router = useRouter();
   const [deadline, setDeadline] = useState(expiresAt);
@@ -263,12 +278,33 @@ export function StudentTestRunner({
     }
   }, []);
 
+  useEffect(() => {
+    if (folderUrl && folderName && examName) {
+      setLocalRecentPractice({
+        testId: mockTestId,
+        testTitle: title,
+        testPath: publicTestPath,
+        folderUrl,
+        folderName,
+        folderType,
+        examName,
+        paperName,
+        subjectName,
+        stateCode,
+        timestamp: Date.now(),
+      });
+    }
+  }, [mockTestId, title, publicTestPath, folderUrl, folderName, folderType, examName, paperName, subjectName, stateCode]);
+
   if (submission) {
     return (
       <SubmissionResult
         publicTestPath={publicTestPath}
         title={title}
         result={submission}
+        mockTestId={mockTestId}
+        folderUrl={folderUrl}
+        folderName={folderName}
       />
     );
   }

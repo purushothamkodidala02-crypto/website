@@ -6,7 +6,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMockTestPublicContextById } from "@/lib/public-route-data";
-import { mockTestUrl } from "@/lib/public-urls";
+import { mockTestUrl, paperUrl, subjectUrl } from "@/lib/public-urls";
 import { StudentTestRunner } from "../StudentTestRunner";
 import { SubmissionResult } from "../SubmissionResult";
 
@@ -73,6 +73,10 @@ export default async function TakeMockTestPage({
   if (!publicContext) notFound();
   const testPath = mockTestUrl(publicContext.state.slug, publicContext.exam.slug, publicContext.paper.slug, publicContext.mockTest.slug);
   const testTitle = publicContext.mockTest.title ?? "Mock Test";
+  const folderUrl = publicContext.subject
+    ? subjectUrl(publicContext.state.slug, publicContext.exam.slug, publicContext.paper.slug, publicContext.subject.slug)
+    : paperUrl(publicContext.state.slug, publicContext.exam.slug, publicContext.paper.slug);
+  const folderName = publicContext.subject?.name ?? publicContext.paper.name;
 
   if (!user) redirect(`/login?next=${encodeURIComponent(testPath)}`);
 
@@ -156,6 +160,9 @@ export default async function TakeMockTestPage({
         <SubmissionResult
           publicTestPath={testPath}
           title={testTitle}
+          mockTestId={id}
+          folderUrl={folderUrl}
+          folderName={folderName}
           result={{
             success: true,
             message: "Attempt submitted successfully.",
@@ -173,6 +180,9 @@ export default async function TakeMockTestPage({
       <SubmissionResult
         publicTestPath={testPath}
         title={testTitle}
+        mockTestId={id}
+        folderUrl={folderUrl}
+        folderName={folderName}
         result={{
           success: false,
           message: "The test time has ended and your answers are saved. Check your result in the dashboard.",
@@ -186,6 +196,9 @@ export default async function TakeMockTestPage({
       <SubmissionResult
         publicTestPath={testPath}
         title={testTitle}
+        mockTestId={id}
+        folderUrl={folderUrl}
+        folderName={folderName}
         result={{
           success: false,
           message: "This test attempt is no longer active. Check your result in the dashboard.",
@@ -214,6 +227,13 @@ export default async function TakeMockTestPage({
       questions={questions}
       bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)}
       studentEmail={user.email ?? user.user_metadata?.email ?? ""}
+      folderUrl={folderUrl}
+      folderName={folderName}
+      folderType={publicContext.subject ? "subject" : "paper"}
+      examName={publicContext.exam.name}
+      paperName={publicContext.paper.name}
+      subjectName={publicContext.subject?.name}
+      stateCode={publicContext.state.code}
     />
   );
 }

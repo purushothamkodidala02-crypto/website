@@ -6,51 +6,75 @@ import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { beginMockTest } from "./start-actions";
 import { isBigScreen, isCurrentlyFullscreen, isFullscreenSupported, requestFullscreenSafely } from "@/lib/fullscreen";
 import { createClient } from "@/lib/supabase/client";
+import { addLocalAttemptedTestId, getLocalAttemptedTestIds } from "@/lib/storage/student-practice-storage";
 
 export function TestStartActions({
   testId,
   testPath,
   isLoggedIn,
   hasResumableSession,
+  hasPreviousAttempt = false,
 }: {
   testId: string;
   testPath: string;
   isLoggedIn: boolean;
   hasResumableSession: boolean;
+  hasPreviousAttempt?: boolean;
 }) {
   const [clientSignedIn, setClientSignedIn] = useState(false);
   const [clientResumable, setClientResumable] = useState(false);
+  const [clientHasAttempt, setClientHasAttempt] = useState(false);
 
   const signedIn = isLoggedIn || clientSignedIn;
   const resumable = hasResumableSession || clientResumable;
+  const hasAttempt = hasPreviousAttempt || clientHasAttempt;
 
   useEffect(() => {
-    if (isLoggedIn) return;
+    // Check localStorage cache for 0ms initial attempt status
+    const localAttempted = getLocalAttemptedTestIds();
+    if (localAttempted.includes(testId)) {
+      setClientHasAttempt(true);
+    }
+
     let active = true;
     const supabase = createClient();
     void supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!active || !session?.user) return;
       setClientSignedIn(true);
-      const { data: activeSession } = await supabase
-        .from("test_attempt_sessions")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .eq("mock_test_id", testId)
-        .is("submitted_at", null)
-        .gt("remaining_seconds", 0)
-        .order("started_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
 
-      if (active && activeSession) {
+      const [sessionRes, attemptRes] = await Promise.all([
+        supabase
+          .from("test_attempt_sessions")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .eq("mock_test_id", testId)
+          .is("submitted_at", null)
+          .gt("remaining_seconds", 0)
+          .order("started_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("test_attempts")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .eq("mock_test_id", testId)
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      if (active && sessionRes.data) {
         setClientResumable(true);
+      }
+      if (active && attemptRes.data) {
+        setClientHasAttempt(true);
+        addLocalAttemptedTestId(testId);
       }
     });
 
     return () => {
       active = false;
     };
-  }, [isLoggedIn, testId]);
+  }, [testId]);
 
   const handleFullscreenOnStart = () => {
     if (isBigScreen() && isFullscreenSupported() && !isCurrentlyFullscreen()) {
@@ -72,6 +96,22 @@ export function TestStartActions({
 
   if (!resumable) {
     const startAction = beginMockTest.bind(null, testId, testPath, "resume");
+
+    if (hasAttempt) {
+      return (
+        <form action={startAction} className="mt-1">
+          <PendingSubmitButton
+            onClick={handleFullscreenOnStart}
+            pendingLabel="Preparing retake…"
+            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+          >
+            <span>Retake test</span>
+            <span className="transition-transform group-hover:translate-x-0.5">→</span>
+          </PendingSubmitButton>
+        </form>
+      );
+    }
+
     return (
       <form action={startAction} className="mt-1">
         <PendingSubmitButton

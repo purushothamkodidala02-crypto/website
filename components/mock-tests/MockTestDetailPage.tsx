@@ -883,7 +883,7 @@ export async function MockTestDetailsPage({
             <div className="w-full sm:w-auto sm:min-w-[220px] lg:min-w-[250px] shrink-0">
               {isUnlocked ? (
                 <div className="space-y-1.5">
-                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
+                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} hasPreviousAttempt={hasPreviousAttempt} />
                   <p className="text-center text-[11px] font-medium text-slate-500">
                     {hasResumableSession
                       ? "Resume to keep your saved progress"
@@ -1068,7 +1068,7 @@ export async function MockTestDetailsPage({
               {/* Action Area */}
               <div>
                 {isUnlocked ? (
-                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} />
+                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} hasPreviousAttempt={hasPreviousAttempt} />
                 ) : paidSalesEnabled && purchaseProduct ? (
                   <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                     <p className="text-sm font-bold text-slate-900">

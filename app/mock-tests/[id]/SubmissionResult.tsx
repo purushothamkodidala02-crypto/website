@@ -5,12 +5,16 @@ import { useEffect } from "react";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
 import { parseMockTestTitle } from "@/lib/exam-catalog";
 import type { SubmitAttemptResult } from "./attempt-actions";
+import { addLocalAttemptedTestId, getLocalRecentPractice, setLocalRecentPractice } from "@/lib/storage/student-practice-storage";
 
 type SubmissionResultProps = {
   publicTestPath: string;
   title: string;
   result: SubmitAttemptResult;
   onRetry?: () => void;
+  mockTestId?: string;
+  folderUrl?: string;
+  folderName?: string;
 };
 
 export function SubmissionResult({
@@ -18,10 +22,25 @@ export function SubmissionResult({
   title,
   result,
   onRetry,
+  mockTestId,
+  folderUrl,
+  folderName,
 }: SubmissionResultProps) {
   useEffect(() => {
     void exitFullscreenSafely();
-  }, []);
+    if (mockTestId && (result.success || typeof result.score === "number")) {
+      addLocalAttemptedTestId(mockTestId);
+      const current = getLocalRecentPractice();
+      if (current && current.testId === mockTestId) {
+        setLocalRecentPractice({
+          ...current,
+          score: typeof result.score === "number" ? result.score : current.score,
+          totalMarks: typeof result.totalMarks === "number" ? result.totalMarks : current.totalMarks,
+          submittedAt: new Date().toISOString(),
+        });
+      }
+    }
+  }, [mockTestId, result]);
 
   const parsedTitle = parseMockTestTitle(title);
 
@@ -99,6 +118,18 @@ export function SubmissionResult({
             </div>
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
+              {folderUrl && (
+                <Link
+                  href={folderUrl}
+                  prefetch={true}
+                  onClick={() => {
+                    void exitFullscreenSafely();
+                  }}
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-2xs transition hover:bg-slate-50 active:scale-[0.98]"
+                >
+                  Continue to {folderName ?? "folder"} →
+                </Link>
+              )}
               {result.attemptId && (
                 <Link
                   href={`/dashboard/attempts/${result.attemptId}`}

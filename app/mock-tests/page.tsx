@@ -21,6 +21,8 @@ import {
   subjectUrl,
 } from "@/lib/public-urls";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
+import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
+import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
@@ -364,6 +366,8 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           exam={selectedState && selectedExam ? { value: selectedExam.name, href: stateUrl(selectedState.slug) } : undefined}
           paper={selectedState && selectedExam && selectedPaper ? { value: paperDisplayById.get(selectedPaper.id)?.shortLabel ?? selectedPaper.name, href: examUrl(selectedState.slug, selectedExam.slug) } : undefined}
         />
+
+        {!isSearching && !selectedState && <StudentResumePracticeBanner className="mb-6" />}
 
         {dataError ? (
           <section className="mt-7 rounded-3xl border border-red-200 bg-red-50 p-7 text-red-800">
@@ -728,6 +732,16 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
         const isFree = test.access_type === "free";
         const testHref = mockTestUrl(test.state.slug, test.exam.slug, test.paper.slug, test.slug);
         const marksDisplay = test.marks === null ? "—" : Number(test.marks).toFixed(2).replace(/\.00$/, "");
+        const folderUrl = test.subject
+          ? subjectUrl(test.state.slug, test.exam.slug, test.paper.slug, test.subject.slug)
+          : paperUrl(test.state.slug, test.exam.slug, test.paper.slug);
+        const folderName = test.subject?.name ?? test.paper.name;
+        const testHeading = displayMockTestHeading({
+          subjectName: test.subject?.name,
+          sectionName: test.section?.name,
+          testScope: test.test_scope,
+          seriesNumber: Number(test.series_number ?? 1),
+        });
 
         return (
           <article
@@ -742,12 +756,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                   </span>
                   <div className="min-w-0">
                     <h3 className="font-display text-base font-bold text-slate-900 transition group-hover:text-teal-800 sm:text-lg truncate">
-                      {displayMockTestHeading({
-                        subjectName: test.subject?.name,
-                        sectionName: test.section?.name,
-                        testScope: test.test_scope,
-                        seriesNumber: Number(test.series_number ?? 1),
-                      })}
+                      {testHeading}
                     </h3>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700 truncate">
                       {test.state.code} · {test.exam.name} · {test.paperDisplay?.shortLabel ?? "Paper"}
@@ -788,14 +797,18 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
               <span className="text-xs font-semibold text-slate-500">
                 Timed CBT · Bilingual
               </span>
-              <Link
-                href={testHref}
-                prefetch={false}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition"
-              >
-                <span>Start test</span>
-                <span aria-hidden="true">→</span>
-              </Link>
+              <MockTestCardAction
+                testId={test.id}
+                testHref={testHref}
+                testTitle={testHeading}
+                folderUrl={folderUrl}
+                folderName={folderName}
+                folderType={test.subject ? "subject" : "paper"}
+                examName={test.exam.name}
+                paperName={test.paper.name}
+                subjectName={test.subject?.name}
+                stateCode={test.state.code}
+              />
             </div>
           </article>
         );
