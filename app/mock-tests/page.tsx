@@ -393,8 +393,8 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   >
                     <div>
                       <span className="flex items-start justify-between gap-4">
-                        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#071f1a] text-teal-300">
-                          <StateSymbol slug={state.slug} />
+                        <span className="grid h-12 w-12 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
+                          <StateSymbol slug={state.slug} className="h-6 w-6" />
                         </span>
                         <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black tracking-wide text-slate-700">
                           {state.code}
@@ -441,7 +441,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
               const paperTests = tests.filter((test) => test.paper.id === paper.id);
               return <Link key={paper.id} href={paperUrl(selectedState.slug, selectedExam.slug, paper.slug)} prefetch={false} className="student-card group flex items-center gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:shadow-md">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#071f1a] text-teal-300"><PaperSymbol /></span>
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900"><PaperSymbol className="h-6 w-6" /></span>
                 <span className="min-w-0 flex-1"><span className="text-xs font-bold uppercase tracking-wider text-teal-700">{display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}</span><strong className="font-display mt-0.5 block text-lg font-bold leading-snug text-slate-900 group-hover:text-teal-800 transition">{paper.name}</strong><span className="mt-1.5 block text-xs font-semibold text-slate-500">{paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}</span></span>
                 <span className="text-lg font-black text-teal-700 transition group-hover:translate-x-1">→</span>
               </Link>;
@@ -546,7 +546,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                         className="student-card group flex min-h-48 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-xl hover:shadow-slate-950/5"
                       >
                         <span className="flex items-center justify-between gap-3">
-                          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-50 text-teal-800">
+                          <span className="grid h-11 w-11 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
                             <PaperSymbol className="h-6 w-6" />
                           </span>
                           <span className="max-w-[62%] truncate rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-600">
@@ -604,7 +604,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                       >
                         <div>
                           <div className="flex items-center justify-between gap-3">
-                            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-teal-50 text-teal-800 border border-teal-100">
+                            <span className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
                               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
                             </span>
                             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black tracking-wide text-teal-800">
@@ -737,7 +737,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-black text-teal-900 border border-teal-200/80">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-100/70 text-xs font-bold text-slate-900 shadow-2xs transition-all duration-200 group-hover:border-slate-300 group-hover:bg-slate-200/60">
                     {testNum}
                   </span>
                   <div className="min-w-0">
