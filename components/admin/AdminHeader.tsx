@@ -83,34 +83,29 @@ export function AdminHeader({
 
   return (
     <header className="sticky top-0 z-20 hidden min-h-16 items-center justify-between gap-4 border-b border-teal-100 bg-white/90 px-5 py-3 shadow-2xs backdrop-blur-xl md:flex sm:px-8">
-      {/* Left: Sidebar Toggle + Breadcrumbs */}
+      {/* Left: Sidebar Toggle (when collapsed) + Breadcrumbs */}
       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          aria-label={collapsed ? "Open navigation ( [ )" : "Close navigation ( [ )"}
-          title={collapsed ? "Open navigation ( [ )" : "Close navigation ( [ )"}
-          className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-teal-200 bg-white text-teal-800 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
-        >
-          {collapsed ? (
+        {collapsed && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            aria-label="Open navigation ( [ )"
+            title="Open navigation ( [ )"
+            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-teal-200 bg-white text-teal-800 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
+          >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
-          ) : (
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
-            </svg>
-          )}
-        </button>
+          </button>
+        )}
 
         {/* Dynamic Breadcrumbs */}
         <nav aria-label="Breadcrumbs" className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 truncate">
           <Link
             href="/admin"
-            className="flex items-center gap-1.5 text-slate-600 hover:text-teal-800 transition font-bold"
+            className="text-slate-600 hover:text-teal-800 transition font-bold"
           >
-            <span className="h-2 w-2 rounded-full bg-teal-600" />
-            <span>Admin</span>
+            Admin
           </Link>
 
           {breadcrumb.parent && (
