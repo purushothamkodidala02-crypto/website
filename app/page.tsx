@@ -218,51 +218,28 @@ export default async function Home() {
                 const stateExams = activeExams.filter((exam) =>
                   stateCategoryIds.has(exam.exam_id)
                 );
-                const isTG = state.code.toUpperCase() === "TG";
 
                 return (
                   <Link
                     key={state.id}
                     href={stateUrl(state.slug)}
                     prefetch={true}
-                    className={`student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                      isTG
-                        ? "hover:border-blue-300 hover:shadow-blue-900/5"
-                        : "hover:border-teal-400 hover:shadow-teal-900/5"
-                    }`}
+                    className="student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md"
                   >
                     <div
-                      className={`pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
-                        isTG
-                          ? "from-blue-600/0 via-blue-500/35 to-blue-600/0"
-                          : "from-teal-600/0 via-teal-500/35 to-teal-600/0"
-                      }`}
+                      className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-600/0 via-teal-500/35 to-teal-600/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                       aria-hidden="true"
                     />
                     <div>
                       <div className="flex items-center justify-between">
-                        <span
-                          className={`grid h-11 w-11 place-items-center rounded-xl border transition-all duration-200 group-hover:scale-105 shadow-2xs ${
-                            isTG
-                              ? "border-blue-100/90 bg-blue-50/70 text-blue-900 group-hover:border-blue-200 group-hover:bg-blue-100/80"
-                              : "border-teal-100/90 bg-teal-50/70 text-teal-900 group-hover:border-teal-200 group-hover:bg-teal-100/80"
-                          }`}
-                        >
+                        <span className="grid h-11 w-11 place-items-center rounded-xl border border-teal-100/90 bg-teal-50/70 text-teal-900 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-teal-200 group-hover:bg-teal-100/80">
                           <StateSymbol slug={state.slug} className="h-6 w-6" />
                         </span>
-                        <span
-                          className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold tracking-wide transition ${
-                            isTG
-                              ? "border-blue-200/80 bg-blue-50/80 text-blue-950"
-                              : "border-teal-200/80 bg-teal-50/80 text-teal-950"
-                          }`}
-                        >
+                        <span className="rounded-full border border-teal-200/80 bg-teal-50/80 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-teal-950 transition">
                           {state.code}
                         </span>
                       </div>
-                      <h3 className={`font-display mt-3.5 text-base font-bold leading-snug text-slate-900 transition ${
-                        isTG ? "group-hover:text-blue-950" : "group-hover:text-teal-950"
-                      }`}>
+                      <h3 className="font-display mt-3.5 text-base font-bold leading-snug text-slate-900 group-hover:text-teal-950 transition">
                         {state.name}
                       </h3>
                     </div>
@@ -270,9 +247,7 @@ export default async function Home() {
                       <span className="font-medium text-slate-500">
                         {stateExams.length} exam series available
                       </span>
-                      <span className={`inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition ${
-                        isTG ? "text-blue-800 group-hover:text-blue-950" : "text-teal-800 group-hover:text-teal-950"
-                      }`}>
+                      <span className="inline-flex items-center gap-1 font-bold text-teal-800 group-hover:text-teal-950 group-hover:translate-x-0.5 transition">
                         Explore <span aria-hidden="true">→</span>
                       </span>
                     </div>
@@ -306,51 +281,28 @@ export default async function Home() {
               const state = states.find((item) => item.id === category?.state_id);
               const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
               if (!state) return null;
-              const isTG = state.code.toUpperCase() === "TG";
 
               return (
                 <Link
                   key={exam.id}
                   href={examUrl(state.slug, exam.slug)}
                   prefetch={true}
-                  className={`student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                    isTG
-                      ? "hover:border-blue-300 hover:shadow-blue-900/5"
-                      : "hover:border-teal-400 hover:shadow-teal-900/5"
-                  }`}
+                  className="student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md"
                 >
                   <div
-                    className={`pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
-                      isTG
-                        ? "from-blue-600/0 via-blue-500/35 to-blue-600/0"
-                        : "from-teal-600/0 via-teal-500/35 to-teal-600/0"
-                    }`}
+                    className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-600/0 via-teal-500/35 to-teal-600/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                     aria-hidden="true"
                   />
                   <div>
                     <div className="flex items-center justify-between">
-                      <span
-                        className={`grid h-11 w-11 place-items-center rounded-xl border transition-all duration-200 group-hover:scale-105 shadow-2xs ${
-                          isTG
-                            ? "border-blue-100/90 bg-blue-50/70 text-blue-900 group-hover:border-blue-200 group-hover:bg-blue-100/80"
-                            : "border-teal-100/90 bg-teal-50/70 text-teal-900 group-hover:border-teal-200 group-hover:bg-teal-100/80"
-                        }`}
-                      >
+                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-teal-100/90 bg-teal-50/70 text-teal-900 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-teal-200 group-hover:bg-teal-100/80">
                         <ExamSymbol name={exam.name} className="h-5 w-5" />
                       </span>
-                      <span
-                        className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold tracking-wide transition ${
-                          isTG
-                            ? "border-blue-200/80 bg-blue-50/80 text-blue-950"
-                            : "border-teal-200/80 bg-teal-50/80 text-teal-950"
-                        }`}
-                      >
+                      <span className="rounded-full border border-teal-200/80 bg-teal-50/80 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-teal-950 transition">
                         {state.code}
                       </span>
                     </div>
-                    <h3 className={`font-display mt-3.5 text-base font-bold leading-snug text-slate-900 transition ${
-                      isTG ? "group-hover:text-blue-950" : "group-hover:text-teal-950"
-                    }`}>
+                    <h3 className="font-display mt-3.5 text-base font-bold leading-snug text-slate-900 group-hover:text-teal-950 transition">
                       {exam.name}
                     </h3>
                   </div>
@@ -358,9 +310,7 @@ export default async function Home() {
                     <span className="font-medium text-slate-500">
                       {paperCount} paper{paperCount === 1 ? "" : "s"} available
                     </span>
-                    <span className={`inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition ${
-                      isTG ? "text-blue-800 group-hover:text-blue-950" : "text-teal-800 group-hover:text-teal-950"
-                    }`}>
+                    <span className="inline-flex items-center gap-1 font-bold text-teal-800 group-hover:text-teal-950 group-hover:translate-x-0.5 transition">
                       Practice <span aria-hidden="true">→</span>
                     </span>
                   </div>
