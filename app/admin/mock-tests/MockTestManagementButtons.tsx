@@ -145,7 +145,7 @@ export function MockTestManagementButtons({
         pending={pending}
         onClick={() => run("correct")}
         label="Create corrected version"
-        className="text-teal-800 hover:bg-teal-50"
+        className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
       />
     ) : null;
 
@@ -154,7 +154,7 @@ export function MockTestManagementButtons({
       pending={pending}
       onClick={() => run("permanent-delete")}
       label="Delete permanently"
-      className="text-red-700 hover:bg-red-50"
+      className="border border-slate-200 bg-white text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50/50"
     />
   ) : null;
 
@@ -164,7 +164,7 @@ export function MockTestManagementButtons({
         pending={pending}
         onClick={() => run("clear-admin-attempts")}
         label="Clear my attempt"
-        className="text-amber-800 hover:bg-amber-50"
+        className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
       />
     ) : null;
 
@@ -176,13 +176,13 @@ export function MockTestManagementButtons({
             pending={pending}
             onClick={() => run("hide")}
             label="Hide"
-            className="text-amber-800 hover:bg-amber-50"
+            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
           />
           <ActionButton
             pending={pending}
             onClick={() => run("restore")}
             label="Restore as draft"
-            className="text-teal-700 hover:bg-teal-50"
+            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
           {correct}
@@ -197,14 +197,14 @@ export function MockTestManagementButtons({
               disabled={!ready}
               onClick={() => openPublishDialog("republish")}
               label={ready ? "Publish again" : "Not ready"}
-              className="bg-teal-700 text-white hover:bg-teal-800"
+              className="bg-slate-900 text-white hover:bg-slate-800 border border-slate-900"
             />
           )}
           <ActionButton
             pending={pending}
             onClick={() => run("restore")}
             label="Restore as draft"
-            className="text-teal-700 hover:bg-teal-50"
+            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
           {correct}
@@ -219,7 +219,7 @@ export function MockTestManagementButtons({
             disabled={!ready}
             onClick={() => openPublishDialog("publish")}
             label={ready ? "Publish" : "Not ready"}
-            className="bg-teal-700 text-white hover:bg-teal-800"
+            className="bg-slate-900 text-white hover:bg-slate-800 border border-slate-900"
           />
           {clearAdminBtn}
           {!hasAttempts ? (
@@ -227,7 +227,7 @@ export function MockTestManagementButtons({
               pending={pending}
               onClick={() => run("delete")}
               label="Delete"
-              className="text-red-700 hover:bg-red-50"
+              className="border border-slate-200 bg-white text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50/50"
             />
           ) : (
             <>
@@ -355,7 +355,7 @@ function ActionButton({
       onClick={onClick}
       disabled={pending || disabled}
       aria-busy={pending}
-      className={`rounded-lg px-3 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45 ${className}`}
+      className={`rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition disabled:cursor-not-allowed disabled:opacity-45 ${className}`}
     >
       <PendingButtonContent pending={pending} pendingLabel="Working…">
         {label}

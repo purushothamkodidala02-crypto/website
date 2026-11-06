@@ -130,13 +130,7 @@ export function NotifyStudentsModal({
       <button
         type="button"
         onClick={handleOpen}
-        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition ${
-          hasNotificationHistory
-            ? "border border-teal-200 bg-teal-50/50 text-teal-800 hover:bg-teal-100/70"
-            : isDraft
-            ? "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-            : "border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
-        }`}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900"
         title={
           hasNotificationHistory
             ? `Notified ${notificationCount ?? 0} students on ${formattedLastDate}`
@@ -145,13 +139,12 @@ export function NotifyStudentsModal({
             : "Email previous test-takers about this new test"
         }
       >
-        <span>{hasNotificationHistory ? "📢" : isDraft ? "👥" : "📢"}</span>
         <span>
           {hasNotificationHistory
             ? `Notified (${notificationCount ?? 0})`
             : isDraft
-            ? "Check Students"
-            : "Notify Students"}
+            ? "Check students"
+            : "Notify students"}
         </span>
       </button>
 

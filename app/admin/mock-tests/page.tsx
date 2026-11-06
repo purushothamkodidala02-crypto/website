@@ -143,7 +143,7 @@ export default async function MockTestsPage({
       <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-700">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-600">
               <MockSymbol className="h-4 w-4" />
               <span>Assessment Operations</span>
             </div>
@@ -157,28 +157,28 @@ export default async function MockTestsPage({
           <div className="flex flex-wrap items-center gap-2.5">
             <a
               href="#create-mock-test"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-teal-800 active:bg-teal-900"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-2xs transition hover:bg-slate-800 active:bg-slate-950"
             >
-              <span className="text-base leading-none">+</span> Create Mock Test
+              <span className="text-sm leading-none">+</span> Create Mock Test
             </a>
           </div>
         </div>
 
         {/* Executive KPI Stats Bar */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-slate-100">
-          <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
             <span className="text-xs font-medium text-slate-500">Total Mock Tests</span>
             <p className="mt-1 text-2xl font-bold text-slate-900">{tests.length}</p>
           </div>
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3.5">
-            <span className="text-xs font-medium text-emerald-800">Published (Live)</span>
-            <p className="mt-1 text-2xl font-bold text-emerald-950">{publishedCount}</p>
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
+            <span className="text-xs font-medium text-slate-500">Published (Live)</span>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{publishedCount}</p>
           </div>
-          <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-3.5">
-            <span className="text-xs font-medium text-amber-800">Drafts</span>
-            <p className="mt-1 text-2xl font-bold text-amber-950">{draftCount}</p>
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
+            <span className="text-xs font-medium text-slate-500">Drafts</span>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{draftCount}</p>
           </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
             <span className="text-xs font-medium text-slate-500">States Covered</span>
             <p className="mt-1 text-2xl font-bold text-slate-900">{states.length}</p>
           </div>
@@ -209,7 +209,7 @@ export default async function MockTestsPage({
       {/* Create New Mock Test Section */}
       <section id="create-mock-test" className="scroll-mt-20 rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
         <div className="border-b border-slate-100 px-6 py-5 bg-slate-50/60">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-700">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
             <span>New Test Series</span>
           </div>
           <h2 className="mt-1 text-lg sm:text-xl font-bold text-slate-900">
