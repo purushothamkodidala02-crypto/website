@@ -20,8 +20,8 @@ export function AdminMenuButton() {
   return (
     <button
       type="button"
-      onClick={() => window.dispatchEvent(new Event("admin_sidebar_toggle"))}
-      aria-label="Toggle admin side navigation"
+      onClick={() => window.dispatchEvent(new Event("admin_sidebar_open"))}
+      aria-label="Open admin side navigation"
       className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-teal-200 bg-white text-teal-800 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
     >
       <span className="space-y-1" aria-hidden="true">

@@ -222,15 +222,13 @@ function NavigationLinks({
                     prefetch={true}
                     onClick={onLinkClick}
                     title={collapsed ? link.label : undefined}
-                    className={`relative group flex items-center rounded-2xl border text-sm font-black transition hover:translate-x-0.5 ${
-                      collapsed ? "justify-center p-2.5" : "justify-between gap-3 px-3.5 py-3"
-                    } ${
+                    className={`group flex items-center justify-between gap-3 rounded-2xl border px-3.5 py-3 text-sm font-black transition hover:translate-x-0.5 ${
                       active
                         ? "border-teal-600 bg-teal-700 text-white shadow-lg shadow-teal-900/15"
                         : "border-teal-100 bg-white/90 text-slate-950 hover:border-teal-200 hover:bg-teal-50"
                     }`}
                   >
-                    <div className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-3"}`}>
+                    <div className="flex items-center gap-3 min-w-0">
                       <span
                         className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition ${
                           active
@@ -240,44 +238,33 @@ function NavigationLinks({
                       >
                         <NavIcon name={link.icon} />
                       </span>
-                      {!collapsed && <span className="truncate">{link.label}</span>}
+                      <span className="truncate">{link.label}</span>
                     </div>
                     {showBadge && (
-                      collapsed ? (
-                        <span
-                          aria-label={
-                            isReport
-                              ? `${reportCount} open question ${reportCount === 1 ? "report" : "reports"}`
-                              : `${surveyCount} new survey ${surveyCount === 1 ? "response" : "responses"}`
-                          }
-                          className="absolute -top-1 -right-1 flex h-3 w-3 rounded-full bg-amber-500 ring-2 ring-white animate-pulse"
-                        />
-                      ) : (
-                        <span
-                          aria-label={
-                            isReport
-                              ? `${reportCount} open question ${reportCount === 1 ? "report" : "reports"}`
-                              : `${surveyCount} new survey ${surveyCount === 1 ? "response" : "responses"}`
-                          }
-                          className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
-                            isReport
-                              ? active
-                                ? "bg-amber-400 text-slate-950 ring-1 ring-amber-400/50"
-                                : "bg-amber-100 text-amber-900 border border-amber-200"
-                              : active
-                                ? "bg-white/20 text-white ring-1 ring-white/30"
-                                : "bg-teal-100 text-teal-800 border border-teal-200"
-                          }`}
-                        >
-                          {((isReport && badges.hasNewReport) || (!isReport && surveyCount > 0)) && (
-                            <span className="relative flex h-2 w-2">
-                              <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isReport ? "bg-amber-400" : active ? "bg-white" : "bg-teal-600"}`} />
-                              <span className={`relative inline-flex h-2 w-2 rounded-full ${isReport ? "bg-amber-600" : active ? "bg-white" : "bg-teal-800"}`} />
-                            </span>
-                          )}
-                          <span>{badgeCount > 99 ? "99+" : badgeCount}{!isReport ? " new" : ""}</span>
-                        </span>
-                      )
+                      <span
+                        aria-label={
+                          isReport
+                            ? `${reportCount} open question ${reportCount === 1 ? "report" : "reports"}`
+                            : `${surveyCount} new survey ${surveyCount === 1 ? "response" : "responses"}`
+                        }
+                        className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
+                          isReport
+                            ? active
+                              ? "bg-amber-400 text-slate-950 ring-1 ring-amber-400/50"
+                              : "bg-amber-100 text-amber-900 border border-amber-200"
+                            : active
+                              ? "bg-white/20 text-white ring-1 ring-white/30"
+                              : "bg-teal-100 text-teal-800 border border-teal-200"
+                        }`}
+                      >
+                        {((isReport && badges.hasNewReport) || (!isReport && surveyCount > 0)) && (
+                          <span className="relative flex h-2 w-2">
+                            <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isReport ? "bg-amber-400" : active ? "bg-white" : "bg-teal-600"}`} />
+                            <span className={`relative inline-flex h-2 w-2 rounded-full ${isReport ? "bg-amber-600" : active ? "bg-white" : "bg-teal-800"}`} />
+                          </span>
+                        )}
+                        <span>{badgeCount > 99 ? "99+" : badgeCount}{!isReport ? " new" : ""}</span>
+                      </span>
                     )}
                   </Link>
                 );
@@ -308,7 +295,7 @@ export function AdminNavigation(props: {
   collapsed?: boolean;
   onToggle?: () => void;
 }) {
-  const { collapsed = false, onToggle } = props;
+  const { collapsed = false } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -455,70 +442,6 @@ export function AdminNavigation(props: {
 
   return (
     <>
-      {/* Desktop Persistent Collapsible Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-teal-100 bg-gradient-to-b from-white via-white to-teal-50/60 py-5 text-slate-900 transition-[width] duration-200 md:flex ${
-          collapsed ? "w-20 px-3" : "w-64 px-4"
-        }`}
-      >
-        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
-          <Brand collapsed={collapsed} />
-          {!collapsed && (
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-label="Collapse sidebar"
-              title="Collapse sidebar"
-              className="grid h-9 w-9 place-items-center rounded-xl border border-teal-200/80 bg-teal-50/60 text-teal-800 transition hover:bg-teal-100 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
-            >
-              <MenuIcon />
-            </button>
-          )}
-        </div>
-        {collapsed && (
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label="Expand sidebar"
-            title="Expand sidebar"
-            className="mt-4 grid h-10 w-full place-items-center rounded-xl border border-teal-200/80 bg-teal-50/60 text-teal-800 transition hover:bg-teal-100 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
-          >
-            <MenuIcon />
-          </button>
-        )}
-        <div className="mt-6 flex-1 overflow-x-hidden overflow-y-auto pb-4 pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.100)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-teal-100 hover:[&::-webkit-scrollbar-thumb]:bg-teal-200">
-          <NavigationLinks collapsed={collapsed} badges={badges} />
-        </div>
-        <div className="mt-auto border-t border-teal-100 pt-4 space-y-2">
-          <Link
-            href="/"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Student"
-            title={collapsed ? "Student portal (Open in new tab)" : undefined}
-            className={`flex items-center rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2.5 text-xs font-bold text-teal-900 hover:border-teal-300 hover:bg-teal-100 ${
-              collapsed ? "justify-center" : "justify-between"
-            }`}
-          >
-            {collapsed ? (
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-white text-teal-700 shadow-2xs" title="Student portal (Open in new tab)">
-                <NavIcon name="portal" />
-              </span>
-            ) : (
-              <>
-                <span className="flex items-center gap-2">
-                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-white text-teal-700 shadow-2xs">
-                    <NavIcon name="portal" />
-                  </span>
-                  <span>Student portal</span>
-                </span>
-                <span className="text-[10px] font-bold tracking-wider text-teal-700">Open ↗</span>
-              </>
-            )}
-          </Link>
-        </div>
-      </aside>
-
       {/* Mobile Sticky Top Navigation Bar */}
       <div className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-teal-100 bg-white/95 px-4 text-slate-900 shadow-xs backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
@@ -545,12 +468,12 @@ export function AdminNavigation(props: {
         </div>
       </div>
 
-      {/* Slide-Out Side Navigation Drawer (For mobile screens) */}
+      {/* Slide-Out Side Navigation Drawer (Matches Student Navigation - Closed by default with no side visible) */}
       {mounted &&
         createPortal(
           <div
             id="admin-mobile-drawer"
-            className={`fixed inset-0 z-[100] transition-opacity duration-300 md:hidden ${
+            className={`fixed inset-0 z-[100] transition-opacity duration-300 ${
               mobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
             }`}
             aria-hidden={!mobileOpen}
@@ -594,7 +517,7 @@ export function AdminNavigation(props: {
                 <NavigationLinks
                   badges={badges}
                   onLinkClick={handleDrawerClose}
-                  collapsed={false}
+                  collapsed={collapsed}
                 />
               </div>
 
@@ -611,7 +534,7 @@ export function AdminNavigation(props: {
                     rel="noreferrer"
                     onClick={handleDrawerClose}
                     aria-label="Student"
-                    title="Student portal (Open in new tab)"
+                    title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
                     className="flex flex-1 items-center justify-between rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2.5 text-xs font-bold text-teal-900 hover:border-teal-300 hover:bg-teal-100"
                   >
                     <span className="flex items-center gap-2">
