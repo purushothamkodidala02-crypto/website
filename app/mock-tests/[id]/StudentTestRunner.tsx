@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
@@ -13,7 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
 import { SubmissionResult } from "./SubmissionResult";
-import { setLocalRecentPractice } from "@/lib/storage/student-practice-storage";
+import { setLocalRecentPractice, clearLocalPracticeStorage } from "@/lib/storage/student-practice-storage";
 import { ScreenWatermark } from "@/components/mock-tests/ScreenWatermark";
 import {
   exitFullscreenSafely,
@@ -85,7 +84,6 @@ export function StudentTestRunner({
   subjectName,
   stateCode,
 }: Props) {
-  const router = useRouter();
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
     const lastAnsweredIndex = questions.reduce((last, question, questionIndex) => question.selected_answer ? questionIndex : last, -1);
@@ -146,6 +144,7 @@ export function StudentTestRunner({
     setIsDisplaced(true);
     void exitFullscreenSafely();
     try {
+      clearLocalPracticeStorage();
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch {
@@ -194,7 +193,6 @@ export function StudentTestRunner({
     try {
       await flushSaves();
       const res = await submitAttempt(sessionId, answers);
-      router.refresh();
       if (!res.success) {
         console.warn("submitAttempt returned unsuccessful:", res.message);
         const verified = await verifySubmittedAttempt(sessionId);
@@ -228,7 +226,7 @@ export function StudentTestRunner({
       setSubmitting(false);
       void exitFullscreenSafely();
     }
-  }, [answers, flushSaves, router, sessionId, submission, submitting]);
+  }, [answers, flushSaves, sessionId, submission, submitting]);
 
   useEffect(() => {
     if (submission || paused) return;
@@ -327,18 +325,22 @@ export function StudentTestRunner({
 
   useEffect(() => {
     if (folderUrl && folderName && examName) {
-      setLocalRecentPractice({
-        testId: mockTestId,
-        testTitle: title,
-        testPath: publicTestPath,
-        folderUrl,
-        folderName,
-        folderType,
-        examName,
-        paperName,
-        subjectName,
-        stateCode,
-        timestamp: Date.now(),
+      const supabase = createClient();
+      void supabase.auth.getSession().then(({ data }) => {
+        setLocalRecentPractice({
+          testId: mockTestId,
+          testTitle: title,
+          testPath: publicTestPath,
+          folderUrl,
+          folderName,
+          folderType,
+          examName,
+          paperName,
+          subjectName,
+          stateCode,
+          timestamp: Date.now(),
+          userId: data.session?.user.id,
+        });
       });
     }
   }, [mockTestId, title, publicTestPath, folderUrl, folderName, folderType, examName, paperName, subjectName, stateCode]);

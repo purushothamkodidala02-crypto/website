@@ -118,6 +118,9 @@ export default async function TakeMockTestPage({
       <SubmissionResult
         publicTestPath={testPath}
         title={testTitle}
+        mockTestId={id}
+        folderUrl={folderUrl}
+        folderName={folderName}
         result={{
           success: true,
           message: "Attempt submitted successfully.",
@@ -138,6 +141,9 @@ export default async function TakeMockTestPage({
       <SubmissionResult
         publicTestPath={testPath}
         title={testTitle}
+        mockTestId={id}
+        folderUrl={folderUrl}
+        folderName={folderName}
         result={{
           success: false,
           message: "Your answers are saved in your account. Check your result in the dashboard.",

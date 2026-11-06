@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { checkActiveSessionStatus } from "@/app/actions/session-status";
 import { createClient } from "@/lib/supabase/client";
+import { clearLocalPracticeStorage } from "@/lib/storage/student-practice-storage";
 
 export function SingleDeviceWatcher() {
   const [displaced, setDisplaced] = useState(false);
@@ -30,6 +31,7 @@ export function SingleDeviceWatcher() {
           hasTriggeredRef.current = true;
           setDisplaced(true);
           try {
+            clearLocalPracticeStorage();
             await supabase.auth.signOut();
           } catch {
             // Ignore

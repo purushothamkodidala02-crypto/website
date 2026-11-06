@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useStudentPractice } from "./useStudentPractice";
 import { setLocalRecentPractice } from "@/lib/storage/student-practice-storage";
+import { createClient } from "@/lib/supabase/client";
 
 export type MockTestCardActionProps = {
   testId: string;
@@ -34,18 +35,23 @@ export function MockTestCardAction({
 
   const handleClick = () => {
     if (folderUrl && folderName && examName && testTitle) {
-      setLocalRecentPractice({
-        testId,
-        testTitle,
-        testPath: testHref,
-        folderUrl,
-        folderName,
-        folderType,
-        examName,
-        paperName,
-        subjectName,
-        stateCode,
-        timestamp: Date.now(),
+      const supabase = createClient();
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!data.session?.user?.id) return;
+        setLocalRecentPractice({
+          testId,
+          testTitle,
+          testPath: testHref,
+          folderUrl,
+          folderName,
+          folderType,
+          examName,
+          paperName,
+          subjectName,
+          stateCode,
+          timestamp: Date.now(),
+          userId: data.session.user.id,
+        });
       });
     }
   };

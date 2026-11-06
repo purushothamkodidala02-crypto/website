@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
+  clearLocalPracticeStorage,
+  clearLocalRecentPractice,
   getLocalAttemptedTestIds,
   getLocalRecentPractice,
   setLocalAttemptedTestIds,
@@ -10,6 +12,7 @@ import {
   type RecentPracticeItem,
 } from "@/lib/storage/student-practice-storage";
 import { getStudentPracticeStatus } from "@/app/actions/practice-status";
+import { createClient } from "@/lib/supabase/client";
 
 export function useStudentPractice() {
   const [attemptedList, setAttemptedList] = useState<string[]>([]);
@@ -17,33 +20,66 @@ export function useStudentPractice() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // 1. Initial read from localStorage for 0ms immediate render
-    const localAttempted = getLocalAttemptedTestIds();
-    const localPractice = getLocalRecentPractice();
-
-    if (localAttempted.length > 0) setAttemptedList(localAttempted);
-    if (localPractice) setRecentPractice(localPractice);
-    setIsLoaded(true);
-
-    // 2. Fetch authoritative state from server
     let active = true;
-    void getStudentPracticeStatus().then((status) => {
+    const supabase = createClient();
+
+    const applyStatus = (status: Awaited<ReturnType<typeof getStudentPracticeStatus>>) => {
       if (!active) return;
-      if (status.attemptedMockTestIds.length > 0) {
-        setAttemptedList((prev) => {
-          const merged = Array.from(new Set([...prev, ...status.attemptedMockTestIds]));
-          setLocalAttemptedTestIds(merged);
-          return merged;
-        });
+      if (status.isAuthenticated) {
+        if (status.lastPractice) {
+          setRecentPractice(status.lastPractice);
+          setLocalRecentPractice(status.lastPractice);
+        } else {
+          // New student with 0 attempts: clear any stale banner from past users
+          setRecentPractice(null);
+          clearLocalRecentPractice();
+        }
+        setAttemptedList(status.attemptedMockTestIds);
+        setLocalAttemptedTestIds(status.attemptedMockTestIds);
+      } else {
+        // Not authenticated: clear all student practice data
+        setRecentPractice(null);
+        setAttemptedList([]);
+        clearLocalPracticeStorage();
+      }
+      setIsLoaded(true);
+    };
+
+    // 1. Check local session and verified local practice cache
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      const currentUserId = data.session?.user.id;
+      if (currentUserId) {
+        const localPractice = getLocalRecentPractice(currentUserId);
+        if (localPractice && localPractice.userId === currentUserId) {
+          setRecentPractice(localPractice);
+        }
+        const localAttempted = getLocalAttemptedTestIds();
+        if (localAttempted.length > 0) setAttemptedList(localAttempted);
+      } else {
+        // Guest user: discard any leftover practice from prior logins
+        clearLocalPracticeStorage();
       }
 
-      if (status.lastPractice) {
-        setRecentPractice(status.lastPractice);
-        setLocalRecentPractice(status.lastPractice);
+      // 2. Fetch authoritative state from server
+      void getStudentPracticeStatus().then(applyStatus);
+    }).catch(() => {
+      void getStudentPracticeStatus().then(applyStatus);
+    });
+
+    // 3. Listen to auth changes (sign-in, sign-out, account switches)
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      if (event === "SIGNED_OUT" || !session) {
+        setRecentPractice(null);
+        setAttemptedList([]);
+        clearLocalPracticeStorage();
+      } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        void getStudentPracticeStatus().then(applyStatus);
       }
     });
 
-    // 3. Subscribe to local updates across components / tabs
+    // 4. Subscribe to local updates across components / tabs
     const unsubscribe = subscribePracticeUpdates(() => {
       setAttemptedList(getLocalAttemptedTestIds());
       setRecentPractice(getLocalRecentPractice());
@@ -51,6 +87,7 @@ export function useStudentPractice() {
 
     return () => {
       active = false;
+      authListener.subscription.unsubscribe();
       unsubscribe();
     };
   }, []);

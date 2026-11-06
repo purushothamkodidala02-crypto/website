@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { clearLocalPracticeStorage } from "@/lib/storage/student-practice-storage";
 
 export default function LogoutButton({ className }: { className?: string } = {}) {
   const router = useRouter();
@@ -11,6 +12,8 @@ export default function LogoutButton({ className }: { className?: string } = {})
 
   async function handleLogout() {
     setLoading(true);
+
+    clearLocalPracticeStorage();
 
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();

@@ -15,18 +15,26 @@ export type RecentPracticeItem = {
   totalMarks?: number;
   submittedAt?: string;
   timestamp: number;
+  userId?: string | null;
 };
 
 const PRACTICE_KEY = "varadhi_recent_practice_v1";
 const ATTEMPTED_IDS_KEY = "varadhi_attempted_tests_v1";
 const SYNC_EVENT = "varadhi_practice_updated";
 
-export function getLocalRecentPractice(): RecentPracticeItem | null {
+export function getLocalRecentPractice(expectedUserId?: string | null): RecentPracticeItem | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(PRACTICE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as RecentPracticeItem;
+    const parsed = JSON.parse(raw) as RecentPracticeItem;
+    // If expectedUserId is specified, only return if it matches
+    if (expectedUserId) {
+      if (!parsed.userId || parsed.userId !== expectedUserId) {
+        return null;
+      }
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -39,6 +47,27 @@ export function setLocalRecentPractice(item: RecentPracticeItem): void {
     window.dispatchEvent(new CustomEvent(SYNC_EVENT));
   } catch {
     // Ignore storage quota or disabled errors
+  }
+}
+
+export function clearLocalRecentPractice(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(PRACTICE_KEY);
+    window.dispatchEvent(new CustomEvent(SYNC_EVENT));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function clearLocalPracticeStorage(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(PRACTICE_KEY);
+    localStorage.removeItem(ATTEMPTED_IDS_KEY);
+    window.dispatchEvent(new CustomEvent(SYNC_EVENT));
+  } catch {
+    // Ignore storage errors
   }
 }
 
