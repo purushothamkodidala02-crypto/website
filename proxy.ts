@@ -82,14 +82,18 @@ export async function proxy(request: NextRequest) {
   });
   response.headers.set("Content-Security-Policy", contentSecurityPolicy);
 
+  // Attempt pages are live assessment runs that require fresh authentication cookies
+  const isExamAttemptRoute = request.nextUrl.pathname.includes("/attempt");
+
   // Anonymous public catalogue traffic does not need Supabase Auth round-trip
   if (
-    request.nextUrl.pathname === "/" ||
-    request.nextUrl.pathname.startsWith("/mock-tests") ||
-    request.nextUrl.pathname.startsWith("/terms-and-conditions") ||
-    request.nextUrl.pathname.startsWith("/privacy-policy") ||
-    request.nextUrl.pathname.startsWith("/refunds-and-cancellations") ||
-    request.nextUrl.pathname.startsWith("/support")
+    !isExamAttemptRoute &&
+    (request.nextUrl.pathname === "/" ||
+      request.nextUrl.pathname.startsWith("/mock-tests") ||
+      request.nextUrl.pathname.startsWith("/terms-and-conditions") ||
+      request.nextUrl.pathname.startsWith("/privacy-policy") ||
+      request.nextUrl.pathname.startsWith("/refunds-and-cancellations") ||
+      request.nextUrl.pathname.startsWith("/support"))
   ) {
     return response;
   }
@@ -98,8 +102,8 @@ export async function proxy(request: NextRequest) {
     .getAll()
     .some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token"));
 
-  // Fast-path redirect for unauthenticated dashboard access (eliminates RSC bootstrap & remote network delay)
-  if (request.nextUrl.pathname.startsWith("/dashboard") && !hasAuthCookie) {
+  // Fast-path redirect for unauthenticated dashboard or attempt access
+  if ((request.nextUrl.pathname.startsWith("/dashboard") || isExamAttemptRoute) && !hasAuthCookie) {
     const loginUrl = new URL("/login", request.url);
     const search = request.nextUrl.search;
     loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${search}`);
@@ -161,4 +165,3 @@ export const config = {
     },
   ],
 };
-

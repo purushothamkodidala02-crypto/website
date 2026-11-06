@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { registerActiveSessionToken } from "@/lib/auth/single-session";
 
 type LoginInput = {
   email: string;
@@ -73,6 +74,7 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
     if (sessionError) {
       return { success: false, code: "session_security_unavailable", message: "We could not secure this sign-in session. Please try again." };
     }
+    await registerActiveSessionToken(supabase, authData.user.id);
     return { success: true, redirectTo: nextPath };
   }
 

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { SINGLE_SESSION_COOKIE_NAME } from "@/lib/auth/single-session";
 
 function safeNextPath(value: string | null) {
   return value?.startsWith("/") && !value.startsWith("//") ? value : "/";
@@ -45,6 +46,23 @@ export async function GET(request: NextRequest) {
     if (profile?.role === "student") {
       const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
       if (sessionError) return NextResponse.redirect(loginUrl);
+
+      const deviceSessionToken = crypto.randomUUID();
+      await supabase
+        .from("profiles")
+        .update({
+          active_session_token: deviceSessionToken,
+          active_session_updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+
+      response.cookies.set(SINGLE_SESSION_COOKIE_NAME, deviceSessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
     }
   }
 

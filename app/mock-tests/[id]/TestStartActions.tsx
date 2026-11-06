@@ -7,6 +7,7 @@ import { beginMockTest } from "./start-actions";
 import { isBigScreen, isCurrentlyFullscreen, isFullscreenSupported, requestFullscreenSafely } from "@/lib/fullscreen";
 import { createClient } from "@/lib/supabase/client";
 import { addLocalAttemptedTestId, getLocalAttemptedTestIds } from "@/lib/storage/student-practice-storage";
+import { getClientDeviceId } from "@/lib/auth/client-device";
 
 export function TestStartActions({
   testId,
@@ -24,12 +25,15 @@ export function TestStartActions({
   const [clientSignedIn, setClientSignedIn] = useState(false);
   const [clientResumable, setClientResumable] = useState(false);
   const [clientHasAttempt, setClientHasAttempt] = useState(false);
+  const [deviceId, setDeviceId] = useState("");
 
   const signedIn = isLoggedIn || clientSignedIn;
   const resumable = hasResumableSession || clientResumable;
   const hasAttempt = hasPreviousAttempt || clientHasAttempt;
 
   useEffect(() => {
+    setDeviceId(getClientDeviceId());
+
     // Check localStorage cache for 0ms initial attempt status
     const localAttempted = getLocalAttemptedTestIds();
     if (localAttempted.includes(testId)) {
@@ -45,11 +49,10 @@ export function TestStartActions({
       const [sessionRes, attemptRes] = await Promise.all([
         supabase
           .from("test_attempt_sessions")
-          .select("id")
+          .select("id, remaining_seconds, expires_at")
           .eq("user_id", session.user.id)
           .eq("mock_test_id", testId)
           .is("submitted_at", null)
-          .gt("remaining_seconds", 0)
           .order("started_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
@@ -63,7 +66,12 @@ export function TestStartActions({
       ]);
 
       if (active && sessionRes.data) {
-        setClientResumable(true);
+        const remainingSec = sessionRes.data.remaining_seconds;
+        const expiresAt = sessionRes.data.expires_at ? new Date(sessionRes.data.expires_at).getTime() : 0;
+        const isStillValid = (typeof remainingSec === "number" && remainingSec > 0) || expiresAt > Date.now();
+        if (isStillValid) {
+          setClientResumable(true);
+        }
       }
       if (active && attemptRes.data) {
         setClientHasAttempt(true);
@@ -95,8 +103,10 @@ export function TestStartActions({
     );
   }
 
+  const effectiveDeviceId = deviceId || (typeof window !== "undefined" ? getClientDeviceId() : "");
+
   if (!resumable) {
-    const startAction = beginMockTest.bind(null, testId, testPath, "resume");
+    const startAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
 
     if (hasAttempt) {
       return (
@@ -127,8 +137,8 @@ export function TestStartActions({
     );
   }
 
-  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume");
-  const restartAction = beginMockTest.bind(null, testId, testPath, "restart");
+  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
+  const restartAction = beginMockTest.bind(null, testId, testPath, "restart", effectiveDeviceId);
 
   return (
     <div className="mt-1 grid gap-2.5">

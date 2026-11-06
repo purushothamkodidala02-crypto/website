@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { registerActiveSessionToken } from "@/lib/auth/single-session";
 
 function safeNextPath(value: string | null) {
   return value?.startsWith("/") && !value.startsWith("//") ? value : "/";
@@ -53,6 +54,8 @@ export async function GET(request: NextRequest) {
   if (sessionError) {
     return NextResponse.redirect(loginErrorUrl(requestUrl.origin, nextPath));
   }
+
+  await registerActiveSessionToken(supabase, user.id);
 
   if (!profile.phone) {
     const completeProfileUrl = new URL("/complete-profile", requestUrl.origin);
