@@ -496,9 +496,9 @@ export default async function AdminQuestionReportsPage({
 
         {/* Total & Resolution Rate */}
         <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 shadow-2xs min-w-0">
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex flex-wrap items-center justify-between gap-1 min-w-0">
             <p className="text-xs font-medium text-slate-500 truncate">Active Queue</p>
-            <span className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700">
+            <span className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700 shrink-0">
               {resolutionRate}% Closed
             </span>
           </div>

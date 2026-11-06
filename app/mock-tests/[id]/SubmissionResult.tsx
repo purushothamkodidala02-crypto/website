@@ -50,8 +50,8 @@ export function SubmissionResult({
       : null;
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10">
-      <section className="w-full max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl sm:p-10">
+    <main className="grid min-h-screen place-items-center bg-slate-50 px-3 py-6 sm:px-5 sm:py-10">
+      <section className="w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-8 text-center shadow-xl sm:p-10 min-w-0 overflow-hidden">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -63,7 +63,7 @@ export function SubmissionResult({
         </p>
 
         {parsedTitle.breadcrumb.length > 0 && (
-          <p className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700">
+          <p className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700 break-words">
             {parsedTitle.breadcrumb.map((crumb, idx) => (
               <span key={idx} className="inline-flex items-center gap-1.5">
                 {idx > 0 && <span className="text-slate-400 font-normal" aria-hidden="true">›</span>}
@@ -73,10 +73,10 @@ export function SubmissionResult({
           </p>
         )}
 
-        <h1 className="mt-1.5 flex flex-wrap items-center justify-center gap-2.5 text-2xl font-black text-slate-900 sm:text-3xl">
+        <h1 className="mt-1.5 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 text-xl font-black text-slate-900 sm:text-3xl break-words [overflow-wrap:anywhere]">
           <span>{parsedTitle.primaryTitle}</span>
           {parsedTitle.testLabel && (
-            <span className="inline-flex items-center rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-sm sm:text-base font-bold text-teal-800">
+            <span className="inline-flex items-center rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-xs sm:text-base font-bold text-teal-800">
               {parsedTitle.testLabel}
             </span>
           )}
@@ -85,9 +85,9 @@ export function SubmissionResult({
         {result.success || typeof result.score === "number" ? (
           <>
             <div className="mt-6">
-              <p className="text-5xl font-black text-slate-950">
+              <p className="text-4xl sm:text-5xl font-black text-slate-950">
                 {result.score}{" "}
-                <span className="text-2xl font-bold text-slate-400">/ {result.totalMarks}</span>
+                <span className="text-xl sm:text-2xl font-bold text-slate-400">/ {result.totalMarks}</span>
               </p>
               {percentage !== null && (
                 <span className="mt-2 inline-block rounded-full bg-slate-100 px-3.5 py-1 text-xs font-bold text-slate-700">
@@ -96,7 +96,7 @@ export function SubmissionResult({
               )}
             </div>
 
-            <div className="mt-7 grid grid-cols-3 gap-3">
+            <div className="mt-6 sm:mt-7 grid grid-cols-3 gap-2 sm:gap-3">
               <Metric
                 value={result.correctAnswers ?? 0}
                 label="Correct"
@@ -117,7 +117,7 @@ export function SubmissionResult({
               />
             </div>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row flex-wrap justify-center items-stretch sm:items-center gap-2.5 sm:gap-3 w-full max-w-full">
               {folderUrl && (
                 <Link
                   href={folderUrl}
@@ -125,9 +125,10 @@ export function SubmissionResult({
                   onClick={() => {
                     void exitFullscreenSafely();
                   }}
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-2xs transition hover:bg-slate-50 active:scale-[0.98]"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 shadow-2xs transition hover:bg-slate-50 active:scale-[0.98] max-w-full truncate text-center"
+                  title={`Continue to ${folderName ?? "folder"}`}
                 >
-                  Continue to {folderName ?? "folder"} →
+                  <span className="truncate">Continue to {folderName ?? "folder"} →</span>
                 </Link>
               )}
               {result.attemptId && (
@@ -137,7 +138,7 @@ export function SubmissionResult({
                   onClick={() => {
                     void exitFullscreenSafely();
                   }}
-                  className="rounded-xl bg-[#0a2922] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f]"
+                  className="rounded-xl bg-[#0a2922] px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] text-center"
                 >
                   Review answers
                 </Link>
@@ -148,7 +149,7 @@ export function SubmissionResult({
                 onClick={() => {
                   void exitFullscreenSafely();
                 }}
-                className="rounded-xl bg-[#ea580c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#d94f08]"
+                className="rounded-xl bg-[#ea580c] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#d94f08] text-center"
               >
                 Go to dashboard
               </Link>
@@ -214,9 +215,12 @@ function Metric({
   bg: string;
 }) {
   return (
-    <div className={`rounded-2xl border p-3.5 text-center ${bg}`}>
-      <strong className={`block text-xl font-black ${tone}`}>{value}</strong>
-      <span className="mt-0.5 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+    <div className={`rounded-xl sm:rounded-2xl border p-2 sm:p-3.5 text-center min-w-0 overflow-hidden ${bg}`}>
+      <strong className={`block text-lg sm:text-xl font-black ${tone}`}>{value}</strong>
+      <span
+        className="mt-0.5 block text-[10px] sm:text-[11px] font-bold uppercase tracking-tight sm:tracking-wider text-slate-500 truncate"
+        title={label}
+      >
         {label}
       </span>
     </div>

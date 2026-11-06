@@ -458,21 +458,22 @@ export function StudentTestRunner({
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
           
           {/* Box 1: Test Title & Question Indicator */}
-          <div className="flex min-w-0 items-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-xs">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3.5 sm:py-2 shadow-xs">
             <div className="min-w-0">
               <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[200px] xl:max-w-xs" title={title}>
                 {title}
               </p>
-              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
-                Question {index + 1}{" "}
-                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">of {questions.length}</span>
+              <h1 className="text-xs sm:text-sm lg:text-base font-black text-slate-950 truncate">
+                <span className="sm:hidden">Q{index + 1}</span>
+                <span className="hidden sm:inline">Question {index + 1}</span>{" "}
+                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
               </h1>
             </div>
           </div>
 
           {/* Box 2: Attempted Questions Progress & Stats */}
-          <div className="flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 sm:px-4 sm:py-2 shadow-xs">
-            <div className="flex items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-4 sm:py-2 shadow-xs">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
               <span className="hidden sm:inline text-[11px] font-bold text-slate-600">Attempted:</span>
               <span className="sm:hidden text-[10px] font-bold text-slate-600">Done:</span>
@@ -685,7 +686,7 @@ export function StudentTestRunner({
                       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
                         {key}
                       </span>
-                      <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line text-sm sm:text-base font-normal sm:font-medium leading-normal text-slate-800 font-exam ${teluguOption ? "font-telugu" : ""}`}>
+                      <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line text-sm sm:text-base font-normal sm:font-medium leading-normal text-slate-800 font-exam ${teluguOption ? "font-telugu" : ""} break-words [overflow-wrap:anywhere]`}>
                         {text}
                       </span>
                     </label>
@@ -953,16 +954,16 @@ function PracticeTimerControl({
         <span className="hidden sm:inline">{busy ? (paused ? "Resuming" : "Pausing") : paused ? "Resume" : "Pause"}</span>
       </button>
 
-      <div className="ml-1 sm:ml-1.5 min-w-[4.2rem] sm:min-w-[5.6rem] border-l border-slate-200 px-1.5 py-0.5 sm:px-2.5 text-right">
+      <div className="ml-1 sm:ml-1.5 min-w-[3.6rem] sm:min-w-[5.6rem] border-l border-slate-200 px-1 py-0.5 sm:px-2.5 text-right">
         <span
-          className={`block text-[8px] sm:text-[9px] font-black uppercase tracking-[0.14em] ${
+          className={`block text-[8px] sm:text-[9px] font-black uppercase tracking-tight sm:tracking-[0.14em] ${
             paused ? "text-teal-800 font-bold" : urgent ? "text-rose-600 font-black" : "text-slate-500"
           }`}
         >
           {paused ? "Paused" : "Time Left"}
         </span>
         <strong
-          className={`block font-mono text-xs sm:text-sm lg:text-base font-black leading-tight tracking-wider ${
+          className={`block font-mono text-xs sm:text-sm lg:text-base font-black leading-tight tracking-tight sm:tracking-wider ${
             urgent ? "text-rose-600" : "text-slate-950"
           }`}
         >
