@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { formatMockNumber, mockTestLabel, displayMockTestHeading } from "@/lib/exam-catalog";
@@ -51,6 +51,42 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   const [isTargetCountCustom, setIsTargetCountCustom] = useState(false);
   const [selectedSeriesNumber, setSelectedSeriesNumber] = useState<number | string>("");
   const [isSeriesCustom, setIsSeriesCustom] = useState(false);
+  const [locallyCreatedSeries, setLocallyCreatedSeries] = useState<ExistingSeries[]>([]);
+
+  useEffect(() => {
+    if (result.success && result.createdSeriesNumber && result.createdPaperId) {
+      setLocallyCreatedSeries((prev) => {
+        if (
+          prev.some(
+            (item) =>
+              item.paperId === result.createdPaperId &&
+              item.scope === result.createdScope &&
+              item.subjectId === result.createdSubjectId &&
+              item.subjectSectionId === result.createdSectionId &&
+              item.seriesNumber === result.createdSeriesNumber,
+          )
+        ) {
+          return prev;
+        }
+        return [
+          ...prev,
+          {
+            paperId: result.createdPaperId!,
+            scope: result.createdScope!,
+            subjectId: result.createdSubjectId ?? null,
+            subjectSectionId: result.createdSectionId ?? null,
+            seriesNumber: result.createdSeriesNumber!,
+          },
+        ];
+      });
+      setSelectedSeriesNumber("");
+      setIsSeriesCustom(false);
+    }
+  }, [result]);
+
+  const allExistingSeries = useMemo(() => {
+    return [...existingSeries, ...locallyCreatedSeries];
+  }, [existingSeries, locallyCreatedSeries]);
 
   const allSections = useMemo(() => {
     const combined = [...sections];
@@ -120,7 +156,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   }
 
   const currentNumbers = useMemo(() => {
-    return existingSeries
+    return allExistingSeries
       .filter(
         (item) =>
           item.paperId === paperId &&
@@ -132,7 +168,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
                 : !item.subjectSectionId))),
       )
       .map((item) => item.seriesNumber);
-  }, [existingSeries, paperId, scope, subjectId, subjectSectionId]);
+  }, [allExistingSeries, paperId, scope, subjectId, subjectSectionId]);
 
   const existingNumbersSet = useMemo(() => new Set(currentNumbers), [currentNumbers]);
   const maxSeries = useMemo(() => (currentNumbers.length ? Math.max(...currentNumbers) : 0), [currentNumbers]);

@@ -31,7 +31,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="admin-workspace">
+    <div className="admin-workspace min-h-screen bg-[#f6faf8] text-slate-900 select-text">
+      {/* Desktop header is rendered inside AdminHeader with hidden min-h-18 md:flex */}
       <AdminShell
         userEmail={user.email ?? ""}
         adminName={profile?.full_name ?? "Administrator"}

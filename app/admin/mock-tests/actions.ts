@@ -7,7 +7,15 @@ import { mockTestSlug } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
 import type { MockTestScope } from "@/types/mock-test";
 
-export type CreateMockTestState = { success: boolean; message: string };
+export type CreateMockTestState = {
+  success: boolean;
+  message: string;
+  createdSeriesNumber?: number;
+  createdPaperId?: string;
+  createdSubjectId?: string | null;
+  createdSectionId?: string | null;
+  createdScope?: MockTestScope;
+};
 
 export async function createMockTest(_previous: CreateMockTestState, formData: FormData): Promise<CreateMockTestState> {
   const supabase = await createClient();
@@ -119,15 +127,16 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     .maybeSingle();
 
   if (existingSlugTest) {
-    if (scope === "subject" && !subjectSectionId) {
+    const formattedNum = String(seriesNumber).padStart(2, "0");
+    if (existingSlugTest.series_number === seriesNumber) {
       return {
         success: false,
-        message: `The slug "${slug}" is already in use by "${existingSlugTest.title}". If you are creating a topic test (e.g. Time and Distance), please select or add that topic/sub-section so it receives its own unique slug.`,
+        message: `Mock Test ${formattedNum} already exists in this series. Please select Mock Test ${String(seriesNumber + 1).padStart(2, "0")}.`,
       };
     }
     return {
       success: false,
-      message: `A mock test with slug "${slug}" already exists on this paper ("${existingSlugTest.title}"). Please choose an unused series number.`,
+      message: `A mock test with this title already exists on this paper ("${existingSlugTest.title}"). Please choose an unused series number.`,
     };
   }
 
@@ -159,15 +168,20 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
         message: "Database index update required: Please execute migration 20260920130000_fix_subject_series_unique_index.sql in Supabase SQL Editor so sub-sections can start from Mock Test 01.",
       };
     }
-    if (error.message?.includes("uq_mock_tests_current_paper_slug") || error.message?.includes("mock_tests_paper_id_slug_key")) {
-      return {
-        success: false,
-        message: `The URL slug "${slug}" is already taken on this paper. Please select a topic/sub-section or choose an unused series number.`,
-      };
-    }
-    return { success: false, message: "This series number or slug is already taken. Refresh and try again." };
+    return {
+      success: false,
+      message: `Mock Test ${String(seriesNumber).padStart(2, "0")} already exists in this series. Please choose an unused number.`,
+    };
   }
   if (error) return { success: false, message: error.message };
   revalidatePath("/admin/mock-tests");
-  return { success: true, message: `${title} was created as a draft.` };
+  return {
+    success: true,
+    message: `${title} was created as a draft.`,
+    createdSeriesNumber: seriesNumber,
+    createdPaperId: paperId,
+    createdSubjectId: scope === "subject" ? subjectId : null,
+    createdSectionId: scope === "subject" ? subjectSectionId : null,
+    createdScope: scope,
+  };
 }

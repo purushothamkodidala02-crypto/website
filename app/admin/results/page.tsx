@@ -90,112 +90,230 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
   }
 
   return (
-    <main>
-      <div><h1 className="text-3xl font-bold">Results</h1><p className="mt-2 text-gray-600">Monitor completed student attempts and overall performance.</p></div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-teal-600" />
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
+              Candidate Analytics
+            </p>
+          </div>
+          <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+            Results & Submissions
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Monitor completed student test attempts, score distribution, accuracy metrics, and evaluation summaries.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/admin/mock-tests"
+            prefetch={true}
+            className="rounded-xl border border-teal-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs hover:bg-teal-50 hover:border-teal-300 transition"
+          >
+            Review Mock Tests
+          </Link>
+        </div>
+      </div>
 
       {attemptsResult.error ? (
-        <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
-          Unable to load attempt results right now.
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm font-semibold text-rose-800">
+          Unable to load candidate attempt results right now. Please refresh the page.
         </div>
       ) : (
         <>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border bg-white p-5">
-              <p className="text-sm text-gray-500">Completed attempts</p>
-              <p className="mt-2 text-3xl font-bold">{Number(summary.completed_attempts)}</p>
+          {/* KPI Metrics */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-teal-100 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Completed Attempts</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </span>
+              </div>
+              <p className="mt-4 text-3xl font-black text-slate-950">{Number(summary.completed_attempts).toLocaleString("en-IN")}</p>
+              <p className="mt-1 text-xs text-slate-400">Total submitted tests</p>
             </div>
-            <div className="rounded-xl border bg-white p-5">
-              <p className="text-sm text-gray-500">Participants</p>
-              <p className="mt-2 text-3xl font-bold">{Number(summary.participants)}</p>
+
+            <div className="rounded-2xl border border-teal-100 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Participants</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-800">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="9" cy="8" r="3" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 20v-2.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V20" />
+                  </svg>
+                </span>
+              </div>
+              <p className="mt-4 text-3xl font-black text-slate-950">{Number(summary.participants).toLocaleString("en-IN")}</p>
+              <p className="mt-1 text-xs text-slate-400">Unique candidate test-takers</p>
             </div>
-            <div className="rounded-xl border bg-white p-5">
-              <p className="text-sm text-gray-500">Average score</p>
-              <p className="mt-2 text-3xl font-bold">{Number(summary.average_score).toFixed(1)}%</p>
+
+            <div className="rounded-2xl border border-teal-100 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Average Score</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-800">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                  </svg>
+                </span>
+              </div>
+              <p className="mt-4 text-3xl font-black text-slate-950">{Number(summary.average_score).toFixed(1)}%</p>
+              <p className="mt-1 text-xs text-slate-400">Mean marks percentage</p>
             </div>
-            <div className="rounded-xl border bg-white p-5">
-              <p className="text-sm text-gray-500">Average accuracy</p>
-              <p className="mt-2 text-3xl font-bold">{Number(summary.average_accuracy).toFixed(1)}%</p>
+
+            <div className="rounded-2xl border border-teal-100 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Average Accuracy</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl border border-amber-100 bg-amber-50 text-amber-800">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </span>
+              </div>
+              <p className="mt-4 text-3xl font-black text-slate-950">{Number(summary.average_accuracy).toFixed(1)}%</p>
+              <p className="mt-1 text-xs text-slate-400">Correct answers / attempted</p>
             </div>
           </div>
+
+          {/* Attempts Table */}
           {attempts.length === 0 ? (
-            <section className="mt-8 rounded-xl border border-dashed p-8 text-center">
-              <h2 className="text-lg font-semibold">No completed attempts yet</h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Results will appear here when students finish published Mock Tests.
+            <div className="rounded-3xl border border-dashed border-teal-200 bg-white p-12 text-center shadow-xs">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-teal-50 text-teal-800">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </div>
+              <h2 className="mt-3 text-base font-bold text-slate-900">No completed submissions recorded</h2>
+              <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+                Candidate test submissions and score reports will populate automatically when students take published mock tests.
               </p>
-            </section>
+            </div>
           ) : (
-            <section className="mt-8">
-              <h2 className="text-xl font-semibold">Recent attempts</h2>
-              <div className="mt-4 overflow-x-auto rounded-xl border bg-white">
-                <table className="w-full text-left">
-                  <thead className="border-b bg-gray-50">
+            <div className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xs">
+              <div className="flex items-center justify-between gap-4 border-b border-teal-100 bg-slate-50/60 px-6 py-4">
+                <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
+                  Latest Attempt Logs
+                </h2>
+                <span className="text-xs font-semibold text-slate-500">
+                  Showing {attempts.length} recent attempts
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-teal-100/80 bg-teal-50/30 text-xs font-black uppercase tracking-wider text-teal-900">
                     <tr>
-                      <th className="px-4 py-3 text-sm font-bold text-slate-700">Student</th>
-                      <th className="px-4 py-3 text-sm font-bold text-slate-700">Mock Test</th>
-                      <th className="px-4 py-3 text-sm font-bold text-slate-700">Score</th>
-                      <th className="px-4 py-3 text-sm font-bold text-slate-700">Correct</th>
-                      <th className="px-4 py-3 text-sm font-bold text-slate-700">Unanswered</th>
-                      <th className="px-4 py-3 text-sm font-bold text-slate-700">Submitted</th>
+                      <th className="px-6 py-3.5">Candidate</th>
+                      <th className="px-6 py-3.5">Mock Test</th>
+                      <th className="px-6 py-3.5">Score / Marks</th>
+                      <th className="px-6 py-3.5">Correct</th>
+                      <th className="px-6 py-3.5">Unanswered</th>
+                      <th className="px-6 py-3.5">Submitted At</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {attempts.map((attempt) => (
-                      <tr key={attempt.id} className="border-b last:border-b-0 hover:bg-slate-50/50">
-                        <td className="px-4 py-3">
-                          <p className="font-semibold text-slate-900">{names.get(attempt.user_id) ?? "Student"}</p>
-                          <p className="text-xs text-slate-500">{emails.get(attempt.user_id) || phones.get(attempt.user_id) || "No contact"}</p>
-                        </td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{mockTestTitles.get(attempt.mock_test_id) ?? "Mock Test"}</td>
-                        <td className="px-4 py-3 font-semibold text-slate-900">
-                          {attempt.score} / {attempt.total_marks}
-                          <span className="ml-1.5 text-xs font-normal text-slate-500">
-                            ({attempt.total_marks > 0 ? Math.round((attempt.score / attempt.total_marks) * 100) : 0}%)
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-emerald-700 font-semibold">{attempt.correct_answers}</td>
-                        <td className="px-4 py-3 text-slate-500">{attempt.unanswered_questions}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          {new Intl.DateTimeFormat("en-IN", {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                            timeZone: "Asia/Kolkata",
-                          }).format(new Date(attempt.submitted_at))}
-                        </td>
-                      </tr>
-                    ))}
+                  <tbody className="divide-y divide-teal-50">
+                    {attempts.map((attempt) => {
+                      const studentName = names.get(attempt.user_id) ?? "Student";
+                      const studentContact = emails.get(attempt.user_id) || phones.get(attempt.user_id) || "No contact";
+                      const percent = attempt.total_marks > 0 ? Math.round((attempt.score / attempt.total_marks) * 100) : 0;
+                      const initial = studentName[0]?.toUpperCase() ?? "S";
+
+                      return (
+                        <tr key={attempt.id} className="transition hover:bg-teal-50/30">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-100 text-xs font-black text-teal-800">
+                                {initial}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-900 truncate">{studentName}</p>
+                                <p className="text-xs text-slate-400 truncate">{studentContact}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-6 py-4 font-semibold text-slate-800">
+                            {mockTestTitles.get(attempt.mock_test_id) ?? "Mock Test"}
+                          </td>
+
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-slate-950">
+                                {attempt.score} / {attempt.total_marks}
+                              </span>
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                                  percent >= 60
+                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                    : percent >= 35
+                                      ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                      : "bg-rose-50 text-rose-800 border border-rose-200"
+                                }`}
+                              >
+                                {percent}%
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="px-6 py-4 font-bold text-emerald-700">
+                            {attempt.correct_answers}
+                          </td>
+
+                          <td className="px-6 py-4 text-slate-400 font-medium">
+                            {attempt.unanswered_questions}
+                          </td>
+
+                          <td className="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
+                            {new Intl.DateTimeFormat("en-IN", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                              timeZone: "Asia/Kolkata",
+                            }).format(new Date(attempt.submitted_at))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-                {totalPages > 1 && (
-                  <nav className="flex items-center justify-center gap-3 border-t p-4">
-                    <Link
-                      href={page > 2 ? `/admin/results?page=${page - 1}` : "/admin/results"}
-                      aria-disabled={page === 1}
-                      className={`rounded-lg border px-3 py-2 text-sm font-bold ${
-                        page === 1 ? "pointer-events-none opacity-40" : ""
-                      }`}
-                    >
-                      Previous
-                    </Link>
-                    <span className="text-sm font-semibold text-slate-600">
-                      Page {page} of {totalPages}
-                    </span>
-                    <Link
-                      href={`/admin/results?page=${Math.min(totalPages, page + 1)}`}
-                      aria-disabled={page === totalPages}
-                      className={`rounded-lg border px-3 py-2 text-sm font-bold ${
-                        page === totalPages ? "pointer-events-none opacity-40" : ""
-                      }`}
-                    >
-                      Next
-                    </Link>
-                  </nav>
-                )}
               </div>
-            </section>
+
+              {totalPages > 1 && (
+                <nav className="flex items-center justify-between border-t border-teal-100 bg-slate-50/50 px-6 py-3.5">
+                  <Link
+                    href={page > 2 ? `/admin/results?page=${page - 1}` : "/admin/results"}
+                    aria-disabled={page === 1}
+                    className={`rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 ${
+                      page === 1 ? "pointer-events-none opacity-40" : ""
+                    }`}
+                  >
+                    &larr; Previous
+                  </Link>
+
+                  <span className="text-xs font-semibold text-slate-500">
+                    Page {page} of {totalPages}
+                  </span>
+
+                  <Link
+                    href={`/admin/results?page=${Math.min(totalPages, page + 1)}`}
+                    aria-disabled={page === totalPages}
+                    className={`rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 ${
+                      page === totalPages ? "pointer-events-none opacity-40" : ""
+                    }`}
+                  >
+                    Next &rarr;
+                  </Link>
+                </nav>
+              )}
+            </div>
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }

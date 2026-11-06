@@ -44,7 +44,7 @@ export const ADMIN_SECTIONS = [
   {
     label: "Commerce & Users",
     links: [
-      { href: "/admin/access", label: "Exam series passes", icon: "passes" as const },
+      { href: "/admin/access", label: "Exam series", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations & Sales", icon: "students" as const },
       { href: "/admin/surveys", label: "Surveys & Feedback", icon: "surveys" as const },
     ],
@@ -201,6 +201,132 @@ export type BadgeState = {
   newSurveys: number;
   hasNewReport: boolean;
 };
+
+export function NavigationLinks({
+  collapsed = false,
+  badges,
+  onLinkClick,
+}: {
+  collapsed?: boolean;
+  badges: BadgeState;
+  onLinkClick?: () => void;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <div className="space-y-5">
+      {ADMIN_SECTIONS.map((section) => {
+        const sectionHasUpdates = section.links.some((l) =>
+          l.href === "/admin/question-reports"
+            ? badges.openReports > 0
+            : l.href === "/admin/surveys"
+              ? badges.newSurveys > 0
+              : false
+        );
+
+        return (
+          <section key={section.label} className="space-y-1">
+            {!collapsed ? (
+              <div className="flex items-center justify-between px-3 py-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
+                  {section.label}
+                </p>
+                {sectionHasUpdates && (
+                  <span
+                    title="Updates available in this section"
+                    className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="my-1 border-t border-slate-100" />
+            )}
+
+            <div className="space-y-0.5">
+              {section.links.map((link) => {
+                const active = isActive(pathname, link.href);
+                const isReportsLink = link.href === "/admin/question-reports";
+                const isSurveysLink = link.href === "/admin/surveys";
+                const reportCount = isReportsLink
+                  ? pathname.startsWith("/admin/question-reports")
+                    ? 0
+                    : badges.openReports
+                  : 0;
+                const surveyCount = isSurveysLink
+                  ? pathname.startsWith("/admin/surveys")
+                    ? 0
+                    : badges.newSurveys
+                  : 0;
+                const showBadge = reportCount > 0 || surveyCount > 0;
+                const badgeCount = reportCount || surveyCount;
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    prefetch={true}
+                    onClick={onLinkClick}
+                    title={collapsed ? `${link.label}${showBadge ? ` (${badgeCount})` : ""}` : undefined}
+                    className={`group relative flex items-center rounded-xl transition duration-150 ${
+                      collapsed
+                        ? "h-10 w-full justify-center px-0"
+                        : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
+                    } ${
+                      active
+                        ? "bg-teal-700 text-white shadow-xs font-bold"
+                        : "text-slate-700 hover:bg-teal-50 hover:text-teal-950"
+                    }`}
+                  >
+                    <div className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-3"}`}>
+                      <span
+                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition ${
+                          active
+                            ? "bg-white/15 text-white"
+                            : "text-teal-800 group-hover:text-teal-950"
+                        }`}
+                      >
+                        <NavIcon name={link.icon} />
+                      </span>
+
+                      {!collapsed && (
+                        <span className="truncate">{link.label}</span>
+                      )}
+                    </div>
+
+                    {/* Badges in expanded mode */}
+                    {!collapsed && showBadge && (
+                      <span
+                        className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black tracking-tight ${
+                          isReportsLink
+                            ? active
+                              ? "bg-amber-400 text-slate-950"
+                              : "bg-amber-100 text-amber-900 border border-amber-200"
+                            : active
+                              ? "bg-white/20 text-white"
+                              : "bg-teal-100 text-teal-800 border border-teal-200"
+                        }`}
+                      >
+                        {badgeCount > 99 ? "99+" : badgeCount}
+                      </span>
+                    )}
+
+                    {/* Unread indicator dot in collapsed mode */}
+                    {collapsed && showBadge && (
+                      <span
+                        title={`${badgeCount} update${badgeCount === 1 ? "" : "s"}`}
+                        className="absolute top-1.5 right-2 flex h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white animate-pulse"
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
 
 export function AdminNavigation(props: {
   collapsed?: boolean;
@@ -370,7 +496,7 @@ export function AdminNavigation(props: {
       <aside
         aria-label="Admin desktop navigation"
         className={`fixed inset-y-0 left-0 z-30 hidden md:flex flex-col border-r border-teal-100 bg-white text-slate-900 shadow-[1px_0_4px_rgba(0,0,0,0.02)] transition-[width] duration-200 ease-in-out ${
-          collapsed ? "w-20" : "w-68"
+          collapsed ? "w-20" : "w-72"
         }`}
       >
         {/* Sidebar Header Brand Lockup */}
@@ -413,114 +539,10 @@ export function AdminNavigation(props: {
 
         {/* Scrollable Navigation Links */}
         <div className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 space-y-5 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.100)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-teal-100 hover:[&::-webkit-scrollbar-thumb]:bg-teal-200">
-          {ADMIN_SECTIONS.map((section) => {
-            const sectionHasUpdates = section.links.some((l) =>
-              l.href === "/admin/question-reports"
-                ? badges.openReports > 0
-                : l.href === "/admin/surveys"
-                  ? badges.newSurveys > 0
-                  : false
-            );
-
-            return (
-              <section key={section.label} className="space-y-1">
-                {!collapsed ? (
-                  <div className="flex items-center justify-between px-3 py-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
-                      {section.label}
-                    </p>
-                    {sectionHasUpdates && (
-                      <span
-                        title="Updates available in this section"
-                        className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <div className="my-1 border-t border-slate-100" />
-                )}
-
-                <div className="space-y-0.5">
-                  {section.links.map((link) => {
-                    const active = isActive(pathname, link.href);
-                    const isReportsLink = link.href === "/admin/question-reports";
-                    const isSurveysLink = link.href === "/admin/surveys";
-                    const reportCount = isReportsLink
-                      ? pathname.startsWith("/admin/question-reports")
-                        ? 0
-                        : badges.openReports
-                      : 0;
-                    const surveyCount = isSurveysLink
-                      ? pathname.startsWith("/admin/surveys")
-                        ? 0
-                        : badges.newSurveys
-                      : 0;
-                    const showBadge = reportCount > 0 || surveyCount > 0;
-                    const badgeCount = reportCount || surveyCount;
-
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        prefetch={true}
-                        title={collapsed ? `${link.label}${showBadge ? ` (${badgeCount})` : ""}` : undefined}
-                        className={`group relative flex items-center rounded-xl transition duration-150 ${
-                          collapsed
-                            ? "h-10 w-full justify-center px-0"
-                            : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
-                        } ${
-                          active
-                            ? "bg-teal-700 text-white shadow-xs font-bold"
-                            : "text-slate-700 hover:bg-teal-50 hover:text-teal-950"
-                        }`}
-                      >
-                        <div className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-3"}`}>
-                          <span
-                            className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition ${
-                              active
-                                ? "bg-white/15 text-white"
-                                : "text-teal-800 group-hover:text-teal-950"
-                            }`}
-                          >
-                            <NavIcon name={link.icon} />
-                          </span>
-
-                          {!collapsed && (
-                            <span className="truncate">{link.label}</span>
-                          )}
-                        </div>
-
-                        {/* Badges in expanded mode */}
-                        {!collapsed && showBadge && (
-                          <span
-                            className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black tracking-tight ${
-                              isReportsLink
-                                ? active
-                                  ? "bg-amber-400 text-slate-950"
-                                  : "bg-amber-100 text-amber-900 border border-amber-200"
-                                : active
-                                  ? "bg-white/20 text-white"
-                                  : "bg-teal-100 text-teal-800 border border-teal-200"
-                            }`}
-                          >
-                            {badgeCount > 99 ? "99+" : badgeCount}
-                          </span>
-                        )}
-
-                        {/* Unread indicator dot in collapsed mode */}
-                        {collapsed && showBadge && (
-                          <span
-                            title={`${badgeCount} update${badgeCount === 1 ? "" : "s"}`}
-                            className="absolute top-1.5 right-2 flex h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white animate-pulse"
-                          />
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
+          <NavigationLinks
+            collapsed={collapsed}
+            badges={badges}
+          />
         </div>
 
         {/* Sidebar Bottom Actions */}
@@ -532,7 +554,7 @@ export function AdminNavigation(props: {
                 href="/"
                 target="_blank"
                 rel="noreferrer"
-                title="Open live student portal"
+                title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
                 className="flex items-center justify-between rounded-xl border border-teal-200/80 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 transition"
               >
                 <span className="flex items-center gap-2">
@@ -579,7 +601,7 @@ export function AdminNavigation(props: {
                 href="/"
                 target="_blank"
                 rel="noreferrer"
-                title="Open live student portal"
+                title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
                 className="grid h-9 w-9 place-items-center rounded-xl border border-teal-200/80 bg-white text-teal-800 shadow-2xs hover:bg-teal-50 transition"
               >
                 <NavIcon name="portal" />
@@ -656,7 +678,7 @@ export function AdminNavigation(props: {
             {/* Backdrop overlay */}
             <button
               type="button"
-              aria-label="Close admin navigation"
+              aria-label="Close admin side navigation"
               onClick={handleDrawerClose}
               className={`absolute inset-0 h-full w-full bg-[#0a2922]/50 backdrop-blur-[2px] transition-opacity duration-300 cursor-pointer ${
                 mobileOpen ? "opacity-100" : "opacity-0"
@@ -690,74 +712,12 @@ export function AdminNavigation(props: {
               </div>
 
               {/* Drawer Navigation Links */}
-              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin]">
-                {ADMIN_SECTIONS.map((section) => (
-                  <section key={section.label} className="space-y-1.5">
-                    <p className="px-3 text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
-                      {section.label}
-                    </p>
-                    <div className="grid gap-1">
-                      {section.links.map((link) => {
-                        const active = isActive(pathname, link.href);
-                        const isReportsLink = link.href === "/admin/question-reports";
-                        const isSurveysLink = link.href === "/admin/surveys";
-                        const reportCount = isReportsLink
-                          ? pathname.startsWith("/admin/question-reports")
-                            ? 0
-                            : badges.openReports
-                          : 0;
-                        const surveyCount = isSurveysLink
-                          ? pathname.startsWith("/admin/surveys")
-                            ? 0
-                            : badges.newSurveys
-                          : 0;
-                        const showBadge = reportCount > 0 || surveyCount > 0;
-                        const badgeCount = reportCount || surveyCount;
-
-                        return (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            prefetch={true}
-                            onClick={handleDrawerClose}
-                            className={`flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-sm font-bold transition ${
-                              active
-                                ? "bg-teal-700 text-white shadow-xs"
-                                : "text-slate-900 hover:bg-teal-50 hover:text-teal-950"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <span
-                                className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${
-                                  active ? "bg-white/15 text-white" : "text-teal-800"
-                                }`}
-                              >
-                                <NavIcon name={link.icon} />
-                              </span>
-                              <span className="truncate">{link.label}</span>
-                            </div>
-
-                            {showBadge && (
-                              <span
-                                className={`flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-black ${
-                                  isReportsLink
-                                    ? active
-                                      ? "bg-amber-400 text-slate-950"
-                                      : "bg-amber-100 text-amber-900 border border-amber-200"
-                                    : active
-                                      ? "bg-white/20 text-white"
-                                      : "bg-teal-100 text-teal-800 border border-teal-200"
-                                }`}
-                              >
-                                {badgeCount > 99 ? "99+" : badgeCount}
-                              </span>
-                            )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </section>
-                ))}
+              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.100)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-teal-100 hover:[&::-webkit-scrollbar-thumb]:bg-teal-200">
+                <NavigationLinks
+                  badges={badges}
+                  onLinkClick={handleDrawerClose}
+                  collapsed={false}
+                />
               </div>
 
               {/* Drawer Footer */}
@@ -772,6 +732,7 @@ export function AdminNavigation(props: {
                     target="_blank"
                     rel="noreferrer"
                     onClick={handleDrawerClose}
+                    title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
                     className="flex flex-1 items-center justify-between rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50"
                   >
                     <span>Student portal</span>

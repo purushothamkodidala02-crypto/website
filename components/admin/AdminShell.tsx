@@ -108,7 +108,7 @@ export function AdminShell({
       {/* Main Content Area - dynamically adjusted for sidebar width */}
       <div
         className={`min-w-0 flex flex-col transition-[padding] duration-200 ease-in-out ${
-          sidebarCollapsed ? "md:pl-20" : "md:pl-68"
+          sidebarCollapsed ? "md:pl-20" : "md:pl-72"
         }`}
       >
         {/* Desktop Sticky Header */}
