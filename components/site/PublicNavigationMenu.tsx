@@ -30,6 +30,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
   const [hasUser, setHasUser] = useState(false);
   const [hasAdminRole, setHasAdminRole] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -47,9 +48,10 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
   useEffect(() => {
     let active = true;
     const supabase = createClient();
-    const updateAccount = async (userId?: string) => {
+    const updateAccount = async (userId?: string, email?: string | null) => {
       if (!active) return;
       setHasUser(Boolean(userId));
+      setUserEmail(email ?? null);
       if (!userId) {
         setHasAdminRole(false);
         return;
@@ -70,7 +72,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
           router.prefetch("/dashboard");
         } catch {}
       }
-      void updateAccount(data.session?.user.id);
+      void updateAccount(data.session?.user.id, data.session?.user.email);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user.id) {
@@ -78,7 +80,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
           router.prefetch("/dashboard");
         } catch {}
       }
-      void updateAccount(session?.user.id);
+      void updateAccount(session?.user.id, session?.user.email);
     });
     return () => {
       active = false;
@@ -163,6 +165,20 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
               ×
             </button>
           </div>
+
+          {userEmail && (
+            <div className="mx-4 mt-3 flex items-center gap-2.5 rounded-2xl border border-teal-100 bg-white/90 p-3 shadow-2xs">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-700 text-xs font-bold text-white uppercase" aria-hidden="true">
+                {userEmail.charAt(0)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-teal-700">Signed in as</p>
+                <p className="truncate text-xs font-bold text-slate-800" title={userEmail}>
+                  {userEmail}
+                </p>
+              </div>
+            </div>
+          )}
 
           <nav className="font-brand flex-1 space-y-2 overflow-y-auto p-4" aria-label="Sidebar navigation">
             {visibleItems.map((item) => {

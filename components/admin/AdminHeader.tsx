@@ -179,7 +179,7 @@ export function AdminHeader({
           <div className="grid h-6 w-6 place-items-center rounded-lg bg-teal-700 font-black text-white text-[10px]">
             {initials}
           </div>
-          <span className="max-w-44 truncate font-semibold text-slate-700">
+          <span className="max-w-xs md:max-w-sm lg:max-w-none truncate font-semibold text-slate-700" title={userEmail ?? adminName}>
             {userEmail ?? adminName}
           </span>
         </div>

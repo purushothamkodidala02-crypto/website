@@ -93,9 +93,15 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
           {!isAdmin && (
             <span
               title={email}
-              className="hidden max-w-48 truncate text-sm font-semibold text-slate-600 lg:inline"
+              className="hidden sm:inline-flex max-w-[220px] sm:max-w-xs md:max-w-md lg:max-w-none items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition hover:border-teal-200 hover:bg-teal-50/50 hover:text-teal-900"
             >
-              {email}
+              <span
+                className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-teal-700 text-[10px] font-bold text-white uppercase"
+                aria-hidden="true"
+              >
+                {email.charAt(0)}
+              </span>
+              <span className="truncate">{email}</span>
             </span>
           )}
           <LogoutButton />
