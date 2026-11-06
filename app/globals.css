@@ -27,6 +27,36 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-ui);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Allow text selection and interaction inside form controls and editable areas */
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable="plaintext-only"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Allow selection in administrative workspace */
+.admin-workspace,
+.admin-workspace * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 .font-brand {
@@ -55,6 +85,15 @@ body {
 }
 
 ::selection {
+  background: transparent;
+  color: inherit;
+}
+
+input::selection,
+textarea::selection,
+[contenteditable="true"]::selection,
+[contenteditable="plaintext-only"]::selection,
+.admin-workspace ::selection {
   background: #a7f3d0;
   color: #0f172a;
 }
@@ -171,6 +210,13 @@ a {
   .student-card {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body {
+    -webkit-user-select: none !important;
+    user-select: none !important;
   }
 }
 

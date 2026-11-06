@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-[#f6faf8] text-slate-900">
+    <div className="admin-workspace min-h-screen bg-[#f6faf8] text-slate-900 select-text">
       <AdminShell>
         <header className="sticky top-0 z-20 hidden min-h-18 items-center justify-between gap-4 border-b border-teal-100 bg-white/90 px-5 py-4 shadow-xs backdrop-blur-xl md:flex sm:px-8">
           <div className="flex items-center gap-3 sm:gap-4">

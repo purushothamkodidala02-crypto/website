@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
+import { CopyProtection } from "@/components/site/CopyProtection";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -98,9 +99,10 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`}>
-      <body className="min-h-screen bg-white text-gray-900">
+      <body className="min-h-screen bg-white text-gray-900 select-none">
         <PostHogProvider>
           <NavigationProgress />
+          <CopyProtection />
           {children}
           <GoogleAnalytics />
         </PostHogProvider>
