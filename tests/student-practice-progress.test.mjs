@@ -32,6 +32,7 @@ test("mock test card action distinguishes between written (Retake) and unwritten
   assert.match(cardAction, />\s*Retake\s*</);
   assert.match(cardAction, />\s*Start test\s*</);
   assert.match(cardAction, /Attempted/);
+  assert.match(cardAction, /shrink-0/);
 });
 
 test("student resume practice banner routes directly to folder where student last practiced", async () => {
@@ -43,12 +44,13 @@ test("student resume practice banner routes directly to folder where student las
   assert.match(banner, /Retake test/);
 });
 
-test("home and mock test pages render resume practice progress and card actions", async () => {
-  const [home, mockTests, runner, details] = await Promise.all([
+test("home, catalogue, and exam pages render resume practice progress and responsive card actions", async () => {
+  const [home, mockTests, runner, details, examPage] = await Promise.all([
     read("app/page.tsx"),
     read("app/mock-tests/page.tsx"),
     read("app/mock-tests/[id]/StudentTestRunner.tsx"),
     read("components/mock-tests/MockTestDetailPage.tsx"),
+    read("app/mock-tests/[id]/[exam]/page.tsx"),
   ]);
 
   assert.match(home, /StudentResumePracticeBanner/);
@@ -56,4 +58,7 @@ test("home and mock test pages render resume practice progress and card actions"
   assert.match(mockTests, /MockTestCardAction/);
   assert.match(runner, /setLocalRecentPractice/);
   assert.match(details, /hasPreviousAttempt=\{hasPreviousAttempt\}/);
+  assert.match(examPage, /MockTestCardAction/);
+  assert.match(examPage, /grid-cols-1 md:grid-cols-2/);
+  assert.match(examPage, /overflow-hidden/);
 });
