@@ -25,7 +25,7 @@ export function StartTestCardButton({
           router.push(href);
         });
       }}
-      className={`inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition active:scale-[0.98] ${
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-white shadow-xs transition active:scale-[0.98] whitespace-nowrap ${
         clicked || isPending ? "opacity-90 cursor-wait bg-teal-900" : ""
       }`}
     >

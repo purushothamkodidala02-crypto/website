@@ -7,6 +7,7 @@ import { ExamSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import {
+  displayMockTestHeading,
   formatExamFallbackDescription,
   formatExamFallbackTitle,
   formatExamHeading,
@@ -16,13 +17,14 @@ import {
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
-import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl } from "@/lib/public-urls";
+import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
 import { StartTestCardButton } from "@/components/exams/StartTestCardButton";
+import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
@@ -224,7 +226,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <h2 id="specialisations-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl">
               Choose a specialisation
             </h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0 max-w-full">
               {specializations.map((item) => (
                 <Link
                   key={item.id}
@@ -261,7 +263,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           {papers.length === 0 ? (
             <EmptyState title="Papers are being prepared" detail="This exam landing page is ready. Its papers and mock tests will appear here after the administrator publishes them." />
           ) : (
-            <div className="student-stagger mt-5 sm:mt-6 grid gap-3 sm:gap-4 md:grid-cols-2">
+            <div className="student-stagger mt-5 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 min-w-0 max-w-full">
               {papers.map((paper) => {
                 const display = paperDisplayById.get(paper.id);
                 const specialization = paper.specialization_id
@@ -273,7 +275,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   <Link
                     key={paper.id}
                     href={paperUrl(context.state.slug, context.exam!.slug, paper.slug)}
-                    className="student-card group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+                    className="student-card group min-w-0 max-w-full overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -321,34 +323,53 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <EmptyState title="Mock tests are coming soon" detail="The exam page is active. Published mock tests will automatically appear here." />
           ) : (
             <>
-              <div className="student-stagger mt-6 grid gap-3 sm:gap-4 md:grid-cols-2">
+              <div className="student-stagger mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 min-w-0 max-w-full">
                 {tests.slice(0, 4).map((test) => {
                   const paper = papers.find((item) => item.id === test.paper_id)!;
                   const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
                   const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
-                  const title = studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name);
+                  const testNum = String(test.series_number ?? 1).padStart(2, "0");
                   const isFree = test.access_type === "free";
+                  const testHref = mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug);
+                  const folderUrl = subject
+                    ? subjectUrl(context.state.slug, context.exam!.slug, paper.slug, subject.slug)
+                    : paperUrl(context.state.slug, context.exam!.slug, paper.slug);
+                  const folderName = subject?.name ?? paper.name;
+                  const testHeading = displayMockTestHeading({
+                    subjectName: subject?.name,
+                    sectionName: section?.name,
+                    testScope: test.test_scope,
+                    seriesNumber: Number(test.series_number ?? 1),
+                  });
+                  const paperLabel = paperDisplayById.get(paper.id)?.shortLabel ?? "Paper";
 
                   return (
                     <article
                       key={test.id}
-                      className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+                      className="group min-w-0 max-w-full overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
                     >
-                      <div>
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="min-w-0">
-                            <Link
-                              href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)}
-                              className="font-display block text-base font-bold text-slate-900 hover:text-teal-800 transition truncate"
-                            >
-                              {title}
-                            </Link>
-                            <p className="mt-1 text-xs text-slate-500 truncate">
-                              {paper.name}{subject ? ` · ${subject.name}` : ""}{section ? ` (${section.name})` : ""}
-                            </p>
+                      <div className="min-w-0 max-w-full">
+                        <div className="flex items-start justify-between gap-2.5 min-w-0 max-w-full">
+                          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                            <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-100/70 text-xs font-bold text-slate-900 shadow-2xs transition-all duration-200 group-hover:border-slate-300 group-hover:bg-slate-200/60">
+                              {testNum}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <Link
+                                href={testHref}
+                                className="font-display block text-sm sm:text-base font-bold text-slate-900 hover:text-teal-800 transition truncate"
+                                title={testHeading}
+                              >
+                                {testHeading}
+                              </Link>
+                              <p className="mt-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-teal-700 truncate">
+                                {paperLabel} · {paper.name}
+                              </p>
+                            </div>
                           </div>
+
                           <span
-                            className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                            className={`shrink-0 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${
                               isFree
                                 ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                                 : "bg-amber-50 text-amber-900 border border-amber-200"
@@ -358,30 +379,41 @@ export default async function ExamPage({ params, searchParams }: Props) {
                           </span>
                         </div>
 
-                        <div className="mt-3.5 flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-2 text-xs border border-slate-100">
-                          <div className="flex items-center gap-1.5">
+                        <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs border border-slate-100 min-w-0 max-w-full">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <span className="font-bold text-slate-900">{test.target_question_count ?? paper.question_count ?? "—"}</span>
                             <span className="text-[11px] font-medium text-slate-500">Qs</span>
                           </div>
                           <span className="text-slate-300 font-bold">•</span>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <span className="font-bold text-slate-900">{test.duration_minutes}</span>
                             <span className="text-[11px] font-medium text-slate-500">Mins</span>
                           </div>
                           <span className="text-slate-300 font-bold">•</span>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <span className="text-[11px] font-medium text-slate-600">Timed CBT</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                        <span className="text-xs font-semibold text-slate-500">
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
+                        <span className="text-xs font-semibold text-slate-500 shrink-0 truncate">
                           Bilingual Review
                         </span>
-                        <StartTestCardButton
-                          href={mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)}
-                        />
+                        <div className="shrink-0">
+                          <MockTestCardAction
+                            testId={test.id}
+                            testHref={testHref}
+                            testTitle={testHeading}
+                            folderUrl={folderUrl}
+                            folderName={folderName}
+                            folderType={test.subject_id ? "subject" : "paper"}
+                            examName={context.exam!.name}
+                            paperName={paper.name}
+                            subjectName={subject?.name}
+                            stateCode={context.state.code}
+                          />
+                        </div>
                       </div>
                     </article>
                   );
