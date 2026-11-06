@@ -66,6 +66,16 @@ export async function checkQuestionDuplicate(
   const paperSubjectIds = (paperSubjects ?? []).map((s) => s.id);
   if (!paperSubjectIds.length) return { isDuplicate: false };
 
+  let currentTestScope = "paper";
+  if (mockTestId) {
+    const { data: mt } = await supabase
+      .from("mock_tests")
+      .select("test_scope")
+      .eq("id", mockTestId)
+      .maybeSingle();
+    currentTestScope = mt?.test_scope ?? "paper";
+  }
+
   let query = supabase
     .from("questions")
     .select(`
@@ -109,7 +119,6 @@ export async function checkQuestionDuplicate(
   }
 
   if (mockTestId) {
-    const currentTestScope = mockTest?.test_scope ?? "paper";
     const otherTest = assignedTests.find((t) => {
       if (t.id === mockTestId) return false;
       const rawMtq = (match.mock_test_questions ?? []).find(

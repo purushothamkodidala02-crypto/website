@@ -378,6 +378,16 @@ async function importQuestions(
     return { success: false, message: error instanceof Error ? error.message : "The Question file could not be read." };
   }
 
+  let existingMockQuestionCount = 0;
+  if (mockTest && mode === "add") {
+    const { count } = await supabase
+      .from("mock_test_questions")
+      .select("question_id", { count: "exact", head: true })
+      .eq("mock_test_id", mockTest.id);
+    existingMockQuestionCount = count ?? 0;
+  }
+  const startSlot = mode === "add" ? existingMockQuestionCount : 0;
+
   // Pre-fetch active questions in this paper to check for duplicates
   const subjectIds = (subjects ?? []).map((subject) => subject.id);
   let existingPaperQuestions: Array<{
@@ -388,7 +398,7 @@ async function importQuestions(
     import_key: string | null;
     mock_test_questions: Array<{
       mock_test_id: string;
-      mock_tests: { id: string; title: string; paper_id: string } | null;
+      mock_tests: { id: string; title: string; paper_id: string; status?: string; superseded_by_mock_test_id?: string | null; test_scope?: "paper" | "subject" } | null;
     }>;
   }> = [];
 
@@ -490,11 +500,11 @@ async function importQuestions(
     const normEn = normalizeQuestionText(q.question_text);
     const normTe = normalizeQuestionText(q.question_text_te);
     const subjName = (subjects ?? []).find((s) => s.id === q.subject_id)?.name ?? "Subject";
-    const assignedMockTests: Array<{ id: string; title: string }> = [];
+    const assignedMockTests: Array<{ id: string; title: string; testScope: "paper" | "subject" }> = [];
 
     for (const mtq of (q.mock_test_questions as unknown as Array<{
       mock_test_id: string;
-      mock_tests: { id: string; title: string; paper_id: string; status: string; superseded_by_mock_test_id: string | null } | null;
+      mock_tests: { id: string; title: string; paper_id: string; status: string; superseded_by_mock_test_id: string | null; test_scope?: "paper" | "subject" } | null;
     }>) ?? []) {
       if (
         mtq.mock_tests?.title &&
@@ -531,11 +541,13 @@ async function importQuestions(
   const embeddedImageTargets: Array<{ importIndex: number; image: EmbeddedQuestionImage; rowNumber: number }> = [];
   const assignmentPreferences: Array<{ key: string; rowNumber: number; questionOrder: number | null; marks: number | null; negativeMarks: number | null }> = [];
 
-  parsedFile.rows.forEach(({ values: row, rowNumber }) => {
-    const importKey = (row.import_key ?? "").trim().toLocaleLowerCase();
-    // A file uploaded from a mock test owns its Questions. This prevents the
-    // same import_key in another mock test from updating this test's content.
-    const storedImportKey = mockTest ? `mock:${mockTest.id}:${importKey}` : importKey;
+  parsedFile.rows.forEach(({ values: row, rowNumber }, rowIndex) => {
+    // Option 1: Automatic slot assignment (q1, q2...) for mock test uploads
+    // Completely frees the admin from managing random import_keys in Excel
+    const slotNumber = startSlot + rowIndex + 1;
+    const slotKey = `q${slotNumber}`;
+    const importKey = mockTest ? slotKey : ((row.import_key ?? "").trim().toLocaleLowerCase() || slotKey);
+    const storedImportKey = mockTest ? `mock:${mockTest.id}:${slotKey}` : importKey;
     const subject = subjectByName.get(normalizeLookup(row.subject ?? ""));
     const correctAnswer = (row.correct_answer ?? "").trim().toUpperCase() as CorrectAnswer;
     const rawExpiresOn = (
