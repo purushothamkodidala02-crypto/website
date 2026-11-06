@@ -430,24 +430,16 @@ export async function MockTestDetailsPage({
 
   const catalogPromise = getMockTestCatalogData();
   const supplementaryPromise = getCachedMockTestSupplementary(id);
-
-  let supabaseClient: Awaited<ReturnType<typeof createClient>> | null = null;
-  const getSupabase = async () => {
-    if (!supabaseClient) {
-      supabaseClient = await createClient();
-    }
-    return supabaseClient;
-  };
+  const supabase = await createClient();
 
   const userPromise = hasAuthToken
-    ? getSupabase().then((sb) => sb.auth.getUser().then(({ data }) => data.user ?? null))
+    ? supabase.auth.getUser().then(({ data }) => data.user ?? null)
     : Promise.resolve(null);
 
   const sessionPromise = hasAuthToken
     ? userPromise.then(async (user) => {
         if (!user) return null;
-        const sb = await getSupabase();
-        const { data } = await sb
+        const { data } = await supabase
           .from("test_attempt_sessions")
           .select("id")
           .eq("user_id", user.id)
@@ -464,8 +456,7 @@ export async function MockTestDetailsPage({
   const attemptPromise = hasAuthToken
     ? userPromise.then(async (user) => {
         if (!user) return null;
-        const sb = await getSupabase();
-        const { data } = await sb
+        const { data } = await supabase
           .from("test_attempts")
           .select("id")
           .eq("user_id", user.id)
@@ -554,9 +545,8 @@ export async function MockTestDetailsPage({
         : null,
     };
   } else {
-    const sb = await getSupabase();
     const [testResult, mqResult] = await Promise.all([
-      sb
+      supabase
         .from("mock_tests")
         .select(`
           id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, description, instructions, duration_minutes, status, access_type, target_question_count,
@@ -576,7 +566,7 @@ export async function MockTestDetailsPage({
         .eq("id", id)
         .eq("status", "published")
         .maybeSingle(),
-      sb
+      supabase
         .from("mock_test_questions")
         .select("marks, negative_marks")
         .eq("mock_test_id", id),
@@ -608,12 +598,11 @@ export async function MockTestDetailsPage({
   const [accessResult, resumableSessionResult, previousAttemptResult, fallbackPapers] = await Promise.all([
     test.access_type === "paid" && examGroup
       ? (async () => {
-          const sb = await getSupabase();
           const [products, canAccess] = await Promise.all([
             paidSalesEnabled
-              ? sb.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", examGroup.id).eq("access_products.is_active", true)
+              ? supabase.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", examGroup.id).eq("access_products.is_active", true)
               : Promise.resolve({ data: [] }),
-            isLoggedIn ? sb.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
+            isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
           ]);
           return { products, canAccess };
         })()
@@ -623,14 +612,12 @@ export async function MockTestDetailsPage({
     attemptPromise,
 
     paper && siblingPapers.length === 0
-      ? getSupabase().then((sb) =>
-          sb
-            .from("papers")
-            .select("id, exam_group_id, specialization_id, name, display_order")
-            .eq("exam_group_id", paper.exam_group_id)
-            .eq("is_active", true)
-            .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
-        )
+      ? supabase
+          .from("papers")
+          .select("id, exam_group_id, specialization_id, name, display_order")
+          .eq("exam_group_id", paper.exam_group_id)
+          .eq("is_active", true)
+          .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
       : Promise.resolve([] as OrderedPaper[]),
   ]);
 

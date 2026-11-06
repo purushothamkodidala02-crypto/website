@@ -23,24 +23,10 @@ import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
 import { StartTestCardButton } from "@/components/exams/StartTestCardButton";
-import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
-
-export async function generateStaticParams() {
-  const catalog = await getMockTestCatalogData();
-  const params: { id: string; exam: string }[] = [];
-  for (const exam of catalog.exams) {
-    const category = catalog.categories.find((c) => c.id === exam.exam_id);
-    const state = category ? catalog.states.find((s) => s.id === category.state_id) : null;
-    if (state?.slug && exam.slug) {
-      params.push({ id: state.slug, exam: exam.slug });
-    }
-  }
-  return params;
-}
 
 type Props = { params: Promise<{ id: string; exam: string }>; searchParams: Promise<Filters> };
 

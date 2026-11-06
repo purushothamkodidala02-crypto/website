@@ -8,6 +8,8 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/immutability": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
@@ -19,6 +21,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "scratch/**",
+    "*.mjs",
   ]),
 ]);
 

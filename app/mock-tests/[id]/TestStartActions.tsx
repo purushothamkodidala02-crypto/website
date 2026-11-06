@@ -18,16 +18,11 @@ export function TestStartActions({
   isLoggedIn: boolean;
   hasResumableSession: boolean;
 }) {
-  const [signedIn, setSignedIn] = useState(isLoggedIn);
-  const [resumable, setResumable] = useState(hasResumableSession);
+  const [clientSignedIn, setClientSignedIn] = useState(false);
+  const [clientResumable, setClientResumable] = useState(false);
 
-  useEffect(() => {
-    setSignedIn(isLoggedIn);
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    setResumable(hasResumableSession);
-  }, [hasResumableSession]);
+  const signedIn = isLoggedIn || clientSignedIn;
+  const resumable = hasResumableSession || clientResumable;
 
   useEffect(() => {
     if (isLoggedIn) return;
@@ -35,7 +30,7 @@ export function TestStartActions({
     const supabase = createClient();
     void supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!active || !session?.user) return;
-      setSignedIn(true);
+      setClientSignedIn(true);
       const { data: activeSession } = await supabase
         .from("test_attempt_sessions")
         .select("id")
@@ -48,7 +43,7 @@ export function TestStartActions({
         .maybeSingle();
 
       if (active && activeSession) {
-        setResumable(true);
+        setClientResumable(true);
       }
     });
 

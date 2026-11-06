@@ -283,6 +283,12 @@ test("ratio expressions in English and Telugu question texts are not split into 
   assert.match(formatter, /\(\[\.\?\]\|\(\?<!\[\\d౦-౯\]\\s\*\):\)/);
 });
 
+test("introductory statements ending with colon before list items are split onto new lines", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /\(:\)\[ \\t\]\*\(\?=\\\(\(\?:\[a-hA-H\\d\]/);
+});
+
 test("sentences ending with trainee or variable letters are not split into false list items", async () => {
   const formatter = await read("components/questions/FormattedQuestionText.tsx");
 
