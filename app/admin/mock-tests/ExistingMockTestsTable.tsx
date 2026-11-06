@@ -57,9 +57,9 @@ type ExistingMockTest = {
 const emptyLocation: LocationFilterValue = { categoryId: "", examId: "", specializationId: "", paperId: "", subjectId: "" };
 
 const statusDetails: Record<MockTestStatus, { label: string; className: string }> = {
-  draft: { label: "Draft", className: "border border-slate-200 bg-slate-100 text-slate-700" },
-  published: { label: "Published", className: "border border-slate-200 bg-slate-100 text-slate-700" },
-  archived: { label: "Hidden", className: "border border-slate-200 bg-slate-50 text-slate-500" },
+  draft: { label: "Draft", className: "border border-amber-200/80 bg-amber-50/60 text-amber-800" },
+  published: { label: "Published", className: "border border-emerald-200/80 bg-emerald-50/60 text-emerald-800" },
+  archived: { label: "Hidden", className: "border border-slate-200/80 bg-slate-100/70 text-slate-600" },
 };
 
 export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialStatus, initialScope = "all" }: {

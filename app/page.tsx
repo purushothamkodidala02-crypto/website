@@ -127,7 +127,7 @@ export default async function Home() {
         <div className="flex justify-end">
           <div className="w-full max-w-xl">
             <form action="/mock-tests" method="GET">
-              <div className="relative flex items-center rounded-2xl border border-slate-200/90 bg-white/95 p-1.5 shadow-2xs backdrop-blur-xs transition hover:border-slate-300 focus-within:border-slate-400 focus-within:bg-white focus-within:shadow-xs focus-within:ring-4 focus-within:ring-slate-500/10">
+              <div className="relative flex items-center rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-xs shadow-slate-900/4 transition-all duration-200 hover:border-slate-300 hover:shadow-sm focus-within:border-slate-400 focus-within:bg-white focus-within:shadow-md focus-within:ring-4 focus-within:ring-slate-500/10">
                 <svg
                   className="ml-2.5 h-4 w-4 shrink-0 text-slate-400"
                   fill="none"
@@ -151,7 +151,7 @@ export default async function Home() {
                 />
                 <button
                   type="submit"
-                  className="rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 px-4 py-2 text-xs font-semibold text-white shadow-2xs transition active:scale-[0.98]"
+                  className="rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 px-4 py-2 text-xs font-semibold text-white shadow-xs transition active:scale-[0.98]"
                 >
                   Search
                 </button>
@@ -171,7 +171,7 @@ export default async function Home() {
                   <Link
                     key={tag.label}
                     href={`/mock-tests?q=${encodeURIComponent(tag.q)}`}
-                    className="rounded-lg border border-slate-200/90 bg-white/80 px-2.5 py-0.5 font-medium text-slate-700 shadow-2xs transition hover:border-slate-400 hover:bg-white hover:text-slate-950"
+                    className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   >
                     {tag.label}
                   </Link>
@@ -189,13 +189,13 @@ export default async function Home() {
         ) : (
           <div className="mt-7 sm:mt-8">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-base sm:text-lg font-bold text-slate-900">
+              <h2 className="font-display text-base sm:text-lg font-bold tracking-tight text-slate-900">
                 Select State
               </h2>
               {states.length > 4 && (
                 <Link
                   href="/mock-tests"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-950 transition"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-950 transition"
                 >
                   Browse all ({states.length}) <span aria-hidden="true">→</span>
                 </Link>
@@ -211,20 +211,41 @@ export default async function Home() {
                 const stateExams = activeExams.filter((exam) =>
                   stateCategoryIds.has(exam.exam_id)
                 );
+                const isTG = state.code.toUpperCase() === "TG";
 
                 return (
                   <Link
                     key={state.id}
                     href={stateUrl(state.slug)}
                     prefetch={true}
-                    className="student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-xs"
+                    className="student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/40 p-5 shadow-xs shadow-slate-900/4 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/8"
                   >
+                    <div
+                      className={`pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
+                        isTG
+                          ? "from-blue-600/0 via-blue-600/25 to-blue-600/0"
+                          : "from-teal-600/0 via-teal-600/25 to-teal-600/0"
+                      }`}
+                      aria-hidden="true"
+                    />
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="grid h-11 w-11 place-items-center rounded-xl border border-slate-200/80 bg-slate-50/80 text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900 transition-all duration-200 group-hover:scale-105 shadow-2xs">
+                        <span
+                          className={`grid h-11 w-11 place-items-center rounded-xl border transition-all duration-200 group-hover:scale-105 shadow-2xs ${
+                            isTG
+                              ? "border-blue-100/90 bg-blue-50/60 text-blue-900 group-hover:border-blue-200 group-hover:bg-blue-100/70"
+                              : "border-teal-100/90 bg-teal-50/60 text-teal-900 group-hover:border-teal-200 group-hover:bg-teal-100/70"
+                          }`}
+                        >
                           <StateSymbol slug={state.slug} className="h-6 w-6" />
                         </span>
-                        <span className="rounded-full border border-slate-200 bg-slate-50/90 px-2.5 py-0.5 text-[11px] font-bold text-slate-700 tracking-wide">
+                        <span
+                          className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold tracking-wide transition ${
+                            isTG
+                              ? "border-blue-200/70 bg-blue-50/70 text-blue-950"
+                              : "border-teal-200/70 bg-teal-50/70 text-teal-950"
+                          }`}
+                        >
                           {state.code}
                         </span>
                       </div>
@@ -250,12 +271,12 @@ export default async function Home() {
         {/* Available Exams Section */}
         <div className="mt-8 sm:mt-10">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-base sm:text-lg font-bold text-slate-900">
+            <h2 className="font-display text-base sm:text-lg font-bold tracking-tight text-slate-900">
               Available Exams
             </h2>
             <Link
               href="/mock-tests"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-950 transition"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-950 transition"
             >
               Browse all ({activeExams.length}) <span aria-hidden="true">→</span>
             </Link>
@@ -267,20 +288,35 @@ export default async function Home() {
               const state = states.find((item) => item.id === category?.state_id);
               const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
               if (!state) return null;
+              const isTG = state.code.toUpperCase() === "TG";
 
               return (
                 <Link
                   key={exam.id}
                   href={examUrl(state.slug, exam.slug)}
                   prefetch={true}
-                  className="student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-xs"
+                  className="student-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/40 p-5 shadow-xs shadow-slate-900/4 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/8"
                 >
+                  <div
+                    className={`pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
+                      isTG
+                        ? "from-blue-600/0 via-blue-600/20 to-blue-600/0"
+                        : "from-teal-600/0 via-teal-600/20 to-teal-600/0"
+                    }`}
+                    aria-hidden="true"
+                  />
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-slate-200/80 bg-slate-50/80 text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900 transition-all duration-200 group-hover:scale-105 shadow-2xs">
+                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-slate-200/80 bg-slate-50 text-slate-700 transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900 shadow-2xs">
                         <ExamSymbol name={exam.name} className="h-5 w-5" />
                       </span>
-                      <span className="rounded-full border border-slate-200 bg-slate-50/90 px-2.5 py-0.5 text-[11px] font-bold text-slate-700 tracking-wide">
+                      <span
+                        className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold tracking-wide transition ${
+                          isTG
+                            ? "border-blue-100 bg-blue-50/50 text-blue-900"
+                            : "border-teal-100 bg-teal-50/50 text-teal-900"
+                        }`}
+                      >
                         {state.code}
                       </span>
                     </div>
