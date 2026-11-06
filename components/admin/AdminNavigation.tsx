@@ -12,36 +12,46 @@ const subscribeToClient = () => () => {};
 const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
 
-const sections = [
+export const ADMIN_SECTIONS = [
   {
     label: "Workspace",
     links: [{ href: "/admin", label: "Overview", icon: "overview" as const }],
   },
   {
-    label: "Exam structure",
+    label: "Curriculum",
     links: [
       { href: "/admin/exams", label: "Exam catalogue", icon: "categories" as const },
-      { href: "/admin/subjects", label: "Subjects", icon: "subjects" as const },
+      { href: "/admin/subjects", label: "Subjects & Syllabus", icon: "subjects" as const },
       { href: "/admin/exam-pages", label: "Public exam pages", icon: "exams" as const },
     ],
   },
   {
-    label: "Content and publishing",
+    label: "Question Bank",
     links: [
       { href: "/admin/questions", label: "Question bank", icon: "questions" as const },
       { href: "/admin/similarity", label: "Similarity scanner", icon: "similarity" as const },
       { href: "/admin/excel-import-guide", label: "Excel import guide", icon: "guide" as const },
       { href: "/admin/question-reports", label: "Question reports", icon: "reports" as const },
+    ],
+  },
+  {
+    label: "Assessments",
+    links: [
       { href: "/admin/mock-tests", label: "Mock tests", icon: "tests" as const },
-      { href: "/admin/access", label: "Exam series", icon: "passes" as const },
-      { href: "/admin/students", label: "Registrations", icon: "students" as const },
-      { href: "/admin/results", label: "Results", icon: "results" as const },
-      { href: "/admin/surveys", label: "Surveys", icon: "surveys" as const },
+      { href: "/admin/results", label: "Results & Submissions", icon: "results" as const },
+    ],
+  },
+  {
+    label: "Commerce & Users",
+    links: [
+      { href: "/admin/access", label: "Exam series passes", icon: "passes" as const },
+      { href: "/admin/students", label: "Registrations & Sales", icon: "students" as const },
+      { href: "/admin/surveys", label: "Surveys & Feedback", icon: "surveys" as const },
     ],
   },
 ];
 
-type NavIconName =
+export type NavIconName =
   | "overview"
   | "categories"
   | "exams"
@@ -57,7 +67,7 @@ type NavIconName =
   | "guide"
   | "portal";
 
-function NavIcon({ name }: { name: NavIconName }) {
+export function NavIcon({ name }: { name: NavIconName }) {
   const common = {
     fill: "none",
     stroke: "currentColor",
@@ -67,7 +77,7 @@ function NavIcon({ name }: { name: NavIconName }) {
   };
 
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4" {...common}>
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 shrink-0" {...common}>
       {name === "overview" && (
         <>
           <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
@@ -125,9 +135,26 @@ function NavIcon({ name }: { name: NavIconName }) {
           <rect x="15.2" y="4" width="2.8" height="14" rx=".7" />
         </>
       )}
-      {name === "passes" && <><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7Z" /><path d="M12 4v16M4 8.5l8 4.5 8-4.5" /></>}
-      {name === "students" && <><circle cx="9" cy="8" r="3" /><path d="M3.5 20v-2.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V20" /><path d="M15 5.5a3 3 0 0 1 0 5.8M16 14a4.5 4.5 0 0 1 4.5 4.5V20" /></>}
-      {name === "reports" && <><path d="M5 4h14v16H5z" /><path d="M8 8h8M8 12h5M8 16h4" /><path d="m15 15 1.5 1.5L19 14" /></>}
+      {name === "passes" && (
+        <>
+          <path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7Z" />
+          <path d="M12 4v16M4 8.5l8 4.5 8-4.5" />
+        </>
+      )}
+      {name === "students" && (
+        <>
+          <circle cx="9" cy="8" r="3" />
+          <path d="M3.5 20v-2.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V20" />
+          <path d="M15 5.5a3 3 0 0 1 0 5.8M16 14a4.5 4.5 0 0 1 4.5 4.5V20" />
+        </>
+      )}
+      {name === "reports" && (
+        <>
+          <path d="M5 4h14v16H5z" />
+          <path d="M8 8h8M8 12h5M8 16h4" />
+          <path d="m15 15 1.5 1.5L19 14" />
+        </>
+      )}
       {name === "surveys" && (
         <>
           <path d="M9 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
@@ -136,7 +163,13 @@ function NavIcon({ name }: { name: NavIconName }) {
           <path d="M9 17h6" />
         </>
       )}
-      {name === "guide" && <><path d="M6 3.5h10l3 3V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" /><path d="M13 3.5V7h3" /><path d="M8 11h8M8 14.5h8M8 18h5" /></>}
+      {name === "guide" && (
+        <>
+          <path d="M6 3.5h10l3 3V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" />
+          <path d="M13 3.5V7h3" />
+          <path d="M8 11h8M8 14.5h8M8 18h5" />
+        </>
+      )}
       {name === "portal" && (
         <>
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -163,139 +196,19 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-type BadgeState = {
+export type BadgeState = {
   openReports: number;
   newSurveys: number;
   hasNewReport: boolean;
 };
 
-function NavigationLinks({
-  collapsed = false,
-  badges,
-  onLinkClick,
-}: {
-  collapsed?: boolean;
-  badges: BadgeState;
-  onLinkClick?: () => void;
-}) {
-  const pathname = usePathname();
-
-  return (
-    <nav className="space-y-6" aria-label="Admin Navigation">
-      {sections.map((section) => {
-        const sectionHasUpdates = section.links.some((l) =>
-          l.href === "/admin/question-reports"
-            ? badges.openReports > 0
-            : l.href === "/admin/surveys"
-              ? badges.newSurveys > 0
-              : false
-        );
-
-        return (
-          <section key={section.label}>
-            {!collapsed && (
-              <div className="flex items-center justify-between px-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.17em] text-teal-800/80">{section.label}</p>
-                {sectionHasUpdates && (
-                  <span
-                    title="Updates available in this section"
-                    className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
-                  />
-                )}
-              </div>
-            )}
-            <div className="mt-2 grid gap-1.5">
-              {section.links.map((link) => {
-                const active = isActive(pathname, link.href);
-                const isReportsLink = link.href === "/admin/question-reports";
-                const isSurveysLink = link.href === "/admin/surveys";
-                const reportCount = isReportsLink ? (pathname.startsWith("/admin/question-reports") ? 0 : badges.openReports) : 0;
-                const surveyCount = isSurveysLink ? (pathname.startsWith("/admin/surveys") ? 0 : badges.newSurveys) : 0;
-                const showBadge = reportCount > 0 || surveyCount > 0;
-                const badgeCount = reportCount || surveyCount;
-                const isReport = isReportsLink;
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    prefetch={true}
-                    onClick={onLinkClick}
-                    title={collapsed ? link.label : undefined}
-                    className={`group flex items-center justify-between gap-3 rounded-2xl border px-3.5 py-3 text-sm font-black transition hover:translate-x-0.5 ${
-                      active
-                        ? "border-teal-600 bg-teal-700 text-white shadow-lg shadow-teal-900/15"
-                        : "border-teal-100 bg-white/90 text-slate-950 hover:border-teal-200 hover:bg-teal-50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition ${
-                          active
-                            ? "bg-white text-teal-800 shadow-2xs"
-                            : "border border-teal-100 bg-teal-50 text-teal-800 group-hover:bg-teal-100 group-hover:text-teal-900"
-                        }`}
-                      >
-                        <NavIcon name={link.icon} />
-                      </span>
-                      <span className="truncate">{link.label}</span>
-                    </div>
-                    {showBadge && (
-                      <span
-                        aria-label={
-                          isReport
-                            ? `${reportCount} open question ${reportCount === 1 ? "report" : "reports"}`
-                            : `${surveyCount} new survey ${surveyCount === 1 ? "response" : "responses"}`
-                        }
-                        className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-black tracking-tight transition-transform duration-200 group-hover:scale-105 ${
-                          isReport
-                            ? active
-                              ? "bg-amber-400 text-slate-950 ring-1 ring-amber-400/50"
-                              : "bg-amber-100 text-amber-900 border border-amber-200"
-                            : active
-                              ? "bg-white/20 text-white ring-1 ring-white/30"
-                              : "bg-teal-100 text-teal-800 border border-teal-200"
-                        }`}
-                      >
-                        {((isReport && badges.hasNewReport) || (!isReport && surveyCount > 0)) && (
-                          <span className="relative flex h-2 w-2">
-                            <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isReport ? "bg-amber-400" : active ? "bg-white" : "bg-teal-600"}`} />
-                            <span className={`relative inline-flex h-2 w-2 rounded-full ${isReport ? "bg-amber-600" : active ? "bg-white" : "bg-teal-800"}`} />
-                          </span>
-                        )}
-                        <span>{badgeCount > 99 ? "99+" : badgeCount}{!isReport ? " new" : ""}</span>
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        );
-      })}
-    </nav>
-  );
-}
-
-function Brand({ linked = true, collapsed = false }: { linked?: boolean; collapsed?: boolean }) {
-  const content = collapsed
-    ? <BrandMark preload className="h-9 w-9 shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.06)]" />
-    : <BrandLockup context="admin" markClassName="h-9 w-9 shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.06)]" />;
-
-  if (!linked) return <div className="flex min-w-0 items-center">{content}</div>;
-
-  return (
-    <Link href="/admin" prefetch={true} className="flex min-w-0 items-center">
-      {content}
-    </Link>
-  );
-}
-
 export function AdminNavigation(props: {
   collapsed?: boolean;
   onToggle?: () => void;
+  userEmail?: string;
+  adminName?: string;
 }) {
-  const { collapsed = false } = props;
+  const { collapsed = false, onToggle, userEmail, adminName = "Administrator" } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -357,7 +270,7 @@ export function AdminNavigation(props: {
     }
   }
 
-  // Listen to open/toggle/close events from desktop header or shortcuts
+  // Listen to open/toggle/close events from header or shortcuts
   useEffect(() => {
     const handleOpen = () => setMobileOpen(true);
     const handleClose = () => setMobileOpen(false);
@@ -365,16 +278,16 @@ export function AdminNavigation(props: {
 
     window.addEventListener("admin_sidebar_open", handleOpen);
     window.addEventListener("admin_sidebar_close", handleClose);
-    window.addEventListener("admin_sidebar_toggle", handleToggle);
+    window.addEventListener("admin_sidebar_toggle_mobile", handleToggle);
 
     return () => {
       window.removeEventListener("admin_sidebar_open", handleOpen);
       window.removeEventListener("admin_sidebar_close", handleClose);
-      window.removeEventListener("admin_sidebar_toggle", handleToggle);
+      window.removeEventListener("admin_sidebar_toggle_mobile", handleToggle);
     };
   }, []);
 
-  // Lock body scroll and close on Escape key when drawer is open
+  // Lock body scroll on mobile drawer open
   useEffect(() => {
     if (!mobileOpen) return;
     const prevOverflow = document.body.style.overflow;
@@ -391,7 +304,7 @@ export function AdminNavigation(props: {
     };
   }, [mobileOpen, handleDrawerClose]);
 
-  // Update seen states in localStorage when visiting report/survey pages
+  // Update seen states in localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (pathname.startsWith("/admin/surveys")) {
@@ -407,7 +320,7 @@ export function AdminNavigation(props: {
     }
   }, [pathname]);
 
-  // Fetch badges on mount, window focus, visibility change, or periodic interval
+  // Periodic badge check
   useEffect(() => {
     const initialTimer = window.setTimeout(() => {
       void fetchBadges();
@@ -440,18 +353,265 @@ export function AdminNavigation(props: {
 
   const hasAnyUpdate = badges.openReports > 0 || badges.newSurveys > 0;
 
+  const initials = adminName
+    ? adminName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "AD";
+
   return (
     <>
-      {/* Mobile Sticky Top Navigation Bar */}
+      {/* ========================================================
+          1. PERSISTENT DESKTOP SIDEBAR (Visible md: and up)
+      ======================================================== */}
+      <aside
+        aria-label="Admin desktop navigation"
+        className={`fixed inset-y-0 left-0 z-30 hidden md:flex flex-col border-r border-teal-100 bg-white text-slate-900 shadow-[1px_0_4px_rgba(0,0,0,0.02)] transition-[width] duration-200 ease-in-out ${
+          collapsed ? "w-20" : "w-68"
+        }`}
+      >
+        {/* Sidebar Header Brand Lockup */}
+        <div
+          className={`flex h-16 shrink-0 items-center border-b border-teal-100 px-4 transition-all ${
+            collapsed ? "justify-center" : "justify-between"
+          }`}
+        >
+          {collapsed ? (
+            <Link
+              href="/admin"
+              title="Varadhi Administration"
+              className="grid h-10 w-10 place-items-center transition hover:opacity-90"
+            >
+              <BrandMark preload className="h-8 w-8 drop-shadow-xs" />
+            </Link>
+          ) : (
+            <Link href="/admin" className="flex items-center gap-2.5 min-w-0">
+              <BrandLockup
+                context="admin"
+                markClassName="h-8 w-8 shrink-0 drop-shadow-xs"
+              />
+            </Link>
+          )}
+
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={onToggle}
+              title="Collapse sidebar ( [ )"
+              aria-label="Collapse sidebar"
+              className="grid h-7 w-7 place-items-center rounded-lg border border-teal-100 bg-teal-50/50 text-teal-800 transition hover:bg-teal-100 hover:text-teal-950 focus:outline-none"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Scrollable Navigation Links */}
+        <div className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 space-y-5 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.100)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-teal-100 hover:[&::-webkit-scrollbar-thumb]:bg-teal-200">
+          {ADMIN_SECTIONS.map((section) => {
+            const sectionHasUpdates = section.links.some((l) =>
+              l.href === "/admin/question-reports"
+                ? badges.openReports > 0
+                : l.href === "/admin/surveys"
+                  ? badges.newSurveys > 0
+                  : false
+            );
+
+            return (
+              <section key={section.label} className="space-y-1">
+                {!collapsed ? (
+                  <div className="flex items-center justify-between px-3 py-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
+                      {section.label}
+                    </p>
+                    {sectionHasUpdates && (
+                      <span
+                        title="Updates available in this section"
+                        className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="my-1 border-t border-slate-100" />
+                )}
+
+                <div className="space-y-0.5">
+                  {section.links.map((link) => {
+                    const active = isActive(pathname, link.href);
+                    const isReportsLink = link.href === "/admin/question-reports";
+                    const isSurveysLink = link.href === "/admin/surveys";
+                    const reportCount = isReportsLink
+                      ? pathname.startsWith("/admin/question-reports")
+                        ? 0
+                        : badges.openReports
+                      : 0;
+                    const surveyCount = isSurveysLink
+                      ? pathname.startsWith("/admin/surveys")
+                        ? 0
+                        : badges.newSurveys
+                      : 0;
+                    const showBadge = reportCount > 0 || surveyCount > 0;
+                    const badgeCount = reportCount || surveyCount;
+
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        prefetch={true}
+                        title={collapsed ? `${link.label}${showBadge ? ` (${badgeCount})` : ""}` : undefined}
+                        className={`group relative flex items-center rounded-xl transition duration-150 ${
+                          collapsed
+                            ? "h-10 w-full justify-center px-0"
+                            : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
+                        } ${
+                          active
+                            ? "bg-teal-700 text-white shadow-xs font-bold"
+                            : "text-slate-700 hover:bg-teal-50 hover:text-teal-950"
+                        }`}
+                      >
+                        <div className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-3"}`}>
+                          <span
+                            className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition ${
+                              active
+                                ? "bg-white/15 text-white"
+                                : "text-teal-800 group-hover:text-teal-950"
+                            }`}
+                          >
+                            <NavIcon name={link.icon} />
+                          </span>
+
+                          {!collapsed && (
+                            <span className="truncate">{link.label}</span>
+                          )}
+                        </div>
+
+                        {/* Badges in expanded mode */}
+                        {!collapsed && showBadge && (
+                          <span
+                            className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black tracking-tight ${
+                              isReportsLink
+                                ? active
+                                  ? "bg-amber-400 text-slate-950"
+                                  : "bg-amber-100 text-amber-900 border border-amber-200"
+                                : active
+                                  ? "bg-white/20 text-white"
+                                  : "bg-teal-100 text-teal-800 border border-teal-200"
+                            }`}
+                          >
+                            {badgeCount > 99 ? "99+" : badgeCount}
+                          </span>
+                        )}
+
+                        {/* Unread indicator dot in collapsed mode */}
+                        {collapsed && showBadge && (
+                          <span
+                            title={`${badgeCount} update${badgeCount === 1 ? "" : "s"}`}
+                            className="absolute top-1.5 right-2 flex h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white animate-pulse"
+                          />
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+
+        {/* Sidebar Bottom Actions */}
+        <div className="shrink-0 border-t border-teal-100 bg-slate-50/50 p-3 space-y-2">
+          {!collapsed ? (
+            <>
+              {/* Student Portal shortcut */}
+              <Link
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                title="Open live student portal"
+                className="flex items-center justify-between rounded-xl border border-teal-200/80 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 transition"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="grid h-5 w-5 place-items-center rounded bg-teal-50 text-teal-800">
+                    <NavIcon name="portal" />
+                  </span>
+                  <span>Student Portal</span>
+                </span>
+                <span className="text-[10px] font-bold text-teal-700">↗</span>
+              </Link>
+
+              {/* Admin identity & status */}
+              <div className="flex items-center justify-between gap-2 pt-1 px-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-teal-700 text-[10px] font-black text-white">
+                    {initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-slate-900 leading-tight">
+                      {userEmail ?? adminName}
+                    </p>
+                    <p className="flex items-center gap-1 text-[10px] font-semibold text-teal-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+                      <span>MFA Active</span>
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onToggle}
+                  title="Collapse sidebar ( [ )"
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <Link
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                title="Open live student portal"
+                className="grid h-9 w-9 place-items-center rounded-xl border border-teal-200/80 bg-white text-teal-800 shadow-2xs hover:bg-teal-50 transition"
+              >
+                <NavIcon name="portal" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={onToggle}
+                title="Expand sidebar ( [ )"
+                className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-2xs hover:bg-slate-50 transition"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* ========================================================
+          2. MOBILE TOP STICKY BAR (Visible on < md)
+      ======================================================== */}
       <div className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-teal-100 bg-white/95 px-4 text-slate-900 shadow-xs backdrop-blur md:hidden">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open admin side navigation"
             aria-expanded={mobileOpen}
             aria-controls="admin-mobile-drawer"
-            className="relative grid h-9 w-9 place-items-center rounded-lg border border-teal-200/80 bg-teal-50/60 text-teal-800 transition hover:bg-teal-100 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="relative grid h-9 w-9 place-items-center rounded-xl border border-teal-200/80 bg-teal-50/60 text-teal-800 transition hover:bg-teal-100 hover:text-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
             <MenuIcon />
             {hasAnyUpdate && (
@@ -461,19 +621,34 @@ export function AdminNavigation(props: {
               />
             )}
           </button>
-          <Brand linked={true} />
+          <Link href="/admin" className="flex items-center">
+            <BrandLockup context="admin" markClassName="h-7 w-7 shrink-0 drop-shadow-xs" />
+          </Link>
         </div>
+
         <div className="flex items-center gap-2">
-          <LogoutButton className="rounded-lg border border-teal-200/80 bg-teal-50/60 px-2.5 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50" />
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("admin_open_command_palette"))}
+            aria-label="Open command search"
+            className="grid h-9 w-9 place-items-center rounded-xl border border-teal-200/80 bg-teal-50/60 text-teal-800 hover:bg-teal-100 transition"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+          </button>
+          <LogoutButton className="rounded-xl border border-teal-200/80 bg-teal-50/60 px-2.5 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50" />
         </div>
       </div>
 
-      {/* Slide-Out Side Navigation Drawer (Matches Student Navigation - Closed by default with no side visible) */}
+      {/* ========================================================
+          3. MOBILE SLIDE-OUT DRAWER (createPortal)
+      ======================================================== */}
       {mounted &&
         createPortal(
           <div
             id="admin-mobile-drawer"
-            className={`fixed inset-0 z-[100] transition-opacity duration-300 ${
+            className={`fixed inset-0 z-[100] transition-opacity duration-300 md:hidden ${
               mobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
             }`}
             aria-hidden={!mobileOpen}
@@ -481,7 +656,7 @@ export function AdminNavigation(props: {
             {/* Backdrop overlay */}
             <button
               type="button"
-              aria-label="Close admin side navigation"
+              aria-label="Close admin navigation"
               onClick={handleDrawerClose}
               className={`absolute inset-0 h-full w-full bg-[#0a2922]/50 backdrop-blur-[2px] transition-opacity duration-300 cursor-pointer ${
                 mobileOpen ? "opacity-100" : "opacity-0"
@@ -489,43 +664,107 @@ export function AdminNavigation(props: {
               tabIndex={mobileOpen ? 0 : -1}
             />
 
-            {/* Slide-out Sidebar */}
+            {/* Slide-out Sidebar Drawer */}
             <aside
               role="dialog"
               aria-modal="true"
               aria-label="Admin side navigation"
-              className={`absolute inset-y-0 left-0 flex h-full w-[min(22rem,88vw)] flex-col border-r border-teal-100 bg-gradient-to-b from-white via-white to-teal-50/60 text-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
+              className={`absolute inset-y-0 left-0 flex h-full w-[min(22rem,88vw)] flex-col border-r border-teal-100 bg-white text-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
                 mobileOpen ? "translate-x-0" : "-translate-x-full"
               }`}
             >
               {/* Drawer Top Header */}
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-teal-100 px-5">
-                <Brand linked={true} />
+                <Link href="/admin" onClick={handleDrawerClose}>
+                  <BrandLockup context="admin" markClassName="h-8 w-8 shrink-0 drop-shadow-xs" />
+                </Link>
                 <button
                   ref={closeButtonRef}
                   type="button"
                   onClick={handleDrawerClose}
-                  aria-label="Close admin side navigation"
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-xl font-semibold text-slate-700 transition hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  aria-label="Close admin navigation"
+                  className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700 transition hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-400"
                 >
-                  <span className="leading-none">✕</span>
+                  ✕
                 </button>
               </div>
 
               {/* Drawer Navigation Links */}
-              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin] [scrollbar-color:theme(colors.teal.100)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-teal-100 hover:[&::-webkit-scrollbar-thumb]:bg-teal-200">
-                <NavigationLinks
-                  badges={badges}
-                  onLinkClick={handleDrawerClose}
-                  collapsed={collapsed}
-                />
+              <div className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 space-y-6 [scrollbar-width:thin]">
+                {ADMIN_SECTIONS.map((section) => (
+                  <section key={section.label} className="space-y-1.5">
+                    <p className="px-3 text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
+                      {section.label}
+                    </p>
+                    <div className="grid gap-1">
+                      {section.links.map((link) => {
+                        const active = isActive(pathname, link.href);
+                        const isReportsLink = link.href === "/admin/question-reports";
+                        const isSurveysLink = link.href === "/admin/surveys";
+                        const reportCount = isReportsLink
+                          ? pathname.startsWith("/admin/question-reports")
+                            ? 0
+                            : badges.openReports
+                          : 0;
+                        const surveyCount = isSurveysLink
+                          ? pathname.startsWith("/admin/surveys")
+                            ? 0
+                            : badges.newSurveys
+                          : 0;
+                        const showBadge = reportCount > 0 || surveyCount > 0;
+                        const badgeCount = reportCount || surveyCount;
+
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            prefetch={true}
+                            onClick={handleDrawerClose}
+                            className={`flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-sm font-bold transition ${
+                              active
+                                ? "bg-teal-700 text-white shadow-xs"
+                                : "text-slate-900 hover:bg-teal-50 hover:text-teal-950"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span
+                                className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${
+                                  active ? "bg-white/15 text-white" : "text-teal-800"
+                                }`}
+                              >
+                                <NavIcon name={link.icon} />
+                              </span>
+                              <span className="truncate">{link.label}</span>
+                            </div>
+
+                            {showBadge && (
+                              <span
+                                className={`flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-black ${
+                                  isReportsLink
+                                    ? active
+                                      ? "bg-amber-400 text-slate-950"
+                                      : "bg-amber-100 text-amber-900 border border-amber-200"
+                                    : active
+                                      ? "bg-white/20 text-white"
+                                      : "bg-teal-100 text-teal-800 border border-teal-200"
+                                }`}
+                              >
+                                {badgeCount > 99 ? "99+" : badgeCount}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
               </div>
 
-              {/* Drawer Footer Actions */}
-              <div className="shrink-0 border-t border-teal-100 bg-white/95 p-4 space-y-3">
+              {/* Drawer Footer */}
+              <div className="shrink-0 border-t border-teal-100 bg-slate-50 p-4 space-y-3">
                 <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-teal-800">
                   <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                  <span>MFA verified session</span>
+                  <span>MFA Verified Session</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <Link
@@ -533,19 +772,12 @@ export function AdminNavigation(props: {
                     target="_blank"
                     rel="noreferrer"
                     onClick={handleDrawerClose}
-                    aria-label="Student"
-                    title={collapsed ? "Student portal (Open in new tab)" : "Student portal (Open in new tab)"}
-                    className="flex flex-1 items-center justify-between rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2.5 text-xs font-bold text-teal-900 hover:border-teal-300 hover:bg-teal-100"
+                    className="flex flex-1 items-center justify-between rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50"
                   >
-                    <span className="flex items-center gap-2">
-                      <span className="grid h-6 w-6 place-items-center rounded-lg bg-white text-teal-700 shadow-2xs">
-                        <NavIcon name="portal" />
-                      </span>
-                      <span>Student portal</span>
-                    </span>
-                    <span className="text-[10px] font-bold tracking-wider text-teal-700">Open ↗</span>
+                    <span>Student portal</span>
+                    <span className="text-[10px] text-teal-700">↗</span>
                   </Link>
-                  <LogoutButton className="rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2.5 text-xs font-bold text-teal-900 hover:border-teal-300 hover:bg-teal-100 disabled:opacity-50" />
+                  <LogoutButton className="rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 disabled:opacity-50" />
                 </div>
               </div>
             </aside>
@@ -557,5 +789,11 @@ export function AdminNavigation(props: {
 }
 
 function MenuIcon() {
-  return <span className="space-y-1" aria-hidden="true"><span className="block h-0.5 w-4 rounded-full bg-current" /><span className="block h-0.5 w-4 rounded-full bg-current" /><span className="block h-0.5 w-4 rounded-full bg-current" /></span>;
+  return (
+    <span className="space-y-1" aria-hidden="true">
+      <span className="block h-0.5 w-4 rounded-full bg-current" />
+      <span className="block h-0.5 w-4 rounded-full bg-current" />
+      <span className="block h-0.5 w-4 rounded-full bg-current" />
+    </span>
+  );
 }

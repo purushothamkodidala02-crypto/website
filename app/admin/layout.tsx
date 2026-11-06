@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
-import LogoutButton from "@/components/admin/LogoutButton";
-import { AdminMenuButton } from "@/components/admin/AdminMenuButton";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Administration",
+  title: "Administration | Varadhi Prep",
   robots: { index: false, follow: false },
 };
 
@@ -20,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     await Promise.all([
       supabase
         .from("profiles")
-        .select("role")
+        .select("role, full_name")
         .eq("id", user.id)
         .maybeSingle(),
       supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
@@ -33,29 +31,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="admin-workspace min-h-screen bg-[#f6faf8] text-slate-900 select-text">
-      <AdminShell>
-        <header className="sticky top-0 z-20 hidden min-h-18 items-center justify-between gap-4 border-b border-teal-100 bg-white/90 px-5 py-4 shadow-xs backdrop-blur-xl md:flex sm:px-8">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <AdminMenuButton />
-            <div>
-              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-teal-800">
-                <span className="h-2 w-2 rounded-full bg-teal-600" />
-                Administration
-              </p>
-              <p className="mt-1 hidden text-sm text-slate-500 sm:block">Manage exam content, tests, and student outcomes.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-teal-800 sm:inline-flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-              MFA verified
-            </span>
-            <p className="hidden max-w-56 truncate text-sm font-semibold text-slate-700 sm:block">{user.email}</p>
-            <LogoutButton />
-          </div>
-        </header>
-        <main className="mx-auto max-w-7xl p-4 sm:p-8 lg:p-10">{children}</main>
+    <div className="admin-workspace">
+      <AdminShell
+        userEmail={user.email ?? ""}
+        adminName={profile?.full_name ?? "Administrator"}
+      >
+        {children}
       </AdminShell>
     </div>
   );
