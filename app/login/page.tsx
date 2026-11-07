@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { createClient } from "@/lib/supabase/server";
@@ -26,22 +27,30 @@ export default async function LoginPage({
     requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
       ? requestedPath
       : "/";
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user && params.confirmed !== "1" && params.reset !== "1") {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (profile?.role === "admin") {
-      const { data: assurance } =
-        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      redirect(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa");
+
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+
+  if (hasAuthCookie && params.confirmed !== "1" && params.reset !== "1") {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.role === "admin") {
+        const { data: assurance } =
+          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        redirect(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa");
+      }
+      redirect(nextPath);
     }
-    redirect(nextPath);
   }
   const initialMessage =
     params.reset === "1"

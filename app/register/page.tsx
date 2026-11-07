@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { createClient } from "@/lib/supabase/server";
@@ -21,11 +22,19 @@ export default async function RegisterPage({
     requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
       ? requestedPath
       : "/";
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) redirect(nextPath);
+
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+
+  if (hasAuthCookie) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) redirect(nextPath);
+  }
 
   return (
     <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">

@@ -5,56 +5,117 @@ import { useEffect, useState } from "react";
 import LogoutButton from "@/components/admin/LogoutButton";
 import { createClient } from "@/lib/supabase/client";
 
+// Module-level in-memory cache to prevent redundant DB calls across client route transitions
+let cachedPaidSales: boolean | null = null;
+let lastPaidSalesFetchTime = 0;
+
+let cachedAccount: {
+  userId: string;
+  email: string | null;
+  activePurchases: number;
+  isAdmin: boolean;
+  timestamp: number;
+} | null = null;
+
 export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: { initialEmail?: string | null; initialIsAdmin?: boolean }) {
-  const [email, setEmail] = useState<string | null>(initialEmail ?? null);
-  const [accountReady, setAccountReady] = useState(initialEmail !== undefined);
-  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
-  const [activePurchases, setActivePurchases] = useState(0);
-  const [paidSalesEnabled, setPaidSalesEnabled] = useState(false);
+  const [email, setEmail] = useState<string | null>(initialEmail ?? cachedAccount?.email ?? null);
+  const [accountReady, setAccountReady] = useState(initialEmail !== undefined || cachedAccount !== null);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin || (cachedAccount?.isAdmin ?? false));
+  const [activePurchases, setActivePurchases] = useState(cachedAccount?.activePurchases ?? 0);
+  const [paidSalesEnabled, setPaidSalesEnabled] = useState(cachedPaidSales ?? false);
 
   useEffect(() => {
     let active = true;
     const supabase = createClient();
-    void supabase
-      .from("site_settings")
-      .select("enabled")
-      .eq("key", "paid_sales")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (active) setPaidSalesEnabled(data?.enabled === true);
-      });
+
+    // 1. Paid sales settings cache (60s TTL)
+    const now = Date.now();
+    if (cachedPaidSales !== null && now - lastPaidSalesFetchTime < 60000) {
+      setPaidSalesEnabled(cachedPaidSales);
+    } else {
+      void supabase
+        .from("site_settings")
+        .select("enabled")
+        .eq("key", "paid_sales")
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!active) return;
+          const enabled = data?.enabled === true;
+          cachedPaidSales = enabled;
+          lastPaidSalesFetchTime = Date.now();
+          setPaidSalesEnabled(enabled);
+        });
+    }
+
     const loadAccount = async (userEmail: string | null, userId?: string) => {
       if (!active) return;
       setEmail(userEmail);
       setAccountReady(true);
       if (!userId) {
+        cachedAccount = null;
         setActivePurchases(0);
         setIsAdmin(false);
         return;
       }
-      const now = new Date().toISOString();
+
+      // Check cache (30s TTL) to prevent hammering Supabase on every navigation
+      const currentTime = Date.now();
+      if (
+        cachedAccount &&
+        cachedAccount.userId === userId &&
+        currentTime - cachedAccount.timestamp < 30000
+      ) {
+        setActivePurchases(cachedAccount.activePurchases);
+        setIsAdmin(cachedAccount.isAdmin);
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
       const [{ count }, { data: profile }] = await Promise.all([
         supabase
           .from("student_entitlements")
           .select("id", { count: "exact", head: true })
           .eq("user_id", userId)
-          .lte("starts_at", now)
-          .gt("expires_at", now),
+          .lte("starts_at", nowIso)
+          .gt("expires_at", nowIso),
         supabase.from("profiles").select("role").eq("id", userId).maybeSingle(),
       ]);
+
       if (active) {
-        setActivePurchases(count ?? 0);
-        setIsAdmin(profile?.role === "admin");
+        const purchases = count ?? 0;
+        const adminRole = profile?.role === "admin";
+        cachedAccount = {
+          userId,
+          email: userEmail,
+          activePurchases: purchases,
+          isAdmin: adminRole,
+          timestamp: Date.now(),
+        };
+        setActivePurchases(purchases);
+        setIsAdmin(adminRole);
       }
     };
+
+    let lastLoadedId: string | undefined = cachedAccount?.userId;
+
     void supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      lastLoadedId = data.session?.user.id;
       void loadAccount(data.session?.user.email ?? null, data.session?.user.id);
     }).catch(() => {
       if (active) setAccountReady(true);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      // Skip redundant duplicate fetch on initial session mount
+      if (event === "INITIAL_SESSION" && session?.user.id === lastLoadedId) {
+        return;
+      }
+      lastLoadedId = session?.user.id;
       void loadAccount(session?.user.email ?? null, session?.user.id);
     });
+
     return () => {
       active = false;
       listener.subscription.unsubscribe();

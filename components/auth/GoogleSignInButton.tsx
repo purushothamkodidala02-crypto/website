@@ -124,13 +124,16 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         strategy="afterInteractive"
         onReady={() => {
           setScriptReady(true);
-          try {
-            router.prefetch(`/auth/session/complete?next=${encodeURIComponent(nextPath)}`);
-          } catch {}
         }}
         onError={() => setError("Google sign-in could not load. Please use email sign-in or try again shortly.")}
       />
-      <div ref={buttonRef} className="min-h-11" aria-busy={pending} aria-live="polite" />
+      <div ref={buttonRef} className={`min-h-11 ${pending ? "opacity-40 pointer-events-none" : ""}`} aria-busy={pending} aria-live="polite" />
+      {pending && (
+        <div className="mt-2.5 flex items-center justify-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-3 py-2 text-xs font-bold text-teal-800">
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-teal-700 border-t-transparent" />
+          <span>Signing in with Google and preparing your session…</span>
+        </div>
+      )}
       <LongPendingNotice pending={pending} />
       {error && (
         <p role="alert" aria-live="polite" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">

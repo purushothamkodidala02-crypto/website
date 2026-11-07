@@ -14,6 +14,8 @@ import {
 import { getStudentPracticeStatus } from "@/app/actions/practice-status";
 import { createClient } from "@/lib/supabase/client";
 
+let lastGlobalPracticeFetchTime = 0;
+
 export function useStudentPractice() {
   const [attemptedList, setAttemptedList] = useState<string[]>([]);
   const [recentPractice, setRecentPractice] = useState<RecentPracticeItem | null>(null);
@@ -45,11 +47,10 @@ export function useStudentPractice() {
       setIsLoaded(true);
     };
 
-    let lastFetched = 0;
-    const fetchStatus = () => {
+    const fetchStatus = (force = false) => {
       const now = Date.now();
-      if (now - lastFetched < 2500) return;
-      lastFetched = now;
+      if (!force && now - lastGlobalPracticeFetchTime < 10000) return;
+      lastGlobalPracticeFetchTime = now;
       void getStudentPracticeStatus().then(applyStatus);
     };
 
@@ -83,7 +84,7 @@ export function useStudentPractice() {
         setAttemptedList([]);
         clearLocalPracticeStorage();
       } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        fetchStatus();
+        fetchStatus(true);
       }
     });
 

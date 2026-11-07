@@ -113,14 +113,14 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  // Public auth pages without session cookies do not need Supabase getUser() round-trip
+  // Public auth pages do not need Supabase getUser() round-trip in middleware
   const isPublicAuthPage =
     request.nextUrl.pathname === "/login" ||
     request.nextUrl.pathname === "/register" ||
     request.nextUrl.pathname === "/forgot-password" ||
     request.nextUrl.pathname === "/reset-password";
 
-  if (isPublicAuthPage && !hasAuthCookie) {
+  if (isPublicAuthPage) {
     return response;
   }
 
