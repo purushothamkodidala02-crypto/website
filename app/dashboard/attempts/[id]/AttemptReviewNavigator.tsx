@@ -184,10 +184,10 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
             </div>
           </div>
 
-          {/* 2-Column Wide Grid on Laptop (lg:), Single Column on Mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+          {/* 2-Column Wide Grid on Desktop / Tablet (md+), Single Column on Mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 md:grid-cols-12 divide-y md:divide-y-0 lg:divide-y-0 md:divide-x lg:divide-x divide-slate-100">
             {/* Left Pane: Question Text & Options */}
-            <div className="lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between">
+            <div className="lg:col-span-7 md:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between">
               <div>
                 <div className="flex items-start gap-3 sm:gap-4">
                   <span className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-xl bg-teal-800 text-xs sm:text-sm font-black text-white">
@@ -236,7 +236,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
             </div>
 
             {/* Right Pane: Complete Explanation & Answer Key Analysis */}
-            <div className="lg:col-span-5 bg-slate-50/50 p-4 sm:p-6 lg:p-7 flex flex-col justify-between gap-6">
+            <div className="lg:col-span-5 md:col-span-5 bg-slate-50/50 p-4 sm:p-6 lg:p-7 flex flex-col justify-between gap-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">

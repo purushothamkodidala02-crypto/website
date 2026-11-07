@@ -141,7 +141,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   const showTelugu = (effectiveLanguage === "telugu" && hasTelugu) || isTeluguOnly;
 
   return (
-    <section className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
+    <section className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm w-full max-w-full">
       {/* Top Toolbar: Navigation, Palette Toggle, Language Switch & Actions */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-5">
         <div className="flex items-center gap-2 sm:gap-3">
@@ -199,7 +199,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
             </span>
           </button>
 
-          <div className="hidden lg:flex items-center gap-2 pl-1 text-xs font-bold text-slate-600">
+          <div className="hidden md:flex items-center gap-2 pl-1 text-xs font-bold text-slate-600">
             <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full bg-teal-600 transition-all duration-300"
@@ -413,10 +413,10 @@ function StudyQuestionCard({
         </div>
       </div>
 
-      {/* 2-Column Grid on Desktop (lg:), Single-Column on Mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+      {/* 2-Column Grid on Desktop / Tablet (md+), Single-Column on Mobile */}
+      <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-100">
         {/* Left Pane: Question text and options */}
-        <div className="lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto overscroll-contain">
+        <div className="md:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between md:max-h-[calc(100vh-250px)] md:overflow-y-auto overscroll-contain">
           <div>
             <div className="flex items-start gap-3">
               <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-xl bg-[#0a2922] text-xs font-black text-white">
@@ -492,7 +492,7 @@ function StudyQuestionCard({
         </div>
 
         {/* Right Pane: Explanation & Analysis */}
-        <div className="lg:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
+        <div className="md:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 md:max-h-[calc(100vh-250px)] md:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">

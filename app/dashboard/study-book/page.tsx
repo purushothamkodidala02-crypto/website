@@ -451,7 +451,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   const currentIndex = Number.isInteger(requestedItem) ? Math.min(Math.max(requestedItem - 1, 0), Math.max(filteredRows.length - 1, 0)) : 0;
 
   return (
-    <main className="student-page min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
       <PublicHeader />
       <div className="mx-auto max-w-7xl 2xl:max-w-[90rem] px-4 py-4 sm:px-6 lg:py-6">
         {/* Top bar: Back link and View Switcher Tabs */}
@@ -502,7 +502,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
           </summary>
           <form action="/dashboard/study-book" className="mt-3 border-t border-slate-100 pt-3">
             {view === "bookmarks" && <input type="hidden" name="view" value="bookmarks" />}
-            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               <label className="block text-xs font-bold text-slate-700">State / catalogue<select name="state" defaultValue={state} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All states</option>{stateOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
               <label className="block text-xs font-bold text-slate-700">Exam<select name="exam" defaultValue={exam} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All exams</option>{examOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
               <label className="block text-xs font-bold text-slate-700">Paper<select name="paper" defaultValue={paper} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal"><option value="">All papers</option>{paperOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>

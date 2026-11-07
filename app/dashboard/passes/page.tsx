@@ -86,9 +86,9 @@ export default async function ExamPassesPage({
   );
 
   return (
-    <main className="student-page min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
       <PublicHeader />
-      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
         <Link href="/dashboard" prefetch={true} className="text-sm font-bold text-teal-700 hover:underline">
           ← Back to dashboard
         </Link>
@@ -129,7 +129,7 @@ export default async function ExamPassesPage({
             <Link href="/mock-tests" className="text-sm font-bold text-teal-700 hover:underline">Browse mock tests</Link>
           </div>
           {entitlements.length ? (
-            <div className="student-stagger mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="student-stagger mt-5 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {entitlements.map((item) => {
                 const active = new Date(item.starts_at) <= now && new Date(item.expires_at) > now;
                 return (

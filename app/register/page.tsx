@@ -28,7 +28,7 @@ export default async function RegisterPage({
   if (user) redirect(nextPath);
 
   return (
-    <main className="student-page min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
       <PublicHeader compact />
       <div className="mx-auto grid max-w-4xl gap-8 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-[0.85fr_1.15fr] md:items-start">
         <aside className="min-w-0 rounded-3xl bg-teal-700 p-7 text-white md:sticky md:top-24">

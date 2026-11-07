@@ -451,7 +451,7 @@ export function StudentTestRunner({
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
-  return <main ref={containerRef} className="student-page relative flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden bg-slate-100">
+  return <main ref={containerRef} className="student-page relative flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] min-h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-slate-100">
     <ScreenWatermark text={watermarkText} />
     <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
@@ -460,7 +460,7 @@ export function StudentTestRunner({
           {/* Box 1: Test Title & Question Indicator */}
           <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3.5 sm:py-2 shadow-xs">
             <div className="min-w-0">
-              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[200px] xl:max-w-xs" title={title}>
+              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[150px] lg:max-w-[220px] xl:max-w-xs" title={title}>
                 {title}
               </p>
               <h1 className="text-xs sm:text-sm lg:text-base font-black text-slate-950 truncate">
@@ -491,7 +491,7 @@ export function StudentTestRunner({
               <strong className="text-xs sm:text-sm font-black text-amber-700">{reviewIds.size}</strong>
             </div>
 
-            <div className="hidden lg:flex items-center gap-1.5 border-l border-slate-200 pl-3">
+            <div className="hidden md:flex items-center gap-1.5 border-l border-slate-200 pl-2.5 sm:pl-3">
               <span className="text-[11px] font-semibold text-slate-500">Left:</span>
               <strong className="text-xs sm:text-sm font-black text-slate-800">{unanswered}</strong>
             </div>
@@ -515,7 +515,7 @@ export function StudentTestRunner({
               onClick={() => setNavigatorOpenDesktop((v) => !v)}
               title={navigatorOpenDesktop ? "Hide Question Palette (Expand question width)" : "Show Question Palette"}
               aria-label={navigatorOpenDesktop ? "Hide Question Palette" : "Show Question Palette"}
-              className={`hidden lg:flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
+              className={`hidden md:flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
                 !navigatorOpenDesktop
                   ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
                   : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
@@ -706,8 +706,8 @@ export function StudentTestRunner({
             </div>
           </section>
 
-          {/* Mobile/Tablet number scroller (hidden on PC / desktop where right-side Question Navigator is active) */}
-          <div className="mt-4 lg:hidden">
+          {/* Mobile/Tablet number scroller (hidden when right-side Question Navigator is active on md+ / Desktop mode) */}
+          <div className="mt-4 md:hidden lg:hidden">
             <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
           </div>
 
@@ -715,8 +715,8 @@ export function StudentTestRunner({
         </div>
       </div>
 
-      {/* TCS iON Style Vertical Edge Toggle Button */}
-      <div className="hidden lg:flex items-center shrink-0 z-20">
+      {/* TCS iON Style Vertical Edge Toggle Button (Desktop & Tablet / Mobile Desktop Mode) */}
+      <div className="hidden md:flex items-center shrink-0 z-20">
         <button
           type="button"
           onClick={() => setNavigatorOpenDesktop((v) => !v)}
@@ -738,11 +738,11 @@ export function StudentTestRunner({
         </button>
       </div>
 
-      {/* Collapsible Question Navigator Sidebar (Desktop) */}
+      {/* Collapsible Question Navigator Sidebar (Desktop & Tablet / Mobile Desktop Mode) */}
       <aside
-        className={`hidden lg:flex flex-col shrink-0 border-l border-slate-200/90 bg-white transition-all duration-300 ease-in-out ${
+        className={`hidden md:flex flex-col shrink-0 border-l border-slate-200/90 bg-white transition-all duration-300 ease-in-out ${
           navigatorOpenDesktop
-            ? "w-80 xl:w-88 2xl:w-96 p-4 overflow-y-auto"
+            ? "w-72 lg:w-80 xl:w-88 2xl:w-96 p-3.5 lg:p-4 overflow-y-auto"
             : "w-0 p-0 border-l-0 overflow-hidden"
         }`}
       >
@@ -761,14 +761,14 @@ export function StudentTestRunner({
     >
       <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-2 sm:gap-3">
         <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
-          <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white lg:inline-block">←</kbd>
+          <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white md:inline-block">←</kbd>
           Previous
         </button>
 
         {/* Center: Mobile Sheet Trigger & Desktop Palette Toggle */}
         <div className="flex items-center gap-2">
           {/* Mobile trigger */}
-          <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-sm lg:hidden">
+          <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-sm md:hidden">
             Questions <span className="font-mono">({index + 1}/{questions.length})</span>
           </button>
 
@@ -776,7 +776,7 @@ export function StudentTestRunner({
           <button
             type="button"
             onClick={() => setNavigatorOpenDesktop((v) => !v)}
-            className="hidden lg:flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-xs"
+            className="hidden md:flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-xs"
             title={navigatorOpenDesktop ? "Hide Question Navigator (Full width question view)" : "Show Question Navigator"}
           >
             <svg className="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -797,7 +797,7 @@ export function StudentTestRunner({
         ) : (
           <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#0a2922] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
             Save & next
-            <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 lg:inline-block">→</kbd>
+            <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 md:inline-block">→</kbd>
           </button>
         )}
       </div>
@@ -805,7 +805,7 @@ export function StudentTestRunner({
 
     {/* Mobile Navigator Overlay */}
     {navigatorOpen && (
-      <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[#0a2922]/60 backdrop-blur-sm lg:hidden" onClick={() => setNavigatorOpen(false)}>
+      <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[#0a2922]/60 backdrop-blur-sm md:hidden" onClick={() => setNavigatorOpen(false)}>
         <div
           className="flex flex-col max-h-[88vh] max-h-[88dvh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
@@ -840,7 +840,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
   const remainingCount = questions.length - answeredCount;
 
   return (
-    <div className="flex min-h-0 flex-col lg:h-full">
+    <div className="flex min-h-0 flex-col md:h-full lg:h-full">
       <div className="shrink-0 bg-white">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Question navigator</p>
@@ -853,7 +853,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
         </div>
       </div>
 
-      <div className="mt-4 max-h-[42vh] lg:max-h-none min-h-0 overflow-y-auto overscroll-contain pr-1 lg:flex-1">
+      <div className="mt-4 max-h-[42vh] md:max-h-none lg:max-h-none min-h-0 overflow-y-auto overscroll-contain pr-1 md:flex-1 lg:flex-1">
         <div className="grid grid-cols-5 xl:grid-cols-6 gap-2">
           {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);

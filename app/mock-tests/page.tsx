@@ -309,10 +309,10 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     : [];
 
   return (
-    <main className="student-page min-h-screen bg-[#f6faf8] text-[#132621]">
+    <main className="student-page min-h-screen bg-[#f6faf8] text-[#132621] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
       <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f1f5f9] via-[#f5f8fc] to-[#f8fafc]">
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-10 md:grid-cols-[1.18fr_0.82fr] md:items-center">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-xs font-semibold text-blue-900">
@@ -577,7 +577,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   </div>
                 </div>
 
-                <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="student-stagger grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                   {paperSubjects.map((sub) => {
                     const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
                     return (
@@ -630,7 +630,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   </p>
                 </div>
 
-                <div className="student-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="student-stagger grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                   {subjectSections.map((sec) => {
                     const secTests = tests.filter((t) => t.subject_section_id === sec.id);
                     return (

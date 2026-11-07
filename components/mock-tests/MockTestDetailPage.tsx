@@ -774,11 +774,11 @@ export async function MockTestDetailsPage({
   ];
 
   return (
-    <main className="student-page min-h-screen bg-slate-50">
+    <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
       <JsonLd data={jsonLd} />
       <PublicHeader />
 
-      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
         {query.start_error === "1" && (
           <p className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-900">
             This test could not be started because its setup is incomplete.
@@ -859,7 +859,7 @@ export async function MockTestDetailsPage({
             )}
           </div>
 
-          <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="mt-4 grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
                 {state?.code ?? "State"} ·{" "}
@@ -915,7 +915,7 @@ export async function MockTestDetailsPage({
           </div>
 
           {/* Key Exam Specifications Strip */}
-          <div className="student-stagger mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3 border-t border-slate-100 pt-5">
+          <div className="student-stagger mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5 sm:gap-3 border-t border-slate-100 pt-5">
             {testSummaryMetrics.map(([label, value]) => (
               <div key={label} className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center sm:text-left">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -930,7 +930,7 @@ export async function MockTestDetailsPage({
         </section>
 
         {/* Instructions and Start Action Station */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_21rem] lg:items-start">
+        <div className="mt-6 grid gap-6 md:grid-cols-[1fr_20rem] lg:grid-cols-[1fr_21rem] md:items-start">
           <section className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>

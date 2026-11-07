@@ -151,13 +151,13 @@ export default async function AttemptReviewPage({
   const parsedTitle = parseMockTestTitle(resolvedTitle ?? summary.mock_test_title);
 
   return (
-    <main className="student-page min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
       <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
         <BackToDashboardButton />
 
         <section className="relative mt-6 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-          <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="relative grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
@@ -256,7 +256,7 @@ export default async function AttemptReviewPage({
 function ExpiredAttemptReview({ attempt, title }: { attempt: AttemptSummary; title: string }) {
   const parsedTitle = parseMockTestTitle(title);
   return (
-    <main className="student-page min-h-screen bg-[#f5f8f8]">
+    <main className="student-page min-h-screen bg-[#f5f8f8] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         <BackToDashboardButton />

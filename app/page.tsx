@@ -116,7 +116,7 @@ export default async function Home() {
   };
 
   return (
-    <main className="student-page relative min-h-screen bg-[#f6faf8] text-[#132621]">
+    <main className="student-page relative min-h-screen bg-[#f6faf8] text-[#132621] w-full max-w-full overflow-x-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-[#eaf2ef]/70 via-[#f2f7f5]/40 to-transparent -z-10" />
       <JsonLd data={[websiteJsonLd, organizationJsonLd]} />
       <PublicHeader />
@@ -208,7 +208,7 @@ export default async function Home() {
                 </Link>
               )}
             </div>
-            <div className="student-stagger mt-3.5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+            <div className="student-stagger mt-3.5 grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
               {states.map((state) => {
                 const stateCategoryIds = new Set(
                   categories
@@ -275,7 +275,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="student-stagger mt-3.5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          <div className="student-stagger mt-3.5 grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
             {activeExams.map((exam) => {
               const category = categoryById.get(exam.exam_id);
               const state = states.find((item) => item.id === category?.state_id);
