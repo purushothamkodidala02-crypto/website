@@ -45,6 +45,14 @@ export function useStudentPractice() {
       setIsLoaded(true);
     };
 
+    let lastFetched = 0;
+    const fetchStatus = () => {
+      const now = Date.now();
+      if (now - lastFetched < 2500) return;
+      lastFetched = now;
+      void getStudentPracticeStatus().then(applyStatus);
+    };
+
     // 1. Check local session and verified local practice cache
     void supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
@@ -62,9 +70,9 @@ export function useStudentPractice() {
       }
 
       // 2. Fetch authoritative state from server
-      void getStudentPracticeStatus().then(applyStatus);
+      fetchStatus();
     }).catch(() => {
-      void getStudentPracticeStatus().then(applyStatus);
+      fetchStatus();
     });
 
     // 3. Listen to auth changes (sign-in, sign-out, account switches)
@@ -75,7 +83,7 @@ export function useStudentPractice() {
         setAttemptedList([]);
         clearLocalPracticeStorage();
       } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        void getStudentPracticeStatus().then(applyStatus);
+        fetchStatus();
       }
     });
 

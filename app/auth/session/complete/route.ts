@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { registerActiveSessionToken } from "@/lib/auth/single-session";
 
 function safeNextPath(value: string | null) {
   return value?.startsWith("/") && !value.startsWith("//") ? value : "/";
@@ -15,11 +16,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(nextPath)}&oauth_error=1`, requestUrl.origin));
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, phone")
-    .eq("id", user.id)
-    .maybeSingle();
+  // Fetch profile and clean other sessions concurrently to eliminate login delay
+  const [{ data: profile }, { error: sessionError }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("role, phone")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase.auth.signOut({ scope: "others" }),
+  ]);
 
   if (!profile) {
     return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(nextPath)}&oauth_error=1`, requestUrl.origin));
@@ -30,10 +35,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa", requestUrl.origin));
   }
 
-  const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
   if (sessionError) {
     return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(nextPath)}&oauth_error=1`, requestUrl.origin));
   }
+
+  await registerActiveSessionToken(supabase, user.id);
 
   if (!profile.phone) {
     const completeProfileUrl = new URL("/complete-profile", requestUrl.origin);

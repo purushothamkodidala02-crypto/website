@@ -117,10 +117,17 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
 
   return (
     <div>
+      <link rel="preconnect" href="https://accounts.google.com" />
+      <link rel="dns-prefetch" href="https://accounts.google.com" />
       <Script
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
-        onReady={() => setScriptReady(true)}
+        onReady={() => {
+          setScriptReady(true);
+          try {
+            router.prefetch(`/auth/session/complete?next=${encodeURIComponent(nextPath)}`);
+          } catch {}
+        }}
         onError={() => setError("Google sign-in could not load. Please use email sign-in or try again shortly.")}
       />
       <div ref={buttonRef} className="min-h-11" aria-busy={pending} aria-live="polite" />

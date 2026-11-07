@@ -85,10 +85,11 @@ export async function proxy(request: NextRequest) {
   // Attempt pages are live assessment runs that require fresh authentication cookies
   const isExamAttemptRoute = request.nextUrl.pathname.includes("/attempt");
 
-  // Anonymous public catalogue traffic does not need Supabase Auth round-trip
+  // Anonymous public catalogue traffic and auth handler routes do not need Supabase Auth round-trip
   if (
     !isExamAttemptRoute &&
     (request.nextUrl.pathname === "/" ||
+      request.nextUrl.pathname.startsWith("/auth/") ||
       request.nextUrl.pathname.startsWith("/mock-tests") ||
       request.nextUrl.pathname.startsWith("/terms-and-conditions") ||
       request.nextUrl.pathname.startsWith("/privacy-policy") ||
