@@ -27,14 +27,17 @@ export type ExamTeluguSeo = {
 
 const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ పోలీస్ కానిస్టేబుల్",
-  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్ 2026",
+  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్ సిరీస్ 2026 (OMR పరీక్ష విధానం)",
   bilingualPageTitle: "TG Police Constable Free Mock Test 2026 (TGPRB/TSLPRB) | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
   bilingualDescription:
-    "Free TG Police Constable mock test 2026 (TGPRB/TSLPRB) in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ ప్రాక్టీస్ పేపర్స్ with CBT timer, negative marking & full solutions.",
+    "Free TG Police Constable mock test 2026 (TGPRB/TSLPRB) in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ ప్రాక్టీస్ పేపర్స్ for OMR exam with negative marking & full solutions.",
   keywords: [
     "Telangana police constable mock test",
     "Telangana police mock test",
     "Telangana police exam mock test",
+    "TG Police Constable OMR exam pattern",
+    "Telangana police constable OMR test",
+    "TG police constable OMR sheet practice",
     "TG Police Constable mock test in Telugu",
     "TG Police Constable syllabus 2026",
     "Telangana police constable syllabus in telugu",
@@ -57,6 +60,8 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "టీజీ పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ పేపర్స్",
     "పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ మోడల్ పేపర్స్ తెలుగు",
     "తెలంగాణ పోలీస్ ఎగ్జామ్ టెస్ట్ సిరీస్",
+    "తెలంగాణ పోలీస్ OMR పరీక్ష విధానం",
+    "TG police constable offline OMR mock test",
   ],
   pattern: {
     authority: "TGPRB (Telangana State Level Police Recruitment Board)",
@@ -65,11 +70,11 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     durationMinutes: 180,
     negativeMarking: "0.25 (1/4 mark deducted per wrong answer)",
     medium: "Bilingual (Telugu & English)",
-    mode: "Computer-Based Test (CBT) & Offline Simulation",
+    mode: "OMR Based Written Test (Offline OMR Sheet)",
     stages: [
-      "Stage 1: Preliminary Written Test (PWT) - 200 Marks",
+      "Stage 1: Preliminary Written Test (PWT) - 200 Marks (Offline OMR Sheet)",
       "Stage 2: Physical Measurement Test (PMT) & Physical Efficiency Test (PET)",
-      "Stage 3: Final Written Examination (FWE)",
+      "Stage 3: Final Written Examination (FWE) - Offline OMR Sheet",
     ],
     subjects: [
       {
@@ -111,14 +116,19 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   },
   englishFaqs: [
     {
+      question: "Is the official Telangana Police Constable exam conducted online (CBT) or offline (OMR)?",
+      answer:
+        "The official Telangana Police Constable Preliminary Written Test (PWT) and Final Written Examination (FWE) conducted by TGPRB (TSLPRB) are offline OMR-based written tests where candidates bubble answers on an OMR answer sheet. Varadhi Prep provides online mock tests strictly modeled after the official 200-question, 3-hour, 0.25-negative-marking OMR pattern to build speed, accuracy, and exam discipline.",
+    },
+    {
       question: "How can I practice Telangana Police Constable mock tests for free on Varadhi Prep?",
       answer:
-        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and click on any published mock test to start practicing immediately with full timer and CBT interface without any payment.",
+        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and click on any published mock test to start practicing immediately with full timer and instant bilingual explanations without any payment.",
     },
     {
       question: "What is the exam pattern for Telangana Police Constable Preliminary Written Test (PWT)?",
       answer:
-        "The PWT consists of 200 objective multiple-choice questions for 200 marks with a duration of 3 hours (180 minutes). There is a negative marking of 0.25 marks for every incorrect answer.",
+        "The PWT consists of 200 objective multiple-choice questions for 200 marks with a duration of 3 hours (180 minutes) on an offline OMR sheet. There is a negative marking of 0.25 marks for every incorrect answer.",
     },
     {
       question: "Are the mock test questions available in both Telugu and English?",
@@ -142,6 +152,11 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     },
   ],
   teluguFaqs: [
+    {
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష విధానం ఏమిటి? ఇది ఆన్‌లైన్ (CBT) పరీక్షా లేక OMR పరీక్షా?",
+      answer:
+        "తెలంగాణ స్టేట్ లెవల్ పోలీస్ రిక్రూట్‌మెంట్ బోర్డ్ (TGPRB/TSLPRB) నిర్వహించే కానిస్టేబుల్ ప్రిలిమ్స్ (PWT) మరియు మెయిన్స్ (FWE) పరీక్షలు ఆఫ్‌లైన్ OMR షీట్ ఆధారిత రాత పరీక్షలు (Offline OMR Based Exam). అభ్యర్థులు ఓఎంఆర్ షీట్‌పై సరైన సమాధానాలను బబ్లింగ్ చేయాల్సి ఉంటుంది. వరధి ప్రెప్ (Varadhi Prep) ఈ పరీక్ష సిలబస్, 200 ప్రశ్నలు, 3 గంటల సమయం మరియు 0.25 నెగెటివ్ మార్కింగ్ నిబంధనలకు అనుగుణంగా ఆన్‌లైన్ ప్రాక్టీస్ టెస్టులను ఉచితంగా అందిస్తుంది.",
+    },
     {
       question: "ఈ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మాధ్యమంలో అందుబాటులో ఉన్నాయా?",
       answer:

@@ -23,17 +23,20 @@ function resolvePaperFallbacks(c: NonNullable<Awaited<ReturnType<typeof resolveP
     : `${c.exam?.name} ${c.paper?.name} Mock Tests`;
 
   const description = isPolice
-    ? `Free ${c.state.name} Police Constable ${c.paper?.name} mock tests in Telugu & English. Practise authentic questions with solutions, CBT timer, and negative marking.`
+    ? `Free ${c.state.name} Police Constable ${c.paper?.name} mock tests in Telugu & English for OMR exam. Practise authentic questions with solutions, timer, and 0.25 negative marking.`
     : `Take free ${c.paper?.name} mock tests for ${c.exam?.name}. Practise authentic questions with solutions and timed scoring.`;
 
   const keywords = isPolice
     ? [
         `${c.state.name} police constable ${c.paper?.name} mock test`,
+        "Telangana police constable OMR test",
+        "TG Police Constable OMR exam pattern",
         "Telangana police constable PWT mock test",
         "TG police constable paper 1 mock test in telugu",
         "Telangana police constable preliminary written test",
         "TS police constable mock test free",
         "తెలంగాణ పోలీస్ కానిస్టేబుల్ పేపర్ 1 మాక్ టెస్ట్",
+        "తెలంగాణ పోలీస్ OMR పరీక్ష మాక్ టెస్ట్",
       ]
     : undefined;
 

@@ -226,7 +226,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 Bilingual (English & Telugu)
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
-                Online CBT Interface
+                {teluguData?.pattern?.mode ? `Official Mode: ${teluguData.pattern.mode}` : "Online Practice Tests"}
               </span>
             </div>
 
@@ -419,7 +419,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                           </div>
                           <span className="text-slate-300 font-bold">•</span>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="text-[11px] font-medium text-slate-600">Timed CBT</span>
+                            <span className="text-[11px] font-medium text-slate-600">Timed Practice</span>
                           </div>
                         </div>
                       </div>
@@ -507,9 +507,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 <p className="mt-0.5 text-[10px] text-slate-500">English & Telugu</p>
               </div>
               <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Mode</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">Online CBT</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">Timed Simulation</p>
+                <p className="text-xs font-medium text-slate-500">Official Mode</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">{teluguData.pattern.mode.includes("OMR") ? "OMR Based Test" : teluguData.pattern.mode}</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">Offline OMR Sheet</p>
               </div>
             </div>
 
@@ -557,9 +557,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
               <span className="text-2xl" aria-hidden="true">⏱️</span>
-              <h3 className="mt-2 text-sm font-bold text-white">Official CBT Timer</h3>
+              <h3 className="mt-2 text-sm font-bold text-white">Timed Exam Simulator</h3>
               <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                Experience real test conditions with section countdown timers, color-coded question palette, and mark-for-review navigation.
+                Experience real 3-hour exam pressure with countdown timers and instant question review to build the speed required for your OMR test.
               </p>
             </div>
             <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
