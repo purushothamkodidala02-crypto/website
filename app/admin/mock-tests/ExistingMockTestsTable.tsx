@@ -250,7 +250,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               type="button"
               disabled={isSyncing}
               onClick={handleSyncTitles}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
               title="Update all mock test titles in the database to the canonical standard format"
             >
               <span>⚙</span>
@@ -266,7 +266,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
         )}
 
         {/* Clean Status Tabs */}
-        <div className="mt-5 flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-200/60 border border-slate-200">
+        <div className="mt-5 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center p-1 rounded-xl bg-slate-200/60 border border-slate-200">
           {([
             ["all", "All Tests", counts.all],
             ["published", "Published", counts.published],
@@ -279,7 +279,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                 key={value}
                 type="button"
                 onClick={() => setStatus(value)}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                className={`flex items-center justify-center sm:justify-start gap-2 rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-semibold transition ${
                   isActive
                     ? "bg-white text-slate-900 shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
@@ -415,10 +415,10 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   className="p-5 sm:p-6 transition hover:bg-slate-50/60"
                 >
                   {/* Top Metadata Row */}
-                  <div className="flex flex-wrap items-center justify-between gap-2.5">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
                       <span
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-bold shrink-0 ${
                           isTG
                             ? "border-sky-200/80 bg-sky-50/60 text-sky-800"
                             : "border-teal-200/80 bg-teal-50/60 text-teal-800"
@@ -426,31 +426,31 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       >
                         {test.stateCode}
                       </span>
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="text-xs font-medium text-slate-600 break-words">
                         {test.examName} · {test.paperName}
                         {test.subjectName && ` · ${test.subjectName}`}
                       </span>
-                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 shrink-0">
                         {test.scope === "paper" ? "Paper-wise" : "Subject-wise"}
                       </span>
-                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 shrink-0">
                         Series #{test.seriesNumber}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="shrink-0 flex flex-wrap items-center justify-end gap-1.5">
                       {test.supersededByMockTestId && (
-                        <span className="rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2 py-0.5 text-xs font-medium text-indigo-800">
+                        <span className="rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-indigo-800">
                           Correction in progress
                         </span>
                       )}
                       {test.replacesMockTestId && (
-                        <span className="rounded-md border border-violet-200/80 bg-violet-50/60 px-2 py-0.5 text-xs font-medium text-violet-800">
+                        <span className="rounded-md border border-violet-200/80 bg-violet-50/60 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-violet-800">
                           Corrected version
                         </span>
                       )}
                       <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${statusDetail.className}`}
+                        className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${statusDetail.className}`}
                       >
                         {statusDetail.label}
                       </span>
@@ -470,35 +470,37 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   </div>
 
                   {/* Clean Metric Indicators Strip */}
-                  <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
-                    <div className="flex items-center gap-1.5">
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
+                    <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0">
                       <span className="text-slate-400">Questions:</span>
-                      <span
-                        className={`font-semibold ${
-                          ready ? "text-emerald-700/90" : "text-amber-700/90"
-                        }`}
-                      >
-                        {test.questionCount} / {test.targetQuestionCount} target
-                      </span>
-                      {unavailableCount > 0 && (
-                        <span className="text-rose-600 font-medium">
-                          ({unavailableCount} unavailable)
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`font-semibold ${
+                            ready ? "text-emerald-700/90" : "text-amber-700/90"
+                          }`}
+                        >
+                          {test.questionCount} / {test.targetQuestionCount} target
                         </span>
-                      )}
+                        {unavailableCount > 0 && (
+                          <span className="text-rose-600 font-medium">
+                            ({unavailableCount} unavailable)
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-600">
+                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
                       <span className="text-slate-400">Marks:</span>
                       <span className="font-semibold font-mono text-slate-800">
                         {test.totalMarks.toFixed(2).replace(/\.00$/, "")}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-600">
+                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
                       <span className="text-slate-400">Duration:</span>
                       <span className="font-semibold font-mono text-slate-800">
                         {test.durationMinutes} mins
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-600">
+                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
                       <span className="text-slate-400">Attempts:</span>
                       <span className="font-semibold font-mono text-slate-800">
                         {test.adminAttemptCount && test.attemptCount === 0
@@ -506,7 +508,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                           : test.attemptCount}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-600">
+                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
                       <span className="text-slate-400">Notification:</span>
                       <span
                         className={`font-semibold ${
@@ -531,18 +533,18 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     </div>
                   )}
 
-                  {/* Clean Action Toolbar */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3.5">
+                  {/* Clean Synchronized Action Toolbar */}
+                  <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 border-t border-slate-100 pt-3.5">
                     <Link
                       href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs transition"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3 py-2 text-xs font-semibold text-slate-800 shadow-2xs transition"
                     >
                       Manage test
                     </Link>
 
                     <Link
                       href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition"
                     >
                       Questions ({test.questionCount})
                     </Link>
@@ -556,7 +558,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                           test.slug
                         )}
                         target="_blank"
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-sky-300 hover:text-sky-700 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-sky-300 hover:text-sky-700 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition"
                       >
                         View live ↗
                       </Link>
@@ -596,8 +598,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </div>
 
           {/* Clean Pagination Footer */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-slate-50/70 px-5 py-3.5 sm:px-7">
-            <p className="text-xs sm:text-sm text-slate-600">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200 bg-slate-50/70 px-5 py-3.5 sm:px-7">
+            <p className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
               Showing{" "}
               <span className="font-semibold text-slate-900">
                 {(currentPage - 1) * pageSize + 1}
@@ -613,12 +615,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               mock tests
             </p>
             {totalPages > 1 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between sm:justify-end gap-2">
                 <button
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                  className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
                 >
                   ← Previous
                 </button>
@@ -629,7 +631,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   type="button"
                   disabled={currentPage >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                  className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
                 >
                   Next →
                 </button>

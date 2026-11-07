@@ -482,7 +482,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
         <button
           disabled={pending || isSubmitting || !paperId || (scope === "subject" && !subjectId) || isSeriesTaken}
           aria-busy={pending || isSubmitting}
-          className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg disabled:opacity-50"
         >
           <PendingButtonContent pending={pending || isSubmitting} pendingLabel="Creating draft…">
             Create {paper ? mockTestLabel(effectiveSeries) : "mock test"}
