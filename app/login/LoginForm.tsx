@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
@@ -31,6 +32,7 @@ export function LoginForm({
   initialMessage?: string;
   initialError?: string;
 }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice | null>(
@@ -49,6 +51,14 @@ export function LoginForm({
   const [loginMethod, setLoginMethod] = useState<"password" | "otp">("password");
   const registerHref = `/register?next=${encodeURIComponent(nextPath)}`;
   const forgotPasswordHref = `/forgot-password?next=${encodeURIComponent(nextPath)}`;
+
+  useEffect(() => {
+    if (email.trim() && password && nextPath) {
+      try {
+        router.prefetch(nextPath);
+      } catch {}
+    }
+  }, [email, password, nextPath, router]);
 
   if (loginMethod === "otp") {
     return <EmailOtpLoginForm nextPath={nextPath} onUsePassword={() => setLoginMethod("password")} />;
@@ -105,7 +115,14 @@ export function LoginForm({
       setLoading(false);
       return;
     }
-    window.location.replace(result.redirectTo);
+
+    // Fast client transition preserves cache and avoids heavy cold reload on mobile
+    try {
+      router.replace(result.redirectTo);
+      router.refresh();
+    } catch {
+      window.location.replace(result.redirectTo);
+    }
   }
 
   async function resendConfirmation() {
@@ -200,7 +217,9 @@ export function LoginForm({
         </div>
         <TurnstileChallenge onToken={setCaptchaToken} resetKey={captchaResetKey} />
         <button type="submit" disabled={loading || !captchaToken} aria-busy={loading} className="w-full rounded-xl bg-[#ea580c] px-4 py-3 font-bold text-white shadow-md shadow-orange-950/20 transition hover:bg-[#d94f08] disabled:cursor-not-allowed disabled:opacity-50">
-          <PendingButtonContent pending={loading} pendingLabel="Signing in…">Sign in and continue</PendingButtonContent>
+          <PendingButtonContent pending={loading} pendingLabel="Signing in…">
+            {!captchaToken ? "Verifying security…" : "Sign in and continue"}
+          </PendingButtonContent>
         </button>
         <LongPendingNotice pending={loading} />
         {notice && (

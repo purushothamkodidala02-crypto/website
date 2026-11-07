@@ -23,16 +23,22 @@ export async function GET(request: NextRequest) {
   void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
   // Concurrently register active session token and fetch profile in a single DB roundtrip
-  const admin = createAdminClient();
-  const { data: updatedProfile } = await admin
-    .from("profiles")
-    .update({
-      active_session_token: token,
-      active_session_updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id)
-    .select("role, phone")
-    .maybeSingle();
+  let updatedProfile: { role: string; phone: string | null } | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("profiles")
+      .update({
+        active_session_token: token,
+        active_session_updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id)
+      .select("role, phone")
+      .maybeSingle();
+    updatedProfile = data;
+  } catch {
+    // Service role key may not be present in all runtime environments
+  }
 
   let profile = updatedProfile;
   if (!profile) {

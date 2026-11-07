@@ -45,12 +45,7 @@ export default async function LoginPage({
         // Displaced session from another device: clear stale session token so login form renders immediately
         await clearActiveSessionToken();
       } else {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (profile?.role === "admin") {
+        if (activeCheck.role === "admin") {
           const { data: assurance } =
             await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
           redirect(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa");
@@ -71,6 +66,10 @@ export default async function LoginPage({
 
   return (
     <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
+      <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+      <link rel="preconnect" href="https://eauomwkwaxqpvzogdltq.supabase.co" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://eauomwkwaxqpvzogdltq.supabase.co" />
       <PublicHeader compact />
       <div className="mx-auto grid max-w-4xl gap-8 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-[0.85fr_1.15fr] md:items-start">
         <aside className="min-w-0 rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 md:sticky md:top-24">

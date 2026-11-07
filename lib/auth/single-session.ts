@@ -94,7 +94,7 @@ export async function registerActiveSessionToken(
 export async function verifyActiveSession(
   supabase: SupabaseClient,
   userId: string,
-): Promise<{ valid: boolean; reason?: string }> {
+): Promise<{ valid: boolean; role?: string; reason?: string }> {
   try {
     const cookieToken = await getActiveSessionToken();
 
@@ -109,19 +109,19 @@ export async function verifyActiveSession(
     }
 
     if (profile.role === "admin") {
-      return { valid: true };
+      return { valid: true, role: "admin" };
     }
 
     // If no active session token was ever registered in DB or cookie is missing before migration, allow
     if (!profile.active_session_token || !cookieToken) {
-      return { valid: true };
+      return { valid: true, role: profile.role };
     }
 
     if (profile.active_session_token !== cookieToken) {
-      return { valid: false, reason: "displaced_by_another_device" };
+      return { valid: false, role: profile.role, reason: "displaced_by_another_device" };
     }
 
-    return { valid: true };
+    return { valid: true, role: profile.role };
   } catch {
     return { valid: true };
   }

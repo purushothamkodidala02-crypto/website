@@ -28,13 +28,18 @@ export function SingleDeviceWatcher() {
 
         const res = await checkActiveSessionStatus();
         if (mounted && res.authenticated && !res.valid && res.reason === "displaced_by_another_device") {
-          hasTriggeredRef.current = true;
-          setDisplaced(true);
-          try {
-            clearLocalPracticeStorage();
-            await supabase.auth.signOut({ scope: "local" });
-          } catch {
-            // Ignore
+          // Double-check after a brief grace delay to eliminate transient cookie-sync race conditions
+          await new Promise((resolve) => setTimeout(resolve, 2500));
+          const confirmed = await checkActiveSessionStatus();
+          if (mounted && confirmed.authenticated && !confirmed.valid && confirmed.reason === "displaced_by_another_device") {
+            hasTriggeredRef.current = true;
+            setDisplaced(true);
+            try {
+              clearLocalPracticeStorage();
+              await supabase.auth.signOut({ scope: "local" });
+            } catch {
+              // Ignore
+            }
           }
         }
       } catch {
@@ -44,11 +49,15 @@ export function SingleDeviceWatcher() {
       }
     };
 
-    // Check periodically every 15 seconds and when tab becomes active
-    const interval = window.setInterval(() => void verify(), 15000);
+    // Check periodically every 60 seconds and debounced when tab becomes active
+    const interval = window.setInterval(() => void verify(), 60000);
+    let visibilityTimer: ReturnType<typeof setTimeout> | undefined;
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        void verify();
+        if (visibilityTimer) clearTimeout(visibilityTimer);
+        visibilityTimer = setTimeout(() => {
+          void verify();
+        }, 3000);
       }
     };
 
@@ -57,6 +66,7 @@ export function SingleDeviceWatcher() {
     return () => {
       mounted = false;
       window.clearInterval(interval);
+      if (visibilityTimer) clearTimeout(visibilityTimer);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);

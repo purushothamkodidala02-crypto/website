@@ -48,14 +48,18 @@ export async function GET(request: NextRequest) {
       void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
       const deviceSessionToken = crypto.randomUUID();
-      const admin = createAdminClient();
-      await admin
-        .from("profiles")
-        .update({
-          active_session_token: deviceSessionToken,
-          active_session_updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+      try {
+        const admin = createAdminClient();
+        await admin
+          .from("profiles")
+          .update({
+            active_session_token: deviceSessionToken,
+            active_session_updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+      } catch {
+        await supabase.rpc("set_active_site_session", { requested_session_token: deviceSessionToken });
+      }
 
       response.cookies.set(SINGLE_SESSION_COOKIE_NAME, deviceSessionToken, {
         httpOnly: true,

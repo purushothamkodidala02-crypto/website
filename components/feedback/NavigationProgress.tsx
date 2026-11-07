@@ -105,12 +105,12 @@ export function NavigationProgress() {
       }
     }
 
-    // Keep dynamic routes warm every 20 seconds while student is active on page
+    // Keep dynamic routes warm every 60 seconds while student is active on page
     const intervalId = window.setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
         runWarm();
       }
-    }, 20000);
+    }, 60000);
 
     return () => {
       if (idleId !== undefined && typeof window !== "undefined" && "cancelIdleCallback" in window) {

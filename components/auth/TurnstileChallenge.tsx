@@ -38,7 +38,10 @@ export function TurnstileChallenge({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const onTokenRef = useRef(onToken);
-  onTokenRef.current = onToken;
+
+  useEffect(() => {
+    onTokenRef.current = onToken;
+  }, [onToken]);
 
   const [ready, setReady] = useState(
     () => typeof window !== "undefined" && Boolean(window.turnstile),
@@ -103,12 +106,20 @@ export function TurnstileChallenge({
 
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"
         onReady={() => setReady(true)}
       />
       <div ref={containerRef} className="min-h-16" role="region" aria-label="Security verification" />
+      {!ready && (
+        <div className="flex items-center justify-center gap-2 py-2 text-xs text-slate-500" aria-live="polite">
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+          <span>Verifying security…</span>
+        </div>
+      )}
       {errorMessage && <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{errorMessage}</p>}
       <p className="mt-2 text-center text-xs text-slate-500">
         Protected from automated abuse by Cloudflare Turnstile.
