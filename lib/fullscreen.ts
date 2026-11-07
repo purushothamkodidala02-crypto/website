@@ -19,9 +19,11 @@ export function getLastFullscreenStatus(): {
 export function isBigScreen(): boolean {
   if (typeof window === "undefined") return false;
   // Standard tablet / desktop breakpoint (iPad is 768px+, laptops/desktops 1024px+)
+  // Viewport width in CSS pixels determines mobile vs desktop behavior
   const width = window.innerWidth || 0;
+  if (width > 0) return width >= 768;
   const screenWidth = typeof window.screen !== "undefined" ? window.screen.width : 0;
-  return width >= 768 || screenWidth >= 768;
+  return screenWidth >= 768;
 }
 
 export function isFullscreenSupported(): boolean {

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getMockTestPublicContextById } from "@/lib/public-route-data";
+import { getMockTestFastContextById, getMockTestPublicContextById } from "@/lib/public-route-data";
 import { mockTestUrl, paperUrl, subjectUrl } from "@/lib/public-urls";
 
 export type StudentPracticeStatus = {
@@ -68,7 +68,9 @@ export async function getStudentPracticeStatus(): Promise<StudentPracticeStatus>
         return { attemptedMockTestIds, lastPractice: null, isAuthenticated: true, userId: user.id };
       }
 
-      const c = await getMockTestPublicContextById(activeSession.mock_test_id);
+      const c =
+        (await getMockTestFastContextById(activeSession.mock_test_id, supabase)) ??
+        (await getMockTestPublicContextById(activeSession.mock_test_id));
       if (!c) return { attemptedMockTestIds, lastPractice: null, isAuthenticated: true, userId: user.id };
 
       const folderUrl = c.subject
@@ -97,7 +99,9 @@ export async function getStudentPracticeStatus(): Promise<StudentPracticeStatus>
     }
 
     // Build lastPractice from the latest completed attempt
-    const c = await getMockTestPublicContextById(latestAttempt.mock_test_id);
+    const c =
+      (await getMockTestFastContextById(latestAttempt.mock_test_id, supabase)) ??
+      (await getMockTestPublicContextById(latestAttempt.mock_test_id));
     if (!c) {
       return { attemptedMockTestIds, lastPractice: null, isAuthenticated: true, userId: user.id };
     }

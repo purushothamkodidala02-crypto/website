@@ -38,7 +38,7 @@ export async function beginMockTest(
     requested_device_token: deviceToken,
   });
 
-  if (rpcResult.error && rpcResult.error.message.includes("parameter")) {
+  if (rpcResult.error && (rpcResult.error.message.includes("parameter") || rpcResult.error.message.includes("candidate"))) {
     rpcResult = await supabase.rpc(functionName, {
       requested_mock_test_id: mockTestId,
     });

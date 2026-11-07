@@ -85,8 +85,12 @@ export function TestStartActions({
   }, [testId]);
 
   const handleFullscreenOnStart = () => {
-    if (isBigScreen() && isFullscreenSupported() && !isCurrentlyFullscreen()) {
-      void requestFullscreenSafely();
+    try {
+      if (isBigScreen() && isFullscreenSupported() && !isCurrentlyFullscreen()) {
+        void requestFullscreenSafely();
+      }
+    } catch {
+      // Ignore fullscreen failure so form submission continues immediately
     }
   };
 

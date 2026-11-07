@@ -5,7 +5,7 @@ export const fetchCache = "force-no-store";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMockTestPublicContextById } from "@/lib/public-route-data";
+import { getMockTestFastContextById } from "@/lib/public-route-data";
 import { mockTestUrl, paperUrl, subjectUrl } from "@/lib/public-urls";
 import { StudentTestRunner } from "../StudentTestRunner";
 import { SubmissionResult } from "../SubmissionResult";
@@ -49,9 +49,8 @@ export default async function TakeMockTestPage({
   const supabase = await createClient();
 
   // Eagerly initiate all primary data queries in parallel
-  const publicContextPromise = getMockTestPublicContextById(id);
   const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
-  const mockTestPromise = supabase.from("mock_tests").select("id, title, status, access_type").eq("id", id).eq("status", "published").maybeSingle();
+  const fastContextPromise = getMockTestFastContextById(id, supabase);
   const sessionPromise = isValidSession
     ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
     : Promise.resolve({ data: null });
@@ -61,13 +60,22 @@ export default async function TakeMockTestPage({
   const payloadPromise = isValidSession
     ? supabase.rpc("get_mock_test_session_payload", { requested_session_id: requestedSessionId })
     : Promise.resolve({ data: null, error: null });
+  const bookmarksPromise: Promise<string[]> = userPromise.then(async (user) => {
+    if (!user) return [];
+    const { data } = await supabase
+      .from("student_question_bookmarks")
+      .select("question_id")
+      .eq("user_id", user.id);
+    return (data ?? []).map((item) => item.question_id as string);
+  });
 
-  const [publicContext, user, mockTestResult, sessionResult, attemptResult] = await Promise.all([
-    publicContextPromise,
+  const [publicContext, user, sessionResult, attemptResult, payloadResult, bookmarkedQuestionIds] = await Promise.all([
+    fastContextPromise,
     userPromise,
-    mockTestPromise,
     sessionPromise,
     attemptPromise,
+    payloadPromise,
+    bookmarksPromise,
   ]);
 
   if (!publicContext) notFound();
@@ -80,8 +88,8 @@ export default async function TakeMockTestPage({
 
   if (!user) redirect(`/login?next=${encodeURIComponent(testPath)}`);
 
-  const mockTest = mockTestResult.data;
-  if (!mockTest) notFound();
+  const mockTest = publicContext.mockTest;
+  if (!mockTest || mockTest.status !== "published") notFound();
 
   if (mockTest.access_type === "paid") {
     const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
@@ -213,15 +221,9 @@ export default async function TakeMockTestPage({
     );
   }
 
-  const { data, error } = await payloadPromise;
+  const { data, error } = payloadResult;
   const questions = (data ?? []) as TestQuestion[];
   if (error || questions.length === 0) return <TestNotReady title={testTitle} testPath={testPath} message="This mock test does not have active questions available yet. Please try again later." />;
-
-  const { data: bookmarks } = await supabase
-    .from("student_question_bookmarks")
-    .select("question_id")
-    .eq("user_id", user.id)
-    .in("question_id", questions.map((question) => question.question_id));
 
   return (
     <StudentTestRunner
@@ -231,7 +233,7 @@ export default async function TakeMockTestPage({
       sessionId={session.id}
       expiresAt={session.expires_at}
       questions={questions}
-      bookmarkedQuestionIds={(bookmarks ?? []).map((item) => item.question_id)}
+      bookmarkedQuestionIds={bookmarkedQuestionIds}
       studentEmail={user.email ?? user.user_metadata?.email ?? ""}
       folderUrl={folderUrl}
       folderName={folderName}

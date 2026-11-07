@@ -102,3 +102,82 @@ export async function getMockTestPublicContextById(mockTestId: string) {
   const subject = mockTest.subject_id ? catalog.subjects.find((item) => item.id === mockTest.subject_id) : undefined;
   return { catalog, state, category, exam, paper, subject, mockTest };
 }
+
+export async function getMockTestFastContextById(
+  mockTestId: string,
+  client?: ReturnType<typeof createPublicClient>,
+) {
+  const supabase = client ?? createPublicClient();
+  const selectQuery =
+    "id, title, slug, status, access_type, test_scope, subject:subjects(id, name, slug), paper:papers!inner(id, name, slug, exam_group:exam_groups!inner(id, name, slug, exam:exams!inner(id, name, slug, state:exam_states!inner(id, name, code, slug))))";
+
+  const { data: test } = await (supabase as unknown as ReturnType<typeof createPublicClient>)
+    .from("mock_tests")
+    .select(selectQuery)
+    .eq("id", mockTestId)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (!test) return null;
+
+  const rawPaper = test.paper as unknown as {
+    id: string;
+    name: string;
+    slug: string;
+    exam_group: {
+      id: string;
+      name: string;
+      slug: string;
+      exam: {
+        id: string;
+        name: string;
+        slug: string;
+        state: {
+          id: string;
+          name: string;
+          code: string;
+          slug: string;
+        };
+      };
+    };
+  };
+
+  const rawSubject = test.subject as unknown as { id: string; name: string; slug: string } | null;
+
+  const examGroup = rawPaper.exam_group;
+  const category = examGroup.exam;
+  const state = category.state;
+
+  return {
+    mockTest: {
+      id: test.id,
+      title: test.title,
+      slug: test.slug,
+      status: test.status,
+      access_type: test.access_type,
+      test_scope: test.test_scope,
+    },
+    paper: {
+      id: rawPaper.id,
+      name: rawPaper.name,
+      slug: rawPaper.slug,
+    },
+    exam: {
+      id: examGroup.id,
+      name: examGroup.name,
+      slug: examGroup.slug,
+    },
+    category: {
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+    },
+    state: {
+      id: state.id,
+      name: state.name,
+      code: state.code,
+      slug: state.slug,
+    },
+    subject: rawSubject ? { id: rawSubject.id, name: rawSubject.name, slug: rawSubject.slug } : null,
+  };
+}
