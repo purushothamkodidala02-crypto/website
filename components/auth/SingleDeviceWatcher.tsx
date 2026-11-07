@@ -32,7 +32,7 @@ export function SingleDeviceWatcher() {
           setDisplaced(true);
           try {
             clearLocalPracticeStorage();
-            await supabase.auth.signOut();
+            await supabase.auth.signOut({ scope: "local" });
           } catch {
             // Ignore
           }

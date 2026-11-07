@@ -18,26 +18,19 @@ export async function GET(request: NextRequest) {
 
   const token = crypto.randomUUID();
 
-  // Fast-timeout (1200ms) guard so slow backend session revocation never stalls student login
-  const timeoutPromise = new Promise<{ error: null }>((resolve) => setTimeout(() => resolve({ error: null }), 1200));
-  const signOutPromise = Promise.race([
-    supabase.auth.signOut({ scope: "others" }),
-    timeoutPromise,
-  ]).catch(() => ({ error: null }));
+  // Non-blocking async revocation of previous device sessions so student login is instantaneous
+  void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
-  // Concurrently register active session token, fetch profile, and revoke other sessions in a single DB roundtrip
-  const [{ data: updatedProfile }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .update({
-        active_session_token: token,
-        active_session_updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id)
-      .select("role, phone")
-      .maybeSingle(),
-    signOutPromise,
-  ]);
+  // Concurrently register active session token and fetch profile in a single DB roundtrip
+  const { data: updatedProfile } = await supabase
+    .from("profiles")
+    .update({
+      active_session_token: token,
+      active_session_updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id)
+    .select("role, phone")
+    .maybeSingle();
 
   let profile = updatedProfile;
   if (!profile) {

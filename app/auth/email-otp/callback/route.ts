@@ -44,8 +44,7 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
     if (profile?.role === "student") {
-      const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
-      if (sessionError) return NextResponse.redirect(loginUrl);
+      void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
       const deviceSessionToken = crypto.randomUUID();
       await supabase

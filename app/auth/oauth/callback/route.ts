@@ -50,10 +50,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa", requestUrl.origin));
   }
 
-  const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
-  if (sessionError) {
-    return NextResponse.redirect(loginErrorUrl(requestUrl.origin, nextPath));
-  }
+  // Non-blocking async revocation of previous device sessions so OAuth callback never stalls
+  void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
   await registerActiveSessionToken(supabase, user.id);
 

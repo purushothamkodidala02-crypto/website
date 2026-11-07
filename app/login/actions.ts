@@ -70,10 +70,8 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
     return { success: false, code: "profile_unavailable", message: "Your password was accepted, but the account profile could not be loaded." };
   }
   if (profile.role !== "admin") {
-    const { error: sessionError } = await supabase.auth.signOut({ scope: "others" });
-    if (sessionError) {
-      return { success: false, code: "session_security_unavailable", message: "We could not secure this sign-in session. Please try again." };
-    }
+    // Non-blocking async revocation of previous device sessions so student login is instantaneous
+    void supabase.auth.signOut({ scope: "others" }).catch(() => null);
     await registerActiveSessionToken(supabase, authData.user.id);
     return { success: true, redirectTo: nextPath };
   }

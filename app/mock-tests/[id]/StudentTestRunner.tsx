@@ -146,7 +146,7 @@ export function StudentTestRunner({
     try {
       clearLocalPracticeStorage();
       const supabase = createClient();
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" }).catch(() => supabase.auth.signOut());
     } catch {
       // Ignore network failure during displacement sign-out
     }
