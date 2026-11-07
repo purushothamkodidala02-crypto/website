@@ -20,7 +20,18 @@ export function isBigScreen(): boolean {
   if (typeof window === "undefined") return false;
   // Standard tablet / desktop breakpoint (iPad is 768px+, laptops/desktops 1024px+)
   // Viewport width in CSS pixels determines mobile vs desktop behavior
-  const width = window.innerWidth || 0;
+  const width =
+    window.innerWidth ||
+    (typeof document !== "undefined" && document.documentElement
+      ? document.documentElement.clientWidth
+      : 0);
+  const height =
+    window.innerHeight ||
+    (typeof document !== "undefined" && document.documentElement
+      ? document.documentElement.clientHeight
+      : 0);
+  // Phones in landscape orientation have wide width (e.g. 844px) but short height (< 500px)
+  if (height > 0 && height < 500) return false;
   if (width > 0) return width >= 768;
   const screenWidth = typeof window.screen !== "undefined" ? window.screen.width : 0;
   return screenWidth >= 768;

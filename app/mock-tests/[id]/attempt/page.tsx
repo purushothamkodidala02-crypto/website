@@ -5,7 +5,7 @@ export const fetchCache = "force-no-store";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMockTestFastContextById } from "@/lib/public-route-data";
+import { getMockTestFastContextById, getMockTestPublicContextById } from "@/lib/public-route-data";
 import { mockTestUrl, paperUrl, subjectUrl } from "@/lib/public-urls";
 import { StudentTestRunner } from "../StudentTestRunner";
 import { SubmissionResult } from "../SubmissionResult";
@@ -50,7 +50,10 @@ export default async function TakeMockTestPage({
 
   // Eagerly initiate all primary data queries in parallel
   const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
-  const fastContextPromise = getMockTestFastContextById(id, supabase);
+  const fastContextPromise = getMockTestFastContextById(id, supabase).then(async (fast) => {
+    if (fast) return fast;
+    return getMockTestPublicContextById(id);
+  });
   const sessionPromise = isValidSession
     ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
     : Promise.resolve({ data: null });
@@ -89,7 +92,7 @@ export default async function TakeMockTestPage({
   if (!user) redirect(`/login?next=${encodeURIComponent(testPath)}`);
 
   const mockTest = publicContext.mockTest;
-  if (!mockTest || mockTest.status !== "published") notFound();
+  if (!mockTest || ("status" in mockTest && mockTest.status !== "published")) notFound();
 
   if (mockTest.access_type === "paid") {
     const { data: access } = await supabase.rpc("can_access_mock_test", { requested_mock_test_id: mockTest.id });
