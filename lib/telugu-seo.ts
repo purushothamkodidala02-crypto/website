@@ -1,3 +1,19 @@
+export type ExamPatternInfo = {
+  authority: string;
+  totalQuestions: number;
+  totalMarks: number;
+  durationMinutes: number;
+  negativeMarking: string;
+  medium: string;
+  mode: string;
+  stages: string[];
+  subjects: Array<{
+    name: string;
+    teluguName: string;
+    description: string;
+  }>;
+};
+
 export type ExamTeluguSeo = {
   teluguName: string;
   teluguTitle: string;
@@ -5,50 +21,168 @@ export type ExamTeluguSeo = {
   bilingualDescription: string;
   keywords: string[];
   teluguFaqs: Array<{ question: string; answer: string }>;
+  englishFaqs?: Array<{ question: string; answer: string }>;
+  pattern?: ExamPatternInfo;
 };
 
-const TELUGU_EXAMS: Record<string, ExamTeluguSeo> = {
-  "police-constable": {
-    teluguName: "తెలంగాణ పోలీస్ కానిస్టేబుల్",
-    teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్",
-    bilingualPageTitle: "TG Police Constable Free Mock Test 2026 (TGPRB/TSLPRB) | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
-    bilingualDescription:
-      "Free TG Police Constable mock test 2026 (TGPRB/TSLPRB) in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ ప్రాక్టీస్ పేపర్స్ with solutions.",
-    keywords: [
-      "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
-      "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్",
-      "టీజీ పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ పేపర్స్",
-      "పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
-      "TG Police Constable mock test in Telugu",
-      "TS police constable mock test in telugu free",
-      "telangana police constable mock test",
-      "tg police constable mock test online",
-      "tslprb police constable mock test",
-      "TGPRB police constable free mock test",
-      "free tg constable mock test",
-      "police constable mock test",
-      "Telangana police constable paper 1 mock test telugu",
-      "police constable model papers with solutions in telugu",
-      "TG Police Constable online test series",
+const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
+  teluguName: "తెలంగాణ పోలీస్ కానిస్టేబుల్",
+  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్ 2026",
+  bilingualPageTitle: "TG Police Constable Free Mock Test 2026 (TGPRB/TSLPRB) | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+  bilingualDescription:
+    "Free TG Police Constable mock test 2026 (TGPRB/TSLPRB) in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ ప్రాక్టీస్ పేపర్స్ with CBT timer, negative marking & full solutions.",
+  keywords: [
+    "Telangana police constable mock test",
+    "Telangana police mock test",
+    "Telangana police exam mock test",
+    "TG Police Constable mock test in Telugu",
+    "TG Police Constable syllabus 2026",
+    "Telangana police constable syllabus in telugu",
+    "TGPRB police constable notification mock test",
+    "TG Police Constable notification 2026 exam pattern",
+    "TS police constable mock test in telugu free",
+    "TGPRB police constable mock test 2026",
+    "TSLPRB police constable test series",
+    "Telangana police constable preliminary written test mock test",
+    "free tg constable mock test online",
+    "Telangana police constable grand test",
+    "TG Police Constable paper 1 mock test telugu",
+    "police constable model papers with solutions in telugu",
+    "TG Police Constable online test series",
+    "Telangana police constable previous papers online",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+    "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ 2026",
+    "టీజీ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ వివరాలు",
+    "టీజీ పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ పేపర్స్",
+    "పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ మోడల్ పేపర్స్ తెలుగు",
+    "తెలంగాణ పోలీస్ ఎగ్జామ్ టెస్ట్ సిరీస్",
+  ],
+  pattern: {
+    authority: "TGPRB (Telangana State Level Police Recruitment Board)",
+    totalQuestions: 200,
+    totalMarks: 200,
+    durationMinutes: 180,
+    negativeMarking: "0.25 (1/4 mark deducted per wrong answer)",
+    medium: "Bilingual (Telugu & English)",
+    mode: "Computer-Based Test (CBT) & Offline Simulation",
+    stages: [
+      "Stage 1: Preliminary Written Test (PWT) - 200 Marks",
+      "Stage 2: Physical Measurement Test (PMT) & Physical Efficiency Test (PET)",
+      "Stage 3: Final Written Examination (FWE)",
     ],
-    teluguFaqs: [
+    subjects: [
       {
-        question: "ఈ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మాధ్యమంలో అందుబాటులో ఉన్నాయా?",
-        answer:
-          "అవును, వరధి ప్రెప్ (Varadhi Prep) లోని అన్ని పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మరియు ఇంగ్లీష్ (Bilingual) మాధ్యమంలో ప్రశ్నలు మరియు పూర్తి వివరణాత్మక సమాధానాలతో లభిస్తాయి.",
+        name: "Arithmetic & Quantitative Aptitude",
+        teluguName: "అర్థమెటిక్ & సంఖ్యా సామర్థ్యం",
+        description: "Number systems, percentages, averages, ratio & proportion, profit & loss, time & work, simple & compound interest, data interpretation.",
       },
       {
-        question: "పోలీస్ కానిస్టేబుల్ పేపర్ 1 లో ఏయే సబ్జెక్టులు ఉంటాయి?",
-        answer:
-          "పేపర్ 1 లో అర్థమెటిక్, రీజనింగ్, జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ చరిత్ర & ఉద్యమం, మరియు కరెంట్ అఫైర్స్ సబ్జెక్టులు ఉంటాయి. ప్రతి సబ్జెక్ట్‌కు ప్రత్యేక ప్రాక్టీస్ టెస్ట్‌లు కూడా అందుబాటులో ఉన్నాయి.",
+        name: "Test of Reasoning & Mental Ability",
+        teluguName: "రీజనింగ్ & మెంటల్ ఎబిలిటీ",
+        description: "Analogy, series completion, coding-decoding, blood relations, direction sense, syllogisms, puzzle tests, non-verbal reasoning.",
       },
       {
-        question: "టెస్ట్ రాసిన వెంటనే మార్కులు మరియు వివరణలు తెలుసుకోవచ్చా?",
-        answer:
-          "అవును. టెస్ట్ సబ్మిట్ చేసిన వెంటనే మీ మొత్తం స్కోర్, సమయం, సబ్జెక్ట్ వారీగా సాధించిన మార్కులు మరియు ప్రతి ప్రశ్నకు స్పష్టమైన వివరణలు మీ స్టూడెంట్ డ్యాష్‌బోర్డ్‌లో చూడవచ్చు.",
+        name: "General Science",
+        teluguName: "జనరల్ సైన్స్",
+        description: "Everyday science observation, basic concepts of physics, chemistry, biology, scientific inventions, environmental studies.",
+      },
+      {
+        name: "History of India & Indian Culture",
+        teluguName: "భారత దేశ చరిత్ర & సంస్కృతి",
+        description: "Ancient, medieval, and modern Indian history, socio-cultural movements, freedom struggle, prominent national leaders.",
+      },
+      {
+        name: "Telangana History, Movement & State Formation",
+        teluguName: "తెలంగాణ చరిత్ర, ఉద్యమం & రాష్ట్ర ఆవిర్భావం",
+        description: "Satavahanas, Kakatiyas, Asaf Jahis, Telangana Armed Struggle, 1969 agitation, Telangana statehood movement & cultural heritage.",
+      },
+      {
+        name: "Indian Geography, Polity & Economy",
+        teluguName: "భారత భూగోళశాస్త్రం, రాజనీతి & ఆర్థిక వ్యవస్థ",
+        description: "Physical geography of India & Telangana, Indian Constitution, political system, fundamental rights, economic planning & development.",
+      },
+      {
+        name: "Current Events of National & International Importance",
+        teluguName: "సమకాలీన అంశాలు (కరెంట్ అఫైర్స్)",
+        description: "Recent national & global developments, awards, sports, appointments, science & tech milestones, state welfare schemes.",
       },
     ],
   },
+  englishFaqs: [
+    {
+      question: "How can I practice Telangana Police Constable mock tests for free on Varadhi Prep?",
+      answer:
+        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and click on any published mock test to start practicing immediately with full timer and CBT interface without any payment.",
+    },
+    {
+      question: "What is the exam pattern for Telangana Police Constable Preliminary Written Test (PWT)?",
+      answer:
+        "The PWT consists of 200 objective multiple-choice questions for 200 marks with a duration of 3 hours (180 minutes). There is a negative marking of 0.25 marks for every incorrect answer.",
+    },
+    {
+      question: "Are the mock test questions available in both Telugu and English?",
+      answer:
+        "Yes, every mock test on Varadhi Prep features full bilingual support. You can toggle between Telugu and English question views and review detailed explanations in both languages.",
+    },
+    {
+      question: "Is there negative marking in the Telangana Police Constable mock tests?",
+      answer:
+        "Yes, all Varadhi Prep Telangana Police Constable mock tests accurately simulate the official TGPRB/TSLPRB rule of 0.25 negative marks per incorrect attempt, ensuring realistic score estimation.",
+    },
+    {
+      question: "What subjects are covered in the Telangana Police Constable mock test series?",
+      answer:
+        "The test series covers Arithmetic, Test of Reasoning, General Science, History of India, Telangana History & Movement, Indian Geography, Polity, Economy, and Current Affairs as per the official TGPRB syllabus.",
+    },
+    {
+      question: "Are these mock tests updated according to the latest TG Police Constable notification and syllabus?",
+      answer:
+        "Yes, all mock tests on Varadhi Prep are strictly mapped to the latest TGPRB notification syllabus, including 200 objective questions, 3-hour duration, and official 0.25 negative marking rules.",
+    },
+  ],
+  teluguFaqs: [
+    {
+      question: "ఈ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మాధ్యమంలో అందుబాటులో ఉన్నాయా?",
+      answer:
+        "అవును, వరధి ప్రెప్ (Varadhi Prep) లోని అన్ని పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మరియు ఇంగ్లీష్ (Bilingual) మాధ్యమంలో ప్రశ్నలు మరియు పూర్తి వివరణాత్మక సమాధానాలతో లభిస్తాయి.",
+    },
+    {
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ మరియు నోటిఫికేషన్ వివరాలు ఏమిటి?",
+      answer:
+        "TGPRB తాజా నిబంధనల ప్రకారం ప్రిలిమినరీ పరీక్ష (PWT) లో 200 ప్రశ్నలు, 200 మార్కులు ఉంటాయి. సమయం 3 గంటలు. ఇందులో అర్థమెటిక్, రీజనింగ్, జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ ఉద్యమం & చరిత్ర, భూగోళశాస్త్రం, రాజ్యాంగం మరియు కరెంట్ అఫైర్స్ సిలబస్‌గా ఉంటాయి.",
+    },
+    {
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ (PWT) లో నెగెటివ్ మార్కింగ్ విధానం ఉందా?",
+      answer:
+        "అవును. అధికారిక TGPRB నిబంధనల ప్రకారం ప్రతి తప్పు సమాధానానికి 0.25 (1/4 వంతు) నెగెటివ్ మార్కు తీసివేయబడుతుంది. మా టెస్ట్‌లలో కూడా ఈ నెగెటివ్ మార్కింగ్ అమలు చేయబడుతుంది.",
+    },
+    {
+      question: "పోలీస్ కానిస్టేబుల్ పేపర్ 1 లో ఏయే సబ్జెక్టులు ఉంటాయి?",
+      answer:
+        "పేపర్ 1 లో అర్థమెటిక్, రీజనింగ్, జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ చరిత్ర & ఉద్యమం, భారత రాజ్యాంగం మరియు కరెంట్ అఫైర్స్ సబ్జెక్టులు ఉంటాయి. ప్రతి సబ్జెక్ట్‌కు ప్రత్యేక ప్రాక్టీస్ టెస్ట్‌లు కూడా అందుబాటులో ఉన్నాయి.",
+    },
+    {
+      question: "టెస్ట్ రాసిన వెంటనే మార్కులు మరియు వివరణలు తెలుసుకోవచ్చా?",
+      answer:
+        "అవును. టెస్ట్ సబ్మిట్ చేసిన వెంటనే మీ మొత్తం స్కోర్, సమయం, సబ్జెక్ట్ వారీగా సాధించిన మార్కులు మరియు ప్రతి ప్రశ్నకు స్పష్టమైన వివరణలు మీ స్టూడెంట్ డ్యాష్‌బోర్డ్‌లో చూడవచ్చు.",
+    },
+    {
+      question: "వరధి ప్రెప్‌లో పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు ఉచితంగా రాయవచ్చా?",
+      answer:
+        "అవును! వరధి ప్రెప్‌లో పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ టెస్ట్‌లు మరియు మునుపటి పేపర్ల ఆధారిత మోడల్ టెస్ట్‌లు అభ్యర్థులందరికీ ఉచితంగా అందుబాటులో ఉన్నాయి.",
+    },
+  ],
+};
+
+const TELUGU_EXAMS: Record<string, ExamTeluguSeo> = {
+  "police-constable": POLICE_CONSTABLE_SEO,
+  "police-constable-free-mock-test": POLICE_CONSTABLE_SEO,
+  "tg-police-constable-mock-test": POLICE_CONSTABLE_SEO,
+  "telangana-police-mock-test": POLICE_CONSTABLE_SEO,
+  "telangana-police-exam": POLICE_CONSTABLE_SEO,
+  "police-exam": POLICE_CONSTABLE_SEO,
+  "police-constable-mock-tests": POLICE_CONSTABLE_SEO,
   "tg-tet": {
     teluguName: "తెలంగాణ టెట్ (TG-TET 2026)",
     teluguTitle: "తెలంగాణ టెట్ 2026 ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్",
@@ -144,15 +278,48 @@ export function getExamTeluguMetadata(
   stateSlug: string,
 ): ExamTeluguSeo | null {
   const normalizedSlug = examSlug.toLowerCase().trim();
+  const normalizedName = examName.toLowerCase().trim();
+
+  // 1. Direct match in dictionary
   if (TELUGU_EXAMS[normalizedSlug]) {
     return TELUGU_EXAMS[normalizedSlug];
   }
 
+  // 2. Fuzzy match for Police Constable
+  if (
+    normalizedSlug.includes("police") ||
+    normalizedSlug.includes("constable") ||
+    normalizedName.includes("police") ||
+    normalizedName.includes("constable")
+  ) {
+    return POLICE_CONSTABLE_SEO;
+  }
+
+  // 3. Fuzzy match for TG TET
+  if (normalizedSlug.includes("tet") || normalizedName.includes("tet")) {
+    return TELUGU_EXAMS["tg-tet-2026"] || TELUGU_EXAMS["tg-tet"];
+  }
+
+  // 4. Fuzzy match for Endowment Officer
+  if (normalizedSlug.includes("endowment") || normalizedName.includes("endowment")) {
+    return TELUGU_EXAMS["endowment-officer"];
+  }
+
+  // 5. Fuzzy match for AEE
+  if (normalizedSlug.includes("aee") || normalizedName.includes("aee")) {
+    return TELUGU_EXAMS["aee"];
+  }
+
   // If exam is in Telangana or Andhra Pradesh, generate dynamic Telugu search metadata
-  const isTeluguState = stateSlug === "tg" || stateSlug === "ap" || stateSlug === "telangana" || stateSlug === "andhra-pradesh";
+  const isTeluguState =
+    stateSlug === "tg" ||
+    stateSlug === "ap" ||
+    stateSlug === "telangana" ||
+    stateSlug === "andhra-pradesh";
   if (!isTeluguState) return null;
 
-  const statePrefix = stateSlug === "ap" || stateSlug === "andhra-pradesh" ? "ఆంధ్రప్రదేశ్" : "తెలంగాణ";
+  const statePrefix =
+    stateSlug === "ap" || stateSlug === "andhra-pradesh" ? "ఆంధ్రప్రదేశ్" : "తెలంగాణ";
   const stateCode = stateSlug === "ap" || stateSlug === "andhra-pradesh" ? "AP" : "TG";
 
   return {
@@ -178,4 +345,3 @@ export function getExamTeluguMetadata(
     ],
   };
 }
-

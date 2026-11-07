@@ -31,12 +31,38 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const context = await resolvePublicRoute({ stateSlug: id });
   if (!context) return { title: "State Mock Tests Not Found", robots: { index: false, follow: false } };
   const canonical = stateUrl(context.state.slug);
+
+  const isTelangana = context.state.slug === "telangana" || context.state.slug === "tg";
+  const defaultFallbackTitle = isTelangana
+    ? "Telangana Competitive Exams Free Mock Tests 2026 - Police, TGPSC & TET | తెలంగాణ మాక్ టెస్ట్"
+    : `${context.state.name} Mock Tests`;
+  const defaultFallbackDesc = isTelangana
+    ? "Take free Telangana competitive exam mock tests online. Practise TG Police Constable, TGPSC Group exams, TG TET 2026 with bilingual test papers in Telugu & English, CBT timer, and detailed solutions."
+    : `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.`;
+
+  const stateKeywords = isTelangana
+    ? [
+        "Telangana mock test",
+        "Telangana police mock test",
+        "Telangana police constable mock test",
+        "Telangana police exam",
+        "TG police constable mock test free",
+        "TGPSC mock test online",
+        "TG TET 2026 practice test",
+        "Telangana competitive exams online test series",
+        "తెలంగాణ మాక్ టెస్ట్",
+        "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్",
+        "టీజీ పోటీ పరీక్షల ప్రాక్టీస్ పేపర్స్",
+      ]
+    : undefined;
+
   const seo = resolveSeoFields(context.state, {
-    title: `${context.state.name} Mock Tests`,
-    description: `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.`,
+    title: defaultFallbackTitle,
+    description: defaultFallbackDesc,
   });
   return publicCollectionMetadata({
     ...seo,
+    keywords: stateKeywords,
     canonical,
     indexable: isIndexableCollectionQuery(await searchParams),
   });
@@ -53,6 +79,15 @@ export default async function StateOrLegacyTestPage({ params, searchParams }: Pr
   if (!context) notFound();
   const canonical = stateUrl(context.state.slug);
   if (context.usedAlias || id !== context.state.slug) permanentRedirect(canonical);
-  const seo = resolveSeoFields(context.state, { title: `${context.state.name} Mock Tests`, description: `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.` });
+
+  const isTelangana = context.state.slug === "telangana" || context.state.slug === "tg";
+  const defaultFallbackTitle = isTelangana
+    ? "Telangana Competitive Exams Free Mock Tests 2026 - Police, TGPSC & TET | తెలంగాణ మాక్ టెస్ట్"
+    : `${context.state.name} Mock Tests`;
+  const defaultFallbackDesc = isTelangana
+    ? "Take free Telangana competitive exam mock tests online. Practise TG Police Constable, TGPSC Group exams, TG TET 2026 with bilingual test papers in Telugu & English, CBT timer, and detailed solutions."
+    : `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.`;
+
+  const seo = resolveSeoFields(context.state, { title: defaultFallbackTitle, description: defaultFallbackDesc });
   return <><JsonLd data={collectionStructuredData(seo.title, seo.description, canonical, [{ name: "Home", path: "/" }, { name: "Mock tests", path: "/mock-tests" }, { name: context.state.name, path: canonical }])} />{await MockTestsPage({ searchParams: Promise.resolve({ ...(await searchParams), state: context.state.slug }), canonicalPath: canonical })}</>;
 }

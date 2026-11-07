@@ -23,7 +23,6 @@ import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
-import { StartTestCardButton } from "@/components/exams/StartTestCardButton";
 import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
@@ -119,19 +118,47 @@ export default async function ExamPage({ params, searchParams }: Props) {
   const savedQuestions = await getCachedFaqs(context.exam!.id);
     
   const introduction = context.exam.description?.trim() || seo.description;
+  const statePrefixedName = context.exam.name.toLowerCase().includes(context.state.name.toLowerCase())
+    ? context.exam.name
+    : `${context.state.name} ${context.exam.name}`;
   const examHeading = formatExamHeading(context.exam.name);
+  
   const standardQuestions = [
     { question: `Where can I take ${hasMockTestSuffixOrMention(context.exam.name) ? context.exam.name : `${context.exam.name} mock tests`}?`, answer: `Choose a paper on this page, open an available mock test and start practising ${context.exam.name} on Varadhi Prep.`, displayOrder: 0 },
     { question: `How many ${hasMockTestSuffixOrMention(context.exam.name) ? `${context.exam.name} tests` : `${context.exam.name} mock tests`} are available?`, answer: tests.length > 0 ? `${tests.length} published mock test${tests.length === 1 ? " is" : "s are"} currently available across ${papers.length} paper${papers.length === 1 ? "" : "s"}. New published tests automatically appear on this page.` : "Mock tests are being prepared and will appear on this page after publication.", displayOrder: 1 },
     { question: `Can I review my ${context.exam.name} answers?`, answer: "Yes. After submitting a test, you can review your score, selected answers, correct answers and available explanations from your student dashboard.", displayOrder: 2 },
   ];
   const savedByOrder = new Map((savedQuestions ?? []).map((item) => [item.display_order, item]));
+  const englishFaqItems = teluguData?.englishFaqs ?? [];
   const teluguFaqItems = teluguData?.teluguFaqs ?? [];
   const questions = [
     ...standardQuestions.map((item) => savedByOrder.get(item.displayOrder) ?? item),
+    ...englishFaqItems,
     ...(savedQuestions ?? []).filter((item) => item.display_order >= standardQuestions.length),
     ...teluguFaqItems,
   ].map((item) => ({ question: item.question, answer: item.answer }));
+
+  const courseJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: seo.title,
+    description: seo.description,
+    provider: {
+      "@type": "Organization",
+      name: "Varadhi Prep",
+      url: absoluteUrl("/"),
+    },
+    educationalLevel: "Competitive Examination",
+    inLanguage: ["en", "te"],
+    isAccessibleForFree: true,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "INR",
+      category: "Free",
+    },
+  };
+
   const structuredData = [
     ...collectionStructuredData(seo.title, seo.description, canonical, [
       { name: "Home", path: "/" },
@@ -139,6 +166,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
       { name: context.state.name, path: stateUrl(context.state.slug) },
       { name: context.exam.name, path: canonical },
     ]),
+    courseJsonLd,
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
     { "@context": "https://schema.org", "@type": "ItemList", name: examHeading, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined; const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
   ];
@@ -434,6 +462,131 @@ export default async function ExamPage({ params, searchParams }: Props) {
           )}
         </section>
 
+        {/* Official Exam Pattern & CBT Overview */}
+        {teluguData?.pattern && (
+          <section aria-labelledby="exam-pattern-heading" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  {teluguData.pattern.authority}
+                </p>
+                <h2 id="exam-pattern-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">
+                  {statePrefixedName} Exam Pattern & Syllabus
+                </h2>
+              </div>
+              <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-900">
+                Official 2026 Notification Pattern
+              </span>
+            </div>
+
+            {/* Pattern Metric Cards */}
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
+                <p className="text-xs font-medium text-slate-500">Questions</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalQuestions} Qs</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">Multiple Choice (MCQ)</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
+                <p className="text-xs font-medium text-slate-500">Total Marks</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalMarks} Marks</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">1 Mark Each</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
+                <p className="text-xs font-medium text-slate-500">Duration</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.durationMinutes} Mins</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">3 Hours Timed</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
+                <p className="text-xs font-medium text-slate-500">Negative Marks</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-rose-700">0.25 Mark</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">1/4 Deduction</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
+                <p className="text-xs font-medium text-slate-500">Languages</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">Bilingual</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">English & Telugu</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
+                <p className="text-xs font-medium text-slate-500">Mode</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">Online CBT</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">Timed Simulation</p>
+              </div>
+            </div>
+
+            {/* Selection Stages */}
+            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Recruitment Selection Stages</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {teluguData.pattern.stages.map((stage) => (
+                  <span key={stage} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs">
+                    {stage}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Subject-Wise Syllabus Cards */}
+            <div className="mt-6">
+              <h3 className="text-sm font-bold text-slate-900">Subject-wise Syllabus Coverage</h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Practice topic-wise and full-length tests mapped to every section of the official syllabus:
+              </p>
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {teluguData.pattern.subjects.map((sub) => (
+                  <div key={sub.name} className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+                    <h4 className="text-xs font-bold text-teal-900">{sub.name}</h4>
+                    <p className="text-xs font-semibold text-slate-700 mt-0.5">{sub.teluguName}</p>
+                    <p className="text-[11px] leading-relaxed text-slate-600 mt-2">{sub.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Why Prepare on Varadhi Prep */}
+        <section aria-labelledby="why-varadhi-heading" className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-teal-950 p-6 sm:p-8 text-white shadow-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-teal-400">High-Performance Practice</p>
+          <h2 id="why-varadhi-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-white">
+            Why Aspirants Choose Varadhi Prep Mock Tests
+          </h2>
+          <p className="mt-2 max-w-2xl text-xs sm:text-sm text-slate-300">
+            Engineered to give competitive exam candidates in Telangana and Andhra Pradesh an authentic testing edge.
+          </p>
+
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
+              <span className="text-2xl" aria-hidden="true">⏱️</span>
+              <h3 className="mt-2 text-sm font-bold text-white">Official CBT Timer</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                Experience real test conditions with section countdown timers, color-coded question palette, and mark-for-review navigation.
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
+              <span className="text-2xl" aria-hidden="true">🌐</span>
+              <h3 className="mt-2 text-sm font-bold text-white">Dual-Language Switch</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                Instantly switch questions between English and Telugu at any second to verify terminology and practice in your preferred medium.
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
+              <span className="text-2xl" aria-hidden="true">🎯</span>
+              <h3 className="mt-2 text-sm font-bold text-white">Realistic Negative Marking</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                Real 0.25 penalty scoring ensures you learn disciplined attempt strategy and avoid negative mark traps in the actual exam.
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
+              <span className="text-2xl" aria-hidden="true">💡</span>
+              <h3 className="mt-2 text-sm font-bold text-white">Detailed Bilingual Solutions</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                Access step-by-step explanations in Telugu and English for every single question immediately upon submission.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Frequently Asked Questions */}
         <section aria-labelledby="faq-title" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Frequently Asked Questions</p>
           <h2 id="faq-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">About {examHeading}</h2>

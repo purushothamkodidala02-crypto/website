@@ -33,11 +33,27 @@ export function resolveSeoFields(
   entity: SeoFields,
   fallback: { title: string; description: string },
 ) {
-  const isLegacyTitle = entity.seo_title?.trim() === "Telangana Police Constable Mock Test 2026 – Free Online Tests";
-  const isLegacyDesc = entity.seo_description?.trim()?.startsWith("Take free Telangana Police Constable mock tests online for preliminary");
+  const rawTitle = entity.seo_title?.trim();
+  const rawDesc = entity.seo_description?.trim();
+
+  const isLegacyTitle =
+    rawTitle === "Telangana Police Constable Mock Test 2026 – Free Online Tests" ||
+    rawTitle === "Telangana Police Constable Mock Test Series 2026";
+  const isLegacyDesc =
+    rawDesc?.startsWith("Take free Telangana Police Constable mock tests online for preliminary") ||
+    rawDesc?.startsWith("Practice the latest Telangana Police Constable Mock Test 2026 for free");
+
+  // If fallback title is bilingual (contains Telugu script \u0C00-\u0C7F) and entity title lacks Telugu,
+  // prefer the rich bilingual fallback for optimal search visibility across English & Telugu queries.
+  const hasTeluguInFallback = fallback.title && /[\u0C00-\u0C7F]/.test(fallback.title);
+  const hasTeluguInDb = rawTitle && /[\u0C00-\u0C7F]/.test(rawTitle);
+
+  const useFallbackTitle =
+    !rawTitle || isLegacyTitle || (hasTeluguInFallback && !hasTeluguInDb);
+  const useFallbackDesc = !rawDesc || isLegacyDesc;
 
   return {
-    title: (isLegacyTitle ? null : entity.seo_title?.trim()) || fallback.title,
-    description: (isLegacyDesc ? null : entity.seo_description?.trim()) || fallback.description,
+    title: useFallbackTitle ? fallback.title : rawTitle,
+    description: useFallbackDesc ? fallback.description : rawDesc,
   };
 }

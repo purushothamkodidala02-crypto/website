@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/VaradhiBrand";
-import { ExamSymbol, MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
+import { ExamSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
-import { HomeAuthAction } from "@/components/site/HomeAuthAction";
 import { getHomeCatalogData } from "@/lib/catalog-data";
 import { examUrl, stateUrl } from "@/lib/public-urls";
 import { absoluteUrl, SITE_DESCRIPTION } from "@/lib/site";
@@ -17,15 +16,21 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests",
+    absolute: "Varadhi Prep - TG & AP Competitive Exams Free Mock Tests | తెలంగాణ పోలీస్ & పోటీ పరీక్షలు",
   },
   description: SITE_DESCRIPTION,
   keywords: [
     "Varadhi Prep",
     "TG & AP Competitive Exams Free Mock Tests",
-    "TG Police Constable mock test",
-    "Telangana police constable free mock test",
+    "Telangana police mock test",
+    "Telangana police constable mock test",
+    "Telangana police exam mock test",
+    "TG Police Constable mock test in Telugu",
+    "TS police constable mock test in telugu free",
     "TGPRB police constable mock test 2026",
+    "TSLPRB police constable test series",
+    "TG Police Constable grand test online",
+    "Telangana police constable preliminary written test",
     "TSPSC mock test free",
     "TGPSC online test series",
     "TG TET mock test papers",
@@ -35,6 +40,7 @@ export const metadata: Metadata = {
     "Telangana history and movement practice test",
     "Current affairs mock test for Telangana exams",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+    "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
     "టీజీ టెట్ మాక్ టెస్ట్",
     "పోటీ పరీక్షల మాక్ టెస్ట్‌లు",
   ],
@@ -52,25 +58,6 @@ export const metadata: Metadata = {
   },
 };
 
-const pillars = [
-  {
-    title: "Official Notification Mapping",
-    description: "Every mock paper is mapped to the latest TGPSC, APPSC, Police, or TET notification syllabus, ensuring you practice only relevant topics.",
-  },
-  {
-    title: "Bilingual Question Papers",
-    description: "Full dual-language support in English and Telugu, allowing you to cross-check terminology and practice in your preferred medium.",
-  },
-  {
-    title: "Authentic CBT Interface",
-    description: "Experience the real computer-based testing interface with official timers, section-wise navigation, question status palettes, and negative marking.",
-  },
-  {
-    title: "Detailed Performance Analysis",
-    description: "Receive instant answer keys, detailed bilingual explanations for every question, and subject-wise accuracy metrics immediately upon submission.",
-  },
-];
-
 export default async function Home() {
   const [{ states, categories, exams, papers, hasStateError }, activeSurvey] = await Promise.all([
     getHomeCatalogData(),
@@ -83,7 +70,7 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Varadhi Prep",
-    alternateName: ["VaradhiPrep", "Varadhi Prep Mock Tests", "TG and AP State Exam Mock Tests"],
+    alternateName: ["VaradhiPrep", "Varadhi Prep Mock Tests", "TG and AP State Exam Mock Tests", "తెలంగాణ పోలీస్ మాక్ టెస్ట్"],
     url: absoluteUrl("/"),
     description: SITE_DESCRIPTION,
     inLanguage: ["en-IN", "te-IN"],
@@ -146,7 +133,7 @@ export default async function Home() {
                 <input
                   type="search"
                   name="q"
-                  placeholder="Search exam (e.g. Group 2, Police Constable, TET, APPSC)..."
+                  placeholder="Search exam (e.g. Police Constable, TET, TGPSC, APPSC)..."
                   aria-label="Search exams"
                   className="w-full border-none bg-transparent px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-0"
                 />
@@ -158,20 +145,20 @@ export default async function Home() {
                 </button>
               </div>
 
-              {/* Popular Exam Shortcuts - Right Aligned */}
+              {/* Popular Exam Direct Shortcuts */}
               <div className="mt-2.5 flex flex-wrap items-center justify-end gap-1.5 text-xs">
                 <span className="font-semibold text-slate-500">Popular:</span>
                 {[
-                  { label: "Group 2", q: "Group 2" },
-                  { label: "Police Constable", q: "Constable" },
-                  { label: "Sub-Inspector", q: "Sub-Inspector" },
-                  { label: "TET 2026", q: "TET" },
-                  { label: "TGPSC", q: "TGPSC" },
-                  { label: "APPSC", q: "APPSC" },
+                  { label: "Police Constable", href: "/mock-tests/telangana/police-constable-free-mock-test" },
+                  { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
+                  { label: "TGPSC", href: "/mock-tests/telangana" },
+                  { label: "APPSC", href: "/mock-tests/andhra-pradesh" },
+                  { label: "Endowment Officer", href: "/mock-tests/telangana/endowment-officer" },
+                  { label: "AEE", href: "/mock-tests/telangana/aee" },
                 ].map((tag) => (
                   <Link
                     key={tag.label}
-                    href={`/mock-tests?q=${encodeURIComponent(tag.q)}`}
+                    href={tag.href}
                     className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-950"
                   >
                     {tag.label}
@@ -264,7 +251,7 @@ export default async function Home() {
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Explore exams</p>
               <h2 className="font-display mt-0.5 text-base sm:text-lg font-bold tracking-tight text-slate-900">
-                Available Exams
+                Available Exams & Test Series
               </h2>
             </div>
             <Link
@@ -281,6 +268,14 @@ export default async function Home() {
               const state = states.find((item) => item.id === category?.state_id);
               const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
               if (!state) return null;
+
+              const fullExamName = exam.name.toLowerCase().includes(state.name.toLowerCase())
+                ? exam.name
+                : `${state.name} ${exam.name}`;
+              const isPolice =
+                exam.slug.includes("police") ||
+                exam.name.toLowerCase().includes("police") ||
+                exam.name.toLowerCase().includes("constable");
 
               return (
                 <Link
@@ -303,8 +298,13 @@ export default async function Home() {
                       </span>
                     </div>
                     <h3 className="font-display mt-3.5 text-base font-bold leading-snug text-slate-900 group-hover:text-teal-950 transition">
-                      {exam.name}
+                      {fullExamName}
                     </h3>
+                    {isPolice && (
+                      <p className="mt-1 text-xs font-semibold text-teal-800">
+                        తెలంగాణ పోలీస్ కానిస్టేబుల్ (TGPRB / TSLPRB)
+                      </p>
+                    )}
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
                     <span className="font-medium text-slate-500">
@@ -333,7 +333,7 @@ export default async function Home() {
               </div>
             </div>
             <p className="mt-4 text-xs leading-relaxed text-slate-400">
-              Syllabus-aligned computer-based mock tests for competitive exam aspirants across Telangana and Andhra Pradesh.
+              Syllabus-aligned computer-based mock tests for competitive exam aspirants across Telangana and Andhra Pradesh. Free practice for TGPRB Police Constable, TSPSC, APPSC, and TET.
             </p>
             <p className="mt-4 text-xs text-slate-500">
               © {new Date().getFullYear()} Varadhi Prep. All rights reserved.
@@ -342,6 +342,10 @@ export default async function Home() {
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
+              <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
+              <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>
+              <Link href="/mock-tests/andhra-pradesh" className="hover:text-white transition">Andhra Pradesh Exams</Link>
               <Link href="/support" className="hover:text-white transition">Support</Link>
               <Link href="/login" className="hover:text-white transition">Sign in</Link>
               <Link href="/register" className="hover:text-white transition">Create account</Link>
