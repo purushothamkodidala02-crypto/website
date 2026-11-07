@@ -172,7 +172,8 @@ export default async function ExamPage({ params, searchParams }: Props) {
   ];
 
   return (
-    <main className="student-page min-h-screen bg-[#f4f7f8] text-slate-950">
+    <main className="student-page relative min-h-screen bg-[#f6faf8] text-[#132621] w-full max-w-full overflow-x-hidden">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-[#eaf2ef]/70 via-[#f2f7f5]/40 to-transparent -z-10" />
       <JsonLd data={structuredData} />
       <script
         dangerouslySetInnerHTML={{
@@ -180,23 +181,23 @@ export default async function ExamPage({ params, searchParams }: Props) {
         }}
       />
       <PublicHeader />
-      <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f1f5f9] via-[#f5f8fc] to-[#f8fafc]">
+      <section className="border-b border-teal-900/5 bg-gradient-to-b from-[#eaf2ef]/60 via-[#f2f7f5]/30 to-transparent">
         <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-12">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
-            <Link href="/" className="hover:text-blue-700 py-0.5 inline-flex items-center">Home</Link>
+            <Link href="/" className="hover:text-teal-800 py-0.5 inline-flex items-center transition">Home</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
-            <Link href={stateUrl(context.state.slug)} className="hover:text-blue-700 py-0.5 inline-flex items-center">{context.state.name}</Link>
+            <Link href={stateUrl(context.state.slug)} className="hover:text-teal-800 py-0.5 inline-flex items-center transition">{context.state.name}</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
             <span className="text-slate-800 font-semibold py-0.5 inline-flex items-center truncate max-w-[200px] sm:max-w-none">{context.exam.name}</span>
           </nav>
 
           <div className="mt-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-xs font-semibold text-blue-900">
-                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-blue-700" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200/80 bg-teal-50/80 px-3 py-1 text-xs font-bold text-teal-950">
+                <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-800" />
                 {context.state.name} State Examination
               </span>
-              <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+              <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 shadow-2xs">
                 Official Syllabus Pattern
               </span>
             </div>
@@ -206,7 +207,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </h1>
 
             {teluguData && (
-              <p className="mt-2 text-base font-semibold text-blue-950 sm:text-lg">
+              <p className="mt-2 text-base font-bold text-teal-950 sm:text-lg">
                 {teluguData.teluguTitle}
               </p>
             )}
@@ -233,7 +234,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
               <a
                 href="#papers"
-                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs text-center"
+                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-teal-800 hover:bg-teal-900 active:bg-teal-950 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs text-center"
               >
                 Choose a paper ↓
               </a>
@@ -462,7 +463,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           )}
         </section>
 
-        {/* Official Exam Pattern & CBT Overview */}
+        {/* Official Exam Pattern & Overview */}
         {teluguData?.pattern && (
           <section aria-labelledby="exam-pattern-heading" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -474,51 +475,51 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   {statePrefixedName} Exam Pattern & Syllabus
                 </h2>
               </div>
-              <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-900">
+              <span className="rounded-full bg-teal-50 border border-teal-200/80 px-3 py-1 text-xs font-bold text-teal-950">
                 Official 2026 Notification Pattern
               </span>
             </div>
 
             {/* Pattern Metric Cards */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Questions</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
+                <p className="text-xs font-semibold text-slate-500">Questions</p>
                 <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalQuestions} Qs</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">Multiple Choice (MCQ)</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">Multiple Choice (MCQ)</p>
               </div>
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Total Marks</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
+                <p className="text-xs font-semibold text-slate-500">Total Marks</p>
                 <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalMarks} Marks</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">1 Mark Each</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">1 Mark Each</p>
               </div>
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Duration</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
+                <p className="text-xs font-semibold text-slate-500">Duration</p>
                 <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.durationMinutes} Mins</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">3 Hours Timed</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">3 Hours Timed</p>
               </div>
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Negative Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-rose-700">0.25 Mark</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">1/4 Deduction</p>
+              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
+                <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">0.25 Mark</p>
+                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">1/4 Deduction</p>
               </div>
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Languages</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
+                <p className="text-xs font-semibold text-slate-500">Languages</p>
                 <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">Bilingual</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">English & Telugu</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">English & Telugu</p>
               </div>
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-center">
-                <p className="text-xs font-medium text-slate-500">Official Mode</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">{teluguData.pattern.mode.includes("OMR") ? "OMR Based Test" : teluguData.pattern.mode}</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">Offline OMR Sheet</p>
+              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
+                <p className="text-xs font-semibold text-teal-800">Official Mode</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-teal-950">{teluguData.pattern.mode.includes("OMR") ? "OMR Based Test" : teluguData.pattern.mode}</p>
+                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Offline OMR Sheet</p>
               </div>
             </div>
 
             {/* Selection Stages */}
-            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Recruitment Selection Stages</h3>
+            <div className="mt-6 rounded-2xl border border-slate-200/80 bg-[#f6faf8] p-4 sm:p-5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">Recruitment Selection Stages</h3>
               <div className="mt-3 flex flex-wrap gap-2">
                 {teluguData.pattern.stages.map((stage) => (
-                  <span key={stage} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs">
+                  <span key={stage} className="rounded-xl border border-slate-200/90 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs">
                     {stage}
                   </span>
                 ))}
@@ -533,9 +534,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </p>
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {teluguData.pattern.subjects.map((sub) => (
-                  <div key={sub.name} className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
-                    <h4 className="text-xs font-bold text-teal-900">{sub.name}</h4>
-                    <p className="text-xs font-semibold text-slate-700 mt-0.5">{sub.teluguName}</p>
+                  <div key={sub.name} className="group rounded-2xl border border-slate-200/90 bg-white p-4 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
+                    <h4 className="text-xs font-bold text-teal-800 group-hover:text-teal-950 transition">{sub.name}</h4>
+                    <p className="text-xs font-semibold text-slate-800 mt-0.5">{sub.teluguName}</p>
                     <p className="text-[11px] leading-relaxed text-slate-600 mt-2">{sub.description}</p>
                   </div>
                 ))}
@@ -544,42 +545,44 @@ export default async function ExamPage({ params, searchParams }: Props) {
           </section>
         )}
 
-        {/* Why Prepare on Varadhi Prep */}
-        <section aria-labelledby="why-varadhi-heading" className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-teal-950 p-6 sm:p-8 text-white shadow-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-teal-400">High-Performance Practice</p>
-          <h2 id="why-varadhi-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-white">
-            Why Aspirants Choose Varadhi Prep Mock Tests
-          </h2>
-          <p className="mt-2 max-w-2xl text-xs sm:text-sm text-slate-300">
-            Engineered to give competitive exam candidates in Telangana and Andhra Pradesh an authentic testing edge.
-          </p>
+        {/* Why Aspirants Choose Varadhi Prep */}
+        <section aria-labelledby="why-varadhi-heading" className="rounded-2xl border border-teal-100/90 bg-gradient-to-b from-teal-50/50 via-white to-white p-6 sm:p-8 shadow-2xs">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">High-Performance Practice</p>
+            <h2 id="why-varadhi-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-950">
+              Why Aspirants Choose Varadhi Prep Mock Tests
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600">
+              Engineered to give competitive exam candidates in Telangana and Andhra Pradesh an authentic testing edge.
+            </p>
+          </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
-              <span className="text-2xl" aria-hidden="true">⏱️</span>
-              <h3 className="mt-2 text-sm font-bold text-white">Timed Exam Simulator</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
+              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">⏱️</span>
+              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Timed Exam Simulator</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Experience real 3-hour exam pressure with countdown timers and instant question review to build the speed required for your OMR test.
               </p>
             </div>
-            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
-              <span className="text-2xl" aria-hidden="true">🌐</span>
-              <h3 className="mt-2 text-sm font-bold text-white">Dual-Language Switch</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
+              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">🌐</span>
+              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Dual-Language Switch</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Instantly switch questions between English and Telugu at any second to verify terminology and practice in your preferred medium.
               </p>
             </div>
-            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
-              <span className="text-2xl" aria-hidden="true">🎯</span>
-              <h3 className="mt-2 text-sm font-bold text-white">Realistic Negative Marking</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
+              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">🎯</span>
+              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Realistic Negative Marking</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Real 0.25 penalty scoring ensures you learn disciplined attempt strategy and avoid negative mark traps in the actual exam.
               </p>
             </div>
-            <div className="rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-xs">
-              <span className="text-2xl" aria-hidden="true">💡</span>
-              <h3 className="mt-2 text-sm font-bold text-white">Detailed Bilingual Solutions</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
+            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
+              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">💡</span>
+              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Detailed Bilingual Solutions</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Access step-by-step explanations in Telugu and English for every single question immediately upon submission.
               </p>
             </div>
@@ -588,16 +591,16 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
         {/* Frequently Asked Questions */}
         <section aria-labelledby="faq-title" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Frequently Asked Questions</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Frequently Asked Questions</p>
           <h2 id="faq-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">About {examHeading}</h2>
-          <div className="mt-6 divide-y divide-slate-200">
+          <div className="mt-6 divide-y divide-slate-100">
             {questions.map((item) => (
               <details key={item.question} className="group py-4">
-                <summary className="cursor-pointer list-none font-semibold text-slate-900 marker:hidden flex items-center justify-between">
+                <summary className="cursor-pointer list-none font-semibold text-slate-900 hover:text-teal-950 marker:hidden flex items-center justify-between gap-3 transition">
                   <span>{item.question}</span>
-                  <span className="text-slate-400 group-open:rotate-45 transition text-lg leading-none" aria-hidden="true">+</span>
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 group-open:border-teal-200 group-open:bg-teal-50 group-open:text-teal-800 group-open:rotate-45 transition text-base leading-none font-bold" aria-hidden="true">+</span>
                 </summary>
-                <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-slate-600">{item.answer}</p>
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 bg-[#f9fbfa] rounded-xl p-3.5 border border-slate-100/80">{item.answer}</p>
               </details>
             ))}
           </div>
