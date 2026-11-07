@@ -13,9 +13,16 @@ export async function POST(request: Request) {
   const ip = ipFromHeaders(request.headers);
   if (!email || !captchaToken) return Response.json({ message: "Complete your email and security verification." }, { status: 400 });
   try {
-    if (!await verifyTurnstile(captchaToken, ip)) return Response.json({ message: "Security verification was rejected. Please try again." }, { status: 400 });
     const admin = createAdminClient();
-    const { data: userId } = await admin.rpc("find_auth_user_id_by_email", { requested_email: email });
+    const [turnstilePassed, { data: userId }] = await Promise.all([
+      verifyTurnstile(captchaToken, ip),
+      admin.rpc("find_auth_user_id_by_email", { requested_email: email }),
+    ]);
+
+    if (!turnstilePassed) {
+      return Response.json({ message: "Security verification was rejected. Please try again." }, { status: 400 });
+    }
+
     if (!userId) return Response.json({ ok: true });
     const { data: authUser, error: userError } = await admin.auth.admin.getUserById(userId);
     if (userError) return Response.json({ ok: true });
@@ -29,9 +36,26 @@ export async function POST(request: Request) {
       );
     }
     const otp = createSixDigitOtp();
-    const { error } = await admin.rpc("issue_custom_email_login_challenge", { requested_user_id: userId, requested_email: email, requested_code_hash: hashOtp(`${email}:${otp}`), requested_ip_hash: hashIp(ip) });
-    if (error) return Response.json({ message: error.message.includes("wait") || error.message.includes("Too many") ? error.message : "We could not send a code right now. Please try again shortly." }, { status: error.message.includes("wait") || error.message.includes("Too many") ? 429 : 500 });
+    const { error } = await admin.rpc("issue_custom_email_login_challenge", {
+      requested_user_id: userId,
+      requested_email: email,
+      requested_code_hash: hashOtp(`${email}:${otp}`),
+      requested_ip_hash: hashIp(ip),
+    });
+    if (error) {
+      return Response.json(
+        {
+          message:
+            error.message.includes("wait") || error.message.includes("Too many")
+              ? error.message
+              : "We could not send a code right now. Please try again shortly.",
+        },
+        { status: error.message.includes("wait") || error.message.includes("Too many") ? 429 : 500 },
+      );
+    }
     await sendSixDigitOtp(email, otp);
     return Response.json({ ok: true });
-  } catch (error) { return Response.json({ message: error instanceof Error ? error.message : "We could not send a code right now." }, { status: 503 }); }
+  } catch (error) {
+    return Response.json({ message: error instanceof Error ? error.message : "We could not send a code right now." }, { status: 503 });
+  }
 }

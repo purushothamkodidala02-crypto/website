@@ -16,12 +16,17 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
     const { data: challengedUserId, error } = await admin.rpc("consume_custom_email_login_challenge", { requested_email: email, requested_code_hash: hashOtp(`${email}:${code}`) });
     if (error) return Response.json({ message: error.message.includes("Too many") ? error.message : "That code is invalid or has expired." }, { status: 400 });
-    const { data: authUser, error: userError } = await admin.auth.admin.getUserById(challengedUserId);
-    if (userError || !authUser.user?.email_confirmed_at) return Response.json({ message: "Confirm your email address before using email-code sign-in." }, { status: 403 });
+
     const nextPath = safeNext(payload?.nextPath);
-    const { data, error: linkError } = await admin.auth.admin.generateLink({ type: "magiclink", email, options: { redirectTo: absoluteUrl(nextPath) } });
+    const [{ data: authUser, error: userError }, { data, error: linkError }] = await Promise.all([
+      admin.auth.admin.getUserById(challengedUserId),
+      admin.auth.admin.generateLink({ type: "magiclink", email, options: { redirectTo: absoluteUrl(nextPath) } }),
+    ]);
+
+    if (userError || !authUser?.user?.email_confirmed_at) return Response.json({ message: "Confirm your email address before using email-code sign-in." }, { status: 403 });
     const tokenHash = data?.properties?.hashed_token;
     if (linkError || !tokenHash) return Response.json({ message: "We could not complete sign-in. Please try again." }, { status: 503 });
+
     // The callback verifies Supabase's one-time token server-side and persists
     // the session cookies before sending the student to the requested page.
     const callbackUrl = new URL("/auth/email-otp/callback", absoluteUrl("/"));

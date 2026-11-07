@@ -34,10 +34,10 @@ export async function GET(request: NextRequest) {
       },
     },
   );
-  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+  const { data: authData, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
   if (error) return NextResponse.redirect(loginUrl);
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = authData?.user;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")

@@ -100,6 +100,10 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+      </head>
       <body className="min-h-screen bg-white text-gray-900 select-none">
         <PostHogProvider>
           <NavigationProgress />

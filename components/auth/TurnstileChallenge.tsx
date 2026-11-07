@@ -16,6 +16,7 @@ type TurnstileApi = {
       callback: (token: string) => void;
       "expired-callback": () => void;
       "error-callback": (errorCode: string) => boolean;
+      "refresh-expired"?: "auto" | "manual" | "never";
     },
   ) => string;
   remove: (widgetId: string) => void;
@@ -36,12 +37,23 @@ export function TurnstileChallenge({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [ready, setReady] = useState(false);
+  const onTokenRef = useRef(onToken);
+  onTokenRef.current = onToken;
+
+  const [ready, setReady] = useState(
+    () => typeof window !== "undefined" && Boolean(window.turnstile),
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const rawSiteKey =
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
     (process.env.NODE_ENV === "development" ? DEVELOPMENT_SITE_KEY : PRODUCTION_SITE_KEY);
   const siteKey = rawSiteKey.trim();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.turnstile && !ready) {
+      setReady(true);
+    }
+  }, [ready]);
 
   useEffect(() => {
     if (!ready || !siteKey || !containerRef.current || !window.turnstile) return;
@@ -51,18 +63,19 @@ export function TurnstileChallenge({
       widgetIdRef.current = null;
     }
 
-    onToken(null);
+    onTokenRef.current(null);
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: siteKey,
       theme: "auto",
       size: "flexible",
+      "refresh-expired": "auto",
       callback: (token) => {
         setErrorMessage(null);
-        onToken(token);
+        onTokenRef.current(token);
       },
-      "expired-callback": () => onToken(null),
+      "expired-callback": () => onTokenRef.current(null),
       "error-callback": (errorCode) => {
-        onToken(null);
+        onTokenRef.current(null);
         setErrorMessage(
           errorCode === "110200"
             ? `This address (${typeof window !== "undefined" ? window.location.hostname : "hostname"}) is not authorized in Cloudflare Turnstile. Add it to your Turnstile widget hostnames in Cloudflare.`
@@ -78,7 +91,7 @@ export function TurnstileChallenge({
         widgetIdRef.current = null;
       }
     };
-  }, [onToken, ready, resetKey, siteKey]);
+  }, [ready, resetKey, siteKey]);
 
   if (!siteKey) {
     return (
