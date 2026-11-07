@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { registerActiveSessionToken, SINGLE_SESSION_COOKIE_NAME } from "@/lib/auth/single-session";
 
 function safeNextPath(value: string | null) {
@@ -22,7 +23,8 @@ export async function GET(request: NextRequest) {
   void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
   // Concurrently register active session token and fetch profile in a single DB roundtrip
-  const { data: updatedProfile } = await supabase
+  const admin = createAdminClient();
+  const { data: updatedProfile } = await admin
     .from("profiles")
     .update({
       active_session_token: token,

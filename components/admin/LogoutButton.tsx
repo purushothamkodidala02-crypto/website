@@ -16,15 +16,19 @@ export default function LogoutButton({ className }: { className?: string } = {})
     clearLocalPracticeStorage();
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
 
-    if (error) {
-      setLoading(false);
-      return;
+    // 1. Clear session locally in 0ms so the browser cookies are wiped immediately
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch {
+      // Ignore
     }
 
-    router.replace("/login");
-    router.refresh();
+    // 2. Fire-and-forget remote revocation in background so user never waits
+    void supabase.auth.signOut({ scope: "global" }).catch(() => null);
+
+    // 3. Instant navigation to login page
+    window.location.href = "/login";
   }
 
   return (

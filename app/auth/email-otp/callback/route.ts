@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { cookies } from "next/headers";
 import { SINGLE_SESSION_COOKIE_NAME } from "@/lib/auth/single-session";
 
@@ -47,7 +48,8 @@ export async function GET(request: NextRequest) {
       void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
       const deviceSessionToken = crypto.randomUUID();
-      await supabase
+      const admin = createAdminClient();
+      await admin
         .from("profiles")
         .update({
           active_session_token: deviceSessionToken,
