@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { createPublicClient } from "@/lib/supabase/public";
 
@@ -34,7 +35,7 @@ export type PublicRouteRequest = {
   mockTestSlug?: string;
 };
 
-export async function resolvePublicRoute(request: PublicRouteRequest) {
+async function resolvePublicRouteInternal(request: PublicRouteRequest) {
   const catalog = await getMockTestCatalogData();
   let usedAlias = false;
   const stateMatch = await resolveEntity(catalog.states, request.stateSlug, "state", () => true);
@@ -86,6 +87,40 @@ export async function resolvePublicRoute(request: PublicRouteRequest) {
   usedAlias ||= Boolean(mockTestMatch?.usedAlias);
 
   return { catalog, state, category, exam, specialization, paper, subject, mockTest, usedAlias };
+}
+
+const resolvePublicRouteCached = cache(
+  async (
+    stateSlug: string,
+    categorySlug: string = "",
+    examSlug: string = "",
+    specializationSlug: string = "",
+    paperSlug: string = "",
+    subjectSlug: string = "",
+    mockTestSlug: string = "",
+  ) => {
+    return resolvePublicRouteInternal({
+      stateSlug,
+      categorySlug: categorySlug || undefined,
+      examSlug: examSlug || undefined,
+      specializationSlug: specializationSlug || undefined,
+      paperSlug: paperSlug || undefined,
+      subjectSlug: subjectSlug || undefined,
+      mockTestSlug: mockTestSlug || undefined,
+    });
+  },
+);
+
+export async function resolvePublicRoute(request: PublicRouteRequest) {
+  return resolvePublicRouteCached(
+    request.stateSlug,
+    request.categorySlug ?? "",
+    request.examSlug ?? "",
+    request.specializationSlug ?? "",
+    request.paperSlug ?? "",
+    request.subjectSlug ?? "",
+    request.mockTestSlug ?? "",
+  );
 }
 
 export type PublicRouteContext = NonNullable<Awaited<ReturnType<typeof resolvePublicRoute>>>;

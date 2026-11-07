@@ -6,6 +6,86 @@ import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, paperUrl, stateUrl, subjectUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
-type Props = { params: Promise<{ id: string; exam: string; paper: string; subject: string }>; searchParams: Promise<Filters> };
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> { const p = await params; const c = await resolvePublicRoute({ stateSlug: p.id, examSlug: p.exam, paperSlug: p.paper, subjectSlug: p.subject }); if (!c?.exam || !c.paper || !c.subject) return { title: "Subject Not Found", robots: { index: false, follow: false } }; const canonical = subjectUrl(c.state.slug, c.exam.slug, c.paper.slug, c.subject.slug); const seo = resolveSeoFields(c.subject, { title: `${c.subject.name} Mock Tests for ${c.exam.name}`, description: `Practise free ${c.subject.name} mock tests for ${c.exam.name} ${c.paper.name}. Master important syllabus questions with chapter-wise tests, answers, and detailed explanations.` }); return publicCollectionMetadata({ ...seo, canonical, indexable: isIndexableCollectionQuery(await searchParams) }); }
-export default async function SubjectPage({ params, searchParams }: Props) { const p = await params; const sp = await searchParams; const c = await resolvePublicRoute({ stateSlug: p.id, examSlug: p.exam, paperSlug: p.paper, subjectSlug: p.subject }); if (!c?.exam || !c.paper || !c.subject) notFound(); const canonical = subjectUrl(c.state.slug, c.exam.slug, c.paper.slug, c.subject.slug); if (c.usedAlias || p.id !== c.state.slug || p.exam !== c.exam.slug || p.paper !== c.paper.slug || p.subject !== c.subject.slug) permanentRedirect(canonical); const seo = resolveSeoFields(c.subject, { title: `${c.subject.name} Mock Tests for ${c.exam.name}`, description: `Practise free ${c.subject.name} mock tests for ${c.exam.name} ${c.paper.name}. Master important syllabus questions with chapter-wise tests, answers, and detailed explanations.` }); return <><JsonLd data={collectionStructuredData(seo.title, seo.description, canonical, [{ name: "Home", path: "/" }, { name: "Mock tests", path: "/mock-tests" }, { name: c.state.name, path: stateUrl(c.state.slug) }, { name: c.exam.name, path: examUrl(c.state.slug, c.exam.slug) }, { name: c.paper.name, path: paperUrl(c.state.slug, c.exam.slug, c.paper.slug) }, { name: c.subject.name, path: canonical }])} />{await MockTestsPage({ searchParams: Promise.resolve({ ...sp, state: c.state.slug, exam: c.exam.slug, paper: c.paper.slug, subject: c.subject.slug, type: sp.type ?? "subject" }), canonicalPath: canonical })}</>; }
+
+// ⚡ Cache on global Edge CDN and revalidate every 5 minutes
+export const revalidate = 300;
+
+type Props = {
+  params: Promise<{ id: string; exam: string; paper: string; subject: string }>;
+  searchParams: Promise<Filters>;
+};
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const p = await params;
+  const c = await resolvePublicRoute({
+    stateSlug: p.id,
+    examSlug: p.exam,
+    paperSlug: p.paper,
+    subjectSlug: p.subject,
+  });
+  if (!c?.exam || !c.paper || !c.subject) {
+    return { title: "Subject Not Found", robots: { index: false, follow: false } };
+  }
+  const canonical = subjectUrl(c.state.slug, c.exam.slug, c.paper.slug, c.subject.slug);
+  const seo = resolveSeoFields(c.subject, {
+    title: `${c.subject.name} Mock Tests for ${c.exam.name}`,
+    description: `Practise free ${c.subject.name} mock tests for ${c.exam.name} ${c.paper.name}. Master important syllabus questions with chapter-wise tests, answers, and detailed explanations.`,
+  });
+  return publicCollectionMetadata({
+    ...seo,
+    canonical,
+    indexable: isIndexableCollectionQuery(await searchParams),
+  });
+}
+
+export default async function SubjectPage({ params, searchParams }: Props) {
+  const p = await params;
+  const sp = await searchParams;
+  const c = await resolvePublicRoute({
+    stateSlug: p.id,
+    examSlug: p.exam,
+    paperSlug: p.paper,
+    subjectSlug: p.subject,
+  });
+  if (!c?.exam || !c.paper || !c.subject) notFound();
+  const canonical = subjectUrl(c.state.slug, c.exam.slug, c.paper.slug, c.subject.slug);
+  if (
+    c.usedAlias ||
+    p.id !== c.state.slug ||
+    p.exam !== c.exam.slug ||
+    p.paper !== c.paper.slug ||
+    p.subject !== c.subject.slug
+  ) {
+    permanentRedirect(canonical);
+  }
+  const seo = resolveSeoFields(c.subject, {
+    title: `${c.subject.name} Mock Tests for ${c.exam.name}`,
+    description: `Practise free ${c.subject.name} mock tests for ${c.exam.name} ${c.paper.name}. Master important syllabus questions with chapter-wise tests, answers, and detailed explanations.`,
+  });
+
+  return (
+    <>
+      <JsonLd
+        data={collectionStructuredData(seo.title, seo.description, canonical, [
+          { name: "Home", path: "/" },
+          { name: "Mock tests", path: "/mock-tests" },
+          { name: c.state.name, path: stateUrl(c.state.slug) },
+          { name: c.exam.name, path: examUrl(c.state.slug, c.exam.slug) },
+          { name: c.paper.name, path: paperUrl(c.state.slug, c.exam.slug, c.paper.slug) },
+          { name: c.subject.name, path: canonical },
+        ])}
+      />
+      {await MockTestsPage({
+        searchParams: Promise.resolve({
+          ...sp,
+          state: c.state.slug,
+          exam: c.exam.slug,
+          paper: c.paper.slug,
+          subject: c.subject.slug,
+          type: sp.type ?? "subject",
+        }),
+        canonicalPath: canonical,
+      })}
+    </>
+  );
+}

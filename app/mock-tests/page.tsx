@@ -543,6 +543,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                       <Link
                         key={sub.id}
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
+                        prefetch={true}
                         className={`rounded-xl px-3.5 py-1.5 text-xs transition ${
                           isSelected
                             ? "bg-teal-800 text-white shadow-sm font-bold border border-teal-800"
@@ -890,7 +891,7 @@ function CatalogPagination({ filters, page, totalPages, basePath }: { filters: F
     <nav aria-label="Mock-test pages" className="mt-8 flex flex-wrap items-center justify-center gap-2">
       <Link
         href={pageHref(page - 1)}
-        prefetch={false}
+        prefetch={true}
         aria-disabled={page === 1}
         className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition sm:text-sm ${
           page === 1 ? "pointer-events-none opacity-40" : "hover:border-teal-400 hover:text-teal-900 hover:shadow-xs"
@@ -922,7 +923,7 @@ function CatalogPagination({ filters, page, totalPages, basePath }: { filters: F
             <Link
               key={item}
               href={pageHref(item)}
-              prefetch={false}
+              prefetch={true}
               className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-2xs transition hover:border-teal-400 hover:text-teal-900 hover:shadow-xs sm:h-9 sm:w-9 sm:text-sm"
               aria-label={`Go to page ${item}`}
             >
@@ -934,7 +935,7 @@ function CatalogPagination({ filters, page, totalPages, basePath }: { filters: F
 
       <Link
         href={pageHref(Math.min(totalPages, page + 1))}
-        prefetch={false}
+        prefetch={true}
         aria-disabled={page === totalPages}
         className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition sm:text-sm ${
           page === totalPages ? "pointer-events-none opacity-40" : "hover:border-teal-400 hover:text-teal-900 hover:shadow-xs"
