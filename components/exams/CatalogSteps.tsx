@@ -28,7 +28,7 @@ export function CatalogSteps({
       {steps.map((step, index) => {
         const content = (
           <>
-            <span className={`mx-auto grid h-6 w-6 place-items-center rounded-full text-[11px] font-bold ${completed[index] ? "bg-blue-600 text-white" : index === activeIndex ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400"}`}>{completed[index] ? "✓" : index + 1}</span>
+            <span className={`mx-auto grid h-6 w-6 place-items-center rounded-full text-[11px] font-bold ${completed[index] ? "bg-teal-800 text-white" : index === activeIndex ? "bg-teal-800 text-white" : "bg-slate-100 text-slate-400"}`}>{completed[index] ? "✓" : index + 1}</span>
             <span className="mt-1.5 block text-[9.5px] sm:text-xs font-bold uppercase tracking-tight sm:tracking-wider text-slate-500 whitespace-nowrap">{step.label}</span>
             {step.value && <span className="mt-0.5 hidden truncate text-xs font-semibold text-slate-900 sm:block">{step.value}</span>}
           </>
