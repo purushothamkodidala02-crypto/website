@@ -454,6 +454,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 <div className="mt-6 flex justify-center">
                   <Link
                     href={`${canonical}?view=all`}
+                    rel="nofollow"
                     className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition shadow-xs"
                   >
                     View all {tests.length} mock tests →

@@ -32,6 +32,13 @@ const nextConfig: NextConfig = {
         ]
       : [],
   },
+  redirects: async () => [
+    {
+      source: "/exams",
+      destination: "/mock-tests",
+      permanent: true,
+    },
+  ],
   headers: async () => [
     {
       source: "/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff|woff2)",

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
+import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, publicCollectionMetadata } from "@/lib/public-seo";
@@ -10,6 +11,19 @@ import { examUrl, paperUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/publ
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
 export const revalidate = 300;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const catalog = await getMockTestCatalogData();
+  const categoryById = new Map(catalog.categories.map((category) => [category.id, category]));
+  const stateById = new Map(catalog.states.map((state) => [state.id, state]));
+
+  return catalog.exams.flatMap((exam) => {
+    const category = categoryById.get(exam.exam_id);
+    const state = category ? stateById.get(category.state_id) : undefined;
+    return state ? [{ id: state.slug, exam: exam.slug }] : [];
+  });
+}
 
 type Props = { params: Promise<{ id: string; exam: string }> };
 

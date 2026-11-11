@@ -40,7 +40,7 @@ export function publicCollectionMetadata({
     description: safeDescription,
     keywords,
     alternates: { canonical },
-    robots: indexable ? undefined : { index: false, follow: true },
+    robots: indexable ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } } : { index: false, follow: true },
     openGraph: { type: "website", url: canonical, title, description: safeDescription, siteName: "Varadhi Prep", images: ["/opengraph-image"] },
     twitter: { card: "summary_large_image", title, description: safeDescription, images: ["/opengraph-image"] },
   };
@@ -62,8 +62,8 @@ export function trimMetaDescription(desc: string, max = 160): string {
   return (lastSpace > minPunctuationIndex ? sliced.slice(0, lastSpace) : sliced).trim() + "...";
 }
 
-export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string; view?: string }) {
-  return !filters.q && (!filters.page || filters.page === "1");
+export function isIndexableCollectionQuery(filters: { q?: string; type?: string; page?: string; view?: string; section?: string }) {
+  return !filters.q && !filters.view && !filters.section && (!filters.type || filters.type === "all") && (!filters.page || filters.page === "1");
 }
 
 export function collectionStructuredData(
