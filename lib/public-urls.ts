@@ -13,6 +13,10 @@ export function examUrl(stateSlug: string, examSlug: string) {
   return `${stateUrl(stateSlug)}/${examSlug}`;
 }
 
+export function syllabusUrl(stateSlug: string, examSlug: string) {
+  return `${examUrl(stateSlug, examSlug)}/syllabus`;
+}
+
 export function specializationUrl(stateSlug: string, examSlug: string, specializationSlug: string) {
   return `${examUrl(stateSlug, examSlug)}/specialization/${specializationSlug}`;
 }

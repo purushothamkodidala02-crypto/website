@@ -19,7 +19,10 @@ import {
   specializationUrl,
   stateUrl,
   subjectUrl,
+  syllabusUrl,
 } from "@/lib/public-urls";
+import { expandSearchableText, scoreCatalogMatch } from "@/lib/catalog-search";
+import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
 import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
@@ -227,9 +230,71 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
     ? subjectSections.find((s) => s.slug === filters.section || s.id === filters.section)
     : undefined;
 
+  const paperCountsByExam = new Map<string, number>();
+  const subjectTextByExam = new Map<string, string[]>();
+  for (const paper of papers) {
+    paperCountsByExam.set(paper.exam_group_id, (paperCountsByExam.get(paper.exam_group_id) ?? 0) + 1);
+    const examSubjects = subjects
+      .filter((subject) => subject.paper_id === paper.id && subject.is_active)
+      .map((subject) => `${subject.name} ${subject.description ?? ""}`);
+    if (examSubjects.length > 0) {
+      const existing = subjectTextByExam.get(paper.exam_group_id) ?? [];
+      existing.push(...examSubjects);
+      subjectTextByExam.set(paper.exam_group_id, existing);
+    }
+  }
+
+  const examMetaById = new Map(
+    exams.map((exam) => {
+      const category = categoryById.get(exam.exam_id);
+      const state = category ? stateById.get(category.state_id) : undefined;
+      const teluguData = state ? getExamTeluguMetadata(exam.slug, exam.name, state.slug) : null;
+      const patternText = teluguData?.pattern
+        ? `${teluguData.pattern.authority} ${teluguData.pattern.stages.join(" ")} ${teluguData.pattern.subjects.map((sub) => `${sub.name} ${sub.teluguName} ${sub.description}`).join(" ")}`
+        : "";
+      const searchable = expandSearchableText([
+        state?.name,
+        state?.code,
+        category?.name,
+        exam.name,
+        exam.description,
+        teluguData?.teluguName,
+        teluguData?.keywords.join(" "),
+        patternText,
+        subjectTextByExam.get(exam.id)?.join(" "),
+        "exam syllabus pattern mock test",
+      ]);
+      return [exam.id, { state, category, teluguData, searchable }] as const;
+    }),
+  );
+
+  const matchingExams = isSearching
+    ? exams
+        .flatMap((exam) => {
+          const meta = examMetaById.get(exam.id);
+          if (!meta?.state || !meta.category) return [];
+          if (selectedState && meta.state.id !== selectedState.id) return [];
+          if (selectedCategory && meta.category.id !== selectedCategory.id) return [];
+          if (selectedExam && exam.id !== selectedExam.id) return [];
+          const primary = `${meta.state.name} ${meta.state.code} ${exam.name} ${meta.teluguData?.teluguName ?? ""}`;
+          const score = scoreCatalogMatch(meta.searchable, query, primary);
+          return score > 0
+            ? [{
+                exam,
+                state: meta.state,
+                category: meta.category,
+                teluguData: meta.teluguData,
+                paperCount: paperCountsByExam.get(exam.id) ?? 0,
+                score,
+              }]
+            : [];
+        })
+        .sort((a, b) => b.score - a.score)
+    : [];
+
+  const scoreByTestId = new Map<string, number>();
   const matchingTests = tests.filter((test) => {
-    const searchable = `${test.state.name} ${test.state.code} ${test.category.name} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.section?.name ?? ""} ${test.title}`.toLowerCase();
-    return (
+    const matchesFilters =
       (!selectedState || test.state.id === selectedState.id) &&
       (!selectedCategory || test.category.id === selectedCategory.id) &&
       (!selectedExam || test.exam.id === selectedExam.id) &&
@@ -241,12 +306,40 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
         ? (selectedSubject && subjectSections.length > 0 && !isSearching
             ? !test.subject_section_id
             : true)
-        : test.subject_section_id === selectedSection.id) &&
-      (!query || searchable.includes(query))
-    );
+        : test.subject_section_id === selectedSection.id);
+
+    if (!matchesFilters) return false;
+    if (!query) return true;
+
+    const examMeta = examMetaById.get(test.exam.id);
+    const primary = `${test.state.name} ${test.state.code} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.title}`;
+    const searchable = expandSearchableText([
+      primary,
+      test.category.name,
+      test.section?.name,
+      test.description,
+      test.exam.description,
+      test.paper.description,
+      test.subject?.description,
+      examMeta?.teluguData?.teluguName,
+      examMeta?.teluguData?.keywords.join(" "),
+      examMeta?.teluguData?.pattern?.authority,
+      examMeta?.teluguData?.pattern?.subjects.map((sub) => `${sub.name} ${sub.teluguName}`).join(" "),
+      "exam syllabus pattern mock test",
+    ]);
+    const score = scoreCatalogMatch(searchable, query, primary);
+    if (score > 0) {
+      scoreByTestId.set(test.id, score);
+      return true;
+    }
+    return false;
   });
 
   matchingTests.sort((a, b) => {
+    if (isSearching) {
+      const scoreDiff = (scoreByTestId.get(b.id) ?? 0) - (scoreByTestId.get(a.id) ?? 0);
+      if (scoreDiff !== 0) return scoreDiff;
+    }
     if (selectedSubject || selectedSection) {
       const diff = Number(a.series_number ?? 0) - Number(b.series_number ?? 0);
       if (diff !== 0) return diff;
@@ -348,7 +441,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                 name="q"
                 type="search"
                 defaultValue={filters.q ?? ""}
-                placeholder="Search by exam, paper, or subject..."
+                placeholder="Search by exam, syllabus, paper, or subject..."
                 className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition"
               />
               <button
@@ -382,10 +475,72 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             <p className="mt-2 text-sm">Please refresh the page after the catalogue database update is applied.</p>
           </section>
         ) : isSearching ? (
-          <CatalogSection eyebrow="Search results" title={`${matchingTests.length} result${matchingTests.length === 1 ? "" : "s"} for “${filters.q?.trim()}”`} action={<Link href={selectedState ? stateUrl(selectedState.slug) : "/mock-tests"} className="text-sm font-bold text-teal-800">Clear search</Link>}>
-            <TestGrid tests={paginatedTests} />
-            <CatalogPagination filters={filters} page={currentPage} totalPages={totalPages} basePath={selectedState && selectedExam ? examUrl(selectedState.slug, selectedExam.slug) : selectedState ? stateUrl(selectedState.slug) : "/mock-tests"} />
-          </CatalogSection>
+          <div className="space-y-8">
+            {matchingExams.length > 0 && (
+              <CatalogSection
+                eyebrow="Exam & Syllabus Guides"
+                title={`Matching exams & syllabus (${matchingExams.length})`}
+                description="Open official exam syllabus breakdowns, selection stages, and free bilingual mock test series."
+              >
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {matchingExams.map((item) => {
+                    const displayExamTitle = item.exam.name.toLowerCase().includes(item.state.name.toLowerCase())
+                      ? item.exam.name
+                      : `${item.state.name} ${item.exam.name}`;
+                    return (
+                    <div
+                      key={item.exam.id}
+                      className="flex flex-col justify-between rounded-2xl border border-teal-200/80 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-sm"
+                    >
+                      <div>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="rounded-full bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 text-[11px] font-bold text-teal-900">
+                            {item.state.code} · {item.category.name}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-500">
+                            {item.paperCount} paper{item.paperCount === 1 ? "" : "s"}
+                          </span>
+                        </div>
+                        <h3 className="font-display mt-3 text-lg font-bold text-slate-900">
+                          {displayExamTitle}
+                        </h3>
+                        {item.teluguData && (
+                          <p className="mt-1 text-xs font-semibold text-teal-800">
+                            {item.teluguData.teluguName}
+                          </p>
+                        )}
+                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-600">
+                          {item.exam.description?.trim() ||
+                            item.teluguData?.bilingualDescription ||
+                            `Complete exam syllabus, pattern, and free bilingual mock tests for ${item.exam.name}.`}
+                        </p>
+                      </div>
+                      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                        <Link
+                          href={syllabusUrl(item.state.slug, item.exam.slug)}
+                          prefetch={false}
+                          className="inline-flex min-h-[38px] items-center justify-center rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-1.5 text-xs font-semibold text-white transition"
+                        >
+                          Syllabus &amp; Pattern →
+                        </Link>
+                        <Link
+                          href={examUrl(item.state.slug, item.exam.slug)}
+                          prefetch={false}
+                          className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-800 transition"
+                        >
+                          Open Mock Tests
+                        </Link>
+                      </div>
+                    </div>
+                  );})}
+                </div>
+              </CatalogSection>
+            )}
+            <CatalogSection eyebrow="Search results" title={`${matchingTests.length} result${matchingTests.length === 1 ? "" : "s"} for “${filters.q?.trim()}”`} action={<Link href={selectedState ? stateUrl(selectedState.slug) : "/mock-tests"} className="text-sm font-bold text-teal-800">Clear search</Link>}>
+              <TestGrid tests={paginatedTests} />
+              <CatalogPagination filters={filters} page={currentPage} totalPages={totalPages} basePath={selectedState && selectedExam ? examUrl(selectedState.slug, selectedExam.slug) : selectedState ? stateUrl(selectedState.slug) : "/mock-tests"} />
+            </CatalogSection>
+          </div>
         ) : !selectedState ? (
           <CatalogSection
             eyebrow="Step 1"

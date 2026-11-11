@@ -26,6 +26,8 @@ export const metadata: Metadata = {
     "Telangana police constable mock test",
     "Telangana police exam mock test",
     "TG Police Constable mock test in Telugu",
+    "tg police exam syllabus",
+    "Telangana police constable syllabus 2026",
     "TS police constable mock test in telugu free",
     "TGPRB police constable mock test 2026",
     "TSLPRB police constable test series",
@@ -40,6 +42,7 @@ export const metadata: Metadata = {
     "Telangana history and movement practice test",
     "Current affairs mock test for Telangana exams",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్",
     "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
     "టీజీ టెట్ మాక్ టెస్ట్",
     "పోటీ పరీక్షల మాక్ టెస్ట్‌లు",
@@ -111,9 +114,20 @@ export default async function Home() {
 
       {/* Main Content Area */}
       <section className="mx-auto max-w-7xl px-4 pt-6 pb-12 sm:px-6 sm:pt-8 sm:pb-16 lg:px-8">
-        {/* Quick Search - Right Aligned */}
-        <div className="flex justify-end">
-          <div className="w-full max-w-xl">
+        {/* Hero Heading & Quick Search */}
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-xl">
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+              Telangana &amp; Andhra Pradesh
+            </p>
+            <h1 className="font-display mt-1 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+              TG &amp; AP Competitive Exams Mock Tests &amp; Official Syllabus
+            </h1>
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-600">
+              Practise bilingual mock tests and check official syllabi for TGPRB Police Constable, TG TET, TSPSC &amp; APPSC.
+            </p>
+          </div>
+          <div className="w-full max-w-xl lg:shrink-0">
             <form action="/mock-tests" method="GET">
               <div className="relative flex items-center rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-xs shadow-slate-900/4 transition-all duration-200 hover:border-slate-300 hover:shadow-sm focus-within:border-teal-500 focus-within:bg-white focus-within:shadow-md focus-within:ring-4 focus-within:ring-teal-500/10">
                 <svg
@@ -133,8 +147,8 @@ export default async function Home() {
                 <input
                   type="search"
                   name="q"
-                  placeholder="Search exam (e.g. Police Constable, TET, TGPSC, APPSC)..."
-                  aria-label="Search exams"
+                  placeholder="Search exam or syllabus (e.g. TG Police Syllabus, TET, TGPSC)..."
+                  aria-label="Search exams and syllabi"
                   className="w-full border-none bg-transparent px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-0"
                 />
                 <button
@@ -150,6 +164,7 @@ export default async function Home() {
                 <span className="font-semibold text-slate-500">Popular:</span>
                 {[
                   { label: "Police Constable", href: "/mock-tests/telangana/police-constable-free-mock-test" },
+                  { label: "TG Police Syllabus", href: "/mock-tests/telangana/police-constable-free-mock-test/syllabus" },
                   { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
                   { label: "TGPSC", href: "/mock-tests/telangana" },
                   { label: "APPSC", href: "/mock-tests/andhra-pradesh" },
@@ -343,6 +358,7 @@ export default async function Home() {
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
               <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test/syllabus" className="hover:text-white transition">TG Police Syllabus</Link>
               <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
               <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>
               <Link href="/mock-tests/andhra-pradesh" className="hover:text-white transition">Andhra Pradesh Exams</Link>

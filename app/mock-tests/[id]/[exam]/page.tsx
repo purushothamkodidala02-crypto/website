@@ -17,7 +17,7 @@ import {
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
-import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl } from "@/lib/public-urls";
+import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
@@ -175,11 +175,6 @@ export default async function ExamPage({ params, searchParams }: Props) {
     <main className="student-page relative min-h-screen bg-[#f6faf8] text-[#132621] w-full max-w-full overflow-x-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-[#eaf2ef]/70 via-[#f2f7f5]/40 to-transparent -z-10" />
       <JsonLd data={structuredData} />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `if(window.location.hash==='#exam-pattern'){history.replaceState(null,'',window.location.pathname+window.location.search);}`,
-        }}
-      />
       <PublicHeader />
       <section className="border-b border-teal-900/5 bg-gradient-to-b from-[#eaf2ef]/60 via-[#f2f7f5]/30 to-transparent">
         <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-12">
@@ -238,6 +233,12 @@ export default async function ExamPage({ params, searchParams }: Props) {
               >
                 Choose a paper ↓
               </a>
+              <Link
+                href={syllabusUrl(context.state.slug, context.exam.slug)}
+                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-teal-200 bg-white hover:bg-teal-50/70 px-5 py-2.5 text-xs sm:text-sm font-semibold text-teal-900 transition shadow-2xs text-center"
+              >
+                {context.state.code ? `${context.state.code} ` : ""}Exam Syllabus &amp; Pattern →
+              </Link>
               <AccountActionButton canonical={canonical} />
             </div>
           </div>
@@ -465,7 +466,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
         {/* Official Exam Pattern & Overview */}
         {teluguData?.pattern && (
-          <section aria-labelledby="exam-pattern-heading" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
+          <section id="exam-pattern" aria-labelledby="exam-pattern-heading" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
@@ -475,9 +476,12 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   {statePrefixedName} Exam Pattern & Syllabus
                 </h2>
               </div>
-              <span className="rounded-full bg-teal-50 border border-teal-200/80 px-3 py-1 text-xs font-bold text-teal-950">
-                Official 2026 Notification Pattern
-              </span>
+              <Link
+                href={syllabusUrl(context.state.slug, context.exam.slug)}
+                className="rounded-full bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3.5 py-1.5 text-xs font-bold text-teal-950 transition"
+              >
+                Full {context.state.code || statePrefixedName} Syllabus Guide →
+              </Link>
             </div>
 
             {/* Pattern Metric Cards */}
