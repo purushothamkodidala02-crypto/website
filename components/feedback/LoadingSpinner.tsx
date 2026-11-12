@@ -43,10 +43,12 @@ export function PendingButtonContent({
   children: React.ReactNode;
 }) {
   return (
-    <span className="inline-grid min-w-0 grid-flow-col items-center justify-center gap-2">
-      <span className="grid h-4 w-4 place-items-center">
-        {pending ? <LoadingSpinner /> : null}
-      </span>
+    <span className="inline-flex min-w-0 items-center justify-center gap-2 whitespace-nowrap">
+      {pending ? (
+        <span className="grid h-4 w-4 shrink-0 place-items-center">
+          <LoadingSpinner />
+        </span>
+      ) : null}
       <span>{pending ? pendingLabel : children}</span>
     </span>
   );

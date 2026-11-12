@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
 import { clearLocalPracticeStorage } from "@/lib/storage/student-practice-storage";
 
 export default function LogoutButton({ className }: { className?: string } = {}) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
@@ -39,10 +37,28 @@ export default function LogoutButton({ className }: { className?: string } = {})
       aria-busy={loading}
       className={
         className ??
-        "rounded-xl border border-teal-200 bg-white px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 disabled:opacity-50"
+        "inline-flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 disabled:opacity-50"
       }
     >
-      <PendingButtonContent pending={loading} pendingLabel="Logging out…">Logout</PendingButtonContent>
+      <span className="inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap">
+        {loading ? (
+          <LoadingSpinner className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+        ) : (
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 fill-none stroke-current"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+            />
+          </svg>
+        )}
+        <span>{loading ? "Logging out…" : "Logout"}</span>
+      </span>
     </button>
   );
 }

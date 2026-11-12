@@ -123,7 +123,7 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
   }, []);
 
   return (
-    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+    <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2.5">
       {!accountReady ? (
         <div
           role="status"
@@ -137,7 +137,7 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
               href="/dashboard/passes"
               prefetch={true}
               aria-label={`My purchases${activePurchases ? `, ${activePurchases} active` : ""}`}
-              className="relative inline-flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
+              className="relative inline-flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
             >
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
                 <path d="M6 8h12l-1 12H7L6 8Z" />
@@ -154,7 +154,7 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
           {!isAdmin && (
             <span
               title={email}
-              className="hidden sm:inline-flex max-w-[220px] sm:max-w-xs md:max-w-md lg:max-w-none items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition hover:border-teal-200 hover:bg-teal-50/50 hover:text-teal-900"
+              className="hidden md:inline-flex h-9 sm:h-10 min-w-0 max-w-44 lg:max-w-56 xl:max-w-xs items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50/80 px-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition hover:border-teal-200 hover:bg-teal-50/50 hover:text-teal-900"
             >
               <span
                 className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-teal-700 text-[10px] font-bold text-white uppercase"
@@ -172,14 +172,14 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
           <Link
             href="/login"
             prefetch={true}
-            className="hidden rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 sm:inline-flex"
+            className="hidden h-10 shrink-0 items-center whitespace-nowrap rounded-xl px-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 sm:inline-flex"
           >
             Login
           </Link>
           <Link
             href="/register"
             prefetch={true}
-            className="group/button inline-flex items-center gap-2 rounded-xl bg-[#0a2922] px-3 py-2.5 text-xs font-semibold text-white shadow-lg shadow-emerald-950/15 transition hover:-translate-y-0.5 hover:bg-[#11382f] hover:shadow-xl sm:py-2 sm:pl-4 sm:pr-2 sm:text-sm"
+            className="group/button inline-flex h-9 sm:h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3 text-xs font-semibold text-white shadow-lg shadow-emerald-950/15 transition hover:-translate-y-0.5 hover:bg-[#11382f] hover:shadow-xl sm:pl-4 sm:pr-2 sm:text-sm"
           >
             Create account
             <span className="hidden h-7 w-7 place-items-center rounded-lg bg-[#ea580c] text-white transition group-hover/button:translate-x-0.5 sm:grid" aria-hidden="true">→</span>

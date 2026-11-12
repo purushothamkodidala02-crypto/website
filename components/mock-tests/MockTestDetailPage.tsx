@@ -9,8 +9,10 @@ import { absoluteUrl } from "@/lib/site";
 import { paperUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
+import { formatMarkValue, resolveMockTestScoring, type MockTestStatsSummary } from "@/lib/scoring";
 import { isPaidSalesEnabled } from "@/lib/paid-sales";
 import { TestStartActions } from "@/app/mock-tests/[id]/TestStartActions";
 import { BuyExamPassForm } from "@/app/dashboard/passes/BuyExamPassForm";
@@ -384,22 +386,57 @@ export async function generateMockTestMetadata({ id, canonicalPath }: MockTestDe
 const getCachedMockTestSupplementary = unstable_cache(
   async (testId: string) => {
     try {
-      const publicClient = createPublicClient();
-      const [testRes, mqRes] = await Promise.all([
-        publicClient
-          .from("mock_tests")
-          .select("instructions, status")
-          .eq("id", testId)
-          .maybeSingle(),
-        publicClient
+      const hasServiceRole = Boolean(
+        process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+      );
+      const client = hasServiceRole ? createAdminClient() : createPublicClient();
+      const { data: testData } = await client
+        .from("mock_tests")
+        .select("instructions, status")
+        .eq("id", testId)
+        .maybeSingle();
+
+      const isPublished = testData?.status === "published";
+      let mq: { marks: number; negative_marks: number }[] = [];
+
+      if (hasServiceRole && isPublished) {
+        const { data: mqData } = await client
           .from("mock_test_questions")
-          .select("marks, negative_marks")
-          .eq("mock_test_id", testId),
-      ]);
+          .select(
+            "marks, negative_marks, question:questions!inner(is_active, content_lifecycle, expires_on)",
+          )
+          .eq("mock_test_id", testId)
+          .eq("question.is_active", true);
+
+        const todayIst = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Kolkata",
+        }).format(new Date());
+
+        mq = ((mqData ?? []) as unknown as {
+          marks: number;
+          negative_marks: number;
+          question: {
+            is_active: boolean;
+            content_lifecycle?: string | null;
+            expires_on?: string | null;
+          } | null;
+        }[])
+          .filter((row) => {
+            const q = row.question;
+            if (!q || !q.is_active) return false;
+            if (q.content_lifecycle !== "expires") return true;
+            return Boolean(q.expires_on && q.expires_on >= todayIst);
+          })
+          .map((row) => ({
+            marks: Number(row.marks),
+            negative_marks: Number(row.negative_marks),
+          }));
+      }
+
       return {
-        instructions: testRes.data?.instructions ?? null,
-        status: testRes.data?.status ?? "published",
-        mq: (mqRes.data ?? []) as { marks: number; negative_marks: number }[],
+        instructions: testData?.instructions ?? null,
+        status: testData?.status ?? "published",
+        mq,
       };
     } catch {
       return {
@@ -409,7 +446,7 @@ const getCachedMockTestSupplementary = unstable_cache(
       };
     }
   },
-  ["mock-test-supplementary-v3"],
+  ["mock-test-supplementary-v4"],
   { revalidate: 300 }
 );
 
@@ -522,7 +559,7 @@ export async function MockTestDetailsPage({
             display_order: paperItem.display_order,
             question_count: paperItem.question_count,
             default_correct_marks: paperItem.default_correct_marks,
-            default_negative_marks: (paperItem as { default_negative_marks?: number | null }).default_negative_marks ?? null,
+            default_negative_marks: paperItem.default_negative_marks ?? null,
             specialization: specItem,
             exam_group: examItem
               ? {
@@ -572,7 +609,7 @@ export async function MockTestDetailsPage({
         .eq("mock_test_id", id),
     ]);
     test = testResult.data as unknown as MockTestDetailData | null;
-    mq = mqResult.data ?? [];
+    mq = mqResult.data && mqResult.data.length > 0 ? mqResult.data : supplementary.mq;
   }
 
   if (!test) {
@@ -626,21 +663,31 @@ export async function MockTestDetailsPage({
     ? buildPaperDisplayMap(allSiblingPapers).get(paper.id)
     : undefined;
 
-  const configuredQuestionCount = Number(test.target_question_count ?? paper?.question_count ?? 0);
-  const questionCount = mq.length > 0 ? mq.length : (configuredQuestionCount > 0 ? configuredQuestionCount : null);
-  
-  const defaultCorrectMarks = Number(paper?.default_correct_marks ?? 0);
-  const totalMarks = mq.length > 0 
-    ? mq.reduce((sum, q) => sum + Number(q.marks), 0) 
-    : (questionCount !== null && defaultCorrectMarks > 0 ? questionCount * defaultCorrectMarks : null);
-    
-  const defaultNegativeMarks = Number(paper?.default_negative_marks ?? 0);
-  const negativeMarks = mq.length > 0 
-    ? Math.max(0, ...mq.map(q => Number(q.negative_marks))) 
-    : defaultNegativeMarks;
+  const catalogStats = cachedTest
+    ? ((catalog.stats as (MockTestStatsSummary & { mock_test_id: string })[] | undefined) ?? []).find(
+        (s) => s.mock_test_id === id,
+      )
+    : undefined;
+
+  const scoring = resolveMockTestScoring({
+    questions: mq,
+    stats: catalogStats,
+    targetQuestionCount: test.target_question_count,
+    paperQuestionCount: paper?.question_count,
+    defaultCorrectMarks: paper?.default_correct_marks,
+    defaultNegativeMarks: paper?.default_negative_marks,
+  });
+  const {
+    questionCount,
+    totalMarks,
+    negativeMarks,
+    hasNegativeMarking,
+    negativeSummaryLabel,
+    markingPairLabel,
+  } = scoring;
 
   const questionCountLabel = questionCount ? String(questionCount) : "Shown when started";
-  const totalMarksLabel = totalMarks ? totalMarks.toFixed(2).replace(/\.00$/, "") : "Shown when started";
+  const totalMarksLabel = totalMarks ? formatMarkValue(totalMarks) : "Shown when started";
 
   const languageMode = subject?.content_language_mode ?? "bilingual";
   const languageLabel =
@@ -665,7 +712,7 @@ export async function MockTestDetailsPage({
     ["Total marks", totalMarksLabel],
     [
       "Negative marking",
-      negativeMarks > 0 ? `${negativeMarks}` : "No negative marking",
+      negativeSummaryLabel,
     ],
     ["Language", languageLabel],
     ...(hasResumableSession
@@ -876,7 +923,9 @@ export async function MockTestDetailsPage({
                 {test.description ??
                   (test.test_scope === "subject" && subject?.name
                     ? `Dedicated ${subject.name} practice test aligned with the official examination pattern. Practise under timed conditions with instant scoring, bilingual solutions, and comprehensive analysis.`
-                    : "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with negative marking and instant detailed solutions.")}
+                    : hasNegativeMarking
+                      ? `Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with -${formatMarkValue(negativeMarks)} negative marking and instant detailed solutions.`
+                      : "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with no negative marking and instant detailed solutions.")}
               </p>
             </div>
 
@@ -1025,7 +1074,7 @@ export async function MockTestDetailsPage({
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Marking</p>
                   <p className="mt-1 text-sm font-bold text-slate-900">
-                    {negativeMarks > 0 ? `+${defaultCorrectMarks || 1} / -${negativeMarks}` : `+${defaultCorrectMarks || 1} / None`}
+                    {markingPairLabel}
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">

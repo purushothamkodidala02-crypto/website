@@ -147,7 +147,7 @@ export function AdminHeader({
       </div>
 
       {/* Right: Security, Student Portal, User Profile, Sign Out */}
-      <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-2.5 shrink-0">
         {/* MFA Active Badge */}
         <span
           title="Session secured with Two-Factor Authentication (AAL2)"
@@ -166,7 +166,7 @@ export function AdminHeader({
           target="_blank"
           rel="noreferrer"
           title="Open public student portal in new tab"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200/90 bg-teal-50/70 px-3 py-1.5 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-100"
+          className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/90 bg-teal-50/70 px-3 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-100"
         >
           <svg className="h-3.5 w-3.5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -175,17 +175,17 @@ export function AdminHeader({
         </Link>
 
         {/* Admin User Info */}
-        <div className="hidden lg:flex items-center gap-2 rounded-xl border border-teal-100 bg-white px-2.5 py-1 text-xs shadow-2xs">
+        <div className="hidden h-8 min-w-0 lg:flex items-center gap-2 rounded-xl border border-teal-100 bg-white px-2.5 text-xs shadow-2xs">
           <div className="grid h-6 w-6 place-items-center rounded-lg bg-teal-700 font-black text-white text-[10px]">
             {initials}
           </div>
-          <span className="max-w-xs md:max-w-sm lg:max-w-none truncate font-semibold text-slate-700" title={userEmail ?? adminName}>
+          <span className="max-w-44 xl:max-w-64 truncate font-semibold text-slate-700" title={userEmail ?? adminName}>
             {userEmail ?? adminName}
           </span>
         </div>
 
         {/* Logout */}
-        <LogoutButton className="rounded-xl border border-teal-200 bg-white px-3 py-1.5 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 disabled:opacity-50" />
+        <LogoutButton className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 disabled:opacity-50" />
       </div>
     </header>
   );

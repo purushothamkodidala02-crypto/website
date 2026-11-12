@@ -56,3 +56,37 @@ test("student test runner detects another device and closes PC session with auto
   // Start actions record active device token
   assert.match(startActions, /active_device_token/);
 });
+
+test("attempt RPC calls pass requested_device_token to avoid PostgREST PGRST203 overload ambiguity and test runner omits saving indicator", async () => {
+  const [runner, actions, migration] = await Promise.all([
+    read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+    read("app/mock-tests/[id]/attempt-actions.ts"),
+    read("supabase/migrations/20261112000000_drop_ambiguous_rpc_overloads.sql"),
+  ]);
+
+  // Every RPC that has a device-token overload must pass requested_device_token explicitly
+  assert.match(actions, /save_mock_test_answer_update[\s\S]*?requested_device_token:/);
+  assert.match(actions, /sync_mock_test_session_timer[\s\S]*?requested_device_token:/);
+  assert.match(actions, /start_mock_test_session[\s\S]*?requested_device_token:/);
+
+  // Clean up redundant database wrapper overloads in SQL migration
+  assert.match(migration, /drop function if exists public\.save_mock_test_answer_update\(uuid, uuid, text\)/);
+  assert.match(migration, /drop function if exists public\.sync_mock_test_session_timer\(uuid\)/);
+  assert.match(migration, /drop function if exists public\.start_mock_test_session\(uuid\)/);
+
+  // Test runner header saves silently without showing Save failed / Saving / Saved badges
+  assert.doesNotMatch(runner, /Save failed|Saving…|Saved ✓/);
+});
+
+test("logout button and header account controls stay centered and aligned across viewports", async () => {
+  const [logoutBtn, accountActions, pendingSpinner] = await Promise.all([
+    read("components/admin/LogoutButton.tsx"),
+    read("components/site/PublicAccountActions.tsx"),
+    read("components/feedback/LoadingSpinner.tsx"),
+  ]);
+
+  assert.match(logoutBtn, /inline-flex[\s\S]*?whitespace-nowrap/);
+  assert.doesNotMatch(logoutBtn, /PendingButtonContent/);
+  assert.match(accountActions, /min-w-0 shrink/);
+  assert.doesNotMatch(pendingSpinner, /<span className="grid h-4 w-4 place-items-center">\s*\{pending/);
+});

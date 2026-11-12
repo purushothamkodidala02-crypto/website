@@ -25,6 +25,13 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { AccountActionButton } from "@/components/exams/AccountActionButton";
 import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
+import {
+  formatMarkValue,
+  formatPatternNegativeDisplay,
+  resolveMockTestScoring,
+  summarizeExamNegativeMarking,
+  type MockTestStatsSummary,
+} from "@/lib/scoring";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
@@ -88,6 +95,13 @@ export default async function ExamPage({ params, searchParams }: Props) {
   const papers = catalog.papers.filter((paper) => paper.exam_group_id === context.exam!.id);
   const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const paperIds = new Set(papers.map((paper) => paper.id));
+  const statsByTestId = new Map(
+    ((catalog.stats ?? []) as (MockTestStatsSummary & { mock_test_id: string })[]).map((row) => [
+      row.mock_test_id,
+      row,
+    ]),
+  );
+  const examNegativeSummary = summarizeExamNegativeMarking(papers);
   const subjectById = new Map(catalog.subjects.map((item) => [item.id, item]));
   const sectionById = new Map(catalog.sections.map((item) => [item.id, item]));
 
@@ -108,6 +122,10 @@ export default async function ExamPage({ params, searchParams }: Props) {
     });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
   const teluguData = getExamTeluguMetadata(context.exam.slug, context.exam.name, context.state.slug);
+  const patternNegativeDisplay = formatPatternNegativeDisplay(
+    teluguData?.pattern?.negativeMarking,
+    examNegativeSummary.positiveValues,
+  );
   const fallbackTitle = teluguData ? teluguData.bilingualPageTitle : formatExamFallbackTitle(context.exam.name, context.state.name);
   const fallbackDescription = teluguData ? teluguData.bilingualDescription : formatExamFallbackDescription(context.exam.name, context.state.name);
   const seo = resolveSeoFields(context.exam, {
@@ -321,7 +339,10 @@ export default async function ExamPage({ params, searchParams }: Props) {
                       </h3>
                       {paper.question_count && (
                         <p className="mt-1.5 text-xs text-slate-500">
-                          {paper.question_count} questions per paper • {paper.default_correct_marks ?? 1} mark each
+                          {paper.question_count} questions per paper • +{formatMarkValue(Number(paper.default_correct_marks ?? 1))} /{" "}
+                          {Number(paper.default_negative_marks ?? 0) > 0
+                            ? `-${formatMarkValue(Number(paper.default_negative_marks))} negative marking`
+                            : "No negative marking"}
                         </p>
                       )}
                     </div>
@@ -372,6 +393,13 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     seriesNumber: Number(test.series_number ?? 1),
                   });
                   const paperLabel = paperDisplayById.get(paper.id)?.shortLabel ?? "Paper";
+                  const testScoring = resolveMockTestScoring({
+                    stats: statsByTestId.get(test.id),
+                    targetQuestionCount: test.target_question_count,
+                    paperQuestionCount: paper.question_count,
+                    defaultCorrectMarks: paper.default_correct_marks,
+                    defaultNegativeMarks: paper.default_negative_marks,
+                  });
 
                   return (
                     <article
@@ -411,7 +439,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
                         <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs border border-slate-100 min-w-0 max-w-full">
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="font-bold text-slate-900">{test.target_question_count ?? paper.question_count ?? "—"}</span>
+                            <span className="font-bold text-slate-900">{testScoring.questionCount ?? "—"}</span>
                             <span className="text-[11px] font-medium text-slate-500">Qs</span>
                           </div>
                           <span className="text-slate-300 font-bold">•</span>
@@ -427,8 +455,8 @@ export default async function ExamPage({ params, searchParams }: Props) {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
-                        <span className="text-xs font-semibold text-slate-500 shrink-0 truncate">
-                          Bilingual Review
+                        <span className="text-xs font-semibold text-slate-500 truncate">
+                          {testScoring.cardNegativeLabel} · Bilingual
                         </span>
                         <div className="shrink-0">
                           <MockTestCardAction
@@ -504,8 +532,8 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </div>
               <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">0.25 Mark</p>
-                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">1/4 Deduction</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">{patternNegativeDisplay.headline}</p>
+                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">{patternNegativeDisplay.detail}</p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Languages</p>
@@ -579,9 +607,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </div>
             <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
               <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">🎯</span>
-              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Realistic Negative Marking</h3>
+              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">{examNegativeSummary.cardTitle}</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                Real 0.25 penalty scoring ensures you learn disciplined attempt strategy and avoid negative mark traps in the actual exam.
+                {examNegativeSummary.cardDescription}
               </p>
             </div>
             <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">

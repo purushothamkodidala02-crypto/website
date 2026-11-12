@@ -89,54 +89,80 @@ export async function checkAttemptDeviceStatus(
   }
 }
 
+function isRpcSignatureMismatch(message?: string) {
+  if (!message) return false;
+  return (
+    message.includes("parameter") ||
+    message.includes("Could not find") ||
+    message.includes("candidate")
+  );
+}
+
 export async function saveAttemptProgress(
   sessionId: string,
   questionId: string,
   answer: Answer | null,
   clientDeviceId?: string,
 ): Promise<{ success: boolean; displaced?: boolean }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (
-    !user ||
-    !UUID_PATTERN.test(sessionId) ||
-    !UUID_PATTERN.test(questionId) ||
-    (answer !== null && !["A", "B", "C", "D"].includes(answer))
-  ) {
-    return { success: false };
-  }
-
-  // Verify device ownership
-  if (clientDeviceId) {
-    const { data: session } = await supabase
-      .from("test_attempt_sessions")
-      .select("active_device_token")
-      .eq("id", sessionId)
-      .eq("user_id", user.id)
-      .maybeSingle();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (
-      session?.active_device_token &&
-      session.active_device_token !== clientDeviceId
+      !user ||
+      !UUID_PATTERN.test(sessionId) ||
+      !UUID_PATTERN.test(questionId) ||
+      (answer !== null && !["A", "B", "C", "D"].includes(answer))
     ) {
+      return { success: false };
+    }
+
+    const deviceToken = clientDeviceId?.trim() || null;
+
+    // Verify device ownership
+    if (deviceToken) {
+      const { data: session } = await supabase
+        .from("test_attempt_sessions")
+        .select("active_device_token")
+        .eq("id", sessionId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (
+        session?.active_device_token &&
+        session.active_device_token !== deviceToken
+      ) {
+        return { success: false, displaced: true };
+      }
+    }
+
+    // Pass requested_device_token explicitly to avoid PostgREST PGRST203 overload ambiguity
+    let { error } = await supabase.rpc("save_mock_test_answer_update", {
+      requested_session_id: sessionId,
+      requested_question_id: questionId,
+      requested_answer: answer,
+      requested_device_token: deviceToken,
+    });
+
+    if (error && isRpcSignatureMismatch(error.message)) {
+      const fallback = await supabase.rpc("save_mock_test_answer_update", {
+        requested_session_id: sessionId,
+        requested_question_id: questionId,
+        requested_answer: answer,
+      });
+      error = fallback.error;
+    }
+
+    if (error && error.message.includes("DISPLACED")) {
       return { success: false, displaced: true };
     }
+
+    return { success: !error };
+  } catch {
+    return { success: false };
   }
-
-  const { error } = await supabase.rpc("save_mock_test_answer_update", {
-    requested_session_id: sessionId,
-    requested_question_id: questionId,
-    requested_answer: answer,
-  });
-
-  if (error && error.message.includes("DISPLACED")) {
-    return { success: false, displaced: true };
-  }
-
-  return { success: !error };
 }
 
 export async function saveReviewState(
@@ -144,54 +170,73 @@ export async function saveReviewState(
   questionId: string,
   marked: boolean,
 ): Promise<{ success: boolean }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !UUID_PATTERN.test(sessionId) || !UUID_PATTERN.test(questionId)) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !UUID_PATTERN.test(sessionId) || !UUID_PATTERN.test(questionId)) {
+      return { success: false };
+    }
+
+    const { error } = await supabase.rpc("save_mock_test_review_mark", {
+      requested_session_id: sessionId,
+      requested_question_id: questionId,
+      requested_mark: marked,
+    });
+    return { success: !error };
+  } catch {
     return { success: false };
   }
-
-  const { error } = await supabase.rpc("save_mock_test_review_mark", {
-    requested_session_id: sessionId,
-    requested_question_id: questionId,
-    requested_mark: marked,
-  });
-  return { success: !error };
 }
 
 export async function syncAttemptTimer(
   sessionId: string,
   clientDeviceId?: string,
 ): Promise<{ success: boolean; remaining?: number; displaced?: boolean }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !UUID_PATTERN.test(sessionId)) return { success: false };
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !UUID_PATTERN.test(sessionId)) return { success: false };
 
-  // Fast check for device displacement before syncing timer
-  if (clientDeviceId) {
-    const { data: session } = await supabase
-      .from("test_attempt_sessions")
-      .select("active_device_token")
-      .eq("id", sessionId)
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const deviceToken = clientDeviceId?.trim() || null;
 
-    if (
-      session?.active_device_token &&
-      session.active_device_token !== clientDeviceId
-    ) {
+    // Fast check for device displacement before syncing timer
+    if (deviceToken) {
+      const { data: session } = await supabase
+        .from("test_attempt_sessions")
+        .select("active_device_token")
+        .eq("id", sessionId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (
+        session?.active_device_token &&
+        session.active_device_token !== deviceToken
+      ) {
+        return { success: false, displaced: true };
+      }
+    }
+
+    let rpcResult = await supabase.rpc("sync_mock_test_session_timer", {
+      requested_session_id: sessionId,
+      requested_device_token: deviceToken,
+    });
+
+    if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error.message)) {
+      rpcResult = await supabase.rpc("sync_mock_test_session_timer", {
+        requested_session_id: sessionId,
+      });
+    }
+
+    const { data, error } = rpcResult;
+
+    if (error && error.message.includes("DISPLACED")) {
       return { success: false, displaced: true };
     }
+
+    return error ? { success: false } : { success: true, remaining: Number(data) };
+  } catch {
+    return { success: false };
   }
-
-  const { data, error } = await supabase.rpc("sync_mock_test_session_timer", {
-    requested_session_id: sessionId,
-  });
-
-  if (error && error.message.includes("DISPLACED")) {
-    return { success: false, displaced: true };
-  }
-
-  return error ? { success: false } : { success: true, remaining: Number(data) };
 }
 
 export async function pauseAttempt(
@@ -219,13 +264,28 @@ export async function pauseAttempt(
     : { success: true, message: "Practice paused. Resume whenever you are ready.", remaining: Number(pausedSeconds) };
 }
 
-export async function resumeAttempt(mockTestId: string, sessionId: string): Promise<{ success: boolean; message: string; expiresAt?: string }> {
+export async function resumeAttempt(
+  mockTestId: string,
+  sessionId: string,
+  clientDeviceId?: string,
+): Promise<{ success: boolean; message: string; expiresAt?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user || !UUID_PATTERN.test(mockTestId) || !UUID_PATTERN.test(sessionId)) return { success: false, message: "Unable to resume this attempt." };
-  const { data, error } = await supabase.rpc("start_mock_test_session", {
+
+  const deviceToken = clientDeviceId?.trim() || null;
+  let rpcResult = await supabase.rpc("start_mock_test_session", {
     requested_mock_test_id: mockTestId,
+    requested_device_token: deviceToken,
   });
+
+  if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error.message)) {
+    rpcResult = await supabase.rpc("start_mock_test_session", {
+      requested_mock_test_id: mockTestId,
+    });
+  }
+
+  const { data, error } = rpcResult;
   const resumed = data?.[0] as { session_id: string; expires_at: string } | undefined;
   if (error || !resumed || resumed.session_id !== sessionId) {
     return { success: false, message: "This attempt could not be resumed. Return to the test details and try again." };

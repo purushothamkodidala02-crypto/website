@@ -595,7 +595,7 @@ export function AdminNavigation(props: {
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
           </button>
-          <LogoutButton className="rounded-xl border border-teal-200/80 bg-teal-50/60 px-2.5 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50" />
+          <LogoutButton className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/80 bg-teal-50/60 px-2.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50" />
         </div>
       </div>
 
@@ -673,7 +673,7 @@ export function AdminNavigation(props: {
                     <span>Student portal</span>
                     <span className="text-[10px] text-teal-700">↗</span>
                   </Link>
-                  <LogoutButton className="rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 disabled:opacity-50" />
+                  <LogoutButton className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 disabled:opacity-50" />
                 </div>
               </div>
             </aside>

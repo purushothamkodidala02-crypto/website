@@ -27,6 +27,7 @@ import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
 import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
 import { resolvePublicRoute } from "@/lib/public-route-data";
+import { formatMarkValue, resolveMockTestScoring, summarizeExamNegativeMarking } from "@/lib/scoring";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
@@ -79,6 +80,7 @@ type CatalogTest = {
   paperDisplay?: { number: number; shortLabel: string; label: string };
   questions: number | null;
   marks: number | null;
+  negativeMarks: number;
 };
 
 export async function generateMetadata({ searchParams }: MockTestsPageProps): Promise<Metadata> {
@@ -175,7 +177,15 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       : questions !== null && defaultCorrectMarks > 0
         ? questions * defaultCorrectMarks
         : null;
-    return [{ ...test, paper, exam, category, state, subject, specialization, section, paperDisplay, questions, marks }];
+    const scoring = resolveMockTestScoring({
+      stats,
+      targetQuestionCount: test.target_question_count,
+      paperQuestionCount: paper.question_count,
+      defaultCorrectMarks: paper.default_correct_marks,
+      defaultNegativeMarks: paper.default_negative_marks,
+    });
+    const negativeMarks = scoring.negativeMarks;
+    return [{ ...test, paper, exam, category, state, subject, specialization, section, paperDisplay, questions, marks, negativeMarks }];
   });
 
   let selectedState = states.find((state) => state.slug === filters.state || state.id === filters.state);
@@ -428,7 +438,19 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
             </h1>
             <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
               {selectedExam
-                ? `Practise timed ${selectedExam.name} papers designed to the latest official syllabus with bilingual questions, negative marking, and instant detailed solutions.`
+                ? (() => {
+                    const scopePapers = selectedPaper ? [selectedPaper] : examPapers;
+                    const scopeNegative = summarizeExamNegativeMarking(scopePapers);
+                    const markingPhrase =
+                      scopePapers.length === 0
+                        ? "official exam scoring"
+                        : scopeNegative.hasAnyNegative && !scopeNegative.hasNoNegative
+                          ? "negative marking"
+                          : scopeNegative.hasAnyNegative
+                            ? "official paper-wise marking"
+                            : "zero negative marking";
+                    return `Practise timed ${selectedExam.name} papers designed to the latest official syllabus with bilingual questions, ${markingPhrase}, and instant detailed solutions.`;
+                  })()
                 : "Full-length papers and targeted subject practice for Telangana and Andhra Pradesh competitive exams with real exam timing and scoring."}
             </p>
           </div>
@@ -987,8 +1009,8 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
             </div>
 
             <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
-              <span className="text-xs font-semibold text-slate-500 shrink-0 truncate">
-                Timed CBT · Bilingual
+              <span className="text-xs font-semibold text-slate-500 truncate">
+                {test.negativeMarks > 0 ? `-${formatMarkValue(test.negativeMarks)} Negative · Bilingual` : "No Negative · Bilingual"}
               </span>
               <div className="shrink-0">
                 <MockTestCardAction

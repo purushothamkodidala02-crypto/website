@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, paperUrl, stateUrl } from "@/lib/public-urls";
+import { formatMarkValue } from "@/lib/scoring";
 import { resolveSeoFields } from "@/lib/seo-fields";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
@@ -22,8 +23,14 @@ function resolvePaperFallbacks(c: NonNullable<Awaited<ReturnType<typeof resolveP
     ? `${c.state.name} Police Constable ${c.paper?.name} Free Mock Test | తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ పేపర్`
     : `${c.exam?.name} ${c.paper?.name} Mock Tests`;
 
+  const paperNegativeMarks = Number(c.paper?.default_negative_marks ?? 0);
+  const negativePhrase =
+    paperNegativeMarks > 0
+      ? `${formatMarkValue(paperNegativeMarks)} negative marking`
+      : "official exam scoring";
+
   const description = isPolice
-    ? `Free ${c.state.name} Police Constable ${c.paper?.name} mock tests in Telugu & English for OMR exam. Practise authentic questions with solutions, timer, and 0.25 negative marking.`
+    ? `Free ${c.state.name} Police Constable ${c.paper?.name} mock tests in Telugu & English for OMR exam. Practise authentic questions with solutions, timer, and ${negativePhrase}.`
     : `Take free ${c.paper?.name} mock tests for ${c.exam?.name}. Practise authentic questions with solutions and timed scoring.`;
 
   const keywords = isPolice

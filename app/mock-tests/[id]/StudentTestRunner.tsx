@@ -95,7 +95,6 @@ export function StudentTestRunner({
   );
   const [remaining, setRemaining] = useState<number | null>(null);
   const [language, setLanguage] = useState<"en" | "te">("en");
-  const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [navigatorOpenDesktop, setNavigatorOpenDesktop] = useState(true);
   const [confirming, setConfirming] = useState(false);
@@ -159,23 +158,29 @@ export function StudentTestRunner({
   const pauseControlDisabled = remaining === null || remaining === 0 || submitting || pausing || isDisplaced;
 
   const queueSave = useCallback((key: string, operation: () => Promise<{ success: boolean; displaced?: boolean }>) => {
-    setSaveState("saving");
     const previous = saveChains.current.get(key) ?? Promise.resolve();
-    const next = previous
-      .then(operation)
-      .then((result) => {
+    const runWithRetry = async () => {
+      try {
+        const result = await operation();
         if (result?.displaced) {
           void handleDisplaced();
           return;
         }
-        if (!result?.success) setSaveState("error");
-      })
-      .catch(() => setSaveState("error"))
+        if (!result?.success) {
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          const retryResult = await operation();
+          if (retryResult?.displaced) {
+            void handleDisplaced();
+          }
+        }
+      } catch {
+        // Ignore transient network errors; full answers are also persisted on pause/submit
+      }
+    };
+    const next = previous
+      .then(runWithRetry)
       .then(() => {
         if (saveChains.current.get(key) === next) saveChains.current.delete(key);
-        if (saveChains.current.size === 0) {
-          setSaveState((current) => current === "error" ? current : "saved");
-        }
       });
     saveChains.current.set(key, next);
   }, [handleDisplaced]);
@@ -414,7 +419,6 @@ export function StudentTestRunner({
     );
   }
   function clearAnswer() {
-    setSaveState("saving");
     setAnswers((value) => { const next = { ...value }; delete next[current.question_id]; return next; });
     queueSave(
       `answer:${current.question_id}`,
@@ -427,7 +431,7 @@ export function StudentTestRunner({
     setPausing(true);
     await flushSaves();
     if (paused) {
-      const result = await resumeAttempt(mockTestId, sessionId);
+      const result = await resumeAttempt(mockTestId, sessionId, deviceIdRef.current);
       if (result.success && result.expiresAt) {
         setDeadline(result.expiresAt);
         setPaused(false);
@@ -494,16 +498,6 @@ export function StudentTestRunner({
             <div className="hidden md:flex items-center gap-1.5 border-l border-slate-200 pl-2.5 sm:pl-3">
               <span className="text-[11px] font-semibold text-slate-500">Left:</span>
               <strong className="text-xs sm:text-sm font-black text-slate-800">{unanswered}</strong>
-            </div>
-
-            <div className="hidden sm:flex items-center border-l border-slate-200 pl-2.5 sm:pl-3">
-              <span
-                className={`text-[10px] font-bold ${
-                  saveState === "error" ? "text-rose-600" : saveState === "saving" ? "text-amber-600 animate-pulse" : "text-teal-700"
-                }`}
-              >
-                {saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : "Saved ✓"}
-              </span>
             </div>
           </div>
 
@@ -678,7 +672,6 @@ export function StudentTestRunner({
                         checked={selected}
                         disabled={locked}
                         onChange={() => {
-                          setSaveState("saving");
                           setAnswers((value) => ({ ...value, [current.question_id]: key }));
                           queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key, deviceIdRef.current));
                         }}
