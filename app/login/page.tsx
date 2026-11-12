@@ -71,26 +71,42 @@ export default async function LoginPage({
       <link rel="preconnect" href="https://eauomwkwaxqpvzogdltq.supabase.co" crossOrigin="anonymous" />
       <link rel="dns-prefetch" href="https://eauomwkwaxqpvzogdltq.supabase.co" />
       <PublicHeader compact />
-      <div className="mx-auto grid max-w-4xl gap-8 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-[0.85fr_1.15fr] md:items-start">
-        <aside className="min-w-0 rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 md:sticky md:top-24">
+      <div className="mx-auto grid max-w-5xl gap-5 py-5 pl-[max(0.875rem,env(safe-area-inset-left,0px))] pr-[max(0.875rem,env(safe-area-inset-right,0px))] sm:gap-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14 md:grid-cols-[0.86fr_1.14fr] md:items-start">
+        <aside className="order-2 md:order-1 min-w-0 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-5 sm:p-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-900/40 md:sticky md:top-24">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
             Welcome back
           </p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight">
+          <h2 className="mt-2.5 text-2xl sm:text-3xl font-black tracking-tight">
             Continue your preparation.
-          </h1>
-          <p className="mt-4 text-sm leading-6 text-slate-300">
-            Your mock-test dashboard keeps your attempts and subject progress ready
-            for the next study session.
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-200/90">
+            Sign in once to pick up your timed tests, detailed solutions, and
+            subject analytics right where you left off.
           </p>
+          <ul className="mt-5 space-y-2.5 text-xs sm:text-sm text-teal-50/95">
+            <li className="flex items-start gap-2.5">
+              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-teal-300" aria-hidden="true" />
+              <span>Resume saved exam timers and question progress seamlessly</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-teal-300" aria-hidden="true" />
+              <span>Review bilingual answers, accuracy, and mistake bookmarked notes</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-teal-300" aria-hidden="true" />
+              <span>Quick sign-in with Google, password, or a 6-digit email code</span>
+            </li>
+          </ul>
           <Link
             href="/mock-tests"
-            className="mt-7 inline-flex text-sm font-bold text-teal-200 hover:text-teal-100"
+            className="mt-6 inline-flex min-h-9 items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-2 text-sm font-bold text-teal-100 ring-1 ring-white/15 transition hover:bg-white/15 hover:text-white"
           >
             Browse available tests →
           </Link>
         </aside>
-        <LoginForm nextPath={nextPath} initialMessage={initialMessage} initialError={initialError} />
+        <div className="order-1 md:order-2 min-w-0">
+          <LoginForm nextPath={nextPath} initialMessage={initialMessage} initialError={initialError} />
+        </div>
       </div>
     </main>
   );

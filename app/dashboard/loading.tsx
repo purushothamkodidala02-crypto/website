@@ -25,11 +25,13 @@ export default function DashboardLoading() {
         </section>
 
         {/* Stats Row Skeleton */}
-        <section aria-label="Loading dashboard metrics" className="grid grid-cols-3 gap-2 sm:gap-4">
+        <section aria-label="Loading dashboard metrics" className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
           {[0, 1, 2].map((item) => (
             <div
               key={item}
-              className="rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-xs animate-pulse motion-reduce:animate-none space-y-2"
+              className={`rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs animate-pulse motion-reduce:animate-none space-y-2 ${
+                item === 2 ? "col-span-2 sm:col-span-1" : ""
+              }`}
             >
               <div className="h-3 w-16 sm:w-24 rounded bg-slate-200" />
               <div className="h-6 sm:h-8 w-12 sm:w-20 rounded bg-slate-200" />

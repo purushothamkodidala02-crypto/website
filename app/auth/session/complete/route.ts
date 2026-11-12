@@ -17,30 +17,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(nextPath)}&oauth_error=1`, requestUrl.origin));
   }
 
-  const token = crypto.randomUUID();
-
-  // Non-blocking async revocation of previous device sessions so student login is instantaneous
-  void supabase.auth.signOut({ scope: "others" }).catch(() => null);
-
-  // Concurrently register active session token and fetch profile in a single DB roundtrip
-  let updatedProfile: { role: string; phone: string | null } | null = null;
+  let profile: { role: string; phone: string | null } | null = null;
   try {
     const admin = createAdminClient();
     const { data } = await admin
       .from("profiles")
-      .update({
-        active_session_token: token,
-        active_session_updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id)
       .select("role, phone")
+      .eq("id", user.id)
       .maybeSingle();
-    updatedProfile = data;
+    profile = data;
   } catch {
     // Service role key may not be present in all runtime environments
   }
 
-  let profile = updatedProfile;
   if (!profile) {
     const { data: fallbackProfile } = await supabase
       .from("profiles")
@@ -54,10 +43,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(nextPath)}&oauth_error=1`, requestUrl.origin));
   }
 
+  // Administrators may stay signed in across multiple devices at once; never revoke other sessions or pin active_session_token
   if (profile.role === "admin") {
     const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     return NextResponse.redirect(new URL(assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa", requestUrl.origin));
   }
+
+  const token = crypto.randomUUID();
+
+  // Non-blocking async revocation of previous device sessions so student login is instantaneous
+  void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 
   await registerActiveSessionToken(supabase, user.id, token);
 

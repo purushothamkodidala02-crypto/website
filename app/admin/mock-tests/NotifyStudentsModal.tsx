@@ -294,18 +294,18 @@ export function NotifyStudentsModal({
                                   isSelected ? "bg-teal-50/40 hover:bg-teal-50/80" : "hover:bg-slate-50"
                                 }`}
                               >
-                                <div className="flex items-center gap-2.5 truncate pr-2">
+                                <div className="flex items-start gap-2.5 min-w-0 flex-1 pr-2">
                                   <input
                                     type="checkbox"
                                     checked={isSelected}
                                     onChange={() => toggleStudent(student.email)}
-                                    className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                                   />
-                                  <div className="truncate">
-                                    <p className="font-bold text-slate-900 truncate">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-bold text-slate-900 leading-snug break-words">
                                       {student.name}
                                     </p>
-                                    <p className="font-mono text-[11px] text-slate-500 truncate">
+                                    <p className="font-mono text-[11px] text-slate-500 break-all">
                                       {student.email}
                                     </p>
                                   </div>

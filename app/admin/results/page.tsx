@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { parseMockTestTitle } from "@/lib/exam-catalog";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 
 type Attempt = {
   id: string;
@@ -53,9 +55,22 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
   ]);
 
   const profilesList = (visibleProfiles ?? []) as ProfileSummary[];
-  const names = new Map(profilesList.map((item) => [item.id, item.full_name?.trim() || "Student"]));
   const phones = new Map(profilesList.map((item) => [item.id, item.phone?.trim() || ""]));
   const emails = new Map(((emailResult.data ?? []) as { user_id: string; email: string }[]).map((item) => [item.user_id, item.email ?? ""]));
+  const names = new Map(
+    profilesList.map((item) => [
+      item.id,
+      resolveStudentDisplayInfo({
+        fullName: item.full_name,
+        email: emails.get(item.id),
+      }).displayName,
+    ]),
+  );
+  for (const userId of userIds) {
+    if (!names.has(userId)) {
+      names.set(userId, resolveStudentDisplayInfo({ email: emails.get(userId) }).displayName);
+    }
+  }
 
   const mockTestTitles = new Map(
     (mockTestsResult.data ?? []).map((mockTest) => [mockTest.id, mockTest.title])
@@ -205,46 +220,141 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Mobile card layout */}
+              <div className="divide-y divide-teal-50 md:hidden">
+                {attempts.map((attempt) => {
+                  const studentName = names.get(attempt.user_id) ?? "Student";
+                  const studentContact = emails.get(attempt.user_id) || phones.get(attempt.user_id) || "No contact";
+                  const rawTestTitle = mockTestTitles.get(attempt.mock_test_id) ?? "Mock Test";
+                  const parsedTest = parseMockTestTitle(rawTestTitle);
+                  const percent = attempt.total_marks > 0 ? Math.round((attempt.score / attempt.total_marks) * 100) : 0;
+                  const initial = studentName[0]?.toUpperCase() ?? "S";
+
+                  return (
+                    <article key={attempt.id} className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-100 text-xs font-black text-teal-800">
+                            {initial}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 leading-snug break-words">{studentName}</p>
+                            <p className="text-xs text-slate-500 break-all">{studentContact}</p>
+                          </div>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-black ${
+                            percent >= 60
+                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                              : percent >= 35
+                                ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                : "bg-rose-50 text-rose-800 border border-rose-200"
+                          }`}
+                        >
+                          {attempt.score}/{attempt.total_marks} ({percent}%)
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50/80 border border-slate-100 px-3 py-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="text-xs font-bold text-slate-900 leading-snug break-words">
+                            {parsedTest.primaryTitle}
+                          </p>
+                          {parsedTest.testLabel && (
+                            <span className="rounded-full bg-teal-50 border border-teal-200/70 px-2 py-0.5 text-[10px] font-bold text-teal-800">
+                              {parsedTest.testLabel}
+                            </span>
+                          )}
+                        </div>
+                        {parsedTest.breadcrumb.length > 0 && (
+                          <p className="mt-0.5 text-[11px] font-semibold text-slate-500 break-words">
+                            {parsedTest.breadcrumb.join(" · ")}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                        <span>
+                          <strong className="text-emerald-700">{attempt.correct_answers} correct</strong> ·{" "}
+                          {attempt.unanswered_questions} unanswered
+                        </span>
+                        <span>
+                          {new Intl.DateTimeFormat("en-IN", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                            timeZone: "Asia/Kolkata",
+                          }).format(new Date(attempt.submitted_at))}
+                        </span>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {/* Desktop sticky-header table */}
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Latest attempt logs"
+                className="hidden md:block overflow-x-auto"
+              >
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-teal-100/80 bg-teal-50/30 text-xs font-black uppercase tracking-wider text-teal-900">
+                  <thead className="sticky top-0 z-10 border-b border-teal-100/80 bg-teal-50/60 text-xs font-black uppercase tracking-wider text-teal-900">
                     <tr>
-                      <th className="px-6 py-3.5">Candidate</th>
-                      <th className="px-6 py-3.5">Mock Test</th>
-                      <th className="px-6 py-3.5">Score / Marks</th>
-                      <th className="px-6 py-3.5">Correct</th>
-                      <th className="px-6 py-3.5">Unanswered</th>
-                      <th className="px-6 py-3.5">Submitted At</th>
+                      <th scope="col" className="px-6 py-3.5">Candidate</th>
+                      <th scope="col" className="px-6 py-3.5">Mock Test</th>
+                      <th scope="col" className="px-6 py-3.5">Score / Marks</th>
+                      <th scope="col" className="px-6 py-3.5">Correct</th>
+                      <th scope="col" className="px-6 py-3.5">Unanswered</th>
+                      <th scope="col" className="px-6 py-3.5">Submitted At</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-teal-50">
                     {attempts.map((attempt) => {
                       const studentName = names.get(attempt.user_id) ?? "Student";
                       const studentContact = emails.get(attempt.user_id) || phones.get(attempt.user_id) || "No contact";
+                      const rawTestTitle = mockTestTitles.get(attempt.mock_test_id) ?? "Mock Test";
+                      const parsedTest = parseMockTestTitle(rawTestTitle);
                       const percent = attempt.total_marks > 0 ? Math.round((attempt.score / attempt.total_marks) * 100) : 0;
                       const initial = studentName[0]?.toUpperCase() ?? "S";
 
                       return (
                         <tr key={attempt.id} className="transition hover:bg-teal-50/30">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
+                          <th scope="row" className="px-6 py-4 font-normal text-left">
+                            <div className="flex items-start gap-3">
                               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-100 text-xs font-black text-teal-800">
                                 {initial}
                               </span>
                               <div className="min-w-0">
-                                <p className="font-bold text-slate-900 truncate">{studentName}</p>
-                                <p className="text-xs text-slate-400 truncate">{studentContact}</p>
+                                <p className="font-bold text-slate-900 leading-snug break-words">{studentName}</p>
+                                <p className="text-xs text-slate-500 break-all sm:break-words">{studentContact}</p>
                               </div>
                             </div>
-                          </td>
+                          </th>
 
-                          <td className="px-6 py-4 font-semibold text-slate-800">
-                            {mockTestTitles.get(attempt.mock_test_id) ?? "Mock Test"}
+                          <td className="px-6 py-4">
+                            <div className="min-w-0 max-w-md">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="font-semibold text-slate-800 leading-snug break-words">
+                                  {parsedTest.primaryTitle}
+                                </span>
+                                {parsedTest.testLabel && (
+                                  <span className="rounded-full bg-teal-50 border border-teal-200/70 px-2 py-0.5 text-[10px] font-bold text-teal-800 shrink-0">
+                                    {parsedTest.testLabel}
+                                  </span>
+                                )}
+                              </div>
+                              {parsedTest.breadcrumb.length > 0 && (
+                                <p className="mt-0.5 text-[11px] font-medium text-slate-500 break-words">
+                                  {parsedTest.breadcrumb.join(" · ")}
+                                </p>
+                              )}
+                            </div>
                           </td>
 
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <span className="font-black text-slate-950">
+                              <span className="font-black text-slate-950 tabular-nums">
                                 {attempt.score} / {attempt.total_marks}
                               </span>
                               <span
@@ -261,11 +371,11 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
                             </div>
                           </td>
 
-                          <td className="px-6 py-4 font-bold text-emerald-700">
+                          <td className="px-6 py-4 font-bold text-emerald-700 tabular-nums">
                             {attempt.correct_answers}
                           </td>
 
-                          <td className="px-6 py-4 text-slate-400 font-medium">
+                          <td className="px-6 py-4 text-slate-500 font-medium tabular-nums">
                             {attempt.unanswered_questions}
                           </td>
 

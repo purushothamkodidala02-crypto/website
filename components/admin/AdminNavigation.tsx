@@ -7,6 +7,7 @@ import { BrandLockup, BrandMark } from "@/components/brand/VaradhiBrand";
 import { usePathname } from "next/navigation";
 import { getAdminNavBadges } from "@/app/actions/admin-badges";
 import LogoutButton from "@/components/admin/LogoutButton";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 
 const subscribeToClient = () => () => {};
 const getClientSnapshot = () => true;
@@ -278,7 +279,7 @@ export function NavigationLinks({
                         <NavIcon name={link.icon} />
                       </span>
 
-                      <span className="truncate">{link.label}</span>
+                      <span className="leading-snug break-words">{link.label}</span>
                     </div>
 
                     {showBadge && (
@@ -458,14 +459,18 @@ export function AdminNavigation(props: {
 
   const hasAnyUpdate = badges.openReports > 0 || badges.newSurveys > 0;
 
-  const initials = adminName
-    ? adminName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "AD";
+  const identity = resolveStudentDisplayInfo({
+    fullName: adminName && adminName !== "Administrator" ? adminName : undefined,
+    email: userEmail,
+  });
+
+  const initials = identity.displayName
+    .split(/\s+/)
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || identity.avatarLetter;
 
   return (
     <>
@@ -527,16 +532,21 @@ export function AdminNavigation(props: {
           </Link>
 
           {/* Admin identity & status */}
-          <div className="flex items-center justify-between gap-2 pt-1 px-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-teal-700 text-[10px] font-black text-white">
+          <div className="flex items-start justify-between gap-2 pt-1 px-1">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-teal-700 text-[11px] font-black text-white shadow-2xs">
                 {initials}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-slate-900 leading-tight">
-                  {userEmail ?? adminName}
+                <p className="text-xs font-bold text-slate-900 leading-snug break-words">
+                  {identity.displayName}
                 </p>
-                <p className="flex items-center gap-1 text-[10px] font-semibold text-teal-800">
+                {userEmail && (
+                  <p className="text-[10px] font-medium text-slate-500 break-all leading-snug">
+                    {userEmail}
+                  </p>
+                )}
+                <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-teal-800">
                   <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
                   <span>MFA Active</span>
                 </p>
@@ -595,7 +605,10 @@ export function AdminNavigation(props: {
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
           </button>
-          <LogoutButton className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/80 bg-teal-50/60 px-2.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50" />
+          <LogoutButton
+            allowMultipleDevices
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/80 bg-teal-50/60 px-2.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50"
+          />
         </div>
       </div>
 
@@ -657,9 +670,24 @@ export function AdminNavigation(props: {
 
               {/* Drawer Footer */}
               <div className="shrink-0 border-t border-teal-100 bg-slate-50 p-4 space-y-3">
-                <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-teal-800">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                  <span>MFA Verified Session</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-teal-100 bg-white px-3 py-2">
+                  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-teal-700 text-[11px] font-black text-white">
+                    {initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-slate-900 leading-snug break-words">
+                      {identity.displayName}
+                    </p>
+                    {userEmail && (
+                      <p className="text-[10px] font-medium text-slate-500 break-all leading-snug">
+                        {userEmail}
+                      </p>
+                    )}
+                    <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-teal-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+                      <span>MFA Verified Session</span>
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <Link
@@ -673,7 +701,10 @@ export function AdminNavigation(props: {
                     <span>Student portal</span>
                     <span className="text-[10px] text-teal-700">↗</span>
                   </Link>
-                  <LogoutButton className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 disabled:opacity-50" />
+                  <LogoutButton
+                    allowMultipleDevices
+                    className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-50 disabled:opacity-50"
+                  />
                 </div>
               </div>
             </aside>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/admin/LogoutButton";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 
 const PATH_TITLES: Record<string, { parent?: string; title: string }> = {
   "/admin": { title: "Overview" },
@@ -12,6 +13,7 @@ const PATH_TITLES: Record<string, { parent?: string; title: string }> = {
   "/admin/excel-import-guide": { parent: "Tools", title: "Excel Import Guide" },
   "/admin/question-reports": { parent: "Quality", title: "Question Reports" },
   "/admin/exams": { parent: "Curriculum", title: "Exam Catalogue" },
+  "/admin/groups": { parent: "Curriculum", title: "Exams & Papers" },
   "/admin/subjects": { parent: "Curriculum", title: "Subjects & Syllabus" },
   "/admin/exam-pages": { parent: "Curriculum", title: "Public Exam Pages" },
   "/admin/access": { parent: "Commerce", title: "Exam Series & Access" },
@@ -52,6 +54,22 @@ function getBreadcrumb(pathname: string): { parent?: string; title: string } {
     return { parent: "Exam Catalogue", title: "Edit Category" };
   }
 
+  if (pathname.startsWith("/admin/groups/") && pathname.endsWith("/edit")) {
+    return { parent: "Curriculum", title: "Edit Exam & Papers" };
+  }
+
+  if (pathname.startsWith("/admin/papers/") && pathname.endsWith("/edit")) {
+    return { parent: "Curriculum", title: "Edit Paper" };
+  }
+
+  if (pathname.startsWith("/admin/specializations/") && pathname.endsWith("/edit")) {
+    return { parent: "Curriculum", title: "Edit Specialization" };
+  }
+
+  if (pathname.startsWith("/admin/surveys/")) {
+    return { parent: "Feedback", title: "Survey Editor & Responses" };
+  }
+
   return { title: "Administration" };
 }
 
@@ -71,15 +89,19 @@ export function AdminHeader({
   const pathname = usePathname();
   const breadcrumb = getBreadcrumb(pathname);
 
+  const identity = resolveStudentDisplayInfo({
+    fullName: adminName && adminName !== "Administrator" ? adminName : undefined,
+    email: userEmail,
+  });
+
   // Initials for avatar
-  const initials = adminName
-    ? adminName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "AD";
+  const initials = identity.displayName
+    .split(/\s+/)
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || identity.avatarLetter;
 
   return (
     <header className="sticky top-0 z-20 hidden min-h-16 items-center justify-between gap-4 border-b border-teal-100 bg-white/90 px-5 py-3 shadow-2xs backdrop-blur-xl md:flex sm:px-8">
@@ -100,23 +122,23 @@ export function AdminHeader({
         )}
 
         {/* Dynamic Breadcrumbs */}
-        <nav aria-label="Breadcrumbs" className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 truncate">
+        <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm font-semibold text-slate-500 min-w-0 leading-snug">
           <Link
             href="/admin"
-            className="text-slate-600 hover:text-teal-800 transition font-bold"
+            className="text-slate-600 hover:text-teal-800 transition font-bold shrink-0"
           >
             Admin
           </Link>
 
           {breadcrumb.parent && (
             <>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-600 truncate">{breadcrumb.parent}</span>
+              <span aria-hidden="true" className="text-slate-300">/</span>
+              <span className="text-slate-600 break-words">{breadcrumb.parent}</span>
             </>
           )}
 
-          <span className="text-slate-300">/</span>
-          <span className="font-bold text-slate-900 truncate">{breadcrumb.title}</span>
+          <span aria-hidden="true" className="text-slate-300">/</span>
+          <span className="font-bold text-slate-900 break-words">{breadcrumb.title}</span>
         </nav>
       </div>
 
@@ -175,17 +197,26 @@ export function AdminHeader({
         </Link>
 
         {/* Admin User Info */}
-        <div className="hidden h-8 min-w-0 lg:flex items-center gap-2 rounded-xl border border-teal-100 bg-white px-2.5 text-xs shadow-2xs">
-          <div className="grid h-6 w-6 place-items-center rounded-lg bg-teal-700 font-black text-white text-[10px]">
+        <div
+          className="hidden min-h-8 min-w-0 md:flex items-center gap-2 rounded-xl border border-teal-200/80 bg-teal-50/40 px-2.5 py-1 text-xs shadow-2xs"
+          title={userEmail ? `${identity.displayName} (${userEmail})` : identity.displayName}
+        >
+          <div className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-teal-700 font-black text-white text-[10px]">
             {initials}
           </div>
-          <span className="max-w-44 xl:max-w-64 truncate font-semibold text-slate-700" title={userEmail ?? adminName}>
-            {userEmail ?? adminName}
+          <span className="font-bold text-slate-800 whitespace-nowrap lg:hidden">
+            {identity.firstName}
+          </span>
+          <span className="hidden lg:inline font-bold text-slate-800 max-w-44 xl:max-w-60 truncate">
+            {identity.displayName}
           </span>
         </div>
 
         {/* Logout */}
-        <LogoutButton className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 disabled:opacity-50" />
+        <LogoutButton
+          allowMultipleDevices
+          className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 disabled:opacity-50"
+        />
       </div>
     </header>
   );

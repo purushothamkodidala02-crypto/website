@@ -12,6 +12,7 @@ import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { mockTestUrl } from "@/lib/public-urls";
 import { isPaidSalesEnabled } from "@/lib/paid-sales";
 import { createClient } from "@/lib/supabase/server";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 
 type Attempt = {
   id: string;
@@ -175,15 +176,11 @@ export default async function Dashboard({
     }
   }
 
-  const metadataName =
-    typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name.trim()
-      ? user.user_metadata.full_name.trim()
-      : typeof user.user_metadata?.name === "string" && user.user_metadata.name.trim()
-      ? user.user_metadata.name.trim()
-      : "";
-  const studentName = metadataName || (user.email ? user.email.split("@")[0] : "Student");
-  const firstName = studentName.split(" ")[0];
-  const avatarLetter = (firstName[0] || "S").toUpperCase();
+  const { displayName: studentName, avatarLetter } = resolveStudentDisplayInfo({
+    fullName: user.user_metadata?.full_name,
+    name: user.user_metadata?.name,
+    email: user.email,
+  });
   // counts are resolved directly from promises above
   const isPaidEnabled = paidSalesEnabled === true;
 
@@ -236,19 +233,26 @@ export default async function Dashboard({
           <div className="flex flex-col gap-4 sm:gap-5 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 space-y-1.5 sm:space-y-2">
               {/* Candidate Pill Row */}
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-black text-teal-800">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <span className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-xl bg-teal-600 text-xs sm:text-sm font-black text-white shadow-2xs">
                   {avatarLetter}
                 </span>
-                <span className="truncate text-xs font-bold text-slate-800 max-w-[200px] sm:max-w-none">
-                  Welcome, <span className="font-extrabold text-slate-950">{firstName}</span>
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/80 bg-teal-50 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-800 shrink-0">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-slate-800 break-words leading-snug">
+                    Welcome, <span className="font-extrabold text-slate-950">{studentName}</span>
+                  </p>
+                  {user.email && (
+                    <p className="text-[11px] font-medium text-slate-500 break-all sm:break-normal">
+                      {user.email}
+                    </p>
+                  )}
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/80 bg-teal-50 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-800 shrink-0">
                   <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
                   Active Prep
                 </span>
                 {page > 1 && (
-                  <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-amber-800 shrink-0">
+                  <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-amber-800 shrink-0">
                     Page {page} of {totalPages}
                   </span>
                 )}
@@ -325,8 +329,8 @@ export default async function Dashboard({
           </div>
         </section>
 
-        {/* High-Level Metrics (Responsive 3-Column on Mobile, Cards on Tablet & Desktop) */}
-        <section className="grid grid-cols-3 gap-2 sm:gap-4">
+        {/* High-Level Metrics */}
+        <section className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
           {metrics.map((metric) => (
             <DashboardMetric key={metric.label} {...metric} />
           ))}
@@ -413,35 +417,47 @@ export default async function Dashboard({
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {availableTests.slice(0, 4).map((test) => (
-                    <article
-                      key={test.id}
-                      className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-xs transition hover:border-teal-200 hover:shadow-sm"
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-3">
-                          <span className="rounded-lg bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800 border border-teal-100">
-                            Practice test
-                          </span>
-                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${test.access_type === "free" ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60" : "bg-amber-50 text-amber-900 border border-amber-200/60"}`}>
-                            {test.access_type === "free" ? "Free" : "Paid series"}
-                          </span>
+                  {availableTests.slice(0, 4).map((test) => {
+                    const parsed = parseMockTestTitle(testTitles.get(test.id) ?? test.title);
+                    const paperLabel = paperDisplayById.get(test.paper_id)?.label ?? "Paper";
+
+                    return (
+                      <article
+                        key={test.id}
+                        className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-xs transition hover:border-teal-200 hover:shadow-sm"
+                      >
+                        <div>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-bold text-teal-800 border border-teal-200/70">
+                                {parsed.testLabel ?? "Practice test"}
+                              </span>
+                              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200/80">
+                                {paperLabel}
+                              </span>
+                            </div>
+                            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0 ${test.access_type === "free" ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60" : "bg-amber-50 text-amber-900 border border-amber-200/60"}`}>
+                              {test.access_type === "free" ? "Free" : "Paid series"}
+                            </span>
+                          </div>
+                          <h3 className="mt-3.5 text-base sm:text-lg font-black leading-snug text-slate-950 break-words">
+                            {parsed.primaryTitle}
+                          </h3>
+                          {parsed.breadcrumb.length > 0 && (
+                            <p className="mt-1.5 text-xs font-semibold text-slate-500 leading-relaxed break-words">
+                              {parsed.breadcrumb.join(" · ")}
+                            </p>
+                          )}
                         </div>
-                        <h3 className="mt-3.5 text-base sm:text-lg font-black leading-snug text-slate-950 break-words">
-                          {testTitles.get(test.id) ?? test.title}
-                        </h3>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-wide text-teal-700">
-                          {paperDisplayById.get(test.paper_id)?.label ?? "Paper"}
-                        </p>
-                      </div>
-                      <div className="mt-4 sm:mt-6 flex items-center justify-between border-t border-slate-100 pt-3 sm:pt-4">
-                        <span className="text-xs font-semibold text-slate-500">
-                          {test.duration_minutes} minutes
-                        </span>
-                        <ViewTestLink href={publicTestPath(test)} />
-                      </div>
-                    </article>
-                  ))}
+                        <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 sm:pt-4">
+                          <span className="text-xs font-semibold text-slate-500">
+                            {test.duration_minutes} minutes
+                          </span>
+                          <ViewTestLink href={publicTestPath(test)} />
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -497,13 +513,13 @@ export default async function Dashboard({
                       return (
                         <div key={attempt.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 sm:p-3.5">
                           <div className="mb-2 flex items-start justify-between gap-3 text-xs sm:text-sm">
-                            <div className="min-w-0">
-                              <span className="block truncate font-bold text-slate-900" title={rawTitle}>
+                            <div className="min-w-0 flex-1">
+                              <span className="block font-bold text-slate-900 leading-snug break-words">
                                 {parsed.primaryTitle}
                                 {parsed.testLabel && <span className="ml-1.5 font-semibold text-teal-700">({parsed.testLabel})</span>}
                               </span>
                               {parsed.breadcrumb.length > 0 && (
-                                <span className="block truncate text-[10px] sm:text-[11px] font-semibold text-slate-400">
+                                <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold text-slate-400 leading-relaxed break-words">
                                   {parsed.breadcrumb.join(" · ")}
                                 </span>
                               )}
@@ -542,8 +558,8 @@ export default async function Dashboard({
                         );
                         return (
                           <div key={subject.subject_name} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 sm:p-3.5">
-                            <div className="mb-2 flex justify-between gap-3 text-xs sm:text-sm">
-                              <span className="font-bold text-slate-800 truncate">
+                            <div className="mb-2 flex items-start justify-between gap-3 text-xs sm:text-sm">
+                              <span className="font-bold text-slate-800 leading-snug break-words">
                                 {subject.subject_name}
                               </span>
                               <span className="shrink-0 font-black text-slate-950">
@@ -597,9 +613,13 @@ function DashboardMetric({
   icon: "attempts" | "average" | "latest";
 }) {
   return (
-    <article className="group rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-xs transition hover:border-slate-300 hover:shadow-sm">
+    <article
+      className={`group rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs transition hover:border-slate-300 hover:shadow-sm ${
+        icon === "latest" ? "col-span-2 sm:col-span-1" : ""
+      }`}
+    >
       <div className="flex items-center justify-between gap-1.5 sm:gap-3">
-        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 truncate">
+        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
           <span className="sm:hidden">{mobileLabel}</span>
           <span className="hidden sm:inline">{label}</span>
         </p>
@@ -624,7 +644,7 @@ function DashboardMetric({
       <p className="mt-1.5 sm:mt-4 text-base sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-900 leading-tight">
         {value}
       </p>
-      <p className="mt-0.5 sm:mt-1 truncate text-[10px] sm:text-xs font-semibold text-slate-500">
+      <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs font-semibold text-slate-500 leading-snug line-clamp-2 break-words">
         {detail}
       </p>
     </article>

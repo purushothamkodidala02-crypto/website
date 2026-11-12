@@ -44,6 +44,18 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (profile?.role === "admin") {
+      // Preserve multi-device sessions for admins and route into the MFA / admin flow cleanly
+      const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      const adminTarget = assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa";
+      const adminResponse = NextResponse.redirect(new URL(adminTarget, requestUrl.origin));
+      response.cookies.getAll().forEach((cookie) => {
+        adminResponse.cookies.set(cookie);
+      });
+      return adminResponse;
+    }
+
     if (profile?.role === "student") {
       void supabase.auth.signOut({ scope: "others" }).catch(() => null);
 

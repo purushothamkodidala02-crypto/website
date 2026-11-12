@@ -426,10 +426,17 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       >
                         {test.stateCode}
                       </span>
-                      <span className="text-xs font-medium text-slate-600 break-words">
-                        {test.examName} · {test.paperName}
-                        {test.subjectName && ` · ${test.subjectName}`}
+                      <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 break-words">
+                        {test.examName}
                       </span>
+                      <span className="rounded-md border border-teal-200/70 bg-teal-50/50 px-2 py-0.5 text-[11px] font-semibold text-teal-800 break-words">
+                        {test.paperName}
+                      </span>
+                      {test.subjectName && (
+                        <span className="rounded-md border border-indigo-200/70 bg-indigo-50/50 px-2 py-0.5 text-[11px] font-semibold text-indigo-800 break-words">
+                          {test.subjectName}
+                        </span>
+                      )}
                       <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 shrink-0">
                         {test.scope === "paper" ? "Paper-wise" : "Subject-wise"}
                       </span>

@@ -2,27 +2,28 @@
 
 import { useState } from "react";
 
-type PasswordInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">;
+type PasswordInputProps = Omit<React.ComponentPropsWithRef<"input">, "type">;
 
-export function PasswordInput({ className = "", ...props }: PasswordInputProps) {
+export function PasswordInput({ className = "", ref, ...props }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
 
   return (
     <div className="relative mt-2">
       <input
+        ref={ref}
         {...props}
         type={visible ? "text" : "password"}
-        className={`w-full rounded-xl border px-4 py-3 pr-20 font-normal ${className}`}
+        className={`w-full min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 pr-22 text-base font-normal text-slate-900 placeholder:text-slate-400 transition focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15 focus-visible:outline-none aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus:ring-red-500/20 ${className}`}
       />
       <button
         type="button"
         onClick={() => setVisible((value) => !value)}
         aria-label={visible ? "Hide password" : "Show password"}
         aria-pressed={visible}
-        className="absolute inset-y-1.5 right-1.5 inline-flex min-w-16 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        className="absolute inset-y-1.5 right-1.5 inline-flex min-w-16 items-center justify-center gap-1.5 rounded-lg px-2.5 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}
-        {visible ? "Hide" : "Show"}
+        <span>{visible ? "Hide" : "Show"}</span>
       </button>
     </div>
   );

@@ -22,10 +22,10 @@ export function SubmissionDialog({ answered, review, unanswered, submitting, onC
         <div className="shrink-0 p-4 pb-3 sm:p-7 sm:pb-5 [@media(max-height:540px)]:p-3">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Final review</p>
           <h2 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">Finish this mock test?</h2>
-          <div className="mt-3 sm:mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="mt-3 sm:mt-5 grid grid-cols-2 min-[380px]:grid-cols-3 gap-2 sm:gap-3">
             <Metric value={answered} label="Answered" tone="text-emerald-800" />
             <Metric value={review} label="Review" tone="text-amber-800" />
-            <Metric value={unanswered} label="Unanswered" tone="text-slate-700" />
+            <Metric value={unanswered} label="Unanswered" tone="text-slate-700" className="col-span-2 min-[380px]:col-span-1" />
           </div>
         </div>
         
@@ -65,6 +65,6 @@ export function SubmissionDialog({ answered, review, unanswered, submitting, onC
   );
 }
 
-function Metric({ value, label, tone }: { value: number; label: string; tone: string }) {
-  return <div className="rounded-xl border border-slate-100 bg-white p-3 text-center shadow-sm"><strong className={`block text-lg font-black ${tone}`}>{value}</strong><span className="text-[10px] font-bold text-slate-500 sm:text-xs">{label}</span></div>;
+function Metric({ value, label, tone, className = "" }: { value: number; label: string; tone: string; className?: string }) {
+  return <div className={`min-w-0 rounded-xl border border-slate-100 bg-white p-2.5 sm:p-3 text-center shadow-sm ${className}`}><strong className={`block text-lg font-black ${tone}`}>{value}</strong><span className="mt-0.5 block text-[10px] font-bold text-slate-500 sm:text-xs leading-snug break-words">{label}</span></div>;
 }

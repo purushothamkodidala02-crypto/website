@@ -908,7 +908,7 @@ export async function MockTestDetailsPage({
 
           <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+              <p className="text-xs font-bold uppercase tracking-wider text-teal-800 leading-relaxed break-words">
                 {state?.code ?? "State"} ·{" "}
                 {exam?.name ?? "Board"} ·{" "}
                 {examGroup?.name ?? "Exam"} ·{" "}
@@ -964,13 +964,13 @@ export async function MockTestDetailsPage({
           </div>
 
           {/* Key Exam Specifications Strip */}
-          <div className="student-stagger mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5 sm:gap-3 border-t border-slate-100 pt-5">
+          <div className="student-stagger mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3 border-t border-slate-100 pt-5">
             {testSummaryMetrics.map(([label, value]) => (
               <div key={label} className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center sm:text-left">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   {label}
                 </p>
-                <p className="mt-1 text-sm font-black text-slate-900 sm:text-base truncate">
+                <p className="mt-1 text-sm font-black text-slate-900 sm:text-base break-words">
                   {value}
                 </p>
               </div>

@@ -428,8 +428,8 @@ export function ExamStructureWorkspace({
                     <ExamSymbol name={category.name} className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-1">
-                      <strong className="truncate text-sm font-bold text-slate-900">
+                    <div className="flex items-start justify-between gap-2">
+                      <strong className="text-sm font-bold text-slate-900 leading-snug break-words">
                         {category.name}
                       </strong>
                       <Status active={category.isActive} compact />
@@ -922,7 +922,7 @@ function PaperBranch({
                     <span className="shrink-0 rounded bg-slate-200 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700">
                       #{subject.displayOrder ?? "-"}
                     </span>
-                    <span className="truncate text-xs font-semibold text-slate-800" title={subject.name}>
+                    <span className="text-xs font-semibold text-slate-800 leading-snug break-words">
                       {subject.name}
                     </span>
                   </div>

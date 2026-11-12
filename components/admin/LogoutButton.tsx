@@ -5,7 +5,13 @@ import { createClient } from "@/lib/supabase/client";
 import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
 import { clearLocalPracticeStorage } from "@/lib/storage/student-practice-storage";
 
-export default function LogoutButton({ className }: { className?: string } = {}) {
+export default function LogoutButton({
+  className,
+  allowMultipleDevices = false,
+}: {
+  className?: string;
+  allowMultipleDevices?: boolean;
+} = {}) {
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
@@ -14,16 +20,22 @@ export default function LogoutButton({ className }: { className?: string } = {})
     clearLocalPracticeStorage();
 
     const supabase = createClient();
+    const isAdminRoute =
+      typeof window !== "undefined" &&
+      (window.location.pathname.startsWith("/admin") || window.location.pathname.startsWith("/admin-mfa"));
+    const preserveOtherDevices = allowMultipleDevices || isAdminRoute;
 
-    // 1. Clear session locally in 0ms so the browser cookies are wiped immediately
+    // 1. Clear session locally in 0ms so the browser cookies on this device are wiped immediately
     try {
       await supabase.auth.signOut({ scope: "local" });
     } catch {
       // Ignore
     }
 
-    // 2. Fire-and-forget remote revocation in background so user never waits
-    void supabase.auth.signOut({ scope: "global" }).catch(() => null);
+    // 2. For single-device student accounts, also revoke remote sessions; admins keep other devices signed in
+    if (!preserveOtherDevices) {
+      void supabase.auth.signOut({ scope: "global" }).catch(() => null);
+    }
 
     // 3. Instant navigation to login page
     window.location.href = "/login";
@@ -35,6 +47,8 @@ export default function LogoutButton({ className }: { className?: string } = {})
       onClick={handleLogout}
       disabled={loading}
       aria-busy={loading}
+      aria-label={loading ? "Logging out" : "Logout"}
+      title="Logout"
       className={
         className ??
         "inline-flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 disabled:opacity-50"
@@ -57,7 +71,7 @@ export default function LogoutButton({ className }: { className?: string } = {})
             />
           </svg>
         )}
-        <span>{loading ? "Logging out…" : "Logout"}</span>
+        <span className="hidden min-[400px]:inline">{loading ? "Logging out…" : "Logout"}</span>
       </span>
     </button>
   );

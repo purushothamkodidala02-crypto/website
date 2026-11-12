@@ -124,7 +124,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-3 shadow-xs">
+      <div className="mt-5 min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-xs">
         <div className="flex items-center gap-2 overflow-x-auto pb-1" aria-label="Review question navigator">
           {rows.map((item, questionIndex) => {
             const active = questionIndex === index;

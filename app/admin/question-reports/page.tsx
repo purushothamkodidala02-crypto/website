@@ -5,6 +5,7 @@ import { QuestionPreviewDrawer } from "./QuestionPreviewDrawer";
 import { ExportReportsButton, type ExportReportRow } from "./ExportReportsButton";
 import { QuestionReportsFilterBar } from "./QuestionReportsFilterBar";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 
 type ReportRow = {
   id: string;
@@ -292,9 +293,6 @@ export default async function AdminQuestionReportsPage({
   ]);
 
   const profileList = (profilesResult.data ?? []) as ProfileSummary[];
-  const userNames = new Map<string, string>(
-    profileList.map((profile: ProfileSummary) => [profile.id, profile.full_name?.trim() || "Student"]),
-  );
   const userPhones = new Map<string, string | null>(
     profileList.map((profile: ProfileSummary) => [profile.id, profile.phone?.trim() || null]),
   );
@@ -303,6 +301,23 @@ export default async function AdminQuestionReportsPage({
   for (const row of emailList) {
     if (row.user_id && row.email) {
       userEmails.set(row.user_id, row.email);
+    }
+  }
+  const userNames = new Map<string, string>(
+    profileList.map((profile: ProfileSummary) => [
+      profile.id,
+      resolveStudentDisplayInfo({
+        fullName: profile.full_name,
+        email: userEmails.get(profile.id),
+      }).displayName,
+    ]),
+  );
+  for (const userId of allUserIds) {
+    if (!userNames.has(userId)) {
+      userNames.set(
+        userId,
+        resolveStudentDisplayInfo({ email: userEmails.get(userId) }).displayName,
+      );
     }
   }
 
@@ -449,13 +464,13 @@ export default async function AdminQuestionReportsPage({
           className="group rounded-xl border border-rose-200/70 bg-rose-50/30 p-3.5 shadow-2xs transition hover:bg-rose-50/50 min-w-0"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-medium text-rose-800/90 truncate">Action Required</p>
+            <p className="text-xs font-medium text-rose-800/90 leading-snug break-words">Action Required</p>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
             <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-rose-950">{counts.open}</p>
             <span className="text-xs font-medium text-rose-700/80">open reports</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
+          <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
             {openCountInView} open in current filtered view
           </p>
         </Link>
@@ -466,13 +481,13 @@ export default async function AdminQuestionReportsPage({
           className="group rounded-xl border border-amber-200/70 bg-amber-50/30 p-3.5 shadow-2xs transition hover:bg-amber-50/50 min-w-0"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-medium text-amber-800/90 truncate">Under Review</p>
+            <p className="text-xs font-medium text-amber-800/90 leading-snug break-words">Under Review</p>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
             <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-amber-950">{counts.reviewing}</p>
             <span className="text-xs font-medium text-amber-700/80">in triage</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
+          <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
             Subject matter expert review ongoing
           </p>
         </Link>
@@ -483,13 +498,13 @@ export default async function AdminQuestionReportsPage({
           className="group rounded-xl border border-emerald-200/70 bg-emerald-50/30 p-3.5 shadow-2xs transition hover:bg-emerald-50/50 min-w-0"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-medium text-emerald-800/90 truncate">Resolved (≤15d)</p>
+            <p className="text-xs font-medium text-emerald-800/90 leading-snug break-words">Resolved (≤15d)</p>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
             <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-emerald-950">{counts.resolved}</p>
             <span className="text-xs font-medium text-emerald-700/80">last 15 days</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
+          <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
             {counts.archived > 0 ? `${counts.archived} older resolved archived` : "Older resolved auto-archived"}
           </p>
         </Link>
@@ -497,7 +512,7 @@ export default async function AdminQuestionReportsPage({
         {/* Total & Resolution Rate */}
         <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 shadow-2xs min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-1 min-w-0">
-            <p className="text-xs font-medium text-slate-500 truncate">Active Queue</p>
+            <p className="text-xs font-medium text-slate-500 leading-snug break-words">Active Queue</p>
             <span className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700 shrink-0">
               {resolutionRate}% Closed
             </span>
@@ -506,7 +521,7 @@ export default async function AdminQuestionReportsPage({
             <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-900">{counts.total}</p>
             <span className="text-xs font-medium text-slate-500">active reports</span>
           </div>
-          <p className="mt-1 text-[11px] font-medium text-slate-500 line-clamp-1 sm:line-clamp-none">
+          <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
             {counts.archived > 0 ? `${counts.archived} older resolved archived` : "Resolved clear after 15 days"}
           </p>
         </div>
@@ -645,7 +660,7 @@ export default async function AdminQuestionReportsPage({
                       <span className="break-words">{categoryInfo.label}</span>
                     </span>
 
-                    <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600 max-w-full truncate">
+                    <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700 leading-snug break-words">
                       {report.questions?.subjects?.name ?? "Question Bank"}
                     </span>
                   </div>

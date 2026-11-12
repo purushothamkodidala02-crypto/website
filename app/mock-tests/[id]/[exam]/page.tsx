@@ -201,7 +201,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <span aria-hidden="true" className="text-slate-300">/</span>
             <Link href={stateUrl(context.state.slug)} className="hover:text-teal-800 py-0.5 inline-flex items-center transition">{context.state.name}</Link>
             <span aria-hidden="true" className="text-slate-300">/</span>
-            <span className="text-slate-800 font-semibold py-0.5 inline-flex items-center truncate max-w-[200px] sm:max-w-none">{context.exam.name}</span>
+            <span className="text-slate-800 font-semibold py-0.5 inline-flex items-center break-words">{context.exam.name}</span>
           </nav>
 
           <div className="mt-4">
@@ -326,10 +326,17 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     className="student-card group min-w-0 max-w-full overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 sm:gap-3">
-                        <span className="min-w-0 max-w-[65%] sm:max-w-[70%] truncate rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[11px] sm:text-xs font-bold text-teal-800" title={`${display?.shortLabel ?? "Paper"}${specialization ? ` · ${specialization.name}` : ""}`}>
-                          {display?.shortLabel ?? "Paper"}{specialization ? ` · ${specialization.name}` : ""}
-                        </span>
+                      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                          <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[11px] sm:text-xs font-bold text-teal-800">
+                            {display?.shortLabel ?? "Paper"}
+                          </span>
+                          {specialization && (
+                            <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[11px] sm:text-xs font-semibold text-slate-700 break-words">
+                              {specialization.name}
+                            </span>
+                          )}
+                        </div>
                         <span className="shrink-0 text-xs font-bold text-slate-500">
                           {paperTests.length} mock test{paperTests.length === 1 ? "" : "s"}
                         </span>
@@ -415,12 +422,11 @@ export default async function ExamPage({ params, searchParams }: Props) {
                             <div className="min-w-0 flex-1">
                               <Link
                                 href={testHref}
-                                className="font-display block text-sm sm:text-base font-bold text-slate-900 hover:text-teal-800 transition truncate"
-                                title={testHeading}
+                                className="font-display block text-sm sm:text-base font-bold leading-snug text-slate-900 hover:text-teal-800 transition break-words"
                               >
                                 {testHeading}
                               </Link>
-                              <p className="mt-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-teal-700 truncate">
+                              <p className="mt-1 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-teal-700 leading-relaxed break-words">
                                 {paperLabel} · {paper.name}
                               </p>
                             </div>
@@ -454,8 +460,8 @@ export default async function ExamPage({ params, searchParams }: Props) {
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
-                        <span className="text-xs font-semibold text-slate-500 truncate">
+                      <div className="mt-4 flex flex-wrap items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
+                        <span className="text-xs font-semibold text-slate-500 break-words">
                           {testScoring.cardNegativeLabel} · Bilingual
                         </span>
                         <div className="shrink-0">

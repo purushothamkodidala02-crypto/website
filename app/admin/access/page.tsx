@@ -177,13 +177,26 @@ export default async function AdminAccessPage() {
                       ₹{Number(product.price_inr).toFixed(0)} INR · {product.duration_days} days access
                     </p>
 
-                    <p className="mt-2 text-xs font-semibold text-slate-700">
-                      Includes:{" "}
-                      {product.access_product_exam_groups
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Includes:</span>
+                      {(product.access_product_exam_groups
                         ?.map((item) => item.exam_groups?.name)
-                        .filter(Boolean)
-                        .join(", ") || "No exams selected"}
-                    </p>
+                        .filter(Boolean) ?? []).length > 0 ? (
+                        product.access_product_exam_groups
+                          ?.map((item) => item.exam_groups?.name)
+                          .filter((name): name is string => Boolean(name))
+                          .map((examName) => (
+                            <span
+                              key={examName}
+                              className="rounded-md border border-teal-200/80 bg-white px-2 py-0.5 text-[11px] font-semibold text-teal-900 break-words"
+                            >
+                              {examName}
+                            </span>
+                          ))
+                      ) : (
+                        <span className="text-xs font-medium text-slate-500">No exams selected</span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0">

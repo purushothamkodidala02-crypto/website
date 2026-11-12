@@ -130,9 +130,16 @@ a {
  */
 .student-page {
   text-rendering: optimizeLegibility;
+  overflow-wrap: anywhere;
+  max-inline-size: 100%;
 }
 
 @layer base {
+  .student-page :where(img, video) {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
   .student-page :where(h1, h2, h3) {
     font-family: var(--font-display);
     font-variation-settings: "wght" 750;

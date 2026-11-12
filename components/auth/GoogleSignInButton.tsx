@@ -103,7 +103,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",
         size: "large",
-        width: Math.max(280, Math.floor(buttonRef.current.getBoundingClientRect().width)),
+        width: Math.max(220, Math.min(400, Math.floor(buttonRef.current.getBoundingClientRect().width))),
         text: "continue_with",
       });
     }).catch(() => {
@@ -127,7 +127,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         }}
         onError={() => setError("Google sign-in could not load. Please use email sign-in or try again shortly.")}
       />
-      <div ref={buttonRef} className={`min-h-11 ${pending ? "opacity-40 pointer-events-none" : ""}`} aria-busy={pending} aria-live="polite" />
+      <div ref={buttonRef} className={`min-h-11 w-full overflow-hidden flex justify-center ${pending ? "opacity-40 pointer-events-none" : ""}`} aria-busy={pending} aria-live="polite" />
       {pending && (
         <div className="mt-2.5 flex items-center justify-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-3 py-2 text-xs font-bold text-teal-800">
           <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-teal-700 border-t-transparent" />

@@ -50,8 +50,8 @@ export function SubmissionResult({
       : null;
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-3 py-6 sm:px-5 sm:py-10">
-      <section className="w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-8 text-center shadow-xl sm:p-10 min-w-0 overflow-hidden">
+    <main className="student-page grid min-h-[100dvh] place-items-center bg-slate-50 py-6 pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] sm:px-5 sm:py-10">
+      <section className="w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 text-center shadow-xl sm:p-10 min-w-0 overflow-hidden">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -96,7 +96,7 @@ export function SubmissionResult({
               )}
             </div>
 
-            <div className="mt-6 sm:mt-7 grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="mt-6 sm:mt-7 grid grid-cols-2 min-[400px]:grid-cols-3 gap-2 sm:gap-3">
               <Metric
                 value={result.correctAnswers ?? 0}
                 label="Correct"
@@ -114,6 +114,7 @@ export function SubmissionResult({
                 label="Unanswered"
                 tone="text-slate-700"
                 bg="bg-slate-50 border-slate-100"
+                className="col-span-2 min-[400px]:col-span-1"
               />
             </div>
 
@@ -125,10 +126,9 @@ export function SubmissionResult({
                   onClick={() => {
                     void exitFullscreenSafely();
                   }}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 shadow-2xs transition hover:bg-slate-50 active:scale-[0.98] max-w-full truncate text-center"
-                  title={`Continue to ${folderName ?? "folder"}`}
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 shadow-2xs transition hover:bg-slate-50 active:scale-[0.98] min-w-0 leading-snug text-center whitespace-normal break-words"
                 >
-                  <span className="truncate">Continue to {folderName ?? "folder"} →</span>
+                  <span>Continue to {folderName ?? "folder"} →</span>
                 </Link>
               )}
               {result.attemptId && (
@@ -208,17 +208,19 @@ function Metric({
   label,
   tone,
   bg,
+  className = "",
 }: {
   value: number;
   label: string;
   tone: string;
   bg: string;
+  className?: string;
 }) {
   return (
-    <div className={`rounded-xl sm:rounded-2xl border p-2 sm:p-3.5 text-center min-w-0 overflow-hidden ${bg}`}>
+    <div className={`rounded-xl sm:rounded-2xl border p-2.5 sm:p-3.5 text-center min-w-0 overflow-hidden ${bg} ${className}`}>
       <strong className={`block text-lg sm:text-xl font-black ${tone}`}>{value}</strong>
       <span
-        className="mt-0.5 block text-[10px] sm:text-[11px] font-bold uppercase tracking-tight sm:tracking-wider text-slate-500 truncate"
+        className="mt-0.5 block text-[10px] sm:text-[11px] font-bold uppercase tracking-tight sm:tracking-wider text-slate-500 leading-snug break-words"
         title={label}
       >
         {label}

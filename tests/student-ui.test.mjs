@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { resolveStudentDisplayInfo } from "../lib/student-name.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -111,4 +112,110 @@ test("split-screen and narrow viewport layout stays single-line, balanced, and n
   // Matching layouts respond to container width rather than only viewport width
   assert.match(formattedQuestion, /@container/);
   assert.match(formattedQuestion, /@\[460px\]:grid-cols-2/);
+});
+
+test("resolveStudentDisplayInfo formats metadata names and email fallbacks cleanly", () => {
+  assert.deepEqual(
+    resolveStudentDisplayInfo({
+      fullName: "Ravi Kumar",
+      name: "ravi",
+      email: "ravi.k@example.com",
+    }),
+    { displayName: "Ravi Kumar", firstName: "Ravi", avatarLetter: "R" },
+  );
+
+  assert.deepEqual(
+    resolveStudentDisplayInfo({
+      fullName: "",
+      name: "Anusha",
+      email: "anusha@example.com",
+    }),
+    { displayName: "Anusha", firstName: "Anusha", avatarLetter: "A" },
+  );
+
+  assert.deepEqual(
+    resolveStudentDisplayInfo({
+      email: "sai_krishna.reddy@example.com",
+    }),
+    { displayName: "Sai Krishna Reddy", firstName: "Sai", avatarLetter: "S" },
+  );
+
+  assert.deepEqual(resolveStudentDisplayInfo({}), {
+    displayName: "Student",
+    firstName: "Student",
+    avatarLetter: "S",
+  });
+});
+
+test("student name tags and catalog/exam cards avoid aggressive ellipsis clipping", async () => {
+  const [accountActions, dashboardPage, catalogPage, examPage, examGrid, catalogSteps, submissionResult] =
+    await Promise.all([
+      read("components/site/PublicAccountActions.tsx"),
+      read("app/dashboard/page.tsx"),
+      read("app/mock-tests/page.tsx"),
+      read("app/mock-tests/[id]/[exam]/page.tsx"),
+      read("components/exams/ExamSelectionGrid.tsx"),
+      read("components/exams/CatalogSteps.tsx"),
+      read("app/mock-tests/[id]/SubmissionResult.tsx"),
+    ]);
+
+  assert.match(accountActions, /resolveStudentDisplayInfo/);
+  assert.match(accountActions, /href="\/dashboard"/);
+  assert.match(dashboardPage, /resolveStudentDisplayInfo/);
+  assert.match(dashboardPage, /parseMockTestTitle/);
+  assert.doesNotMatch(catalogPage, /max-w-\[62%\] truncate/);
+  assert.doesNotMatch(examGrid, /max-w-\[65%\] truncate/);
+  assert.doesNotMatch(examPage, /max-w-\[65%\].*truncate/);
+  assert.match(catalogSteps, /grid-cols-2 sm:grid-cols-4/);
+  assert.match(submissionResult, /whitespace-normal break-words[\s\S]{0,120}Continue to \{folderName \?\? "folder"\} →/);
+  assert.doesNotMatch(submissionResult, /<span className="truncate">Continue to/);
+});
+
+test("student screens adapt cleanly across narrow, split-screen, and notched viewports", async () => {
+  const [layout, globalsCss, publicHeader, mockDetail, submissionResult, submissionDialog, runner, studyViewer] =
+    await Promise.all([
+      read("app/layout.tsx"),
+      read("app/globals.css"),
+      read("components/site/PublicHeader.tsx"),
+      read("components/mock-tests/MockTestDetailPage.tsx"),
+      read("app/mock-tests/[id]/SubmissionResult.tsx"),
+      read("app/mock-tests/[id]/SubmissionDialog.tsx"),
+      read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+      read("components/study/StudyViewer.tsx"),
+    ]);
+
+  assert.match(layout, /viewportFit:\s*"cover"/);
+  assert.match(globalsCss, /\.student-page[\s\S]*max-inline-size:\s*100%/);
+  assert.match(globalsCss, /\.student-page\s+:where\(img,\s*video\)\s*\{[\s\S]*max-inline-size:\s*100%/);
+  assert.match(publicHeader, /safe-area-inset-left/);
+  assert.match(publicHeader, /safe-area-inset-right/);
+  assert.match(mockDetail, /grid-cols-2[\s\S]{0,40}lg:grid-cols-5/);
+  assert.doesNotMatch(mockDetail, /md:grid-cols-5/);
+  assert.match(submissionResult, /grid-cols-2 min-\[400px\]:grid-cols-3/);
+  assert.match(submissionDialog, /grid-cols-2 min-\[380px\]:grid-cols-3/);
+  assert.match(runner, /grid-cols-4 min-\[360px\]:grid-cols-5 xl:grid-cols-6/);
+  assert.match(runner, /min-\[360px\]:hidden">Prev</);
+  assert.match(studyViewer, /flex min-w-0 flex-wrap items-center/);
+});
+
+test("login page follows modern autofill, mobile-first order, and shared email switching", async () => {
+  const [loginPage, loginForm, emailOtpForm, passwordInput, googleButton] = await Promise.all([
+    read("app/login/page.tsx"),
+    read("app/login/LoginForm.tsx"),
+    read("app/login/EmailOtpLoginForm.tsx"),
+    read("components/auth/PasswordInput.tsx"),
+    read("components/auth/GoogleSignInButton.tsx"),
+  ]);
+
+  assert.match(loginPage, /order-1 md:order-2/);
+  assert.match(loginPage, /order-2 md:order-1/);
+  assert.match(loginForm, /autoComplete="username"/);
+  assert.match(loginForm, /spellCheck=\{false\}/);
+  assert.match(loginForm, /autoComplete="current-password"/);
+  assert.match(loginForm, /enterKeyHint="done"/);
+  assert.match(loginForm, /onEmailChange=\{setEmail\}/);
+  assert.match(emailOtpForm, /autoComplete="username"/);
+  assert.match(emailOtpForm, /spellCheck=\{false\}/);
+  assert.match(passwordInput, /min-h-12/);
+  assert.match(googleButton, /Math\.max\(220,/);
 });

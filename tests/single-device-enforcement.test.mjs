@@ -90,3 +90,34 @@ test("logout button and header account controls stay centered and aligned across
   assert.match(accountActions, /min-w-0 shrink/);
   assert.doesNotMatch(pendingSpinner, /<span className="grid h-4 w-4 place-items-center">\s*\{pending/);
 });
+
+test("admins stay signed in across multiple devices on sign-in, OTP, Google session completion, and local logout", async () => {
+  const [sessionComplete, emailOtpCallback, logoutBtn, adminHeader, accountActions, adminMfaForm] =
+    await Promise.all([
+      read("app/auth/session/complete/route.ts"),
+      read("app/auth/email-otp/callback/route.ts"),
+      read("components/admin/LogoutButton.tsx"),
+      read("components/admin/AdminHeader.tsx"),
+      read("components/site/PublicAccountActions.tsx"),
+      read("app/admin-mfa/AdminMfaForm.tsx"),
+    ]);
+
+  // Admin check must execute BEFORE signOut({ scope: "others" }) and active_session_token overwrite in session/complete
+  const adminReturnIndex = sessionComplete.indexOf('if (profile.role === "admin")');
+  const scopeOthersIndex = sessionComplete.indexOf('signOut({ scope: "others" })');
+  const registerTokenIndex = sessionComplete.indexOf("await registerActiveSessionToken");
+  assert.ok(adminReturnIndex !== -1 && scopeOthersIndex !== -1 && registerTokenIndex !== -1);
+  assert.ok(adminReturnIndex < scopeOthersIndex, "Admin role return must run before revoking other devices");
+  assert.ok(adminReturnIndex < registerTokenIndex, "Admin role return must run before overwriting active_session_token");
+
+  // Email OTP callback routes admins into MFA / admin dashboard while preserving cookies
+  assert.match(emailOtpCallback, /profile\?\.role === "admin"/);
+  assert.match(emailOtpCallback, /\/admin-mfa/);
+
+  // LogoutButton preserves other admin devices via allowMultipleDevices / admin route check
+  assert.match(logoutBtn, /allowMultipleDevices/);
+  assert.match(logoutBtn, /if \(!preserveOtherDevices\)/);
+  assert.match(adminHeader, /allowMultipleDevices/);
+  assert.match(accountActions, /allowMultipleDevices=\{isAdmin\}/);
+  assert.match(adminMfaForm, /allowMultipleDevices/);
+});

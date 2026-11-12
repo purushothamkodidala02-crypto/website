@@ -188,7 +188,7 @@ export function AdminMfaForm({ email }: { email: string }) {
           </h2>
           <p className="mt-2 max-w-md truncate text-sm text-slate-500">{email}</p>
         </div>
-        <LogoutButton />
+        <LogoutButton allowMultipleDevices />
       </div>
 
       {stage === "setup" && (

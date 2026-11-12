@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 import { SendUserEmailModal } from "./SendUserEmailModal";
 
 type PaidOrder = { id: string; user_id: string; product_id: string; amount_paise: number; created_at: string };
@@ -127,8 +128,8 @@ export default async function AdminStudentsPage() {
   // Fast targeted lookup for the visible 50 students
   const visibleStudentIds = students.map((item) => item.id);
   const visibleUserIds = [...new Set([...visibleStudentIds, ...recentOrders.map((item) => item.user_id)])];
-  const existingNames = new Map(students.map((item) => [item.id, item.full_name?.trim() || "Student"]));
-  const missingNameUserIds = recentOrders.map((item) => item.user_id).filter((id) => !existingNames.has(id));
+  const studentIdSet = new Set(visibleStudentIds);
+  const missingNameUserIds = [...new Set(recentOrders.map((item) => item.user_id).filter((id) => !studentIdSet.has(id)))];
 
   const [studentPaymentsResult, extraProfilesResult, emailResult] = await Promise.all([
     visibleStudentIds.length
@@ -142,12 +143,36 @@ export default async function AdminStudentsPage() {
       : Promise.resolve({ data: [] as { user_id: string; email: string }[], error: null }),
   ]);
 
-  const names = new Map(existingNames);
-  for (const item of extraProfilesResult.data ?? []) {
-    names.set(item.id, item.full_name?.trim() || "Student");
-  }
-
   const emails = new Map(((emailResult.data ?? []) as { user_id: string; email: string }[]).map((item) => [item.user_id, item.email ?? ""]));
+  const names = new Map<string, string>();
+  for (const item of students) {
+    names.set(
+      item.id,
+      resolveStudentDisplayInfo({
+        fullName: item.full_name,
+        email: emails.get(item.id),
+      }).displayName,
+    );
+  }
+  for (const item of extraProfilesResult.data ?? []) {
+    names.set(
+      item.id,
+      resolveStudentDisplayInfo({
+        fullName: item.full_name,
+        email: emails.get(item.id),
+      }).displayName,
+    );
+  }
+  for (const order of recentOrders) {
+    if (!names.has(order.user_id)) {
+      names.set(
+        order.user_id,
+        resolveStudentDisplayInfo({
+          email: emails.get(order.user_id),
+        }).displayName,
+      );
+    }
+  }
   const productNames = new Map(products.map((item) => [item.id, item.name]));
 
   const paymentsByStudent = new Map<string, number>();
@@ -203,31 +228,36 @@ export default async function AdminStudentsPage() {
           </div>
           <p className="text-xs font-semibold text-slate-500">Successful payments only</p>
         </div>
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label="Exam series sales breakdown"
+          className="mt-5 overflow-x-auto rounded-2xl border border-slate-200/80"
+        >
+          <table className="w-full min-w-[680px] text-left text-sm">
+            <thead className="sticky top-0 z-10 border-b bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-4 py-3">Exam Series</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Paid students</th>
-                <th className="px-4 py-3">Payments</th>
-                <th className="px-4 py-3">Active now</th>
-                <th className="px-4 py-3">Gross sales</th>
+                <th scope="col" className="px-4 py-3">Exam Series</th>
+                <th scope="col" className="px-4 py-3">Status</th>
+                <th scope="col" className="px-4 py-3">Paid students</th>
+                <th scope="col" className="px-4 py-3">Payments</th>
+                <th scope="col" className="px-4 py-3">Active now</th>
+                <th scope="col" className="px-4 py-3">Gross sales</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {seriesSales.map((series) => (
-                <tr key={series.id} className="border-b last:border-0">
-                  <td className="px-4 py-4 font-black text-slate-950">{series.name}</td>
+                <tr key={series.id} className="hover:bg-slate-50/60 transition">
+                  <th scope="row" className="px-4 py-4 font-black text-slate-950 text-left break-words">{series.name}</th>
                   <td className="px-4 py-4">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-black ${series.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"}`}>
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-black whitespace-nowrap ${series.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"}`}>
                       {series.is_active ? "Selling" : "Paused"}
                     </span>
                   </td>
-                  <td className="px-4 py-4 font-bold">{series.buyers}</td>
-                  <td className="px-4 py-4">{series.payments}</td>
-                  <td className="px-4 py-4">{series.activeStudents}</td>
-                  <td className="px-4 py-4 font-black">₹{(series.revenuePaise / 100).toLocaleString("en-IN")}</td>
+                  <td className="px-4 py-4 font-bold tabular-nums">{series.buyers}</td>
+                  <td className="px-4 py-4 tabular-nums">{series.payments}</td>
+                  <td className="px-4 py-4 tabular-nums">{series.activeStudents}</td>
+                  <td className="px-4 py-4 font-black tabular-nums">₹{(series.revenuePaise / 100).toLocaleString("en-IN")}</td>
                 </tr>
               ))}
               {!seriesSales.length && (
@@ -250,20 +280,33 @@ export default async function AdminStudentsPage() {
             <SendUserEmailModal triggerLabel="Email Any User" triggerClassName="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-900 transition hover:bg-teal-100" />
           </div>
           <div className="mt-5 divide-y divide-slate-100">
-            {students.slice(0, 20).map((student) => (
-              <div key={student.id} className="flex items-center justify-between gap-4 py-4 first:pt-0">
-                <div className="min-w-0">
-                  <p className="truncate font-bold text-slate-950">{student.full_name?.trim() || "Student"}</p>
-                  <p className="mt-1 truncate text-xs text-slate-500">{emails.get(student.id) || "Email unavailable"}</p>
-                  <p className="mt-1 text-xs font-semibold text-slate-600">{student.phone ? `+91 ${student.phone}` : "Mobile number unavailable"}</p>
-                  <p className="mt-1 text-xs text-slate-500">Joined {dateFormatter.format(new Date(student.created_at))}</p>
+            {students.slice(0, 20).map((student) => {
+              const studentName = names.get(student.id) ?? "Student";
+              const avatarLetter = studentName.charAt(0).toUpperCase() || "S";
+              const email = emails.get(student.id) || "";
+              return (
+                <div key={student.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4 first:pt-0">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-teal-50 border border-teal-200/70 text-xs font-black text-teal-800">
+                      {avatarLetter}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-slate-950 leading-snug break-words">{studentName}</p>
+                      <p className="mt-0.5 text-xs text-slate-500 break-all sm:break-words">{email || "Email unavailable"}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+                        <span className="font-semibold text-slate-600">{student.phone ? `+91 ${student.phone}` : "Mobile number unavailable"}</span>
+                        <span aria-hidden="true" className="text-slate-300">·</span>
+                        <span>Joined {dateFormatter.format(new Date(student.created_at))}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center justify-end gap-2">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700 whitespace-nowrap">{paymentsByStudent.get(student.id) ?? 0} paid</span>
+                    <SendUserEmailModal initialEmail={email} initialName={studentName} triggerVariant="row-action" triggerLabel="Mail" />
+                  </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{paymentsByStudent.get(student.id) ?? 0} paid</span>
-                  <SendUserEmailModal initialEmail={emails.get(student.id) || ""} initialName={student.full_name?.trim() || "Student"} triggerVariant="row-action" triggerLabel="Mail" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {!students.length && <p className="py-8 text-center text-sm text-slate-500">No students have registered yet.</p>}
           </div>
         </section>
@@ -274,14 +317,21 @@ export default async function AdminStudentsPage() {
           <div className="mt-5 divide-y divide-slate-100">
             {recentOrders.slice(0, 20).map((order) => (
               <div key={order.id} className="py-4 first:pt-0">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="truncate font-bold text-slate-950">{names.get(order.user_id) ?? "Student"}</p>
-                    <p className="mt-1 truncate text-xs text-slate-500">{emails.get(order.user_id) || "Email unavailable"}</p>
-                    <p className="mt-1 truncate text-xs text-slate-500">{productNames.get(order.product_id) ?? "Exam Series"} · {order.merchant_order_id}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-slate-950 leading-snug break-words">{names.get(order.user_id) ?? "Student"}</p>
+                    <p className="mt-0.5 text-xs text-slate-500 break-all sm:break-words">{emails.get(order.user_id) || "Email unavailable"}</p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="rounded-md bg-teal-50 border border-teal-200/70 px-2 py-0.5 font-semibold text-teal-900 break-words">
+                        {productNames.get(order.product_id) ?? "Exam Series"}
+                      </span>
+                      <span className="font-mono text-[11px] text-slate-500 break-all">
+                        {order.merchant_order_id}
+                      </span>
+                    </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="font-black">₹{(Number(order.amount_paise) / 100).toLocaleString("en-IN")}</p>
+                    <p className="font-black tabular-nums">₹{(Number(order.amount_paise) / 100).toLocaleString("en-IN")}</p>
                     <PaymentStatus status={order.status} />
                   </div>
                 </div>

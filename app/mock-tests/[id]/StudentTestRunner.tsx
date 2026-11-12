@@ -480,16 +480,16 @@ export function StudentTestRunner({
   return <main ref={containerRef} className="student-page relative flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] min-h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-slate-100">
     <ScreenWatermark text={watermarkText} />
     <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
-      <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-2.5 py-1.5 sm:px-5 sm:py-2 lg:px-8 [@media(max-height:540px)]:py-1">
+      <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] py-1.5 pl-[max(0.625rem,env(safe-area-inset-left,0px))] pr-[max(0.625rem,env(safe-area-inset-right,0px))] sm:py-2 sm:pl-[max(1.25rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.25rem,env(safe-area-inset-right,0px))] lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))] [@media(max-height:540px)]:py-1">
         <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-3">
           
           {/* Box 1: Test Title & Question Indicator */}
           <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3 sm:py-1.5 shadow-xs">
             <div className="min-w-0">
-              <p className="hidden lg:block truncate text-[11px] font-semibold text-slate-500 max-w-[200px] xl:max-w-xs" title={title}>
+              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[180px] lg:max-w-[300px] xl:max-w-[420px]" title={title}>
                 {title}
               </p>
-              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950 truncate">
+              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
                 <span className="min-[420px]:hidden">Q{index + 1}</span>
                 <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
                 <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
@@ -771,19 +771,20 @@ export function StudentTestRunner({
 
     {/* Fixed Bottom Navigation (Lower part) */}
     <footer
-      className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 p-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3 [@media(max-height:540px)]:py-1.5"
+      className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 py-2 pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))] shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:py-3 sm:pl-[max(0.75rem,env(safe-area-inset-left,0px))] sm:pr-[max(0.75rem,env(safe-area-inset-right,0px))] lg:py-3 lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))] [@media(max-height:540px)]:py-1.5"
       style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0px))" }}
     >
-      <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-2 sm:gap-3">
+      <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-1.5 min-[380px]:gap-2 sm:gap-3">
         <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
           <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white md:inline-block">←</kbd>
-          Previous
+          <span className="min-[360px]:hidden">Prev</span>
+          <span className="hidden min-[360px]:inline">Previous</span>
         </button>
 
         {/* Center: Mobile Sheet Trigger & Desktop Palette Toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           {/* Mobile trigger */}
-          <button type="button" onClick={() => setNavigatorOpen(true)} className="whitespace-nowrap rounded-xl border border-teal-200 bg-teal-50 px-2.5 py-2 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-sm md:hidden">
+          <button type="button" onClick={() => setNavigatorOpen(true)} className="whitespace-nowrap rounded-xl border border-teal-200 bg-teal-50 px-2 py-2 text-[11px] min-[380px]:text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 min-[380px]:px-2.5 sm:px-4 sm:py-2.5 sm:text-sm md:hidden">
             Questions <span className="font-mono">({index + 1}/{questions.length})</span>
           </button>
 
@@ -807,11 +808,13 @@ export function StudentTestRunner({
 
         {index === questions.length - 1 ? (
           <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="whitespace-nowrap rounded-xl bg-teal-700 px-3 py-2 text-xs sm:text-sm font-black text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
-            Submit test
+            <span className="min-[360px]:hidden">Submit</span>
+            <span className="hidden min-[360px]:inline">Submit test</span>
           </button>
         ) : (
           <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
-            Save & next
+            <span className="min-[360px]:hidden">Next</span>
+            <span className="hidden min-[360px]:inline">Save &amp; next</span>
             <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 md:inline-block">→</kbd>
           </button>
         )}
@@ -825,9 +828,10 @@ export function StudentTestRunner({
           className="flex flex-col max-h-[88vh] max-h-[88dvh] w-full animate-in slide-in-from-bottom-full overflow-hidden rounded-t-3xl bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3.5">
-            <div>
+          <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
+            <div className="min-w-0 flex-1">
               <h2 className="text-base sm:text-lg font-black text-slate-900">Questions Palette</h2>
+              <p className="mt-0.5 text-xs font-bold text-teal-800 leading-snug break-words">{title}</p>
               <p className="text-[11px] font-semibold text-slate-500">Tap to jump • Submit test anytime</p>
             </div>
             <button
@@ -861,7 +865,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Question navigator</p>
           <p className="whitespace-nowrap text-xs font-black text-slate-700">{questions.length} total</p>
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-2">
           <NavigatorMetric value={answeredCount} label="Answered" tone="text-emerald-800" />
           <NavigatorMetric value={reviewIds.size} label="Review" tone="text-amber-800" />
           <NavigatorMetric value={remainingCount} label="Remaining" tone="text-slate-700" />
@@ -869,7 +873,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
       </div>
 
       <div className="mt-3 min-h-[7rem] max-h-[42dvh] md:max-h-none lg:max-h-none overflow-y-auto overscroll-contain pr-1 md:flex-1 lg:flex-1">
-        <div className="grid grid-cols-5 xl:grid-cols-6 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-4 min-[360px]:grid-cols-5 xl:grid-cols-6 gap-1.5 sm:gap-2">
           {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);
             const answered = Boolean(answers[item.question_id]);
@@ -915,7 +919,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
   );
 }
 
-function NavigatorMetric({ value, label, tone }: { value: number; label: string; tone: string }) { return <div className="rounded-xl bg-slate-50 px-2 py-1.5 sm:py-2 text-center"><strong className={`block text-sm sm:text-base font-black ${tone}`}>{value}</strong><span className="mt-0.5 block text-[10px] font-bold text-slate-500">{label}</span></div>; }
+function NavigatorMetric({ value, label, tone }: { value: number; label: string; tone: string }) { return <div className="min-w-0 overflow-hidden rounded-xl bg-slate-50 px-1.5 py-1.5 sm:px-2 sm:py-2 text-center"><strong className={`block text-sm sm:text-base font-black ${tone}`}>{value}</strong><span className="mt-0.5 block text-[10px] font-bold text-slate-500 leading-snug break-words">{label}</span></div>; }
 function Legend({ color, label }: { color: string; label: string }) { return <span className="flex items-center gap-2"><span className={`h-3 w-3 rounded ${color}`} />{label}</span>; }
 
 function PracticeTimerControl({
@@ -1003,12 +1007,12 @@ function HorizontalQuestionScroller({ questions, currentIndex, answers, reviewId
   }, [currentIndex]);
 
   return (
-    <div className="flex items-center gap-2">
-      <button type="button" onClick={scrollLeft} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50">
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      <button type="button" onClick={scrollLeft} className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50">
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
       </button>
       
-      <div ref={scrollRef} className="flex flex-1 snap-x gap-2 overflow-x-auto scroll-smooth py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div ref={scrollRef} className="flex min-w-0 flex-1 snap-x gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);
             const answered = Boolean(answers[item.question_id]);
@@ -1018,7 +1022,7 @@ function HorizontalQuestionScroller({ questions, currentIndex, answers, reviewId
                 type="button"
                 disabled={locked}
                 onClick={() => onSelect(index)}
-                className={`flex h-11 w-11 shrink-0 snap-center items-center justify-center rounded-lg text-xs font-black transition-colors ${index === currentIndex ? "bg-[#0a2922] text-white shadow-md ring-2 ring-emerald-400 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"}`}
+                className={`flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 snap-center items-center justify-center rounded-lg text-xs font-black transition-colors ${index === currentIndex ? "bg-[#0a2922] text-white shadow-md ring-2 ring-emerald-400 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"}`}
               >
                 {index + 1}
               </button>
@@ -1026,8 +1030,8 @@ function HorizontalQuestionScroller({ questions, currentIndex, answers, reviewId
         })}
       </div>
 
-      <button type="button" onClick={scrollRight} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50">
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+      <button type="button" onClick={scrollRight} className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50">
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>
   );

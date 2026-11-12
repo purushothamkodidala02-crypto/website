@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { indiaDateKey } from "@/lib/date";
-import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
+import { parseMockTestTitle, studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 
 export default async function AdminDashboard() {
@@ -375,45 +375,62 @@ export default async function AdminDashboard() {
             </div>
           ) : (
             <div className="divide-y divide-teal-50/60">
-              {tests.slice(0, 5).map((test) => (
-                <div
-                  key={test.id}
-                  className="group flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-teal-50/40"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900 group-hover:text-teal-950">
-                      {visibleTestTitle(test)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      Updated{" "}
-                      {new Intl.DateTimeFormat("en-IN", {
-                        dateStyle: "medium",
-                        timeZone: "Asia/Kolkata",
-                      }).format(new Date(test.updated_at))}
-                    </p>
-                  </div>
+              {tests.slice(0, 5).map((test) => {
+                const rawTitle = visibleTestTitle(test);
+                const parsed = parseMockTestTitle(rawTitle);
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Status status={test.status as "draft" | "published" | "archived"} />
-                    <div className="flex items-center gap-1.5">
-                      <Link
-                        href={`/admin/mock-tests/${test.id}/edit`}
-                        prefetch={true}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 shadow-2xs"
-                      >
-                        Edit
-                      </Link>
-                      <Link
-                        href={`/admin/mock-tests/${test.id}/preview`}
-                        prefetch={true}
-                        className="rounded-lg border border-teal-200 bg-teal-50/50 px-2.5 py-1 text-xs font-bold text-teal-800 hover:bg-teal-100 shadow-2xs"
-                      >
-                        Preview
-                      </Link>
+                return (
+                  <div
+                    key={test.id}
+                    className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 transition hover:bg-teal-50/40"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="text-sm font-bold text-slate-900 group-hover:text-teal-950 leading-snug break-words">
+                          {parsed.primaryTitle}
+                        </p>
+                        {parsed.testLabel && (
+                          <span className="rounded-full border border-teal-200/80 bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-800 shrink-0">
+                            {parsed.testLabel}
+                          </span>
+                        )}
+                      </div>
+                      {parsed.breadcrumb.length > 0 && (
+                        <p className="mt-0.5 text-[11px] font-semibold text-slate-500 leading-snug break-words">
+                          {parsed.breadcrumb.join(" · ")}
+                        </p>
+                      )}
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        Updated{" "}
+                        {new Intl.DateTimeFormat("en-IN", {
+                          dateStyle: "medium",
+                          timeZone: "Asia/Kolkata",
+                        }).format(new Date(test.updated_at))}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                      <Status status={test.status as "draft" | "published" | "archived"} />
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/admin/mock-tests/${test.id}/edit`}
+                          prefetch={true}
+                          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 shadow-2xs"
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          href={`/admin/mock-tests/${test.id}/preview`}
+                          prefetch={true}
+                          className="rounded-lg border border-teal-200 bg-teal-50/50 px-2.5 py-1 text-xs font-bold text-teal-800 hover:bg-teal-100 shadow-2xs"
+                        >
+                          Preview
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -576,10 +593,10 @@ function AttentionItem({
           {count}
         </span>
         <div className="min-w-0">
-          <h4 className="truncate text-sm font-bold text-slate-900 group-hover:text-teal-950">
+          <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-950 leading-snug break-words">
             {title}
           </h4>
-          <p className="mt-0.5 truncate text-xs text-slate-500">{detail}</p>
+          <p className="mt-0.5 text-xs text-slate-500 leading-snug break-words">{detail}</p>
         </div>
       </div>
       <span className={`shrink-0 font-bold text-sm transition group-hover:translate-x-0.5 ${styles.arrow}`}>
@@ -653,8 +670,8 @@ function ShortcutCard({
           )}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-900 group-hover:text-teal-950">{title}</p>
-          <p className="truncate text-xs text-slate-500">{detail}</p>
+          <p className="text-sm font-bold text-slate-900 group-hover:text-teal-950 leading-snug break-words">{title}</p>
+          <p className="text-xs text-slate-500 leading-snug break-words">{detail}</p>
         </div>
       </div>
       {typeof badge === "number" && badge > 0 ? (

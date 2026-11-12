@@ -488,14 +488,14 @@ export function AdminCommandPalette({
                           </span>
                           <div className="min-w-0">
                             <p
-                              className={`truncate text-xs sm:text-sm font-bold ${
+                              className={`text-xs sm:text-sm font-bold leading-snug break-words ${
                                 isSelected ? "text-white" : "text-slate-900"
                               }`}
                             >
                               {command.title}
                             </p>
                             <p
-                              className={`truncate text-[11px] ${
+                              className={`text-[11px] leading-snug break-words ${
                                 isSelected ? "text-teal-100" : "text-slate-500"
                               }`}
                             >

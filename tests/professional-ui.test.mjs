@@ -99,3 +99,26 @@ test("mock-test filters remain available through settings, questions, and previe
   assert.match(assignments, /const returnToQuery = returnTo \? `\?returnTo=\$\{encodeURIComponent\(returnTo\)\}` : ""/);
   assert.match(assignments, /\$\{questionsPath\}\/new\$\{returnToQuery\}/);
 });
+
+test("admin identity, student name tags, and responsive tables avoid aggressive clipping", async () => {
+  const [adminHeader, adminNav, adminHome, studentsPage, resultsPage, reportsPage] =
+    await Promise.all([
+      read("components/admin/AdminHeader.tsx"),
+      read("components/admin/AdminNavigation.tsx"),
+      read("app/admin/page.tsx"),
+      read("app/admin/students/page.tsx"),
+      read("app/admin/results/page.tsx"),
+      read("app/admin/question-reports/page.tsx"),
+    ]);
+
+  assert.match(adminHeader, /resolveStudentDisplayInfo/);
+  assert.match(adminHeader, /flex-wrap items-center/);
+  assert.match(adminNav, /resolveStudentDisplayInfo/);
+  assert.match(adminHome, /parseMockTestTitle/);
+  assert.match(studentsPage, /resolveStudentDisplayInfo/);
+  assert.match(studentsPage, /role="region"/);
+  assert.match(resultsPage, /resolveStudentDisplayInfo/);
+  assert.match(resultsPage, /parseMockTestTitle/);
+  assert.match(resultsPage, /role="region"/);
+  assert.match(reportsPage, /resolveStudentDisplayInfo/);
+});

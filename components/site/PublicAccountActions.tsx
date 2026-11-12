@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import LogoutButton from "@/components/admin/LogoutButton";
+import { resolveStudentDisplayInfo } from "@/lib/student-name";
 import { createClient } from "@/lib/supabase/client";
 
 // Module-level in-memory cache to prevent redundant DB calls across client route transitions
@@ -12,13 +13,38 @@ let lastPaidSalesFetchTime = 0;
 let cachedAccount: {
   userId: string;
   email: string | null;
+  displayName: string;
+  firstName: string;
+  avatarLetter: string;
   activePurchases: number;
   isAdmin: boolean;
   timestamp: number;
 } | null = null;
 
-export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: { initialEmail?: string | null; initialIsAdmin?: boolean }) {
+export function PublicAccountActions({
+  initialEmail,
+  initialIsAdmin = false,
+  initialDisplayName,
+}: {
+  initialEmail?: string | null;
+  initialIsAdmin?: boolean;
+  initialDisplayName?: string;
+}) {
+  const initialIdentity = resolveStudentDisplayInfo({
+    fullName: initialDisplayName,
+    email: initialEmail ?? cachedAccount?.email ?? null,
+  });
+
   const [email, setEmail] = useState<string | null>(initialEmail ?? cachedAccount?.email ?? null);
+  const [displayName, setDisplayName] = useState<string>(
+    initialDisplayName?.trim() || cachedAccount?.displayName || initialIdentity.displayName,
+  );
+  const [firstName, setFirstName] = useState<string>(
+    initialDisplayName?.trim() ? initialIdentity.firstName : cachedAccount?.firstName || initialIdentity.firstName,
+  );
+  const [avatarLetter, setAvatarLetter] = useState<string>(
+    initialDisplayName?.trim() ? initialIdentity.avatarLetter : cachedAccount?.avatarLetter || initialIdentity.avatarLetter,
+  );
   const [accountReady, setAccountReady] = useState(initialEmail !== undefined || cachedAccount !== null);
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin || (cachedAccount?.isAdmin ?? false));
   const [activePurchases, setActivePurchases] = useState(cachedAccount?.activePurchases ?? 0);
@@ -47,10 +73,24 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
         });
     }
 
-    const loadAccount = async (userEmail: string | null, userId?: string) => {
+    const loadAccount = async (
+      userEmail: string | null,
+      userId?: string,
+      userMetadata?: Record<string, unknown>,
+    ) => {
       if (!active) return;
+      const identity = resolveStudentDisplayInfo({
+        fullName: userMetadata?.full_name,
+        name: userMetadata?.name,
+        email: userEmail,
+      });
+
       setEmail(userEmail);
+      setDisplayName(identity.displayName);
+      setFirstName(identity.firstName);
+      setAvatarLetter(identity.avatarLetter);
       setAccountReady(true);
+
       if (!userId) {
         cachedAccount = null;
         setActivePurchases(0);
@@ -87,6 +127,9 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
         cachedAccount = {
           userId,
           email: userEmail,
+          displayName: identity.displayName,
+          firstName: identity.firstName,
+          avatarLetter: identity.avatarLetter,
           activePurchases: purchases,
           isAdmin: adminRole,
           timestamp: Date.now(),
@@ -98,13 +141,19 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
 
     let lastLoadedId: string | undefined = cachedAccount?.userId;
 
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      lastLoadedId = data.session?.user.id;
-      void loadAccount(data.session?.user.email ?? null, data.session?.user.id);
-    }).catch(() => {
-      if (active) setAccountReady(true);
-    });
+    void supabase.auth.getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        lastLoadedId = data.session?.user.id;
+        void loadAccount(
+          data.session?.user.email ?? null,
+          data.session?.user.id,
+          data.session?.user.user_metadata,
+        );
+      })
+      .catch(() => {
+        if (active) setAccountReady(true);
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active) return;
@@ -113,7 +162,11 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
         return;
       }
       lastLoadedId = session?.user.id;
-      void loadAccount(session?.user.email ?? null, session?.user.id);
+      void loadAccount(
+        session?.user.email ?? null,
+        session?.user.id,
+        session?.user.user_metadata,
+      );
     });
 
     return () => {
@@ -123,7 +176,7 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
   }, []);
 
   return (
-    <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2.5">
+    <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
       {!accountReady ? (
         <div
           role="status"
@@ -143,7 +196,7 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
                 <path d="M6 8h12l-1 12H7L6 8Z" />
                 <path d="M9 9V6a3 3 0 0 1 6 0v3" />
               </svg>
-              <span className="hidden sm:inline">Purchases</span>
+              <span className="hidden md:inline">Purchases</span>
               {activePurchases > 0 && (
                 <span className="grid h-5 min-w-5 place-items-center rounded-full bg-teal-600 px-1 text-[10px] font-black text-white">
                   {activePurchases}
@@ -152,20 +205,27 @@ export function PublicAccountActions({ initialEmail, initialIsAdmin = false }: {
             </Link>
           )}
           {!isAdmin && (
-            <span
+            <Link
+              href="/dashboard"
+              prefetch={true}
               title={email}
-              className="hidden md:inline-flex h-9 sm:h-10 min-w-0 max-w-44 lg:max-w-56 xl:max-w-xs items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50/80 px-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition hover:border-teal-200 hover:bg-teal-50/50 hover:text-teal-900"
+              aria-label={`${displayName} — My progress dashboard`}
+              className="group inline-flex h-9 sm:h-10 min-w-0 max-w-[8.25rem] sm:max-w-[12.5rem] md:max-w-[14.5rem] lg:max-w-[18rem] items-center gap-1.5 sm:gap-2 rounded-full border border-teal-200/80 bg-teal-50/70 pl-1.5 pr-2.5 sm:pl-2 sm:pr-3 text-xs sm:text-sm font-semibold text-slate-800 shadow-2xs transition hover:border-teal-400 hover:bg-teal-100/70 hover:text-teal-950"
             >
               <span
-                className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-teal-700 text-[10px] font-bold text-white uppercase"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#0a2922] text-[11px] font-black text-white uppercase shadow-2xs"
                 aria-hidden="true"
               >
-                {email.charAt(0)}
+                {avatarLetter}
               </span>
-              <span className="truncate">{email}</span>
-            </span>
+              <span className="truncate font-bold text-slate-900 sm:hidden">{firstName}</span>
+              <span className="hidden truncate font-bold text-slate-900 sm:inline">{displayName}</span>
+              <span className="hidden lg:inline shrink-0 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-teal-800 border border-teal-200/70 group-hover:border-teal-300">
+                Dashboard
+              </span>
+            </Link>
           )}
-          <LogoutButton />
+          <LogoutButton allowMultipleDevices={isAdmin} />
         </>
       ) : (
         <>

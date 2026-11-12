@@ -143,8 +143,8 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   return (
     <section className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm w-full max-w-full">
       {/* Top Toolbar: Navigation, Palette Toggle, Language Switch & Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-5">
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-3">
           {currentIndex > 0 ? (
             <button
               type="button"
@@ -209,7 +209,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
           {canSwitchLanguage && (
             <div className="inline-flex rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Question language">
               <button
@@ -370,7 +370,7 @@ function StudyQuestionCard({
             {row.paper_name} · {row.subject_name}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
           {canSwitchLanguage && (
             <div className="inline-flex rounded-lg bg-slate-200/80 p-0.5 sm:hidden" role="group" aria-label="Question language">
               <button
@@ -495,7 +495,7 @@ function StudyQuestionCard({
         <div className="min-w-0 lg:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 lg:max-h-[max(22rem,calc(100dvh-250px))] [@media(max-height:600px)]:max-h-none lg:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="grid h-6 w-6 place-items-center rounded-md bg-teal-600 text-white text-xs font-black">
                   💡
                 </span>
