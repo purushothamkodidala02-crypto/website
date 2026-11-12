@@ -397,9 +397,6 @@ export function LoginForm({
             Create a free account
           </Link>
         </p>
-        <p className="mt-1.5 text-xs leading-5 text-slate-500">
-          Administrators can sign in on multiple devices at the same time; student accounts stay protected on one active device.
-        </p>
       </div>
     </section>
   );
