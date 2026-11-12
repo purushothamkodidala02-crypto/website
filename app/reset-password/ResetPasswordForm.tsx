@@ -39,7 +39,7 @@ export function ResetPasswordForm({
       const verifiedFactor = data?.totp[0];
       if (factorError || !verifiedFactor) {
         setError(
-          "Your administrator authenticator could not be loaded. Sign in again and retry the password reset.",
+          "Your authenticator could not be loaded. Sign in again and retry the password reset.",
         );
         setCheckingMfa(false);
         return;
@@ -91,7 +91,7 @@ export function ResetPasswordForm({
       ) {
         setMfaRequired(true);
         setError(
-          "This administrator account requires its six-digit authenticator code before the password can be changed.",
+          "This account requires its six-digit authenticator code before the password can be changed.",
         );
         return false;
       }
@@ -173,7 +173,7 @@ export function ResetPasswordForm({
         {mfaRequired && (
           <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">
-              Administrator verification
+              Two-factor verification
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               This account has MFA protection. Enter the current code from your

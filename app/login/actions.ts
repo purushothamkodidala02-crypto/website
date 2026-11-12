@@ -78,7 +78,7 @@ export async function loginWithPassword(input: LoginInput): Promise<LoginResult>
 
   const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assuranceError) {
-    return { success: false, code: "mfa_unavailable", message: "Your password was accepted, but administrator security could not be checked." };
+    return { success: false, code: "mfa_unavailable", message: "Your password was accepted, but security verification could not be completed. Please try again." };
   }
   return { success: true, redirectTo: assurance?.currentLevel === "aal2" ? "/admin" : "/admin-mfa" };
 }
