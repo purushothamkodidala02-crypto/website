@@ -184,10 +184,10 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
             </div>
           </div>
 
-          {/* 2-Column Wide Grid on Desktop / Tablet (md+), Single Column on Mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 md:grid-cols-12 divide-y md:divide-y-0 lg:divide-y-0 md:divide-x lg:divide-x divide-slate-100">
+          {/* 2-Column Wide Grid on Wide Desktop (lg+), Single Column on Mobile & Split-Screen */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
             {/* Left Pane: Question Text & Options */}
-            <div className="lg:col-span-7 md:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between">
+            <div className="min-w-0 lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between">
               <div>
                 <div className="flex items-start gap-3 sm:gap-4">
                   <span className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-xl bg-teal-800 text-xs sm:text-sm font-black text-white">
@@ -236,7 +236,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
             </div>
 
             {/* Right Pane: Complete Explanation & Answer Key Analysis */}
-            <div className="lg:col-span-5 md:col-span-5 bg-slate-50/50 p-4 sm:p-6 lg:p-7 flex flex-col justify-between gap-6">
+            <div className="min-w-0 lg:col-span-5 bg-slate-50/50 p-4 sm:p-6 lg:p-7 flex flex-col justify-between gap-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -316,12 +316,12 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
               </div>
 
               {/* Navigation buttons at bottom of right column */}
-              <div className="flex items-center justify-between gap-3 border-t border-slate-200/80 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-4">
                 <button
                   type="button"
                   onClick={() => showQuestion(index - 1)}
                   disabled={index === 0}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-black text-slate-700 shadow-2xs transition hover:border-teal-400 hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-black text-slate-700 shadow-2xs transition hover:border-teal-400 hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <span aria-hidden="true">←</span>
                   <span>Previous</span>
@@ -330,7 +330,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                   type="button"
                   onClick={() => showQuestion(index + 1)}
                   disabled={index === rows.length - 1}
-                  className="inline-flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-2 text-xs font-black text-white shadow-2xs transition hover:bg-teal-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-teal-800 px-4 py-2 text-xs font-black text-white shadow-2xs transition hover:bg-teal-900 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <span>Next</span>
                   <span aria-hidden="true">→</span>

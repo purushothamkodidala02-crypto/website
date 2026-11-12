@@ -131,9 +131,31 @@ export function StudentTestRunner({
   const saveChains = useRef(new Map<string, Promise<void>>());
   const isFinishingRef = useRef(false);
   const hasAutoSubmittedRef = useRef(false);
+  const lastIsWideRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     deviceIdRef.current = getClientDeviceId();
+  }, []);
+
+  useEffect(() => {
+    const syncDesktopPalette = () => {
+      const isWide = window.innerWidth >= 960;
+      if (lastIsWideRef.current === null) {
+        lastIsWideRef.current = isWide;
+        if (!isWide) {
+          setNavigatorOpenDesktop(false);
+        }
+        return;
+      }
+      if (lastIsWideRef.current !== isWide) {
+        lastIsWideRef.current = isWide;
+        setNavigatorOpenDesktop(isWide);
+      }
+    };
+
+    syncDesktopPalette();
+    window.addEventListener("resize", syncDesktopPalette);
+    return () => window.removeEventListener("resize", syncDesktopPalette);
   }, []);
 
   const handleDisplaced = useCallback(async () => {
@@ -458,58 +480,58 @@ export function StudentTestRunner({
   return <main ref={containerRef} className="student-page relative flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] min-h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-slate-100">
     <ScreenWatermark text={watermarkText} />
     <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
-      <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-3 py-2 sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="flex items-center justify-between gap-1.5 sm:gap-4">
+      <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] px-2.5 py-1.5 sm:px-5 sm:py-2 lg:px-8 [@media(max-height:540px)]:py-1">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-3">
           
           {/* Box 1: Test Title & Question Indicator */}
-          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3.5 sm:py-2 shadow-xs">
+          <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3 sm:py-1.5 shadow-xs">
             <div className="min-w-0">
-              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[150px] lg:max-w-[220px] xl:max-w-xs" title={title}>
+              <p className="hidden lg:block truncate text-[11px] font-semibold text-slate-500 max-w-[200px] xl:max-w-xs" title={title}>
                 {title}
               </p>
-              <h1 className="text-xs sm:text-sm lg:text-base font-black text-slate-950 truncate">
-                <span className="sm:hidden">Q{index + 1}</span>
-                <span className="hidden sm:inline">Question {index + 1}</span>{" "}
+              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950 truncate">
+                <span className="min-[420px]:hidden">Q{index + 1}</span>
+                <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
                 <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
               </h1>
             </div>
           </div>
 
           {/* Box 2: Attempted Questions Progress & Stats */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-4 sm:py-2 shadow-xs">
-            <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3.5 sm:py-1.5 shadow-xs">
+            <div className="flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
               <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
               <span className="hidden sm:inline text-[11px] font-bold text-slate-600">Attempted:</span>
-              <span className="sm:hidden text-[10px] font-bold text-slate-600">Done:</span>
+              <span className="hidden min-[380px]:inline sm:hidden text-[10px] font-bold text-slate-600">Done:</span>
               <strong className="text-xs sm:text-sm font-black text-emerald-700">
                 {answered}
               </strong>
               <span className="text-[10px] sm:text-xs text-slate-400 font-medium">/{questions.length}</span>
-              <span className="hidden md:inline rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
+              <span className="hidden xl:inline rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
                 {Math.round((answered / questions.length) * 100)}%
               </span>
             </div>
 
-            <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 pl-2.5 sm:pl-3">
+            <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 pl-2 sm:pl-2.5 whitespace-nowrap">
               <span className="text-[11px] font-semibold text-slate-500">Review:</span>
               <strong className="text-xs sm:text-sm font-black text-amber-700">{reviewIds.size}</strong>
             </div>
 
-            <div className="hidden md:flex items-center gap-1.5 border-l border-slate-200 pl-2.5 sm:pl-3">
+            <div className="hidden lg:flex items-center gap-1.5 border-l border-slate-200 pl-2.5 whitespace-nowrap">
               <span className="text-[11px] font-semibold text-slate-500">Left:</span>
               <strong className="text-xs sm:text-sm font-black text-slate-800">{unanswered}</strong>
             </div>
           </div>
 
           {/* Box 3: Controls (Palette Toggle, Fullscreen Toggle & Timer) */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             {/* Desktop Palette Toggle */}
             <button
               type="button"
               onClick={() => setNavigatorOpenDesktop((v) => !v)}
               title={navigatorOpenDesktop ? "Hide Question Palette (Expand question width)" : "Show Question Palette"}
               aria-label={navigatorOpenDesktop ? "Hide Question Palette" : "Show Question Palette"}
-              className={`hidden md:flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
+              className={`hidden xl:flex items-center gap-1.5 whitespace-nowrap rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold transition shadow-xs ${
                 !navigatorOpenDesktop
                   ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
                   : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
@@ -532,7 +554,7 @@ export function StudentTestRunner({
                     : "Enter full screen (CBT Exam Mode)"
                 }
                 aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
-                className={`hidden md:flex items-center gap-1.5 rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition shadow-xs ${
+                className={`hidden sm:flex items-center gap-1.5 whitespace-nowrap rounded-xl sm:rounded-2xl border px-2 py-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold transition shadow-xs ${
                   isFullscreen
                     ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
@@ -543,14 +565,14 @@ export function StudentTestRunner({
                     <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                     </svg>
-                    <span className="hidden md:inline">Exit full screen</span>
+                    <span className="hidden lg:inline">Exit full screen</span>
                   </>
                 ) : (
                   <>
                     <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                     </svg>
-                    <span className="hidden md:inline">Full screen</span>
+                    <span className="hidden lg:inline">Full screen</span>
                   </>
                 )}
               </button>
@@ -568,7 +590,7 @@ export function StudentTestRunner({
               type="button"
               onClick={() => setConfirming(true)}
               disabled={locked}
-              className="flex items-center gap-1 rounded-xl sm:rounded-2xl bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-black shadow-xs transition disabled:opacity-50"
+              className="flex items-center gap-1 whitespace-nowrap rounded-xl sm:rounded-2xl bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-black shadow-xs transition disabled:opacity-50"
               title="Submit test"
             >
               Submit
@@ -589,7 +611,7 @@ export function StudentTestRunner({
     {/* Middle Movable / Independently Scrollable Section */}
     <div className="relative flex flex-1 min-h-0 w-full overflow-hidden">
       {/* Scrollable Question Workspace (Independent Scroll) */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5 [@media(max-height:540px)]:py-1.5">
         <div className={`mx-auto w-full transition-all duration-300 ${navigatorOpenDesktop ? "max-w-5xl 2xl:max-w-6xl" : "max-w-6xl 2xl:max-w-7xl"}`}>
           {!isFullscreen && isBigDisplay && showFullscreenNotice && (
             <aside
@@ -632,7 +654,7 @@ export function StudentTestRunner({
           {pauseError && <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs sm:text-sm font-semibold text-red-700">{pauseError}</p>}
           {paused && <p className="mb-3 rounded-xl border border-teal-200 bg-teal-50 p-2.5 text-xs sm:text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
 
-          <section className="flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-5 lg:p-6 shadow-sm">
+          <section className="flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-3.5 sm:p-5 lg:p-6 [@media(max-height:540px)]:p-3 shadow-sm">
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -650,7 +672,7 @@ export function StudentTestRunner({
                 )}
               </div>
               <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-medium leading-relaxed sm:leading-8 text-slate-950" />
-              {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-48 sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
+              {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-[32dvh] sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
               <div className="mt-4 sm:mt-5 grid gap-2 sm:gap-2.5">
                 {options.map(([key, text]) => {
                   const selected = answers[current.question_id] === key;
@@ -735,7 +757,7 @@ export function StudentTestRunner({
       <aside
         className={`hidden md:flex flex-col shrink-0 border-l border-slate-200/90 bg-white transition-all duration-300 ease-in-out ${
           navigatorOpenDesktop
-            ? "w-72 lg:w-80 xl:w-88 2xl:w-96 p-3.5 lg:p-4 overflow-y-auto"
+            ? "w-64 lg:w-72 xl:w-80 2xl:w-96 p-3 lg:p-4 overflow-hidden [@media(max-height:540px)]:overflow-y-auto"
             : "w-0 p-0 border-l-0 overflow-hidden"
         }`}
       >
@@ -749,11 +771,11 @@ export function StudentTestRunner({
 
     {/* Fixed Bottom Navigation (Lower part) */}
     <footer
-      className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 p-2.5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3"
-      style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom, 0px))" }}
+      className="shrink-0 z-30 border-t border-slate-200/80 bg-white/95 p-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-3 lg:px-8 lg:py-3 [@media(max-height:540px)]:py-1.5"
+      style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0px))" }}
     >
       <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-2 sm:gap-3">
-        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
+        <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
           <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white md:inline-block">←</kbd>
           Previous
         </button>
@@ -761,7 +783,7 @@ export function StudentTestRunner({
         {/* Center: Mobile Sheet Trigger & Desktop Palette Toggle */}
         <div className="flex items-center gap-2">
           {/* Mobile trigger */}
-          <button type="button" onClick={() => setNavigatorOpen(true)} className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-sm md:hidden">
+          <button type="button" onClick={() => setNavigatorOpen(true)} className="whitespace-nowrap rounded-xl border border-teal-200 bg-teal-50 px-2.5 py-2 text-xs font-bold text-teal-900 shadow-sm transition hover:bg-teal-100 disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-sm md:hidden">
             Questions <span className="font-mono">({index + 1}/{questions.length})</span>
           </button>
 
@@ -769,7 +791,7 @@ export function StudentTestRunner({
           <button
             type="button"
             onClick={() => setNavigatorOpenDesktop((v) => !v)}
-            className="hidden md:flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-xs"
+            className="hidden md:flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-xs"
             title={navigatorOpenDesktop ? "Hide Question Navigator (Full width question view)" : "Show Question Navigator"}
           >
             <svg className="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -784,11 +806,11 @@ export function StudentTestRunner({
         </div>
 
         {index === questions.length - 1 ? (
-          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="rounded-xl bg-teal-700 px-4 py-2 text-xs sm:text-sm font-black text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
+          <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="whitespace-nowrap rounded-xl bg-teal-700 px-3 py-2 text-xs sm:text-sm font-black text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
             Submit test
           </button>
         ) : (
-          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#0a2922] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
+          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
             Save & next
             <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 md:inline-block">→</kbd>
           </button>
@@ -846,8 +868,8 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
         </div>
       </div>
 
-      <div className="mt-4 max-h-[42vh] md:max-h-none lg:max-h-none min-h-0 overflow-y-auto overscroll-contain pr-1 md:flex-1 lg:flex-1">
-        <div className="grid grid-cols-5 xl:grid-cols-6 gap-2">
+      <div className="mt-3 min-h-[7rem] max-h-[42dvh] md:max-h-none lg:max-h-none overflow-y-auto overscroll-contain pr-1 md:flex-1 lg:flex-1">
+        <div className="grid grid-cols-5 xl:grid-cols-6 gap-1.5 sm:gap-2">
           {questions.map((item, index) => {
             const marked = reviewIds.has(item.question_id);
             const answered = Boolean(answers[item.question_id]);
@@ -857,7 +879,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
                 type="button"
                 disabled={locked}
                 onClick={() => onSelect(index)}
-                className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-black transition-all ${
+                className={`flex h-9 sm:h-10 w-full items-center justify-center rounded-xl text-xs font-black transition-all ${
                   index === currentIndex
                     ? "bg-[#0a2922] text-white shadow-md ring-2 ring-emerald-400 ring-offset-2 scale-105"
                     : marked
@@ -874,7 +896,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
         </div>
       </div>
 
-      <div className="mt-4 shrink-0 border-t border-slate-100 pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
+      <div className="mt-3 shrink-0 border-t border-slate-100 pt-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
           <Legend color="bg-emerald-100" label="Answered" />
           <Legend color="bg-amber-100" label="Marked for review" />
@@ -884,7 +906,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
           type="button"
           onClick={onFinish}
           disabled={locked}
-          className="mt-3 w-full rounded-xl bg-teal-700 hover:bg-teal-800 text-white px-4 py-3 text-sm font-black shadow-sm transition disabled:opacity-50"
+          className="mt-2.5 w-full rounded-xl bg-teal-700 hover:bg-teal-800 text-white px-4 py-2.5 text-sm font-black shadow-sm transition disabled:opacity-50"
         >
           Submit / Finish test
         </button>
@@ -893,7 +915,7 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
   );
 }
 
-function NavigatorMetric({ value, label, tone }: { value: number; label: string; tone: string }) { return <div className="rounded-xl bg-slate-50 px-2 py-2.5 text-center"><strong className={`block text-base font-black ${tone}`}>{value}</strong><span className="mt-0.5 block text-[10px] font-bold text-slate-500">{label}</span></div>; }
+function NavigatorMetric({ value, label, tone }: { value: number; label: string; tone: string }) { return <div className="rounded-xl bg-slate-50 px-2 py-1.5 sm:py-2 text-center"><strong className={`block text-sm sm:text-base font-black ${tone}`}>{value}</strong><span className="mt-0.5 block text-[10px] font-bold text-slate-500">{label}</span></div>; }
 function Legend({ color, label }: { color: string; label: string }) { return <span className="flex items-center gap-2"><span className={`h-3 w-3 rounded ${color}`} />{label}</span>; }
 
 function PracticeTimerControl({
@@ -947,7 +969,7 @@ function PracticeTimerControl({
         <span className="hidden sm:inline">{busy ? (paused ? "Resuming" : "Pausing") : paused ? "Resume" : "Pause"}</span>
       </button>
 
-      <div className="ml-1 sm:ml-1.5 min-w-[3.6rem] sm:min-w-[5.6rem] border-l border-slate-200 px-1 py-0.5 sm:px-2.5 text-right">
+      <div className="ml-1 sm:ml-1.5 min-w-[3.2rem] sm:min-w-[5.2rem] border-l border-slate-200 px-1 py-0.5 sm:px-2 text-right">
         <span
           className={`block text-[8px] sm:text-[9px] font-black uppercase tracking-tight sm:tracking-[0.14em] ${
             paused ? "text-teal-800 font-bold" : urgent ? "text-rose-600 font-black" : "text-slate-500"

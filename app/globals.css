@@ -132,25 +132,33 @@ a {
   text-rendering: optimizeLegibility;
 }
 
-.student-page :where(h1, h2, h3) {
-  font-family: var(--font-display);
-  font-variation-settings: "wght" 750;
-  letter-spacing: -0.025em;
-  text-wrap: balance;
-}
+@layer base {
+  .student-page :where(h1, h2, h3) {
+    font-family: var(--font-display);
+    font-variation-settings: "wght" 750;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
 
-.student-page :where(p, li) {
-  text-wrap: pretty;
-}
+  .student-page :where(p, li) {
+    text-wrap: pretty;
+  }
 
-.student-page :where(a, button) {
-  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
-  transition-duration: 180ms;
-  transition-timing-function: ease-out;
-}
+  .student-page :where(a, button) {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 180ms;
+    transition-timing-function: ease-out;
+  }
 
-.student-page button:not(:disabled) {
-  min-height: 2.75rem;
+  .student-page :where(button:not(:disabled)) {
+    min-block-size: 24px;
+  }
+
+  @media (pointer: coarse) {
+    .student-page :where(button:not(:disabled)) {
+      min-block-size: 2.75rem;
+    }
+  }
 }
 
 .student-page :where(a, button, input, select, textarea):focus-visible {

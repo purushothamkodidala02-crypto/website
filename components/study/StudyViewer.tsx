@@ -413,10 +413,10 @@ function StudyQuestionCard({
         </div>
       </div>
 
-      {/* 2-Column Grid on Desktop / Tablet (md+), Single-Column on Mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+      {/* 2-Column Grid on Wide Desktop (lg+), Single-Column on Mobile & Split-Screen */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
         {/* Left Pane: Question text and options */}
-        <div className="md:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between md:max-h-[calc(100vh-250px)] md:overflow-y-auto overscroll-contain">
+        <div className="min-w-0 lg:col-span-7 p-4 sm:p-6 lg:p-7 flex flex-col justify-between lg:max-h-[max(22rem,calc(100dvh-250px))] [@media(max-height:600px)]:max-h-none lg:overflow-y-auto overscroll-contain">
           <div>
             <div className="flex items-start gap-3">
               <span className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-xl bg-[#0a2922] text-xs font-black text-white">
@@ -492,7 +492,7 @@ function StudyQuestionCard({
         </div>
 
         {/* Right Pane: Explanation & Analysis */}
-        <div className="md:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 md:max-h-[calc(100vh-250px)] md:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
+        <div className="min-w-0 lg:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 lg:max-h-[max(22rem,calc(100dvh-250px))] [@media(max-height:600px)]:max-h-none lg:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">

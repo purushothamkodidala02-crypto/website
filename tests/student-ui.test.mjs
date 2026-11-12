@@ -91,3 +91,24 @@ test("mock test submit controls remain visible and accessible on mobile viewport
   assert.match(submissionDialog, /overflow-y-auto/);
 });
 
+
+test("split-screen and narrow viewport layout stays single-line, balanced, and non-cramping", async () => {
+  const [globalsCss, runner, formattedQuestion] = await Promise.all([
+    read("app/globals.css"),
+    read("app/mock-tests/[id]/StudentTestRunner.tsx"),
+    read("components/questions/FormattedQuestionText.tsx"),
+  ]);
+
+  // Student-page element defaults live inside @layer base so utilities like truncate win
+  assert.match(globalsCss, /@layer base\s*\{[\s\S]*\.student-page\s+:where\(h1,\s*h2,\s*h3\)/);
+  assert.match(globalsCss, /@media\s*\(pointer:\s*coarse\)/);
+
+  // Split-screen runner header allows wrapping and single-line question indicator
+  assert.match(runner, /flex flex-wrap items-center justify-between/);
+  assert.match(runner, /window\.innerWidth >= 960/);
+  assert.match(runner, /whitespace-nowrap[\s\S]*Question/);
+
+  // Matching layouts respond to container width rather than only viewport width
+  assert.match(formattedQuestion, /@container/);
+  assert.match(formattedQuestion, /@\[460px\]:grid-cols-2/);
+});

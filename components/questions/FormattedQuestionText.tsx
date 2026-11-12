@@ -540,16 +540,16 @@ export function FormattedQuestionText({
       matchingLayout;
 
     return (
-      <div lang={isTelugu ? "te" : undefined} className={`font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}>
+      <div lang={isTelugu ? "te" : undefined} className={`@container font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}>
         <div className="space-y-1.5">
           {heading.map((line, index) => <p key={`${index}-${line}`} className="font-semibold text-slate-950">{line}</p>)}
         </div>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm">
+        <div className="mt-4 grid grid-cols-1 @[460px]:grid-cols-2 gap-3 sm:gap-4">
+          <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 shadow-sm [overflow-wrap:anywhere]">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{leftTitle}</p>
             <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{leftItems.map((line) => renderListItem(line))}</div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm">
+          <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 shadow-sm [overflow-wrap:anywhere]">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{rightTitle}</p>
             <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{rightItems.map((line) => renderListItem(line))}</div>
           </div>

@@ -906,7 +906,7 @@ export async function MockTestDetailsPage({
             )}
           </div>
 
-          <div className="mt-4 grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
                 {state?.code ?? "State"} ·{" "}
@@ -979,9 +979,9 @@ export async function MockTestDetailsPage({
         </section>
 
         {/* Instructions and Start Action Station */}
-        <div className="mt-6 grid gap-6 md:grid-cols-[1fr_20rem] lg:grid-cols-[1fr_21rem] md:items-start">
-          <section className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_21rem] lg:items-start">
+          <section className="min-w-0 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Examination Instructions</h2>
                 <p className="mt-0.5 text-xs text-slate-500">Read guidelines carefully before beginning the mock test.</p>
@@ -1049,7 +1049,7 @@ export async function MockTestDetailsPage({
           </section>
 
           {/* Clean Action Card - Candidate Portal and CBT badges removed */}
-          <aside className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs lg:sticky lg:top-24">
+          <aside className="min-w-0 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs lg:sticky lg:top-24">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">
               Ready to begin?
             </h2>
