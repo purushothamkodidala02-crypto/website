@@ -34,3 +34,9 @@ test("student bookmarks and mistakes are private, automatic, and accessible", as
   assert.match(reviewNavigator, /BookmarkButton/);
   assert.match(dashboard, /\/dashboard\/study-book/);
 });
+
+test("student_question_mistakes foreign key cascades on question delete", async () => {
+  const cascadeMigration = await read("supabase/migrations/20261112224500_cascade_student_question_mistakes.sql");
+  assert.match(cascadeMigration, /student_question_mistakes_question_id_fkey/);
+  assert.match(cascadeMigration, /on delete cascade/i);
+});
