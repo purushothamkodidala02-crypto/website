@@ -44,11 +44,11 @@ function buildSyllabusMeta(context: NonNullable<Awaited<ReturnType<typeof resolv
     : `${stateCode} ${exam.name}`;
 
   const title = isPolice
-    ? "TG Police Constable Exam Syllabus 2026 & OMR Pattern | తెలంగాణ పోలీస్ సిలబస్"
+    ? "Telangana Police / TG Police Constable Exam Syllabus 2026, Pattern & Dates | TG Police సిలబస్"
     : `${shortPrefixedName} Exam Syllabus 2026 & Pattern${teluguData ? ` | ${teluguData.teluguName} సిలబస్` : ""}`;
 
   const description = isPolice
-    ? "Official TG Police Constable exam syllabus 2026 (TGPRB/TSLPRB), PWT & FWE pattern, subject topics & free bilingual mock tests on Varadhi Prep."
+    ? "Official TGPRB Telangana Police Constable exam syllabus 2026, PWT exam date (20 Dec 2026), OMR pattern, subjects breakdown & free bilingual mock tests on Varadhi Prep."
     : `Complete ${statePrefixedName} (${stateCode}) exam syllabus 2026, paper pattern, subject topics & free bilingual mock tests on Varadhi Prep.`;
 
   const keywords = [
@@ -59,10 +59,17 @@ function buildSyllabusMeta(context: NonNullable<Awaited<ReturnType<typeof resolv
     `${exam.name} syllabus and mock tests`,
     ...(isPolice
       ? [
+          "Telangana police syllabus",
+          "Telangana police mock test",
+          "Telangana constable mock test",
+          "Telangana constable exam date",
           "tg police exam syllabus",
           "tg police syllabus 2026",
           "telangana police constable syllabus",
           "tgprb police constable syllabus",
+          "tg police exam date",
+          "telangana police constable exam date 2026",
+          "tslprb police constable exam date",
         ]
       : []),
   ];
@@ -180,19 +187,19 @@ export default async function ExamSyllabusPage({ params }: Props) {
 
             <h1 className="font-display mt-3.5 max-w-4xl text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
               {meta.isPolice
-                ? "TG Police Constable Exam Syllabus 2026 & OMR Pattern"
+                ? "Telangana Police / TG Police Constable Exam Syllabus 2026, Pattern & Exam Dates"
                 : `${meta.shortPrefixedName} Exam Syllabus 2026 & Pattern`}
             </h1>
 
             {meta.teluguData && (
               <p className="mt-2 text-base font-bold text-teal-950 sm:text-lg">
-                {meta.teluguData.teluguName} — పూర్తి సిలబస్ మరియు పరీక్ష విధానం
+                {meta.teluguData.teluguName} — పూర్తి సిలబస్, పరీక్ష తేదీ &amp; ఎగ్జామ్ ప్యాటర్న్
               </p>
             )}
 
             <p className="mt-3.5 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base sm:leading-7">
               {meta.isPolice
-                ? "Complete TGPRB / TSLPRB Telangana Police Constable exam syllabus for Preliminary Written Test (PWT) and Final Written Examination (FWE), including selection stages, negative marking rules, subject-wise topics, and free bilingual mock tests."
+                ? "Complete TGPRB / TSLPRB Telangana Police Constable exam syllabus for Preliminary Written Test (PWT) and Final Written Examination (FWE), including PWT exam date (20 December 2026), selection stages, negative marking rules, subject-wise topics, and free bilingual mock tests."
                 : examGroup.description?.trim() || meta.description}
             </p>
 
@@ -203,6 +210,14 @@ export default async function ExamSyllabusPage({ params }: Props) {
               >
                 Practice {examTests.length} {examGroup.name} Mock Tests →
               </Link>
+              {meta.teluguData?.schedule && (
+                <a
+                  href="#exam-schedule"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-amber-300 bg-amber-50/90 hover:bg-amber-100 px-5 py-2.5 text-xs sm:text-sm font-semibold text-amber-950 transition shadow-2xs"
+                >
+                  PWT Exam Date: {meta.teluguData.schedule.prelimsExamDate} ↓
+                </a>
+              )}
               <a
                 href="#subjects-syllabus"
                 className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition shadow-2xs"
@@ -215,6 +230,98 @@ export default async function ExamSyllabusPage({ params }: Props) {
       </section>
 
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-8 sm:py-10">
+        {meta.teluguData?.schedule && (
+          <section
+            id="exam-schedule"
+            aria-labelledby="syllabus-schedule-heading"
+            className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  {meta.teluguData.schedule.authority}
+                </p>
+                <h2
+                  id="syllabus-schedule-heading"
+                  className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900"
+                >
+                  {meta.shortPrefixedName} Exam Date &amp; Notification Timeline 2026
+                </h2>
+              </div>
+              <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3.5 py-1 text-xs font-bold text-emerald-900">
+                Preliminary Written Test: {meta.teluguData.schedule.prelimsExamDate}
+              </span>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="rounded-2xl border border-amber-200/90 bg-amber-50/50 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">PWT Exam Date</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
+                  {meta.teluguData.schedule.prelimsExamDate}
+                </p>
+                <p className="mt-0.5 text-xs text-amber-900 font-semibold">{meta.teluguData.schedule.prelimsSession}</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Hall Ticket Release</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
+                  {meta.teluguData.schedule.hallTicketRelease}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-500">Via {meta.teluguData.schedule.officialWebsite.replace("https://www.", "")}</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Duration &amp; Shift</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
+                  {meta.teluguData.schedule.prelimsDuration}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-500">Timed Forenoon Session</p>
+              </div>
+
+              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Target Post</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-teal-950">
+                  {meta.teluguData.schedule.postName}
+                </p>
+                <p className="mt-0.5 text-xs text-teal-800 font-semibold">TG Police Department</p>
+              </div>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90">
+              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/90">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Official Recruitment Milestones
+                </h3>
+              </div>
+              <div className="divide-y divide-slate-100 bg-white">
+                {meta.teluguData.schedule.events.map((evt, idx) => (
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-2 sm:gap-4 hover:bg-slate-50/60 transition">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-slate-900 text-sm">{evt.title}</span>
+                        <span className="text-xs font-semibold text-teal-800">({evt.teluguTitle})</span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">{evt.detail}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900">{evt.date}</span>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                          evt.status === "Completed"
+                            ? "bg-slate-100 text-slate-700 border border-slate-200"
+                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        }`}
+                      >
+                        {evt.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {meta.teluguData?.pattern && (
           <section aria-labelledby="syllabus-pattern-heading" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
             <p className="text-xs font-bold uppercase tracking-wider text-teal-800">

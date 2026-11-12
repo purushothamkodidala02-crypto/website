@@ -23,10 +23,13 @@ export const metadata: Metadata = {
   keywords: [
     "Varadhi Prep",
     "TG & AP Competitive Exams Free Mock Tests",
+    "Telangana constable exam date",
     "Telangana police mock test",
-    "Telangana police constable mock test",
+    "Telangana police syllabus",
+    "Telangana constable mock test",
     "Telangana police exam mock test",
-    "TG Police Constable mock test in Telugu",
+    "Telangana police exam date",
+    "tg police exam date",
     "tg police exam syllabus",
     "Telangana police constable syllabus 2026",
     "TS police constable mock test in telugu free",
@@ -44,6 +47,8 @@ export const metadata: Metadata = {
     "Current affairs mock test for Telangana exams",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ 2026",
+    "తెలంగాణ పోలీస్ ఎగ్జామ్ డేట్",
     "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
     "టీజీ టెట్ మాక్ టెస్ట్",
     "పోటీ పరీక్షల మాక్ టెస్ట్‌లు",
@@ -166,6 +171,7 @@ export default async function Home() {
                 <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">Popular:</span>
                 {[
                   { label: "Police Constable", href: "/mock-tests/telangana/police-constable-free-mock-test" },
+                  { label: "TG Police Exam Date", href: "/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" },
                   { label: "TG Police Syllabus", href: "/mock-tests/telangana/police-constable-free-mock-test/syllabus" },
                   { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
                   { label: "TGPSC", href: "/mock-tests/telangana" },

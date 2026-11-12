@@ -177,6 +177,33 @@ export default async function ExamPage({ params, searchParams }: Props) {
     },
   };
 
+  const eventJsonLd = teluguData?.schedule?.prelimsExamDate
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: `${statePrefixedName} Preliminary Written Test (PWT) 2026`,
+        description: `Official ${statePrefixedName} Preliminary Written Test (PWT) conducted by ${teluguData.schedule.authority}.`,
+        startDate: "2026-12-20T10:00:00+05:30",
+        endDate: "2026-12-20T13:00:00+05:30",
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        location: {
+          "@type": "Place",
+          name: `Designated Examination Centers across ${context.state.name}`,
+          address: {
+            "@type": "PostalAddress",
+            addressRegion: context.state.name,
+            addressCountry: "IN",
+          },
+        },
+        organizer: {
+          "@type": "Organization",
+          name: teluguData.schedule.authority,
+          url: teluguData.schedule.officialWebsite,
+        },
+      }
+    : null;
+
   const structuredData = [
     ...collectionStructuredData(seo.title, seo.description, canonical, [
       { name: "Home", path: "/" },
@@ -185,6 +212,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
       { name: context.exam.name, path: canonical },
     ]),
     courseJsonLd,
+    ...(eventJsonLd ? [eventJsonLd] : []),
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
     { "@context": "https://schema.org", "@type": "ItemList", name: examHeading, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined; const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
   ];
@@ -216,7 +244,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </div>
 
             <h1 className="font-display mt-3.5 max-w-4xl text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl break-words">
-              {examHeading}
+              {examHeading.toLowerCase().includes(context.state.name.toLowerCase())
+                ? examHeading
+                : `${context.state.name} ${examHeading}`}
             </h1>
 
             {teluguData && (
@@ -230,6 +260,15 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600">
+              {teluguData?.schedule?.prelimsExamDate && (
+                <a
+                  href="#exam-schedule"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50/90 px-3 py-1.5 text-xs font-bold text-amber-950 hover:bg-amber-100 transition shadow-2xs"
+                >
+                  <span className="h-2 w-2 rounded-full bg-amber-600 animate-pulse" aria-hidden="true" />
+                  PWT Exam Date: {teluguData.schedule.prelimsExamDate}
+                </a>
+              )}
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
                 <span className="font-semibold text-slate-900">{papers.length}</span> {papers.length === 1 ? "Paper" : "Papers"}
               </span>
@@ -237,7 +276,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 <span className="font-semibold text-slate-900">{tests.length}</span> Practice Tests
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
-                Bilingual (English & Telugu)
+                Bilingual (English &amp; Telugu)
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 shadow-2xs">
                 {teluguData?.pattern?.mode ? `Official Mode: ${teluguData.pattern.mode}` : "Online Practice Tests"}
@@ -251,6 +290,14 @@ export default async function ExamPage({ params, searchParams }: Props) {
               >
                 Choose a paper ↓
               </a>
+              {teluguData?.schedule && (
+                <a
+                  href="#exam-schedule"
+                  className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition shadow-2xs text-center"
+                >
+                  Important Exam Dates ↓
+                </a>
+              )}
               <Link
                 href={syllabusUrl(context.state.slug, context.exam.slug)}
                 className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-teal-200 bg-white hover:bg-teal-50/70 px-5 py-2.5 text-xs sm:text-sm font-semibold text-teal-900 transition shadow-2xs text-center"
@@ -498,6 +545,117 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </>
           )}
         </section>
+
+        {/* Important Dates & Notification Schedule */}
+        {teluguData?.schedule && (
+          <section
+            id="exam-schedule"
+            aria-labelledby="exam-schedule-heading"
+            className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  {teluguData.schedule.authority}
+                </p>
+                <h2
+                  id="exam-schedule-heading"
+                  className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900"
+                >
+                  {statePrefixedName} Exam Date &amp; Notification Schedule 2026
+                </h2>
+              </div>
+              <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3.5 py-1 text-xs font-bold text-emerald-900">
+                Official PWT Exam Date: {teluguData.schedule.prelimsExamDate}
+              </span>
+            </div>
+
+            <p className="mt-2.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600">
+              Check the official examination timeline, preliminary written test (PWT) date, hall ticket release dates, and selection stages for {statePrefixedName} recruitment.
+            </p>
+
+            {/* Quick Metrics Cards */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="rounded-2xl border border-amber-200/90 bg-amber-50/50 p-4 transition hover:border-amber-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">PWT Exam Date</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
+                  {teluguData.schedule.prelimsExamDate}
+                </p>
+                <p className="mt-0.5 text-xs text-amber-900 font-semibold">{teluguData.schedule.prelimsSession}</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Hall Ticket Download</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
+                  {teluguData.schedule.hallTicketRelease}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-500">Download via {teluguData.schedule.officialWebsite.replace("https://www.", "")}</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Exam Duration</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
+                  {teluguData.schedule.prelimsDuration}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-500">Timed 180 Minutes (Forenoon)</p>
+              </div>
+
+              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-4 transition hover:border-teal-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Recruitment Post</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-teal-950">
+                  {teluguData.schedule.postName}
+                </p>
+                <p className="mt-0.5 text-xs text-teal-800 font-semibold">TG Police Department</p>
+              </div>
+            </div>
+
+            {/* Events Timeline Table */}
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90">
+              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/90">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Detailed Recruitment &amp; Examination Timeline
+                </h3>
+              </div>
+              <div className="divide-y divide-slate-100 bg-white">
+                {teluguData.schedule.events.map((evt, idx) => (
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-2 sm:gap-4 hover:bg-slate-50/60 transition">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-slate-900 text-sm">{evt.title}</span>
+                        <span className="text-xs font-semibold text-teal-800">({evt.teluguTitle})</span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">{evt.detail}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900">{evt.date}</span>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                          evt.status === "Completed"
+                            ? "bg-slate-100 text-slate-700 border border-slate-200"
+                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        }`}
+                      >
+                        {evt.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
+              <p className="text-xs sm:text-sm text-teal-950 font-medium">
+                🎯 Build speed and exam temperament for the <strong>{teluguData.schedule.prelimsExamDate}</strong> OMR test with our free timed tests.
+              </p>
+              <a
+                href="#papers"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-teal-800 hover:bg-teal-900 px-4 py-2 text-xs font-bold text-white transition shadow-xs"
+              >
+                Start Practicing Free Tests →
+              </a>
+            </div>
+          </section>
+        )}
 
         {/* Official Exam Pattern & Overview */}
         {teluguData?.pattern && (

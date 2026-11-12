@@ -14,6 +14,23 @@ export type ExamPatternInfo = {
   }>;
 };
 
+export type ExamScheduleInfo = {
+  authority: string;
+  postName: string;
+  prelimsExamDate: string;
+  prelimsSession: string;
+  prelimsDuration: string;
+  hallTicketRelease: string;
+  officialWebsite: string;
+  events: Array<{
+    title: string;
+    teluguTitle: string;
+    date: string;
+    status: "Upcoming" | "Active" | "Completed" | "Tentative";
+    detail: string;
+  }>;
+};
+
 export type ExamTeluguSeo = {
   teluguName: string;
   teluguTitle: string;
@@ -23,22 +40,33 @@ export type ExamTeluguSeo = {
   teluguFaqs: Array<{ question: string; answer: string }>;
   englishFaqs?: Array<{ question: string; answer: string }>;
   pattern?: ExamPatternInfo;
+  schedule?: ExamScheduleInfo;
 };
 
 const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ పోలీస్ కానిస్టేబుల్",
-  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్ సిరీస్ 2026 (OMR పరీక్ష విధానం)",
-  bilingualPageTitle: "TG Police Constable Free Mock Test 2026 & Syllabus (TGPRB/TSLPRB) | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్, సిలబస్ & పరీక్ష తేదీ 2026 (TGPRB OMR విధానం)",
+  bilingualPageTitle: "Telangana Police / TG Police Constable Free Mock Test 2026, Syllabus & Exam Date | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
   bilingualDescription:
-    "TG Police Constable exam syllabus 2026, OMR pattern & free mock tests in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ & మాక్ టెస్ట్‌లు.",
+    "TG Police Constable exam syllabus 2026, PWT exam date (20 Dec 2026), OMR pattern & free mock tests in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్, పరీక్ష తేదీ & మాక్ టెస్ట్‌లు.",
   keywords: [
-    "Telangana police constable mock test",
+    "Telangana constable exam date",
     "Telangana police mock test",
+    "Telangana police syllabus",
+    "Telangana constable mock test",
     "Telangana police exam mock test",
+    "Telangana police exam date",
+    "Telangana police constable exam date 2026",
+    "tg police exam date",
     "tg police exam syllabus",
-    "tg police syllabus",
+    "tg police syllabus 2026",
     "ts police exam syllabus",
     "telangana police exam syllabus",
+    "ts police exam date",
+    "tslprb police constable exam date",
+    "tgprb constable exam date 2026",
+    "tgprb pwt exam date",
+    "telangana police hall ticket release date",
     "TG Police Constable exam syllabus 2026",
     "TG Police Constable OMR exam pattern",
     "Telangana police constable OMR test",
@@ -63,6 +91,10 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ 2026",
     "తెలంగాణ పోలీస్ ఎగ్జామ్ సిలబస్",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ 2026",
+    "తెలంగాణ పోలీస్ ఎగ్జామ్ డేట్",
+    "తెలంగాణ కానిస్టేబుల్ పరీక్ష తేదీ",
+    "టీజీ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ",
     "టీజీ పోలీస్ సిలబస్",
     "టీజీ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ వివరాలు",
     "టీజీ పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ పేపర్స్",
@@ -71,6 +103,52 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "తెలంగాణ పోలీస్ OMR పరీక్ష విధానం",
     "TG police constable offline OMR mock test",
   ],
+  schedule: {
+    authority: "TGPRB (Telangana State Level Police Recruitment Board)",
+    postName: "SCT Police Constable (Civil / AR / TSRTC / TSSP)",
+    prelimsExamDate: "20 December 2026 (Sunday)",
+    prelimsSession: "Forenoon Session (10:00 AM – 1:00 PM)",
+    prelimsDuration: "3 Hours (180 Minutes)",
+    hallTicketRelease: "7–10 Days Before PWT Exam Date",
+    officialWebsite: "https://www.tgprb.in",
+    events: [
+      {
+        title: "Official Notification & Online Applications",
+        teluguTitle: "అధికారిక నోటిఫికేషన్ & దరఖాస్తుల ప్రక్రియ",
+        date: "Released by TGPRB",
+        status: "Completed",
+        detail: "Online registration completed on the official tgprb.in portal.",
+      },
+      {
+        title: "Preliminary Written Test (PWT) Hall Ticket Download",
+        teluguTitle: "ప్రిలిమినరీ రాత పరీక్ష హాల్ టికెట్ విడుదల",
+        date: "December 2026 (7-10 days prior)",
+        status: "Upcoming",
+        detail: "Admit cards downloadable online via mobile number and registration login.",
+      },
+      {
+        title: "Preliminary Written Test (PWT) Exam Date",
+        teluguTitle: "ప్రిలిమినరీ రాత పరీక్ష (PWT) నిర్వహణ తేదీ",
+        date: "20 December 2026 (Sunday)",
+        status: "Upcoming",
+        detail: "Offline OMR Based Written Test, 200 Questions, 200 Marks, 0.25 Negative Marking.",
+      },
+      {
+        title: "Physical Measurement Test (PMT) & Physical Efficiency Test (PET)",
+        teluguTitle: "శారీరక కొలతలు & దేహదారుఢ్య పరీక్షలు (PMT / PET)",
+        date: "Scheduled post PWT results",
+        status: "Upcoming",
+        detail: "1600m / 800m running, long jump, and shot put for qualified candidates.",
+      },
+      {
+        title: "Final Written Examination (FWE)",
+        teluguTitle: "తుది రాత పరీక్ష (Final Written Exam)",
+        date: "Post-PMT/PET Timeline",
+        status: "Upcoming",
+        detail: "Final merit ranking and selection examination stage.",
+      },
+    ],
+  },
   pattern: {
     authority: "TGPRB (Telangana State Level Police Recruitment Board)",
     totalQuestions: 200,
@@ -124,6 +202,21 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   },
   englishFaqs: [
     {
+      question: "What is the Telangana Police Constable exam date for 2026?",
+      answer:
+        "The Telangana State Level Police Recruitment Board (TGPRB / TSLPRB) Preliminary Written Test (PWT) for SCT Police Constable (Civil and equivalent) is scheduled for 20 December 2026 (Sunday) in the forenoon session (10:00 AM – 1:00 PM). Candidates should practice full-length 200-question timed mock tests on Varadhi Prep to prepare for the offline OMR sheet format.",
+    },
+    {
+      question: "When will the Telangana Police Constable hall ticket 2026 be released?",
+      answer:
+        "The TGPRB Police Constable Preliminary Written Test admit card / hall ticket will be made available for download on the official website (tgprb.in / tslprb.in) approximately 7 to 10 days before the exam date. Registered candidates can log in with their phone number and password to print their hall ticket.",
+    },
+    {
+      question: "What is the official syllabus for Telangana Police Constable Preliminary Written Test (PWT)?",
+      answer:
+        "The official PWT syllabus comprises 200 objective multiple-choice questions for 200 marks (3 hours duration) across: (1) Arithmetic and Test of Reasoning / Mental Ability (approx. 100 questions); and (2) General Studies (approx. 100 questions) including General Science, Indian History, Telangana Movement and State Formation, Indian Geography, Polity, Economy, and Current Affairs. Negative marking of 0.25 is deducted for each incorrect answer.",
+    },
+    {
       question: "Is the official Telangana Police Constable exam conducted online (CBT) or offline (OMR)?",
       answer:
         "The official Telangana Police Constable Preliminary Written Test (PWT) and Final Written Examination (FWE) conducted by TGPRB (TSLPRB) are offline OMR-based written tests where candidates bubble answers on an OMR answer sheet. Varadhi Prep provides online mock tests strictly modeled after the official 200-question, 3-hour, 0.25-negative-marking OMR pattern to build speed, accuracy, and exam discipline.",
@@ -160,6 +253,21 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     },
   ],
   teluguFaqs: [
+    {
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ (Exam Date 2026) ఎప్పుడు?",
+      answer:
+        "తెలంగాణ స్టేట్ లెవల్ పోలీస్ రిక్రూట్‌మెంట్ బోర్డ్ (TGPRB/TSLPRB) కానిస్టేబుల్ ప్రిలిమినరీ రాత పరీక్ష (PWT) 20 డిసెంబర్ 2026 (ఆదివారం) ఉదయం సెషన్‌లో నిర్వహించబడుతుంది. అభ్యర్థులు అధికారిక ఓఎంఆర్ విధానం ప్రకారం 200 ప్రశ్నలు, 3 గంటల సమయం మరియు 0.25 నెగెటివ్ మార్కింగ్ గల పూర్తి మాక్ టెస్ట్‌లను వరధి ప్రెప్‌లో ఉచితంగా సాధన చేయవచ్చు.",
+    },
+    {
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ హాల్ టికెట్లు ఎప్పుడు విడుదలవుతాయి?",
+      answer:
+        "అధికారిక TGPRB నిబంధనల ప్రకారం పరీక్ష తేదీకి సుమారు 7 నుండి 10 రోజుల ముందు అధికారిక పోర్టల్ (tgprb.in) లో పోలీస్ కానిస్టేబుల్ హాల్ టికెట్లు అందుబాటులో ఉంచబడతాయి. అభ్యర్థులు తమ మొబైల్ నంబర్ మరియు పాస్‌వర్డ్ ద్వారా లాగిన్ అయి అడ్మిట్ కార్డును డౌన్‌లోడ్ చేసుకోవచ్చు.",
+    },
+    {
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ సిలబస్ మరియు మార్కుల కేటాయింపు ఏమిటి?",
+      answer:
+        "ప్రిలిమ్స్ (PWT) పరీక్ష మొత్తం 200 మార్కులకు (200 ప్రశ్నలు) 3 గంటల వ్యవధిలో జరుగుతుంది. ఇందులో అర్థమెటిక్ & రీజనింగ్ (దాదాపు 100 ప్రశ్నలు), జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ ఉద్యమం & రాష్ట్ర ఆవిర్భావం, భూగోళశాస్త్రం, రాజ్యాంగం, ఆర్థిక వ్యవస్థ మరియు కరెంట్ అఫైర్స్ (దాదాపు 100 ప్రశ్నలు) ఉంటాయి. ప్రతి తప్పు సమాధానానికి 0.25 నెగెటివ్ మార్కు ఉంటుంది.",
+    },
     {
       question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష విధానం ఏమిటి? ఇది ఆన్‌లైన్ (CBT) పరీక్షా లేక OMR పరీక్షా?",
       answer:
