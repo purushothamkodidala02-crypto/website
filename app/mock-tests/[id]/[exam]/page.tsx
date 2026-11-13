@@ -760,66 +760,61 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </div>
             </div>
 
-            {/* Subject-Wise Syllabus Topics */}
+            {/* Subject-Wise Syllabus Cards */}
             {syllabus.units.length > 0 && (
               <div className="mt-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900">Subject-wise Syllabus Topics</h3>
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      Curriculum topics and subjects prescribed for {statePrefixedName}:
-                    </p>
-                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900">Subject-wise Syllabus Coverage</h3>
                   <Link
                     href={syllabusUrl(context.state.slug, context.exam.slug)}
                     className="text-xs font-semibold text-teal-800 hover:underline"
                   >
-                    View all {syllabus.units.length} subjects &amp; full topics →
+                    View all {syllabus.units.length} subjects &amp; units →
                   </Link>
                 </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Practice topic-wise and full-length tests mapped to every section of the official syllabus:
+                </p>
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-                  {syllabus.units.slice(0, 6).map((unit) => (
-                    <div
-                      key={unit.name}
-                      className="flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 sm:p-4"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="rounded-md bg-teal-50 border border-teal-200 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-900">
-                            {unit.unitNumber}
-                          </span>
-                          {unit.paperName && (
+                  {syllabus.units.slice(0, 6).map((unit) => {
+                    const unitHref =
+                      unit.paperSlug && unit.subjectSlug
+                        ? subjectUrl(context.state.slug, context.exam!.slug, unit.paperSlug, unit.subjectSlug)
+                        : unit.paperSlug
+                        ? paperUrl(context.state.slug, context.exam!.slug, unit.paperSlug)
+                        : syllabusUrl(context.state.slug, context.exam!.slug);
+
+                    return (
+                      <Link
+                        key={unit.name}
+                        href={unitHref}
+                        className="group flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 sm:p-4 transition hover:border-teal-300 hover:bg-white hover:shadow-2xs active:scale-[0.99]"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="rounded-md bg-teal-50 border border-teal-200 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-900">
+                              {unit.unitNumber}
+                            </span>
                             <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate max-w-[140px] sm:max-w-[180px]">
                               {unit.paperName}
                             </span>
-                          )}
-                        </div>
-                        <h4 className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900 break-words">
-                          {unit.name}
-                        </h4>
-                      </div>
-
-                      {unit.topics.length > 0 && (
-                        <div className="mt-3 border-t border-slate-200/60 pt-2">
-                          <div className="flex flex-wrap gap-1">
-                            {unit.topics.slice(0, 4).map((topic) => (
-                              <span
-                                key={topic}
-                                className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-700"
-                              >
-                                {topic}
-                              </span>
-                            ))}
-                            {unit.topics.length > 4 && (
-                              <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 self-center">
-                                +{unit.topics.length - 4} more
-                              </span>
-                            )}
                           </div>
+                          <h4 className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900 group-hover:text-teal-800 transition break-words">
+                            {unit.name}
+                          </h4>
+                          <p className="mt-1 text-xs text-slate-600 line-clamp-2 break-words">{unit.description}</p>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <div className="mt-3 flex items-center justify-between border-t border-slate-200/60 pt-2 text-xs">
+                          <span className="text-[11px] font-medium text-slate-500">
+                            {unit.testCount > 0 ? `${unit.testCount} test${unit.testCount === 1 ? "" : "s"}` : "Bilingual Practice"}
+                          </span>
+                          <span className="inline-flex items-center gap-1 font-bold text-teal-800 transition group-hover:translate-x-1">
+                            Start practice →
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}

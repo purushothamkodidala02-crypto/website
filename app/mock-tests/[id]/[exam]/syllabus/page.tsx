@@ -7,7 +7,6 @@ import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, paperUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
-import { createPublicClient } from "@/lib/supabase/public";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 import {
   computeExamSyllabus,
@@ -127,23 +126,7 @@ export default async function ExamSyllabusPage({ params }: Props) {
   const examSections = catalog.sections.filter((sec) => subjectIds.has(sec.subject_id) && sec.is_active);
   const examTests = catalog.tests.filter((test) => paperIds.has(test.paper_id));
 
-  // Fetch any custom government notification syllabus or FAQs saved by admin
-  const supabase = createPublicClient();
-  const { data: rawFaqs } = await supabase
-    .from("exam_page_faqs")
-    .select("question, answer, display_order")
-    .eq("exam_group_id", examGroup.id)
-    .order("display_order");
-
-  const syllabusFaqs = (rawFaqs ?? []).filter((f) =>
-    f.question.startsWith("__OFFICIAL_GOVERNMENT_SYLLABUS"),
-  );
-  const customSyllabusText = syllabusFaqs.map((f) => f.answer).join("");
-  const studentFaqs = (rawFaqs ?? []).filter(
-    (f) => !f.question.startsWith("__OFFICIAL_GOVERNMENT_SYLLABUS"),
-  );
-
-  // Compute comprehensive syllabus details automatically or from custom government syllabus
+  // Compute comprehensive syllabus details automatically
   const syllabus = computeExamSyllabus({
     examName: examGroup.name,
     examDescription: examGroup.description,
@@ -155,7 +138,6 @@ export default async function ExamSyllabusPage({ params }: Props) {
     sections: examSections as RawSection[],
     tests: examTests as RawTest[],
     overridePattern: meta.teluguData?.pattern,
-    customSyllabusText: customSyllabusText || null,
   });
 
   const subjectNames = examSubjects.map((s) => s.name).slice(0, 8);
@@ -179,10 +161,9 @@ export default async function ExamSyllabusPage({ params }: Props) {
   ];
 
   const faqs = [
-    ...studentFaqs.map((f) => ({ question: f.question, answer: f.answer })),
     ...(meta.teluguData?.englishFaqs ?? []),
     ...(meta.teluguData?.teluguFaqs ?? []),
-    ...(meta.teluguData || studentFaqs.length > 0 ? [] : dynamicFaqs),
+    ...(meta.teluguData ? [] : dynamicFaqs),
   ];
 
   const structuredData = [
@@ -460,56 +441,65 @@ export default async function ExamSyllabusPage({ params }: Props) {
               </div>
               <span className="rounded-full bg-teal-50 border border-teal-200/80 px-3.5 py-1 text-xs font-bold text-teal-950">
                 {syllabus.totalSubjectsCount} Subject{syllabus.totalSubjectsCount === 1 ? "" : "s"}
-                {syllabus.totalTopicsCount > 0 ? ` · ${syllabus.totalTopicsCount} Topics` : ""}
+                {syllabus.totalTopicsCount > 0 ? ` · ${syllabus.totalTopicsCount} Sub-Topics` : ""}
               </span>
             </div>
 
-            {/* Subject-Wise Topic Breakdown - Official Government Format */}
+            {/* Structured Unit Cards */}
             {syllabus.units.length > 0 && (
-              <div className="mt-5 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                {syllabus.units.map((unit) => (
-                  <article
-                    key={unit.name + unit.unitNumber}
-                    className="flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 sm:p-5 transition hover:border-teal-300 hover:bg-white shadow-2xs"
-                  >
-                    <div>
-                      <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
-                        <span className="rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-900">
-                          {unit.unitNumber}
-                        </span>
-                        {unit.paperName && (
-                          <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-slate-600 truncate max-w-[180px] sm:max-w-[220px]">
+              <div className="mt-5 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                {syllabus.units.map((unit) => {
+                  const unitHref =
+                    unit.paperSlug && unit.subjectSlug
+                      ? subjectUrl(state.slug, examGroup.slug, unit.paperSlug, unit.subjectSlug)
+                      : unit.paperSlug
+                      ? paperUrl(state.slug, examGroup.slug, unit.paperSlug)
+                      : null;
+
+                  return (
+                    <article key={unit.name} className="flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 sm:p-5 transition hover:border-teal-300">
+                      <div>
+                        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+                          <span className="rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-900">
+                            {unit.unitNumber}
+                          </span>
+                          <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-slate-600 truncate max-w-[150px] sm:max-w-[200px]">
                             {unit.paperName}
                           </span>
-                        )}
-                      </div>
-                      <h3 className="font-display mt-2 sm:mt-2.5 text-base sm:text-lg font-bold text-slate-900 break-words">
-                        {unit.name}
-                      </h3>
-                      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-700 font-normal">
-                        {unit.description}
-                      </p>
-                    </div>
-
-                    {unit.topics.length > 0 && (
-                      <div className="mt-3.5 border-t border-slate-200/70 pt-2.5 sm:pt-3">
-                        <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-teal-800">
-                          Key Focus Areas ({unit.topics.length}):
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
-                          {unit.topics.map((topic) => (
-                            <span
-                              key={topic}
-                              className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-2xs"
-                            >
-                              {topic}
-                            </span>
-                          ))}
                         </div>
+                        <h3 className="font-display mt-2 sm:mt-2.5 text-base sm:text-lg font-bold text-slate-900 break-words">{unit.name}</h3>
+                        <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600">{unit.description}</p>
                       </div>
-                    )}
-                  </article>
-                ))}
+
+                      {unit.topics.length > 0 && (
+                        <div className="mt-3.5 border-t border-slate-200/70 pt-2.5 sm:pt-3">
+                          <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-teal-800">Key Focus Areas:</p>
+                          <div className="mt-1.5 flex flex-wrap gap-1 sm:gap-1.5">
+                            {unit.topics.map((topic) => (
+                              <span key={topic} className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-700">
+                                {topic}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {unitHref && (
+                        <div className="mt-3.5 border-t border-slate-200/60 pt-2.5 flex items-center justify-between text-xs">
+                          <span className="text-[11px] font-semibold text-slate-500">
+                            {unit.testCount > 0 ? `${unit.testCount} practice test${unit.testCount === 1 ? "" : "s"}` : "Bilingual Tests"}
+                          </span>
+                          <Link
+                            href={unitHref}
+                            className="inline-flex items-center gap-1 font-bold text-teal-800 hover:text-teal-950 transition"
+                          >
+                            Practise tests →
+                          </Link>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
               </div>
             )}
 
@@ -525,66 +515,90 @@ export default async function ExamSyllabusPage({ params }: Props) {
 
                 {syllabus.papers.map((paper) => (
                   <div key={paper.id} className="rounded-2xl border border-slate-200 bg-[#f9fbfa] p-4 sm:p-5 lg:p-6">
-                    <div>
-                      <h4 className="font-display text-base sm:text-lg font-bold text-slate-900">{paper.label}</h4>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600">
-                        {paper.questionCount && (
-                          <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
-                            {paper.questionCount} Questions
-                          </span>
-                        )}
-                        {paper.totalMarks && (
-                          <span className="rounded-md bg-teal-50 border border-teal-200 text-teal-900 px-2 py-0.5">
-                            {paper.totalMarks} Marks
-                          </span>
-                        )}
-                        {paper.durationMinutes && (
-                          <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
-                            {paper.durationMinutes} Minutes
-                          </span>
-                        )}
-                        {paper.negativeMarks > 0 ? (
-                          <span className="rounded-md bg-rose-50 border border-rose-200 text-rose-800 px-2 py-0.5">
-                            -{paper.negativeMarks} Negative
-                          </span>
-                        ) : (
-                          <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5">
-                            No Negative
-                          </span>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h4 className="font-display text-base sm:text-lg font-bold text-slate-900">{paper.label}</h4>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600">
+                          {paper.questionCount && (
+                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
+                              {paper.questionCount} Questions
+                            </span>
+                          )}
+                          {paper.totalMarks && (
+                            <span className="rounded-md bg-teal-50 border border-teal-200 text-teal-900 px-2 py-0.5">
+                              {paper.totalMarks} Marks
+                            </span>
+                          )}
+                          {paper.durationMinutes && (
+                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
+                              {paper.durationMinutes} Minutes
+                            </span>
+                          )}
+                          {paper.negativeMarks > 0 ? (
+                            <span className="rounded-md bg-rose-50 border border-rose-200 text-rose-800 px-2 py-0.5">
+                              -{paper.negativeMarks} Negative
+                            </span>
+                          ) : (
+                            <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5">
+                              No Negative
+                            </span>
+                          )}
+                        </div>
+                        {paper.description && (
+                          <p className="mt-2 text-xs text-slate-600">{paper.description}</p>
                         )}
                       </div>
-                      {paper.description && (
-                        <p className="mt-2 text-xs text-slate-600">{paper.description}</p>
-                      )}
+                      <Link
+                        href={paperUrl(state.slug, examGroup.slug, paper.slug)}
+                        className="inline-flex min-h-[38px] items-center rounded-xl bg-teal-800 hover:bg-teal-900 px-4 py-2 text-xs font-semibold text-white transition shadow-xs"
+                      >
+                        Open {paper.name} Tests →
+                      </Link>
                     </div>
 
                     {paper.subjects.length > 0 && (
                       <div className="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
                         {paper.subjects.map((sub) => (
-                          <div
+                          <Link
                             key={sub.id}
-                            className="flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4"
+                            href={subjectUrl(state.slug, examGroup.slug, paper.slug, sub.slug)}
+                            className="group flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 transition hover:border-teal-400 hover:shadow-xs active:scale-[0.99]"
                           >
                             <div>
-                              <span className="text-sm sm:text-base font-bold text-slate-900 break-words">
-                                {sub.name}
-                              </span>
-                              {sub.topics.length > 0 ? (
-                                <div className="mt-2.5 flex flex-wrap gap-1">
-                                  {sub.topics.map((topic) => (
-                                    <span
-                                      key={topic}
-                                      className="rounded bg-slate-50 border border-slate-200/70 px-2 py-0.5 text-[11px] font-medium text-slate-700"
-                                    >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-teal-800 transition break-words">
+                                  {sub.name}
+                                </span>
+                                <span className="shrink-0 rounded-full bg-teal-50 border border-teal-200 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-900">
+                                  {sub.testCount} test{sub.testCount === 1 ? "" : "s"}
+                                </span>
+                              </div>
+                              {sub.description && (
+                                <p className="mt-1.5 text-xs text-slate-600 line-clamp-2 break-words">{sub.description}</p>
+                              )}
+                            </div>
+
+                            {sub.topics.length > 0 && (
+                              <div className="mt-3 border-t border-slate-100 pt-2">
+                                <div className="flex flex-wrap gap-1">
+                                  {sub.topics.slice(0, 3).map((topic) => (
+                                    <span key={topic} className="rounded bg-slate-50 border border-slate-200/70 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
                                       {topic}
                                     </span>
                                   ))}
+                                  {sub.topics.length > 3 && (
+                                    <span className="text-[10px] font-semibold text-slate-400 self-center">
+                                      +{sub.topics.length - 3} more
+                                    </span>
+                                  )}
                                 </div>
-                              ) : (
-                                <p className="mt-1 text-xs text-slate-500">Official curriculum subject</p>
-                              )}
-                            </div>
-                          </div>
+                              </div>
+                            )}
+
+                            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 transition group-hover:translate-x-1">
+                              Practice tests →
+                            </span>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -627,29 +641,6 @@ export default async function ExamSyllabusPage({ params }: Props) {
             </div>
           </section>
         )}
-
-        {/* Dedicated Mock Test Practice CTA Banner */}
-        <section className="rounded-2xl border border-teal-200/80 bg-gradient-to-br from-teal-900 to-slate-950 p-6 sm:p-8 text-white shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-teal-300">
-                Official Pattern Practice
-              </p>
-              <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-white">
-                Ready to Practice for {examGroup.name}?
-              </h2>
-              <p className="mt-1 text-xs sm:text-sm text-slate-300">
-                Take full-length bilingual mock tests mapped directly to this official government syllabus.
-              </p>
-            </div>
-            <Link
-              href={examHref}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-teal-950 hover:bg-teal-50 transition shadow-xs shrink-0"
-            >
-              Explore {examGroup.name} Mock Tests →
-            </Link>
-          </div>
-        </section>
 
         {faqs.length > 0 && (
           <section aria-labelledby="syllabus-faq-title" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">

@@ -2,7 +2,6 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
-import { SYLLABUS_FAQ_KEY } from "@/lib/exam-syllabus";
 import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
@@ -88,60 +87,4 @@ export async function deleteExamPageFaq(formData: FormData) {
   if (error) return;
   await supabase.from("exam_page_faqs").delete().eq("id", faqId);
   refresh();
-}
-
-export async function updateExamPageSyllabus(
-  _previous: ExamPageContentActionState,
-  formData: FormData,
-): Promise<ExamPageContentActionState> {
-  const examGroupId = String(formData.get("exam_group_id") ?? "").trim();
-  const rawSyllabus = String(formData.get("syllabus_text") ?? "").trim();
-
-  if (!/^[0-9a-f-]{36}$/i.test(examGroupId)) {
-    return { success: false, message: "Choose an exam first." };
-  }
-
-  const { supabase, error } = await requireAdmin();
-  if (error) return { success: false, message: error };
-
-  // Delete existing syllabus entry for this exam
-  const { error: deleteError } = await supabase
-    .from("exam_page_faqs")
-    .delete()
-    .eq("exam_group_id", examGroupId)
-    .like("question", `${SYLLABUS_FAQ_KEY}%`);
-
-  if (deleteError) {
-    return { success: false, message: `Failed to clear previous syllabus: ${deleteError.message}` };
-  }
-
-  if (!rawSyllabus) {
-    refresh();
-    return {
-      success: true,
-      message: "Custom government syllabus cleared. Official state notification syllabus will be displayed by default.",
-    };
-  }
-
-  // Chunk text if longer than 2,800 characters to stay within check constraint (10..3000 chars)
-  const chunkSize = 2800;
-  const chunks: string[] = [];
-  for (let i = 0; i < rawSyllabus.length; i += chunkSize) {
-    chunks.push(rawSyllabus.slice(i, i + chunkSize));
-  }
-
-  const rowsToInsert = chunks.map((chunk, index) => ({
-    exam_group_id: examGroupId,
-    question: chunks.length === 1 ? SYLLABUS_FAQ_KEY : `${SYLLABUS_FAQ_KEY}_${index + 1}`,
-    answer: chunk,
-    display_order: 9990 + index,
-  }));
-
-  const { error: insertError } = await supabase.from("exam_page_faqs").insert(rowsToInsert);
-  if (insertError) {
-    return { success: false, message: `Failed to save syllabus: ${insertError.message}` };
-  }
-
-  refresh();
-  return { success: true, message: "Official government notification syllabus saved successfully!" };
 }

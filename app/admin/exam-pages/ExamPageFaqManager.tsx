@@ -5,18 +5,12 @@ import { useActionState, useMemo, useState } from "react";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { SeoFields } from "@/components/admin/SeoFields";
 import { formatExamHeading } from "@/lib/exam-catalog";
-import {
-  DEFAULT_APPSC_GENERAL_STUDIES_SYLLABUS,
-  DEFAULT_TELANGANA_POLICE_SYLLABUS,
-  SYLLABUS_FAQ_KEY,
-} from "@/lib/exam-syllabus";
-import { examUrl, syllabusUrl } from "@/lib/public-urls";
+import { examUrl } from "@/lib/public-urls";
 import {
   createExamPageFaq,
   deleteExamPageFaq,
   updateExamPageContent,
   updateExamPageFaq,
-  updateExamPageSyllabus,
   type ExamPageContentActionState,
   type FaqActionState,
 } from "./actions";
@@ -79,108 +73,6 @@ function ExamPageContentForm({ exam, state }: { exam: Exam; state: State }) {
   );
 }
 
-function ExamPageSyllabusForm({
-  exam,
-  state,
-  initialSyllabus,
-}: {
-  exam: Exam;
-  state: State;
-  initialSyllabus: string;
-}) {
-  const [result, formAction, pending] = useActionState(updateExamPageSyllabus, initialContentState);
-  const [syllabusText, setSyllabusText] = useState(initialSyllabus);
-  const syllabusPath = syllabusUrl(state.slug, exam.slug);
-
-  const loadDefaultAppsc = () => {
-    setSyllabusText(DEFAULT_APPSC_GENERAL_STUDIES_SYLLABUS);
-  };
-
-  const loadDefaultTgprb = () => {
-    setSyllabusText(DEFAULT_TELANGANA_POLICE_SYLLABUS);
-  };
-
-  return (
-    <section className="overflow-hidden rounded-3xl border border-teal-200 bg-white shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b bg-gradient-to-r from-teal-50 to-white px-6 py-5">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Official Government Notification</p>
-          <h2 className="font-display mt-2 text-2xl">{exam.name} Official Syllabus</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Paste or update the official syllabus released by the government commission. It powers the dedicated syllabus page.
-          </p>
-        </div>
-        <Link
-          href={syllabusPath}
-          target="_blank"
-          className="rounded-xl border border-teal-200 bg-white px-4 py-2.5 text-sm font-black text-teal-800 hover:bg-teal-50"
-        >
-          View student syllabus page ↗
-        </Link>
-      </div>
-
-      <form action={formAction} className="space-y-5 p-6">
-        <input type="hidden" name="exam_group_id" value={exam.id} />
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <label className="block text-sm font-bold text-slate-900">
-            Official Government Syllabus Units
-          </label>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={loadDefaultAppsc}
-              className="rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 transition"
-            >
-              Load APPSC 10-Unit Template
-            </button>
-            <button
-              type="button"
-              onClick={loadDefaultTgprb}
-              className="rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 transition"
-            >
-              Load TGPRB Police 8-Unit Template
-            </button>
-          </div>
-        </div>
-
-        <p className="text-xs text-slate-500 leading-relaxed">
-          Format supported: Numbered units as released in official gazette/notifications (e.g. <code>01 . Major Current Events...</code>, <code>02 . General Science...</code>). The student syllabus page will automatically parse this into distinct, beautifully typeset curriculum units with focus tags.
-        </p>
-
-        <textarea
-          name="syllabus_text"
-          rows={12}
-          value={syllabusText}
-          onChange={(e) => setSyllabusText(e.target.value)}
-          placeholder={`01 . Major Current Events and Issues pertaining to International, National and State of Andhra Pradesh.\n02 . General Science and its applications to the day to day life Contemporary developments in Science & Technology...\n03 . History of India – emphasis will be on broad general understanding...`}
-          className="w-full rounded-xl border border-slate-300 bg-slate-50/50 p-4 font-mono text-xs leading-relaxed focus:bg-white focus:outline-teal-600 text-slate-900"
-        />
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-xl bg-teal-800 hover:bg-teal-900 px-5 py-3 text-sm font-black text-white transition disabled:opacity-50"
-          >
-            {pending ? "Saving syllabus…" : "Save Official Government Syllabus"}
-          </button>
-          {syllabusText && (
-            <button
-              type="button"
-              onClick={() => setSyllabusText("")}
-              className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-600 transition"
-            >
-              Clear (Reset to default)
-            </button>
-          )}
-        </div>
-        <Message state={result} />
-      </form>
-    </section>
-  );
-}
-
 function FaqForm({ examId, faq, initial }: { examId: string; faq?: Faq; initial?: NewFaq }) {
   const action = faq ? updateExamPageFaq : createExamPageFaq;
   const [state, formAction, pending] = useActionState(action, initialFaqState);
@@ -228,32 +120,14 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
   const availableExams = useMemo(() => exams.filter((exam) => exam.boardId === boardId), [exams, boardId]);
   const selectedState = states.find((state) => state.id === stateId);
   const selected = exams.find((exam) => exam.id === examId);
-
-  const syllabusFaqs = useMemo(
-    () =>
-      faqs
-        .filter((faq) => faq.exam_group_id === examId && faq.question.startsWith(SYLLABUS_FAQ_KEY))
-        .sort((a, b) => a.display_order - b.display_order),
-    [faqs, examId],
-  );
-  const initialSyllabus = useMemo(() => syllabusFaqs.map((f) => f.answer).join(""), [syllabusFaqs]);
-
-  const examFaqs = useMemo(
-    () =>
-      faqs
-        .filter((faq) => faq.exam_group_id === examId && !faq.question.startsWith(SYLLABUS_FAQ_KEY))
-        .sort((a, b) => a.display_order - b.display_order || a.question.localeCompare(b.question)),
-    [faqs, examId],
-  );
+  const examFaqs = faqs.filter((faq) => faq.exam_group_id === examId).sort((a, b) => a.display_order - b.display_order || a.question.localeCompare(b.question));
 
   return (
     <main>
       <section className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-teal-900 via-teal-950 to-slate-950 p-7 text-white shadow-xl shadow-teal-950/15 sm:p-9">
         <p className="text-xs font-black uppercase tracking-[0.15em] text-teal-200">Student page editor</p>
         <h1 className="font-display mt-3 text-4xl">Public exam pages</h1>
-        <p className="mt-3 max-w-3xl leading-7 text-slate-300">
-          Edit the student introduction, official government syllabus curriculum, Google search appearance, and Common Questions in one workspace.
-        </p>
+        <p className="mt-3 max-w-3xl leading-7 text-slate-300">Edit the student introduction, Google search appearance, and Common Questions for one Exam in one workspace.</p>
       </section>
 
       <section className="mt-8 rounded-3xl border bg-white p-6 shadow-sm">
@@ -269,7 +143,6 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
       {selected && selectedState ? (
         <div className="mt-8 space-y-8">
           <ExamPageContentForm key={`content-${selected.id}`} exam={selected} state={selectedState} />
-          <ExamPageSyllabusForm key={`syllabus-${selected.id}`} exam={selected} state={selectedState} initialSyllabus={initialSyllabus} />
           <section className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Common Questions for</p>
             <h2 className="font-display mt-2 text-3xl">{selected.name}</h2>
