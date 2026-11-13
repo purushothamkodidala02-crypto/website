@@ -7,7 +7,7 @@ import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, paperUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 import {
   computeExamSyllabus,
@@ -128,7 +128,7 @@ export default async function ExamSyllabusPage({ params }: Props) {
   const examTests = catalog.tests.filter((test) => paperIds.has(test.paper_id));
 
   // Fetch any custom government notification syllabus or FAQs saved by admin
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: rawFaqs } = await supabase
     .from("exam_page_faqs")
     .select("question, answer, display_order")
