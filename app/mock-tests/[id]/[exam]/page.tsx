@@ -32,6 +32,13 @@ import {
   summarizeExamNegativeMarking,
   type MockTestStatsSummary,
 } from "@/lib/scoring";
+import {
+  computeExamSyllabus,
+  type RawPaper,
+  type RawSubject,
+  type RawSection,
+  type RawTest,
+} from "@/lib/exam-syllabus";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
@@ -122,8 +129,24 @@ export default async function ExamPage({ params, searchParams }: Props) {
     });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
   const teluguData = getExamTeluguMetadata(context.exam.slug, context.exam.name, context.state.slug);
+  const examCategory = catalog.categories.find((cat) => cat.id === context.exam!.exam_id);
+  const boardName = examCategory?.name ?? null;
+
+  const syllabus = computeExamSyllabus({
+    examName: context.exam.name,
+    examDescription: context.exam.description,
+    stateName: context.state.name,
+    stateCode: context.state.code,
+    boardName,
+    papers: papers as RawPaper[],
+    subjects: catalog.subjects.filter((s) => paperIds.has(s.paper_id) && s.is_active) as RawSubject[],
+    sections: catalog.sections.filter((sec) => sec.is_active) as RawSection[],
+    tests: tests as RawTest[],
+    overridePattern: teluguData?.pattern,
+  });
+
   const patternNegativeDisplay = formatPatternNegativeDisplay(
-    teluguData?.pattern?.negativeMarking,
+    syllabus.pattern.negativeMarking,
     examNegativeSummary.positiveValues,
   );
   const fallbackTitle = teluguData ? teluguData.bilingualPageTitle : formatExamFallbackTitle(context.exam.name, context.state.name);
@@ -657,16 +680,16 @@ export default async function ExamPage({ params, searchParams }: Props) {
           </section>
         )}
 
-        {/* Official Exam Pattern & Overview */}
-        {teluguData?.pattern && (
+        {/* Official Exam Pattern & Overview - Computed Automatically */}
+        {syllabus.hasCurriculum && (
           <section id="exam-pattern" aria-labelledby="exam-pattern-heading" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
-                  {teluguData.pattern.authority}
+                  {syllabus.pattern.authority}
                 </p>
                 <h2 id="exam-pattern-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">
-                  {statePrefixedName} Exam Pattern & Syllabus
+                  {statePrefixedName} Exam Pattern &amp; Syllabus
                 </h2>
               </div>
               <Link
@@ -681,33 +704,47 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Questions</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalQuestions} Qs</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
+                  {syllabus.pattern.totalQuestions ? `${syllabus.pattern.totalQuestions} Qs` : `${syllabus.pattern.totalPapers} Paper(s)`}
+                </p>
                 <p className="mt-0.5 text-[10px] font-medium text-slate-500">Multiple Choice (MCQ)</p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Total Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalMarks} Marks</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">1 Mark Each</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
+                  {syllabus.pattern.totalMarks ? `${syllabus.pattern.totalMarks} Marks` : "Official Scale"}
+                </p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">1 Mark / Question</p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Duration</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.durationMinutes} Mins</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">3 Hours Timed</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
+                  {syllabus.pattern.durationMinutes
+                    ? `${syllabus.pattern.durationMinutes} Mins`
+                    : (syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Sessions` : "Timed CBT")}
+                </p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">Official Exam Time</p>
               </div>
               <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">{patternNegativeDisplay.headline}</p>
-                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">{patternNegativeDisplay.detail}</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">
+                  {patternNegativeDisplay.headline || syllabus.pattern.negativeMarking}
+                </p>
+                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">
+                  {patternNegativeDisplay.detail || "Official Scheme"}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Languages</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">Bilingual</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">English & Telugu</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">{syllabus.pattern.medium}</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">English &amp; Telugu</p>
               </div>
               <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-teal-800">Official Mode</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-teal-950">{teluguData.pattern.mode.includes("OMR") ? "OMR Based Test" : teluguData.pattern.mode}</p>
-                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Offline OMR Sheet</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-teal-950">
+                  {syllabus.pattern.mode}
+                </p>
+                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Official Format</p>
               </div>
             </div>
 
@@ -715,7 +752,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <div className="mt-6 rounded-2xl border border-slate-200/80 bg-[#f6faf8] p-4 sm:p-5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">Recruitment Selection Stages</h3>
               <div className="mt-3 flex flex-wrap gap-2">
-                {teluguData.pattern.stages.map((stage) => (
+                {syllabus.pattern.stages.map((stage) => (
                   <span key={stage} className="rounded-xl border border-slate-200/90 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs">
                     {stage}
                   </span>
@@ -724,21 +761,36 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </div>
 
             {/* Subject-Wise Syllabus Cards */}
-            <div className="mt-6">
-              <h3 className="text-sm font-bold text-slate-900">Subject-wise Syllabus Coverage</h3>
-              <p className="mt-1 text-xs text-slate-500">
-                Practice topic-wise and full-length tests mapped to every section of the official syllabus:
-              </p>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {teluguData.pattern.subjects.map((sub) => (
-                  <div key={sub.name} className="group rounded-2xl border border-slate-200/90 bg-white p-4 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-                    <h4 className="text-xs font-bold text-teal-800 group-hover:text-teal-950 transition">{sub.name}</h4>
-                    <p className="text-xs font-semibold text-slate-800 mt-0.5">{sub.teluguName}</p>
-                    <p className="text-[11px] leading-relaxed text-slate-600 mt-2">{sub.description}</p>
-                  </div>
-                ))}
+            {syllabus.units.length > 0 && (
+              <div className="mt-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-slate-900">Subject-wise Syllabus Coverage</h3>
+                  <Link
+                    href={syllabusUrl(context.state.slug, context.exam.slug)}
+                    className="text-xs font-semibold text-teal-800 hover:underline"
+                  >
+                    View all {syllabus.units.length} subjects &amp; units →
+                  </Link>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Practice topic-wise and full-length tests mapped to every section of the official syllabus:
+                </p>
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {syllabus.units.slice(0, 6).map((unit) => (
+                    <article key={unit.name} className="rounded-xl border border-slate-200 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="rounded-md bg-teal-50 border border-teal-200 px-2 py-0.5 text-[11px] font-bold text-teal-900">
+                          {unit.unitNumber}
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-500">{unit.paperName}</span>
+                      </div>
+                      <h4 className="font-display mt-2 text-sm font-bold text-slate-900">{unit.name}</h4>
+                      <p className="mt-1 text-xs text-slate-600 line-clamp-2">{unit.description}</p>
+                    </article>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </section>
         )}
 

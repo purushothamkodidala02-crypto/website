@@ -91,7 +91,7 @@ export const getMockTestCatalogData = unstable_cache(
       supabase.from("exams").select("id, state_id, name, slug, seo_title, seo_description, is_active").order("display_order"),
       supabase.from("exam_groups").select("id, exam_id, name, slug, description, seo_title, seo_description, is_active").order("display_order"),
       supabase.from("exam_specializations").select("id, exam_group_id, name, slug, description, seo_title, seo_description, is_active").order("display_order"),
-      supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, description, seo_title, seo_description, display_order, question_count, default_correct_marks, default_negative_marks, is_active").order("display_order"),
+      supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, description, seo_title, seo_description, display_order, duration_minutes, question_count, default_correct_marks, default_negative_marks, is_active").order("display_order"),
       supabase.from("subjects").select("id, paper_id, name, slug, description, seo_title, seo_description, is_active").order("display_order"),
       supabase.from("subject_sections").select("id, subject_id, name, slug, description, display_order, is_active").order("display_order"),
       supabase.from("mock_tests").select("id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, slug, description, seo_title, seo_description, duration_minutes, target_question_count, access_type, created_at, published_at, updated_at").eq("status", "published").order("series_number"),

@@ -4,11 +4,17 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
-import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, paperUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
+import {
+  computeExamSyllabus,
+  type RawPaper,
+  type RawSubject,
+  type RawSection,
+  type RawTest,
+} from "@/lib/exam-syllabus";
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -110,29 +116,54 @@ export default async function ExamSyllabusPage({ params }: Props) {
   const meta = buildSyllabusMeta(context);
   const examHref = examUrl(state.slug, examGroup.slug);
 
+  const category = catalog.categories.find((cat) => cat.id === examGroup.exam_id);
+  const boardName = category?.name ?? null;
+
   const papers = catalog.papers.filter((paper) => paper.exam_group_id === examGroup.id);
-  const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const paperIds = new Set(papers.map((paper) => paper.id));
   const examSubjects = catalog.subjects.filter((sub) => paperIds.has(sub.paper_id) && sub.is_active);
   const subjectIds = new Set(examSubjects.map((sub) => sub.id));
   const examSections = catalog.sections.filter((sec) => subjectIds.has(sec.subject_id) && sec.is_active);
   const examTests = catalog.tests.filter((test) => paperIds.has(test.paper_id));
 
+  // Compute comprehensive syllabus details automatically
+  const syllabus = computeExamSyllabus({
+    examName: examGroup.name,
+    examDescription: examGroup.description,
+    stateName: state.name,
+    stateCode: meta.stateCode,
+    boardName,
+    papers: papers as RawPaper[],
+    subjects: examSubjects as RawSubject[],
+    sections: examSections as RawSection[],
+    tests: examTests as RawTest[],
+    overridePattern: meta.teluguData?.pattern,
+  });
+
+  const subjectNames = examSubjects.map((s) => s.name).slice(0, 8);
+  const dynamicFaqs = [
+    {
+      question: `What is the exam pattern for ${meta.shortPrefixedName}?`,
+      answer: syllabus.hasPapers
+        ? `${meta.shortPrefixedName} consists of ${syllabus.pattern.totalPapers} paper(s)${syllabus.pattern.totalQuestions ? ` with ${syllabus.pattern.totalQuestions} total questions` : ""}${syllabus.pattern.totalMarks ? ` and ${syllabus.pattern.totalMarks} total marks` : ""}. Marking scheme follows ${syllabus.pattern.negativeMarking}. The examination is conducted in ${syllabus.pattern.medium} via ${syllabus.pattern.mode}.`
+        : `The official examination pattern for ${meta.shortPrefixedName} is framed by ${syllabus.pattern.authority} and will be detailed as per the latest notification release.`,
+    },
+    {
+      question: `Which subjects are covered in the ${meta.shortPrefixedName} syllabus?`,
+      answer: subjectNames.length > 0
+        ? `The syllabus covers key papers and subjects including: ${subjectNames.join(", ")}${examSubjects.length > subjectNames.length ? ` and ${examSubjects.length - subjectNames.length} more` : ""}. Practice tests are available for each subject on Varadhi Prep.`
+        : `The syllabus covers all foundational General Studies and specialised subjects notified by ${syllabus.pattern.authority}. Free mock tests are organized paper-wise.`,
+    },
+    {
+      question: `Are free mock tests available for ${examGroup.name} on Varadhi Prep?`,
+      answer: `Yes! Varadhi Prep provides free chapter-wise and full-length bilingual mock tests in Telugu and English with timed CBT interfaces, negative marking calculations, and detailed solutions.`,
+    },
+  ];
+
   const faqs = [
     ...(meta.teluguData?.englishFaqs ?? []),
     ...(meta.teluguData?.teluguFaqs ?? []),
-    ...(meta.teluguData
-      ? []
-      : [
-          {
-            question: `What is included in the ${meta.statePrefixedName} syllabus on Varadhi Prep?`,
-            answer: `You can inspect paper-wise subjects (${examSubjects.length} active subjects across ${papers.length} paper${papers.length === 1 ? "" : "s"}) and start free timed bilingual mock tests directly mapped to the syllabus.`,
-          },
-          {
-            question: `Are ${examGroup.name} mock tests free to practice after reading the syllabus?`,
-            answer: `Yes. Use any subject or paper link on this syllabus page to open free online mock tests in Telugu and English with detailed solutions.`,
-          },
-        ]),
+    ...(meta.teluguData ? [] : dynamicFaqs),
   ];
 
   const structuredData = [
@@ -218,12 +249,14 @@ export default async function ExamSyllabusPage({ params }: Props) {
                   PWT Exam Date: {meta.teluguData.schedule.prelimsExamDate} ↓
                 </a>
               )}
-              <a
-                href="#subjects-syllabus"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition shadow-2xs"
-              >
-                Jump to Subject Syllabus ↓
-              </a>
+              {syllabus.hasCurriculum && (
+                <a
+                  href="#subjects-syllabus"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition shadow-2xs"
+                >
+                  Jump to Subject Syllabus ↓
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -322,141 +355,254 @@ export default async function ExamSyllabusPage({ params }: Props) {
           </section>
         )}
 
-        {meta.teluguData?.pattern && (
-          <section aria-labelledby="syllabus-pattern-heading" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
-              {meta.teluguData.pattern.authority}
-            </p>
-            <h2 id="syllabus-pattern-heading" className="font-display mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-              {meta.shortPrefixedName} ({state.name}) Exam Pattern Overview
-            </h2>
-
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
-                <p className="text-xs font-semibold text-slate-500">Questions</p>
-                <p className="font-display mt-1 text-lg font-bold text-slate-900">{meta.teluguData.pattern.totalQuestions} Qs</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
-                <p className="text-xs font-semibold text-slate-500">Total Marks</p>
-                <p className="font-display mt-1 text-lg font-bold text-slate-900">{meta.teluguData.pattern.totalMarks} Marks</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
-                <p className="text-xs font-semibold text-slate-500">Duration</p>
-                <p className="font-display mt-1 text-lg font-bold text-slate-900">{meta.teluguData.pattern.durationMinutes} Mins</p>
-              </div>
-              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center">
-                <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
-                <p className="font-display mt-1 text-sm font-bold text-teal-950">{meta.teluguData.pattern.negativeMarking}</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
-                <p className="text-xs font-semibold text-slate-500">Medium</p>
-                <p className="font-display mt-1 text-sm font-bold text-slate-900">{meta.teluguData.pattern.medium}</p>
-              </div>
-              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center">
-                <p className="text-xs font-semibold text-teal-800">Exam Mode</p>
-                <p className="font-display mt-1 text-sm font-bold text-teal-950">{meta.teluguData.pattern.mode}</p>
-              </div>
+        {/* Dynamic Exam Pattern Overview - Computed Automatically for All Exams */}
+        <section aria-labelledby="syllabus-pattern-heading" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                {syllabus.pattern.authority}
+              </p>
+              <h2 id="syllabus-pattern-heading" className="font-display mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
+                {meta.shortPrefixedName} ({state.name}) Exam Pattern Overview
+              </h2>
             </div>
+            {syllabus.hasPapers && (
+              <span className="rounded-full bg-teal-50 border border-teal-200/80 px-3 py-1 text-xs font-bold text-teal-950">
+                {syllabus.pattern.totalPapers} Official Paper{syllabus.pattern.totalPapers === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-200/80 bg-[#f6faf8] p-4 sm:p-5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">Selection Stages</h3>
-              <ol className="mt-3 space-y-2 text-sm text-slate-800">
-                {meta.teluguData.pattern.stages.map((stage) => (
-                  <li key={stage} className="rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 font-medium">
-                    {stage}
-                  </li>
-                ))}
-              </ol>
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
+              <p className="text-xs font-semibold text-slate-500">Total Questions</p>
+              <p className="font-display mt-1 text-lg font-bold text-slate-900">
+                {syllabus.pattern.totalQuestions ? `${syllabus.pattern.totalQuestions} Qs` : `${syllabus.pattern.totalPapers} Paper(s)`}
+              </p>
+              <p className="mt-0.5 text-[10px] font-medium text-slate-500">Multiple Choice (MCQ)</p>
             </div>
-          </section>
-        )}
+            <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
+              <p className="text-xs font-semibold text-slate-500">Total Marks</p>
+              <p className="font-display mt-1 text-lg font-bold text-slate-900">
+                {syllabus.pattern.totalMarks ? `${syllabus.pattern.totalMarks} Marks` : "Official Scale"}
+              </p>
+              <p className="mt-0.5 text-[10px] font-medium text-slate-500">Full Weightage</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
+              <p className="text-xs font-semibold text-slate-500">Duration</p>
+              <p className="font-display mt-1 text-lg font-bold text-slate-900">
+                {syllabus.pattern.durationMinutes
+                  ? `${syllabus.pattern.durationMinutes} Mins`
+                  : (syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Sessions` : "Timed CBT")}
+              </p>
+              <p className="mt-0.5 text-[10px] font-medium text-slate-500">Official Exam Time</p>
+            </div>
+            <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center">
+              <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
+              <p className="font-display mt-1 text-sm font-bold text-teal-950">{syllabus.pattern.negativeMarking}</p>
+              <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Official Penalty</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
+              <p className="text-xs font-semibold text-slate-500">Medium</p>
+              <p className="font-display mt-1 text-sm font-bold text-slate-900">{syllabus.pattern.medium}</p>
+              <p className="mt-0.5 text-[10px] font-medium text-slate-500">Telugu &amp; English</p>
+            </div>
+            <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center">
+              <p className="text-xs font-semibold text-teal-800">Exam Mode</p>
+              <p className="font-display mt-1 text-sm font-bold text-teal-950">{syllabus.pattern.mode}</p>
+              <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Official Format</p>
+            </div>
+          </div>
 
-        <section id="subjects-syllabus" aria-labelledby="subjects-syllabus-heading" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
-          <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Topic Breakdown</p>
-          <h2 id="subjects-syllabus-heading" className="font-display mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Subject-Wise Syllabus &amp; Practice Links
-          </h2>
-
-          {meta.teluguData?.pattern?.subjects && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {meta.teluguData.pattern.subjects.map((sub, idx) => (
-                <article key={sub.name} className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-5">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="rounded-lg bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 text-xs font-bold text-teal-900">
-                      Unit {String(idx + 1).padStart(2, "0")}
-                    </span>
-                  </div>
-                  <h3 className="font-display mt-3 text-base font-bold text-slate-900">{sub.name}</h3>
-                  <p className="mt-0.5 text-xs font-semibold text-teal-800">{sub.teluguName}</p>
-                  <p className="mt-2.5 text-sm leading-relaxed text-slate-600">{sub.description}</p>
-                </article>
+          <div className="mt-6 rounded-2xl border border-slate-200/80 bg-[#f6faf8] p-4 sm:p-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">Recruitment &amp; Selection Stages</h3>
+            <ol className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-slate-800">
+              {syllabus.pattern.stages.map((stage, idx) => (
+                <li key={stage} className="flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 font-medium">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-700 text-xs font-bold text-white">
+                    {idx + 1}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900">{stage}</span>
+                </li>
               ))}
-            </div>
-          )}
+            </ol>
+          </div>
+        </section>
 
-          {papers.length > 0 && (
-            <div className="mt-8 space-y-5">
-              <h3 className="font-display text-lg font-bold text-slate-900">
-                Published Papers &amp; Syllabus Subjects ({papers.length})
-              </h3>
-              {papers.map((paper) => {
-                const paperSubjects = examSubjects.filter((sub) => sub.paper_id === paper.id);
-                const paperLabel = paperDisplayById.get(paper.id)?.label ?? paper.name;
-                return (
-                  <div key={paper.id} className="rounded-2xl border border-slate-200 bg-[#f9fbfa] p-5">
+        {/* Curriculum & Subject Breakdown */}
+        {syllabus.hasCurriculum ? (
+          <section id="subjects-syllabus" aria-labelledby="subjects-syllabus-heading" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Academic Curriculum</p>
+                <h2 id="subjects-syllabus-heading" className="font-display mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
+                  Subject-Wise Syllabus &amp; Topic Units
+                </h2>
+              </div>
+              <span className="rounded-full bg-teal-50 border border-teal-200/80 px-3.5 py-1 text-xs font-bold text-teal-950">
+                {syllabus.totalSubjectsCount} Subject{syllabus.totalSubjectsCount === 1 ? "" : "s"}
+                {syllabus.totalTopicsCount > 0 ? ` · ${syllabus.totalTopicsCount} Sub-Topics` : ""}
+              </span>
+            </div>
+
+            {/* Structured Unit Cards */}
+            {syllabus.units.length > 0 && (
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {syllabus.units.map((unit) => (
+                  <article key={unit.name} className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-5 transition hover:border-teal-300">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="rounded-lg bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 text-xs font-bold text-teal-900">
+                          {unit.unitNumber}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-500">
+                          {unit.paperName}
+                        </span>
+                      </div>
+                      <h3 className="font-display mt-3 text-base font-bold text-slate-900">{unit.name}</h3>
+                      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">{unit.description}</p>
+                    </div>
+
+                    {unit.topics.length > 0 && (
+                      <div className="mt-4 border-t border-slate-200/70 pt-3">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Key Focus Areas:</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {unit.topics.map((topic) => (
+                            <span key={topic} className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            )}
+
+            {/* Paper-Wise Structure & Marks Allocation */}
+            {syllabus.papers.length > 0 && (
+              <div className="mt-10 space-y-6 border-t border-slate-100 pt-8">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Exam Scheme</p>
+                  <h3 className="font-display mt-1 text-xl font-bold text-slate-900">
+                    Paper-Wise Marks &amp; Question Distribution ({syllabus.papers.length})
+                  </h3>
+                </div>
+
+                {syllabus.papers.map((paper) => (
+                  <div key={paper.id} className="rounded-2xl border border-slate-200 bg-[#f9fbfa] p-5 sm:p-6">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <h4 className="font-display text-base font-bold text-slate-900">{paperLabel}</h4>
+                        <h4 className="font-display text-base sm:text-lg font-bold text-slate-900">{paper.label}</h4>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600">
+                          {paper.questionCount && (
+                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
+                              {paper.questionCount} Questions
+                            </span>
+                          )}
+                          {paper.totalMarks && (
+                            <span className="rounded-md bg-teal-50 border border-teal-200 text-teal-900 px-2 py-0.5">
+                              {paper.totalMarks} Marks
+                            </span>
+                          )}
+                          {paper.durationMinutes && (
+                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
+                              {paper.durationMinutes} Minutes
+                            </span>
+                          )}
+                          {paper.negativeMarks > 0 ? (
+                            <span className="rounded-md bg-rose-50 border border-rose-200 text-rose-800 px-2 py-0.5">
+                              -{paper.negativeMarks} Negative
+                            </span>
+                          ) : (
+                            <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5">
+                              No Negative
+                            </span>
+                          )}
+                        </div>
                         {paper.description && (
-                          <p className="mt-1 text-xs text-slate-600">{paper.description}</p>
+                          <p className="mt-2 text-xs text-slate-600">{paper.description}</p>
                         )}
                       </div>
                       <Link
                         href={paperUrl(state.slug, examGroup.slug, paper.slug)}
-                        className="inline-flex items-center rounded-xl bg-teal-800 hover:bg-teal-900 px-4 py-2 text-xs font-semibold text-white transition"
+                        className="inline-flex min-h-[38px] items-center rounded-xl bg-teal-800 hover:bg-teal-900 px-4 py-2 text-xs font-semibold text-white transition shadow-xs"
                       >
                         Open {paper.name} Tests →
                       </Link>
                     </div>
 
-                    {paperSubjects.length > 0 && (
-                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {paperSubjects.map((sub) => {
-                          const subSections = examSections.filter((sec) => sec.subject_id === sub.id);
-                          const subTests = examTests.filter((test) => test.subject_id === sub.id);
-                          return (
-                            <Link
-                              key={sub.id}
-                              href={subjectUrl(state.slug, examGroup.slug, paper.slug, sub.slug)}
-                              className="group rounded-xl border border-slate-200 bg-white p-4 transition hover:border-teal-400 hover:shadow-xs"
-                            >
+                    {paper.subjects.length > 0 && (
+                      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {paper.subjects.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            href={subjectUrl(state.slug, examGroup.slug, paper.slug, sub.slug)}
+                            className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 transition hover:border-teal-400 hover:shadow-xs"
+                          >
+                            <div>
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-sm font-bold text-slate-900 group-hover:text-teal-800 transition">
                                   {sub.name}
                                 </span>
                                 <span className="shrink-0 text-xs font-semibold text-teal-800">
-                                  {subTests.length} tests
+                                  {sub.testCount} test{sub.testCount === 1 ? "" : "s"}
                                 </span>
                               </div>
                               {sub.description && (
                                 <p className="mt-1.5 text-xs text-slate-600 line-clamp-2">{sub.description}</p>
                               )}
-                              {subSections.length > 0 && (
-                                <p className="mt-2 text-[11px] font-medium text-slate-500">
-                                  Topics: {subSections.map((s) => s.name).join(", ")}
-                                </p>
-                              )}
-                            </Link>
-                          );
-                        })}
+                            </div>
+
+                            {sub.topics.length > 0 && (
+                              <p className="mt-3 text-[11px] font-medium text-slate-500 border-t border-slate-100 pt-2">
+                                Sub-topics: {sub.topics.slice(0, 3).join(", ")}{sub.topics.length > 3 ? ` +${sub.topics.length - 3}` : ""}
+                              </p>
+                            )}
+                          </Link>
+                        ))}
                       </div>
                     )}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+            )}
+          </section>
+        ) : (
+          /* Graceful Notice when an Exam is brand new and has no papers/subjects added yet */
+          <section className="rounded-2xl border border-teal-200/80 bg-white p-8 text-center shadow-2xs">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
             </div>
-          )}
-        </section>
+            <span className="mt-4 inline-block rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold text-teal-900">
+              Official 2026 Notification &amp; Syllabus in Preparation
+            </span>
+            <h2 className="font-display mt-2 text-2xl font-bold text-slate-900">
+              {meta.shortPrefixedName} Syllabus &amp; Pattern
+            </h2>
+            <p className="mx-auto mt-2.5 max-w-xl text-sm leading-relaxed text-slate-600">
+              The official examination pattern, paper allocation, and topic syllabus for {examGroup.name} are currently being compiled according to the latest {boardName || state.name} recruiting guidelines.
+              New papers and free mock tests will appear here automatically.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                href={stateUrl(state.slug)}
+                className="inline-flex min-h-[42px] items-center rounded-xl bg-teal-800 hover:bg-teal-900 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs"
+              >
+                Browse Available {state.name} Mock Tests →
+              </Link>
+              <Link
+                href="/mock-tests"
+                className="inline-flex min-h-[42px] items-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition"
+              >
+                View All States &amp; Exams
+              </Link>
+            </div>
+          </section>
+        )}
 
         {faqs.length > 0 && (
           <section aria-labelledby="syllabus-faq-title" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
