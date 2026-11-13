@@ -378,7 +378,7 @@ const TELUGU_EXAMS: Record<string, ExamTeluguSeo> = {
     pattern: {
       authority: "APPSC / TGPSC Endowments Commission",
       totalQuestions: null,
-      totalMarks: 300,
+      totalMarks: null,
       durationMinutes: 300,
       negativeMarking: "0.33 (1/3rd penalty per wrong answer)",
       medium: "Bilingual (Telugu & English)",

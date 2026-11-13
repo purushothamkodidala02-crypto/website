@@ -268,7 +268,7 @@ export function computeExamSyllabus(params: {
     overridePattern?.totalMarks !== undefined
       ? overridePattern.totalMarks
       : isEndowment
-        ? 300
+        ? null
         : hasKnownMarks
           ? sumMarks
           : null;

@@ -145,7 +145,7 @@ export default async function ExamSyllabusPage({ params }: Props) {
     {
       question: `What is the exam pattern for ${meta.shortPrefixedName}?`,
       answer: syllabus.hasPapers
-        ? `${meta.shortPrefixedName} consists of ${syllabus.pattern.totalPapers} paper(s)${syllabus.pattern.totalQuestions ? ` with ${syllabus.pattern.totalQuestions} total questions` : ""}${syllabus.pattern.totalMarks ? ` and ${syllabus.pattern.totalMarks} total marks` : ""}. Marking scheme follows ${syllabus.pattern.negativeMarking}. The examination is conducted in ${syllabus.pattern.medium} via ${syllabus.pattern.mode}.`
+        ? `${meta.shortPrefixedName} consists of ${syllabus.pattern.totalPapers} official examination paper(s)${syllabus.pattern.totalQuestions ? ` with ${syllabus.pattern.totalQuestions} questions` : ""}. The examination is conducted in ${syllabus.pattern.medium} via ${syllabus.pattern.mode}.`
         : `The official examination pattern for ${meta.shortPrefixedName} is framed by ${syllabus.pattern.authority} and will be detailed as per the latest notification release.`,
     },
     {
@@ -373,7 +373,7 @@ export default async function ExamSyllabusPage({ params }: Props) {
             )}
           </div>
 
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
               <p className="text-xs font-semibold text-slate-500">
                 {syllabus.pattern.totalQuestions ? "Total Questions" : "Exam Papers"}
@@ -388,17 +388,6 @@ export default async function ExamSyllabusPage({ params }: Props) {
               </p>
             </div>
             <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
-              <p className="text-xs font-semibold text-slate-500">Total Marks</p>
-              <p className="font-display mt-1 text-lg font-bold text-slate-900">
-                {syllabus.pattern.totalMarks ? `${syllabus.pattern.totalMarks} Marks` : "Official Scale"}
-              </p>
-              <p className="mt-0.5 text-[10px] font-medium text-slate-500">
-                {syllabus.pattern.totalMarks && syllabus.pattern.totalPapers > 1
-                  ? `${Math.round(syllabus.pattern.totalMarks / syllabus.pattern.totalPapers)} Marks / Paper`
-                  : "Full Weightage"}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
               <p className="text-xs font-semibold text-slate-500">Duration</p>
               <p className="font-display mt-1 text-lg font-bold text-slate-900">
                 {syllabus.pattern.durationMinutes
@@ -408,11 +397,6 @@ export default async function ExamSyllabusPage({ params }: Props) {
               <p className="mt-0.5 text-[10px] font-medium text-slate-500">
                 {syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Timed Sessions` : "Official Exam Time"}
               </p>
-            </div>
-            <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center">
-              <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
-              <p className="font-display mt-1 text-sm font-bold text-teal-950">{syllabus.pattern.negativeMarking}</p>
-              <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Official Penalty</p>
             </div>
             <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center">
               <p className="text-xs font-semibold text-slate-500">Medium</p>
@@ -515,13 +499,13 @@ export default async function ExamSyllabusPage({ params }: Props) {
               </div>
             )}
 
-            {/* Paper-Wise Structure & Marks Allocation */}
+            {/* Paper-Wise Structure & Curriculum */}
             {syllabus.papers.length > 0 && (
               <div className="mt-8 sm:mt-10 space-y-5 sm:space-y-6 border-t border-slate-100 pt-6 sm:pt-8">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Exam Scheme</p>
                   <h3 className="font-display mt-1 text-xl font-bold text-slate-900">
-                    Paper-Wise Marks &amp; Question Distribution ({syllabus.papers.length})
+                    Official Examination Papers &amp; Structure ({syllabus.papers.length})
                   </h3>
                 </div>
 
@@ -531,28 +515,12 @@ export default async function ExamSyllabusPage({ params }: Props) {
                       <div>
                         <h4 className="font-display text-base sm:text-lg font-bold text-slate-900">{paper.label}</h4>
                         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600">
-                          {paper.questionCount && (
-                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
-                              {paper.questionCount} Questions
-                            </span>
-                          )}
-                          {paper.totalMarks && (
-                            <span className="rounded-md bg-teal-50 border border-teal-200 text-teal-900 px-2 py-0.5">
-                              {paper.totalMarks} Marks
-                            </span>
-                          )}
+                          <span className="rounded-md bg-teal-50 border border-teal-200/80 text-teal-950 px-2 py-0.5">
+                            {paper.subjects.length} Subject{paper.subjects.length === 1 ? "" : "s"}
+                          </span>
                           {paper.durationMinutes && (
                             <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5">
                               {paper.durationMinutes} Minutes
-                            </span>
-                          )}
-                          {paper.negativeMarks > 0 ? (
-                            <span className="rounded-md bg-rose-50 border border-rose-200 text-rose-800 px-2 py-0.5">
-                              -{paper.negativeMarks} Negative
-                            </span>
-                          ) : (
-                            <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5">
-                              No Negative
                             </span>
                           )}
                         </div>

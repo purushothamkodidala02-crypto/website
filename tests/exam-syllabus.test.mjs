@@ -32,11 +32,17 @@ test("app/mock-tests/[id]/[exam]/syllabus/page.tsx utilizes computeExamSyllabus 
   assert.match(syllabusPage, /syllabus\.hasCurriculum/);
   assert.match(syllabusPage, /syllabus\.pattern\.authority/);
   assert.match(syllabusPage, /syllabus\.pattern\.totalQuestions/);
-  assert.match(syllabusPage, /syllabus\.pattern\.totalMarks/);
   assert.match(syllabusPage, /syllabus\.pattern\.durationMinutes/);
-  assert.match(syllabusPage, /syllabus\.pattern\.negativeMarking/);
+  assert.match(syllabusPage, /syllabus\.pattern\.medium/);
+  assert.match(syllabusPage, /syllabus\.pattern\.mode/);
   assert.match(syllabusPage, /syllabus\.units\.map/);
   assert.match(syllabusPage, /syllabus\.papers\.map/);
+
+  // Student-facing syllabus removes all marks displays
+  assert.doesNotMatch(syllabusPage, /Total Marks/);
+  assert.doesNotMatch(syllabusPage, /Negative Marks/);
+  assert.doesNotMatch(syllabusPage, /totalMarks/);
+  assert.match(syllabusPage, /Official Examination Papers &amp; Structure/);
 
   // Graceful fallback when no papers/subjects exist yet
   assert.match(syllabusPage, /Official 2026 Notification &amp; Syllabus in Preparation/);
