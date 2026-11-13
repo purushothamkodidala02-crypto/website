@@ -1,9 +1,7 @@
 /**
- * Content Protection Utilities
+ * Content Selection & Editing Helpers
  *
- * Helpers to identify editable vs protected content elements to block
- * unauthorized copying, scraping, and text selection across Varadhi Prep
- * while keeping form controls fully interactive for students.
+ * Helpers to identify editable form elements and inputs across Varadhi Prep.
  */
 
 export function isEditableElement(target: EventTarget | null): boolean {

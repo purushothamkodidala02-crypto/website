@@ -118,7 +118,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
       </head>
-      <body className="min-h-screen bg-white text-gray-900 select-none">
+      <body className="min-h-screen bg-white text-gray-900">
         <PostHogProvider>
           <NavigationProgress />
           <CopyProtection />

@@ -5,45 +5,42 @@ import { isEditableElement } from "../lib/copy-protection.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("site root layout wires global CopyProtection and applies select-none", async () => {
+test("site root layout permits text selection without select-none class", async () => {
   const [layout, component] = await Promise.all([
     read("app/layout.tsx"),
     read("components/site/CopyProtection.tsx"),
   ]);
 
-  // Root layout imports and renders CopyProtection
+  // Root layout renders CopyProtection
   assert.match(layout, /import\s*\{\s*CopyProtection\s*\}\s*from\s*["']@\/components\/site\/CopyProtection["']/);
   assert.match(layout, /<CopyProtection\s*\/>/);
 
-  // Root body enforces select-none
-  assert.match(layout, /<body[^>]*\bselect-none\b/);
+  // Root body does NOT enforce select-none so text selection and copying are permitted
+  assert.doesNotMatch(layout, /<body[^>]*\bselect-none\b/);
 
   // Component is a client component
   assert.match(component, /^"use client"/);
 });
 
-test("globals.css sets universal user-select none, callout blocking, and transparent selection", async () => {
+test("globals.css sets universal user-select text and visible selection highlights", async () => {
   const css = await read("app/globals.css");
 
-  // html, body user-select blocking and iOS touch callout blocking
-  assert.match(css, /html,\s*body\s*\{[^}]*-webkit-user-select:\s*none;/);
-  assert.match(css, /html,\s*body\s*\{[^}]*user-select:\s*none;/);
-  assert.match(css, /html,\s*body\s*\{[^}]*-webkit-touch-callout:\s*none;/);
+  // html, body user-select is enabled for text copying
+  assert.match(css, /html,\s*body\s*\{[^}]*-webkit-user-select:\s*text;/);
+  assert.match(css, /html,\s*body\s*\{[^}]*user-select:\s*text;/);
+  assert.doesNotMatch(css, /html,\s*body\s*\{[^}]*user-select:\s*none;/);
 
-  // Form controls preserve text selection for legitimate student interaction
+  // Touch callout is not blocked so mobile users can long-press to copy
+  assert.doesNotMatch(css, /html,\s*body\s*\{[^}]*-webkit-touch-callout:\s*none;/);
+
+  // Form controls preserve text selection
   assert.match(css, /input,\s*textarea,\s*\[contenteditable=["']true["']\][^\{]*\{[^}]*user-select:\s*text;/);
 
-  // Images cannot be dragged out of the page
-  assert.match(css, /img\s*\{[^}]*-webkit-user-drag:\s*none;/);
-
-  // Selection highlight is transparent by default for protected content
-  assert.match(css, /::selection\s*\{[^}]*background:\s*transparent;/);
-
-  // Inputs preserve visible selection highlight
-  assert.match(css, /input::selection,\s*textarea::selection/);
+  // Selection highlight is visible (#a7f3d0) for clear feedback when copying
+  assert.match(css, /::selection\s*\{[^}]*background:\s*#a7f3d0;/);
 });
 
-test("isEditableElement helper correctly distinguishes form inputs from protected content", () => {
+test("isEditableElement helper correctly distinguishes form inputs from static content", () => {
   // Mock element generator for node test environment
   const mockElement = (tagName, isContentEditable = false, parent = null) => {
     const el = {
@@ -88,38 +85,17 @@ test("isEditableElement helper correctly distinguishes form inputs from protecte
   assert.equal(isEditableElement(nullEl), false);
 });
 
-test("CopyProtection hooks into copy, cut, dragstart, selectstart, contextmenu, and keydown", async () => {
+test("CopyProtection does not block clipboard or text selection events for any users or admins", async () => {
   const component = await read("components/site/CopyProtection.tsx");
 
-  // Capturing listeners registered for all relevant clipboard and selection events
-  assert.match(component, /addEventListener\(["']copy["'],\s*handleCopy,\s*true\)/);
-  assert.match(component, /addEventListener\(["']cut["'],\s*handleCut,\s*true\)/);
-  assert.match(component, /addEventListener\(["']selectstart["'],\s*handleSelectStart,\s*true\)/);
-  assert.match(component, /addEventListener\(["']dragstart["'],\s*handleDragStart,\s*true\)/);
-  assert.match(component, /addEventListener\(["']contextmenu["'],\s*handleContextMenu,\s*true\)/);
-  assert.match(component, /addEventListener\(["']keydown["'],\s*handleKeyDown,\s*true\)/);
+  // Does NOT prevent default or wipe clipboardData on copy or cut
+  assert.doesNotMatch(component, /e\.preventDefault\(\)/);
+  assert.doesNotMatch(component, /clipboardData\.setData/);
+  assert.doesNotMatch(component, /selection\.removeAllRanges\(\)/);
 
-  // Clean-up on unmount
-  assert.match(component, /removeEventListener\(["']copy["']/);
-  assert.match(component, /removeEventListener\(["']cut["']/);
-  assert.match(component, /removeEventListener\(["']selectstart["']/);
-  assert.match(component, /removeEventListener\(["']dragstart["']/);
-  assert.match(component, /removeEventListener\(["']contextmenu["']/);
-  assert.match(component, /removeEventListener\(["']keydown["']/);
-
-  // Clipboard wiping and selection clearing
-  assert.match(component, /clipboardData\.setData\(["']text\/plain["'],\s*["']["']\)/);
-  assert.match(component, /selection\.removeAllRanges\(\)/);
-
-  // Keydown intercepts Ctrl+C, Ctrl+X, Ctrl+A, Ctrl+P
-  assert.match(component, /key\s*===\s*["']c["']/);
-  assert.match(component, /key\s*===\s*["']x["']/);
-  assert.match(component, /key\s*===\s*["']a["']/);
-  assert.match(component, /key\s*===\s*["']p["']/);
-
-  // Admin routes are exempted so administrators can manage test content
-  assert.match(component, /pathname\?\.startsWith\(["']\/admin["']\)/);
-  assert.match(component, /if\s*\(isAdmin\)\s*return/);
+  // Does NOT block keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+A)
+  assert.doesNotMatch(component, /key\s*===\s*["']c["']/);
+  assert.doesNotMatch(component, /key\s*===\s*["']a["']/);
 });
 
 test("admin layout maintains select-text and admin-workspace marker", async () => {
