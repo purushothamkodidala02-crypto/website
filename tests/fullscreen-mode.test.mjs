@@ -37,8 +37,9 @@ test("fullscreen exam mode opens on tablet/PC start and gracefully supports norm
   assert.match(runner, /Exam Hall Mode/);
   assert.match(runner, /Normal \/ Split screen/);
 
-  // Bottom number scrolling is removed for PC (scoped to lg:hidden)
-  assert.match(runner, /<div className="[^"]*lg:hidden[^"]*">\s*<HorizontalQuestionScroller/);
+  // Inline number scroller is removed from mobile exam view to prevent 3 simultaneous attempt indicators
+  assert.doesNotMatch(runner, /HorizontalQuestionScroller/);
+  assert.match(runner, /Questions Palette/);
 
   // Question layout fits screen on PC without perpetual scrolling
   assert.match(runner, /max-w-\[1720px\]/);

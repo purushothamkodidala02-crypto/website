@@ -497,8 +497,8 @@ export function StudentTestRunner({
             </div>
           </div>
 
-          {/* Box 2: Attempted Questions Progress & Stats */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3.5 sm:py-1.5 shadow-xs">
+          {/* Box 2: Attempted Questions Progress & Stats (Desktop/Tablet) */}
+          <div className="hidden md:flex shrink-0 items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3.5 sm:py-1.5 shadow-xs">
             <div className="flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
               <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
               <span className="hidden sm:inline text-[11px] font-bold text-slate-600">Attempted:</span>
@@ -720,11 +720,6 @@ export function StudentTestRunner({
               </div>
             </div>
           </section>
-
-          {/* Mobile/Tablet number scroller (hidden when right-side Question Navigator is active on md+ / Desktop mode) */}
-          <div className="mt-4 md:hidden lg:hidden">
-            <HorizontalQuestionScroller questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => setIndex(next)} />
-          </div>
 
           {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
         </div>
@@ -993,46 +988,4 @@ function PracticeTimerControl({
   );
 }
 
-function HorizontalQuestionScroller({ questions, currentIndex, answers, reviewIds, locked, onSelect }: { questions: TestQuestion[]; currentIndex: number; answers: Record<string, Answer>; reviewIds: Set<string>; locked: boolean; onSelect: (index: number) => void }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollLeft = () => { scrollRef.current?.scrollBy({ left: -200, behavior: "smooth" }); };
-  const scrollRight = () => { scrollRef.current?.scrollBy({ left: 200, behavior: "smooth" }); };
-  
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const activeButton = scrollRef.current.children[currentIndex] as HTMLElement | undefined;
-    if (activeButton) {
-       activeButton.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-    }
-  }, [currentIndex]);
 
-  return (
-    <div className="flex items-center gap-1.5 sm:gap-2">
-      <button type="button" onClick={scrollLeft} className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50">
-        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-      </button>
-      
-      <div ref={scrollRef} className="flex min-w-0 flex-1 snap-x gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {questions.map((item, index) => {
-            const marked = reviewIds.has(item.question_id);
-            const answered = Boolean(answers[item.question_id]);
-            return (
-              <button
-                key={item.question_id}
-                type="button"
-                disabled={locked}
-                onClick={() => onSelect(index)}
-                className={`flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 snap-center items-center justify-center rounded-lg text-xs font-black transition-colors ${index === currentIndex ? "bg-[#0a2922] text-white shadow-md ring-2 ring-emerald-400 ring-offset-2" : marked ? "bg-amber-100 text-amber-900" : answered ? "bg-emerald-100 text-emerald-800" : "border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"}`}
-              >
-                {index + 1}
-              </button>
-            );
-        })}
-      </div>
-
-      <button type="button" onClick={scrollRight} className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50">
-        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-      </button>
-    </div>
-  );
-}
