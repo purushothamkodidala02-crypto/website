@@ -99,6 +99,7 @@ export function StudentTestRunner({
   const [navigatorOpenDesktop, setNavigatorOpenDesktop] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isTimeUp, setIsTimeUp] = useState(false);
   const [pausing, setPausing] = useState(false);
   const [paused, setPaused] = useState(false);
   const [pauseError, setPauseError] = useState("");
@@ -211,14 +212,21 @@ export function StudentTestRunner({
     await Promise.all([...saveChains.current.values()]);
   }, []);
 
-  const finish = useCallback(async () => {
+  const finish = useCallback(async (autoSubmitDueToTime = false) => {
     if (isFinishingRef.current || submitting || submission) return;
     isFinishingRef.current = true;
+    if (autoSubmitDueToTime) {
+      setIsTimeUp(true);
+    }
     setConfirming(false);
     setSubmitting(true);
     void exitFullscreenSafely();
     try {
-      await flushSaves();
+      // Race flushSaves with 120ms timeout so in-flight background retries never stall submission
+      await Promise.race([
+        flushSaves(),
+        new Promise((resolve) => setTimeout(resolve, 120)),
+      ]);
       const res = await submitAttempt(sessionId, answers);
       if (!res.success) {
         console.warn("submitAttempt returned unsuccessful:", res.message);
@@ -262,7 +270,7 @@ export function StudentTestRunner({
       setRemaining(next);
       if (next === 0 && !hasAutoSubmittedRef.current && !isFinishingRef.current && !submitting) {
         hasAutoSubmittedRef.current = true;
-        void finish();
+        void finish(true);
       }
     };
     updateTimer();
@@ -414,6 +422,7 @@ export function StudentTestRunner({
         mockTestId={mockTestId}
         folderUrl={folderUrl}
         folderName={folderName}
+        isTimeUp={isTimeUp}
       />
     );
   }
@@ -854,7 +863,50 @@ export function StudentTestRunner({
       </div>
     )}
 
-    {confirming && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish()} questions={questions} answers={answers} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
+    {submitting && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2922]/80 backdrop-blur-sm p-4 animate-in fade-in duration-150" role="alertdialog" aria-modal="true" aria-busy="true">
+        <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white p-6 sm:p-8 text-center shadow-2xl border border-teal-100">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 border border-teal-200">
+            {isTimeUp ? (
+              <svg className="h-7 w-7 text-amber-600 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            ) : (
+              <svg className="h-7 w-7 text-teal-700 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+            )}
+          </div>
+
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-teal-800">
+            {isTimeUp ? "Examination Duration Completed" : "Official Examination Submission"}
+          </p>
+
+          <h2 className="mt-2 text-xl sm:text-2xl font-black text-slate-900">
+            {isTimeUp ? "Time Has Expired — Auto-Submitting" : "Submitting Your Examination"}
+          </h2>
+
+          <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-slate-600">
+            {isTimeUp
+              ? "The allotted time for this mock test has ended. In accordance with examination regulations, all your recorded responses are being securely submitted and evaluated."
+              : "Your examination responses are being securely transmitted to the evaluation server. Please wait a moment."}
+          </p>
+
+          <div className="mt-6 flex items-center justify-center gap-3 rounded-2xl bg-slate-50 border border-slate-200/90 px-4 py-3 text-xs sm:text-sm font-bold text-slate-700">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-teal-700 border-t-transparent" />
+            <span>Finalizing official test results…</span>
+          </div>
+
+          <p className="mt-4 text-[11px] font-semibold text-slate-400">
+            Please do not refresh or close this tab. You will be redirected to your evaluation summary automatically.
+          </p>
+        </div>
+      </div>
+    )}
+
+    {confirming && !submitting && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish(false)} questions={questions} answers={answers} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
   </main>;
 }
 

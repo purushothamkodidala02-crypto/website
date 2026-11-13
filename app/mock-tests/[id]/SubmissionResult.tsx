@@ -15,6 +15,7 @@ type SubmissionResultProps = {
   mockTestId?: string;
   folderUrl?: string;
   folderName?: string;
+  isTimeUp?: boolean;
 };
 
 export function SubmissionResult({
@@ -25,6 +26,7 @@ export function SubmissionResult({
   mockTestId,
   folderUrl,
   folderName,
+  isTimeUp = false,
 }: SubmissionResultProps) {
   useEffect(() => {
     void exitFullscreenSafely();
@@ -59,7 +61,9 @@ export function SubmissionResult({
         </div>
 
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-          {result.success || typeof result.score === "number" ? "Test submitted successfully" : "Answers safely recorded"}
+          {isTimeUp
+            ? "Time expired • Automatic submission"
+            : (result.success || typeof result.score === "number" ? "Test submitted successfully" : "Answers safely recorded")}
         </p>
 
         {parsedTitle.breadcrumb.length > 0 && (
@@ -81,6 +85,12 @@ export function SubmissionResult({
             </span>
           )}
         </h1>
+
+        {isTimeUp && (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200/80 px-3.5 py-1.5 text-xs font-bold text-amber-900">
+            <span>⏱️ Allotted examination time concluded — Responses evaluated automatically</span>
+          </div>
+        )}
 
         {result.success || typeof result.score === "number" ? (
           <>
@@ -157,12 +167,14 @@ export function SubmissionResult({
           </>
         ) : (
           <>
-            <p className="mt-5 text-base font-semibold text-slate-700">
-              {result.message || "Your answers are saved in your account."}
-            </p>
-            <p className="mt-2 text-sm text-slate-600">
-              Check your result in the dashboard.
-            </p>
+            <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50 p-5 text-center">
+              <p className="text-sm sm:text-base font-bold text-slate-900">
+                {result.message || "Your answers are saved in your account. Check your result in the dashboard."}
+              </p>
+              <p className="mt-1.5 text-xs sm:text-sm text-slate-600">
+                Your examination responses have been safely saved. Check your result in the dashboard.
+              </p>
+            </div>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               {onRetry && (
                 <button

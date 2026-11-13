@@ -180,6 +180,7 @@ export default async function TakeMockTestPage({
           mockTestId={id}
           folderUrl={folderUrl}
           folderName={folderName}
+          isTimeUp={true}
           result={{
             success: true,
             message: "Attempt submitted successfully.",
@@ -200,6 +201,7 @@ export default async function TakeMockTestPage({
         mockTestId={id}
         folderUrl={folderUrl}
         folderName={folderName}
+        isTimeUp={true}
         result={{
           success: false,
           message: "The test time has ended and your answers are saved. Check your result in the dashboard.",
