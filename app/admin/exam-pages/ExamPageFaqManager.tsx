@@ -8,12 +8,12 @@ import { formatExamHeading } from "@/lib/exam-catalog";
 import {
   DEFAULT_APPSC_GENERAL_STUDIES_SYLLABUS,
   DEFAULT_TELANGANA_POLICE_SYLLABUS,
+  SYLLABUS_FAQ_KEY,
 } from "@/lib/exam-syllabus";
 import { examUrl, syllabusUrl } from "@/lib/public-urls";
 import {
   createExamPageFaq,
   deleteExamPageFaq,
-  SYLLABUS_FAQ_KEY,
   updateExamPageContent,
   updateExamPageFaq,
   updateExamPageSyllabus,

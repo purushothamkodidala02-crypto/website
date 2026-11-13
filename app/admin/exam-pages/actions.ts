@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { SYLLABUS_FAQ_KEY } from "@/lib/exam-syllabus";
 import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
@@ -88,8 +89,6 @@ export async function deleteExamPageFaq(formData: FormData) {
   await supabase.from("exam_page_faqs").delete().eq("id", faqId);
   refresh();
 }
-
-export const SYLLABUS_FAQ_KEY = "__OFFICIAL_GOVERNMENT_SYLLABUS__";
 
 export async function updateExamPageSyllabus(
   _previous: ExamPageContentActionState,

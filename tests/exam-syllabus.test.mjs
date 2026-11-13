@@ -78,7 +78,7 @@ test("admin exam-pages allows updating official government notification syllabus
   const managerFile = await read("app/admin/exam-pages/ExamPageFaqManager.tsx");
 
   assert.match(actionsFile, /updateExamPageSyllabus/);
-  assert.match(actionsFile, /__OFFICIAL_GOVERNMENT_SYLLABUS__/);
+  assert.match(actionsFile, /SYLLABUS_FAQ_KEY/);
 
   assert.match(managerFile, /ExamPageSyllabusForm/);
   assert.match(managerFile, /Official Government Notification/);

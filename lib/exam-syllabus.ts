@@ -2,6 +2,8 @@ import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { summarizeExamNegativeMarking, formatMarkValue } from "@/lib/scoring";
 import type { ExamPatternInfo } from "@/lib/telugu-seo";
 
+export const SYLLABUS_FAQ_KEY = "__OFFICIAL_GOVERNMENT_SYLLABUS__";
+
 export type RawPaper = {
   id: string;
   exam_group_id: string;
@@ -411,7 +413,7 @@ export function computeExamSyllabus(params: {
 
   const isAndhra =
     stateName.toLowerCase().includes("andhra") ||
-    stateCode.toUpperCase() === "AP" ||
+    stateCode?.toUpperCase() === "AP" ||
     boardName?.toLowerCase().includes("appsc") ||
     examName.toLowerCase().includes("appsc");
 
