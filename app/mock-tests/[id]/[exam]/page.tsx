@@ -703,18 +703,28 @@ export default async function ExamPage({ params, searchParams }: Props) {
             {/* Pattern Metric Cards */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-slate-500">Questions</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
-                  {syllabus.pattern.totalQuestions ? `${syllabus.pattern.totalQuestions} Qs` : `${syllabus.pattern.totalPapers} Paper(s)`}
+                <p className="text-xs font-semibold text-slate-500">
+                  {syllabus.pattern.totalQuestions ? "Questions" : "Exam Papers"}
                 </p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">Multiple Choice (MCQ)</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
+                  {syllabus.pattern.totalQuestions
+                    ? `${syllabus.pattern.totalQuestions} Qs`
+                    : `${syllabus.pattern.totalPapers} Paper${syllabus.pattern.totalPapers === 1 ? "" : "s"}`}
+                </p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">
+                  {syllabus.pattern.totalQuestions ? "Multiple Choice (MCQ)" : "Official Papers"}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Total Marks</p>
                 <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
                   {syllabus.pattern.totalMarks ? `${syllabus.pattern.totalMarks} Marks` : "Official Scale"}
                 </p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">1 Mark / Question</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">
+                  {syllabus.pattern.totalMarks && syllabus.pattern.totalPapers > 1
+                    ? `${Math.round(syllabus.pattern.totalMarks / syllabus.pattern.totalPapers)} Marks / Paper`
+                    : "1 Mark / Question"}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Duration</p>
@@ -723,7 +733,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     ? `${syllabus.pattern.durationMinutes} Mins`
                     : (syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Sessions` : "Timed CBT")}
                 </p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">Official Exam Time</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">
+                  {syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Timed Sessions` : "Official Exam Time"}
+                </p>
               </div>
               <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-teal-800">Negative Marks</p>

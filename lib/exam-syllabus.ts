@@ -118,6 +118,7 @@ export function computeExamSyllabus(params: {
 }): ComputedSyllabus {
   const {
     examName,
+    examDescription,
     stateName,
     stateCode = "",
     boardName,
@@ -156,6 +157,11 @@ export function computeExamSyllabus(params: {
     }
   }
 
+  const isEndowment =
+    examName.toLowerCase().includes("endowment") ||
+    Boolean(examDescription && examDescription.toLowerCase().includes("endowment")) ||
+    Boolean(boardName && boardName.toLowerCase().includes("endowment"));
+
   // Build computed papers
   let sumQuestions = 0;
   let hasKnownQuestions = false;
@@ -176,7 +182,11 @@ export function computeExamSyllabus(params: {
         testCount: testsBySubjectId.get(s.id) ?? 0,
       }));
 
-    const qCount = paper.question_count && paper.question_count > 0 ? paper.question_count : null;
+    const rawQCount = paper.question_count && paper.question_count > 0 ? paper.question_count : null;
+    const qCount =
+      isEndowment && (paper.slug === "general-studies-mental-abilities" || rawQCount === 136)
+        ? 150
+        : rawQCount;
     const durMins = paper.duration_minutes && paper.duration_minutes > 0 ? paper.duration_minutes : null;
     const correctMarks = Number(paper.default_correct_marks ?? 1) || 1;
     const negMarks = Number(paper.default_negative_marks ?? 0) || 0;
@@ -237,15 +247,42 @@ export function computeExamSyllabus(params: {
     "Final Merit Order & Selection",
   ];
 
+  const resolvedAuthority =
+    overridePattern?.authority ||
+    (isEndowment
+      ? (stateName.toLowerCase().includes("andhra") || stateCode?.toUpperCase() === "AP"
+          ? "APPSC (Andhra Pradesh Public Service Commission)"
+          : "TGPSC / APPSC Endowments Commission")
+      : authorityLabel);
+
+  const resolvedTotalQuestions =
+    isEndowment
+      ? null
+      : overridePattern?.totalQuestions !== undefined
+        ? overridePattern.totalQuestions
+        : activePapers.length === 1 && hasKnownQuestions
+          ? sumQuestions
+          : null;
+
+  const resolvedTotalMarks =
+    overridePattern?.totalMarks !== undefined
+      ? overridePattern.totalMarks
+      : isEndowment
+        ? 300
+        : hasKnownMarks
+          ? sumMarks
+          : null;
+
   const pattern: ComputedExamPattern = {
-    authority: authorityLabel,
+    authority: resolvedAuthority,
     totalPapers: activePapers.length,
-    totalQuestions:
-      overridePattern?.totalQuestions ?? (hasKnownQuestions ? sumQuestions : null),
-    totalMarks: overridePattern?.totalMarks ?? (hasKnownMarks ? sumMarks : null),
+    totalQuestions: resolvedTotalQuestions,
+    totalMarks: resolvedTotalMarks,
     durationMinutes:
       overridePattern?.durationMinutes ?? (hasKnownDuration ? sumDuration : null),
-    negativeMarking: overridePattern?.negativeMarking || negativeMarkingLabel,
+    negativeMarking:
+      overridePattern?.negativeMarking ||
+      (isEndowment ? "0.33 (1/3rd penalty per wrong answer)" : negativeMarkingLabel),
     medium: overridePattern?.medium || "Bilingual (Telugu & English)",
     mode: overridePattern?.mode || (examName.toLowerCase().includes("police") ? "OMR Sheet (Offline)" : "CBT / OMR Sheet"),
     stages: overridePattern?.stages?.length ? overridePattern.stages : defaultStages,

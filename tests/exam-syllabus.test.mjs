@@ -77,3 +77,20 @@ test("exam and syllabus pages provide mobile-optimized touch cards with direct p
   assert.match(syllabusPage, /Practise tests →/);
   assert.match(syllabusPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
 });
+
+test("AP Endowment Officer does not show 286 questions and pattern metrics adapt cleanly", async () => {
+  const syllabusPage = await read("app/mock-tests/[id]/[exam]/syllabus/page.tsx");
+  const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
+  const syllabusLib = await read("lib/exam-syllabus.ts");
+
+  // Avoids showing misleading 286 question sum
+  assert.match(syllabusLib, /isEndowment/);
+  assert.match(syllabusLib, /resolvedTotalQuestions/);
+  assert.match(syllabusLib, /resolvedTotalMarks/);
+
+  // Cards display "Exam Papers" when total questions is not needed or null
+  assert.match(examPage, /Exam Papers/);
+  assert.match(syllabusPage, /Exam Papers/);
+  assert.doesNotMatch(syllabusPage, /286/);
+  assert.doesNotMatch(examPage, /286/);
+});
