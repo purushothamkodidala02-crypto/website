@@ -19,7 +19,6 @@ import {
   specializationUrl,
   stateUrl,
   subjectUrl,
-  syllabusUrl,
 } from "@/lib/public-urls";
 import { expandSearchableText, scoreCatalogMatch } from "@/lib/catalog-search";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
@@ -539,18 +538,11 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                       </div>
                       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
                         <Link
-                          href={syllabusUrl(item.state.slug, item.exam.slug)}
-                          prefetch={false}
-                          className="inline-flex min-h-[38px] items-center justify-center rounded-xl bg-teal-800 hover:bg-teal-900 px-3.5 py-1.5 text-xs font-semibold text-white transition"
-                        >
-                          Syllabus &amp; Pattern →
-                        </Link>
-                        <Link
                           href={examUrl(item.state.slug, item.exam.slug)}
                           prefetch={false}
-                          className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-800 transition"
+                          className="inline-flex min-h-[38px] items-center justify-center rounded-xl bg-teal-800 hover:bg-teal-900 px-4 py-2 text-xs font-semibold text-white transition shadow-xs"
                         >
-                          Open Mock Tests
+                          Explore {item.exam.name} Tests →
                         </Link>
                       </div>
                     </div>

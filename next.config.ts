@@ -38,6 +38,11 @@ const nextConfig: NextConfig = {
       destination: "/mock-tests",
       permanent: true,
     },
+    {
+      source: "/mock-tests/:state/:exam/syllabus",
+      destination: "/mock-tests/:state/:exam",
+      permanent: true,
+    },
   ],
   headers: async () => [
     {

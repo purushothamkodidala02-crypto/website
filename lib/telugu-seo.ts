@@ -375,34 +375,6 @@ const TELUGU_EXAMS: Record<string, ExamTeluguSeo> = {
       "హిందూ ఫిలాసఫీ మాక్ టెస్ట్ పేపర్స్",
       "Endowment officer grade 3 online test series",
     ],
-    pattern: {
-      authority: "APPSC / TGPSC Endowments Commission",
-      totalQuestions: null,
-      totalMarks: null,
-      durationMinutes: 300,
-      negativeMarking: "0.33 (1/3rd penalty per wrong answer)",
-      medium: "Bilingual (Telugu & English)",
-      mode: "CBT / OMR Sheet",
-      stages: [
-        "Stage 1: Written Examination (Paper 1: GS + Paper 2: Hindu Philosophy)",
-        "Stage 2: Certificate & Document Verification",
-        "Stage 3: Final Selection & Appointment",
-      ],
-      subjects: [
-        {
-          name: "General Studies & Mental Ability",
-          teluguName: "జనరల్ స్టడీస్ & మెంటల్ ఎబిలిటీ (పేపర్ 1)",
-          description:
-            "National & AP Current Events, General Science, History of India & AP, Geography, Indian Polity, Economy, and Logical Reasoning.",
-        },
-        {
-          name: "Hindu Philosophy & Temple System",
-          teluguName: "హిందూ ఫిలాసఫీ & దేవాలయ వ్యవస్థ (పేపర్ 2)",
-          description:
-            "Ramayana, Mahabharata, Bhagavatam, Hindu Puranams, Temple Architecture, Agamas, Festivals, and AP Endowments Act 1987.",
-        },
-      ],
-    },
     teluguFaqs: [
       {
         question: "ఎండోమెంట్ ఆఫీసర్ పేపర్ 2 (హిందూ ఫిలాసఫీ & దేవాలయ వ్యవస్థ) ప్రశ్నలు ఉన్నాయా?",

@@ -17,7 +17,7 @@ import {
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, isIndexableCollectionQuery, publicCollectionMetadata } from "@/lib/public-seo";
-import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
+import { examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { absoluteUrl } from "@/lib/site";
 import { unstable_cache } from "next/cache";
@@ -32,13 +32,6 @@ import {
   summarizeExamNegativeMarking,
   type MockTestStatsSummary,
 } from "@/lib/scoring";
-import {
-  computeExamSyllabus,
-  type RawPaper,
-  type RawSubject,
-  type RawSection,
-  type RawTest,
-} from "@/lib/exam-syllabus";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
@@ -132,21 +125,8 @@ export default async function ExamPage({ params, searchParams }: Props) {
   const examCategory = catalog.categories.find((cat) => cat.id === context.exam!.exam_id);
   const boardName = examCategory?.name ?? null;
 
-  const syllabus = computeExamSyllabus({
-    examName: context.exam.name,
-    examDescription: context.exam.description,
-    stateName: context.state.name,
-    stateCode: context.state.code,
-    boardName,
-    papers: papers as RawPaper[],
-    subjects: catalog.subjects.filter((s) => paperIds.has(s.paper_id) && s.is_active) as RawSubject[],
-    sections: catalog.sections.filter((sec) => sec.is_active) as RawSection[],
-    tests: tests as RawTest[],
-    overridePattern: teluguData?.pattern,
-  });
-
   const patternNegativeDisplay = formatPatternNegativeDisplay(
-    syllabus.pattern.negativeMarking,
+    teluguData?.pattern?.negativeMarking,
     examNegativeSummary.positiveValues,
   );
   const fallbackTitle = teluguData ? teluguData.bilingualPageTitle : formatExamFallbackTitle(context.exam.name, context.state.name);
@@ -321,12 +301,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   Important Exam Dates ↓
                 </a>
               )}
-              <Link
-                href={syllabusUrl(context.state.slug, context.exam.slug)}
-                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-teal-200 bg-white hover:bg-teal-50/70 px-5 py-2.5 text-xs sm:text-sm font-semibold text-teal-900 transition shadow-2xs text-center"
-              >
-                {context.state.code ? `${context.state.code} ` : ""}Exam Syllabus &amp; Pattern →
-              </Link>
+              
               <AccountActionButton canonical={canonical} />
             </div>
           </div>
@@ -680,82 +655,50 @@ export default async function ExamPage({ params, searchParams }: Props) {
           </section>
         )}
 
-        {/* Official Exam Pattern & Overview - Computed Automatically */}
-        {syllabus.hasCurriculum && (
+        {/* Official Exam Pattern & Overview */}
+        {teluguData?.pattern && (
           <section id="exam-pattern" aria-labelledby="exam-pattern-heading" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
-                  {syllabus.pattern.authority}
+                  {teluguData.pattern.authority}
                 </p>
                 <h2 id="exam-pattern-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">
-                  {statePrefixedName} Exam Pattern &amp; Syllabus
+                  {statePrefixedName} Exam Pattern &amp; Structure
                 </h2>
               </div>
-              <Link
-                href={syllabusUrl(context.state.slug, context.exam.slug)}
-                className="rounded-full bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3.5 py-1.5 text-xs font-bold text-teal-950 transition"
-              >
-                Full {context.state.code || statePrefixedName} Syllabus Guide →
-              </Link>
             </div>
 
             {/* Pattern Metric Cards */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-slate-500">
-                  {syllabus.pattern.totalQuestions ? "Questions" : "Exam Papers"}
-                </p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
-                  {syllabus.pattern.totalQuestions
-                    ? `${syllabus.pattern.totalQuestions} Qs`
-                    : `${syllabus.pattern.totalPapers} Paper${syllabus.pattern.totalPapers === 1 ? "" : "s"}`}
-                </p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">
-                  {syllabus.pattern.totalQuestions ? "Multiple Choice (MCQ)" : "Official Papers"}
-                </p>
+                <p className="text-xs font-semibold text-slate-500">Questions</p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalQuestions} Qs</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">Multiple Choice (MCQ)</p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Total Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
-                  {syllabus.pattern.totalMarks ? `${syllabus.pattern.totalMarks} Marks` : "Official Scale"}
-                </p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">
-                  {syllabus.pattern.totalMarks && syllabus.pattern.totalPapers > 1
-                    ? `${Math.round(syllabus.pattern.totalMarks / syllabus.pattern.totalPapers)} Marks / Paper`
-                    : "1 Mark / Question"}
-                </p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalMarks} Marks</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">1 Mark Each</p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Duration</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
-                  {syllabus.pattern.durationMinutes
-                    ? `${syllabus.pattern.durationMinutes} Mins`
-                    : (syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Sessions` : "Timed CBT")}
-                </p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">
-                  {syllabus.pattern.totalPapers > 1 ? `${syllabus.pattern.totalPapers} Timed Sessions` : "Official Exam Time"}
-                </p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.durationMinutes} Mins</p>
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500">3 Hours Timed</p>
               </div>
               <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">
-                  {patternNegativeDisplay.headline || syllabus.pattern.negativeMarking}
-                </p>
-                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">
-                  {patternNegativeDisplay.detail || "Official Scheme"}
-                </p>
+                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">{patternNegativeDisplay.headline}</p>
+                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">{patternNegativeDisplay.detail}</p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-slate-500">Languages</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">{syllabus.pattern.medium}</p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">{teluguData.pattern.medium}</p>
                 <p className="mt-0.5 text-[10px] font-medium text-slate-500">English &amp; Telugu</p>
               </div>
               <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
                 <p className="text-xs font-semibold text-teal-800">Official Mode</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-teal-950">
-                  {syllabus.pattern.mode}
-                </p>
+                <p className="font-display mt-1 text-sm sm:text-base font-bold text-teal-950">{teluguData.pattern.mode}</p>
                 <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Official Format</p>
               </div>
             </div>
@@ -764,72 +707,13 @@ export default async function ExamPage({ params, searchParams }: Props) {
             <div className="mt-6 rounded-2xl border border-slate-200/80 bg-[#f6faf8] p-4 sm:p-5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">Recruitment Selection Stages</h3>
               <div className="mt-3 flex flex-wrap gap-2">
-                {syllabus.pattern.stages.map((stage) => (
+                {teluguData.pattern.stages.map((stage) => (
                   <span key={stage} className="rounded-xl border border-slate-200/90 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs">
                     {stage}
                   </span>
                 ))}
               </div>
             </div>
-
-            {/* Subject-Wise Syllabus Cards */}
-            {syllabus.units.length > 0 && (
-              <div className="mt-6">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900">Subject-wise Syllabus Coverage</h3>
-                  <Link
-                    href={syllabusUrl(context.state.slug, context.exam.slug)}
-                    className="text-xs font-semibold text-teal-800 hover:underline"
-                  >
-                    View all {syllabus.units.length} subjects &amp; units →
-                  </Link>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  Practice topic-wise and full-length tests mapped to every section of the official syllabus:
-                </p>
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-                  {syllabus.units.slice(0, 6).map((unit) => {
-                    const unitHref =
-                      unit.paperSlug && unit.subjectSlug
-                        ? subjectUrl(context.state.slug, context.exam!.slug, unit.paperSlug, unit.subjectSlug)
-                        : unit.paperSlug
-                        ? paperUrl(context.state.slug, context.exam!.slug, unit.paperSlug)
-                        : syllabusUrl(context.state.slug, context.exam!.slug);
-
-                    return (
-                      <Link
-                        key={unit.name}
-                        href={unitHref}
-                        className="group flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 sm:p-4 transition hover:border-teal-300 hover:bg-white hover:shadow-2xs active:scale-[0.99]"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="rounded-md bg-teal-50 border border-teal-200 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-900">
-                              {unit.unitNumber}
-                            </span>
-                            <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate max-w-[140px] sm:max-w-[180px]">
-                              {unit.paperName}
-                            </span>
-                          </div>
-                          <h4 className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900 group-hover:text-teal-800 transition break-words">
-                            {unit.name}
-                          </h4>
-                          <p className="mt-1 text-xs text-slate-600 line-clamp-2 break-words">{unit.description}</p>
-                        </div>
-                        <div className="mt-3 flex items-center justify-between border-t border-slate-200/60 pt-2 text-xs">
-                          <span className="text-[11px] font-medium text-slate-500">
-                            {unit.testCount > 0 ? `${unit.testCount} test${unit.testCount === 1 ? "" : "s"}` : "Bilingual Practice"}
-                          </span>
-                          <span className="inline-flex items-center gap-1 font-bold text-teal-800 transition group-hover:translate-x-1">
-                            Start practice →
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </section>
         )}
 

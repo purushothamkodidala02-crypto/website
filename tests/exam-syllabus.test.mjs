@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, access } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -25,37 +25,32 @@ test("lib/exam-syllabus.ts exports computeExamSyllabus and types", async () => {
   assert.match(file, /unitNumber: `Unit \$\{String\(unitIndex\)\.padStart\(2, "0"\)\}`/);
 });
 
-test("app/mock-tests/[id]/[exam]/syllabus/page.tsx utilizes computeExamSyllabus and graceful fallbacks", async () => {
-  const syllabusPage = await read("app/mock-tests/[id]/[exam]/syllabus/page.tsx");
+test("dedicated syllabus page route is deleted and redirected cleanly in next.config.ts", async () => {
+  const nextConfig = await read("next.config.ts");
 
-  assert.match(syllabusPage, /computeExamSyllabus/);
-  assert.match(syllabusPage, /syllabus\.hasCurriculum/);
-  assert.match(syllabusPage, /syllabus\.pattern\.authority/);
-  assert.match(syllabusPage, /syllabus\.pattern\.totalQuestions/);
-  assert.match(syllabusPage, /syllabus\.pattern\.durationMinutes/);
-  assert.match(syllabusPage, /syllabus\.pattern\.medium/);
-  assert.match(syllabusPage, /syllabus\.pattern\.mode/);
-  assert.match(syllabusPage, /syllabus\.units\.map/);
-  assert.match(syllabusPage, /syllabus\.papers\.map/);
+  // Route file must not exist
+  let routeExists = false;
+  try {
+    await access(new URL("../app/mock-tests/[id]/[exam]/syllabus/page.tsx", import.meta.url));
+    routeExists = true;
+  } catch {
+    routeExists = false;
+  }
+  assert.equal(routeExists, false);
 
-  // Student-facing syllabus removes all marks displays
-  assert.doesNotMatch(syllabusPage, /Total Marks/);
-  assert.doesNotMatch(syllabusPage, /Negative Marks/);
-  assert.doesNotMatch(syllabusPage, /totalMarks/);
-  assert.match(syllabusPage, /Official Examination Papers &amp; Structure/);
-
-  // Graceful fallback when no papers/subjects exist yet
-  assert.match(syllabusPage, /Official 2026 Notification &amp; Syllabus in Preparation/);
-  assert.match(syllabusPage, /Browse Available/);
+  // next.config.ts redirects /syllabus requests back to the exam page
+  assert.match(nextConfig, /source:\s*"\/mock-tests\/:state\/:exam\/syllabus"/);
+  assert.match(nextConfig, /destination:\s*"\/mock-tests\/:state\/:exam"/);
 });
 
-test("exam landing page automatically displays pattern and syllabus overview for all exams", async () => {
+test("exam landing page does not render auto-generated syllabus units or links to /syllabus", async () => {
   const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
 
-  assert.match(examPage, /computeExamSyllabus/);
-  assert.match(examPage, /syllabus\.hasCurriculum/);
-  assert.match(examPage, /syllabus\.pattern\.authority/);
-  assert.match(examPage, /syllabus\.units\.slice\(0, 6\)/);
+  assert.doesNotMatch(examPage, /syllabusUrl/);
+  assert.doesNotMatch(examPage, /computeExamSyllabus/);
+  assert.doesNotMatch(examPage, /View Official Syllabus/);
+  assert.doesNotMatch(examPage, /Full.*Syllabus Guide/);
+  assert.doesNotMatch(examPage, /Subject-wise Syllabus Coverage/);
 });
 
 test("admin subjects page clarifies automatic syllabus generation", async () => {
@@ -73,30 +68,20 @@ test("student-side mock-tests page has mobile-optimized horizontal touch scrolli
   assert.match(mockTestsPage, /touch-pan-x/);
   assert.match(mockTestsPage, /min-h-\[42px\]/);
   assert.match(mockTestsPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
+
+  // Syllabus links removed from student-side catalogue cards
+  assert.doesNotMatch(mockTestsPage, /Syllabus &amp; Pattern/);
 });
 
-test("exam and syllabus pages provide mobile-optimized touch cards with direct practice links", async () => {
-  const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
-  const syllabusPage = await read("app/mock-tests/[id]/[exam]/syllabus/page.tsx");
+test("AP Endowment Officer does not show 286 questions or syllabus cards", async () => {
+  const [examPage, teluguSeo] = await Promise.all([
+    read("app/mock-tests/[id]/[exam]/page.tsx"),
+    read("lib/telugu-seo.ts"),
+  ]);
 
-  assert.match(examPage, /Start practice →/);
-  assert.match(syllabusPage, /Practise tests →/);
-  assert.match(syllabusPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
-});
+  // AP EO has no custom pattern in teluguData
+  assert.doesNotMatch(teluguSeo, /"endowment-officer":\s*\{[\s\S]*?pattern:\s*\{/);
 
-test("AP Endowment Officer does not show 286 questions and pattern metrics adapt cleanly", async () => {
-  const syllabusPage = await read("app/mock-tests/[id]/[exam]/syllabus/page.tsx");
-  const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
-  const syllabusLib = await read("lib/exam-syllabus.ts");
-
-  // Avoids showing misleading 286 question sum
-  assert.match(syllabusLib, /isEndowment/);
-  assert.match(syllabusLib, /resolvedTotalQuestions/);
-  assert.match(syllabusLib, /resolvedTotalMarks/);
-
-  // Cards display "Exam Papers" when total questions is not needed or null
-  assert.match(examPage, /Exam Papers/);
-  assert.match(syllabusPage, /Exam Papers/);
-  assert.doesNotMatch(syllabusPage, /286/);
+  // No 286 anywhere on the exam page
   assert.doesNotMatch(examPage, /286/);
 });

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { absoluteUrl } from "@/lib/site";
-import { categoryUrl, examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
+import { categoryUrl, examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl } from "@/lib/public-urls";
 
 // Cache sitemap on Edge CDN and revalidate once per hour
 export const revalidate = 3600;
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const exam of catalog.exams) {
     const category = categoryById.get(exam.exam_id);
     const state = category ? stateById.get(category.state_id) : undefined;
-    if (state) { add(examUrl(state.slug, exam.slug), 0.9, "daily"); add(syllabusUrl(state.slug, exam.slug), 0.85, "weekly"); }
+    if (state) add(examUrl(state.slug, exam.slug), 0.9, "daily");
   }
   for (const specialization of catalog.specializations) {
     const exam = examById.get(specialization.exam_group_id);

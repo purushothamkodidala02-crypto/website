@@ -74,9 +74,8 @@ test("catalog search matches multi-word, regional alias, and syllabus queries wi
   assert.ok(primaryMatchScore > secondaryMatchScore);
 });
 
-test("dedicated exam syllabus route, sitemap entries, and catalog search integration are wired", async () => {
-  const [syllabusPage, examPage, catalogPage, sitemap, publicSeo, nextConfig] = await Promise.all([
-    read("app/mock-tests/[id]/[exam]/syllabus/page.tsx"),
+test("exam syllabus redirect, sitemap entries, and catalog search integration are wired", async () => {
+  const [examPage, catalogPage, sitemap, publicSeo, nextConfig] = await Promise.all([
     read("app/mock-tests/[id]/[exam]/page.tsx"),
     read("app/mock-tests/page.tsx"),
     read("app/sitemap.ts"),
@@ -85,15 +84,13 @@ test("dedicated exam syllabus route, sitemap entries, and catalog search integra
   ]);
 
   assert.equal(syllabusUrl("telangana", "police-constable-free-mock-test"), "/mock-tests/telangana/police-constable-free-mock-test/syllabus");
-  assert.match(syllabusPage, /ExamSyllabusPage/);
-  assert.match(syllabusPage, /generateStaticParams/);
-  assert.match(syllabusPage, /TG Police Constable Exam Syllabus 2026/);
-  assert.match(syllabusPage, /Subject-Wise Syllabus/);
-  assert.match(examPage, /syllabusUrl\(context\.state\.slug, context\.exam\.slug\)/);
+  assert.match(nextConfig, /source:\s*"\/mock-tests\/:state\/:exam\/syllabus"/);
+  assert.match(nextConfig, /destination:\s*"\/mock-tests\/:state\/:exam"/);
+  assert.doesNotMatch(examPage, /syllabusUrl/);
   assert.match(examPage, /rel="nofollow"/);
   assert.match(catalogPage, /scoreCatalogMatch/);
   assert.match(catalogPage, /matchingExams/);
-  assert.match(sitemap, /syllabusUrl\(state\.slug, exam\.slug\)/);
+  assert.doesNotMatch(sitemap, /syllabusUrl/);
   assert.match(publicSeo, /index:\s*true/);
   assert.match(publicSeo, /!filters\.view/);
   assert.match(nextConfig, /source:\s*"\/exams"/);
