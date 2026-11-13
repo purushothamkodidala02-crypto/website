@@ -471,3 +471,44 @@ export async function clearAdminMockTestAttemptsAction(mockTestId: string): Prom
       : `No admin test attempts found for “${result.mockTest.title}”.`,
   };
 }
+
+export async function clearAllMockTestAttemptsAction(mockTestId: string): Promise<MockTestManagementResult> {
+  const result = await getManagedMockTest(mockTestId);
+  if ("error" in result) return { success: false, message: result.error ?? "Unable to clear test attempts." };
+
+  // 1. Delete test attempts first (so session_id foreign key constraint on delete restrict does not block)
+  const { error: attemptsError } = await result.supabase
+    .from("test_attempts")
+    .delete()
+    .eq("mock_test_id", mockTestId);
+
+  if (attemptsError) {
+    return { success: false, message: `Failed to clear test attempts: ${attemptsError.message}` };
+  }
+
+  // 2. Delete test attempt sessions
+  const { error: sessionsError } = await result.supabase
+    .from("test_attempt_sessions")
+    .delete()
+    .eq("mock_test_id", mockTestId);
+
+  if (sessionsError) {
+    return { success: false, message: `Failed to clear test sessions: ${sessionsError.message}` };
+  }
+
+  // 3. Reset status to draft and published_at to null so questions can be replaced/edited freely
+  const { error: draftError } = await result.supabase
+    .from("mock_tests")
+    .update({ status: "draft", published_at: null })
+    .eq("id", mockTestId);
+
+  if (draftError) {
+    return { success: false, message: `Failed to restore mock test to draft: ${draftError.message}` };
+  }
+
+  revalidateMockTestPages(mockTestId);
+  return {
+    success: true,
+    message: `All attempts cleared! “${result.mockTest.title}” is restored as a draft and open for Excel question import.`,
+  };
+}

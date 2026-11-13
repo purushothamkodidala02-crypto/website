@@ -27,12 +27,13 @@ test("database migration defines mock_test_has_student_attempts exempting kodida
 });
 
 test("admin mock test management UI wires admin attempt exemption and clear attempt action", async () => {
-  const [buttons, table, page, actions, questionActions] = await Promise.all([
+  const [buttons, table, page, actions, questionActions, importActions] = await Promise.all([
     read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
     read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
     read("app/admin/mock-tests/page.tsx"),
     read("app/admin/mock-tests/manage-actions.ts"),
     read("app/admin/mock-tests/[id]/edit/question-actions.ts"),
+    read("app/admin/questions/import-actions.ts"),
   ]);
 
   // MockTestManagementButtons supports adminAttemptCount and clearing attempts
@@ -40,6 +41,9 @@ test("admin mock test management UI wires admin attempt exemption and clear atte
   assert.match(buttons, /clear-admin-attempts/);
   assert.match(buttons, /clearAdminBtn/);
   assert.match(buttons, /Clear my attempt/);
+  assert.match(buttons, /clear-all-attempts/);
+  assert.match(buttons, /clearAllAttemptsBtn/);
+  assert.match(buttons, /Clear attempts & restore draft/);
 
   // ExistingMockTestsTable displays admin test info and passes count
   assert.match(table, /adminAttemptCount/);
@@ -54,8 +58,10 @@ test("admin mock test management UI wires admin attempt exemption and clear atte
   // manage-actions.ts handles admin attempt cleanup on draft deletion and exports clear action
   assert.match(actions, /clearAdminTestAttempts/);
   assert.match(actions, /clearAdminMockTestAttemptsAction/);
+  assert.match(actions, /clearAllMockTestAttemptsAction/);
   assert.match(actions, /mockTestHasStudentAttempts/);
 
-  // question-actions.ts uses mockTestHasStudentAttempts
+  // question-actions.ts and import-actions.ts use mockTestHasStudentAttempts
   assert.match(questionActions, /mockTestHasStudentAttempts/);
+  assert.match(importActions, /mockTestHasStudentAttempts/);
 });

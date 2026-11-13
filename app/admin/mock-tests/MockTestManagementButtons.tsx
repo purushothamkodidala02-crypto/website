@@ -7,6 +7,7 @@ import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import {
   archiveMockTest,
   clearAdminMockTestAttemptsAction,
+  clearAllMockTestAttemptsAction,
   createCorrectedMockTestVersion,
   deleteDraftMockTest,
   permanentlyDeleteMockTest,
@@ -90,7 +91,7 @@ export function MockTestManagementButtons({
   }
 
   async function run(
-    action: "hide" | "restore" | "delete" | "correct" | "permanent-delete" | "clear-admin-attempts"
+    action: "hide" | "restore" | "delete" | "correct" | "permanent-delete" | "clear-admin-attempts" | "clear-all-attempts"
   ) {
     if (pending) return;
     const confirmations = {
@@ -100,6 +101,7 @@ export function MockTestManagementButtons({
       correct: `Create a corrected version of ${mockTestTitle}?\n\nThe attempted version is kept for result history. A new editable draft with the same student-facing name and independent question copies will be created.`,
       "permanent-delete": `Permanently delete ${mockTestTitle}?\n\nAll student attempts, scores, answers and review history for this test will be erased. This cannot be undone.`,
       "clear-admin-attempts": `Clear your admin test attempt(s) from “${mockTestTitle}”?\n\nThis removes only attempts made by your admin account so the test can be modified or restored as a draft cleanly.`,
+      "clear-all-attempts": `Clear all test attempts from “${mockTestTitle}” and restore it as an editable draft?\n\nThis removes previous attempts so you can upload or replace questions with your Excel file.`,
     };
 
     if (!window.confirm(confirmations[action])) return;
@@ -130,6 +132,8 @@ export function MockTestManagementButtons({
         ? await permanentlyDeleteMockTest(mockTestId, permanentConfirmation ?? "")
         : action === "clear-admin-attempts"
         ? await clearAdminMockTestAttemptsAction(mockTestId)
+        : action === "clear-all-attempts"
+        ? await clearAllMockTestAttemptsAction(mockTestId)
         : await deleteDraftMockTest(mockTestId);
 
     if (!result.success) {
@@ -168,6 +172,16 @@ export function MockTestManagementButtons({
     />
   ) : null;
 
+  const clearAllAttemptsBtn =
+    hasAttempts ? (
+      <ActionButton
+        pending={pending}
+        onClick={() => run("clear-all-attempts")}
+        label="Clear attempts & restore draft"
+        className="border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 hover:text-amber-950"
+      />
+    ) : null;
+
   const clearAdminBtn =
     adminAttemptCount > 0 ? (
       <ActionButton
@@ -195,6 +209,7 @@ export function MockTestManagementButtons({
             className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
+          {clearAllAttemptsBtn}
           {correct}
         </>
       )}
@@ -217,6 +232,7 @@ export function MockTestManagementButtons({
             className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
+          {clearAllAttemptsBtn}
           {correct}
           {permanentDelete}
         </>
@@ -241,6 +257,7 @@ export function MockTestManagementButtons({
             />
           ) : (
             <>
+              {clearAllAttemptsBtn}
               {correct}
               {permanentDelete}
             </>

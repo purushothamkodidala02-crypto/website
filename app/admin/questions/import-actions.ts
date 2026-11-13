@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import { createClient } from "@/lib/supabase/server";
+import { mockTestHasStudentAttempts } from "@/lib/admin-mock-test-exemptions";
 import {
   QUESTION_IMPORT_REQUIRED_HEADERS,
   getRequiredHeadersForLanguageMode,
@@ -330,7 +331,10 @@ async function importQuestions(
     if (!mockTest) return { success: false, message: "Mock Test not found." };
     if (mockTest.status !== "draft") return { success: false, message: "Only draft Mock Tests can receive a file import." };
     const { count: attemptCount } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTest.id);
-    if ((attemptCount ?? 0) > 0) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
+    if ((attemptCount ?? 0) > 0) {
+      const hasStudents = await mockTestHasStudentAttempts(mockTest.id);
+      if (hasStudents) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
+    }
     paperId = mockTest.paper_id;
   } else if (!categoryId || !examId || !paperId) {
     return { success: false, message: "Choose a Recruiting Board, Exam, and Paper before importing." };
