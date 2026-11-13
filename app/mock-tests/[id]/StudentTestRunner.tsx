@@ -492,18 +492,13 @@ export function StudentTestRunner({
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] py-1.5 pl-[max(0.625rem,env(safe-area-inset-left,0px))] pr-[max(0.625rem,env(safe-area-inset-right,0px))] sm:py-2 sm:pl-[max(1.25rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.25rem,env(safe-area-inset-right,0px))] lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))] [@media(max-height:540px)]:py-1">
         <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-3">
           
-          {/* Box 1: Test Title & Question Indicator */}
-          <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-1 sm:px-3 sm:py-1.5 shadow-xs">
-            <div className="min-w-0">
-              <p className="hidden md:block truncate text-[11px] font-semibold text-slate-500 max-w-[180px] lg:max-w-[300px] xl:max-w-[420px]" title={title}>
-                {title}
-              </p>
-              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
-                <span className="min-[420px]:hidden">Q{index + 1}</span>
-                <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
-                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
-              </h1>
-            </div>
+          {/* Box 1: Question Indicator */}
+          <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-xs">
+            <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
+              <span className="min-[420px]:hidden">Q{index + 1}</span>
+              <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
+              <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
+            </h1>
           </div>
 
           {/* Box 2: Attempted Questions Progress & Stats (Desktop/Tablet) */}
