@@ -652,7 +652,16 @@ export function StudentTestRunner({
           )}
 
           {pauseError && <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs sm:text-sm font-semibold text-red-700">{pauseError}</p>}
-          {paused && <p className="mb-3 rounded-xl border border-teal-200 bg-teal-50 p-2.5 text-xs sm:text-sm font-semibold text-teal-800">Test paused. Your answers and remaining time are saved. Select Resume when you are ready.</p>}
+          {paused && (
+            <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/90 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 shadow-2xs">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                ⏸
+              </span>
+              <span>
+                Test paused · Answers and time are saved. Click <strong className="font-bold text-slate-900">Resume</strong> on the timer when you are ready.
+              </span>
+            </div>
+          )}
 
           <section className="flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-3.5 sm:p-5 lg:p-6 [@media(max-height:540px)]:p-3 shadow-sm">
             <div className="flex-1">
@@ -940,7 +949,7 @@ function PracticeTimerControl({
       title={paused ? "Resume timer" : "Pause timer"}
       className={`group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold transition shadow-xs select-none disabled:cursor-not-allowed disabled:opacity-50 ${
         paused
-          ? "border-teal-400 bg-teal-50 text-teal-900 hover:bg-teal-100 ring-1 ring-teal-300"
+          ? "border-emerald-200/90 bg-emerald-50/50 text-slate-800 hover:border-emerald-300 hover:bg-emerald-100/60"
           : urgent
           ? "border-rose-300 bg-rose-50 text-rose-700 animate-pulse hover:bg-rose-100"
           : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
@@ -949,11 +958,11 @@ function PracticeTimerControl({
       {busy ? (
         <LoadingSpinner className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-slate-600" />
       ) : paused ? (
-        <span className="flex items-center gap-1 text-teal-800 shrink-0">
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current">
+        <span className="flex items-center gap-1 text-emerald-800 shrink-0">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current text-emerald-700">
             <path d="M8 5.2v13.6c0 .9 1 1.4 1.7.9l9.1-6.8a1.1 1.1 0 0 0 0-1.8L9.7 4.3A1.1 1.1 0 0 0 8 5.2Z" />
           </svg>
-          <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider">Resume</span>
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-900">Resume</span>
         </span>
       ) : (
         <svg
@@ -972,7 +981,7 @@ function PracticeTimerControl({
 
       <strong
         className={`font-mono text-xs sm:text-sm lg:text-base font-black leading-none tracking-tight sm:tracking-wider ${
-          paused ? "text-teal-950" : urgent ? "text-rose-600" : "text-slate-950"
+          paused ? "text-slate-900" : urgent ? "text-rose-600" : "text-slate-950"
         }`}
       >
         {remaining === null ? "--:--" : displayTime(remaining)}
