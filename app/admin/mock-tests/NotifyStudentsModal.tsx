@@ -326,9 +326,13 @@ export function NotifyStudentsModal({
                     <div className="flex items-center justify-between">
                       <label
                         htmlFor="custom-user-emails"
-                        className="text-xs font-bold text-slate-900 uppercase tracking-wider"
+                        className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider"
                       >
-                        ✉️ Enter Specific User Email(s)
+                        <svg className="h-4 w-4 text-teal-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect width="20" height="16" x="2" y="4" rx="2" />
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                        </svg>
+                        <span>Enter Specific User Email(s) (Optional)</span>
                       </label>
                       {validCustomEmails.length > 0 && (
                         <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold text-teal-800">
@@ -336,8 +340,8 @@ export function NotifyStudentsModal({
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                      Want to send to a specific student or user? Type or paste their email addresses below (separate multiple emails with commas, spaces, or new lines):
+                    <p className="mt-1 text-[11px] text-slate-500 leading-relaxed">
+                      Enter any specific email addresses to notify (e.g. your own email for testing, or additional students not listed above). Separate multiple emails with commas, spaces, or new lines:
                     </p>
                     <textarea
                       id="custom-user-emails"
@@ -389,8 +393,11 @@ export function NotifyStudentsModal({
 
                   <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs">
                     <p className="font-bold text-slate-700">Email Subject Preview:</p>
-                    <p className="mt-1 text-slate-900 font-mono text-[11px] bg-slate-50 p-2 rounded-md border border-slate-100">
-                      🎯 New Mock Test Live: {preview.examName} - {preview.mockTestTitle} | Varadhi Prep
+                    <p className="mt-1 text-slate-900 font-mono text-[11px] bg-slate-50 p-2 rounded-md border border-slate-100 break-words">
+                      {preview.emailSubject ??
+                        (preview.mockTestTitle.toLowerCase().startsWith(preview.examName.toLowerCase())
+                          ? `🎯 New Mock Test Live: ${preview.mockTestTitle} | Varadhi Prep`
+                          : `🎯 New Mock Test Live: ${preview.examName} - ${preview.mockTestTitle} | Varadhi Prep`)}
                     </p>
                     <p className="mt-2 text-[11px] text-slate-500">
                       Includes details: {preview.durationMinutes} mins, {preview.questionCount} questions, and direct test attempt link.

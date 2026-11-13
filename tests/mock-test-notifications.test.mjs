@@ -88,4 +88,22 @@ test("email template generation produces correct HTML and plain text structure",
   assert.match(email.htmlContent, /200/);
   assert.match(email.htmlContent, /href="https:\/\/varadhiprep\.in\/mock-tests\/telangana\/police-constable\/prelims\/mock-test-05"/);
   assert.match(email.htmlContent, /Start Mock Test Now/);
+  assert.match(email.htmlContent, /📝 Questions:/);
+  assert.doesNotMatch(email.htmlContent, /❓ Questions:/);
+
+  // When testTitle already begins with examName, subject does not duplicate the exam name
+  const deduplicatedEmail = buildMockTestNotificationEmail({
+    studentName: "Purushotham",
+    examName: "APPSC Endowment Officer",
+    testTitle: "APPSC Endowment Officer · Paper 2 · Hindu Puranams · Mock Test 07",
+    testUrl: "https://varadhiprep.in/mock-tests/andhra-pradesh/appsc-endowment-officer/paper-2/mock-test-07",
+    durationMinutes: 150,
+    questionCount: 150,
+  });
+
+  assert.equal(
+    deduplicatedEmail.subject,
+    "🎯 New Mock Test Live: APPSC Endowment Officer · Paper 2 · Hindu Puranams · Mock Test 07 | Varadhi Prep"
+  );
+  assert.doesNotMatch(deduplicatedEmail.subject, /APPSC Endowment Officer - APPSC Endowment Officer/);
 });

@@ -1,3 +1,19 @@
+export function formatMockTestNotificationSubject({
+  examName,
+  testTitle,
+  siteName = "Varadhi Prep",
+}: {
+  examName: string;
+  testTitle: string;
+  siteName?: string;
+}): string {
+  const trimmedExam = examName.trim();
+  const trimmedTitle = testTitle.trim();
+  const titleIncludesExam = trimmedTitle.toLowerCase().startsWith(trimmedExam.toLowerCase());
+  const mainPart = titleIncludesExam ? trimmedTitle : `${trimmedExam} - ${trimmedTitle}`;
+  return `🎯 New Mock Test Live: ${mainPart} | ${siteName}`;
+}
+
 export function buildMockTestNotificationEmail({
   studentName,
   examName,
@@ -16,7 +32,7 @@ export function buildMockTestNotificationEmail({
   siteName?: string;
 }) {
   const safeName = studentName.trim() || "Student";
-  const subject = `🎯 New Mock Test Live: ${examName} - ${testTitle} | ${siteName}`;
+  const subject = formatMockTestNotificationSubject({ examName, testTitle, siteName });
 
   const textContent = `Hi ${safeName},
 
@@ -68,7 +84,7 @@ https://varadhiprep.in`;
         <table style="width:100%;border-collapse:collapse;margin-top:8px;">
           <tr>
             <td style="padding:4px 0;font-size:13px;color:#475569;"><strong>⏱ Duration:</strong> ${durationMinutes} mins</td>
-            <td style="padding:4px 0;font-size:13px;color:#475569;"><strong>❓ Questions:</strong> ${questionCount}</td>
+            <td style="padding:4px 0;font-size:13px;color:#475569;"><strong>📝 Questions:</strong> ${questionCount}</td>
           </tr>
         </table>
       </div>

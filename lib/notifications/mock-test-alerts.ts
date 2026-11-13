@@ -2,9 +2,9 @@ import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { mockTestUrl } from "@/lib/public-urls";
 import { absoluteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { buildMockTestNotificationEmail } from "./email-template";
+import { buildMockTestNotificationEmail, formatMockTestNotificationSubject } from "./email-template";
 
-export { buildMockTestNotificationEmail };
+export { buildMockTestNotificationEmail, formatMockTestNotificationSubject };
 
 const BREVO_SEND_EMAIL_URL = "https://api.brevo.com/v3/smtp/email";
 
@@ -33,6 +33,7 @@ export type MockTestNotificationPreview = {
     recipient_count: number;
     recipients?: { email: string; name: string }[];
   }[];
+  emailSubject?: string;
 };
 
 export type SendNotificationResult = {
@@ -248,6 +249,10 @@ export async function previewMockTestNotification(mockTestId: string): Promise<M
       recipient_count: item.recipient_count,
       recipients: item.metadata?.recipients ?? [],
     })),
+    emailSubject: formatMockTestNotificationSubject({
+      examName: details.group.name,
+      testTitle: details.formattedTitle,
+    }),
   };
 }
 
