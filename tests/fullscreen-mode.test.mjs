@@ -41,6 +41,11 @@ test("fullscreen exam mode opens on tablet/PC start and gracefully supports norm
   assert.doesNotMatch(runner, /HorizontalQuestionScroller/);
   assert.match(runner, /Questions Palette/);
 
+  // Timer button in exam is unified and does not display redundant "Time Left" sentence
+  assert.doesNotMatch(runner, /Time Left/);
+  assert.match(runner, /function PracticeTimerControl[\s\S]*?<button/);
+  assert.match(runner, /title=\{paused \? "Resume timer" : "Pause timer"\}/);
+
   // Question layout fits screen on PC without perpetual scrolling
   assert.match(runner, /max-w-\[1720px\]/);
   assert.match(runner, /FormattedQuestionText text=\{questionText\}/);

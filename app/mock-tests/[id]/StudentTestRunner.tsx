@@ -932,59 +932,65 @@ function PracticeTimerControl({
 }) {
   const urgent = remaining !== null && remaining <= 300 && !paused;
   return (
-    <div
-      className={`flex items-center rounded-xl sm:rounded-2xl border p-1 shadow-xs transition ${
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={disabled}
+      aria-label={paused ? "Resume test timer" : "Pause test timer"}
+      title={paused ? "Resume timer" : "Pause timer"}
+      className={`group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold transition shadow-xs select-none disabled:cursor-not-allowed disabled:opacity-50 ${
         paused
-          ? "border-teal-300 bg-teal-50"
+          ? "border-teal-400 bg-teal-50 text-teal-900 hover:bg-teal-100 ring-1 ring-teal-300"
           : urgent
-          ? "border-rose-300 bg-rose-50 animate-pulse"
-          : "border-slate-200 bg-slate-50/80"
+          ? "border-rose-300 bg-rose-50 text-rose-700 animate-pulse hover:bg-rose-100"
+          : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
       }`}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        disabled={disabled}
-        aria-label={paused ? "Resume test timer" : "Pause test timer"}
-        title={paused ? "Resume timer" : "Pause timer"}
-        className={`inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
-          paused
-            ? "bg-teal-600 text-white hover:bg-teal-700 shadow-xs"
-            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-950 shadow-xs"
-        }`}
-      >
-        {busy ? (
-          <LoadingSpinner className="h-3.5 w-3.5" />
-        ) : paused ? (
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current">
+      {busy ? (
+        <LoadingSpinner className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-slate-600" />
+      ) : paused ? (
+        <span className="flex items-center gap-1 text-teal-800 shrink-0">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current">
             <path d="M8 5.2v13.6c0 .9 1 1.4 1.7.9l9.1-6.8a1.1 1.1 0 0 0 0-1.8L9.7 4.3A1.1 1.1 0 0 0 8 5.2Z" />
           </svg>
-        ) : (
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current">
-            <rect x="6" y="5" width="4.5" height="14" rx="1.2" />
-            <rect x="13.5" y="5" width="4.5" height="14" rx="1.2" />
-          </svg>
-        )}
-        <span className="hidden sm:inline">{busy ? (paused ? "Resuming" : "Pausing") : paused ? "Resume" : "Pause"}</span>
-      </button>
-
-      <div className="ml-1 sm:ml-1.5 min-w-[3.2rem] sm:min-w-[5.2rem] border-l border-slate-200 px-1 py-0.5 sm:px-2 text-right">
-        <span
-          className={`block text-[8px] sm:text-[9px] font-black uppercase tracking-tight sm:tracking-[0.14em] ${
-            paused ? "text-teal-800 font-bold" : urgent ? "text-rose-600 font-black" : "text-slate-500"
-          }`}
-        >
-          {paused ? "Paused" : "Time Left"}
+          <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider">Resume</span>
         </span>
-        <strong
-          className={`block font-mono text-xs sm:text-sm lg:text-base font-black leading-tight tracking-tight sm:tracking-wider ${
-            urgent ? "text-rose-600" : "text-slate-950"
-          }`}
+      ) : (
+        <svg
+          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 transition-colors ${urgent ? "text-rose-600" : "text-teal-700 group-hover:text-teal-800"}`}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          {remaining === null ? "--:--" : displayTime(remaining)}
-        </strong>
-      </div>
-    </div>
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      )}
+
+      <strong
+        className={`font-mono text-xs sm:text-sm lg:text-base font-black leading-none tracking-tight sm:tracking-wider ${
+          paused ? "text-teal-950" : urgent ? "text-rose-600" : "text-slate-950"
+        }`}
+      >
+        {remaining === null ? "--:--" : displayTime(remaining)}
+      </strong>
+
+      {!paused && !busy && (
+        <span
+          className="hidden min-[400px]:inline-flex items-center gap-1 rounded-md bg-slate-100 group-hover:bg-slate-200 text-slate-600 px-1.5 py-0.5 text-[10px] font-bold transition"
+          title="Pause timer"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-2.5 w-2.5 fill-current">
+            <rect x="6" y="5" width="4" height="14" rx="1" />
+            <rect x="14" y="5" width="4" height="14" rx="1" />
+          </svg>
+          <span className="hidden sm:inline">Pause</span>
+        </span>
+      )}
+    </button>
   );
 }
 
