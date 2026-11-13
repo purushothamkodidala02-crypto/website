@@ -710,21 +710,33 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               })}
             </div>
 
-            {selectedType === "subject" && paperSubjects.length > 0 && (
-              <div className="mb-6 rounded-2xl border border-teal-100 bg-white p-3 sm:p-4 shadow-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="mr-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Subjects:
+            {selectedType !== "paper" && paperSubjects.length > 0 && (
+              <div className="mb-6 rounded-2xl border border-teal-100/90 bg-white p-3 sm:p-4 shadow-2xs">
+                <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5 px-0.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">
+                    {selectedSubject ? `Subject: ${selectedSubject.name}` : "Filter by Subject"}
                   </span>
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    {paperSubjects.length} subject{paperSubjects.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 sm:pb-0 sm:flex-wrap no-scrollbar -mx-1 px-1 touch-pan-x scroll-smooth">
                   <Link
-                    href={testTypeUrl("subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
-                    className={`inline-flex min-h-[36px] items-center rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+                    href={testTypeUrl(selectedType === "all" ? "all" : "subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                    className={`inline-flex min-h-[42px] sm:min-h-[38px] shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap active:scale-[0.98] ${
                       !selectedSubject
-                        ? "bg-teal-800 text-white shadow-sm font-bold border border-teal-800"
-                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300"
+                        ? "bg-teal-800 text-white shadow-xs border border-teal-800 font-bold"
+                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300 hover:bg-white"
                     }`}
                   >
-                    All subjects ({paperSubjects.length})
+                    <span>All subjects</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
+                        !selectedSubject ? "bg-teal-900/70 text-teal-100" : "bg-slate-200/90 text-slate-700"
+                      }`}
+                    >
+                      {paperSubjects.length}
+                    </span>
                   </Link>
                   {paperSubjects.map((sub) => {
                     const isSelected = selectedSubject?.id === sub.id;
@@ -734,16 +746,16 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                         key={sub.id}
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
                         prefetch={true}
-                        className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs transition ${
+                        className={`inline-flex min-h-[42px] sm:min-h-[38px] shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap active:scale-[0.98] ${
                           isSelected
-                            ? "bg-teal-800 text-white shadow-sm font-bold border border-teal-800"
-                            : "border border-slate-200 bg-slate-50 text-slate-700 font-bold hover:border-teal-300"
+                            ? "bg-teal-800 text-white shadow-xs border border-teal-800 font-bold"
+                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300 hover:bg-white"
                         }`}
                       >
                         <span className="leading-snug">{isSelected ? "✓ " : ""}{sub.name}</span>
                         <span
                           className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
-                            isSelected ? "bg-teal-900/60 text-teal-100" : "bg-slate-200/80 text-slate-600"
+                            isSelected ? "bg-teal-900/70 text-teal-100" : "bg-slate-200/90 text-slate-700"
                           }`}
                         >
                           {subTestsCount}
@@ -768,37 +780,45 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   </div>
                 </div>
 
-                <div className="student-stagger grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="student-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {paperSubjects.map((sub) => {
                     const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
                     return (
                       <Link
                         key={sub.id}
                         href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
-                        className="student-card group flex min-h-48 min-w-0 flex-col rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm transition hover:border-teal-400 hover:shadow-xl hover:shadow-slate-950/5"
+                        className="student-card group flex min-w-0 flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
                       >
-                        <span className="flex flex-wrap items-start justify-between gap-2">
-                          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-teal-100/90 bg-teal-50/70 text-teal-900 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-teal-200 group-hover:bg-teal-100">
-                            <PaperSymbol className="h-6 w-6" />
-                          </span>
-                          <span className="max-w-full rounded-full border border-teal-200/80 bg-teal-50/70 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-teal-900 leading-snug">
-                            {paperDisplayById.get(selectedPaper.id)?.shortLabel ?? "Paper"}
-                          </span>
-                        </span>
-                        <h3 className="font-display mt-4 text-lg sm:text-xl leading-snug text-slate-950 group-hover:text-teal-800 transition break-words">
-                          {sub.name}
-                        </h3>
-                        <p className="mt-2 text-xs sm:text-sm text-slate-500 break-words">
-                          {selectedState.code} · {selectedExam.name}
-                        </p>
-                        <span className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4 text-sm">
-                          <span className="font-semibold text-slate-500">
+                        <div className="min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl sm:rounded-2xl border border-teal-100/90 bg-teal-50/70 text-teal-900 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-teal-200 group-hover:bg-teal-100">
+                              <PaperSymbol className="h-5 w-5 sm:h-6 sm:w-6" />
+                            </span>
+                            <span className="rounded-full border border-teal-200/80 bg-teal-50/70 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide text-teal-900 leading-snug">
+                              {paperDisplayById.get(selectedPaper.id)?.shortLabel ?? "Paper"}
+                            </span>
+                          </div>
+                          <h3 className="font-display mt-3 text-base sm:text-lg font-bold leading-snug text-slate-950 group-hover:text-teal-800 transition break-words">
+                            {sub.name}
+                          </h3>
+                          {sub.description ? (
+                            <p className="mt-1 text-xs text-slate-600 line-clamp-2 break-words">
+                              {sub.description}
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-xs text-slate-400 break-words">
+                              {selectedState.code} · {selectedExam.name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="mt-3.5 sm:mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs sm:text-sm">
+                          <span className="font-bold text-slate-600">
                             {subTestsCount} mock test{subTestsCount === 1 ? "" : "s"}
                           </span>
-                          <span className="shrink-0 font-black text-teal-800 transition group-hover:translate-x-1">
-                            Open →
+                          <span className="inline-flex shrink-0 items-center gap-1 font-bold text-teal-800 transition group-hover:translate-x-1">
+                            Open tests →
                           </span>
-                        </span>
+                        </div>
                       </Link>
                     );
                   })}
@@ -811,7 +831,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
               <div className="mb-10">
                 <div className="mb-4">
                   <p className="text-[11px] font-black uppercase tracking-[0.14em] text-teal-700">
-                    Monthly & Topic Practice
+                    Monthly &amp; Topic Practice
                   </p>
                   <h3 className="font-display mt-0.5 text-xl font-bold text-slate-900 sm:text-2xl">
                     Choose a month or topic in {selectedSubject.name}
@@ -821,7 +841,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   </p>
                 </div>
 
-                <div className="student-stagger grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="student-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {subjectSections.map((sec) => {
                     const secTests = tests.filter((t) => t.subject_section_id === sec.id);
                     return (
@@ -832,22 +852,22 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                           section: sec.slug,
                           page: undefined,
                         })}
-                        className="student-card group flex min-h-36 flex-col justify-between rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:shadow-xl hover:shadow-slate-950/5"
+                        className="student-card group flex min-w-0 flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
                       >
                         <div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
-                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl sm:rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
+                              <svg className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
                             </span>
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black tracking-wide text-teal-800">
+                            <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold tracking-wide text-teal-800">
                               {secTests.length} test{secTests.length === 1 ? "" : "s"}
                             </span>
                           </div>
-                          <h4 className="font-display mt-4 text-xl font-bold text-slate-950 group-hover:text-teal-800 transition">
+                          <h4 className="font-display mt-3 text-base sm:text-lg font-bold text-slate-950 group-hover:text-teal-800 transition break-words">
                             {sec.name}
                           </h4>
                         </div>
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                        <div className="mt-3.5 sm:mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
                           <span className="font-semibold text-slate-500">Practice series</span>
                           <span className="font-black text-teal-800 transition group-hover:translate-x-1">
                             Open tests →

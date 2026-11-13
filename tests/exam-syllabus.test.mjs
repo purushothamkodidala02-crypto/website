@@ -58,3 +58,22 @@ test("admin subjects page clarifies automatic syllabus generation", async () => 
   assert.match(adminSubjects, /Subjects &amp; Syllabus Curriculum/);
   assert.match(adminSubjects, /How Syllabus is generated automatically/);
 });
+
+test("student-side mock-tests page has mobile-optimized horizontal touch scrolling for subjects", async () => {
+  const mockTestsPage = await read("app/mock-tests/page.tsx");
+
+  // Touch scrolling and comfortable tap targets for subjects on mobile
+  assert.match(mockTestsPage, /overflow-x-auto/);
+  assert.match(mockTestsPage, /touch-pan-x/);
+  assert.match(mockTestsPage, /min-h-\[42px\]/);
+  assert.match(mockTestsPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
+});
+
+test("exam and syllabus pages provide mobile-optimized touch cards with direct practice links", async () => {
+  const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
+  const syllabusPage = await read("app/mock-tests/[id]/[exam]/syllabus/page.tsx");
+
+  assert.match(examPage, /Start practice →/);
+  assert.match(syllabusPage, /Practise tests →/);
+  assert.match(syllabusPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
+});

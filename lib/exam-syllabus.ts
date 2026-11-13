@@ -71,6 +71,8 @@ export type ComputedUnit = {
   unitNumber: string;
   name: string;
   paperName: string;
+  paperSlug?: string;
+  subjectSlug?: string;
   description: string;
   topics: string[];
   testCount: number;
@@ -254,14 +256,26 @@ export function computeExamSyllabus(params: {
   let unitIndex = 1;
 
   if (overridePattern?.subjects?.length) {
+    const fallbackPaperSlug = computedPapers[0]?.slug;
     for (const sub of overridePattern.subjects) {
+      const matchedPaperSubject = computedPapers
+        .flatMap((p) => p.subjects.map((s) => ({ ...s, paperSlug: p.slug })))
+        .find(
+          (s) =>
+            s.name.toLowerCase() === sub.name.toLowerCase() ||
+            s.name.toLowerCase().includes(sub.name.toLowerCase()) ||
+            sub.name.toLowerCase().includes(s.name.toLowerCase()),
+        );
+
       units.push({
         unitNumber: `Unit ${String(unitIndex).padStart(2, "0")}`,
         name: sub.name,
         paperName: sub.teluguName || "General Curriculum",
+        paperSlug: matchedPaperSubject?.paperSlug || fallbackPaperSlug,
+        subjectSlug: matchedPaperSubject?.slug,
         description: sub.description,
-        topics: [],
-        testCount: 0,
+        topics: matchedPaperSubject?.topics ?? [],
+        testCount: matchedPaperSubject?.testCount ?? 0,
       });
       unitIndex++;
     }
@@ -272,6 +286,8 @@ export function computeExamSyllabus(params: {
           unitNumber: `Unit ${String(unitIndex).padStart(2, "0")}`,
           name: sub.name,
           paperName: paper.label,
+          paperSlug: paper.slug,
+          subjectSlug: sub.slug,
           description:
             sub.description ||
             `Covers all essential exam-oriented concepts, high-yield practice questions, and bilingual mock test preparation for ${sub.name}.`,
