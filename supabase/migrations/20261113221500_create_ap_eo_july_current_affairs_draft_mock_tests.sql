@@ -1,0 +1,170 @@
+-- Migration: Create July Current Affairs sub-section and 4 draft mock tests
+-- Exam: AP Endowment Officer (APPSC)
+-- Paper: General Studies & General Abilities (7c9ee5a1-0d79-422f-8cd1-13ae921d9b53)
+-- Subject: Current Affairs (b675525c-5185-40e8-9df5-a869a113c7bb)
+-- Sub-section: July (87a21644-329b-4e17-b73f-c1f9380962b7)
+
+BEGIN;
+
+-- 1. Ensure July sub-section exists under Current Affairs
+INSERT INTO public.subject_sections (
+  id,
+  subject_id,
+  name,
+  slug,
+  display_order,
+  is_active,
+  created_at,
+  updated_at
+) VALUES (
+  '87a21644-329b-4e17-b73f-c1f9380962b7',
+  'b675525c-5185-40e8-9df5-a869a113c7bb',
+  'July',
+  'july',
+  4,
+  true,
+  now(),
+  now()
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  slug = EXCLUDED.slug,
+  display_order = EXCLUDED.display_order,
+  is_active = EXCLUDED.is_active,
+  updated_at = now();
+
+-- 2. Create 4 Draft Mock Tests for July Current Affairs
+INSERT INTO public.mock_tests (
+  id,
+  paper_id,
+  subject_id,
+  subject_section_id,
+  title,
+  slug,
+  description,
+  instructions,
+  duration_minutes,
+  difficulty,
+  status,
+  version,
+  display_order,
+  published_at,
+  access_type,
+  price_inr,
+  test_scope,
+  series_number,
+  seo_title,
+  seo_description,
+  target_question_count,
+  created_at,
+  updated_at
+) VALUES
+  (
+    'd7b415a1-7788-449e-bdf1-3b7454823901',
+    '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
+    'b675525c-5185-40e8-9df5-a869a113c7bb',
+    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 01',
+    'current-affairs-july-mock-test-01',
+    'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
+    null,
+    25,
+    'mixed',
+    'draft',
+    1,
+    1,
+    null,
+    'free',
+    null,
+    'subject',
+    1,
+    null,
+    null,
+    25,
+    now(),
+    now()
+  ),
+  (
+    'd7b415a2-7788-449e-bdf1-3b7454823902',
+    '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
+    'b675525c-5185-40e8-9df5-a869a113c7bb',
+    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 02',
+    'current-affairs-july-mock-test-02',
+    'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
+    null,
+    25,
+    'mixed',
+    'draft',
+    1,
+    2,
+    null,
+    'free',
+    null,
+    'subject',
+    2,
+    null,
+    null,
+    25,
+    now(),
+    now()
+  ),
+  (
+    'd7b415a3-7788-449e-bdf1-3b7454823903',
+    '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
+    'b675525c-5185-40e8-9df5-a869a113c7bb',
+    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 03',
+    'current-affairs-july-mock-test-03',
+    'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
+    null,
+    25,
+    'mixed',
+    'draft',
+    1,
+    3,
+    null,
+    'free',
+    null,
+    'subject',
+    3,
+    null,
+    null,
+    25,
+    now(),
+    now()
+  ),
+  (
+    'd7b415a4-7788-449e-bdf1-3b7454823904',
+    '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
+    'b675525c-5185-40e8-9df5-a869a113c7bb',
+    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 04',
+    'current-affairs-july-mock-test-04',
+    'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
+    null,
+    25,
+    'mixed',
+    'draft',
+    1,
+    4,
+    null,
+    'free',
+    null,
+    'subject',
+    4,
+    null,
+    null,
+    25,
+    now(),
+    now()
+  )
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  slug = EXCLUDED.slug,
+  description = EXCLUDED.description,
+  duration_minutes = EXCLUDED.duration_minutes,
+  target_question_count = EXCLUDED.target_question_count,
+  status = EXCLUDED.status,
+  updated_at = now();
+
+COMMIT;
