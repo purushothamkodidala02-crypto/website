@@ -1,6 +1,6 @@
-import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
-import { summarizeExamNegativeMarking, formatMarkValue } from "@/lib/scoring";
-import type { ExamPatternInfo } from "@/lib/telugu-seo";
+import { buildPaperDisplayMap, type OrderedPaper } from "./papers";
+import { summarizeExamNegativeMarking, formatMarkValue } from "./scoring";
+import type { ExamPatternInfo } from "./telugu-seo";
 
 export type RawPaper = {
   id: string;

@@ -7,6 +7,7 @@ import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { collectionStructuredData, publicCollectionMetadata } from "@/lib/public-seo";
 import { examUrl, paperUrl, stateUrl, subjectUrl, syllabusUrl } from "@/lib/public-urls";
+import { createClient } from "@/lib/supabase/server";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 import {
   computeExamSyllabus,
@@ -126,7 +127,23 @@ export default async function ExamSyllabusPage({ params }: Props) {
   const examSections = catalog.sections.filter((sec) => subjectIds.has(sec.subject_id) && sec.is_active);
   const examTests = catalog.tests.filter((test) => paperIds.has(test.paper_id));
 
-  // Compute comprehensive syllabus details automatically
+  // Fetch any custom government notification syllabus or FAQs saved by admin
+  const supabase = await createClient();
+  const { data: rawFaqs } = await supabase
+    .from("exam_page_faqs")
+    .select("question, answer, display_order")
+    .eq("exam_group_id", examGroup.id)
+    .order("display_order");
+
+  const syllabusFaqs = (rawFaqs ?? []).filter((f) =>
+    f.question.startsWith("__OFFICIAL_GOVERNMENT_SYLLABUS"),
+  );
+  const customSyllabusText = syllabusFaqs.map((f) => f.answer).join("");
+  const studentFaqs = (rawFaqs ?? []).filter(
+    (f) => !f.question.startsWith("__OFFICIAL_GOVERNMENT_SYLLABUS"),
+  );
+
+  // Compute comprehensive syllabus details automatically or from custom government syllabus
   const syllabus = computeExamSyllabus({
     examName: examGroup.name,
     examDescription: examGroup.description,
@@ -138,6 +155,7 @@ export default async function ExamSyllabusPage({ params }: Props) {
     sections: examSections as RawSection[],
     tests: examTests as RawTest[],
     overridePattern: meta.teluguData?.pattern,
+    customSyllabusText: customSyllabusText || null,
   });
 
   const subjectNames = examSubjects.map((s) => s.name).slice(0, 8);
@@ -161,9 +179,10 @@ export default async function ExamSyllabusPage({ params }: Props) {
   ];
 
   const faqs = [
+    ...studentFaqs.map((f) => ({ question: f.question, answer: f.answer })),
     ...(meta.teluguData?.englishFaqs ?? []),
     ...(meta.teluguData?.teluguFaqs ?? []),
-    ...(meta.teluguData ? [] : dynamicFaqs),
+    ...(meta.teluguData || studentFaqs.length > 0 ? [] : dynamicFaqs),
   ];
 
   const structuredData = [
@@ -445,12 +464,12 @@ export default async function ExamSyllabusPage({ params }: Props) {
               </span>
             </div>
 
-            {/* Subject-Wise Topic Breakdown - Displays Only Topic Names */}
+            {/* Subject-Wise Topic Breakdown - Official Government Format */}
             {syllabus.units.length > 0 && (
               <div className="mt-5 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                 {syllabus.units.map((unit) => (
                   <article
-                    key={unit.name}
+                    key={unit.name + unit.unitNumber}
                     className="flex min-w-0 flex-col justify-between rounded-xl sm:rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 sm:p-5 transition hover:border-teal-300 hover:bg-white shadow-2xs"
                   >
                     <div>
@@ -467,12 +486,15 @@ export default async function ExamSyllabusPage({ params }: Props) {
                       <h3 className="font-display mt-2 sm:mt-2.5 text-base sm:text-lg font-bold text-slate-900 break-words">
                         {unit.name}
                       </h3>
+                      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-700 font-normal">
+                        {unit.description}
+                      </p>
                     </div>
 
                     {unit.topics.length > 0 && (
                       <div className="mt-3.5 border-t border-slate-200/70 pt-2.5 sm:pt-3">
                         <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-teal-800">
-                          Syllabus Topics ({unit.topics.length}):
+                          Key Focus Areas ({unit.topics.length}):
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
                           {unit.topics.map((topic) => (
@@ -605,6 +627,29 @@ export default async function ExamSyllabusPage({ params }: Props) {
             </div>
           </section>
         )}
+
+        {/* Dedicated Mock Test Practice CTA Banner */}
+        <section className="rounded-2xl border border-teal-200/80 bg-gradient-to-br from-teal-900 to-slate-950 p-6 sm:p-8 text-white shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-teal-300">
+                Official Pattern Practice
+              </p>
+              <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-white">
+                Ready to Practice for {examGroup.name}?
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                Take full-length bilingual mock tests mapped directly to this official government syllabus.
+              </p>
+            </div>
+            <Link
+              href={examHref}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-teal-950 hover:bg-teal-50 transition shadow-xs shrink-0"
+            >
+              Explore {examGroup.name} Mock Tests →
+            </Link>
+          </div>
+        </section>
 
         {faqs.length > 0 && (
           <section aria-labelledby="syllabus-faq-title" className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs">
