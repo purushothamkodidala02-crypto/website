@@ -69,11 +69,12 @@ test("student-side mock-tests page has mobile-optimized horizontal touch scrolli
   assert.match(mockTestsPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
 });
 
-test("exam and syllabus pages provide mobile-optimized touch cards with direct practice links", async () => {
+test("exam and syllabus pages display curriculum topics cleanly without test preview clutter", async () => {
   const examPage = await read("app/mock-tests/[id]/[exam]/page.tsx");
   const syllabusPage = await read("app/mock-tests/[id]/[exam]/syllabus/page.tsx");
 
-  assert.match(examPage, /Start practice →/);
-  assert.match(syllabusPage, /Practise tests →/);
-  assert.match(syllabusPage, /grid-cols-1 sm:grid-cols-2 lg:grid-cols-3/);
+  assert.match(examPage, /Subject-wise Syllabus Topics/);
+  assert.match(syllabusPage, /Syllabus Topics/);
+  assert.match(syllabusPage, /grid-cols-1 md:grid-cols-2/);
+  assert.doesNotMatch(syllabusPage, /Practise tests →/);
 });

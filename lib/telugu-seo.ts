@@ -164,39 +164,44 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     ],
     subjects: [
       {
+        name: "English",
+        teluguName: "జనరల్ ఇంగ్లీష్ (General English)",
+        description: "Reading Comprehension, Vocabulary, Spelling, Grammar, Sentence Correction, Idioms & Phrases.",
+      },
+      {
         name: "Arithmetic & Quantitative Aptitude",
         teluguName: "అర్థమెటిక్ & సంఖ్యా సామర్థ్యం",
-        description: "Number systems, percentages, averages, ratio & proportion, profit & loss, time & work, simple & compound interest, data interpretation.",
+        description: "Number Systems, Percentages, Averages, Ratio & Proportion, Profit & Loss, Time & Work, Time & Distance, Simple & Compound Interest, Data Interpretation, Simplification & LCM & HCF.",
       },
       {
         name: "Test of Reasoning & Mental Ability",
         teluguName: "రీజనింగ్ & మెంటల్ ఎబిలిటీ",
-        description: "Analogy, series completion, coding-decoding, blood relations, direction sense, syllogisms, puzzle tests, non-verbal reasoning.",
+        description: "Analogy, Series Completion, Coding-Decoding, Blood Relations, Direction Sense, Syllogisms, Puzzle Tests, Non-Verbal Reasoning.",
       },
       {
         name: "General Science",
         teluguName: "జనరల్ సైన్స్",
-        description: "Everyday science observation, basic concepts of physics, chemistry, biology, scientific inventions, environmental studies.",
+        description: "Everyday Science Observation, Basic Concepts of Physics, Chemistry, Biology, Scientific Inventions, Environmental Studies.",
       },
       {
         name: "History of India & Indian Culture",
         teluguName: "భారత దేశ చరిత్ర & సంస్కృతి",
-        description: "Ancient, medieval, and modern Indian history, socio-cultural movements, freedom struggle, prominent national leaders.",
+        description: "Ancient Indian History, Medieval Indian History, Modern Indian History, Socio-Cultural Movements, Indian National Movement.",
       },
       {
         name: "Telangana History, Movement & State Formation",
         teluguName: "తెలంగాణ చరిత్ర, ఉద్యమం & రాష్ట్ర ఆవిర్భావం",
-        description: "Satavahanas, Kakatiyas, Asaf Jahis, Telangana Armed Struggle, 1969 agitation, Telangana statehood movement & cultural heritage.",
+        description: "Satavahanas, Kakatiyas, Asaf Jahis, Telangana Armed Struggle, 1969 Agitation, Telangana Statehood Movement, Telangana Cultural Heritage.",
       },
       {
         name: "Indian Geography, Polity & Economy",
         teluguName: "భారత భూగోళశాస్త్రం, రాజనీతి & ఆర్థిక వ్యవస్థ",
-        description: "Physical geography of India & Telangana, Indian Constitution, political system, fundamental rights, economic planning & development.",
+        description: "Physical Geography of India & Telangana, Indian Constitution, Political System & Governance, Fundamental Rights, Indian & Telangana Economy.",
       },
       {
         name: "Current Events of National & International Importance",
         teluguName: "సమకాలీన అంశాలు (కరెంట్ అఫైర్స్)",
-        description: "Recent national & global developments, awards, sports, appointments, science & tech milestones, state welfare schemes.",
+        description: "Current Affairs (June - December), National & Global Developments, Awards & Honours, Sports & Games, Science & Tech Milestones, State Welfare Schemes.",
       },
     ],
   },
