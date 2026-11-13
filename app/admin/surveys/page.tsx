@@ -8,6 +8,7 @@ import {
   getAdminSurveysWithCounts,
 } from "@/app/actions/surveys-admin";
 import { useRouter } from "next/navigation";
+import { ApEndowmentFeedbackSection } from "@/components/admin/ApEndowmentFeedbackSection";
 
 type SurveyItem = {
   id: string;
@@ -88,6 +89,9 @@ export default function AdminSurveysList() {
           </p>
         </div>
       </div>
+
+      {/* AP Endowment Officer Targeted Feedback Section */}
+      <ApEndowmentFeedbackSection />
 
       {/* Active Public Survey Banner */}
       {activeSurvey && (
