@@ -860,7 +860,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </div>
             )}
 
-            {/* Quick Highlights / At a Glance Table (Testbook Style) */}
+            {/* Quick Highlights / At a Glance Table */}
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
               <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">

@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { revalidatePath } from "next/cache";
 import {
-  type ZohoSurveySettings,
-  DEFAULT_ZOHO_SETTINGS,
-} from "@/lib/surveys/zoho-settings";
+  type SurveySettings,
+  DEFAULT_SURVEY_SETTINGS,
+} from "@/lib/surveys/survey-settings";
 
 async function getSupabaseServerClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -31,7 +31,7 @@ export type AdminSurveyResponse = {
   answers: Array<{ question_id: string; answer_text: string }>;
 };
 
-export type { ZohoSurveySettings };
+export type { SurveySettings };
 
 export type AdminSurveyDetail = {
   id: string;
@@ -39,7 +39,7 @@ export type AdminSurveyDetail = {
   description?: string | null;
   is_active: boolean;
   created_at?: string;
-  settings?: ZohoSurveySettings | null;
+  settings?: SurveySettings | null;
 };
 
 export type AdminSurveyQuestion = {
@@ -89,7 +89,7 @@ export async function updateAdminSurvey(
 
 export async function updateSurveySettings(
   surveyId: string,
-  settings: ZohoSurveySettings
+  settings: SurveySettings
 ) {
   try {
     const dbClient = await getSupabaseServerClient();

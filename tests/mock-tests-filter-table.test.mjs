@@ -127,4 +127,36 @@ test("ExistingMockTestsTable displays sub-topic tag and uses clean Mock Test lab
     /sectionName:\s*section\?\.name/,
     "syncAllMockTestTitles should preserve sectionName in buildMockTestTitle"
   );
+
+  // 6. Interactive tag search across all states
+  assert.match(
+    existingTableSrc,
+    /handleTagSearch\s*=\s*\(term:\s*string\)/,
+    "ExistingMockTestsTable should define handleTagSearch"
+  );
+  assert.match(
+    existingTableSrc,
+    /onClick=\{\(\)\s*=>\s*handleTagSearch\(test\.examName\)\}/,
+    "Clicking exam tag should search examName"
+  );
+  assert.match(
+    existingTableSrc,
+    /onClick=\{\(\)\s*=>\s*handleTagSearch\(test\.subjectName!\)\}/,
+    "Clicking subject tag should search subjectName"
+  );
+  assert.match(
+    existingTableSrc,
+    /onClick=\{\(\)\s*=>\s*handleTagSearch\(test\.sectionName!\)\}/,
+    "Clicking section tag should search sectionName"
+  );
+  assert.match(
+    existingTableSrc,
+    /onClick=\{\(\)\s*=>\s*handleStateClick\(test\.stateId\)\}/,
+    "Clicking state tag should toggle stateId"
+  );
+  assert.match(
+    existingTableSrc,
+    /Filtered by tag \/ keyword/,
+    "ExistingMockTestsTable should render active filter indicator with clear option"
+  );
 });

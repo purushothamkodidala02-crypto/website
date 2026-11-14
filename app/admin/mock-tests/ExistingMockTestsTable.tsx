@@ -103,8 +103,30 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     }
   };
 
+  const handleTagSearch = (term: string) => {
+    const cleanTerm = term.trim();
+    if (!cleanTerm) return;
+    if (search.trim().toLowerCase() === cleanTerm.toLowerCase()) {
+      setSearch("");
+    } else {
+      setStateId("");
+      setLocation(emptyLocation);
+      setSearch(cleanTerm);
+    }
+  };
+
+  const handleStateClick = (clickedStateId: string) => {
+    setStateId((prev) => (prev === clickedStateId ? "" : clickedStateId));
+    setLocation(emptyLocation);
+  };
+
+  const handleScopeClick = (clickedScope: "paper" | "subject") => {
+    setScope((prev) => (prev === clickedScope ? "all" : clickedScope));
+  };
+
   const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    const rawQuery = search.trim().toLowerCase();
+    const queryWords = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
     return tests.filter((test) =>
       (!stateId || test.stateId === stateId) &&
       (!location.categoryId || test.categoryId === location.categoryId) &&
@@ -113,7 +135,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       (!location.paperId || test.paperId === location.paperId) &&
       (status === "all" || test.status === status) &&
       (scope === "all" || test.scope === scope) &&
-      (!query || `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""}`.toLowerCase().includes(query)),
+      (queryWords.length === 0 ||
+        (() => {
+          const haystack = `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""}`.toLowerCase();
+          return haystack.includes(rawQuery) || queryWords.every((word) => haystack.includes(word));
+        })()),
     );
   }, [location, search, stateId, status, scope, tests]);
 
@@ -375,8 +401,19 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by test title, exam name, paper, subject, or topic..."
-              className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
+              className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-9 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition text-xs cursor-pointer"
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
           </div>
           <div className="w-full sm:w-56 shrink-0">
             <select
@@ -390,6 +427,38 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
             </select>
           </div>
         </div>
+
+        {search.trim() && (
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600">
+            <span>Filtered by tag / keyword:</span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+              <span>&ldquo;{search.trim()}&rdquo;</span>
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500"
+                title="Clear search filter"
+              >
+                ✕
+              </button>
+            </span>
+            <span className="text-slate-400">
+              ({filtered.length} {filtered.length === 1 ? "test" : "tests"} found{stateId ? " in selected state" : " across all states"})
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setStateId("");
+                setLocation(emptyLocation);
+                setScope("all");
+              }}
+              className="text-xs font-medium text-teal-700 hover:underline cursor-pointer ml-1"
+            >
+              Reset all filters
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tests List */}
@@ -420,37 +489,128 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   {/* Top Metadata Row */}
                   <div className="flex items-start justify-between gap-2.5">
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
-                      <span
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-bold shrink-0 ${
+                      <button
+                        type="button"
+                        onClick={() => handleStateClick(test.stateId)}
+                        title={
+                          stateId === test.stateId
+                            ? `Active state filter: ${test.stateCode}. Click to show all states.`
+                            : `Filter by state: ${test.stateCode}`
+                        }
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-bold shrink-0 transition cursor-pointer hover:opacity-85 active:scale-95 ${
+                          stateId === test.stateId
+                            ? "ring-2 ring-slate-900 shadow-xs"
+                            : ""
+                        } ${
                           isTG
                             ? "border-sky-200/80 bg-sky-50/60 text-sky-800"
                             : "border-teal-200/80 bg-teal-50/60 text-teal-800"
                         }`}
                       >
                         {test.stateCode}
-                      </span>
-                      <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 break-words">
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTagSearch(test.examName)}
+                        title={
+                          search.trim().toLowerCase() === test.examName.trim().toLowerCase()
+                            ? `Active filter: "${test.examName}". Click to clear.`
+                            : `Search "${test.examName}" across all states`
+                        }
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-slate-100 hover:border-slate-300 active:scale-95 text-left ${
+                          search.trim().toLowerCase() === test.examName.trim().toLowerCase()
+                            ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                            : "border-slate-200 bg-white text-slate-700"
+                        }`}
+                      >
                         {test.examName}
-                      </span>
-                      <span className="rounded-md border border-teal-200/70 bg-teal-50/50 px-2 py-0.5 text-[11px] font-semibold text-teal-800 break-words">
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTagSearch(test.paperName)}
+                        title={
+                          search.trim().toLowerCase() === test.paperName.trim().toLowerCase()
+                            ? `Active filter: "${test.paperName}". Click to clear.`
+                            : `Search "${test.paperName}" across all states`
+                        }
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-teal-100/70 hover:border-teal-300 active:scale-95 text-left ${
+                          search.trim().toLowerCase() === test.paperName.trim().toLowerCase()
+                            ? "border-teal-700 bg-teal-700 text-white shadow-xs"
+                            : "border-teal-200/70 bg-teal-50/50 text-teal-800"
+                        }`}
+                      >
                         {test.paperName}
-                      </span>
+                      </button>
+
                       {test.subjectName && (
-                        <span className="rounded-md border border-indigo-200/70 bg-indigo-50/50 px-2 py-0.5 text-[11px] font-semibold text-indigo-800 break-words">
+                        <button
+                          type="button"
+                          onClick={() => handleTagSearch(test.subjectName!)}
+                          title={
+                            search.trim().toLowerCase() === test.subjectName.trim().toLowerCase()
+                              ? `Active filter: "${test.subjectName}". Click to clear.`
+                              : `Search "${test.subjectName}" across all states`
+                          }
+                          className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-indigo-100/70 hover:border-indigo-300 active:scale-95 text-left ${
+                            search.trim().toLowerCase() === test.subjectName.trim().toLowerCase()
+                              ? "border-indigo-700 bg-indigo-700 text-white shadow-xs"
+                              : "border-indigo-200/70 bg-indigo-50/50 text-indigo-800"
+                          }`}
+                        >
                           {test.subjectName}
-                        </span>
+                        </button>
                       )}
+
                       {test.sectionName && (
-                        <span className="rounded-md border border-purple-200/70 bg-purple-50/50 px-2 py-0.5 text-[11px] font-semibold text-purple-800 break-words">
+                        <button
+                          type="button"
+                          onClick={() => handleTagSearch(test.sectionName!)}
+                          title={
+                            search.trim().toLowerCase() === test.sectionName.trim().toLowerCase()
+                              ? `Active filter: "${test.sectionName}". Click to clear.`
+                              : `Search "${test.sectionName}" across all states`
+                          }
+                          className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-purple-100/70 hover:border-purple-300 active:scale-95 text-left ${
+                            search.trim().toLowerCase() === test.sectionName.trim().toLowerCase()
+                              ? "border-purple-700 bg-purple-700 text-white shadow-xs"
+                              : "border-purple-200/70 bg-purple-50/50 text-purple-800"
+                          }`}
+                        >
                           {test.sectionName}
-                        </span>
+                        </button>
                       )}
-                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 shrink-0">
+
+                      <button
+                        type="button"
+                        onClick={() => handleScopeClick(test.scope)}
+                        title={
+                          scope === test.scope
+                            ? `Active scope: ${test.scope === "paper" ? "Paper-wise" : "Subject-wise"}. Click to show all scopes.`
+                            : `Filter by ${test.scope === "paper" ? "Paper-wise" : "Subject-wise"}`
+                        }
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold shrink-0 transition cursor-pointer hover:bg-slate-100 active:scale-95 ${
+                          scope === test.scope
+                            ? "border-slate-800 bg-slate-800 text-white shadow-xs"
+                            : "border-slate-200 bg-slate-50 text-slate-600"
+                        }`}
+                      >
                         {test.scope === "paper" ? "Paper-wise" : "Subject-wise"}
-                      </span>
-                      <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 shrink-0">
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTagSearch(mockTestLabel(test.seriesNumber))}
+                        title={`Search "${mockTestLabel(test.seriesNumber)}" across all states`}
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold shrink-0 transition cursor-pointer hover:bg-slate-100 active:scale-95 ${
+                          search.trim().toLowerCase() === mockTestLabel(test.seriesNumber).toLowerCase()
+                            ? "border-slate-800 bg-slate-800 text-white shadow-xs"
+                            : "border-slate-200 bg-slate-50 text-slate-600"
+                        }`}
+                      >
                         Series #{test.seriesNumber}
-                      </span>
+                      </button>
                     </div>
 
                     <div className="shrink-0 flex flex-wrap items-center justify-end gap-1.5">

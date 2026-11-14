@@ -20,7 +20,7 @@ import {
   type AdminSurveyQuestion,
 } from "@/app/actions/surveys-admin";
 import { BackButton } from "@/components/admin/BackButton";
-import { ZohoSurveySettingsPanel } from "@/components/admin/ZohoSurveySettingsPanel";
+import { SurveySettingsPanel } from "@/components/admin/SurveySettingsPanel";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 export default function AdminSurveyEditor({ params }: { params: Promise<{ id: string }> }) {
@@ -605,7 +605,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* Zoho Survey Platform Navigation Tabs */}
+      {/* Survey Platform Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/90 pb-3">
         <button
           type="button"
@@ -638,7 +638,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
               : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
           }`}
         >
-          <span>⚙️</span> Survey Settings (Zoho-style)
+          <span>⚙️</span> Survey Settings
         </button>
         <button
           type="button"
@@ -655,7 +655,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
 
       {activeTab === "settings" && (
         <div className="space-y-4">
-          <ZohoSurveySettingsPanel
+          <SurveySettingsPanel
             surveyId={survey.id}
             surveyTitle={survey.title}
             initialSettings={survey.settings}

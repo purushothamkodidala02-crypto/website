@@ -36,7 +36,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
   const [editTitle, setEditTitle] = useState("AP Endowment Officer — Subject Priority Responses");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  // Zoho Survey Conditions State
+  // Survey Conditions State
   const [showSettings, setShowSettings] = useState(false);
   const [conditions, setConditions] = useState<ApEndowmentSurveyConditions>(DEFAULT_SURVEY_CONDITIONS);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -462,7 +462,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
                 ? "bg-slate-100 border-slate-300 text-slate-900"
                 : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
             }`}
-            title="Zoho-style survey display rules and conditions"
+            title="Survey display rules and conditions"
           >
             {showSettings ? "✕ Settings" : "⚙️ Settings"}
           </button>
@@ -477,13 +477,13 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
         </div>
       </div>
 
-      {/* Zoho Survey Conditions Box */}
+      {/* Survey Conditions Box */}
       {showSettings && (
         <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-6 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
             <div>
               <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                <span>⚙️</span> Survey Conditions & Re-appearance Rules (Zoho-style)
+                <span>⚙️</span> Survey Conditions & Re-appearance Rules
               </h4>
               <p className="text-xs text-slate-500 mt-0.5">
                 Control target audience and student re-trigger conditions.

@@ -9,11 +9,11 @@ import {
   deleteAdminSurvey,
   toggleSurveyStatus,
   getAdminSurveysWithCounts,
-  type ZohoSurveySettings,
+  type SurveySettings,
 } from "@/app/actions/surveys-admin";
 import { useRouter } from "next/navigation";
 import { ApEndowmentFeedbackSection } from "@/components/admin/ApEndowmentFeedbackSection";
-import { ZohoSurveySettingsPanel } from "@/components/admin/ZohoSurveySettingsPanel";
+import { SurveySettingsPanel } from "@/components/admin/SurveySettingsPanel";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 type SurveyItem = {
@@ -23,7 +23,7 @@ type SurveyItem = {
   is_active: boolean;
   created_at: string;
   response_count?: number;
-  settings?: ZohoSurveySettings | null;
+  settings?: SurveySettings | null;
 };
 
 export default function AdminSurveysList() {
@@ -45,7 +45,7 @@ export default function AdminSurveysList() {
   // Delete State
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Zoho Survey Settings State
+  // Survey Settings State
   const [openSettingsSurveyId, setOpenSettingsSurveyId] = useState<string | null>(null);
 
   const router = useRouter();
@@ -465,7 +465,7 @@ export default function AdminSurveysList() {
                           ? "bg-slate-100 border-slate-300 text-slate-900"
                           : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                       }`}
-                      title="Zoho-style survey display rules and conditions"
+                      title="Survey display rules and conditions"
                     >
                       {openSettingsSurveyId === survey.id ? "✕ Settings" : "⚙️ Settings"}
                     </button>
@@ -491,7 +491,7 @@ export default function AdminSurveysList() {
 
                 {openSettingsSurveyId === survey.id && (
                   <div className="w-full pt-1">
-                    <ZohoSurveySettingsPanel
+                    <SurveySettingsPanel
                       surveyId={survey.id}
                       surveyTitle={survey.title}
                       initialSettings={survey.settings}

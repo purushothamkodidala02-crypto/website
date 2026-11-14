@@ -1,28 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import {
-  type ZohoSurveySettings,
-  DEFAULT_ZOHO_SETTINGS,
-} from "@/lib/surveys/zoho-settings";
+import type { SurveySettings } from "@/lib/surveys/survey-settings";
+import { DEFAULT_SURVEY_SETTINGS } from "@/lib/surveys/survey-settings";
 
-interface ZohoSurveySettingsPanelProps {
+interface SurveySettingsPanelProps {
   surveyId: string;
   surveyTitle: string;
-  initialSettings?: Partial<ZohoSurveySettings> | null;
-  onSave: (newSettings: ZohoSurveySettings) => Promise<boolean | void>;
+  initialSettings?: Partial<SurveySettings> | null;
+  onSave: (newSettings: SurveySettings) => Promise<boolean | void>;
   onClose?: () => void;
 }
 
-export function ZohoSurveySettingsPanel({
+export function SurveySettingsPanel({
   surveyId,
   surveyTitle,
   initialSettings,
   onSave,
   onClose,
-}: ZohoSurveySettingsPanelProps) {
-  const [settings, setSettings] = useState<ZohoSurveySettings>(() => ({
-    ...DEFAULT_ZOHO_SETTINGS,
+}: SurveySettingsPanelProps) {
+  const [settings, setSettings] = useState<SurveySettings>(() => ({
+    ...DEFAULT_SURVEY_SETTINGS,
     ...(initialSettings || {}),
   }));
 
@@ -44,8 +42,8 @@ export function ZohoSurveySettingsPanel({
   };
 
   const handleReset = () => {
-    if (confirm("Reset all settings for this survey to default Zoho rules?")) {
-      setSettings(DEFAULT_ZOHO_SETTINGS);
+    if (confirm("Reset all settings for this survey to default rules?")) {
+      setSettings(DEFAULT_SURVEY_SETTINGS);
       if (typeof window !== "undefined") {
         localStorage.removeItem(`varadhi_survey_settings_${surveyId}`);
       }
@@ -58,7 +56,7 @@ export function ZohoSurveySettingsPanel({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
         <div>
           <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-            <span>⚙️</span> Survey Conditions & Controls (Zoho-style)
+            <span>⚙️</span> Survey Conditions & Controls
           </h4>
           <p className="text-xs text-slate-500 mt-0.5">
             Configure display mode, student targeting, re-appearance frequency, and quota for &ldquo;{surveyTitle}&rdquo;.
@@ -150,7 +148,7 @@ export function ZohoSurveySettingsPanel({
               onChange={(e) =>
                 setSettings((s) => ({
                   ...s,
-                  targetAudience: e.target.value as ZohoSurveySettings["targetAudience"],
+                  targetAudience: e.target.value as SurveySettings["targetAudience"],
                 }))
               }
               className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:border-slate-400 focus:outline-none"
@@ -228,7 +226,7 @@ export function ZohoSurveySettingsPanel({
                 onChange={(e) =>
                   setSettings((s) => ({
                     ...s,
-                    requirePhone: e.target.value as ZohoSurveySettings["requirePhone"],
+                    requirePhone: e.target.value as SurveySettings["requirePhone"],
                   }))
                 }
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:border-slate-400 focus:outline-none"

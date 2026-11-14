@@ -31,7 +31,7 @@ export function ApEndowmentPriorityModal() {
       return;
     }
 
-    // 2. Check Zoho survey conditions:
+    // 2. Check survey display conditions:
     if (typeof window !== "undefined") {
       if (localStorage.getItem("varadhi_ap_endowment_survey_active") === "false") {
         return;
@@ -117,7 +117,7 @@ export function ApEndowmentPriorityModal() {
 
   const handleDismiss = () => {
     setIsOpen(false);
-    // Mark as dismissed and increment skip count according to Zoho rules
+    // Mark as dismissed and increment skip count according to frequency rules
     if (typeof window !== "undefined") {
       const currentCount = Number(localStorage.getItem("varadhi_ap_eo_feedback_skip_count") || "0");
       localStorage.setItem("varadhi_ap_eo_feedback_skip_count", String(currentCount + 1));
