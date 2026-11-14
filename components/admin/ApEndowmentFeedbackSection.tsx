@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import {
   getApEndowmentFeedbackSummaryAction,
   deleteApEndowmentFeedbackAction,
@@ -18,14 +19,26 @@ import {
   type ApEndowmentSurveyConditions,
 } from "@/lib/campaigns/ap-endowment";
 
-export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: number } = {}) {
-  const [data, setData] = useState<ApEndowmentFeedbackSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+export function ApEndowmentFeedbackSection({
+  surveyIndex = 1,
+  initialSurvey,
+}: {
+  surveyIndex?: number;
+  initialSurvey?: { id?: string; response_count?: number } | null;
+} = {}) {
+  const [data, setData] = useState<ApEndowmentFeedbackSummary>({
+    totalResponses: 0,
+    paper1Count: 0,
+    paper2Count: 0,
+    bothCount: 0,
+    recentResponses: [],
+  });
+  const [loading, setLoading] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showResponses, setShowResponses] = useState(false);
-  const [dynamicSurveyId, setDynamicSurveyId] = useState<string | null>(null);
+  const [dynamicSurveyId, setDynamicSurveyId] = useState<string | null>("fb880bb0-f509-4935-997d-ce1fc3b3e6c0");
 
   // Copy Link State
   const [copiedLink, setCopiedLink] = useState(false);
@@ -51,7 +64,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
 
   const fetchFeedbackSafely = useCallback(async (): Promise<ApEndowmentFeedbackSummary> => {
     const emptySummary: ApEndowmentFeedbackSummary = {
-      totalResponses: 0,
+      totalResponses: initialSurvey?.response_count || 0,
       paper1Count: 0,
       paper2Count: 0,
       bothCount: 0,
@@ -81,8 +94,63 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
       console.warn("API /api/admin/feedback failed:", err);
     }
 
+    // Strategy 3: Direct browser Supabase client fallback
+    try {
+      const supabase = createBrowserClient();
+      const [{ data: fbRows }, { data: dynSurveys }] = await Promise.all([
+        supabase.from("ap_endowment_feedback").select("*").order("created_at", { ascending: false }),
+        supabase.from("dynamic_surveys").select("id").ilike("title", "%Endowment%").maybeSingle(),
+      ]);
+
+      if (fbRows && fbRows.length > 0) {
+        let p1 = 0;
+        let p2 = 0;
+        let both = 0;
+        const responses = fbRows.map((r: any) => {
+          const c = (r.paper_choice || "").toLowerCase();
+          if (c.includes("both")) both++;
+          else if (c.includes("paper 1") || c.includes("general")) p1++;
+          else if (c.includes("paper 2") || c.includes("hindu")) p2++;
+          return {
+            id: r.id,
+            studentName: r.student_name || "Student",
+            studentEmail: r.student_email || "N/A",
+            studentPhone: r.student_phone,
+            paperChoice: r.paper_choice,
+            subjectFocus: r.subject_focus,
+            specificTopics: r.specific_topics,
+            createdAt: r.created_at,
+          };
+        });
+        return {
+          totalResponses: responses.length,
+          paper1Count: p1,
+          paper2Count: p2,
+          bothCount: both,
+          recentResponses: responses,
+        };
+      }
+
+      if (dynSurveys?.id) {
+        const { count } = await supabase
+          .from("dynamic_survey_responses")
+          .select("id", { count: "exact", head: true })
+          .eq("survey_id", dynSurveys.id);
+
+        return {
+          totalResponses: count || initialSurvey?.response_count || 0,
+          paper1Count: 0,
+          paper2Count: 0,
+          bothCount: 0,
+          recentResponses: [],
+        };
+      }
+    } catch (err) {
+      console.warn("Browser Supabase feedback fallback failed:", err);
+    }
+
     return emptySummary;
-  }, []);
+  }, [initialSurvey?.response_count]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -137,11 +205,13 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
     }
 
     let ignore = false;
-    void getOrCreateApEndowmentSurveyIdAction().then((id) => {
-      if (!ignore && id) {
-        setDynamicSurveyId(id);
-      }
-    });
+    if (!dynamicSurveyId && !initialSurvey?.id) {
+      void getOrCreateApEndowmentSurveyIdAction().then((id) => {
+        if (!ignore && id) {
+          setDynamicSurveyId(id);
+        }
+      });
+    }
     void (async () => {
       try {
         const res = await fetchFeedbackSafely();
@@ -152,7 +222,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
       } catch {
         if (!ignore) {
           setData({
-            totalResponses: 0,
+            totalResponses: initialSurvey?.response_count || 0,
             paper1Count: 0,
             paper2Count: 0,
             bothCount: 0,
@@ -165,7 +235,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
     return () => {
       ignore = true;
     };
-  }, [fetchFeedbackSafely]);
+  }, [fetchFeedbackSafely, initialSurvey?.id, initialSurvey?.response_count, dynamicSurveyId]);
 
   const handleCopyLink = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";

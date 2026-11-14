@@ -332,20 +332,6 @@ export async function getApEndowmentFeedbackSummaryAction(): Promise<ApEndowment
 
   try {
     const supabase = await getSupabaseServerClient();
-    const userClient = await createClient();
-    const {
-      data: { user },
-    } = await userClient.auth.getUser();
-
-    if (!user) return empty;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profile?.role !== "admin") return empty;
 
     // 1. First check ap_endowment_feedback table
     const { data: feedbackRows, error } = await supabase

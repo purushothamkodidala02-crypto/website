@@ -419,23 +419,31 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   ];
 
   return (
-    <main className="min-h-screen bg-white text-[#1a1a1a] antialiased">
+    <main className="min-h-screen w-full bg-white text-[#1a1a1a] antialiased">
       <JsonLd data={jsonLd} />
 
-      {/* Top Broadsheet Hairline */}
+      {/* Direct Google Font Preload for Mandali (TV9 Telugu Font) */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Mandali&display=swap"
+      />
+
+      {/* Full-Screen Broadsheet Top Rule */}
       <div className="h-1 w-full bg-[#111827]" />
 
-      {/* Official Newspaper Style Header (Daily Dispatch & Moneycontrol Masthead) */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5">
+      {/* Full-Screen Newspaper Header (Daily Dispatch & Moneycontrol Style) */}
+      <header className="border-b border-gray-200 bg-white w-full">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-3.5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2" aria-label="Varadhi Prep home">
             <BrandLockup />
           </Link>
           <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
-            <span className="hidden sm:inline text-gray-500">Saturday, Nov 14, 2026</span>
+            <span className="hidden sm:inline text-gray-500 font-sans">Saturday, Nov 14, 2026</span>
             <Link
               href="/mock-tests/telangana/police-constable-free-mock-test"
-              className="inline-flex items-center rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white px-3.5 py-1.5 font-semibold transition"
+              className="inline-flex items-center rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white px-4 py-2 font-semibold transition text-xs sm:text-sm"
             >
               Practice Mock Tests &rarr;
             </Link>
@@ -443,9 +451,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </div>
       </header>
 
-      {/* Editorial Article Masthead & Lead (Daily Dispatch Layout) */}
-      <article className="border-b border-gray-200 bg-white">
-        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      {/* Full-Screen Editorial Article Header */}
+      <article className="border-b border-gray-200 bg-white w-full">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6 sm:py-8">
           
           {/* Breadcrumb Navigation */}
           <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -458,24 +466,24 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             <span className="font-semibold text-gray-900">Telangana Police Constable 2026</span>
           </nav>
 
-          {/* Editorial Category Tag (Broadsheet Kicker) */}
+          {/* Editorial Category Tag */}
           <div className="mt-3.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#b91c1c]">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#b91c1c]">
               Telangana State Recruitment &bull; Official Notification
             </span>
           </div>
 
-          {/* Editorial Headline in Broadsheet Georgia Serif */}
-          <div className="mt-2 max-w-4xl">
-            <h1 className="font-brand text-2xl sm:text-3xl lg:text-[2.5rem] font-bold text-gray-950 leading-[1.2] tracking-tight">
+          {/* Full-Width Headline with TV9 Mandali Telugu Font */}
+          <div className="mt-2.5 max-w-6xl">
+            <h1 className="font-brand text-2xl sm:text-3xl lg:text-[2.65rem] font-bold text-gray-950 leading-[1.2] tracking-tight">
               Telangana Police Constable Notification 2026: 7,112 Posts, Cadre Breakdown, Syllabus &amp; Selection Procedure
             </h1>
-            <p lang="te" className="font-telugu mt-2 text-base sm:text-lg text-gray-700 leading-relaxed font-normal">
+            <p lang="te" className="font-telugu text-lg sm:text-xl lg:text-2xl text-gray-800 mt-2.5 leading-[1.75] font-normal">
               తెలంగాణ పోలీస్ కానిస్టేబుల్ 7,112 పోస్టుల అధికారిక నోటిఫికేషన్, సిలబస్, ఈవెంట్స్ &amp; ఎంపిక విధానం
             </p>
           </div>
 
-          {/* Author Byline & Timestamp (Moneycontrol / Daily Dispatch Style) */}
+          {/* Author Byline & Timestamp */}
           <div className="mt-4 pt-3 border-t border-gray-200 flex flex-wrap items-center justify-between gap-y-2 text-xs text-gray-600">
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <span className="font-bold text-gray-900">Varadhi News Desk</span>
@@ -489,62 +497,62 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </div>
           </div>
 
-          {/* Moneycontrol "Key Highlights & Exam Snapshot" Box */}
-          <div className="mt-6 rounded-md border border-gray-200 bg-[#f9fafb] p-4 sm:p-5">
+          {/* Full-Width Moneycontrol "Key Highlights & Exam Snapshot" Box */}
+          <div className="mt-6 rounded-md border border-gray-200 bg-[#f9fafb] p-4 sm:p-5 w-full">
             <div className="flex items-center gap-2 border-b border-gray-200 pb-2.5">
               <span className="h-2 w-2 rounded-full bg-[#b91c1c]" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-gray-800">
                 Key Highlights &amp; Exam Snapshot
               </h2>
             </div>
-            <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-left">
+            <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4 text-left">
               
               <div className="rounded border border-gray-200 bg-white p-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Total Vacancies</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">7,112</strong>
-                <span className="text-xs text-gray-600 block">Civil &amp; Allied Cadres</span>
+                <span className="text-xs text-gray-600 block">Civil &amp; Allied</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">PWT Exam Date</span>
-                <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">20 Dec 2026</strong>
-                <span className="text-xs text-gray-600 block">10:00 AM – 1:00 PM</span>
+                <strong className="text-lg sm:text-xl font-bold text-gray-900 block mt-0.5">20 Dec 2026</strong>
+                <span className="text-xs text-gray-600 block">10 AM – 1 PM</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Age Limit (General)</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Age (General)</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">18 – 27 Yrs</strong>
-                <span className="text-xs text-gray-600 block">G.O. Ms 87 (+5 Years)</span>
+                <span className="text-xs text-gray-600 block">G.O. Ms 87 (+5Y)</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Scale of Pay</span>
-                <strong className="text-base sm:text-lg font-bold text-gray-900 block mt-0.5 leading-snug">₹24,280 – ₹72,850</strong>
-                <span className="text-xs text-gray-600 block">~₹34k–₹39k Gross/mo</span>
+                <strong className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 leading-snug">₹24,280–₹72,850</strong>
+                <span className="text-xs text-gray-600 block">~₹34k–₹39k Gross</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Qualification</span>
-                <strong className="text-base sm:text-lg font-bold text-gray-900 block mt-0.5 leading-snug">10+2 Intermediate</strong>
-                <span className="text-xs text-gray-600 block">Board of Intermediate</span>
+                <strong className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 leading-snug">10+2 Intermediate</strong>
+                <span className="text-xs text-gray-600 block">Board of Inter.</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Negative Marking</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Negative Mark</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">0.20 Marks</strong>
-                <span className="text-xs text-gray-600 block">20% per wrong answer</span>
+                <span className="text-xs text-gray-600 block">20% deduction</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Selection Stages</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Selection</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">4 Stages</strong>
-                <span className="text-xs text-gray-600 block">PWT &rarr; PMT &rarr; PET &rarr; FWE</span>
+                <span className="text-xs text-gray-600 block">PWT &rarr; FWE</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Application Fee</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Exam Fee</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">₹800 / ₹400</strong>
-                <span className="text-xs text-gray-600 block">50% TS SC/ST Concession</span>
+                <span className="text-xs text-gray-600 block">50% SC/ST Relief</span>
               </div>
 
             </div>
@@ -553,12 +561,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </div>
       </article>
 
-      {/* 2-Column Broad Editorial Grid: Main Story (70%) + Moneycontrol-Style Market/Sidebar (30%) */}
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Full-Screen 2-Column Broad Editorial Grid: Main Story + Sidebar */}
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start w-full">
 
-          {/* Main Story Editorial Content Column */}
-          <div className="lg:col-span-8 space-y-9">
+          {/* Main Story Editorial Content Column (Full Width Stretch) */}
+          <div className="lg:col-span-8 xl:col-span-9 2xl:col-span-9 space-y-9">
 
             {/* Lead Story Paragraph */}
             <p className="text-base sm:text-[17px] leading-[1.8] text-gray-800 font-normal">
@@ -602,7 +610,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                             </span>
                           </div>
                           {evt.teluguTitle && (
-                            <p lang="te" className="font-telugu text-xs sm:text-sm text-gray-600 mt-0.5">
+                            <p lang="te" className="font-telugu text-sm sm:text-base text-gray-700 mt-1 leading-[1.7]">
                               {evt.teluguTitle}
                             </p>
                           )}
@@ -638,7 +646,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 tabIndex={0}
                 role="region"
                 aria-label="Cadre-wise vacancy breakdown table"
-                className="overflow-x-auto rounded border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                className="overflow-x-auto rounded border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 w-full"
               >
                 <table className="w-full min-w-[620px] text-left text-sm divide-y divide-gray-200">
                   <thead className="bg-[#f3f4f6] font-bold text-gray-900 text-xs uppercase tracking-wider">
@@ -666,7 +674,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                           {v.department}
                         </td>
                         <td className="px-3.5 py-3 text-gray-600 border-r border-gray-200 text-xs">
-                          <span className="inline-block rounded bg-gray-100 px-2 py-0.5 text-gray-800 font-medium border border-gray-200">
+                          <span className="inline-block rounded bg-gray-100 px-2.5 py-0.5 text-gray-800 font-medium border border-gray-200">
                             {v.genderEligibility}
                           </span>
                         </td>
@@ -709,7 +717,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 tabIndex={0}
                 role="region"
                 aria-label="Age limit category-wise table"
-                className="overflow-x-auto rounded border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                className="overflow-x-auto rounded border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 w-full"
               >
                 <table className="w-full min-w-[550px] text-left text-sm divide-y divide-gray-200">
                   <thead className="bg-[#f3f4f6] font-bold text-gray-900 text-xs uppercase tracking-wider">
@@ -778,7 +786,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-gray-900 mt-2">{st.name}</h3>
-                      <p lang="te" className="font-telugu text-xs text-gray-600 mt-0.5 font-normal">
+                      <p lang="te" className="font-telugu text-sm text-gray-700 mt-0.5 leading-[1.7]">
                         {st.teluguName}
                       </p>
                       <p className="mt-2 text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
@@ -939,7 +947,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         </span>
                         <h3 className="text-sm sm:text-base font-bold text-gray-900">{sub.name}</h3>
                       </div>
-                      <span lang="te" className="font-telugu text-xs sm:text-sm text-gray-600 font-medium block mt-1">
+                      <span lang="te" className="font-telugu text-sm sm:text-base text-gray-700 font-medium block mt-1 leading-[1.7]">
                         {sub.teluguName}
                       </span>
                       <p className="mt-2 text-xs sm:text-sm text-gray-700 leading-relaxed font-normal">
@@ -1060,7 +1068,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </Link>
                 </div>
 
-                <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
                   <div>
                     <h3 className="font-bold text-gray-900">TSLPRB Candidate Support &amp; Helpdesk</h3>
                     <p className="text-xs text-gray-600 mt-0.5">Official board query portal for registration and hall ticket concerns.</p>
@@ -1095,7 +1103,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                           {faq.question}
                         </h3>
                         {faq.teluguQuestion && (
-                          <p lang="te" className="font-telugu mt-1 text-xs sm:text-sm text-gray-600 font-medium">
+                          <p lang="te" className="font-telugu mt-1 text-sm sm:text-base text-gray-700 font-medium leading-[1.7]">
                             {faq.teluguQuestion}
                           </p>
                         )}
@@ -1103,7 +1111,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                           {faq.answer}
                         </p>
                         {faq.teluguAnswer && (
-                          <p lang="te" className="font-telugu mt-1.5 text-xs sm:text-sm text-gray-600 leading-relaxed">
+                          <p lang="te" className="font-telugu mt-1.5 text-xs sm:text-sm text-gray-600 leading-[1.7]">
                             {faq.teluguAnswer}
                           </p>
                         )}
@@ -1124,8 +1132,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
           </div>
 
-          {/* Sticky Sidebar Column (30%) - Moneycontrol / Daily Dispatch Layout */}
-          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-16">
+          {/* Sticky Sidebar Column (30%) - Full Height Alignment */}
+          <aside className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 space-y-6 lg:sticky lg:top-16">
 
             {/* Quick Summary Card */}
             <div className="rounded border border-gray-200 bg-white p-5 shadow-2xs">
@@ -1241,8 +1249,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       </div>
 
       {/* Broadsheet Newspaper Editorial Footer */}
-      <footer className="mt-16 border-t border-gray-200 bg-[#f9fafb] py-8 text-center text-xs text-gray-500">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-2">
+      <footer className="mt-16 border-t border-gray-200 bg-[#f9fafb] py-8 text-center text-xs text-gray-500 w-full">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-2">
           <p className="font-semibold text-gray-800 text-sm">
             Varadhi Prep &bull; Examination Information &amp; Practice Portal
           </p>
