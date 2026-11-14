@@ -174,7 +174,6 @@ export default async function Home() {
                   { label: "TG Police 7,112 Vacancies", href: "/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" },
                   { label: "TG Police PET & Standards", href: "/mock-tests/telangana/police-constable-free-mock-test#physical-standards" },
                   { label: "TG Police GO 87 Age", href: "/mock-tests/telangana/police-constable-free-mock-test#age-limits" },
-                  { label: "Exam Guides & Syllabus", href: "/mock-tests#exam-guides" },
                   { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
                   { label: "TGPSC", href: "/mock-tests/telangana" },
                   { label: "APPSC", href: "/mock-tests/andhra-pradesh" },
@@ -355,7 +354,7 @@ export default async function Home() {
         </div>
 
         {/* Official Exam Guides & Physical Standards Section */}
-        <div id="exam-guides" className="mt-8 sm:mt-12 rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs scroll-mt-24">
+        <div className="mt-8 sm:mt-12 rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-100 pb-5">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
@@ -572,7 +571,6 @@ export default async function Home() {
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <Link href="/mock-tests#exam-guides" className="hover:text-white transition">Exam Guides &amp; Syllabus</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:text-white transition">Police PET Standards</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" className="hover:text-white transition">Police 7,112 Vacancies</Link>

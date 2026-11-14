@@ -305,12 +305,6 @@ export default function SupportPage() {
                       Age Limits (GO 87) →
                     </Link>
                     <Link
-                      href="/mock-tests#exam-guides"
-                      className="rounded-lg bg-white border border-teal-200 px-2.5 py-1 hover:bg-teal-50 transition"
-                    >
-                      All Exam Guides →
-                    </Link>
-                    <Link
                       href="/mock-tests"
                       className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
                     >
