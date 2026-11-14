@@ -332,116 +332,112 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-2.5">
-          {isEditing ? (
-            <div className="space-y-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-              <label className="block text-xs font-bold text-slate-800">Survey Title</label>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none"
-                required
-              />
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleSaveEdit}
-                  disabled={isSavingEdit}
-                  className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60 transition shadow-2xs"
-                >
-                  {isSavingEdit ? "Saving…" : "Save Changes"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Clean Tags Row - identical to Survey 2's clean horizontal flow */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
-                  Survey {surveyIndex}
-                </span>
-                {isActive ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-0.5 text-xs font-semibold">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Active
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                    Draft
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowResponses((prev) => !prev)}
-                  className="inline-flex items-center gap-1 rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium hover:bg-slate-100 transition cursor-pointer"
-                  title="Click to toggle quick table preview"
-                >
-                  <span>
-                    {loading ? "…" : data?.totalResponses ?? 0}{" "}
-                    {(data?.totalResponses ?? 0) === 1 ? "response" : "responses"}
-                  </span>
-                  <span className="text-[10px] text-slate-400">{showResponses ? "▲" : "▼"}</span>
-                </button>
-                <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                  AP Endowment
-                </span>
-                <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                  {isExpired ? "Campaign Expired" : "1-Week Campaign"}
-                </span>
-              </div>
+    <div className="flex flex-col gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition">
+      {/* 1. Full-Width Top Tags Row - All tags side by side */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
+          Survey {surveyIndex}
+        </span>
+        {isActive ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-0.5 text-xs font-semibold">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Active
+          </span>
+        ) : (
+          <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+            Draft
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => setShowResponses((prev) => !prev)}
+          className="inline-flex items-center gap-1 rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium hover:bg-slate-100 transition cursor-pointer"
+          title="Click to toggle quick table preview"
+        >
+          <span>
+            {loading ? "…" : data?.totalResponses ?? 0}{" "}
+            {(data?.totalResponses ?? 0) === 1 ? "response" : "responses"}
+          </span>
+          <span className="text-[10px] text-slate-400">{showResponses ? "▲" : "▼"}</span>
+        </button>
+        <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+          AP Endowment
+        </span>
+        <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+          {isExpired ? "Campaign Expired" : "1-Week Campaign"}
+        </span>
+      </div>
 
-              {/* Title without long text paragraph */}
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 sm:text-xl break-words tracking-tight">
-                  {title}
-                </h3>
-              </div>
+      {/* 2. Survey Title (or Edit Form) */}
+      {isEditing ? (
+        <div className="space-y-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+          <label className="block text-xs font-bold text-slate-800">Survey Title</label>
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none"
+            required
+          />
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={handleSaveEdit}
+              disabled={isSavingEdit}
+              className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60 transition shadow-2xs"
+            >
+              {isSavingEdit ? "Saving…" : "Save Changes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <h3 className="text-lg font-bold text-slate-900 sm:text-xl break-words tracking-tight">
+            {title}
+          </h3>
+        </div>
+      )}
 
-              {/* Metadata row */}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-0.5">
-                <span>Created 9/2/2026</span>
-                <span className="text-slate-300">•</span>
-                <span>
-                  Public link:{" "}
-                  <code className="rounded-md bg-slate-50 border border-slate-200/90 px-1.5 py-0.5 font-mono text-slate-700">
-                    {isActive ? "/survey" : "/survey?campaign=ap-endowment"}
-                  </code>
-                </span>
-                {isActive && (
-                  <a
-                    href="/survey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 ml-1 transition"
-                  >
-                    Open public page ↗
-                  </a>
-                )}
-                <span className="text-slate-300">•</span>
-                <button
-                  type="button"
-                  onClick={() => setShowResponses((prev) => !prev)}
-                  className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 transition"
-                >
-                  {showResponses ? "Hide quick table ▲" : "View quick table ▾"}
-                </button>
-              </div>
-            </>
+      {/* 3. Bottom Row: Metadata on left, Actions on right */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 pt-1 border-t border-slate-100">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <span>Created 9/2/2026</span>
+          <span className="text-slate-300">•</span>
+          <span>
+            Public link:{" "}
+            <code className="rounded-md bg-slate-50 border border-slate-200/90 px-1.5 py-0.5 font-mono text-slate-700">
+              {isActive ? "/survey" : "/survey?campaign=ap-endowment"}
+            </code>
+          </span>
+          {isActive && (
+            <a
+              href="/survey"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 ml-1 transition"
+            >
+              Open public page ↗
+            </a>
           )}
+          <span className="text-slate-300">•</span>
+          <button
+            type="button"
+            onClick={() => setShowResponses((prev) => !prev)}
+            className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 transition"
+          >
+            {showResponses ? "Hide quick table ▲" : "View quick table ▾"}
+          </button>
         </div>
 
         {/* Buttons Row - exactly 6 buttons identical to Survey 2 */}
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto shrink-0 sm:self-center">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handleCopyLink}
