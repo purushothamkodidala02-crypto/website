@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { PublicHeader } from "@/components/site/PublicHeader";
+import { BrandLockup } from "@/components/brand/VaradhiBrand";
 import { absoluteUrl } from "@/lib/site";
 import { getExamTeluguMetadata } from "@/lib/telugu-seo";
 
@@ -34,9 +34,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const teluguData = getExamTeluguMetadata("police-constable-free-mock-test", "Police Constable", "telangana");
-  const title = "Telangana Police Constable Notification 2026: 7,112 Vacancies, Syllabus, Exam Pattern, Age Limit & PET Standards";
+  const title = "Telangana Police Constable Notification 2026";
   const description =
-    "Telangana Police Constable Notification 2026 released for 7,112 vacancies by TSLPRB (Rc No. 189/Rect./Rect.2/2026). Check post-wise vacancies, syllabus, exam pattern, GO Ms 87 age limits, physical tests (PET/PMT) and pay scale.";
+    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/Rect./Rect.2/2026) for 7,112 vacancies. Complete details on cadre-wise vacancies, syllabus, exam pattern, GO Ms 87 age limits, PMT/PET standards, salary & application process.";
   const canonical = absoluteUrl(`/news/${PRIMARY_SLUG}`);
 
   return {
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       type: "article",
       url: canonical,
-      title,
+      title: `${title} - 7,112 Vacancies, Syllabus & Pattern`,
       description,
       siteName: "Varadhi Prep",
       images: [
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: `${title} - 7,112 Vacancies, Syllabus & Pattern`,
       description,
       images: ["/opengraph-image"],
     },
@@ -98,6 +98,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   const stages = teluguData?.pattern?.stages ?? [];
   const subjects = teluguData?.pattern?.subjects ?? [];
   const qualifyingMarks = teluguData?.pattern?.qualifyingMarks ?? [];
+  const scheduleEvents = teluguData?.schedule?.events ?? [];
   const jobProfile = teluguData?.jobProfile;
 
   const jsonLd = [
@@ -183,7 +184,26 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   return (
     <main className="student-page min-h-screen bg-[#f8fafc] text-slate-900 w-full max-w-full overflow-x-hidden">
       <JsonLd data={jsonLd} />
-      <PublicHeader />
+
+      {/* Editorial Navigation Header */}
+      <header className="sticky top-0 z-40 border-b border-slate-200/90 bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2" aria-label="Varadhi Prep home">
+            <BrandLockup />
+          </Link>
+          <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+            <span className="hidden sm:inline text-slate-400">Official Recruitment Portal:</span>
+            <a
+              href="https://www.tgprb.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-bold text-teal-900 hover:bg-slate-100 transition"
+            >
+              tgprb.in
+            </a>
+          </div>
+        </div>
+      </header>
 
       {/* Article Hero Header */}
       <section className="border-b border-slate-200/90 bg-white">
@@ -260,8 +280,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <strong className="text-slate-900 block mt-0.5">Intermediate (10+2) Pass</strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Selection Mode</span>
-                <strong className="text-slate-900 block mt-0.5">PWT → PMT / PET → FWE</strong>
+                <span className="text-slate-500 block">Official Website</span>
+                <strong className="text-teal-900 block mt-0.5">www.tgprb.in</strong>
               </div>
             </div>
           </div>
@@ -276,42 +296,92 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Index</p>
           <h2 className="font-display mt-1 text-lg font-bold text-slate-950">Table of Contents</h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-slate-700">
+            <a href="#schedule" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
+              1. Important Dates &amp; Schedule →
+            </a>
             <a href="#vacancies" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              1. 7,112 Cadre Vacancy Distribution →
+              2. 7,112 Cadre Vacancy Distribution →
+            </a>
+            <a href="#fees" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
+              3. Application Fees &amp; Mode →
             </a>
             <a href="#salary" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              2. Pay Scale &amp; Salary Structure →
+              4. Pay Scale &amp; Salary Structure →
             </a>
             <a href="#eligibility" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              3. Age Limits &amp; GO Ms 87 5-Yr Relaxation →
+              5. Age Limits &amp; GO Ms 87 5-Yr Relaxation →
             </a>
             <a href="#selection" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              4. 4-Stage Selection Procedure →
+              6. 4-Stage Selection Procedure →
             </a>
             <a href="#physical" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              5. PMT &amp; PET Physical Standards →
+              7. PMT &amp; PET Physical Standards →
             </a>
             <a href="#pattern" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              6. Preliminary Written Test (PWT) Pattern →
+              8. Written Examination Pattern (PWT &amp; FWE) →
             </a>
             <a href="#syllabus" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              7. Annexure-II Subject-wise Syllabus →
+              9. Annexure-II Subject-wise Syllabus →
+            </a>
+            <a href="#how-to-apply" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
+              10. How to Apply Online at tgprb.in →
             </a>
             <a href="#duties" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              8. Police Hierarchy &amp; Duties →
+              11. Police Hierarchy &amp; Duties →
             </a>
             <a href="#faqs" className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-100 hover:bg-teal-50 hover:text-teal-900 transition">
-              9. Frequently Asked Questions (FAQs) →
+              12. Frequently Asked Questions (FAQs) →
             </a>
           </div>
         </section>
 
-        {/* 1. Vacancy Details */}
+        {/* 1. Important Dates & Schedule */}
+        <section id="schedule" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-b border-slate-100 pb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Recruitment Timeline</span>
+            <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
+              1. Important Dates &amp; Timeline
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600">
+              Key milestones for Telangana Police Constable Recruitment (Rc No. 189/Rect./Rect.2/2026).
+            </p>
+          </div>
+
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[500px] text-left text-xs sm:text-sm border border-slate-200 divide-y divide-slate-200">
+              <thead className="bg-slate-50 font-bold text-slate-700">
+                <tr>
+                  <th className="px-3.5 py-3 border-r border-slate-200">Event</th>
+                  <th className="px-3.5 py-3 border-r border-slate-200">Date / Window</th>
+                  <th className="px-3.5 py-3">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-800">
+                {scheduleEvents.map((evt) => (
+                  <tr key={evt.title} className="hover:bg-slate-50/70 transition">
+                    <td className="px-3.5 py-3 font-semibold text-slate-950 border-r border-slate-200">
+                      <div>{evt.title}</div>
+                      {evt.teluguTitle && <div className="text-[11px] text-teal-800 font-normal mt-0.5">{evt.teluguTitle}</div>}
+                    </td>
+                    <td className="px-3.5 py-3 font-bold text-teal-900 border-r border-slate-200 whitespace-nowrap">
+                      {evt.date}
+                    </td>
+                    <td className="px-3.5 py-3 text-slate-600 leading-relaxed text-xs">
+                      {evt.detail}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* 2. Vacancy Details */}
         <section id="vacancies" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Post Breakdown</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              1. Telangana Police Constable Vacancy 2026 (7,112 Posts)
+              2. Telangana Police Constable Vacancy 2026 (7,112 Posts)
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-slate-600">
               Official post code distribution as per TSLPRB Notification Rc No. 189/Rect./Rect.2/2026.
@@ -354,12 +424,49 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 2. Salary & Pay Scale */}
+        {/* 3. Application Fees & Mode */}
+        <section id="fees" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-b border-slate-100 pb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Registration Fee</span>
+            <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
+              3. Application Fee Structure
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600">
+              Fee prescribed by TSLPRB payable via Online Payment Gateway.
+            </p>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">OC &amp; BC Candidates</span>
+              <p className="font-display mt-1 text-2xl font-bold text-slate-950">₹800</p>
+              <p className="mt-2 text-xs text-slate-600">
+                Applicable to Open Competition (OC) and Backward Classes (BC) candidates of Telangana.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">SC &amp; ST Candidates</span>
+              <p className="font-display mt-1 text-2xl font-bold text-teal-900">₹400</p>
+              <p className="mt-2 text-xs text-slate-600">
+                Applicable to Scheduled Castes (SC) and Scheduled Tribes (ST) candidates belonging to Telangana.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">All Other States</span>
+              <p className="font-display mt-1 text-2xl font-bold text-slate-950">₹800</p>
+              <p className="mt-2 text-xs text-slate-600">
+                Candidates of all categories belonging to other States must pay the full fee.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Salary & Pay Scale */}
         <section id="salary" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Remuneration</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              2. Salary &amp; Pay Scale for Telangana Police Constables
+              4. Salary &amp; Pay Scale for Telangana Police Constables
             </h2>
           </div>
 
@@ -381,12 +488,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 3. Eligibility & Age Limits */}
+        {/* 5. Eligibility & Age Limits */}
         <section id="eligibility" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Age &amp; Education</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              3. Eligibility Criteria &amp; Age Limit (GO Ms No. 87)
+              5. Eligibility Criteria &amp; Age Limit (GO Ms No. 87)
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-slate-600">
               Age is calculated as of 1st July 2026. The Government of Telangana issued G.O. Ms No. 87 granting a 5-year upper age relaxation.
@@ -420,12 +527,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 4. Selection Process */}
+        {/* 6. Selection Process */}
         <section id="selection" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Selection Stages</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              4. Selection Procedure
+              6. 4-Stage Selection Procedure
             </h2>
           </div>
 
@@ -443,12 +550,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 5. PMT & PET Physical Standards */}
+        {/* 7. PMT & PET Physical Standards */}
         <section id="physical" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Annexure-I Physical Standards</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              5. Physical Measurement Test (PMT) &amp; Physical Efficiency Test (PET)
+              7. Physical Measurement Test (PMT) &amp; Physical Efficiency Test (PET)
             </h2>
           </div>
 
@@ -505,12 +612,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 6. PWT Pattern & Negative Marking */}
+        {/* 8. Written Examination Pattern (PWT & FWE) */}
         <section id="pattern" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Examination Scheme</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              6. Preliminary Written Test (PWT) Pattern &amp; 20% Negative Marking
+              8. Written Examination Pattern &amp; Qualifying Marks
             </h2>
           </div>
 
@@ -549,12 +656,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 7. Annexure-II Syllabus */}
+        {/* 9. Annexure-II Syllabus */}
         <section id="syllabus" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Annexure-II Curriculum</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              7. Complete Subject-wise Syllabus (PWT &amp; FWE)
+              9. Complete Subject-wise Syllabus (PWT &amp; FWE)
             </h2>
           </div>
 
@@ -578,12 +685,73 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 8. Duties & Responsibilities */}
+        {/* 10. How to Apply Online at tgprb.in */}
+        <section id="how-to-apply" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-b border-slate-100 pb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Application Instructions</span>
+            <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
+              10. How to Apply Online for Telangana Police Constable 2026
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600">
+              Follow these official steps to register on the TSLPRB portal (www.tgprb.in).
+            </p>
+          </div>
+
+          <div className="mt-5 space-y-3 text-xs sm:text-sm text-slate-700">
+            <div className="flex gap-3">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-800 text-white font-bold text-xs">
+                1
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Visit the Official TSLPRB Website:</strong>
+                <p className="text-slate-600 mt-0.5">Go to <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-teal-900 font-semibold underline">www.tgprb.in</a> and click on the Police Constable recruitment link.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-800 text-white font-bold text-xs">
+                2
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Register with Active Mobile Number:</strong>
+                <p className="text-slate-600 mt-0.5">Your mobile number serves as your User ID. Verify OTP and complete candidate registration.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-800 text-white font-bold text-xs">
+                3
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Pay the Application Fee:</strong>
+                <p className="text-slate-600 mt-0.5">Pay ₹800 (for OC/BC) or ₹400 (for TS SC/ST) online using Net Banking, UPI, or Debit/Credit card.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-800 text-white font-bold text-xs">
+                4
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Fill Part-I Application Form:</strong>
+                <p className="text-slate-600 mt-0.5">Enter personal details, educational qualifications, post preferences, and upload photo and signature.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-800 text-white font-bold text-xs">
+                5
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Download &amp; Print Confirmation:</strong>
+                <p className="text-slate-600 mt-0.5">Download the PDF copy of your submitted application for future reference during document verification.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 11. Duties & Responsibilities */}
         <section id="duties" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Service Roles</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              8. Police Constable Responsibilities &amp; Hierarchy
+              11. Police Constable Responsibilities &amp; Hierarchy
             </h2>
           </div>
 
@@ -615,12 +783,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
         </section>
 
-        {/* 9. Bilingual FAQs */}
+        {/* 12. Bilingual FAQs */}
         <section id="faqs" className="scroll-mt-24 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-b border-slate-100 pb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Questions &amp; Answers</span>
             <h2 className="font-display mt-1 text-xl sm:text-2xl font-bold text-slate-950">
-              9. Frequently Asked Questions (English &amp; Telugu)
+              12. Frequently Asked Questions (English &amp; Telugu)
             </h2>
           </div>
 
@@ -652,6 +820,19 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
       </article>
+
+      {/* Editorial Footer */}
+      <footer className="mt-16 border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
+        <div className="mx-auto max-w-4xl px-4">
+          <p className="font-semibold text-slate-700">Varadhi Prep &bull; Examination Information &amp; Preparation Portal</p>
+          <p className="mt-1">
+            Data sourced from official TSLPRB Notification Rc No. 189 / Rect. / Rect.2 / 2026. For official portal, visit{" "}
+            <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-teal-900 underline font-medium">
+              www.tgprb.in
+            </a>
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }
