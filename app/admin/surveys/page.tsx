@@ -188,9 +188,9 @@ export default function AdminSurveysList() {
   };
 
   const sortedSurveys = useMemo(() => {
-    return [...surveys].sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
+    return surveys
+      .filter((s) => !s.title.toLowerCase().includes("endowment"))
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   }, [surveys]);
 
   return (

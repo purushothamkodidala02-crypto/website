@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import {
   checkApEndowmentFeedbackEligibilityAction,
   submitApEndowmentFeedbackAction,
+  getApEndowmentDynamicQuestionsAction,
+  type DynamicSurveyQuestionItem,
 } from "@/app/actions/ap-endowment-feedback";
 import {
   AP_EO_CAMPAIGN_EXPIRY_MS,
@@ -24,6 +26,8 @@ export function ApEndowmentPriorityModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [dynamicQuestions, setDynamicQuestions] = useState<DynamicSurveyQuestionItem[]>([]);
+  const [dynamicAnswers, setDynamicAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // 1. Check if campaign has expired (1 week duration)
@@ -85,6 +89,12 @@ export function ApEndowmentPriorityModal() {
     // User must be signed in AND have attempted AP Endowment Officer exam
     let cancelled = false;
 
+    void getApEndowmentDynamicQuestionsAction().then((res) => {
+      if (!cancelled && res.questions && res.questions.length > 0) {
+        setDynamicQuestions(res.questions);
+      }
+    });
+
     void checkApEndowmentFeedbackEligibilityAction().then((res) => {
       if (cancelled) return;
 
@@ -141,6 +151,7 @@ export function ApEndowmentPriorityModal() {
       specificTopics: specificTopics.trim() || undefined,
       studentName: studentName.trim() || undefined,
       studentPhone: studentPhone.trim() || undefined,
+      dynamicAnswers,
     });
 
     setIsSubmitting(false);
@@ -225,7 +236,8 @@ export function ApEndowmentPriorityModal() {
             {/* Field 1: Choose Paper */}
             <div>
               <label className="block text-xs sm:text-sm font-bold text-slate-900">
-                1. Choose the Paper <span className="text-rose-500">*</span>
+                {dynamicQuestions[0]?.question_text ? `1. ${dynamicQuestions[0].question_text.replace(/^[0-9.]+\s*/, "")}` : "1. Choose the Paper"}{" "}
+                <span className="text-rose-500">*</span>
               </label>
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <label
@@ -293,7 +305,10 @@ export function ApEndowmentPriorityModal() {
             {/* Field 2: Which Subject to Focus On (Text Box 1) */}
             <div>
               <label htmlFor="ap-eo-subject-focus" className="block text-xs sm:text-sm font-bold text-slate-900">
-                2. Which subject or topic should we focus on? <span className="text-rose-500">*</span>
+                {dynamicQuestions[1]?.question_text
+                  ? `2. ${dynamicQuestions[1].question_text.replace(/^[0-9.]+\s*/, "")}`
+                  : "2. Which subject or topic should we focus on?"}{" "}
+                <span className="text-rose-500">*</span>
               </label>
               <p className="mt-0.5 text-[11px] text-slate-500">
                 Enter the subject or topic you want prioritized for mock test preparation.
@@ -312,7 +327,10 @@ export function ApEndowmentPriorityModal() {
             {/* Field 3: Specific Chapters / Notes (Text Box 2 - Optional) */}
             <div>
               <label htmlFor="ap-eo-specific-topics" className="block text-xs sm:text-sm font-bold text-slate-900">
-                3. Any specific chapters or details? <span className="font-normal text-slate-500">(Optional)</span>
+                {dynamicQuestions[2]?.question_text
+                  ? `3. ${dynamicQuestions[2].question_text.replace(/^[0-9.]+\s*/, "")}`
+                  : "3. Any specific chapters or details?"}{" "}
+                <span className="font-normal text-slate-500">(Optional)</span>
               </label>
               <textarea
                 id="ap-eo-specific-topics"
@@ -323,6 +341,62 @@ export function ApEndowmentPriorityModal() {
                 className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-hidden focus:ring-1 focus:ring-teal-600 resize-none"
               />
             </div>
+
+            {/* Dynamic extra questions added by admin */}
+            {dynamicQuestions.length > 3 && (
+              <div className="space-y-4 pt-2 border-t border-slate-100">
+                {dynamicQuestions.slice(3).map((dq, qIdx) => (
+                  <div key={dq.id}>
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900">
+                      {qIdx + 4}. {dq.question_text}{" "}
+                      {dq.is_required && <span className="text-rose-500">*</span>}
+                    </label>
+                    {dq.question_type === "textarea" ? (
+                      <textarea
+                        required={dq.is_required}
+                        value={dynamicAnswers[dq.id] || ""}
+                        onChange={(e) =>
+                          setDynamicAnswers((prev) => ({ ...prev, [dq.id]: e.target.value }))
+                        }
+                        rows={2}
+                        className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-hidden focus:ring-1 focus:ring-teal-600 resize-none"
+                      />
+                    ) : dq.question_type === "radio" && dq.options && dq.options.length > 0 ? (
+                      <div className="mt-2 space-y-1.5">
+                        {dq.options.map((opt) => (
+                          <label
+                            key={opt}
+                            className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-2 text-xs text-slate-700 hover:bg-slate-100 transition"
+                          >
+                            <input
+                              type="radio"
+                              name={`dynamic-${dq.id}`}
+                              value={opt}
+                              checked={dynamicAnswers[dq.id] === opt}
+                              onChange={(e) =>
+                                setDynamicAnswers((prev) => ({ ...prev, [dq.id]: e.target.value }))
+                              }
+                              className="h-3.5 w-3.5 text-teal-700 focus:ring-teal-500"
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        required={dq.is_required}
+                        value={dynamicAnswers[dq.id] || ""}
+                        onChange={(e) =>
+                          setDynamicAnswers((prev) => ({ ...prev, [dq.id]: e.target.value }))
+                        }
+                        className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-hidden focus:ring-1 focus:ring-teal-600"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Actions */}
             <div className="mt-5 flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-slate-100">

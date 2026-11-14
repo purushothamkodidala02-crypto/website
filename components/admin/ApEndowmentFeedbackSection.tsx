@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
+import Link from "next/link";
 import {
   getApEndowmentFeedbackSummaryAction,
   deleteApEndowmentFeedbackAction,
@@ -8,6 +9,7 @@ import {
   updateApEndowmentMetaAction,
   clearAllApEndowmentResponsesAction,
   saveApEndowmentSurveyConditionsAction,
+  getOrCreateApEndowmentSurveyIdAction,
   type ApEndowmentFeedbackSummary,
 } from "@/app/actions/ap-endowment-feedback";
 import {
@@ -23,6 +25,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showResponses, setShowResponses] = useState(false);
+  const [dynamicSurveyId, setDynamicSurveyId] = useState<string | null>(null);
 
   // Copy Link State
   const [copiedLink, setCopiedLink] = useState(false);
@@ -134,6 +137,11 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
     }
 
     let ignore = false;
+    void getOrCreateApEndowmentSurveyIdAction().then((id) => {
+      if (!ignore && id) {
+        setDynamicSurveyId(id);
+      }
+    });
     void (async () => {
       try {
         const res = await fetchFeedbackSafely();
@@ -446,16 +454,6 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
 
           <button
             type="button"
-            onClick={handleDeleteSurvey}
-            disabled={isDeleting}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
-            title="Delete entire survey and its responses"
-          >
-            {isDeleting ? "Deleting…" : "🗑️ Delete"}
-          </button>
-
-          <button
-            type="button"
             onClick={() => setShowSettings((prev) => !prev)}
             className={`inline-flex items-center justify-center rounded-xl border px-3 py-2 text-xs font-medium shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap ${
               showSettings
@@ -469,11 +467,29 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
 
           <button
             type="button"
+            onClick={handleDeleteSurvey}
+            disabled={isDeleting}
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+            title="Delete entire survey and its responses"
+          >
+            {isDeleting ? "Deleting…" : "🗑️ Delete"}
+          </button>
+
+          <button
+            type="button"
             onClick={() => setShowResponses((prev) => !prev)}
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+            title="Preview student responses inline"
+          >
+            {showResponses ? "Hide Table" : "👁️ View Table"}
+          </button>
+
+          <Link
+            href={dynamicSurveyId ? `/admin/surveys/${dynamicSurveyId}` : "/admin/surveys"}
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center whitespace-nowrap"
           >
-            {showResponses ? "Hide Responses" : `View Responses (${data?.totalResponses ?? 0})`}
-          </button>
+            Edit Questions & Responses ({data?.totalResponses ?? 0})
+          </Link>
         </div>
       </div>
 
