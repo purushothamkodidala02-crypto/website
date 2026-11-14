@@ -356,6 +356,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         name: "Varadhi Prep",
         url: absoluteUrl("/"),
       },
+      "associatedMedia": {
+        "@type": "DigitalDocument",
+        name: "TSLPRB Telangana Police Constable 2026 Official Gazette Notification PDF",
+        encodingFormat: "application/pdf",
+        url: absoluteUrl("/docs/telangana-police-constable-notification-2026-official.pdf"),
+      },
     },
     {
       "@context": "https://schema.org",
@@ -439,11 +445,22 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           <Link href="/" className="flex items-center gap-2" aria-label="Varadhi Prep home">
             <BrandLockup />
           </Link>
-          <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
+          <div className="flex items-center gap-2.5 sm:gap-3 text-xs font-medium text-gray-600">
             <span className="hidden sm:inline text-gray-500 font-sans">Saturday, Nov 14, 2026</span>
+            <a
+              href="/docs/telangana-police-constable-notification-2026-official.pdf"
+              download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
+              className="inline-flex items-center gap-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 px-3 py-1.5 sm:py-2 font-semibold transition text-xs"
+              title="Download Official Notification PDF (748 KB)"
+            >
+              <svg className="w-4 h-4 text-red-700 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4 4a1 1 0 10-2 0v2a1 1 0 102 0v-2z" clipRule="evenodd" />
+              </svg>
+              <span>Download Official PDF</span>
+            </a>
             <Link
               href="/mock-tests/telangana/police-constable-free-mock-test"
-              className="inline-flex items-center rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white px-4 py-2 font-semibold transition text-xs sm:text-sm"
+              className="inline-flex items-center rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white px-3 sm:px-4 py-1.5 sm:py-2 font-semibold transition text-xs sm:text-sm"
             >
               Practice Mock Tests &rarr;
             </Link>
@@ -555,6 +572,40 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <span className="text-xs text-gray-600 block">50% SC/ST Relief</span>
               </div>
 
+            </div>
+
+            {/* Official Gazette PDF Banner */}
+            <div className="mt-4 pt-3.5 border-t border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 rounded border border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
+                  <span className="text-red-700 font-bold text-xs">PDF</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-sm">
+                    Original Gazette Notification Document: Rc No. 189 / Rect. / Rect.2 / 2026
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Official 36-page TSLPRB Gazette publication &bull; Includes Cadre Breakdowns, Annexure-II Syllabus, PMT/PET Standards &bull; 748 KB
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <a
+                  href="/docs/telangana-police-constable-notification-2026-official.pdf"
+                  download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
+                  className="inline-flex items-center gap-1.5 rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white px-3.5 py-2 font-bold text-xs transition shadow-2xs"
+                >
+                  <span>📥 Download Official PDF (748 KB)</span>
+                </a>
+                <a
+                  href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 font-semibold text-xs transition"
+                >
+                  <span>Board Server Mirror ↗</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1023,22 +1074,93 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 9: Official Links Hub */}
+            {/* Section 9: Official Links & Original PDF Hub */}
             <section id="links" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  9. Official Direct Links &amp; Preparation Resources
+                  9. Official Notification PDF &amp; Direct Links
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Verified direct links to recruitment documentation and online preparation.
+                Verified direct downloads of the original government recruitment gazette, press release, and official portal.
               </p>
 
               <div className="divide-y divide-gray-200 border border-gray-200 rounded overflow-hidden text-xs sm:text-sm bg-white">
-                <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* 1. Official Notification PDF */}
+                <div className="p-4 bg-[#fbfcfd] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded bg-red-100 border border-red-300 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-red-800 font-bold text-xs uppercase">PDF</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900">TSLPRB Official Gazette Notification (Rc No. 189/2026)</h3>
+                        <span className="rounded bg-red-50 text-red-700 border border-red-200 text-[10px] px-1.5 py-0.5 font-bold uppercase tracking-wide">
+                          Official PDF
+                        </span>
+                      </div>
+                      <p lang="te" className="font-telugu text-xs text-gray-700 mt-0.5">
+                        తెలంగాణ కానిస్టేబుల్ 7,112 పోస్టుల ఒరిజినల్ అఫీషియల్ గెజిట్ నోటిఫికేషన్
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Complete 36-page document: Cadres, G.O. 87 age rules, PMT/PET standards &amp; Annexure-II syllabus &bull; 748 KB
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0 sm:self-center">
+                    <a
+                      href="/docs/telangana-police-constable-notification-2026-official.pdf"
+                      download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
+                      className="inline-flex items-center gap-1.5 rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white font-bold px-4 py-2 transition text-xs shadow-2xs"
+                    >
+                      <span>📥 Download PDF (748 KB)</span>
+                    </a>
+                    <a
+                      href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded bg-white hover:bg-gray-100 text-gray-700 font-semibold px-3 py-2 transition text-xs border border-gray-300"
+                    >
+                      <span>Board Mirror ↗</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* 2. Official Press Note */}
+                <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded bg-gray-100 border border-gray-300 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-gray-700 font-bold text-xs uppercase">PDF</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">TSLPRB Official Press Release Note</h3>
+                      <p className="text-xs text-gray-600 mt-0.5">Recruitment board executive release summarizing 7,112 posts &amp; key dates &bull; 255 KB</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <a
+                      href="/docs/telangana-police-constable-2026-press-note.pdf"
+                      download="TSLPRB_Constable_2026_Press_Note.pdf"
+                      className="inline-flex items-center gap-1.5 rounded bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold px-3.5 py-2 transition text-xs border border-gray-300"
+                    >
+                      <span>📥 Press Note PDF</span>
+                    </a>
+                    <a
+                      href="https://www.tgprb.in/SI_PC_2026/Notification%202026%20Press%20Note%20dated%2029-07-2026.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded bg-white hover:bg-gray-50 text-gray-600 font-medium px-2.5 py-2 transition text-xs border border-gray-200"
+                    >
+                      <span>Mirror ↗</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* 3. Official Recruitment Portal */}
+                <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
                   <div>
                     <h3 className="font-bold text-gray-900">TSLPRB Official Recruitment Portal</h3>
-                    <p className="text-xs text-gray-600 mt-0.5">Online candidate login, notifications, and results portal.</p>
+                    <p className="text-xs text-gray-600 mt-0.5">Online candidate login, notifications, and results portal (tgprb.in).</p>
                   </div>
                   <a
                     href="https://www.tgprb.in"
@@ -1050,6 +1172,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </a>
                 </div>
 
+                {/* 4. Free Mock Tests */}
                 <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#f9fafb]">
                   <div>
                     <div className="flex items-center gap-2">
@@ -1068,14 +1191,20 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </Link>
                 </div>
 
+                {/* 5. Support & Helpline */}
                 <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
                   <div>
-                    <h3 className="font-bold text-gray-900">TSLPRB Candidate Support &amp; Helpdesk</h3>
+                    <h3 className="font-bold text-gray-900">TSLPRB Candidate Support &amp; Helpline</h3>
                     <p className="text-xs text-gray-600 mt-0.5">Official board query portal for registration and hall ticket concerns.</p>
                   </div>
-                  <span className="shrink-0 text-xs font-mono text-gray-800 bg-gray-100 px-2.5 py-1 rounded border border-gray-300 font-semibold">
-                    support@tgprb.in
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="shrink-0 text-xs font-mono text-gray-800 bg-gray-100 px-2.5 py-1 rounded border border-gray-300 font-semibold">
+                      040-41895151
+                    </span>
+                    <span className="shrink-0 text-xs font-mono text-gray-800 bg-gray-100 px-2.5 py-1 rounded border border-gray-300 font-semibold">
+                      support@tgprb.in
+                    </span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -1134,6 +1263,39 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
           {/* Sticky Sidebar Column (30%) - Full Height Alignment */}
           <aside className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 space-y-6 lg:sticky lg:top-16">
+
+            {/* Official Gazette PDF Download Card */}
+            <div className="rounded border-2 border-[#0f2e59]/30 bg-[#fbfcfd] p-5 shadow-2xs">
+              <div className="flex items-center justify-between gap-2 border-b border-gray-200 pb-2.5">
+                <span className="rounded bg-[#b91c1c] text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-wide">
+                  Official PDF
+                </span>
+                <span className="text-[11px] font-mono font-semibold text-gray-500">Rc No. 189/2026</span>
+              </div>
+              <h3 className="mt-2.5 text-sm font-bold text-gray-900 leading-snug">
+                Original Gazette Notification PDF
+              </h3>
+              <p lang="te" className="font-telugu text-xs text-gray-700 mt-1 leading-[1.6]">
+                పోలీస్ కానిస్టేబుల్ 7,112 పోస్టుల అధికారిక నోటిఫికేషన్ పీడీఎఫ్ డాక్యుమెంట్
+              </p>
+              <div className="mt-3.5 space-y-2">
+                <a
+                  href="/docs/telangana-police-constable-notification-2026-official.pdf"
+                  download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
+                  className="w-full flex items-center justify-center gap-2 rounded bg-[#0f2e59] hover:bg-[#0a1f3d] text-white py-2.5 px-3 text-xs font-bold transition shadow-2xs"
+                >
+                  <span>📥 Download Official PDF (748 KB)</span>
+                </a>
+                <a
+                  href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-2 px-3 text-xs font-semibold transition"
+                >
+                  <span>Board Server Mirror ↗</span>
+                </a>
+              </div>
+            </div>
 
             {/* Quick Summary Card */}
             <div className="rounded border border-gray-200 bg-white p-5 shadow-2xs">
@@ -1238,7 +1400,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <li><a href="#pattern" className="hover:text-gray-900 transition font-medium">6. Exam Pattern &amp; Cutoffs</a></li>
                 <li><a href="#syllabus" className="hover:text-gray-900 transition font-medium">7. Annexure-II Syllabus</a></li>
                 <li><a href="#fees" className="hover:text-gray-900 transition font-medium">8. Application Fee &amp; Steps</a></li>
-                <li><a href="#links" className="hover:text-gray-900 transition font-medium">9. Official Direct Links</a></li>
+                <li><a href="#links" className="hover:text-gray-900 transition font-medium">9. Official Notification PDF &amp; Links</a></li>
                 <li><a href="#faqs" className="hover:text-gray-900 transition font-medium">10. Frequently Asked Questions</a></li>
               </ul>
             </div>
