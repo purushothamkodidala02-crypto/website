@@ -50,42 +50,52 @@ export function TestStartActions({
 
     let active = true;
     const supabase = createClient();
-    void supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!active || !session?.user) return;
-      setClientSignedIn(true);
+    void supabase.auth
+      .getSession()
+      .then(async (res) => {
+        const session = res?.data?.session;
+        if (!active || !session?.user) return;
+        setClientSignedIn(true);
 
-      const [sessionRes, attemptRes] = await Promise.all([
-        supabase
-          .from("test_attempt_sessions")
-          .select("id, remaining_seconds, expires_at")
-          .eq("user_id", session.user.id)
-          .eq("mock_test_id", testId)
-          .is("submitted_at", null)
-          .order("started_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from("test_attempts")
-          .select("id")
-          .eq("user_id", session.user.id)
-          .eq("mock_test_id", testId)
-          .limit(1)
-          .maybeSingle(),
-      ]);
+        try {
+          const [sessionRes, attemptRes] = await Promise.all([
+            supabase
+              .from("test_attempt_sessions")
+              .select("id, remaining_seconds, expires_at")
+              .eq("user_id", session.user.id)
+              .eq("mock_test_id", testId)
+              .is("submitted_at", null)
+              .order("started_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("test_attempts")
+              .select("id")
+              .eq("user_id", session.user.id)
+              .eq("mock_test_id", testId)
+              .limit(1)
+              .maybeSingle(),
+          ]);
 
-      if (active && sessionRes.data) {
-        const remainingSec = sessionRes.data.remaining_seconds;
-        const expiresAt = sessionRes.data.expires_at ? new Date(sessionRes.data.expires_at).getTime() : 0;
-        const isStillValid = (typeof remainingSec === "number" && remainingSec > 0) || expiresAt > Date.now();
-        if (isStillValid) {
-          setClientResumable(true);
+          if (active && sessionRes?.data) {
+            const remainingSec = sessionRes.data.remaining_seconds;
+            const expiresAt = sessionRes.data.expires_at ? new Date(sessionRes.data.expires_at).getTime() : 0;
+            const isStillValid = (typeof remainingSec === "number" && remainingSec > 0) || expiresAt > Date.now();
+            if (isStillValid) {
+              setClientResumable(true);
+            }
+          }
+          if (active && attemptRes?.data) {
+            setClientHasAttempt(true);
+            addLocalAttemptedTestId(testId);
+          }
+        } catch {
+          // Ignore transient error fetching session or attempt
         }
-      }
-      if (active && attemptRes.data) {
-        setClientHasAttempt(true);
-        addLocalAttemptedTestId(testId);
-      }
-    });
+      })
+      .catch(() => {
+        // Ignore auth session retrieval failure
+      });
 
     return () => {
       active = false;

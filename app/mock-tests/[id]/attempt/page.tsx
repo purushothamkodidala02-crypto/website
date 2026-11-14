@@ -65,7 +65,10 @@ export default async function TakeMockTestPage({
   const supabase = await createClient();
 
   // Eagerly initiate all primary data queries in parallel
-  const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
+  const userPromise = supabase.auth
+    .getUser()
+    .then((res) => res?.data?.user ?? null)
+    .catch(() => null);
   const fastContextPromise = getMockTestFastContextById(id, supabase).then(async (fast) => {
     if (fast) return fast;
     return getMockTestPublicContextById(id);

@@ -471,39 +471,54 @@ export async function MockTestDetailsPage({
   const supabase = await createClient();
 
   const userPromise = hasAuthToken
-    ? supabase.auth.getUser().then(({ data }) => data.user ?? null)
+    ? supabase.auth
+        .getUser()
+        .then((res) => res?.data?.user ?? null)
+        .catch(() => null)
     : Promise.resolve(null);
 
   const sessionPromise = hasAuthToken
-    ? userPromise.then(async (user) => {
-        if (!user) return null;
-        const { data } = await supabase
-          .from("test_attempt_sessions")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("mock_test_id", id)
-          .is("submitted_at", null)
-          .gt("remaining_seconds", 0)
-          .order("started_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        return data;
-      })
+    ? userPromise
+        .then(async (user) => {
+          if (!user) return null;
+          try {
+            const { data } = await supabase
+              .from("test_attempt_sessions")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("mock_test_id", id)
+              .is("submitted_at", null)
+              .gt("remaining_seconds", 0)
+              .order("started_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            return data ?? null;
+          } catch {
+            return null;
+          }
+        })
+        .catch(() => null)
     : Promise.resolve(null);
 
   const attemptPromise = hasAuthToken
-    ? userPromise.then(async (user) => {
-        if (!user) return null;
-        const { data } = await supabase
-          .from("test_attempts")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("mock_test_id", id)
-          .order("submitted_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        return data;
-      })
+    ? userPromise
+        .then(async (user) => {
+          if (!user) return null;
+          try {
+            const { data } = await supabase
+              .from("test_attempts")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("mock_test_id", id)
+              .order("submitted_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            return data ?? null;
+          } catch {
+            return null;
+          }
+        })
+        .catch(() => null)
     : Promise.resolve(null);
 
   const [catalog, supplementary, user] = await Promise.all([
@@ -636,13 +651,28 @@ export async function MockTestDetailsPage({
   const [accessResult, resumableSessionResult, previousAttemptResult, fallbackPapers] = await Promise.all([
     test.access_type === "paid" && examGroup
       ? (async () => {
-          const [products, canAccess] = await Promise.all([
-            paidSalesEnabled
-              ? supabase.from("access_product_exam_groups").select("access_products!inner(id, name, price_inr, duration_days, is_active)").eq("exam_group_id", examGroup.id).eq("access_products.is_active", true)
-              : Promise.resolve({ data: [] }),
-            isLoggedIn ? supabase.rpc("can_access_mock_test", { requested_mock_test_id: id }) : Promise.resolve({ data: false }),
-          ]);
-          return { products, canAccess };
+          try {
+            const [products, canAccess] = await Promise.all([
+              paidSalesEnabled
+                ? supabase
+                    .from("access_product_exam_groups")
+                    .select("access_products!inner(id, name, price_inr, duration_days, is_active)")
+                    .eq("exam_group_id", examGroup.id)
+                    .eq("access_products.is_active", true)
+                    .then((res) => res)
+                    .catch(() => ({ data: [] }))
+                : Promise.resolve({ data: [] }),
+              isLoggedIn
+                ? supabase
+                    .rpc("can_access_mock_test", { requested_mock_test_id: id })
+                    .then((res) => res)
+                    .catch(() => ({ data: false }))
+                : Promise.resolve({ data: false }),
+            ]);
+            return { products, canAccess };
+          } catch {
+            return { products: { data: [] }, canAccess: { data: false } };
+          }
         })()
       : Promise.resolve({ products: { data: [] }, canAccess: { data: true } }),
 
@@ -656,6 +686,7 @@ export async function MockTestDetailsPage({
           .eq("exam_group_id", paper.exam_group_id)
           .eq("is_active", true)
           .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
+          .catch(() => [] as OrderedPaper[])
       : Promise.resolve([] as OrderedPaper[]),
   ]);
 
