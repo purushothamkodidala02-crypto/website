@@ -217,14 +217,14 @@ export default function AdminSurveysList() {
 
       {/* Create Survey Form (collapsible or if no dynamic surveys) */}
       {(showCreateForm || (!loading && surveys.length === 0)) && (
-        <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50/60 to-slate-50 p-4 sm:p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-6 shadow-2xs">
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-lg font-bold text-slate-900">Create New Survey</h2>
             {surveys.length > 0 && (
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600"
+                className="text-xs font-semibold text-slate-500 hover:text-slate-800"
               >
                 ✕ Cancel
               </button>
@@ -235,7 +235,7 @@ export default function AdminSurveysList() {
           </p>
 
           {errorMsg && (
-            <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-800">
+            <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800">
               {errorMsg}
             </div>
           )}
@@ -247,13 +247,13 @@ export default function AdminSurveysList() {
                 placeholder="e.g. APPSC Group 2 Feedback Survey"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                className="w-full flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
                 required
               />
               <button
                 type="submit"
                 disabled={isCreating}
-                className="w-full sm:w-auto rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-60 transition active:scale-95 touch-manipulation text-center justify-center inline-flex items-center shrink-0"
+                className="w-full sm:w-auto rounded-xl bg-slate-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60 transition active:scale-95 touch-manipulation text-center justify-center inline-flex items-center shrink-0"
               >
                 {isCreating ? "Creating…" : "Create Survey"}
               </button>
@@ -263,7 +263,7 @@ export default function AdminSurveysList() {
               placeholder="Optional subtitle or purpose (e.g. Tell us which subjects you want us to cover next)"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none"
             />
           </form>
         </div>
@@ -288,7 +288,7 @@ export default function AdminSurveysList() {
 
           {/* Survey 2, Survey 3, etc.: Dynamic Surveys */}
           {loading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 text-center text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-8 sm:p-12 text-center text-slate-500">
               <span className="inline-block animate-spin mr-2">⏳</span> Loading surveys…
             </div>
           ) : (
@@ -299,25 +299,25 @@ export default function AdminSurveysList() {
               return (
                 <div
                   key={survey.id}
-                  className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm hover:border-slate-300 transition sm:flex-row sm:items-start"
+                  className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-6 shadow-2xs hover:border-slate-300 transition sm:flex-row sm:items-start"
                 >
                   <div className="min-w-0 flex-1 space-y-2.5">
                     {isEditing ? (
-                      <div className="space-y-2 rounded-xl border border-teal-200 bg-teal-50/50 p-3">
-                        <label className="block text-xs font-bold text-teal-900">Survey Title</label>
+                      <div className="space-y-2 rounded-xl border border-slate-300 bg-white p-3">
+                        <label className="block text-xs font-bold text-slate-800">Survey Title</label>
                         <input
                           type="text"
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-bold text-slate-900 focus:border-teal-500 focus:outline-none"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 focus:border-slate-500 focus:outline-none"
                           required
                         />
-                        <label className="block text-xs font-bold text-teal-900">Survey Description</label>
+                        <label className="block text-xs font-bold text-slate-800">Survey Description</label>
                         <textarea
                           rows={2}
                           value={editDescription}
                           onChange={(e) => setEditDescription(e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 focus:outline-none"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-slate-500 focus:outline-none"
                           placeholder="Optional description shown to students"
                         />
                         <div className="flex items-center gap-2 pt-1">
@@ -325,14 +325,14 @@ export default function AdminSurveysList() {
                             type="button"
                             onClick={() => handleSaveEdit(survey.id)}
                             disabled={isSavingEdit}
-                            className="rounded-lg bg-teal-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-teal-800 disabled:opacity-60 transition"
+                            className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 disabled:opacity-60 transition"
                           >
                             {isSavingEdit ? "Saving…" : "Save Changes"}
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingSurveyId(null)}
-                            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
                           >
                             Cancel
                           </button>
@@ -341,25 +341,16 @@ export default function AdminSurveysList() {
                     ) : (
                       <>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="inline-flex items-center rounded-lg bg-teal-800 px-2.5 py-1 text-xs font-black tracking-wider text-white shadow-2xs">
+                          <span className="inline-flex items-center rounded-md bg-slate-200 text-slate-800 border border-slate-300 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
                             Survey {surveyNumber}
                           </span>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {survey.is_active ? (
-                              <span className="inline-flex items-center gap-1.5 shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-200">
-                                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                Active (Live Public Survey)
-                              </span>
-                            ) : (
-                              <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 border border-slate-200">
-                                Draft
-                              </span>
-                            )}
-                            <span className="shrink-0 rounded-full bg-teal-50 border border-teal-100 px-2.5 py-0.5 text-xs font-bold text-teal-800">
-                              {survey.response_count || 0}{" "}
-                              {survey.response_count === 1 ? "response" : "responses"}
-                            </span>
-                          </div>
+                          <span className="inline-flex items-center rounded-md bg-white text-slate-700 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+                            {survey.is_active ? "Active" : "Draft"}
+                          </span>
+                          <span className="inline-flex items-center rounded-md bg-white text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+                            {survey.response_count || 0}{" "}
+                            {survey.response_count === 1 ? "response" : "responses"}
+                          </span>
                         </div>
 
                         <div>
@@ -375,10 +366,10 @@ export default function AdminSurveysList() {
 
                         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                           <span>Created {new Date(survey.created_at).toLocaleDateString()}</span>
-                          <span>•</span>
+                          <span>|</span>
                           <span>
                             Public link:{" "}
-                            <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-700">
+                            <code className="rounded bg-white border border-slate-200 px-1.5 py-0.5 font-mono text-slate-700">
                               {survey.is_active ? "/survey" : `/survey?id=${survey.id}`}
                             </code>
                           </span>
@@ -387,7 +378,7 @@ export default function AdminSurveysList() {
                               href="/survey"
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="font-bold text-teal-700 hover:text-teal-800 underline underline-offset-2 ml-1"
+                              className="font-semibold text-slate-700 hover:text-slate-900 underline underline-offset-2 ml-1"
                             >
                               Open public page ↗
                             </a>
@@ -401,7 +392,7 @@ export default function AdminSurveysList() {
                     <button
                       type="button"
                       onClick={() => handleCopyLink(survey.id, survey.is_active)}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition active:scale-95 touch-manipulation"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition active:scale-95 touch-manipulation"
                       title="Copy link to share with students"
                     >
                       {copiedId === survey.id ? "✓ Copied!" : "🔗 Copy Link"}
@@ -410,11 +401,7 @@ export default function AdminSurveysList() {
                     <button
                       type="button"
                       onClick={() => handleToggle(survey.id, survey.is_active)}
-                      className={`flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-xs font-bold transition active:scale-95 touch-manipulation ${
-                        survey.is_active
-                          ? "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
-                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                      }`}
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition active:scale-95 touch-manipulation"
                     >
                       {survey.is_active ? "Deactivate" : "Activate"}
                     </button>
@@ -422,7 +409,7 @@ export default function AdminSurveysList() {
                     <button
                       type="button"
                       onClick={() => (isEditing ? setEditingSurveyId(null) : startEdit(survey))}
-                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition active:scale-95 touch-manipulation"
+                      className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition active:scale-95 touch-manipulation"
                       title="Edit title and description"
                     >
                       ✏️ Edit
@@ -432,7 +419,7 @@ export default function AdminSurveysList() {
                       type="button"
                       onClick={() => handleDeleteSurvey(survey.id, survey.title)}
                       disabled={deletingId === survey.id}
-                      className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50/50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100 disabled:opacity-40 transition active:scale-95 touch-manipulation"
+                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-40 transition active:scale-95 touch-manipulation"
                       title="Delete entire survey and its responses"
                     >
                       {deletingId === survey.id ? "Deleting…" : "🗑️ Delete"}
@@ -440,7 +427,7 @@ export default function AdminSurveysList() {
 
                     <Link
                       href={`/admin/surveys/${survey.id}`}
-                      className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 transition active:scale-95 touch-manipulation text-center"
+                      className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-900 transition active:scale-95 touch-manipulation text-center"
                     >
                       Edit Questions & Responses ({survey.response_count || 0})
                     </Link>
