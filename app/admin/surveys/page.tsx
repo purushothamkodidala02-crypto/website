@@ -405,7 +405,7 @@ export default function AdminSurveysList() {
                     <button
                       type="button"
                       onClick={() => handleCopyLink(survey.id, survey.is_active)}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                       title="Copy link to share with students"
                     >
                       {copiedId === survey.id ? "✓ Copied!" : "🔗 Copy Link"}
@@ -414,7 +414,7 @@ export default function AdminSurveysList() {
                     <button
                       type="button"
                       onClick={() => handleToggle(survey.id, survey.is_active)}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                     >
                       {survey.is_active ? "Deactivate" : "Activate"}
                     </button>
@@ -422,7 +422,7 @@ export default function AdminSurveysList() {
                     <button
                       type="button"
                       onClick={() => (isEditing ? setEditingSurveyId(null) : startEdit(survey))}
-                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation"
+                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                       title="Edit title and description"
                     >
                       ✏️ Edit
@@ -432,7 +432,7 @@ export default function AdminSurveysList() {
                       type="button"
                       onClick={() => handleDeleteSurvey(survey.id, survey.title)}
                       disabled={deletingId === survey.id}
-                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation"
+                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                       title="Delete entire survey and its responses"
                     >
                       {deletingId === survey.id ? "Deleting…" : "🗑️ Delete"}
@@ -440,7 +440,7 @@ export default function AdminSurveysList() {
 
                     <Link
                       href={`/admin/surveys/${survey.id}`}
-                      className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center"
+                      className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center whitespace-nowrap"
                     >
                       Edit Questions & Responses ({survey.response_count || 0})
                     </Link>
