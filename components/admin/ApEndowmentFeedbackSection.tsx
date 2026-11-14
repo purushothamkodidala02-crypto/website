@@ -163,34 +163,34 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
   };
 
   return (
-    <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-6 shadow-2xs hover:border-slate-300 transition">
+    <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1 space-y-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-md bg-slate-200 text-slate-800 border border-slate-300 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
+            <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
               Survey {surveyIndex}
             </span>
-            <span className="inline-flex items-center rounded-md bg-white text-slate-700 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+            <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
               {isExpired ? "Campaign Expired" : "Targeted Campaign"}
             </span>
-            <span className="inline-flex items-center rounded-md bg-white text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+            <span className="inline-flex items-center rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium">
               {loading ? "…" : data?.totalResponses ?? 0}{" "}
               {(data?.totalResponses ?? 0) === 1 ? "response" : "responses"}
             </span>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900 sm:text-xl break-words">
+            <h3 className="text-lg font-bold text-slate-900 sm:text-xl break-words tracking-tight">
               AP Endowment Officer — Subject Priority Responses
             </h3>
-            <p className="mt-0.5 text-xs sm:text-sm text-slate-600 break-words">
+            <p className="mt-1 text-xs sm:text-sm text-slate-600 leading-relaxed break-words">
               Targeted exclusively to students who attempt AP Endowment Officer mock tests. Asks which Paper and Subjects they want prioritized.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-0.5">
             <span>Targeted 1-Week Campaign</span>
-            <span>|</span>
+            <span className="text-slate-300">•</span>
             <span>Priority Feedback</span>
           </div>
         </div>
@@ -200,7 +200,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition active:scale-95 touch-manipulation"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation"
           >
             {loading ? "…" : "↻ Refresh"}
           </button>
@@ -208,14 +208,14 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
             type="button"
             onClick={handleExportCSV}
             disabled={loading || !data || data.totalResponses === 0}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-40 transition active:scale-95 touch-manipulation"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation"
           >
             📥 Export CSV
           </button>
           <button
             type="button"
             onClick={() => setShowResponses((prev) => !prev)}
-            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-900 transition active:scale-95 touch-manipulation text-center"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center"
           >
             {showResponses ? "Hide Responses" : `View Responses (${data?.totalResponses ?? 0})`}
           </button>
@@ -224,38 +224,38 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
 
       {/* Quick Stats Grid - Light cement boxes */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-1">
-        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-2xs">
-          <strong className="block text-xl sm:text-2xl font-bold text-slate-800">
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {loading ? "…" : data?.totalResponses ?? 0}
           </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500">
+          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             Total Responses
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-2xs">
-          <strong className="block text-xl sm:text-2xl font-bold text-slate-800">
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {loading ? "…" : data?.paper1Count ?? 0}
           </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500">
+          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             Paper 1 Focus
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-2xs">
-          <strong className="block text-xl sm:text-2xl font-bold text-slate-800">
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {loading ? "…" : data?.paper2Count ?? 0}
           </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500">
+          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             Paper 2 Focus
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-2xs">
-          <strong className="block text-xl sm:text-2xl font-bold text-slate-800">
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {loading ? "…" : data?.bothCount ?? 0}
           </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500">
+          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             Both Papers
           </span>
         </div>
@@ -272,7 +272,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search by student, email, phone, topic…"
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 pl-9 text-xs sm:text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 pl-9 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
                 />
                 <span className="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
                 {searchTerm && (
@@ -307,10 +307,10 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
               No responses matching &ldquo;{searchTerm}&rdquo;
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-slate-200/90 bg-white shadow-2xs">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-100/70 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                  <tr className="border-b border-slate-200/90 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-600">
                     <th className="py-2.5 px-3">Date</th>
                     <th className="py-2.5 px-3">Student</th>
                     <th className="py-2.5 px-3">Paper Choice</th>
@@ -321,7 +321,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredResponses.map((r) => (
-                    <tr key={r.id} className="hover:bg-slate-50 transition">
+                    <tr key={r.id} className="hover:bg-slate-50/50 transition">
                       <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-500">
                         {new Date(r.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -333,7 +333,7 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
                         <span className="block font-semibold text-slate-900">{r.studentName}</span>
                         <span className="block text-xs text-slate-500">{r.studentEmail}</span>
                         {r.studentPhone && (
-                          <span className="inline-block mt-0.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700">
+                          <span className="inline-block mt-0.5 rounded-md bg-slate-100 border border-slate-200/60 px-1.5 py-0.5 text-[10px] font-medium text-slate-700">
                             📱 {r.studentPhone.startsWith("+") ? r.studentPhone : `+91 ${r.studentPhone}`}
                           </span>
                         )}
