@@ -599,7 +599,7 @@ export function FormattedQuestionText({
   return (
     <div
       lang={isTelugu ? "te" : "en"}
-      className={`space-y-3 font-medium break-words ${isTelugu ? "font-telugu leading-[1.85]" : "leading-relaxed sm:leading-8 tracking-[0.01em]"} ${className ?? ""}`}
+      className={`space-y-3 break-words ${isTelugu ? "font-telugu leading-[1.85]" : "leading-relaxed sm:leading-8"} ${className ?? ""}`}
     >
       {lines.map((line, index) => {
         const labelled = line.match(labelledSection);
