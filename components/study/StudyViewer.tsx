@@ -425,7 +425,7 @@ function StudyQuestionCard({
               <div className="min-w-0 flex-1" lang={showTelugu ? "te" : "en"}>
                 <FormattedQuestionText
                   text={questionText}
-                  className={`font-exam text-base sm:text-lg font-medium leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
+                  className={`font-exam text-base sm:text-lg font-normal leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
                 />
               </div>
             </div>
@@ -480,7 +480,7 @@ function StudyQuestionCard({
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${badgeStyle}`}>
                       {key}
                     </span>
-                    <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 tracking-[0.01em] font-medium font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+                    <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 font-normal font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
                       {label}
                     </span>
                     {statusBadge}

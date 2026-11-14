@@ -1018,7 +1018,7 @@ export function StudentTestRunner({
                   </div>
                 )}
               </div>
-              <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-medium leading-relaxed sm:leading-8 text-slate-950" />
+              <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-normal leading-relaxed sm:leading-8 text-slate-950" />
               {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-[32dvh] sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
               <div className="mt-4 sm:mt-5 grid gap-2.5 sm:gap-3">
                 {options.map(([key, text]) => {
@@ -1067,9 +1067,9 @@ export function StudentTestRunner({
                       </span>
                       <span
                         lang={teluguOption ? "te" : "en"}
-                        className={`min-w-0 flex-1 whitespace-pre-line text-[15px] sm:text-base leading-relaxed sm:leading-7 tracking-[0.01em] ${
+                        className={`min-w-0 flex-1 whitespace-pre-line text-[15px] sm:text-base leading-relaxed sm:leading-7 ${
                           teluguOption ? "font-telugu" : ""
-                        } font-normal sm:font-medium text-slate-800 font-exam break-words [overflow-wrap:anywhere]`}
+                        } font-normal text-slate-800 font-exam break-words [overflow-wrap:anywhere]`}
                       >
                         {text}
                       </span>
