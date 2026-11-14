@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatMarkValue, resolveMockTestScoring, type MockTestStatsSummary } from "@/lib/scoring";
 import { isPaidSalesEnabled } from "@/lib/paid-sales";
 import { TestStartActions } from "@/app/mock-tests/[id]/TestStartActions";
+import { AutoExitFullscreen } from "@/components/feedback/AutoExitFullscreen";
 import { BuyExamPassForm } from "@/app/dashboard/passes/BuyExamPassForm";
 import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
@@ -669,6 +670,15 @@ export async function MockTestDetailsPage({
       )
     : undefined;
 
+  const measuredQuestionCount =
+    mq.length > 0
+      ? mq.length
+      : catalogStats !== undefined
+        ? Number(catalogStats.question_count ?? 0)
+        : null;
+
+  const isTestReady = measuredQuestionCount === null ? true : measuredQuestionCount > 0;
+
   const scoring = resolveMockTestScoring({
     questions: mq,
     stats: catalogStats,
@@ -826,12 +836,24 @@ export async function MockTestDetailsPage({
       <PublicHeader />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
-        {query.start_error === "1" && (
-          <p className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-900">
-            This test could not be started because its setup is incomplete.
-            The administrator needs to verify its active questions and Paper
-            count.
-          </p>
+        {query.start_error && (
+          <>
+            <AutoExitFullscreen />
+            <aside
+              role="alert"
+              className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-900 shadow-2xs"
+            >
+              {query.start_error === "no_questions"
+                ? "This mock test does not have active questions available yet. Our team is updating the questions. Please try again shortly or select another test."
+                : query.start_error === "count_mismatch"
+                  ? "This test's question count is being updated by administrators. Please try again shortly."
+                  : query.start_error === "not_available"
+                    ? "This mock test is temporarily unavailable. Please check back shortly."
+                    : query.start_error === "no_access"
+                      ? "You do not have access to this test. Please check your exam series pass or sign in."
+                      : "This test could not be started because its setup is incomplete. The administrator needs to verify its active questions and Paper count."}
+            </aside>
+          </>
         )}
 
         {query.payment_error && (
@@ -1065,7 +1087,9 @@ export async function MockTestDetailsPage({
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Questions</p>
-                  <p className="mt-1 text-lg font-bold text-slate-900">{questionCount ?? "—"}</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">
+                    {isTestReady ? (questionCount ?? "—") : "Being prepared"}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Duration</p>
@@ -1118,7 +1142,14 @@ export async function MockTestDetailsPage({
               {/* Action Area */}
               <div>
                 {isUnlocked ? (
-                  <TestStartActions testId={id} testPath={canonicalPath} isLoggedIn={isLoggedIn} hasResumableSession={hasResumableSession} hasPreviousAttempt={hasPreviousAttempt} />
+                  <TestStartActions
+                    testId={id}
+                    testPath={canonicalPath}
+                    isLoggedIn={isLoggedIn}
+                    hasResumableSession={hasResumableSession}
+                    hasPreviousAttempt={hasPreviousAttempt}
+                    isReady={isTestReady}
+                  />
                 ) : paidSalesEnabled && purchaseProduct ? (
                   <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                     <p className="text-sm font-bold text-slate-900">

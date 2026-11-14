@@ -53,8 +53,11 @@ test("student test runner detects another device and closes PC session with auto
   assert.match(actions, /checkAttemptDeviceStatus/);
   assert.match(actions, /displaced:\s*true/);
 
-  // Start actions record active device token
+  // Start actions record active device token and handle schema cache mismatch gracefully
   assert.match(startActions, /active_device_token/);
+  assert.match(startActions, /isRpcSignatureMismatch/);
+  assert.match(startActions, /PGRST202/);
+  assert.match(startActions, /Could not find/);
 });
 
 test("attempt RPC calls pass requested_device_token to avoid PostgREST PGRST203 overload ambiguity and test runner omits saving indicator", async () => {

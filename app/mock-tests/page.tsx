@@ -238,6 +238,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
   const selectedSection = filters.section
     ? subjectSections.find((s) => s.slug === filters.section || s.id === filters.section)
     : undefined;
+  const hasUnsectionedTests = selectedSubject
+    ? tests.find((t) => t.subject?.id === selectedSubject.id && !t.subject_section_id) !== undefined
+    : false;
 
   const paperCountsByExam = new Map<string, number>();
   const subjectTextByExam = new Map<string, string[]>();
@@ -313,7 +316,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       (selectedType === "all" || test.test_scope === selectedType) &&
       (!selectedSection
         ? (selectedSubject && subjectSections.length > 0 && !isSearching
-            ? !test.subject_section_id
+            ? (hasUnsectionedTests ? !test.subject_section_id : true)
             : true)
         : test.subject_section_id === selectedSection.id);
 
@@ -903,7 +906,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   {selectedSection
                     ? `${selectedSection.name} Tests`
                     : selectedSubject && subjectSections.length > 0
-                      ? "Common Subject Practice"
+                      ? (hasUnsectionedTests ? "Common Subject Practice" : `${selectedSubject.name} Practice Tests`)
                       : selectedSubject
                         ? `${selectedSubject.name} Tests`
                         : selectedType === "subject"
@@ -914,7 +917,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   {selectedSection
                     ? `${selectedSubject?.name} · ${selectedSection.name} Mock Tests`
                     : selectedSubject && subjectSections.length > 0
-                      ? `Common ${selectedSubject.name} Mock Tests`
+                      ? (hasUnsectionedTests ? `Common ${selectedSubject.name} Mock Tests` : `${selectedSubject.name} Mock Tests`)
                       : selectedSubject
                         ? `${selectedSubject.name} Mock Tests`
                         : selectedType === "subject"

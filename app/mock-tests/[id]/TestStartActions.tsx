@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { beginMockTest } from "./start-actions";
-import { isBigScreen, isCurrentlyFullscreen, isFullscreenSupported, requestFullscreenSafely } from "@/lib/fullscreen";
+import {
+  exitFullscreenSafely,
+  isBigScreen,
+  isCurrentlyFullscreen,
+  isFullscreenSupported,
+  requestFullscreenSafely,
+} from "@/lib/fullscreen";
 import { createClient } from "@/lib/supabase/client";
 import { addLocalAttemptedTestId, getLocalAttemptedTestIds } from "@/lib/storage/student-practice-storage";
 import { getClientDeviceId } from "@/lib/auth/client-device";
@@ -15,12 +21,14 @@ export function TestStartActions({
   isLoggedIn,
   hasResumableSession,
   hasPreviousAttempt = false,
+  isReady = true,
 }: {
   testId: string;
   testPath: string;
   isLoggedIn: boolean;
   hasResumableSession: boolean;
   hasPreviousAttempt?: boolean;
+  isReady?: boolean;
 }) {
   const [clientSignedIn, setClientSignedIn] = useState(false);
   const [clientResumable, setClientResumable] = useState(false);
@@ -84,6 +92,13 @@ export function TestStartActions({
     };
   }, [testId]);
 
+  useEffect(() => {
+    // If returning from an aborted attempt or an error state, ensure any fullscreen mode is cleared
+    if (isCurrentlyFullscreen()) {
+      void exitFullscreenSafely();
+    }
+  }, []);
+
   const handleFullscreenOnStart = () => {
     try {
       if (isBigScreen() && isFullscreenSupported() && !isCurrentlyFullscreen()) {
@@ -108,6 +123,35 @@ export function TestStartActions({
   }
 
   const effectiveDeviceId = deviceId || (typeof window !== "undefined" ? getClientDeviceId() : "");
+
+  // If mock test has 0 active questions and user has no resumable session, gracefully inform student
+  if (!isReady && !resumable) {
+    return (
+      <div className="mt-1 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-left shadow-2xs">
+        <div className="flex items-start gap-2.5">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-200 text-xs font-bold text-amber-900 mt-0.5">
+            ℹ
+          </span>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-amber-900">
+              Questions Being Prepared
+            </p>
+            <p className="mt-1 text-xs text-amber-800 leading-relaxed">
+              Active questions for this mock test are currently being added. Check back shortly to take this practice test.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-200 px-6 py-3 text-center text-sm font-bold text-slate-500 cursor-not-allowed shadow-none"
+        >
+          <span>Questions being prepared</span>
+        </button>
+      </div>
+    );
+  }
 
   if (!resumable) {
     const startAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
@@ -171,6 +215,7 @@ export function TestStartActions({
         }}
       >
         <PendingSubmitButton
+          onClick={handleFullscreenOnStart}
           pendingLabel="Restarting test…"
           className="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-5 py-3 text-center text-xs sm:text-sm font-semibold shadow-2xs transition hover:border-slate-400 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
