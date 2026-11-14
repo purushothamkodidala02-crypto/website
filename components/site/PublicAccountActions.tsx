@@ -56,9 +56,7 @@ export function PublicAccountActions({
 
     // 1. Paid sales settings cache (60s TTL)
     const now = Date.now();
-    if (cachedPaidSales !== null && now - lastPaidSalesFetchTime < 60000) {
-      setPaidSalesEnabled(cachedPaidSales);
-    } else {
+    if (cachedPaidSales === null || now - lastPaidSalesFetchTime >= 60000) {
       void supabase
         .from("site_settings")
         .select("enabled")
