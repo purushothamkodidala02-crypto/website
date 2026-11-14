@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   createAdminSurvey,
@@ -30,6 +30,7 @@ export default function AdminSurveysList() {
   const [isCreating, setIsCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Edit Survey State
   const [editingSurveyId, setEditingSurveyId] = useState<string | null>(null);
@@ -179,142 +180,128 @@ export default function AdminSurveysList() {
     refreshSurveys();
   };
 
-  const activeSurvey = surveys.find((s) => s.is_active);
+  const sortedSurveys = useMemo(() => {
+    return [...surveys].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  }, [surveys]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-slate-900 sm:text-3xl">Student Surveys & Feedback</h1>
           <p className="mt-1 text-sm text-slate-500">
             Create surveys, share public links with students, and collect student feedback directly here.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={refreshSurveys}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition active:scale-95 touch-manipulation"
-        >
-          {loading ? "Refreshing…" : "↻ Refresh All"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setShowCreateForm((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation"
+          >
+            {showCreateForm ? "✕ Close Form" : "+ Create New Survey"}
+          </button>
+          <button
+            type="button"
+            onClick={refreshSurveys}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition active:scale-95 touch-manipulation"
+          >
+            {loading ? "Refreshing…" : "↻ Refresh All"}
+          </button>
+        </div>
       </div>
 
-      {/* AP Endowment Officer Targeted Feedback Section */}
-      <ApEndowmentFeedbackSection />
-
-      {/* Active Public Survey Banner */}
-      {activeSurvey && (
-        <div className="rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 p-4 sm:p-5 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-teal-800">
-                  Live Public Survey
-                </span>
-              </div>
-              <h2 className="mt-1 text-base sm:text-lg font-bold text-slate-900 break-words">
-                {activeSurvey.title}
-              </h2>
-              {activeSurvey.description && (
-                <p className="mt-0.5 text-xs text-slate-600 line-clamp-2 break-words">
-                  {activeSurvey.description}
-                </p>
-              )}
-              <p className="mt-1 text-xs text-slate-600 break-words">
-                Active on student dashboard and shareable link:{" "}
-                <code className="rounded bg-teal-100/70 px-1.5 py-0.5 font-mono text-teal-900 break-all">
-                  /survey
-                </code>
-              </p>
-            </div>
-            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto shrink-0">
+      {/* Create Survey Form (collapsible or if no dynamic surveys) */}
+      {(showCreateForm || (!loading && surveys.length === 0)) && (
+        <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50/60 to-slate-50 p-4 sm:p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">Create New Survey</h2>
+            {surveys.length > 0 && (
               <button
                 type="button"
-                onClick={() => handleCopyLink(activeSurvey.id, true)}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-800 transition active:scale-95 touch-manipulation"
+                onClick={() => setShowCreateForm(false)}
+                className="text-xs font-bold text-slate-400 hover:text-slate-600"
               >
-                {copiedId === activeSurvey.id ? "✓ Copied Link!" : "📋 Copy Survey Link"}
+                ✕ Cancel
               </button>
-              <a
-                href="/survey"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded-xl border border-teal-300 bg-white px-3.5 py-2.5 text-xs font-bold text-teal-900 shadow-sm hover:bg-teal-50 transition active:scale-95 touch-manipulation"
-              >
-                View Public Page ↗
-              </a>
-            </div>
+            )}
           </div>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Create a survey to gather student needs, mock test feedback, or exam prep requirements.
+          </p>
+
+          {errorMsg && (
+            <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-800">
+              {errorMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleCreate} className="mt-4 space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                placeholder="e.g. APPSC Group 2 Feedback Survey"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="w-full flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                required
+              />
+              <button
+                type="submit"
+                disabled={isCreating}
+                className="w-full sm:w-auto rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-60 transition active:scale-95 touch-manipulation text-center justify-center inline-flex items-center shrink-0"
+              >
+                {isCreating ? "Creating…" : "Create Survey"}
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="Optional subtitle or purpose (e.g. Tell us which subjects you want us to cover next)"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
+            />
+          </form>
         </div>
       )}
 
-      {/* Create Survey Form */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-        <h2 className="text-base sm:text-lg font-bold text-slate-900">Create New Survey</h2>
-        <p className="mt-0.5 text-xs text-slate-500">
-          Create a survey to gather student needs, mock test feedback, or exam prep requirements.
-        </p>
-
-        {errorMsg && (
-          <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-800">
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleCreate} className="mt-4 space-y-3">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              type="text"
-              placeholder="e.g. APPSC Group 2 Feedback Survey"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-              required
-            />
-            <button
-              type="submit"
-              disabled={isCreating}
-              className="w-full sm:w-auto rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-60 transition active:scale-95 touch-manipulation text-center justify-center inline-flex items-center shrink-0"
-            >
-              {isCreating ? "Creating…" : "Create Survey"}
-            </button>
-          </div>
-          <input
-            type="text"
-            placeholder="Optional subtitle or purpose (e.g. Tell us which subjects you want us to cover next)"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
-          />
-        </form>
-      </div>
-
-      {/* Survey List Section */}
+      {/* Unified Surveys List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
-            All Dynamic Surveys ({surveys.length})
-          </h2>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+              All Surveys ({1 + surveys.length})
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Live feedback campaigns and student surveys ordered sequentially.
+            </p>
+          </div>
         </div>
 
-        {loading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 text-center text-slate-500">
-            <span className="inline-block animate-spin mr-2">⏳</span> Loading surveys…
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {surveys.map((survey) => {
+        <div className="grid gap-4">
+          {/* Survey 1: AP Endowment Officer Targeted Feedback */}
+          <ApEndowmentFeedbackSection />
+
+          {/* Survey 2, Survey 3, etc.: Dynamic Surveys */}
+          {loading ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 text-center text-slate-500">
+              <span className="inline-block animate-spin mr-2">⏳</span> Loading surveys…
+            </div>
+          ) : (
+            sortedSurveys.map((survey, index) => {
+              const surveyNumber = index + 2;
               const isEditing = editingSurveyId === survey.id;
 
               return (
                 <div
                   key={survey.id}
-                  className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm sm:flex-row sm:items-start"
+                  className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm hover:border-slate-300 transition sm:flex-row sm:items-start"
                 >
-                  <div className="min-w-0 flex-1 space-y-2">
+                  <div className="min-w-0 flex-1 space-y-2.5">
                     {isEditing ? (
                       <div className="space-y-2 rounded-xl border border-teal-200 bg-teal-50/50 p-3">
                         <label className="block text-xs font-bold text-teal-900">Survey Title</label>
@@ -354,16 +341,17 @@ export default function AdminSurveysList() {
                     ) : (
                       <>
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-bold text-slate-900 sm:text-xl break-words">
-                            {survey.title}
-                          </h3>
+                          <span className="inline-flex items-center rounded-lg bg-teal-800 px-2.5 py-1 text-xs font-black tracking-wider text-white shadow-2xs">
+                            Survey {surveyNumber}
+                          </span>
                           <div className="flex flex-wrap items-center gap-1.5">
                             {survey.is_active ? (
-                              <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
-                                Active (Live)
+                              <span className="inline-flex items-center gap-1.5 shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-200">
+                                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                Active (Live Public Survey)
                               </span>
                             ) : (
-                              <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+                              <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 border border-slate-200">
                                 Draft
                               </span>
                             )}
@@ -373,14 +361,38 @@ export default function AdminSurveysList() {
                             </span>
                           </div>
                         </div>
-                        {survey.description && (
-                          <p className="text-xs sm:text-sm text-slate-600 break-words">
-                            {survey.description}
-                          </p>
-                        )}
-                        <p className="text-xs text-slate-400">
-                          Created {new Date(survey.created_at).toLocaleDateString()}
-                        </p>
+
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 sm:text-xl break-words">
+                            {survey.title}
+                          </h3>
+                          {survey.description && (
+                            <p className="mt-0.5 text-xs sm:text-sm text-slate-600 break-words">
+                              {survey.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <span>Created {new Date(survey.created_at).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span>
+                            Public link:{" "}
+                            <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-700">
+                              {survey.is_active ? "/survey" : `/survey?id=${survey.id}`}
+                            </code>
+                          </span>
+                          {survey.is_active && (
+                            <a
+                              href="/survey"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-bold text-teal-700 hover:text-teal-800 underline underline-offset-2 ml-1"
+                            >
+                              Open public page ↗
+                            </a>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>
@@ -400,8 +412,8 @@ export default function AdminSurveysList() {
                       onClick={() => handleToggle(survey.id, survey.is_active)}
                       className={`flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-xs font-bold transition active:scale-95 touch-manipulation ${
                         survey.is_active
-                          ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
-                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          ? "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
+                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
                       }`}
                     >
                       {survey.is_active ? "Deactivate" : "Activate"}
@@ -435,18 +447,9 @@ export default function AdminSurveysList() {
                   </div>
                 </div>
               );
-            })}
-
-            {surveys.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-slate-300 p-8 sm:p-12 text-center text-slate-500">
-                <p className="text-base font-semibold text-slate-700">No surveys created yet</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Create your first dynamic survey above to start collecting student opinions and requirements!
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
     </div>
   );

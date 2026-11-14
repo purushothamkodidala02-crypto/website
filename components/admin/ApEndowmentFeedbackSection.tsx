@@ -8,7 +8,7 @@ import {
 } from "@/app/actions/ap-endowment-feedback";
 import { AP_EO_CAMPAIGN_EXPIRY_MS } from "@/lib/campaigns/ap-endowment";
 
-export function ApEndowmentFeedbackSection() {
+export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: number } = {}) {
   const [data, setData] = useState<ApEndowmentFeedbackSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [isExpired, setIsExpired] = useState(false);
@@ -166,10 +166,15 @@ export function ApEndowmentFeedbackSection() {
       <div className="border-b border-amber-100 bg-gradient-to-r from-amber-50/90 via-orange-50/50 to-amber-50/90 p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className={`flex h-2.5 w-2.5 rounded-full ${isExpired ? "bg-slate-400" : "bg-amber-500 animate-pulse"}`} />
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                {isExpired ? "Campaign Expired" : "Targeted 1-Week Campaign (Live)"}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-lg bg-amber-800 px-2.5 py-1 text-xs font-black tracking-wider text-white shadow-2xs">
+                Survey {surveyIndex}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-900 border border-amber-200">
+                <span className={`flex h-2 w-2 rounded-full ${isExpired ? "bg-slate-400" : "bg-amber-500 animate-pulse"}`} />
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  {isExpired ? "Campaign Expired" : "Targeted 1-Week Campaign (Live)"}
+                </span>
               </span>
             </div>
             <h2 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">

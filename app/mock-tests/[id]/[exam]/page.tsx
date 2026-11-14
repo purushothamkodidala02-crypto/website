@@ -122,6 +122,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
     });
   const specializations = catalog.specializations.filter((item) => item.exam_group_id === context.exam!.id);
   const teluguData = getExamTeluguMetadata(context.exam.slug, context.exam.name, context.state.slug);
+  const ageLimits = teluguData?.ageLimits ?? teluguData?.schedule?.ageLimits;
   const examCategory = catalog.categories.find((cat) => cat.id === context.exam!.exam_id);
   const boardName = examCategory?.name ?? null;
 
@@ -386,7 +387,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 Physical Standards
               </a>
             )}
-            {teluguData?.schedule?.ageLimits && teluguData.schedule.ageLimits.length > 0 && (
+            {ageLimits && ageLimits.length > 0 && (
               <a
                 href="#age-limits"
                 className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
@@ -698,10 +699,10 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     Total Vacancies
                   </span>
                   <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                    {teluguData.schedule.totalVacancies ? `${teluguData.schedule.totalVacancies.toLocaleString()} Posts` : "7,112 Posts"}
+                    {teluguData.schedule.totalVacancies ? `${teluguData.schedule.totalVacancies.toLocaleString()} Posts` : "To be notified"}
                   </p>
                 </div>
-                <p className="mt-2 text-xs font-semibold text-slate-600">Across Police, TGSPF, Fire &amp; Prisons</p>
+                <p className="mt-2 text-xs font-semibold text-slate-600">Across Notified Cadres</p>
               </div>
 
               <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
@@ -1089,7 +1090,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 </h2>
               </div>
               <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-800">
-                Annexure I &amp; Para 16(B)
+                Prescribed Standards
               </span>
             </div>
 
@@ -1133,7 +1134,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         )}
 
         {/* Age Limit & Relaxations */}
-        {teluguData?.schedule?.ageLimits && teluguData.schedule.ageLimits.length > 0 && (
+        {ageLimits && ageLimits.length > 0 && (
           <section
             id="age-limits"
             aria-labelledby="age-limits-heading"
@@ -1170,7 +1171,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     Intermediate (10+2) Pass
                   </p>
                 </div>
-                <p className="mt-2 text-xs text-slate-500 font-medium">Recognized State Board as on 29-07-2026</p>
+                <p className="mt-2 text-xs text-slate-500 font-medium">Recognized State Board or equivalent</p>
               </div>
 
               <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 flex flex-col justify-between">
@@ -1214,7 +1215,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {teluguData.schedule.ageLimits.map((al) => (
+                    {ageLimits.map((al) => (
                       <tr key={al.category} className="hover:bg-slate-50/60 transition">
                         <td className="py-2.5 px-4 font-semibold text-slate-900">{al.category}</td>
                         <td className="py-2.5 px-4 font-mono font-bold text-teal-800">{al.ageRange}</td>
@@ -1279,7 +1280,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     {teluguData.jobProfile.eligibility.ageLimit}
                   </p>
                 </div>
-                <p className="mt-2 text-xs text-slate-400 font-medium">Official notification rules apply</p>
+                <p className="mt-2 text-xs text-slate-400 font-medium">Standard recruitment rules apply</p>
               </div>
 
               <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">

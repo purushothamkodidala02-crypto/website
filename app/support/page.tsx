@@ -277,7 +277,7 @@ export default function SupportPage() {
                     </span>
                   </div>
                   <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
-                    Guidance on official recruitment notifications (e.g. TG Police Rc No. 189/2026), 7,112 cadre vacancies, GO Ms 87 5-year age relaxations, physical measurement &amp; efficiency test (PET) standards, and syllabus topics.
+                    Guidance on state exam patterns, GO Ms 87 5-year age relaxations, physical measurement &amp; efficiency test (PET) standards, and syllabus topics.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-teal-800">
                     <Link
@@ -293,10 +293,10 @@ export default function SupportPage() {
                       Police PET Standards →
                     </Link>
                     <Link
-                      href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule"
+                      href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern"
                       className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
                     >
-                      7,112 Vacancy Breakdown →
+                      Exam Pattern &amp; Scoring →
                     </Link>
                     <Link
                       href="/mock-tests/telangana/police-constable-free-mock-test#age-limits"
@@ -412,15 +412,15 @@ export default function SupportPage() {
                 <div className="rounded-xl border border-teal-200/90 bg-teal-50/40 p-3">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-teal-950">TG Police Constable</span>
-                    <span className="rounded-full bg-teal-100 border border-teal-200 px-2 py-0.5 text-[10px] font-bold text-teal-900">7,112 Posts</span>
+                    <span className="rounded-full bg-teal-100 border border-teal-200 px-2 py-0.5 text-[10px] font-bold text-teal-900">Exam Guide</span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-teal-800">
                     <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:underline">
                       PET Standards →
                     </Link>
                     <span className="text-slate-300">•</span>
-                    <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" className="hover:underline">
-                      Vacancies →
+                    <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern" className="hover:underline">
+                      Exam Pattern →
                     </Link>
                     <span className="text-slate-300">•</span>
                     <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:underline">
@@ -481,7 +481,7 @@ export default function SupportPage() {
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
               <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:text-white transition">Police PET Standards</Link>
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" className="hover:text-white transition">Police 7,112 Vacancies</Link>
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern" className="hover:text-white transition">Police Exam Pattern</Link>
               <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
               <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>
               <Link href="/mock-tests/andhra-pradesh" className="hover:text-white transition">Andhra Pradesh Exams</Link>
