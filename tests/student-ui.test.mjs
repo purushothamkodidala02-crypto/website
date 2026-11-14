@@ -160,7 +160,7 @@ test("student name tags and catalog/exam cards avoid aggressive ellipsis clippin
     ]);
 
   assert.match(accountActions, /resolveStudentDisplayInfo/);
-  assert.match(accountActions, /href="\/dashboard"/);
+  assert.doesNotMatch(accountActions, /href="\/dashboard"/);
   assert.match(dashboardPage, /resolveStudentDisplayInfo/);
   assert.match(dashboardPage, /parseMockTestTitle/);
   assert.doesNotMatch(catalogPage, /max-w-\[62%\] truncate/);

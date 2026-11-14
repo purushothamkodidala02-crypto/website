@@ -61,8 +61,6 @@ test("student navigation keeps account details separate from the admin workspace
 
   assert.match(actions, /from\("profiles"\)\.select\("role"\)/);
   assert.match(actions, /profile\?\.role === "admin"/);
-  assert.match(actions, /title=\{email\}/);
-  assert.match(actions, /!isAdmin/);
   assert.match(actions, /initialIsAdmin = false/);
   assert.doesNotMatch(actions, /Return to admin workspace/);
   assert.doesNotMatch(header, /createClient/);
