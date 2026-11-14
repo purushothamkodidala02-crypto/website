@@ -632,35 +632,52 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* Full-Width Exam Preparation Callout Banner Immediately After Section 2 */}
-        <section className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 text-white shadow-md border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <section className="rounded-2xl border border-blue-200/90 bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-emerald-50/60 p-6 sm:p-8 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-                Full-Length Bilingual Test Series
+              <span className="rounded-md border border-blue-300 bg-blue-100/80 text-blue-900 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+                Free Exam Preparation
               </span>
-              <span className="rounded-md bg-white/10 text-slate-200 px-2.5 py-0.5 text-[11px] font-medium">
+              <span className="rounded-md border border-emerald-300 bg-emerald-100 text-emerald-950 px-2.5 py-0.5 text-[11px] font-bold">
                 58 Full Papers &bull; 11,600 Questions
               </span>
             </div>
-            <h3 className="font-display mt-2.5 text-xl sm:text-2xl font-bold leading-snug">
-              Practice All 58 Full-Length Telangana Police Constable Mock Tests
+            <h3 className="font-display mt-2.5 text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-snug">
+              Practice 58 Full-Length Mock Tests Free
             </h3>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Prepare for the 200-question, 180-minute Preliminary Written Test with authentic OMR countdown timers, 0.20 negative marking deduction, and bilingual English &amp; Telugu step-by-step answer explanations on Varadhi Prep.
+            <p className="mt-1 text-xs sm:text-sm font-semibold text-blue-900">
+              తెలంగాణ పోలీస్ కానిస్టేబుల్ 58 పూర్తిస్థాయి మాక్ టెస్టులు ఉచితంగా ప్రాక్టీస్ చేయండి
             </p>
+            <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
+              Train for the 200-question, 3-hour Preliminary Written Test with authentic OMR countdown timers, 0.20 negative marking, and bilingual step-by-step solutions.
+            </p>
+            <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700">
+              <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 shadow-2xs">
+                ⏱️ 180 Mins Timed
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 shadow-2xs">
+                🎯 0.20 Negative Marking
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 shadow-2xs">
+                🌐 English &amp; Telugu
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 shadow-2xs">
+                📝 OMR Sheet Mode
+              </span>
+            </div>
           </div>
           <div className="shrink-0 flex flex-col sm:flex-row gap-3">
             <Link
               href="/mock-tests/telangana/police-constable-free-mock-test"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold px-5 py-3 text-sm transition shadow-sm text-center"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3.5 text-sm transition shadow-sm text-center"
             >
-              Start 58 Mock Tests Free →
+              Start Practicing Free Mock Tests →
             </Link>
             <a
               href="https://www.tgprb.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold px-4 py-3 text-xs border border-white/20 transition text-center"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 font-semibold px-4 py-3.5 text-xs border border-slate-200/90 shadow-2xs transition text-center"
             >
               TSLPRB Portal (tgprb.in) ↗
             </a>
