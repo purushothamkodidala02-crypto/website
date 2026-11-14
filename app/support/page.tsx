@@ -367,9 +367,7 @@ export default function SupportPage() {
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:text-white transition">Police PET Standards</Link>
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern" className="hover:text-white transition">Police Exam Pattern</Link>
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable Mock Tests</Link>
               <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
               <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>
               <Link href="/mock-tests/andhra-pradesh" className="hover:text-white transition">Andhra Pradesh Exams</Link>

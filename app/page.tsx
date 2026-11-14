@@ -170,10 +170,7 @@ export default async function Home() {
               <div className="mt-3 flex flex-wrap items-center justify-start lg:justify-end gap-1.5 text-xs">
                 <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">Popular:</span>
                 {[
-                  { label: "Police Constable Guide", href: "/mock-tests/telangana/police-constable-free-mock-test" },
-                  { label: "TG Police Exam Pattern", href: "/mock-tests/telangana/police-constable-free-mock-test#exam-pattern" },
-                  { label: "TG Police PET & Standards", href: "/mock-tests/telangana/police-constable-free-mock-test#physical-standards" },
-                  { label: "TG Police GO 87 Age", href: "/mock-tests/telangana/police-constable-free-mock-test#age-limits" },
+                  { label: "Police Constable Mock Tests", href: "/mock-tests/telangana/police-constable-free-mock-test" },
                   { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
                   { label: "TGPSC", href: "/mock-tests/telangana" },
                   { label: "APPSC", href: "/mock-tests/andhra-pradesh" },
@@ -375,9 +372,7 @@ export default async function Home() {
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:text-white transition">Police PET Standards</Link>
-              <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern" className="hover:text-white transition">Police Exam Pattern</Link>
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable Mock Tests</Link>
               <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
               <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>
               <Link href="/mock-tests/andhra-pradesh" className="hover:text-white transition">Andhra Pradesh Exams</Link>

@@ -106,41 +106,22 @@ export type ExamTeluguSeo = {
 
 const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ పోలీస్ కానిస్టేబుల్",
-  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్, సిలబస్ & పరీక్ష విధానం (TSLPRB OMR విధానం)",
-  bilingualPageTitle: "Telangana Police / TG Police Constable Free Mock Test 2026, Syllabus & Exam Pattern | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
+  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్",
+  bilingualPageTitle: "Telangana Police / TG Police Constable Free Mock Test 2026 | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
   bilingualDescription:
-    "Telangana Police Constable exam syllabus, PWT exam pattern, age limits, physical standards (PMT/PET) & free bilingual mock tests in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్, పరీక్ష విధానం & ఉచిత మాక్ టెస్ట్‌లు.",
+    "Telangana Police Constable free bilingual mock tests in Telugu and English. తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్‌లు.",
   keywords: [
-    "Telangana constable exam date",
     "Telangana police mock test",
-    "Telangana police syllabus",
     "Telangana constable mock test",
     "Telangana police exam mock test",
-    "Telangana police exam date",
-    "Telangana police constable exam date 2026",
-    "tg police exam date",
-    "tg police exam syllabus",
-    "tg police syllabus 2026",
-    "ts police exam syllabus",
-    "telangana police exam syllabus",
-    "ts police exam date",
-    "tslprb police constable exam date",
-    "tgprb constable exam date 2026",
-    "tgprb pwt exam date",
-    "telangana police hall ticket release date",
-    "TG Police Constable exam syllabus 2026",
-    "TG Police Constable OMR exam pattern",
-    "Telangana police constable OMR test",
-    "TG police constable OMR sheet practice",
+    "tg police mock test",
+    "ts police exam mock test",
+    "telangana police free mock test",
+    "telangana police syllabus",
+    "tg police syllabus",
     "TG Police Constable mock test in Telugu",
-    "TG Police Constable syllabus 2026",
-    "Telangana police constable syllabus in telugu",
     "TG Police Constable mock test",
-    "TGPRB police constable syllabus",
-    "TG Police Constable exam pattern",
     "TS police constable mock test in telugu free",
-    "TGPRB police constable mock test 2026",
-    "TSLPRB police constable test series",
     "Telangana police constable preliminary written test mock test",
     "free tg constable mock test online",
     "Telangana police constable grand test",
@@ -148,322 +129,35 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "police constable model papers with solutions in telugu",
     "TG Police Constable online test series",
     "Telangana police constable previous papers online",
-    "TS Police Constable Syllabus in Telugu PDF",
-    "TS Police Constable Exam Pattern 200 Questions",
-    "TS Police Constable Age Limit GO Ms 87",
-    "TS Police Constable Negative Marking 20%",
-    "TS Police Constable Qualifying Marks 2026",
-    "TS Police Constable PET PMT Standards",
-    "TS Police Constable 1600 meters Run Time",
-    "TS Police Constable Pay Scale 24280-72850",
-    "TS Police Constable Selection Process PWT PMT PET FWE",
-    "TSLPRB Police Constable Free Mock Test 2026",
-    "Telangana police constable qualifying marks PWT FWE",
-    "Telangana police constable duties and responsibilities",
-    "TG police constable salary and pay scale",
-    "Telangana constable job profile",
-    "Telangana police constable eligibility criteria age limit",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
-    "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
-    "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ 2026",
-    "తెలంగాణ పోలీస్ ఎగ్జామ్ సిలబస్",
-    "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ 2026",
-    "తెలంగాణ పోలీస్ ఎగ్జామ్ డేట్",
-    "తెలంగాణ కానిస్టేబుల్ పరీక్ష తేదీ",
-    "టీజీ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ",
-    "టీజీ పోలీస్ సిలబస్",
+    "తెలంగాణ పోలీస్ సిలబస్",
+    "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్",
     "టీజీ పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ పేపర్స్",
     "పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ మోడల్ పేపర్స్ తెలుగు",
     "తెలంగాణ పోలీస్ ఎగ్జామ్ టెస్ట్ సిరీస్",
-    "తెలంగాణ పోలీస్ OMR పరీక్ష విధానం",
-    "TG police constable offline OMR mock test",
-    "తెలంగాణ కానిస్టేబుల్ సిలబస్ తెలుగులో 200 ప్రశ్నలు",
-    "తెలంగాణ పోలీస్ ఈవెంట్స్ 1600 మీటర్లు రన్ టైమింగ్స్",
-    "తెలంగాణ పోలీస్ కానిస్టేబుల్ అర్హతలు వయోపరిమితి జీతం",
-    "తెలంగాణ పోలీస్ కానిస్టేబుల్ విధులు జీతం",
-    "తెలంగాణ కానిస్టేబుల్ జాబ్ ప్రొఫైల్ అర్హతలు",
-  ],
-  jobProfile: {
-    roleTitle: "SCT Police Constable (Civil / AR / SAR CPL / SPF / Fire / Warder)",
-    department: "Telangana State Police & Allied Departments (Home Department)",
-    payScale: "₹24,280 – ₹72,850",
-    grossSalaryMonthly: "₹34,000 – ₹39,000 / month (approx. with DA, HRA & Allowances)",
-    eligibility: {
-      ageLimit: "18 to 27 Years for General/OC (Prescribed 18–22 + 5 years relaxation under GO Ms No. 87). Up to 32 years for BC/SC/ST/EWS.",
-      education: "Must have passed Intermediate (10+2) or equivalent recognized by State Government. Higher qualifications allowed on par. Valid LMV license required for Fire Fighter.",
-      physicalStandards: "Men: Height ≥ 167.6 cm (160 cm for Agency ST). Women: Height ≥ 152.5 cm (150 cm for Agency ST). PET: 1600m / 800m run, Long Jump, Shot Put.",
-    },
-    duties: [
-      {
-        title: "Law & Order Maintenance & Beat Patrolling",
-        teluguTitle: "శాంతిభద్రతల పరిరక్షణ & బీట్ పెట్రోలింగ్",
-        description: "Executing regular day and night foot and mobile beats in station jurisdiction, surveillance on anti-social elements, crime prevention, and maintaining public order during festivals, rallies, and elections.",
-      },
-      {
-        title: "Crime Scene Support & Station Sentry Duty",
-        teluguTitle: "నేర పరిశోధన సహాయం & స్టేషన్ భద్రత",
-        description: "Assisting Station House Officers (SHO) and Sub-Inspectors during crime scene cordoning, evidence preservation, inquest panchanama, and guarding station lockups, records, and armory as station sentry.",
-      },
-      {
-        title: "Emergency Response & Dial 100 / 112 Mobile Patrol",
-        teluguTitle: "డయల్ 100 అత్యవసర ప్రతిస్పందన",
-        description: "Serving as frontline emergency responders in Blue Colts and Patrol Mobiles, reaching distress locations swiftly upon receiving Dial 100 calls to provide immediate citizen assistance.",
-      },
-      {
-        title: "Court Duty, Summons Delivery & Prisoner Escort",
-        teluguTitle: "కోర్టు విధులు, సమన్లు జారీ & ఖైదీల ఎస్కార్ట్",
-        description: "Delivering court summons and warrants to witnesses and accused, escorting under-trial prisoners between central prisons and courts, and producing case evidence before judicial magistrates.",
-      },
-      {
-        title: "Traffic Regulation & Road Safety Checkpoints",
-        teluguTitle: "ట్రాఫిక్ క్రమబద్ధీకరణ & రహదారి భద్రత",
-        description: "Regulating traffic flow at congested intersections, conducting vehicle document and drunk driving checks during nakabandi operations, and assisting victims during road accidents.",
-      },
-    ],
-    careerGrowth: [
-      "Police Constable (Entry Level)",
-      "Head Constable (Promoted after 5–8 years or via departmental qualifying exam)",
-      "Assistant Sub-Inspector (ASI)",
-      "Sub-Inspector of Police (SI - Station Incharge)",
-      "Circle Inspector of Police (CI)",
-    ],
-  },
-  ageLimits: [
-    {
-      category: "General / Open Competition (OC)",
-      ageRange: "18 to 27 Years",
-      basis: "Base 18–22 years + 5 years general relaxation under GO Ms No. 87",
-    },
-    {
-      category: "BC, SC, ST & EWS Candidates",
-      ageRange: "18 to 32 Years",
-      basis: "5 years additional statutory reservation relaxation on top of GO Ms No. 87",
-    },
-    {
-      category: "Home Guards (Min. 360 days in 2 years)",
-      ageRange: "18 to 45 Years",
-      basis: "Base 18–40 years + 5 years general relaxation under GO Ms No. 87",
-    },
-    {
-      category: "Telangana State Govt Employees",
-      ageRange: "Up to 5 Years Relaxation",
-      basis: "Length of regular service (excluding Corporations/Public Undertakings)",
-    },
-    {
-      category: "Ex-Servicemen & NCC Instructors",
-      ageRange: "3 Years + Length of Service",
-      basis: "Rendered in Armed Forces / whole-time NCC Cadet Corps Instructors",
-    },
-    {
-      category: "Widows & Divorced Women (Unremarried)",
-      ageRange: "Up to 40 Years (45 for SC/ST)",
-      basis: "Eligible for SCT Constables, Fire and Warder posts under rules",
-    },
-  ],
-  pattern: {
-    authority: "TSLPRB (Telangana State Level Police Recruitment Board)",
-    totalQuestions: 200,
-    totalMarks: 200,
-    durationMinutes: 180,
-    negativeMarking: "0.20 (20% negative mark per wrong answer)",
-    medium: "Bilingual (English & Telugu / Urdu)",
-    mode: "OMR Based Written Test (Offline OMR Sheet with Ball Point Pen)",
-    stages: [
-      "Stage 1: Preliminary Written Test (PWT) - 200 Marks (1 Paper, 3 Hours, Offline OMR)",
-      "Stage 2: Physical Measurement Test (PMT) & Physical Efficiency Test (PET)",
-      "Stage 3: Final Written Examination (FWE) - 200 Marks (Civil/Fire/Warder) / 100 Marks (AR/SPF)",
-    ],
-    qualifyingMarks: [
-      {
-        category: "Open Competition (OC) & EWS",
-        pwtPercentage: "30%",
-        pwtMarks: "60 Marks / 200",
-        fwePercentage: "40%",
-        fweMarks: "80 Marks / 200 (Civil/Fire) | 40 Marks / 100 (AR/SPF)",
-      },
-      {
-        category: "Backward Classes (BC)",
-        pwtPercentage: "25%",
-        pwtMarks: "50 Marks / 200",
-        fwePercentage: "35%",
-        fweMarks: "70 Marks / 200 (Civil/Fire) | 35 Marks / 100 (AR/SPF)",
-      },
-      {
-        category: "SC / ST / Ex-Servicemen / Home Guards",
-        pwtPercentage: "20%",
-        pwtMarks: "40 Marks / 200",
-        fwePercentage: "30%",
-        fweMarks: "60 Marks / 200 (Civil/Fire) | 30 Marks / 100 (AR/SPF)",
-      },
-    ],
-    physicalStandards: [
-      {
-        event: "Height (General Candidates)",
-        menStandard: "Minimum 167.6 cms",
-        womenStandard: "Minimum 152.5 cms",
-        nature: "Physical Measurement Test (PMT)",
-      },
-      {
-        event: "Height (ST & Aboriginals in Agency Areas)",
-        menStandard: "Minimum 160.0 cms",
-        womenStandard: "Minimum 150.0 cms",
-        nature: "Relaxed PMT Standard (GO Ms No. 24)",
-      },
-      {
-        event: "1600m Run (Men) / 800m Run (Women)",
-        menStandard: "Max 7 mins 15 secs (Ex-SM: 9m 30s)",
-        womenStandard: "Max 5 mins 20 secs",
-        nature: "Qualifying (Civil/Fire/Warder) | Graded up to 100 Marks (AR/SAR/TGSPF)",
-      },
-      {
-        event: "Long Jump",
-        menStandard: "Minimum 4.00 meters (Ex-SM: 3.50m)",
-        womenStandard: "Minimum 2.50 meters",
-        nature: "Qualifying in nature",
-      },
-      {
-        event: "Shot Put",
-        menStandard: "Minimum 6.00 meters (Weight: 7.26 Kgs)",
-        womenStandard: "Minimum 4.00 meters (Weight: 4.00 Kgs)",
-        nature: "Qualifying in nature",
-      },
-      {
-        event: "Medical Eye Sight",
-        menStandard: "Distant 6/6, Near 0/5 (Snellen)",
-        womenStandard: "Distant 6/6, Near 0/5 (Snellen)",
-        nature: "Free from colour blindness & morbid conditions",
-      },
-    ],
-    subjects: [
-      {
-        name: "English",
-        teluguName: "ఇంగ్లీష్ లాంగ్వేజ్ (ఆబ్జెక్టివ్)",
-        description: "Comprehension passage, vocabulary, synonyms & antonyms, spotting errors, grammar rules, prepositions, active & passive voice, sentence correction.",
-      },
-      {
-        name: "Arithmetic",
-        teluguName: "అర్థమెటిక్ & సంఖ్యా సామర్థ్యం",
-        description: "Number systems, LCM & HCF, fractions & decimals, percentages, averages, ratio & proportion, profit & loss, simple & compound interest, time & work, time & distance.",
-      },
-      {
-        name: "General Science",
-        teluguName: "జనరల్ సైన్స్",
-        description: "Everyday science observations, fundamental physics, chemistry in daily life, human anatomy, diseases & prevention, botany, zoology, environmental science.",
-      },
-      {
-        name: "History of India, Indian Culture & Indian National Movement",
-        teluguName: "భారత దేశ చరిత్ర, సంస్కృతి & జాతీయోద్యమం",
-        description: "Ancient civilizations, medieval India, Mughal administration, British rule, 1857 Revolt, socio-religious movements, freedom struggle, prominent national leaders.",
-      },
-      {
-        name: "Principles of Geography, Indian Geography, Polity & Economy",
-        teluguName: "భౌగోళిక సూత్రాలు, భారత భూగోళం, రాజనీతి & ఆర్థిక వ్యవస్థ",
-        description: "Physical geography, Indian physiography, rivers, climate, Constitution of India, fundamental rights & duties, Parliament, Judiciary, planning & Indian economy.",
-      },
-      {
-        name: "Current Events of National & International Importance",
-        teluguName: "సమకాలీన అంశాలు (జాతీయ & అంతర్జాతీయ కరెంట్ అఫైర్స్)",
-        description: "Recent national & international developments, major summits, sports tournaments, prestigious awards, science & technology breakthroughs, government welfare schemes.",
-      },
-      {
-        name: "Test of Reasoning / Mental Ability",
-        teluguName: "రీజనింగ్ & మెంటల్ ఎబిలిటీ",
-        description: "Analogy, series completion, coding-decoding, blood relations, direction sense, syllogisms, Venn diagrams, non-verbal patterns, spatial visualization.",
-      },
-      {
-        name: "Contents Pertaining to the State of Telangana",
-        teluguName: "తెలంగాణ చరిత్ర, ఉద్యమం, సంస్కృతి & ప్రత్యేకతలు",
-        description: "History of Telangana (Satavahanas, Kakatiyas, Qutb Shahis, Asaf Jahis), Telangana armed struggle, 1969 agitation, statehood movement (1948–2014), art, literature, fairs, festivals, geography & state schemes.",
-      },
-      {
-        name: "Personality Test (Ethics & Sensitivity - FWE Stage)",
-        teluguName: "వ్యక్తిత్వ పరీక్ష (ఎథిక్స్ & సామాజిక అవగాహన)",
-        description: "Ethics, sensitivity to gender and weaker sections, social awareness, emotional intelligence, empathetic public policing demeanor.",
-      },
-    ],
-  },
-  englishFaqs: [
-    {
-      question: "What is the educational qualification for Telangana Police Constable?",
-      answer:
-        "Candidates must have passed Intermediate (10+2) or equivalent recognized by the State Government. Higher qualifications are also eligible. Fire Fighter posts require a valid Light Motor Vehicle (LMV) driving license.",
-    },
-    {
-      question: "What is the pay scale for Telangana Police Constable posts?",
-      answer:
-        "The pay scale for SCT Police Constable (Civil/AR/SAR CPL), TGSPF Constable, Fire Fighter, and Warders is ₹24,280 – ₹72,850. The gross monthly salary is approximately ₹34,000 to ₹39,000 per month including DA, HRA, and state police allowances.",
-    },
-    {
-      question: "What is the age limit for Telangana Police Constable? Is there any age relaxation?",
-      answer:
-        "The prescribed base age is 18 to 22 years. Under Government Orders (GO Ms No. 87), an age relaxation of 5 years applies for direct recruitment to uniformed services, allowing General/OC candidates to apply up to 27 years. SC, ST, BC, and EWS candidates receive an additional 5-year statutory relaxation up to 32 years. Home Guards can apply up to 45 years.",
-    },
-    {
-      question: "What is the official exam pattern for TS Police Constable Preliminary Written Test (PWT)?",
-      answer:
-        "The PWT consists of 1 paper with 200 objective multiple-choice questions for 200 marks, with a duration of 3 hours (180 minutes). The exam is conducted offline on an OMR sheet using blue or black ballpoint pen. For each incorrect answer, 20% of full marks (0.20 marks) is deducted as negative marking.",
-    },
-    {
-      question: "What are the minimum qualifying marks in TS Police Constable PWT and FWE?",
-      answer:
-        "For the Preliminary Written Test (PWT): 30% for OC and EWS (60 marks out of 200); 25% for BC (50 marks); and 20% for SC, ST, Ex-Servicemen, and Home Guards (40 marks). For the Final Written Examination (FWE): 40% for OC/EWS, 35% for BC, and 30% for SC/ST/Ex-Servicemen.",
-    },
-    {
-      question: "What are the physical standards and events for TS Police Constable PMT & PET?",
-      answer:
-        "Men must meet a minimum height of 167.6 cm (160 cm for Agency ST) and qualify the 1600m Run in 7 mins 15 secs (Ex-SM: 9m 30s), Long Jump of 4.00 meters, and Shot Put (7.26 kg) of 6.00 meters. Women must meet a minimum height of 152.5 cm (150 cm for Agency ST) and qualify the 800m Run in 5 mins 20 secs, Long Jump of 2.50 meters, and Shot Put (4 kg) of 4.00 meters.",
-    },
-    {
-      question: "What is the syllabus for the TS Police Constable Preliminary Written Test?",
-      answer:
-        "The PWT syllabus (Intermediate Standard) covers 8 subjects: (1) English, (2) Arithmetic, (3) General Science, (4) History of India & Indian Culture, (5) Principles of Geography, Indian Geography, Polity & Economy, (6) Current Events of National & International Importance, (7) Test of Reasoning / Mental Ability, and (8) Contents pertaining to the State of Telangana.",
-    },
-    {
-      question: "Is there negative marking in the Telangana Police Constable exam?",
-      answer:
-        "Yes. In the Preliminary Written Test (PWT), 20% of full marks (0.20 mark) is deducted as negative marking for each incorrect answer marked on the OMR sheet. Unanswered questions receive zero marks.",
-    },
-    {
-      question: "How can I practice TS Police Constable mock tests for free on Varadhi Prep?",
-      answer:
-        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and practice timed 200-question bilingual mock tests strictly matching the official TSLPRB OMR scheme with instant explanations at zero cost.",
-    },
   ],
   teluguFaqs: [
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉద్యోగాలకు విద్యార్హత ఏమిటి?",
-      answer:
-        "తెలంగాణ పోలీస్ కానిస్టేబుల్ పోస్టులకు అభ్యర్థులు ఇంటర్మీడియట్ (10+2) లేదా తత్సమాన విద్యార్హత కలిగి ఉండాలి. హయ్యర్ డిగ్రీలు ఉన్న అభ్యర్థులు కూడా దరఖాస్తు చేసుకోవచ్చు. ఫైర్ ఫైటర్ పోస్టులకు చెల్లుబాటు అయ్యే LMV డ్రైవింగ్ లైసెన్స్ అవసరం.",
-    },
-    {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ వేతన స్కేలు (Pay Scale & Salary) ఎంత?",
-      answer:
-        "పోలీస్ కానిస్టేబుల్, ఎస్పీఎఫ్, ఫైర్ ఫైటర్ మరియు వార్డర్ పోస్టులన్నింటికీ అధికారిక పే స్కేలు ₹24,280 – ₹72,850. డీఏ, హెచ్ఆర్ఏ మరియు పోలీస్ అలవెన్సులతో కలిపి ప్రారంభ స్థూల వేతనం నెలకు సుమారు ₹34,000 నుండి ₹39,000 వరకు ఉంటుంది.",
-    },
-    {
-      question: "తెలంగాణ కానిస్టేబుల్ వయోపరిమితి ఎంత? ఎంత సడలింపు ఉంది?",
-      answer:
-        "ప్రిస్క్రైబ్డ్ సాధారణ వయోపరిమితి 18 నుండి 22 సంవత్సరాలు. అయితే తెలంగాణ ప్రభుత్వం జీవో ఎంఎస్ నం. 87 ద్వారా యూనిఫామ్ సర్వీసుల అభ్యర్థులకు 5 సంవత్సరాల సాధారణ సడలింపు ఇచ్చింది. దీనితో జనరల్/ఓసీ అభ్యర్థులు 27 సంవత్సరాల వరకు అర్హులు. బీసీ, ఎస్సీ, ఎస్టీ, ఈడబ్ల్యూఎస్ అభ్యర్థులకు అదనంగా మరో 5 ఏళ్ల సడలింపుతో 32 సంవత్సరాల వరకు, హోంగార్డులకు 45 ఏళ్ల వరకు అర్హత ఉంటుంది.",
-    },
-    {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ (PWT) పరీక్ష విధానం మరియు నెగెటివ్ మార్కింగ్ ఎంత?",
-      answer:
-        "ప్రిలిమ్స్ రాత పరీక్ష (PWT) ఒకే పేపర్‌గా 200 ఆబ్జెక్టివ్ ప్రశ్నలతో 200 మార్కులకు 3 గంటల (180 నిమిషాలు) వ్యవధిలో ఆఫ్‌లైన్ ఓఎంఆర్ షీట్‌పై నిర్వహించబడుతుంది. ప్రతి తప్పు సమాధానానికి 20% మార్కులు (అంటే 0.20 మార్కు) నెగెటివ్ మార్కింగ్‌గా తీసివేయబడుతుంది.",
-    },
-    {
-      question: "ప్రిలిమ్స్ (PWT) మరియు మెయిన్స్ (FWE) పరీక్షల్లో క్వాలిఫైయింగ్ మార్కులు ఎంత?",
-      answer:
-        "ప్రిలిమ్స్ రాత పరీక్షలో కనీస అర్హత మార్కులు: ఓసీ & ఈడబ్ల్యూఎస్ అభ్యర్థులకు 30% (60 మార్కులు); బీసీలకు 25% (50 మార్కులు); ఎస్సీ, ఎస్టీ, మాజీ సైనికులు, హోంగార్డులకు 20% (40 మార్కులు). మెయిన్స్ పరీక్షలో ఓసీలకు 40%, బీసీలకు 35%, ఎస్సీ/ఎస్టీలకు 30% మార్కులు సాధించాలి.",
-    },
-    {
-      question: "పోలీస్ ఈవెంట్స్ (PMT & PET) శారీరక కొలతలు మరియు ఈవెంట్స్ ప్రమాణాలు ఏమిటి?",
-      answer:
-        "పురుష అభ్యర్థుల ఎత్తు కనీసం 167.6 సెం.మీ (ఏజెన్సీ ఎస్టీలకు 160 సెం.మీ). 1600 మీటర్ల పరుగును 7 నిమిషాల 15 సెకన్లలో పూర్తి చేయాలి. లాంగ్ జంప్ 4.00 మీటర్లు, షాట్‌పుట్ (7.26 కేజీలు) 6.00 మీటర్లు వేయాలి. మహిళా అభ్యర్థుల ఎత్తు కనీసం 152.5 సెం.మీ (ఏజెన్సీ ఎస్టీలకు 150 సెం.మీ). 800 మీటర్ల పరుగును 5 నిమిషాల 20 సెకన్లలో, లాంగ్ జంప్ 2.50 మీటర్లు, షాట్‌పుట్ (4 కేజీలు) 4.00 మీటర్లు సాధించాలి.",
-    },
-    {
       question: "వరధి ప్రెప్‌లో తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్‌లు ఎలా రాయాలి?",
       answer:
-        "వరధి ప్రెప్ (Varadhi Prep) వెబ్‌సైట్‌లో తెలంగాణ పోలీస్ కానిస్టేబుల్ పేజీకి వెళ్లి, ప్రిలిమినరీ రాత పరీక్ష (PWT) పేపర్‌ను ఎంచుకుని, అధికారిక 200 ప్రశ్నలు, 3 గంటల టైమర్ మరియు 0.20 నెగెటివ్ మార్కింగ్ గల టెస్ట్‌లను తెలుగు & ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా సాధన చేయవచ్చు.",
+        "వరధి ప్రెప్ (Varadhi Prep) వెబ్‌సైట్‌లో తెలంగాణ పోలీస్ కానిస్టేబుల్ పేజీకి వెళ్లి, ప్రిలిమినరీ రాత పరీక్ష (PWT) పేపర్‌ను ఎంచుకుని, ఆన్‌లైన్ మాక్ టెస్ట్‌లను తెలుగు & ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా ప్రాక్టీస్ చేయవచ్చు.",
+    },
+    {
+      question: "మాక్ టెస్ట్ రాసిన తర్వాత సమాధానాలు మరియు వివరణలు చూసుకోవచ్చా?",
+      answer:
+        "అవును. టెస్ట్ సబ్మిట్ చేసిన వెంటనే మీ స్కోరు, సరైన సమాధానాలు మరియు తెలుగు & ఇంగ్లీష్ వివరణలను మీ డ్యాష్‌బోర్డులో సమీక్షించుకోవచ్చు.",
+    },
+  ],
+  englishFaqs: [
+    {
+      question: "Where can I take Telangana Police Constable mock tests for free?",
+      answer:
+        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and practice timed bilingual mock tests with instant explanations at zero cost.",
+    },
+    {
+      question: "Can I review my answers after submitting a test?",
+      answer:
+        "Yes. After submitting any test, you can instantly review your detailed score, correct answers, and bilingual step-by-step explanations.",
     },
   ],
 };
