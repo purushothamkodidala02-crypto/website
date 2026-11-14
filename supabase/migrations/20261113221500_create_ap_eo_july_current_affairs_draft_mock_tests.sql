@@ -17,7 +17,7 @@ INSERT INTO public.subject_sections (
   created_at,
   updated_at
 ) VALUES (
-  '87a21644-329b-4e17-b73f-c1f9380962b7',
+  '588e14bd-6098-445c-82dd-77a3bf563cdb',
   'b675525c-5185-40e8-9df5-a869a113c7bb',
   'July',
   'july',
@@ -25,9 +25,8 @@ INSERT INTO public.subject_sections (
   true,
   now(),
   now()
-) ON CONFLICT (id) DO UPDATE SET
+) ON CONFLICT (subject_id, slug) DO UPDATE SET
   name = EXCLUDED.name,
-  slug = EXCLUDED.slug,
   display_order = EXCLUDED.display_order,
   is_active = EXCLUDED.is_active,
   updated_at = now();
@@ -59,10 +58,10 @@ INSERT INTO public.mock_tests (
   updated_at
 ) VALUES
   (
-    'd7b415a1-7788-449e-bdf1-3b7454823901',
+    '25794632-fc09-4404-8af0-59b3b12b7418',
     '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
     'b675525c-5185-40e8-9df5-a869a113c7bb',
-    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    '588e14bd-6098-445c-82dd-77a3bf563cdb',
     'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 01',
     'current-affairs-july-mock-test-01',
     'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
@@ -84,10 +83,10 @@ INSERT INTO public.mock_tests (
     now()
   ),
   (
-    'd7b415a2-7788-449e-bdf1-3b7454823902',
+    '7a5d31af-9aa1-46c8-8590-a7530a3f6899',
     '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
     'b675525c-5185-40e8-9df5-a869a113c7bb',
-    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    '588e14bd-6098-445c-82dd-77a3bf563cdb',
     'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 02',
     'current-affairs-july-mock-test-02',
     'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
@@ -109,10 +108,10 @@ INSERT INTO public.mock_tests (
     now()
   ),
   (
-    'd7b415a3-7788-449e-bdf1-3b7454823903',
+    '08ce5a49-ca02-4f2a-ba90-9b4bce955e50',
     '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
     'b675525c-5185-40e8-9df5-a869a113c7bb',
-    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    '588e14bd-6098-445c-82dd-77a3bf563cdb',
     'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 03',
     'current-affairs-july-mock-test-03',
     'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
@@ -134,10 +133,10 @@ INSERT INTO public.mock_tests (
     now()
   ),
   (
-    'd7b415a4-7788-449e-bdf1-3b7454823904',
+    'f7e8cbee-f5e5-4724-83af-1f775d9b75f2',
     '7c9ee5a1-0d79-422f-8cd1-13ae921d9b53',
     'b675525c-5185-40e8-9df5-a869a113c7bb',
-    '87a21644-329b-4e17-b73f-c1f9380962b7',
+    '588e14bd-6098-445c-82dd-77a3bf563cdb',
     'AP Endowment Officer · General Studies & General Abilities · Current Affairs (July) · Mock Test 04',
     'current-affairs-july-mock-test-04',
     'Practice July 2026 current affairs with 25 bilingual questions covering key Andhra Pradesh, national, and international events for APPSC Endowment Officer Paper 1.',
@@ -158,13 +157,6 @@ INSERT INTO public.mock_tests (
     now(),
     now()
   )
-ON CONFLICT (id) DO UPDATE SET
-  title = EXCLUDED.title,
-  slug = EXCLUDED.slug,
-  description = EXCLUDED.description,
-  duration_minutes = EXCLUDED.duration_minutes,
-  target_question_count = EXCLUDED.target_question_count,
-  status = EXCLUDED.status,
-  updated_at = now();
+ON CONFLICT (id) DO NOTHING;
 
 COMMIT;
