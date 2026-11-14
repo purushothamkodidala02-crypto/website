@@ -615,9 +615,15 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
 
                     <div className="shrink-0 flex flex-wrap items-center justify-end gap-1.5">
                       {test.supersededByMockTestId && (
-                        <span className="rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-indigo-800">
-                          Correction in progress
-                        </span>
+                        test.correctedVersionStatus === "published" ? (
+                          <span className="rounded-md border border-slate-200/80 bg-slate-100/80 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-slate-700">
+                            Superseded by live test
+                          </span>
+                        ) : (
+                          <span className="rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-indigo-800">
+                            Correction in progress
+                          </span>
+                        )
                       )}
                       {test.replacesMockTestId && (
                         <span className="rounded-md border border-violet-200/80 bg-violet-50/60 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-violet-800">
@@ -741,6 +747,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       ready={ready}
                       hasAttempts={test.attemptCount > 0}
                       hasCorrectedVersion={Boolean(test.supersededByMockTestId)}
+                      supersededByMockTestId={test.supersededByMockTestId}
+                      correctedVersionStatus={test.correctedVersionStatus}
                       canRepublish={
                         !test.supersededByMockTestId ||
                         test.correctedVersionStatus === "draft"

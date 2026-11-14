@@ -135,7 +135,7 @@ export function CreateQuestionForm({
         <h2 className="mt-2 text-2xl font-black">Classify, then add the question</h2>
         <p className="mt-2 text-sm text-slate-600">The selected Subject automatically decides whether English, Telugu, or both are required.</p>
       </div>
-      <form action={action} className="p-6 sm:p-7">
+      <form action={action} encType="multipart/form-data" className="p-6 sm:p-7">
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           <section className="rounded-2xl bg-slate-50 p-5">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">1. Question location</p>

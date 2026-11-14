@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
+  isUploadFile,
   normalizeQuestionImageUrl,
   removeQuestionImage,
   uploadQuestionImage,
@@ -325,10 +326,11 @@ export async function createQuestion(
 
   const imageFile = formData.get("question_image");
   const normalizedImage = normalizeQuestionImageUrl(formData.get("image_url"));
-  if (normalizedImage.error && (!(imageFile instanceof File) || imageFile.size === 0)) {
+  const hasUploadedFile = isUploadFile(imageFile);
+  if (normalizedImage.error && !hasUploadedFile) {
     return { success: false, message: normalizedImage.error };
   }
-  const uploadedImage = imageFile instanceof File && imageFile.size > 0
+  const uploadedImage = hasUploadedFile
     ? await uploadQuestionImage(supabase, user.id, imageFile)
     : { url: normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };

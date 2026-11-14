@@ -50,3 +50,31 @@ test("publishMockTest and republishArchivedMockTest are protected against uncaug
   assert.match(migration, /433697ea-8456-44d7-8681-81b46125b23e/);
   assert.match(migration, /15f047ac-d741-4abe-bda4-75fcd4771542/);
 });
+
+test("superseded mock tests protect unique slug constraints and render clean management actions", async () => {
+  const [manageActions, existingTable, buttons] = await Promise.all([
+    read("app/admin/mock-tests/manage-actions.ts"),
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("app/admin/mock-tests/MockTestManagementButtons.tsx"),
+  ]);
+
+  // restoreMockTestAsDraft guards against restoring superseded tests and maps duplicate slug errors
+  assert.match(manageActions, /superseded_by_mock_test_id/);
+  assert.match(manageActions, /Cannot restore as draft/);
+  assert.match(manageActions, /uq_mock_tests/);
+
+  // clearAllMockTestAttemptsAction guards against resetting attempts when superseded by published test
+  assert.match(manageActions, /Cannot reset attempts/);
+
+  // ExistingMockTestsTable displays 'Superseded by live test' when replacement is published
+  assert.match(existingTable, /Superseded by live test/);
+  assert.match(existingTable, /Correction in progress/);
+  assert.match(existingTable, /supersededByMockTestId/);
+  assert.match(existingTable, /correctedVersionStatus/);
+
+  // MockTestManagementButtons routes admin to live test or draft editor instead of colliding draft
+  assert.match(buttons, /Manage live test ↗/);
+  assert.match(buttons, /Edit corrected draft ↗/);
+  assert.match(buttons, /supersededByMockTestId/);
+  assert.match(buttons, /correctedVersionStatus/);
+});

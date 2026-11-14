@@ -95,6 +95,13 @@ export function EditQuestionForm({
   const [lifecycle, setLifecycle] = useState<QuestionLifecycle>(
     question.content_lifecycle,
   );
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
+    question.image_url ?? null,
+  );
+
+  useEffect(() => {
+    setCurrentImageUrl(question.image_url ?? null);
+  }, [question.id, question.image_url]);
 
   const [isDirty, setIsDirty] = useState(false);
   const [showMobilePalette, setShowMobilePalette] = useState(false);
@@ -160,6 +167,10 @@ export function EditQuestionForm({
   useEffect(() => {
     if (state.success) {
       setIsDirty(false);
+      if (state.imageUrl !== undefined) {
+        setCurrentImageUrl(state.imageUrl);
+      }
+      router.refresh();
       if (state.newQuestionId && mockTestId) {
         router.replace(`/admin/mock-tests/${mockTestId}/questions/${state.newQuestionId}/edit`);
         return;
@@ -170,7 +181,7 @@ export function EditQuestionForm({
         router.push(navigation.backHref);
       }
     }
-  }, [state.success, state.newQuestionId, mockTestId, submitIntent, navigation, router]);
+  }, [state.success, state.newQuestionId, state.imageUrl, mockTestId, submitIntent, navigation, router]);
 
   // Keyboard navigation and shortcuts:
   // - Right / Left arrow keys: Navigate to Next / Prev question (when not editing text)
@@ -423,6 +434,7 @@ export function EditQuestionForm({
             <form
               ref={formRef}
               action={action}
+              encType="multipart/form-data"
               onChange={() => setIsDirty(true)}
               onInput={() => setIsDirty(true)}
               className="space-y-6"
@@ -483,7 +495,7 @@ export function EditQuestionForm({
           )}
         </div>
 
-        <QuestionImageField currentUrl={question.image_url} />
+        <QuestionImageField key={`${question.id}-${currentImageUrl ?? "no-img"}`} currentUrl={currentImageUrl} />
 
         <div className="grid gap-5 md:grid-cols-2">
           <label className="block text-sm font-bold">

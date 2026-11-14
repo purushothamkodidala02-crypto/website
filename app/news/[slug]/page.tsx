@@ -32,9 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "News Not Found", robots: { index: false, follow: false } };
   }
 
-  const title = "Telangana Police Constable Notification 2026: 7,112 Posts, Syllabus, Events & Selection";
+  const title = "Telangana Police Constable Notification 2026 (7,112 Posts): Download Official PDF, Syllabus & Dates";
   const description =
-    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/Rect./Rect.2/2026) for 7,112 vacancies. Complete cadre-wise posts, timeline dates, GO Ms 87 age limits, PMT/PET standards, Annexure-II syllabus, salary & application process.";
+    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/2026) issued for 7,112 vacancies. Download official PDF (748 KB), check cadre-wise vacancies, G.O. Ms 87 age limits, PMT/PET standards, Annexure-II syllabus, and apply online at tgprb.in.";
   const canonical = absoluteUrl(`/news/${PRIMARY_SLUG}`);
 
   return {
@@ -43,15 +43,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: [
       "Telangana Police Constable Notification 2026",
       "TS Police Constable Notification 2026 PDF",
+      "TS Police Constable Notification 2026 PDF download",
       "TSLPRB Police Constable 7112 Vacancies",
       "Telangana Police Constable Syllabus 2026",
       "TS Police Constable PWT Exam Pattern",
       "TS Police Constable Age Limit GO Ms 87",
       "TS Police Constable PET PMT Standards",
       "TS Police Constable Salary Pay Scale",
+      "TG Police Constable Notification 2026",
+      "TS Police Constable Apply Online 2026",
+      "TSLPRB Constable official website tgprb in",
       "తెలంగాణ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ 2026",
       "తెలంగాణ కానిస్టేబుల్ 7112 పోస్టుల వివరాలు",
       "తెలంగాణ పోలీస్ సిలబస్ 2026",
+      "తెలంగాణ కానిస్టేబుల్ అధికారిక నోటిఫికేషన్ పీడీఎఫ్ డౌన్‌లోడ్",
       "TG Police Constable mock test in Telugu",
     ],
     alternates: { canonical },
@@ -63,10 +68,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "Varadhi Prep",
       images: [
         {
-          url: "/opengraph-image",
+          url: absoluteUrl("/opengraph-image"),
           width: 1200,
           height: 630,
-          alt: "Telangana Police Constable Notification 2026",
+          alt: "Telangana Police Constable Notification 2026 - 7,112 Vacancies Official Notification PDF",
         },
       ],
     },
@@ -74,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/opengraph-image"],
+      images: [absoluteUrl("/opengraph-image")],
     },
   };
 }
@@ -344,19 +349,36 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
     {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
-      headline: "Telangana Police Constable Notification 2026: 7,112 Posts, Syllabus & Selection Procedure",
+      headline: "Telangana Police Constable Notification 2026: 7,112 Posts, Official PDF Download, Syllabus & Dates",
       description:
         "Official Telangana State Level Police Recruitment Board (TSLPRB) notification Rc No. 189/Rect./Rect.2/2026 for 7,112 posts with complete syllabus, post-wise vacancies, selection process, PMT/PET standards, and salary.",
       url: canonical,
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonical,
+      },
+      image: [absoluteUrl("/opengraph-image")],
       datePublished: "2026-07-29T10:00:00+05:30",
-      dateModified: "2026-11-14T17:00:00+05:30",
+      dateModified: new Date().toISOString(),
       inLanguage: ["en-IN", "te-IN"],
+      articleSection: "Government Recruitment Notifications",
+      keywords:
+        "Telangana Police Constable Notification 2026, TS Police Constable Syllabus, TSLPRB 7112 Vacancies, Download Official PDF, GO Ms 87",
+      author: {
+        "@type": "Organization",
+        name: "Varadhi Prep Editorial Desk",
+        url: absoluteUrl("/"),
+      },
       publisher: {
         "@type": "Organization",
         name: "Varadhi Prep",
         url: absoluteUrl("/"),
+        logo: {
+          "@type": "ImageObject",
+          url: absoluteUrl("/varadhi-v-logo.png"),
+        },
       },
-      "associatedMedia": {
+      associatedMedia: {
         "@type": "DigitalDocument",
         name: "TSLPRB Telangana Police Constable 2026 Official Gazette Notification PDF",
         encodingFormat: "application/pdf",
@@ -366,17 +388,19 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
     {
       "@context": "https://schema.org",
       "@type": "JobPosting",
-      title: "Telangana Police Constable (Civil & Allied) - 7,112 Posts",
+      title: "Telangana Police Constable (Civil, AR, SAR CPL, TSSP) - 7,112 Vacancies",
       description:
-        "Direct recruitment for 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables (Civil, AR, SAR CPL, TSSP/TGSPF), Fire Fighters, and Warders in Telangana State.",
+        "Direct recruitment for 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables (Civil, AR, SAR CPL, TSSP/TGSPF), Fire Fighters, and Warders in Telangana State under TSLPRB Notification Rc No. 189 / Rect. / Rect.2 / 2026.",
       identifier: {
         "@type": "PropertyValue",
         name: "TSLPRB",
         value: "Rc No. 189 / Rect. / Rect.2 / 2026",
       },
       datePosted: "2026-07-29",
-      validThrough: "2026-12-31",
+      validThrough: "2026-12-31T23:59:59+05:30",
       employmentType: "FULL_TIME",
+      industry: "Law Enforcement & State Police Services",
+      directApply: true,
       hiringOrganization: {
         "@type": "Organization",
         name: "Telangana State Level Police Recruitment Board (TSLPRB)",
@@ -390,6 +414,15 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           addressCountry: "IN",
         },
       },
+      applicantLocationRequirements: {
+        "@type": "Country",
+        name: "India",
+      },
+      educationRequirements: {
+        "@type": "EducationalOccupationalCredential",
+        credentialCategory: "Intermediate / 10+2 or equivalent",
+      },
+      experienceRequirements: "No experience required (Freshers eligible)",
       baseSalary: {
         "@type": "MonetaryAmount",
         currency: "INR",
@@ -409,7 +442,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         name: faq.question,
         acceptedAnswer: {
           "@type": "Answer",
-          text: faq.answer,
+          text: `${faq.answer} ${faq.teluguAnswer ? `\n\n(తెలుగు: ${faq.teluguAnswer})` : ""}`,
         },
       })),
     },
@@ -421,6 +454,18 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         { "@type": "ListItem", position: 2, name: "Recruitment News", item: canonical },
         { "@type": "ListItem", position: 3, name: "Telangana Police Constable Notification 2026", item: canonical },
       ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Telangana Police Constable Notification 2026 (7,112 Posts)",
+      url: canonical,
+      description:
+        "Comprehensive guide, syllabus, selection procedure, and official notification PDF for Telangana Police Constable 2026.",
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["h1", "article p:first-of-type"],
+      },
     },
   ];
 

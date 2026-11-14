@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MockTestStatus } from "@/types/mock-test";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
@@ -24,6 +25,8 @@ export function MockTestManagementButtons({
   ready,
   hasAttempts,
   hasCorrectedVersion,
+  supersededByMockTestId,
+  correctedVersionStatus,
   canRepublish,
   adminAttemptCount = 0,
 }: {
@@ -33,12 +36,15 @@ export function MockTestManagementButtons({
   ready: boolean;
   hasAttempts: boolean;
   hasCorrectedVersion: boolean;
+  supersededByMockTestId?: string | null;
+  correctedVersionStatus?: MockTestStatus | null;
   canRepublish: boolean;
   adminAttemptCount?: number;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
+  const [replacementId, setReplacementId] = useState<string | null>(null);
 
   // Publish with email alert modal state
   const [publishAction, setPublishAction] = useState<"publish" | "republish" | null>(null);
@@ -138,11 +144,12 @@ export function MockTestManagementButtons({
 
     if (!result.success) {
       setMessage(result.message);
+      setReplacementId(result.replacementId ?? null);
       setPending(false);
       return;
     }
 
-    if (action === "correct" && result.replacementId) {
+    if (result.replacementId) {
       router.push(`/admin/mock-tests/${result.replacementId}/questions`);
       return;
     }
@@ -225,14 +232,34 @@ export function MockTestManagementButtons({
               className="border border-emerald-700/90 bg-emerald-700 text-white hover:bg-emerald-800 active:bg-emerald-900"
             />
           )}
-          <ActionButton
-            pending={pending}
-            onClick={() => run("restore")}
-            label="Restore as draft"
-            className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-          />
+          {correctedVersionStatus === "published" ? (
+            supersededByMockTestId && (
+              <Link
+                href={`/admin/mock-tests/${supersededByMockTestId}/edit`}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 hover:border-indigo-300 px-3 py-2 text-xs font-semibold text-indigo-800 shadow-2xs transition"
+              >
+                Manage live test ↗
+              </Link>
+            )
+          ) : correctedVersionStatus === "draft" ? (
+            supersededByMockTestId && (
+              <Link
+                href={`/admin/mock-tests/${supersededByMockTestId}/questions`}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 hover:border-indigo-300 px-3 py-2 text-xs font-semibold text-indigo-800 shadow-2xs transition"
+              >
+                Edit corrected draft ↗
+              </Link>
+            )
+          ) : (
+            <ActionButton
+              pending={pending}
+              onClick={() => run("restore")}
+              label="Restore as draft"
+              className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+            />
+          )}
           {clearAdminBtn}
-          {clearAllAttemptsBtn}
+          {correctedVersionStatus !== "published" && clearAllAttemptsBtn}
           {correct}
           {permanentDelete}
         </>
@@ -267,9 +294,17 @@ export function MockTestManagementButtons({
 
       {message && (
         <div className="col-span-2 sm:basis-full py-1">
-          <p aria-live="polite" className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 shadow-xs">
-            {message}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 shadow-xs">
+            <p aria-live="polite">{message}</p>
+            {replacementId && (
+              <Link
+                href={`/admin/mock-tests/${replacementId}/edit`}
+                className="inline-flex items-center gap-1 rounded-md border border-red-300 bg-white px-2 py-0.5 text-xs font-bold text-red-800 hover:bg-red-50 hover:border-red-400"
+              >
+                Open active test ↗
+              </Link>
+            )}
+          </div>
         </div>
       )}
 

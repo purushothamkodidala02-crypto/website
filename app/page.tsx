@@ -170,6 +170,7 @@ export default async function Home() {
               <div className="mt-3 flex flex-wrap items-center justify-start lg:justify-end gap-1.5 text-xs">
                 <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">Popular:</span>
                 {[
+                  { label: "🔥 TS Police Constable Notification 2026", href: "/news/telangana-police-constable-notification-2026" },
                   { label: "Police Constable Mock Tests", href: "/mock-tests/telangana/police-constable-free-mock-test" },
                   { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
                   { label: "TGPSC", href: "/mock-tests/telangana" },
@@ -187,6 +188,48 @@ export default async function Home() {
                 ))}
               </div>
             </form>
+          </div>
+        </div>
+
+        {/* Featured Official Recruitment Notification Card (SEO & Authority Boost) */}
+        <div className="mt-6 rounded-2xl border border-amber-300 bg-amber-50/70 p-4 sm:p-5 shadow-2xs transition hover:border-amber-400">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-600 text-white font-bold text-xs shrink-0">
+                NEW
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
+                    TSLPRB Official Recruitment Announcement
+                  </span>
+                  <span className="rounded bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-950">
+                    7,112 Posts
+                  </span>
+                </div>
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
+                  Telangana Police Constable Notification 2026: Official Gazette PDF, Cadre Vacancies &amp; Syllabus
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Official notification Rc No. 189/2026 released. Check G.O. Ms 87 age relief, PMT/PET standards, and download the 36-page official PDF.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0 sm:self-center">
+              <Link
+                href="/news/telangana-police-constable-notification-2026"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-xs font-bold transition shadow-xs"
+              >
+                Read Notification &rarr;
+              </Link>
+              <a
+                href="/docs/telangana-police-constable-notification-2026-official.pdf"
+                download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3 py-2 text-xs font-semibold transition"
+              >
+                <span>Download PDF</span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -372,6 +415,7 @@ export default async function Home() {
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <Link href="/news/telangana-police-constable-notification-2026" className="text-amber-400 font-semibold hover:text-amber-300 transition">TS Police Constable Notification 2026</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable Mock Tests</Link>
               <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
               <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>

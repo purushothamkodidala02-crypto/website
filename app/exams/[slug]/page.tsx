@@ -14,6 +14,9 @@ type Props = {
 
 export default async function ExamSlugRedirectPage({ params }: Props) {
   const { slug } = await params;
+  if (slug === "telangana-police-constable-notification-2026") {
+    permanentRedirect("/news/telangana-police-constable-notification-2026");
+  }
   if (slug.includes("police") || slug.includes("constable")) {
     permanentRedirect("/mock-tests/telangana/police-constable-free-mock-test");
   }

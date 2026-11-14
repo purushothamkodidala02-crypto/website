@@ -256,6 +256,35 @@ export async function restoreMockTestAsDraft(mockTestId: string): Promise<MockTe
       return { success: true, message: `“${result.mockTest.title}” is already a draft and open for editing.` };
     }
 
+    if (result.mockTest.superseded_by_mock_test_id) {
+      const { data: superseding } = await result.supabase
+        .from("mock_tests")
+        .select("id, title, status")
+        .eq("id", result.mockTest.superseded_by_mock_test_id)
+        .maybeSingle();
+
+      if (superseding?.status === "published") {
+        return {
+          success: false,
+          message: `This is a previous version kept for student result history and cannot be restored. Its corrected version (“${superseding.title}”) is already published and active.`,
+          replacementId: superseding.id,
+        };
+      }
+
+      if (superseding?.status === "draft") {
+        return {
+          success: false,
+          message: `A corrected draft for “${result.mockTest.title}” already exists and is ready for editing. Please edit the draft version directly.`,
+          replacementId: superseding.id,
+        };
+      }
+
+      return {
+        success: false,
+        message: "This is a previous version kept for student result history and cannot be restored.",
+      };
+    }
+
     const { error } = await result.supabase
       .from("mock_tests")
       .update({
@@ -265,7 +294,15 @@ export async function restoreMockTestAsDraft(mockTestId: string): Promise<MockTe
       })
       .eq("id", mockTestId);
 
-    if (error) return { success: false, message: error.message };
+    if (error) {
+      if (error.message?.includes("uq_mock_tests") || error.message?.includes("duplicate key")) {
+        return {
+          success: false,
+          message: `Cannot restore as draft: Another active or draft version of “${result.mockTest.title}” already exists. Check the mock tests list for the current version.`,
+        };
+      }
+      return { success: false, message: error.message };
+    }
 
     revalidateMockTestPages(mockTestId);
     return { success: true, message: `“${result.mockTest.title}” is restored as a draft.` };
@@ -605,6 +642,26 @@ export async function clearAllMockTestAttemptsAction(mockTestId: string): Promis
     const result = await getManagedMockTest(mockTestId);
     if ("error" in result) return { success: false, message: result.error ?? "Unable to clear test attempts." };
 
+    if (result.mockTest.superseded_by_mock_test_id) {
+      const { data: superseding } = await result.supabase
+        .from("mock_tests")
+        .select("id, title, status")
+        .eq("id", result.mockTest.superseded_by_mock_test_id)
+        .maybeSingle();
+
+      if (superseding?.status === "published") {
+        return {
+          success: false,
+          message: `Cannot reset attempts: “${result.mockTest.title}” was replaced by a published live version (“${superseding.title}”). Manage the published version instead, or delete this archived record permanently.`,
+          replacementId: superseding.id,
+        };
+      }
+
+      if (superseding?.status === "draft") {
+        await deleteDraftMockTest(superseding.id);
+      }
+    }
+
     // 1. Delete test attempts first (so session_id foreign key constraint on delete restrict does not block)
     const { error: attemptsError } = await result.supabase
       .from("test_attempts")
@@ -628,10 +685,20 @@ export async function clearAllMockTestAttemptsAction(mockTestId: string): Promis
     // 3. Reset status to draft and published_at to null so questions can be replaced/edited freely
     const { error: draftError } = await result.supabase
       .from("mock_tests")
-      .update({ status: "draft", published_at: null })
+      .update({
+        status: "draft",
+        published_at: null,
+        superseded_by_mock_test_id: null,
+      })
       .eq("id", mockTestId);
 
     if (draftError) {
+      if (draftError.message?.includes("uq_mock_tests") || draftError.message?.includes("duplicate key")) {
+        return {
+          success: false,
+          message: `Cannot restore as draft: Another active or draft version of “${result.mockTest.title}” already exists. Check the mock tests list for the current version.`,
+        };
+      }
       return { success: false, message: `Failed to restore mock test to draft: ${draftError.message}` };
     }
 

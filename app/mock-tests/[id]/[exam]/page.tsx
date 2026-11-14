@@ -342,6 +342,49 @@ export default async function ExamPage({ params, searchParams }: Props) {
       
 
       <div className="mx-auto max-w-7xl space-y-8 sm:space-y-10 px-4 py-6 sm:px-8 sm:py-10">
+        {(context.exam.slug.includes("police") || context.exam.slug.includes("constable")) && (
+          <div className="rounded-2xl border border-amber-300 bg-amber-50/80 p-4 sm:p-5 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-600 text-white font-bold text-xs shrink-0">
+                  NEW
+                </span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
+                      TSLPRB Gazette Notification (Rc No. 189/2026)
+                    </span>
+                    <span className="rounded bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-950">
+                      7,112 Posts
+                    </span>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
+                    Telangana Police Constable Notification 2026: Official PDF, Syllabus &amp; Selection Procedure
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Read the comprehensive breakdown of cadre vacancies, G.O. Ms 87 age limits, PMT/PET events, and download the official PDF.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 shrink-0 sm:self-center">
+                <Link
+                  href="/news/telangana-police-constable-notification-2026"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-xs font-bold transition shadow-xs"
+                >
+                  Read Notification &rarr;
+                </Link>
+                <a
+                  href="/docs/telangana-police-constable-notification-2026-official.pdf"
+                  download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
+                  className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3 py-2 text-xs font-semibold transition"
+                >
+                  <span>Download PDF</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
         <CatalogSteps
           state={{ value: context.state.name, href: "/mock-tests" }}
           exam={{ value: context.exam.name, href: stateUrl(context.state.slug) }}
