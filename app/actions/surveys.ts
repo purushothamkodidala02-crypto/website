@@ -49,15 +49,14 @@ export async function submitDynamicSurvey(
     const userId = user?.id || null;
 
     const dbClient = await getSupabaseServerClient();
-    const { data: response, error: responseError } = await dbClient
+    const responseId = crypto.randomUUID();
+    const { error: responseError } = await dbClient
       .from("dynamic_survey_responses")
-      .insert({ survey_id: surveyId, user_id: userId })
-      .select("id")
-      .single();
+      .insert({ id: responseId, survey_id: surveyId, user_id: userId });
 
-    if (responseError || !response) {
+    if (responseError) {
       console.error("Survey Response Insert Error:", responseError);
-      return { error: responseError?.message || "Failed to submit survey. Please try again." };
+      return { error: responseError.message || "Failed to submit survey. Please try again." };
     }
 
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -65,7 +64,7 @@ export async function submitDynamicSurvey(
     const answerInserts = Object.entries(answers)
       .filter(([questionId, text]) => uuidRegex.test(questionId) && text !== undefined && text !== null && text.trim() !== "")
       .map(([questionId, text]) => ({
-        response_id: response.id,
+        response_id: responseId,
         question_id: questionId,
         answer_text: text.trim(),
       }));

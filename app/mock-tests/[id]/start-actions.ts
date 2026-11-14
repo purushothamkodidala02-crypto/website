@@ -59,7 +59,7 @@ export async function beginMockTest(
     // Try with requested_device_token first, fallback gracefully to legacy signature
     let rpcResult = await supabase.rpc(functionName, {
       requested_mock_test_id: mockTestId,
-      requested_device_token: deviceToken,
+      requested_device_token: deviceToken ?? null,
     });
 
     if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error)) {

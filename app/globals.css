@@ -3,9 +3,9 @@
 :root {
   --background: #f6faf8;
   --foreground: #132621;
-  --font-telugu: var(--font-telugu-noto), "Noto Sans Telugu", "Nirmala UI", Gautami, sans-serif;
-  --font-ui: var(--font-varadhi-ui), var(--font-telugu), "Segoe UI Variable Text", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: var(--font-varadhi-ui), var(--font-telugu), "Aptos Display", "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-telugu: var(--font-telugu-noto), "Nirmala UI", "Noto Sans Telugu", Gautami, sans-serif;
+  --font-ui: var(--font-varadhi-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, var(--font-telugu), sans-serif;
+  --font-display: var(--font-varadhi-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, var(--font-telugu), sans-serif;
   --font-brand: Georgia, "Times New Roman", serif;
 }
 
@@ -65,9 +65,8 @@ img {
 
 .font-display {
   font-family: var(--font-display);
-  font-weight: 750;
-  font-variation-settings: "wght" 750;
-  letter-spacing: -0.025em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .font-telugu,
