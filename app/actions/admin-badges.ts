@@ -15,20 +15,48 @@ export type AdminNavBadges = {
   };
 };
 
+type CacheEntry = {
+  timestamp: number;
+  data: AdminNavBadges;
+};
+
+// In-memory server-side cache for 15 seconds to prevent spamming DB on rapid tabs/mounts
+let badgeCache: CacheEntry | null = null;
+const CACHE_TTL_MS = 15_000;
+
 export async function getAdminNavBadges(
   lastSeenSurveysTime?: string | null
 ): Promise<AdminNavBadges> {
+  const fallbackResult: AdminNavBadges = {
+    reports: { openCount: 0, latestCreatedAt: null },
+    surveys: { newCount: 0, totalCount: 0, latestSubmittedAt: null },
+  };
+
   try {
+    const now = Date.now();
+    if (badgeCache && now - badgeCache.timestamp < CACHE_TTL_MS) {
+      // Re-calculate newCount based on user's lastSeenSurveysTime if present
+      if (lastSeenSurveysTime) {
+        return {
+          ...badgeCache.data,
+          surveys: {
+            ...badgeCache.data.surveys,
+            newCount: badgeCache.data.surveys.latestSubmittedAt && badgeCache.data.surveys.latestSubmittedAt > lastSeenSurveysTime
+              ? badgeCache.data.surveys.newCount
+              : 0,
+          },
+        };
+      }
+      return badgeCache.data;
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return {
-        reports: { openCount: 0, latestCreatedAt: null },
-        surveys: { newCount: 0, totalCount: 0, latestSubmittedAt: null },
-      };
+      return fallbackResult;
     }
 
     const { data: profile } = await supabase
@@ -38,57 +66,45 @@ export async function getAdminNavBadges(
       .maybeSingle();
 
     if (profile?.role !== "admin") {
-      return {
-        reports: { openCount: 0, latestCreatedAt: null },
-        surveys: { newCount: 0, totalCount: 0, latestSubmittedAt: null },
-      };
+      return fallbackResult;
     }
 
-    const admin = createAdminClient();
+    const db = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? createAdminClient()
+      : supabase;
 
-    const newCountQuery = lastSeenSurveysTime
-      ? admin
-          .from("dynamic_survey_responses")
-          .select("id", { count: "exact", head: true })
-          .gt("submitted_at", lastSeenSurveysTime)
-      : admin
-          .from("dynamic_survey_responses")
-          .select("id", { count: "exact", head: true })
-          .gte("submitted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    // Fetch open reports in a single query
+    const reportsPromise = db
+      .from("question_reports")
+      .select("id, created_at")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(50);
 
-    // Fetch Question Reports and Survey Responses badge data in parallel
-    const [reportsCountRes, latestReportRes, surveysTotalRes, latestSurveyRes, newCountRes] =
-      await Promise.all([
-        admin
-          .from("question_reports")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "open"),
-        admin
-          .from("question_reports")
-          .select("created_at")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        admin
-          .from("dynamic_survey_responses")
-          .select("id", { count: "exact", head: true }),
-        admin
-          .from("dynamic_survey_responses")
-          .select("submitted_at")
-          .order("submitted_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        newCountQuery,
-      ]);
+    // Fetch survey responses in a single query
+    const surveysPromise = db
+      .from("dynamic_survey_responses")
+      .select("id, submitted_at", { count: "exact" })
+      .order("submitted_at", { ascending: false })
+      .limit(50);
 
-    const openCount = reportsCountRes.count ?? 0;
-    const latestCreatedAt = latestReportRes.data?.created_at ?? null;
-    const totalCount = surveysTotalRes.count ?? 0;
-    const latestSubmittedAt = latestSurveyRes.data?.submitted_at ?? null;
-    const newCount = newCountRes.count ?? 0;
+    const [reportsRes, surveysRes] = await Promise.all([
+      Promise.resolve(reportsPromise).catch(() => ({ data: [], count: 0, error: null })),
+      Promise.resolve(surveysPromise).catch(() => ({ data: [], count: 0, error: null })),
+    ]);
 
-    return {
+    const reportRows = (reportsRes.data ?? []) as Array<{ id: string; created_at: string }>;
+    const openCount = reportsRes.count ?? reportRows.length;
+    const latestCreatedAt = reportRows[0]?.created_at ?? null;
+
+    const surveyRows = (surveysRes.data ?? []) as Array<{ id: string; submitted_at: string }>;
+    const totalCount = surveysRes.count ?? surveyRows.length;
+    const latestSubmittedAt = surveyRows[0]?.submitted_at ?? null;
+
+    const newCutoff = lastSeenSurveysTime || new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    const newCount = surveyRows.filter((r) => r.submitted_at && r.submitted_at > newCutoff).length;
+
+    const result: AdminNavBadges = {
       reports: {
         openCount,
         latestCreatedAt,
@@ -99,11 +115,15 @@ export async function getAdminNavBadges(
         latestSubmittedAt,
       },
     };
+
+    badgeCache = {
+      timestamp: now,
+      data: result,
+    };
+
+    return result;
   } catch (err) {
     console.error("Error in getAdminNavBadges:", err);
-    return {
-      reports: { openCount: 0, latestCreatedAt: null },
-      surveys: { newCount: 0, totalCount: 0, latestSubmittedAt: null },
-    };
+    return fallbackResult;
   }
 }

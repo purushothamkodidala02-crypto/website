@@ -27,21 +27,6 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
           </Link>
         </div>
 
-        <nav className="hidden md:flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-700">
-          <Link
-            href="/mock-tests"
-            className="rounded-lg px-3 py-1.5 transition hover:bg-slate-100 hover:text-slate-900"
-          >
-            Mock Tests
-          </Link>
-          <Link
-            href="/support"
-            className="rounded-lg px-3 py-1.5 transition hover:bg-slate-100 hover:text-slate-900"
-          >
-            Support
-          </Link>
-        </nav>
-
         <PublicAccountActions />
       </div>
     </header>

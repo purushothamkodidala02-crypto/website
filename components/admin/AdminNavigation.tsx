@@ -329,7 +329,15 @@ export function AdminNavigation(props: {
     setMobileOpen(false);
   }, []);
 
-  const fetchBadges = useCallback(async () => {
+  const isFetchingRef = useRef(false);
+  const lastFetchedRef = useRef(0);
+
+  const fetchBadges = useCallback(async (force = false) => {
+    if (isFetchingRef.current) return;
+    const now = Date.now();
+    if (!force && now - lastFetchedRef.current < 25_000) return;
+
+    isFetchingRef.current = true;
     try {
       const lastSeenSurveys =
         typeof window !== "undefined"
@@ -341,6 +349,7 @@ export function AdminNavigation(props: {
           : null;
 
       const data = await getAdminNavBadges(lastSeenSurveys);
+      lastFetchedRef.current = Date.now();
 
       const hasNewReport = Boolean(
         data.reports.latestCreatedAt &&
@@ -364,7 +373,9 @@ export function AdminNavigation(props: {
         );
       }
     } catch (err) {
-      console.error("Failed to fetch admin nav badges:", err);
+      console.warn("Could not refresh admin nav badges:", err);
+    } finally {
+      isFetchingRef.current = false;
     }
   }, []);
 
@@ -426,17 +437,17 @@ export function AdminNavigation(props: {
     }
   }, [pathname]);
 
-  // Periodic badge check
+  // Periodic badge check with non-blocking delay and throttle
   useEffect(() => {
     const initialTimer = window.setTimeout(() => {
-      void fetchBadges();
-    }, 0);
+      void fetchBadges(true);
+    }, 1500);
 
     const handleFocus = () => void fetchBadges();
     const handleVisibility = () => {
       if (document.visibilityState === "visible") void fetchBadges();
     };
-    const handleBadgeRefresh = () => void fetchBadges();
+    const handleBadgeRefresh = () => void fetchBadges(true);
 
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibility);
@@ -446,7 +457,7 @@ export function AdminNavigation(props: {
       if (document.visibilityState === "visible") {
         void fetchBadges();
       }
-    }, 45000);
+    }, 60000);
 
     return () => {
       window.clearTimeout(initialTimer);
