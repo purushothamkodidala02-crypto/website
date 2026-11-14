@@ -471,54 +471,56 @@ export async function MockTestDetailsPage({
   const supabase = await createClient();
 
   const userPromise = hasAuthToken
-    ? supabase.auth
-        .getUser()
-        .then((res) => res?.data?.user ?? null)
-        .catch(() => null)
+    ? (async () => {
+        try {
+          const res = await supabase.auth.getUser();
+          return res.data?.user ?? null;
+        } catch {
+          return null;
+        }
+      })()
     : Promise.resolve(null);
 
   const sessionPromise = hasAuthToken
-    ? userPromise
-        .then(async (user) => {
+    ? (async () => {
+        try {
+          const user = await userPromise;
           if (!user) return null;
-          try {
-            const { data } = await supabase
-              .from("test_attempt_sessions")
-              .select("id")
-              .eq("user_id", user.id)
-              .eq("mock_test_id", id)
-              .is("submitted_at", null)
-              .gt("remaining_seconds", 0)
-              .order("started_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-            return data ?? null;
-          } catch {
-            return null;
-          }
-        })
-        .catch(() => null)
+          const { data } = await supabase
+            .from("test_attempt_sessions")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("mock_test_id", id)
+            .is("submitted_at", null)
+            .gt("remaining_seconds", 0)
+            .order("started_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          return data ?? null;
+        } catch {
+          return null;
+        }
+      })()
     : Promise.resolve(null);
 
   const attemptPromise = hasAuthToken
-    ? userPromise
-        .then(async (user) => {
+    ? (async () => {
+        try {
+          const user = await userPromise;
           if (!user) return null;
-          try {
-            const { data } = await supabase
-              .from("test_attempts")
-              .select("id")
-              .eq("user_id", user.id)
-              .eq("mock_test_id", id)
-              .order("submitted_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-            return data ?? null;
-          } catch {
-            return null;
-          }
-        })
-        .catch(() => null)
+          const { data } = await supabase
+            .from("test_attempts")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("mock_test_id", id)
+            .order("submitted_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          return data ?? null;
+        } catch {
+          return null;
+        }
+      })()
     : Promise.resolve(null);
 
   const [catalog, supplementary, user] = await Promise.all([
@@ -654,19 +656,26 @@ export async function MockTestDetailsPage({
           try {
             const [products, canAccess] = await Promise.all([
               paidSalesEnabled
-                ? supabase
-                    .from("access_product_exam_groups")
-                    .select("access_products!inner(id, name, price_inr, duration_days, is_active)")
-                    .eq("exam_group_id", examGroup.id)
-                    .eq("access_products.is_active", true)
-                    .then((res) => res)
-                    .catch(() => ({ data: [] }))
+                ? (async () => {
+                    try {
+                      return await supabase
+                        .from("access_product_exam_groups")
+                        .select("access_products!inner(id, name, price_inr, duration_days, is_active)")
+                        .eq("exam_group_id", examGroup.id)
+                        .eq("access_products.is_active", true);
+                    } catch {
+                      return { data: [] };
+                    }
+                  })()
                 : Promise.resolve({ data: [] }),
               isLoggedIn
-                ? supabase
-                    .rpc("can_access_mock_test", { requested_mock_test_id: id })
-                    .then((res) => res)
-                    .catch(() => ({ data: false }))
+                ? (async () => {
+                    try {
+                      return await supabase.rpc("can_access_mock_test", { requested_mock_test_id: id });
+                    } catch {
+                      return { data: false };
+                    }
+                  })()
                 : Promise.resolve({ data: false }),
             ]);
             return { products, canAccess };
@@ -680,13 +689,18 @@ export async function MockTestDetailsPage({
     attemptPromise,
 
     paper && siblingPapers.length === 0
-      ? supabase
-          .from("papers")
-          .select("id, exam_group_id, specialization_id, name, display_order")
-          .eq("exam_group_id", paper.exam_group_id)
-          .eq("is_active", true)
-          .then(({ data }) => (data && data.length > 0 ? (data as OrderedPaper[]) : []))
-          .catch(() => [] as OrderedPaper[])
+      ? (async () => {
+          try {
+            const { data } = await supabase
+              .from("papers")
+              .select("id, exam_group_id, specialization_id, name, display_order")
+              .eq("exam_group_id", paper.exam_group_id)
+              .eq("is_active", true);
+            return (data && data.length > 0 ? (data as OrderedPaper[]) : []);
+          } catch {
+            return [] as OrderedPaper[];
+          }
+        })()
       : Promise.resolve([] as OrderedPaper[]),
   ]);
 
