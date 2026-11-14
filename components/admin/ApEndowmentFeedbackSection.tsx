@@ -10,9 +10,10 @@ import {
 export function ApEndowmentFeedbackSection() {
   const [data, setData] = useState<ApEndowmentFeedbackSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const isExpired = Date.now() > AP_EO_CAMPAIGN_EXPIRY_MS;
+  const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
+    setIsExpired(Date.now() > AP_EO_CAMPAIGN_EXPIRY_MS);
     let ignore = false;
     void getApEndowmentFeedbackSummaryAction().then((res) => {
       if (!ignore) {
