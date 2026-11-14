@@ -22,6 +22,10 @@ test("publishMockTest and republishArchivedMockTest are protected against uncaug
   assert.match(manageActions, /safeRevalidateCatalogTag/);
   assert.match(manageActions, /try \{[\s\S]*?revalidatePath\("\/admin"\)/);
 
+  // edit-actions uses safe catalog revalidation and catches revalidation errors
+  assert.match(editActions, /safeRevalidateCatalogTag/);
+  assert.match(editActions, /try \{[\s\S]*?revalidatePath\("\/admin\/mock-tests"\)/);
+
   // publishMockTest handles MFA and zero questions explicitly
   assert.match(manageActions, /Administrator MFA verification is required/);
   assert.match(manageActions, /Add at least one Question before publishing/);
