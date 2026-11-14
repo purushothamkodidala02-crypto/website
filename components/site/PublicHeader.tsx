@@ -25,18 +25,6 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
           <Link href="/" className="group flex min-w-0 items-center gap-2 sm:gap-3" aria-label="Varadhi Prep home">
             <BrandLockup />
           </Link>
-          <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-1 ml-2 pl-3 border-l border-slate-200/80">
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch={true}
-                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-teal-50/70 hover:text-teal-900 whitespace-nowrap"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
         </div>
 
         <PublicAccountActions />

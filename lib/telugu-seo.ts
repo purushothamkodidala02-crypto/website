@@ -31,6 +31,24 @@ export type ExamScheduleInfo = {
   }>;
 };
 
+export type ExamJobProfileInfo = {
+  roleTitle: string;
+  department: string;
+  payScale: string;
+  grossSalaryMonthly: string;
+  eligibility: {
+    ageLimit: string;
+    education: string;
+    physicalStandards?: string;
+  };
+  duties: Array<{
+    title: string;
+    teluguTitle?: string;
+    description: string;
+  }>;
+  careerGrowth?: string[];
+};
+
 export type ExamTeluguSeo = {
   teluguName: string;
   teluguTitle: string;
@@ -41,6 +59,7 @@ export type ExamTeluguSeo = {
   englishFaqs?: Array<{ question: string; answer: string }>;
   pattern?: ExamPatternInfo;
   schedule?: ExamScheduleInfo;
+  jobProfile?: ExamJobProfileInfo;
 };
 
 const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
@@ -102,7 +121,59 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "తెలంగాణ పోలీస్ ఎగ్జామ్ టెస్ట్ సిరీస్",
     "తెలంగాణ పోలీస్ OMR పరీక్ష విధానం",
     "TG police constable offline OMR mock test",
+    "Telangana police constable duties and responsibilities",
+    "TG police constable salary and pay scale",
+    "Telangana constable job profile",
+    "Telangana police constable eligibility criteria age limit",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ విధులు జీతం",
+    "తెలంగాణ కానిస్టేబుల్ జాబ్ ప్రొఫైల్ అర్హతలు",
+
   ],
+  jobProfile: {
+    roleTitle: "SCT Police Constable (Civil / AR / TSRTC / TSSP)",
+    department: "Telangana State Police Department (Home Department)",
+    payScale: "₹24,280 – ₹72,850 (RPS Pay Scale)",
+    grossSalaryMonthly: "₹34,000 – ₹39,000 / month (approx. with DA, HRA & Special Allowances)",
+    eligibility: {
+      ageLimit: "18 to 25 Years for General/UR candidates (up to 5 years relaxation for BC/SC/ST/EWS and departmental exemptions).",
+      education: "Must have passed Intermediate (10+2) or its equivalent examination conducted by the Board of Intermediate Education or recognized State Board.",
+      physicalStandards: "Men (Civil/AR): Height ≥ 167.6 cm, Chest ≥ 86.3 cm (5 cm expansion). Women: Height ≥ 152.5 cm. PMT/PET includes 1600m / 800m run, Long Jump, and Shot Put.",
+    },
+    duties: [
+      {
+        title: "Law & Order Maintenance & Beat Patrolling",
+        teluguTitle: "శాంతిభద్రతల పరిరక్షణ & బీట్ పెట్రోలింగ్",
+        description: "Executing regular day and night foot and vehicle beats in station jurisdiction, surveillance on anti-social elements, crime prevention, and maintaining public order during festivals, rallies, and elections.",
+      },
+      {
+        title: "Crime Scene Support & Station Sentry Duty",
+        teluguTitle: "నేర పరిశోధన సహాయం & స్టేషన్ భద్రత",
+        description: "Assisting Station House Officers (SHO) and Sub-Inspectors during crime scene cordoning, evidence preservation, inquest panchanama, and guarding station lockups, records, and armory as station sentry.",
+      },
+      {
+        title: "Emergency Response & Dial 100 / 112 Mobile Patrol",
+        teluguTitle: "డయల్ 100 అత్యవసర ప్రతిస్పందన",
+        description: "Serving as frontline emergency responders in Blue Colts and Patrol Mobiles, reaching distress locations swiftly upon receiving Dial 100 calls to provide citizen assistance.",
+      },
+      {
+        title: "Court Duty, Summons Delivery & Prisoner Escort",
+        teluguTitle: "కోర్టు విధులు, సమన్లు జారీ & ఖైదీల ఎస్కార్ట్",
+        description: "Delivering court summons and warrants to witnesses and accused, escorting under-trial prisoners between central prisons and courts, and producing case evidence before judicial magistrates.",
+      },
+      {
+        title: "Traffic Regulation & Road Safety Checkpoints",
+        teluguTitle: "ట్రాఫిక్ క్రమబద్ధీకరణ & రహదారి భద్రత",
+        description: "Regulating traffic flow at congested intersections, conducting vehicle document and drunk driving checks during nakabandi operations, and assisting victims during road accidents.",
+      },
+    ],
+    careerGrowth: [
+      "Police Constable (Entry Level)",
+      "Head Constable (Promoted after 5–8 years or via departmental qualifying exam)",
+      "Assistant Sub-Inspector (ASI)",
+      "Sub-Inspector of Police (SI - Station Incharge)",
+      "Circle Inspector of Police (CI)",
+    ],
+  },
   schedule: {
     authority: "TGPRB (Telangana State Level Police Recruitment Board)",
     postName: "SCT Police Constable (Civil / AR / TSRTC / TSSP)",

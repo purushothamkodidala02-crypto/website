@@ -100,6 +100,7 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     other: {
       "msvalidate.01": "ECDDB1BF993A7E16288F00B7BDBCD3E7",
+      "google-adsense-account": "ca-pub-8295850840600026",
     },
   },
   robots: {
@@ -125,6 +126,13 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8295850840600026"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="min-h-screen bg-white text-gray-900">
         <PostHogProvider>

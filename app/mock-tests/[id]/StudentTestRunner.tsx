@@ -722,27 +722,8 @@ export function StudentTestRunner({
             </div>
           </div>
 
-          {/* Box 3: Controls (Palette Toggle, Fullscreen Toggle & Timer) */}
+          {/* Box 3: Controls (Fullscreen Toggle, Timer & Mobile Submit) */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-            {/* Desktop Palette Toggle */}
-            <button
-              type="button"
-              onClick={() => setNavigatorOpenDesktop((v) => !v)}
-              title={navigatorOpenDesktop ? "Hide Question Palette (Expand question width)" : "Show Question Palette"}
-              aria-label={navigatorOpenDesktop ? "Hide Question Palette" : "Show Question Palette"}
-              className={`hidden xl:flex items-center gap-1.5 whitespace-nowrap rounded-xl sm:rounded-2xl border px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold transition shadow-xs ${
-                !navigatorOpenDesktop
-                  ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-              }`}
-            >
-              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="15" y1="3" x2="15" y2="21" />
-              </svg>
-              <span>{navigatorOpenDesktop ? "Hide Palette" : "View Palette"}</span>
-            </button>
-
             {fullscreenAvailable && (
               <button
                 type="button"
@@ -789,7 +770,7 @@ export function StudentTestRunner({
               type="button"
               onClick={() => setConfirming(true)}
               disabled={locked}
-              className="flex items-center gap-1 whitespace-nowrap rounded-xl sm:rounded-2xl bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-black shadow-xs transition disabled:opacity-50"
+              className="flex md:hidden items-center gap-1 whitespace-nowrap rounded-xl sm:rounded-2xl bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-black shadow-xs transition disabled:opacity-50"
               title="Submit test"
             >
               Submit

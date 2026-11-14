@@ -14,22 +14,22 @@ function buildContentSecurityPolicy(nonce?: string) {
   }
 
   const scriptPolicy = nonce
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`
-    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net${isDevelopment ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net${isDevelopment ? " 'unsafe-eval'" : ""}`;
 
   return [
     "default-src 'self'",
     scriptPolicy,
     "style-src 'self' 'unsafe-inline' https://accounts.google.com",
-    `img-src 'self' data: blob: ${supabaseOrigin} https://www.googletagmanager.com https://*.google-analytics.com`,
+    `img-src 'self' data: blob: ${supabaseOrigin} https://www.googletagmanager.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.g.doubleclick.net https://*.google.com`,
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://static.cloudflareinsights.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net`,
+    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://static.cloudflareinsights.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",
     "frame-ancestors 'none'",
     "worker-src 'self' blob:",
-    "frame-src https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",
+    "frame-src https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://googleads.g.doubleclick.net https://*.googlesyndication.com",
     ...(!isDevelopment ? ["upgrade-insecure-requests"] : []),
   ].join("; ");
 }
@@ -161,7 +161,7 @@ export const config = {
   matcher: [
     {
       source:
-        "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|ico)$).*)",
+        "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|ads.txt|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|ico)$).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

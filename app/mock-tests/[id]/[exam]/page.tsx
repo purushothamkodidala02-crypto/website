@@ -714,9 +714,160 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 ))}
               </div>
             </div>
+
+            {/* Official Subject Curriculum & Topics */}
+            {teluguData.pattern.subjects && teluguData.pattern.subjects.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  Official Subject Breakdown &amp; Curriculum Topics
+                </h3>
+                <div className="mt-3.5 grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {teluguData.pattern.subjects.map((sub, idx) => (
+                    <div
+                      key={sub.name}
+                      className="rounded-2xl border border-slate-200/90 bg-[#fbfdfc] p-4.5 transition hover:border-teal-300 hover:shadow-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
+                            Subject 0{idx + 1}
+                          </span>
+                          <h4 className="font-bold text-slate-900 text-sm sm:text-base mt-0.5">
+                            {sub.name}
+                          </h4>
+                          {sub.teluguName && (
+                            <p className="text-xs font-semibold text-teal-900 mt-0.5">
+                              {sub.teluguName}
+                            </p>
+                          )}
+                        </div>
+                        <a
+                          href="#papers"
+                          className="shrink-0 rounded-lg bg-teal-50 border border-teal-200 px-2.5 py-1 text-[11px] font-bold text-teal-800 hover:bg-teal-100 transition"
+                        >
+                          Practice →
+                        </a>
+                      </div>
+                      <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
+                        {sub.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
+
+        {/* Job Profile, Duties & Eligibility */}
+        {teluguData?.jobProfile && (
+          <section
+            id="job-profile"
+            aria-labelledby="job-profile-heading"
+            className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  {teluguData.jobProfile.department}
+                </p>
+                <h2
+                  id="job-profile-heading"
+                  className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900"
+                >
+                  {teluguData.jobProfile.roleTitle} – Job Duties, Salary &amp; Eligibility
+                </h2>
+              </div>
+              <span className="rounded-full bg-teal-50 border border-teal-200 px-3.5 py-1 text-xs font-bold text-teal-900">
+                Monthly Pay: {teluguData.jobProfile.grossSalaryMonthly}
+              </span>
+            </div>
+
+            <p className="mt-2.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600">
+              Overview of official responsibilities, monthly pay scale, eligibility standards, and promotion hierarchy for {statePrefixedName} recruitment.
+            </p>
+
+            {/* Salary & Eligibility Cards */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-4 transition hover:border-teal-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Pay Scale &amp; Salary</span>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-teal-950">
+                  {teluguData.jobProfile.payScale}
+                </p>
+                <p className="mt-0.5 text-xs text-teal-800 font-semibold">{teluguData.jobProfile.grossSalaryMonthly}</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Age Limit &amp; Relaxations</span>
+                <p className="font-display mt-1.5 text-sm sm:text-base font-bold text-slate-900">
+                  {teluguData.jobProfile.eligibility.ageLimit}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-500">As per official notification guidelines</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Educational Qualification</span>
+                <p className="font-display mt-1.5 text-sm sm:text-base font-bold text-slate-900">
+                  {teluguData.jobProfile.eligibility.education}
+                </p>
+                {teluguData.jobProfile.eligibility.physicalStandards && (
+                  <p className="mt-1 text-xs text-slate-500 font-medium">
+                    {teluguData.jobProfile.eligibility.physicalStandards}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Core Duties & Responsibilities List */}
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90">
+              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/90">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Core Roles &amp; Responsibilities (విధి నిర్వహణ &amp; బాధ్యతలు)
+                </h3>
+              </div>
+              <div className="divide-y divide-slate-100 bg-white">
+                {teluguData.jobProfile.duties.map((duty, idx) => (
+                  <div key={idx} className="p-4 hover:bg-slate-50/60 transition">
+                    <div className="flex items-center gap-2">
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-teal-100/80 text-teal-800 text-xs font-black">
+                        {idx + 1}
+                      </span>
+                      <h4 className="font-bold text-slate-900 text-sm">
+                        {duty.title}
+                        {duty.teluguTitle && <span className="ml-1.5 text-xs font-semibold text-teal-800">({duty.teluguTitle})</span>}
+                      </h4>
+                    </div>
+                    <p className="mt-1.5 ml-8 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      {duty.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Career Growth / Hierarchy */}
+            {teluguData.jobProfile.careerGrowth && teluguData.jobProfile.careerGrowth.length > 0 && (
+              <div className="mt-6 rounded-2xl border border-slate-200/80 bg-[#f6faf8] p-4 sm:p-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  Career Progression &amp; Promotion Hierarchy
+                </h3>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {teluguData.jobProfile.careerGrowth.map((rank, idx) => (
+                    <div key={rank} className="flex items-center gap-2">
+                      <span className="rounded-xl border border-slate-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs">
+                        {rank}
+                      </span>
+                      {idx < teluguData.jobProfile!.careerGrowth!.length - 1 && (
+                        <span className="text-teal-700 font-bold text-xs" aria-hidden="true">→</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
         {/* Why Aspirants Choose Varadhi Prep */}
         <section aria-labelledby="why-varadhi-heading" className="rounded-2xl border border-teal-100/90 bg-gradient-to-b from-teal-50/50 via-white to-white p-6 sm:p-8 shadow-2xs">
           <div className="max-w-3xl">
