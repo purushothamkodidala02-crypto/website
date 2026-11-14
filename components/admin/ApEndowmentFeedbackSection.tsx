@@ -8,11 +8,13 @@ import {
   updateApEndowmentMetaAction,
   clearAllApEndowmentResponsesAction,
   saveApEndowmentSurveyConditionsAction,
-  DEFAULT_SURVEY_CONDITIONS,
-  type ApEndowmentSurveyConditions,
   type ApEndowmentFeedbackSummary,
 } from "@/app/actions/ap-endowment-feedback";
-import { AP_EO_CAMPAIGN_EXPIRY_MS } from "@/lib/campaigns/ap-endowment";
+import {
+  AP_EO_CAMPAIGN_EXPIRY_MS,
+  DEFAULT_SURVEY_CONDITIONS,
+  type ApEndowmentSurveyConditions,
+} from "@/lib/campaigns/ap-endowment";
 
 export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: number } = {}) {
   const [data, setData] = useState<ApEndowmentFeedbackSummary | null>(null);

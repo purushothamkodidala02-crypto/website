@@ -2,6 +2,10 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import {
+  type ApEndowmentSurveyConditions,
+  DEFAULT_SURVEY_CONDITIONS,
+} from "@/lib/campaigns/ap-endowment";
 
 async function getSupabaseServerClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -548,21 +552,7 @@ export async function toggleApEndowmentStatusAction(isActive: boolean) {
   }
 }
 
-export type ApEndowmentSurveyConditions = {
-  reappearIfSubmitted: boolean;
-  submittedIntervalDays: number;
-  reappearIfSkipped: boolean;
-  maxSkipAppearances: number;
-  skipIntervalHours: number;
-};
-
-export const DEFAULT_SURVEY_CONDITIONS: ApEndowmentSurveyConditions = {
-  reappearIfSubmitted: false,
-  submittedIntervalDays: 7,
-  reappearIfSkipped: true,
-  maxSkipAppearances: 2,
-  skipIntervalHours: 24,
-};
+export type { ApEndowmentSurveyConditions };
 
 let cachedConditions: ApEndowmentSurveyConditions = { ...DEFAULT_SURVEY_CONDITIONS };
 
