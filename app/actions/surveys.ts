@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { revalidatePath } from "next/cache";
+import type { SurveySettings } from "@/lib/surveys/survey-settings";
 
 async function getSupabaseServerClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -31,6 +32,7 @@ export type DynamicSurveyData = {
   title: string;
   description: string;
   is_active: boolean;
+  settings?: SurveySettings | null;
   questions: DynamicSurveyQuestion[];
 };
 
@@ -128,13 +130,25 @@ export async function submitDynamicSurvey(
 export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
   try {
     const dbClient = createPublicClient();
-    const { data: survey, error } = await dbClient
+    let { data: survey, error } = await dbClient
       .from("dynamic_surveys")
-      .select("id, title, description, is_active")
+      .select("id, title, description, is_active, settings")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    if (error && error.message?.includes("settings")) {
+      const fallback = await dbClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      survey = fallback.data as any;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error("Error fetching active survey:", error);
@@ -159,11 +173,21 @@ export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
 export async function getSurveyById(surveyId: string): Promise<DynamicSurveyData | null> {
   try {
     const dbClient = await getSupabaseServerClient();
-    const { data: survey, error } = await dbClient
+    let { data: survey, error } = await dbClient
       .from("dynamic_surveys")
-      .select("id, title, description, is_active")
+      .select("id, title, description, is_active, settings")
       .eq("id", surveyId)
       .maybeSingle();
+
+    if (error && error.message?.includes("settings")) {
+      const fallback = await dbClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active")
+        .eq("id", surveyId)
+        .maybeSingle();
+      survey = fallback.data as any;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error("Error fetching survey by id:", error);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { submitDynamicSurvey, type DynamicSurveyData } from "@/app/actions/surveys";
+import type { SurveySettings } from "@/lib/surveys/survey-settings";
 
 export type SurveyQuestion = {
   id: string;
@@ -15,6 +16,7 @@ export type ActiveSurvey = {
   id: string;
   title: string;
   description: string;
+  settings?: SurveySettings | null;
   questions: SurveyQuestion[];
 };
 
@@ -27,25 +29,67 @@ export function SurveyPopup({ survey }: { survey: DynamicSurveyData | ActiveSurv
 
   useEffect(() => {
     if (!survey) return;
-    
-    // Check if they already completed or dismissed this specific survey
-    const storageKey = `survey_completed_${survey.id}`;
-    const hasCompleted = localStorage.getItem(storageKey);
-    
-    if (!hasCompleted) {
-      import("@/lib/supabase/client").then(({ createClient }) => {
-        const supabase = createClient();
-        supabase.auth.getSession().then(({ data }) => {
-          // ONLY show the survey if they are logged in!
-          if (data.session?.user) {
-            const timer = setTimeout(() => {
-              setIsOpen(true);
-            }, 1500);
-            return () => clearTimeout(timer);
-          }
-        });
-      });
+
+    const settings = (survey as any).settings as SurveySettings | undefined;
+
+    // 1. Placement Check: If "page_only", do not display popup
+    if (settings?.displayMode === "page_only") return;
+
+    // 2. Expiry Check
+    if (settings?.expiryDate) {
+      const exp = new Date(settings.expiryDate).getTime();
+      if (!isNaN(exp) && Date.now() > exp) return;
     }
+
+    // 3. Frequency Rules
+    const completedAtStr = localStorage.getItem(`survey_completed_at_${survey.id}`);
+    const dismissedAtStr = localStorage.getItem(`survey_dismissed_at_${survey.id}`);
+    const skipCountStr = localStorage.getItem(`survey_skip_count_${survey.id}`) || "0";
+    const skipCount = parseInt(skipCountStr, 10);
+
+    // If previously submitted:
+    if (completedAtStr) {
+      const canReappear = settings?.reappearIfSubmitted ?? false;
+      if (!canReappear) return;
+      const intervalDays = settings?.submittedIntervalDays ?? 7;
+      const daysPassed = (Date.now() - parseInt(completedAtStr, 10)) / (1000 * 60 * 60 * 24);
+      if (daysPassed < intervalDays) return;
+    }
+
+    // If previously dismissed/skipped:
+    if (dismissedAtStr) {
+      const canReappear = settings?.reappearIfSkipped ?? true;
+      if (!canReappear) return;
+      const maxSkips = settings?.maxSkipAppearances ?? 3;
+      if (skipCount >= maxSkips) return;
+      const intervalHours = settings?.skipIntervalHours ?? 24;
+      const hoursPassed = (Date.now() - parseInt(dismissedAtStr, 10)) / (1000 * 60 * 60);
+      if (hoursPassed < intervalHours) return;
+    }
+
+    // 4. Session & Audience check
+    const delayMs = Math.max(500, ((settings?.triggerDelaySeconds ?? 2) * 1000));
+    let timer: NodeJS.Timeout;
+
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+      supabase.auth.getSession().then(({ data }) => {
+        const user = data.session?.user;
+        // If anonymous not allowed and not logged in, do not show
+        if (settings && !settings.allowAnonymous && !user) {
+          return;
+        }
+
+        // If logged in or anonymous allowed, trigger modal
+        timer = setTimeout(() => {
+          setIsOpen(true);
+        }, delayMs);
+      });
+    });
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [survey]);
 
   if (!survey || !isOpen) return null;
@@ -56,20 +100,23 @@ export function SurveyPopup({ survey }: { survey: DynamicSurveyData | ActiveSurv
     setError(null);
 
     const res = await submitDynamicSurvey(survey.id, answers);
-    
+
     if (res.error) {
       setError(res.error);
       setIsSubmitting(false);
     } else {
       setIsSuccess(true);
       localStorage.setItem(`survey_completed_${survey.id}`, "true");
-      setTimeout(() => setIsOpen(false), 3000);
+      localStorage.setItem(`survey_completed_at_${survey.id}`, String(Date.now()));
+      setTimeout(() => setIsOpen(false), 2400);
     }
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    // Mark as dismissed so we don't annoy them on every single page load
+    const prevCount = parseInt(localStorage.getItem(`survey_skip_count_${survey.id}`) || "0", 10);
+    localStorage.setItem(`survey_dismissed_at_${survey.id}`, String(Date.now()));
+    localStorage.setItem(`survey_skip_count_${survey.id}`, String(prevCount + 1));
     localStorage.setItem(`survey_completed_${survey.id}`, "dismissed");
   };
 

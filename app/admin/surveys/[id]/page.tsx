@@ -15,6 +15,7 @@ import {
   toggleSurveyStatus,
   deleteSurveyResponse,
   clearAllSurveyResponses,
+  seedSurveyTemplateQuestions,
   type AdminSurveyResponse,
   type AdminSurveyDetail,
   type AdminSurveyQuestion,
@@ -63,6 +64,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
   // Action status indicators
   const [isDeletingSurvey, setIsDeletingSurvey] = useState(false);
   const [deletingResponseId, setDeletingResponseId] = useState<string | null>(null);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 
   const fetchSurveySafely = useCallback(async (id: string) => {
     try {
@@ -293,6 +295,13 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
       await deleteSurveyQuestion(questionId, surveyId);
       fetchSurveyData();
     }
+  };
+
+  const handleLoadTemplateQuestions = async () => {
+    setIsLoadingTemplate(true);
+    await seedSurveyTemplateQuestions(surveyId);
+    setIsLoadingTemplate(false);
+    fetchSurveyData();
   };
 
   const handleMoveQuestion = async (index: number, direction: "up" | "down") => {
@@ -861,9 +870,19 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             })}
 
             {questions.length === 0 && (
-              <p className="rounded-xl border border-dashed border-slate-300 p-6 sm:p-8 text-center text-sm text-slate-500">
-                No questions added yet. Add your first question below!
-              </p>
+              <div className="rounded-2xl border border-dashed border-slate-300 p-6 sm:p-8 text-center bg-slate-50/50 space-y-3">
+                <p className="text-sm font-medium text-slate-600">
+                  No questions added yet. Add custom questions below or start instantly with our standard 3-question exam feedback template!
+                </p>
+                <button
+                  type="button"
+                  onClick={handleLoadTemplateQuestions}
+                  disabled={isLoadingTemplate}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-100 shadow-2xs transition active:scale-95 touch-manipulation"
+                >
+                  {isLoadingTemplate ? "Loading template…" : "⚡ Load Standard 3-Question Feedback Template"}
+                </button>
+              </div>
             )}
           </div>
 

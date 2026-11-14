@@ -54,16 +54,73 @@ export type AdminSurveyQuestion = {
 
 export async function createAdminSurvey(title: string, description: string = "") {
   const dbClient = await getSupabaseServerClient();
-  const { data, error } = await dbClient
+  let insertPayload: Record<string, any> = {
+    title: title.trim(),
+    description: description.trim(),
+    settings: DEFAULT_SURVEY_SETTINGS,
+  };
+
+  let { data, error } = await dbClient
     .from("dynamic_surveys")
-    .insert({ title: title.trim(), description: description.trim() })
+    .insert(insertPayload)
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error && error.message?.includes("settings")) {
+    const fallbackRes = await dbClient
+      .from("dynamic_surveys")
+      .insert({ title: title.trim(), description: description.trim() })
+      .select("id")
+      .single();
+    data = fallbackRes.data;
+    error = fallbackRes.error;
+  }
+
+  if (error || !data) return { error: error?.message || "Failed to create survey" };
   revalidatePath("/admin/surveys");
   revalidatePath("/survey");
   return { id: data.id };
+}
+
+export async function seedSurveyTemplateQuestions(surveyId: string) {
+  try {
+    const dbClient = await getSupabaseServerClient();
+    const starterQuestions = [
+      {
+        survey_id: surveyId,
+        question_text: "Which paper or exam section should we focus on next?",
+        question_type: "radio",
+        options: ["General Studies", "Paper 2 - Core Subjects", "Full Mock Test Series"],
+        display_order: 1,
+        is_required: true,
+      },
+      {
+        survey_id: surveyId,
+        question_text: "Which specific subject or topic do you need the most?",
+        question_type: "text",
+        options: null,
+        display_order: 2,
+        is_required: true,
+      },
+      {
+        survey_id: surveyId,
+        question_text: "Any specific chapters, question patterns, or suggestions? (Optional)",
+        question_type: "textarea",
+        options: null,
+        display_order: 3,
+        is_required: false,
+      },
+    ];
+
+    const { error } = await dbClient.from("dynamic_survey_questions").insert(starterQuestions);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/admin/surveys");
+    revalidatePath(`/admin/surveys/${surveyId}`);
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || "Failed to load starter template." };
+  }
 }
 
 export async function updateAdminSurvey(
