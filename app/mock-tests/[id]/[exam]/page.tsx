@@ -510,6 +510,16 @@ export default async function ExamPage({ params, searchParams }: Props) {
                             </div>
                           </div>
 
+                          <span
+                            className={`shrink-0 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${
+                              isFree
+                                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                : "bg-amber-50 text-amber-900 border border-amber-200"
+                            }`}
+                          >
+                            {isFree ? "Free" : "Paid"}
+                          </span>
+
                         </div>
 
                         <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs border border-slate-100 min-w-0 max-w-full">
