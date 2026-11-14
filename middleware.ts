@@ -14,8 +14,8 @@ function buildContentSecurityPolicy(nonce?: string) {
   }
 
   const scriptPolicy = nonce
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`
-    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`;
 
   return [
     "default-src 'self'",
@@ -23,7 +23,7 @@ function buildContentSecurityPolicy(nonce?: string) {
     "style-src 'self' 'unsafe-inline' https://accounts.google.com",
     `img-src 'self' data: blob: ${supabaseOrigin} https://www.googletagmanager.com https://*.google-analytics.com`,
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net`,
+    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://static.cloudflareinsights.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",

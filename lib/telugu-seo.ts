@@ -362,6 +362,27 @@ const TELUGU_EXAMS: Record<string, ExamTeluguSeo> = {
       },
     ],
   },
+  "appsc-endowment-officer-mock-test": {
+    teluguName: "ఎండోమెంట్ ఆఫీసర్ (APPSC Endowment Officer)",
+    teluguTitle: "ఆంధ్రప్రదేశ్ ఎండోమెంట్ ఆఫీసర్ ఉచిత మాక్ టెస్ట్‌లు",
+    bilingualPageTitle: "APPSC Endowment Officer Mock Test | ఎండోమెంట్ ఆఫీసర్ ఆన్‌లైన్ టెస్ట్",
+    bilingualDescription:
+      "APPSC ఎండోమెంట్ ఆఫీసర్ (గ్రేడ్ 3) పరీక్ష పేపర్ 1 జనరల్ స్టడీస్ మరియు పేపర్ 2 హిందూ ఫిలాసఫీ & దేవాలయ వ్యవస్థ కోసం ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్‌లు.",
+    keywords: [
+      "APPSC ఎండోమెంట్ ఆఫీసర్ మాక్ టెస్ట్",
+      "APPSC endowment officer mock test in telugu",
+      "ఆంధ్రప్రదేశ్ ఎండోమెంట్ ఆఫీసర్ సిలబస్",
+      "హిందూ ఫిలాసఫీ మాక్ టెస్ట్ పేపర్స్",
+      "AP Endowment officer grade 3 online test series",
+    ],
+    teluguFaqs: [
+      {
+        question: "ఎండోమెంట్ ఆఫీసర్ పేపర్ 2 (హిందూ ఫిలాసఫీ & దేవాలయ వ్యవస్థ) ప్రశ్నలు ఉన్నాయా?",
+        answer:
+          "అవును, ఎండోమెంట్ పరీక్ష పేపర్ 2 కు సంబంధించిన హిందూ మతం, పురాణాలు మరియు ఆలయ పరిపాలనపై ప్రత్యేక ప్రాక్టీస్ టెస్ట్‌లు మరియు సమాధానాల విశ్లేషణ ఇక్కడ లభిస్తాయి.",
+      },
+    ],
+  },
   "endowment-officer": {
     teluguName: "ఎండోమెంట్ ఆఫీసర్ (Endowment Officer)",
     teluguTitle: "తెలంగాణ ఎండోమెంట్ ఆఫీసర్ ఉచిత మాక్ టెస్ట్‌లు",
@@ -434,7 +455,8 @@ export function getExamTeluguMetadata(
 
   // 4. Fuzzy match for Endowment Officer
   if (normalizedSlug.includes("endowment") || normalizedName.includes("endowment")) {
-    return TELUGU_EXAMS["endowment-officer"];
+    const isAp = stateSlug === "ap" || stateSlug === "andhra-pradesh" || normalizedSlug.includes("appsc");
+    return isAp ? TELUGU_EXAMS["appsc-endowment-officer-mock-test"] : TELUGU_EXAMS["endowment-officer"];
   }
 
   // 5. Fuzzy match for AEE

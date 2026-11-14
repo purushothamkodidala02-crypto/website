@@ -34,6 +34,8 @@ export function TestStartActions({
   const [clientResumable, setClientResumable] = useState(false);
   const [clientHasAttempt, setClientHasAttempt] = useState(false);
   const [deviceId, setDeviceId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
 
   const signedIn = isLoggedIn || clientSignedIn;
   const resumable = hasResumableSession || clientResumable;
@@ -119,6 +121,77 @@ export function TestStartActions({
     }
   };
 
+  const effectiveDeviceId = deviceId || (typeof window !== "undefined" ? getClientDeviceId() : "");
+
+  const handleStartAttempt = async (
+    e: React.FormEvent<HTMLFormElement>,
+    mode: "resume" | "restart",
+  ) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setStartError(null);
+
+    try {
+      handleFullscreenOnStart();
+
+      // 1. Try Route Handler API
+      const res = await fetch(`/api/mock-tests/${testId}/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode, deviceId: effectiveDeviceId }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (data?.ok && data?.url) {
+        window.location.assign(data.url);
+        return;
+      }
+
+      if (data?.loginRequired) {
+        window.location.assign(`/login?next=${encodeURIComponent(testPath)}`);
+        return;
+      }
+
+      // 2. Direct client Supabase RPC fallback
+      const supabase = createClient();
+      const functionName =
+        mode === "restart" ? "restart_mock_test_session" : "start_mock_test_session";
+
+      let clientRpc = await supabase.rpc(functionName, {
+        requested_mock_test_id: testId,
+        requested_device_token: effectiveDeviceId || null,
+      });
+
+      if (clientRpc.error) {
+        clientRpc = await supabase.rpc(functionName, {
+          requested_mock_test_id: testId,
+        });
+      }
+
+      const sessionId = clientRpc.data?.[0]?.session_id;
+      if (sessionId) {
+        window.location.assign(
+          `/mock-tests/${testId}/attempt?session=${encodeURIComponent(sessionId)}`,
+        );
+        return;
+      }
+
+      const errMsg =
+        data?.error ||
+        clientRpc.error?.message ||
+        "Could not begin mock test session. Please try again.";
+      setStartError(errMsg);
+      setIsSubmitting(false);
+    } catch {
+      // 3. Fallback to standard form submit
+      const form = e.currentTarget;
+      form.submit();
+    }
+  };
+
   if (!signedIn) {
     return (
       <Link
@@ -131,8 +204,6 @@ export function TestStartActions({
       </Link>
     );
   }
-
-  const effectiveDeviceId = deviceId || (typeof window !== "undefined" ? getClientDeviceId() : "");
 
   // If mock test has 0 active questions and user has no resumable session, gracefully inform student
   if (!isReady && !resumable) {
@@ -168,29 +239,49 @@ export function TestStartActions({
 
     if (hasAttempt) {
       return (
-        <form action={startAction} className="mt-1">
+        <form action={startAction} onSubmit={(e) => void handleStartAttempt(e, "resume")} className="mt-1">
           <PendingSubmitButton
             onClick={handleFullscreenOnStart}
             pendingLabel="Preparing retake…"
+            disabled={isSubmitting}
             className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
           >
-            <span>Retake test</span>
+            {isSubmitting ? (
+              <span>Preparing retake…</span>
+            ) : (
+              <span>Retake test</span>
+            )}
             <span className="transition-transform group-hover:translate-x-0.5">→</span>
           </PendingSubmitButton>
+          {startError && (
+            <aside role="alert" className="mt-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-900">
+              {startError}
+            </aside>
+          )}
         </form>
       );
     }
 
     return (
-      <form action={startAction} className="mt-1">
+      <form action={startAction} onSubmit={(e) => void handleStartAttempt(e, "resume")} className="mt-1">
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}
           pendingLabel="Starting test…"
+          disabled={isSubmitting}
           className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
-          <span>Start test</span>
+          {isSubmitting ? (
+            <span>Starting test…</span>
+          ) : (
+            <span>Start test</span>
+          )}
           <span className="transition-transform group-hover:translate-x-0.5">→</span>
         </PendingSubmitButton>
+        {startError && (
+          <aside role="alert" className="mt-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-900">
+            {startError}
+          </aside>
+        )}
       </form>
     );
   }
@@ -200,18 +291,22 @@ export function TestStartActions({
 
   return (
     <div className="mt-1 grid gap-2.5">
-      <form action={resumeAction}>
+      <form action={resumeAction} onSubmit={(e) => void handleStartAttempt(e, "resume")}>
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}
           pendingLabel="Resuming test…"
+          disabled={isSubmitting}
           className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
-          <span>Resume test</span>
+          {isSubmitting ? (
+            <span>Resuming test…</span>
+          ) : (
+            <span>Resume test</span>
+          )}
           <span className="transition-transform group-hover:translate-x-0.5">→</span>
         </PendingSubmitButton>
       </form>
-      <form
-        action={restartAction}
+      <form action={restartAction}
         onSubmit={(event) => {
           if (
             !window.confirm(
@@ -220,18 +315,28 @@ export function TestStartActions({
           ) {
             event.preventDefault();
           } else {
-            handleFullscreenOnStart();
+            void handleStartAttempt(event, "restart");
           }
         }}
       >
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}
           pendingLabel="Restarting test…"
+          disabled={isSubmitting}
           className="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-5 py-3 text-center text-xs sm:text-sm font-semibold shadow-2xs transition hover:border-slate-400 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
-          Restart test
+          {isSubmitting ? (
+            <span>Restarting test…</span>
+          ) : (
+            <span>Restart test</span>
+          )}
         </PendingSubmitButton>
       </form>
+      {startError && (
+        <aside role="alert" className="mt-1 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-900">
+          {startError}
+        </aside>
+      )}
     </div>
   );
 }
