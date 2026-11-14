@@ -265,11 +265,6 @@ export function EditQuestionForm({
         <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
           Question {navigation.currentQuestionNumber} of {navigation.totalCount}
         </span>
-        {typeof marks === "number" && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-teal-100 border border-teal-300 px-2.5 py-0.5 text-xs font-bold text-teal-900">
-            {marks.toFixed(2)} Mark{marks === 1 ? "" : "s"}{typeof negativeMarks === "number" && negativeMarks > 0 ? ` (-${negativeMarks.toFixed(2)})` : ""}
-          </span>
-        )}
         {hasUnsavedChanges && (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900 animate-pulse">
             ● Unsaved edits
@@ -278,54 +273,6 @@ export function EditQuestionForm({
       </div>
 
       <div className="flex items-center gap-2">
-        {navigation.prevHref ? (
-          <Link
-            href={navigation.prevHref}
-            onClick={(e) => {
-              const allowed = confirmNavigation(navigation.prevHref!);
-              if (!allowed) e.preventDefault();
-            }}
-            className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
-          >
-            ← Prev (Q{navigation.prevQuestionNumber})
-          </Link>
-        ) : (
-          <span className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-400 opacity-60">
-            ← Prev
-          </span>
-        )}
-
-        {navigation.nextHref ? (
-          <Link
-            href={navigation.nextHref}
-            onClick={(e) => {
-              const allowed = confirmNavigation(navigation.nextHref!);
-              if (!allowed) e.preventDefault();
-            }}
-            className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
-          >
-            Next (Q{navigation.nextQuestionNumber}) →
-          </Link>
-        ) : (
-          <span className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-400 opacity-60">
-            Next →
-          </span>
-        )}
-
-        {/* Desktop Toggle Button for Question Navigator */}
-        <button
-          type="button"
-          onClick={toggleQuestionNavigator}
-          title={showQuestionNavigator ? "Hide Question Navigator (Alt+N)" : "Show Question Navigator (Alt+N)"}
-          className={`hidden lg:inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition shadow-2xs ${
-            showQuestionNavigator
-              ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-              : "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 ring-1 ring-teal-200"
-          }`}
-        >
-          <span>{showQuestionNavigator ? "Hide Navigator ✕" : "Show Navigator 🧭"}</span>
-        </button>
-
         <button
           type="button"
           onClick={() => setShowMobilePalette((v) => !v)}
@@ -473,15 +420,6 @@ export function EditQuestionForm({
       <div className={navigation && showQuestionNavigator ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
         <div className="min-w-0">
           <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-7">
-            {typeof marks === "number" && (
-              <div className="mb-4 inline-flex items-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-3.5 py-1.5 text-xs font-bold text-teal-900">
-                <span>🎯 Marking Weightage:</span>
-                <span className="font-extrabold">+{marks.toFixed(2)} Mark{marks === 1 ? "" : "s"}</span>
-                {typeof negativeMarks === "number" && negativeMarks > 0 && (
-                  <span className="text-rose-700">(-{negativeMarks.toFixed(2)} negative)</span>
-                )}
-              </div>
-            )}
             <form
               ref={formRef}
               action={action}
