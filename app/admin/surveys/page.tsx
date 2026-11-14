@@ -27,8 +27,30 @@ type SurveyItem = {
 };
 
 export default function AdminSurveysList() {
-  const [surveys, setSurveys] = useState<SurveyItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [surveys, setSurveys] = useState<SurveyItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("varadhi_cached_surveys_list");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("varadhi_cached_surveys_list");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return false;
+        }
+      } catch {}
+    }
+    return true;
+  });
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -94,6 +116,9 @@ export default function AdminSurveysList() {
     try {
       const data = await fetchSurveysSafely();
       setSurveys(data);
+      if (typeof window !== "undefined" && data && data.length > 0) {
+        localStorage.setItem("varadhi_cached_surveys_list", JSON.stringify(data));
+      }
       setErrorMsg("");
     } catch {
       setErrorMsg("Failed to load surveys. Please try again.");
@@ -113,6 +138,9 @@ export default function AdminSurveysList() {
         const data = await fetchSurveysSafely();
         if (!ignore) {
           setSurveys(data);
+          if (typeof window !== "undefined" && data && data.length > 0) {
+            localStorage.setItem("varadhi_cached_surveys_list", JSON.stringify(data));
+          }
           setErrorMsg("");
           setLoading(false);
         }
@@ -314,44 +342,53 @@ export default function AdminSurveysList() {
                   key={survey.id}
                   className="flex flex-col gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition"
                 >
-                  {/* 1. Full-Width Top Tags Row - All tags side by side */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
-                      Survey {surveyNumber}
-                    </span>
-                    {survey.is_active ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-0.5 text-xs font-semibold">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        Active
+                  {/* 1. Top Row: Badges on left, Primary Action CTA on right */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
+                        Survey {surveyNumber}
                       </span>
-                    ) : (
+                      {survey.is_active ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-0.5 text-xs font-semibold">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+                          Draft
+                        </span>
+                      )}
+                      <span className="inline-flex items-center rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium">
+                        {survey.response_count || 0}{" "}
+                        {survey.response_count === 1 ? "response" : "responses"}
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+                        {survey.settings?.targetAudience === "ap_endowment"
+                          ? "AP Endowment"
+                          : survey.settings?.targetAudience === "tg_police"
+                          ? "TG Police"
+                          : "All Students"}
+                      </span>
                       <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                        Draft
+                        {survey.settings?.displayMode === "popup_modal"
+                          ? "In-App Popup"
+                          : survey.settings?.displayMode === "page_only"
+                          ? "Page Link"
+                          : "Popup + Page"}
                       </span>
-                    )}
-                    <span className="inline-flex items-center rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium">
-                      {survey.response_count || 0}{" "}
-                      {survey.response_count === 1 ? "response" : "responses"}
-                    </span>
-                    <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                      {survey.settings?.targetAudience === "ap_endowment"
-                        ? "AP Endowment"
-                        : survey.settings?.targetAudience === "tg_police"
-                        ? "TG Police"
-                        : "All Students"}
-                    </span>
-                    <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                      {survey.settings?.displayMode === "popup_modal"
-                        ? "In-App Popup"
-                        : survey.settings?.displayMode === "page_only"
-                        ? "Page Link"
-                        : "Popup + Page"}
-                    </span>
-                    {survey.settings?.expiryDate && (
-                      <span className="inline-flex items-center rounded-full bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 text-xs font-medium">
-                        Ends: {survey.settings.expiryDate}
-                      </span>
-                    )}
+                      {survey.settings?.expiryDate && (
+                        <span className="inline-flex items-center rounded-full bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 text-xs font-medium">
+                          Ends: {survey.settings.expiryDate}
+                        </span>
+                      )}
+                    </div>
+
+                    <Link
+                      href={`/admin/surveys/${survey.id}`}
+                      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center whitespace-nowrap shrink-0 self-start sm:self-auto"
+                    >
+                      Edit Questions & Responses ({survey.response_count || 0}) &rarr;
+                    </Link>
                   </div>
 
                   {/* 2. Survey Title & Description (or Edit Form) */}
@@ -405,7 +442,7 @@ export default function AdminSurveysList() {
                   )}
 
                   {/* 3. Bottom Row: Metadata on left, Actions on right */}
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 pt-1 border-t border-slate-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-slate-100">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                       <span>Created {new Date(survey.created_at).toLocaleDateString()}</span>
                       <span className="text-slate-300">•</span>
@@ -420,18 +457,19 @@ export default function AdminSurveysList() {
                           href="/survey"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 ml-1 transition"
+                          className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 ml-1 transition whitespace-nowrap"
                         >
                           Open public page ↗
                         </a>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    {/* 5 Utility buttons side by side */}
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
                       <button
                         type="button"
                         onClick={() => handleCopyLink(survey.id, survey.is_active)}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                         title="Copy link to share with students"
                       >
                         {copiedId === survey.id ? "✓ Copied!" : "🔗 Copy Link"}
@@ -440,7 +478,7 @@ export default function AdminSurveysList() {
                       <button
                         type="button"
                         onClick={() => handleToggle(survey.id, survey.is_active)}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                       >
                         {survey.is_active ? "Deactivate" : "Activate"}
                       </button>
@@ -448,7 +486,7 @@ export default function AdminSurveysList() {
                       <button
                         type="button"
                         onClick={() => (isEditing ? setEditingSurveyId(null) : startEdit(survey))}
-                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                         title="Edit title and description"
                       >
                         ✏️ Edit
@@ -459,7 +497,7 @@ export default function AdminSurveysList() {
                         onClick={() =>
                           setOpenSettingsSurveyId((prev) => (prev === survey.id ? null : survey.id))
                         }
-                        className={`inline-flex items-center justify-center rounded-xl border px-3 py-2 text-xs font-medium shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap ${
+                        className={`inline-flex items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-medium shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap ${
                           openSettingsSurveyId === survey.id
                             ? "bg-slate-100 border-slate-300 text-slate-900"
                             : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
@@ -473,18 +511,11 @@ export default function AdminSurveysList() {
                         type="button"
                         onClick={() => handleDeleteSurvey(survey.id, survey.title)}
                         disabled={deletingId === survey.id}
-                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
                         title="Delete entire survey and its responses"
                       >
                         {deletingId === survey.id ? "Deleting…" : "🗑️ Delete"}
                       </button>
-
-                      <Link
-                        href={`/admin/surveys/${survey.id}`}
-                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center whitespace-nowrap"
-                      >
-                        Edit Questions & Responses ({survey.response_count || 0})
-                      </Link>
                     </div>
                   </div>
 

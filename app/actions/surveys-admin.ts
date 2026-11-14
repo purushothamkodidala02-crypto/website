@@ -498,10 +498,20 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
 export async function getAdminSurveysWithCounts() {
   try {
     const dbClient = await getSupabaseServerClient();
-    let { data: surveys, error } = await dbClient
-      .from("dynamic_surveys")
-      .select("id, title, description, is_active, created_at, settings")
-      .order("created_at", { ascending: false });
+    
+    // Fetch surveys and counts concurrently for instant performance
+    const [surveysResult, responsesResult] = await Promise.all([
+      dbClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at, settings")
+        .order("created_at", { ascending: false }),
+      dbClient
+        .from("dynamic_survey_responses")
+        .select("survey_id"),
+    ]);
+
+    let surveys = surveysResult.data;
+    let error = surveysResult.error;
 
     if (error && error.message?.includes("settings")) {
       const fallback = await dbClient
@@ -526,18 +536,12 @@ export async function getAdminSurveysWithCounts() {
 
     if (error || !surveys) return [];
 
-    // Fetch response counts
+    // Map counts
     const counts: Record<string, number> = {};
-    try {
-      const { data: responses } = await dbClient
-        .from("dynamic_survey_responses")
-        .select("survey_id");
-
-      (responses || []).forEach((r: { survey_id: string }) => {
+    if (responsesResult.data) {
+      responsesResult.data.forEach((r: { survey_id: string }) => {
         counts[r.survey_id] = (counts[r.survey_id] || 0) + 1;
       });
-    } catch {
-      // Ignore count fetch errors
     }
 
     return surveys.map((s) => ({
