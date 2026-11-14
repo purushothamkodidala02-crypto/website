@@ -259,59 +259,6 @@ export default function SupportPage() {
                   </p>
                 </div>
 
-                <div className="sm:col-span-2 rounded-xl border border-teal-200/90 bg-teal-50/30 p-4 transition-all duration-200 hover:border-teal-400 hover:shadow-xs">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className="grid h-8 w-8 place-items-center rounded-lg border border-teal-200 bg-teal-100/80 text-teal-900">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-950">Official Recruitment, Syllabus &amp; PET Standards</h3>
-                        <p className="text-[11px] text-teal-800 font-semibold">TSLPRB · TGPSC · APPSC Standards</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-teal-100 border border-teal-200 px-2.5 py-0.5 text-[10px] font-bold text-teal-950 shrink-0">
-                      Verified Data
-                    </span>
-                  </div>
-                  <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
-                    Guidance on state exam patterns, GO Ms 87 5-year age relaxations, physical measurement &amp; efficiency test (PET) standards, and syllabus topics.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-teal-800">
-                    <Link
-                      href="/mock-tests/telangana/police-constable-free-mock-test"
-                      className="rounded-lg bg-teal-800 text-white px-2.5 py-1 hover:bg-teal-900 transition"
-                    >
-                      Official Exam Guide →
-                    </Link>
-                    <Link
-                      href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards"
-                      className="rounded-lg bg-white border border-teal-200 px-2.5 py-1 hover:bg-teal-50 transition"
-                    >
-                      Police PET Standards →
-                    </Link>
-                    <Link
-                      href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern"
-                      className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
-                    >
-                      Exam Pattern &amp; Scoring →
-                    </Link>
-                    <Link
-                      href="/mock-tests/telangana/police-constable-free-mock-test#age-limits"
-                      className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
-                    >
-                      Age Limits (GO 87) →
-                    </Link>
-                    <Link
-                      href="/mock-tests"
-                      className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
-                    >
-                      Exam Directory →
-                    </Link>
-                  </div>
-                </div>
               </div>
             </div>
 
