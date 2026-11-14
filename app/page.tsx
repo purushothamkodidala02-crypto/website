@@ -170,10 +170,11 @@ export default async function Home() {
               <div className="mt-3 flex flex-wrap items-center justify-start lg:justify-end gap-1.5 text-xs">
                 <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">Popular:</span>
                 {[
-                  { label: "Police Constable", href: "/mock-tests/telangana/police-constable-free-mock-test" },
-                  { label: "TG Police PET & Events", href: "/mock-tests/telangana/police-constable-free-mock-test#physical-standards" },
+                  { label: "Police Constable Guide", href: "/mock-tests/telangana/police-constable-free-mock-test" },
                   { label: "TG Police 7,112 Vacancies", href: "/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" },
-                  { label: "TG Police Exam Date", href: "/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" },
+                  { label: "TG Police PET & Standards", href: "/mock-tests/telangana/police-constable-free-mock-test#physical-standards" },
+                  { label: "TG Police GO 87 Age", href: "/mock-tests/telangana/police-constable-free-mock-test#age-limits" },
+                  { label: "Exam Guides & Syllabus", href: "/mock-tests#exam-guides" },
                   { label: "TG TET 2026", href: "/mock-tests/telangana/tg-tet-2026" },
                   { label: "TGPSC", href: "/mock-tests/telangana" },
                   { label: "APPSC", href: "/mock-tests/andhra-pradesh" },
@@ -344,7 +345,7 @@ export default async function Home() {
                       {paperCount} paper{paperCount === 1 ? "" : "s"} available
                     </span>
                     <span className="inline-flex shrink-0 items-center gap-1 font-bold text-teal-800 group-hover:text-teal-950 group-hover:translate-x-0.5 transition">
-                      Practice <span aria-hidden="true">→</span>
+                      Official Guide &amp; Tests <span aria-hidden="true">→</span>
                     </span>
                   </div>
                 </Link>
@@ -354,7 +355,7 @@ export default async function Home() {
         </div>
 
         {/* Official Exam Guides & Physical Standards Section */}
-        <div className="mt-8 sm:mt-12 rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs">
+        <div id="exam-guides" className="mt-8 sm:mt-12 rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-100 pb-5">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
@@ -411,6 +412,12 @@ export default async function Home() {
 
               <div className="mt-5 border-t border-teal-100 pt-3 flex flex-wrap gap-2 text-xs font-bold text-teal-800">
                 <Link
+                  href="/mock-tests/telangana/police-constable-free-mock-test"
+                  className="rounded-lg bg-teal-800 text-white px-3 py-1.5 hover:bg-teal-900 transition"
+                >
+                  Official Exam Guide →
+                </Link>
+                <Link
                   href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards"
                   className="rounded-lg bg-white border border-teal-200 px-3 py-1.5 hover:bg-teal-50 transition"
                 >
@@ -423,16 +430,16 @@ export default async function Home() {
                   7,112 Vacancies →
                 </Link>
                 <Link
+                  href="/mock-tests/telangana/police-constable-free-mock-test#age-limits"
+                  className="rounded-lg bg-white border border-slate-200 px-3 py-1.5 hover:bg-slate-50 text-slate-700 transition"
+                >
+                  Age Limits (GO 87) →
+                </Link>
+                <Link
                   href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern"
                   className="rounded-lg bg-white border border-slate-200 px-3 py-1.5 hover:bg-slate-50 text-slate-700 transition"
                 >
-                  Exam Pattern →
-                </Link>
-                <Link
-                  href="/mock-tests/telangana/police-constable-free-mock-test"
-                  className="rounded-lg bg-teal-800 text-white px-3 py-1.5 hover:bg-teal-900 transition"
-                >
-                  Free Mock Tests →
+                  PWT Scheme &amp; Pattern →
                 </Link>
               </div>
             </div>
@@ -565,6 +572,7 @@ export default async function Home() {
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <Link href="/mock-tests#exam-guides" className="hover:text-white transition">Exam Guides &amp; Syllabus</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:text-white transition">Police PET Standards</Link>
               <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" className="hover:text-white transition">Police 7,112 Vacancies</Link>

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore }
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
-type NavigationIconName = "home" | "tests" | "support" | "progress" | "admin";
+type NavigationIconName = "home" | "tests" | "guide" | "support" | "progress" | "admin";
 
 type NavigationItem = {
   href: string;
@@ -219,6 +219,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
 const navigationIconStyles = {
   home: "border border-teal-100 bg-teal-50 text-teal-800",
   tests: "border border-teal-100 bg-teal-50 text-teal-800",
+  guide: "border border-teal-100 bg-teal-50 text-teal-800",
   progress: "border border-teal-100 bg-teal-50 text-teal-800",
   admin: "border border-teal-100 bg-teal-50 text-teal-800",
   support: "border border-teal-100 bg-teal-50 text-teal-800",
@@ -227,6 +228,7 @@ const navigationIconStyles = {
 function NavigationIcon({ name }: { name: NavigationIconName }) {
   if (name === "home") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="m4 10 8-6 8 6v9.5h-6v-6h-4v6H4z" strokeLinejoin="round" /></svg>;
   if (name === "tests") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M7 3.5h8l3 3V20H7z" strokeLinejoin="round" /><path d="M15 3.5V7h3M9.5 11h6M9.5 14.5h6" strokeLinecap="round" /></svg>;
+  if (name === "guide") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" strokeLinecap="round" strokeLinejoin="round" /></svg>;
   if (name === "support") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><rect x="3.5" y="5.5" width="17" height="13" rx="2" /><path d="m5 7 7 5.5L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
   if (name === "admin") return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M4 20V8l8-4 8 4v12" strokeLinejoin="round" /><path d="M8 20v-6h8v6M9 9h.01M15 9h.01" strokeLinecap="round" /></svg>;
   return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]"><path d="M5 19V9m7 10V5m7 14v-7" strokeLinecap="round" /><path d="M3.5 19.5h17" strokeLinecap="round" /></svg>;

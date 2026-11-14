@@ -1003,6 +1003,33 @@ export async function MockTestDetailsPage({
                       ? `Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with -${formatMarkValue(negativeMarks)} negative marking and instant detailed solutions.`
                       : "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with no negative marking and instant detailed solutions.")}
               </p>
+
+              {examGuideUrl && (
+                <div className="mt-3.5 flex flex-wrap items-center gap-2">
+                  <Link
+                    href={examGuideUrl}
+                    className="inline-flex items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-900 hover:bg-teal-100 transition"
+                  >
+                    Official Exam Guide &amp; Vacancies →
+                  </Link>
+                  {isPoliceExam && (
+                    <>
+                      <Link
+                        href={`${examGuideUrl}#physical-standards`}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                      >
+                        PET Standards →
+                      </Link>
+                      <Link
+                        href={`${examGuideUrl}#exam-schedule`}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                      >
+                        7,112 Vacancies →
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Top Primary Start Action (Appears on top of page) */}

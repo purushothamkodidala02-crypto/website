@@ -281,6 +281,12 @@ export default function SupportPage() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-teal-800">
                     <Link
+                      href="/mock-tests/telangana/police-constable-free-mock-test"
+                      className="rounded-lg bg-teal-800 text-white px-2.5 py-1 hover:bg-teal-900 transition"
+                    >
+                      Official Exam Guide →
+                    </Link>
+                    <Link
                       href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards"
                       className="rounded-lg bg-white border border-teal-200 px-2.5 py-1 hover:bg-teal-50 transition"
                     >
@@ -297,6 +303,12 @@ export default function SupportPage() {
                       className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
                     >
                       Age Limits (GO 87) →
+                    </Link>
+                    <Link
+                      href="/mock-tests#exam-guides"
+                      className="rounded-lg bg-white border border-teal-200 px-2.5 py-1 hover:bg-teal-50 transition"
+                    >
+                      All Exam Guides →
                     </Link>
                     <Link
                       href="/mock-tests"

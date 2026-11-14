@@ -11,6 +11,7 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
   const navigation = [
     { href: "/", label: "Home", icon: "home" as const },
     { href: "/mock-tests", label: "Mock Tests", icon: "tests" as const },
+    { href: "/mock-tests#exam-guides", label: "Exam Guides & Syllabus", icon: "guide" as const },
     { href: "/support", label: "Support", icon: "support" as const },
   ];
   return (
@@ -26,6 +27,27 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
             <BrandLockup />
           </Link>
         </div>
+
+        <nav className="hidden md:flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-700">
+          <Link
+            href="/mock-tests"
+            className="rounded-lg px-3 py-1.5 transition hover:bg-slate-100 hover:text-slate-900"
+          >
+            Mock Tests
+          </Link>
+          <Link
+            href="/mock-tests#exam-guides"
+            className="rounded-lg px-3 py-1.5 transition hover:bg-teal-50 hover:text-teal-900"
+          >
+            Exam Guides &amp; Syllabus
+          </Link>
+          <Link
+            href="/support"
+            className="rounded-lg px-3 py-1.5 transition hover:bg-slate-100 hover:text-slate-900"
+          >
+            Support
+          </Link>
+        </nav>
 
         <PublicAccountActions />
       </div>
