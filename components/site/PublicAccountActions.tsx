@@ -14,8 +14,6 @@ let cachedAccount: {
   userId: string;
   email: string | null;
   displayName: string;
-  firstName: string;
-  avatarLetter: string;
   activePurchases: number;
   isAdmin: boolean;
   timestamp: number;
@@ -29,22 +27,8 @@ export function PublicAccountActions({
   initialEmail?: string | null;
   initialIsAdmin?: boolean;
   initialDisplayName?: string;
-}) {
-  const initialIdentity = resolveStudentDisplayInfo({
-    fullName: initialDisplayName,
-    email: initialEmail ?? cachedAccount?.email ?? null,
-  });
-
+} = {}) {
   const [email, setEmail] = useState<string | null>(initialEmail ?? cachedAccount?.email ?? null);
-  const [displayName, setDisplayName] = useState<string>(
-    initialDisplayName?.trim() || cachedAccount?.displayName || initialIdentity.displayName,
-  );
-  const [firstName, setFirstName] = useState<string>(
-    initialDisplayName?.trim() ? initialIdentity.firstName : cachedAccount?.firstName || initialIdentity.firstName,
-  );
-  const [avatarLetter, setAvatarLetter] = useState<string>(
-    initialDisplayName?.trim() ? initialIdentity.avatarLetter : cachedAccount?.avatarLetter || initialIdentity.avatarLetter,
-  );
   const [accountReady, setAccountReady] = useState(initialEmail !== undefined || cachedAccount !== null);
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin || (cachedAccount?.isAdmin ?? false));
   const [activePurchases, setActivePurchases] = useState(cachedAccount?.activePurchases ?? 0);
@@ -78,15 +62,12 @@ export function PublicAccountActions({
     ) => {
       if (!active) return;
       const identity = resolveStudentDisplayInfo({
-        fullName: userMetadata?.full_name,
+        fullName: userMetadata?.full_name ?? initialDisplayName,
         name: userMetadata?.name,
         email: userEmail,
       });
 
       setEmail(userEmail);
-      setDisplayName(identity.displayName);
-      setFirstName(identity.firstName);
-      setAvatarLetter(identity.avatarLetter);
       setAccountReady(true);
 
       if (!userId) {
@@ -126,8 +107,6 @@ export function PublicAccountActions({
           userId,
           email: userEmail,
           displayName: identity.displayName,
-          firstName: identity.firstName,
-          avatarLetter: identity.avatarLetter,
           activePurchases: purchases,
           isAdmin: adminRole,
           timestamp: Date.now(),
@@ -171,7 +150,7 @@ export function PublicAccountActions({
       active = false;
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [initialDisplayName]);
 
   return (
     <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
@@ -188,7 +167,7 @@ export function PublicAccountActions({
               href="/dashboard/passes"
               prefetch={true}
               aria-label={`My purchases${activePurchases ? `, ${activePurchases} active` : ""}`}
-              className="relative inline-flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
+              className="relative inline-flex h-9 sm:h-10 min-h-[38px] sm:min-h-[40px] shrink-0 items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800"
             >
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
                 <path d="M6 8h12l-1 12H7L6 8Z" />
@@ -207,20 +186,22 @@ export function PublicAccountActions({
               href="/dashboard"
               prefetch={true}
               title={email}
-              aria-label={`${displayName} — My progress dashboard`}
-              className="group inline-flex h-9 sm:h-10 min-w-0 max-w-[8.25rem] sm:max-w-[12.5rem] md:max-w-[14.5rem] lg:max-w-[18rem] items-center gap-1.5 sm:gap-2 rounded-full border border-teal-200/80 bg-teal-50/70 pl-1.5 pr-2.5 sm:pl-2 sm:pr-3 text-xs sm:text-sm font-semibold text-slate-800 shadow-2xs transition hover:border-teal-400 hover:bg-teal-100/70 hover:text-teal-950"
+              aria-label="My progress dashboard"
+              className="inline-flex h-9 sm:h-10 min-h-[38px] sm:min-h-[40px] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/90 bg-teal-50/80 px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-100 hover:text-teal-950"
             >
-              <span
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#0a2922] text-[11px] font-black text-white uppercase shadow-2xs"
+              <svg
                 aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 shrink-0 fill-none stroke-current"
+                strokeWidth="2"
               >
-                {avatarLetter}
-              </span>
-              <span className="truncate font-bold text-slate-900 sm:hidden">{firstName}</span>
-              <span className="hidden truncate font-bold text-slate-900 sm:inline">{displayName}</span>
-              <span className="hidden lg:inline shrink-0 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-teal-800 border border-teal-200/70 group-hover:border-teal-300">
-                Dashboard
-              </span>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
+                />
+              </svg>
+              <span className="hidden sm:inline">Dashboard</span>
             </Link>
           )}
           <LogoutButton allowMultipleDevices={isAdmin} />

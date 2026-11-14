@@ -607,7 +607,7 @@ export function AdminNavigation(props: {
           </button>
           <LogoutButton
             allowMultipleDevices
-            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/80 bg-teal-50/60 px-2.5 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200/80 bg-teal-50/60 px-3 text-xs font-bold text-teal-800 hover:bg-teal-100 hover:text-teal-950 disabled:opacity-50"
           />
         </div>
       </div>
