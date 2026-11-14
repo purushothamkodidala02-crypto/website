@@ -30,7 +30,7 @@ test("site-wide single device login registers tokens across password, OTP, and O
 });
 
 test("proxy middleware allows exam attempt routes to refresh authentication cookies", async () => {
-  const proxy = await read("proxy.ts");
+  const proxy = await (read("middleware.ts").catch(() => read("proxy.ts")));
 
   assert.match(proxy, /isExamAttemptRoute = request\.nextUrl\.pathname\.includes\("\/attempt"\)/);
   assert.match(proxy, /!isExamAttemptRoute/);
