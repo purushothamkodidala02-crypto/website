@@ -261,6 +261,16 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 <ExamSymbol name={context.exam.name} className="h-3.5 w-3.5 text-teal-800" />
                 {context.state.name} State Examination
               </span>
+              {teluguData?.schedule?.notificationNumber && (
+                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 shadow-2xs">
+                  Notification: {teluguData.schedule.notificationNumber}
+                </span>
+              )}
+              {teluguData?.schedule?.totalVacancies && (
+                <span className="rounded-full border border-teal-200 bg-teal-50/80 px-2.5 py-0.5 text-xs font-bold text-teal-900 shadow-2xs">
+                  {teluguData.schedule.totalVacancies.toLocaleString()} Vacancies
+                </span>
+              )}
               <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 shadow-2xs">
                 Official Syllabus Pattern
               </span>
@@ -286,9 +296,9 @@ export default async function ExamPage({ params, searchParams }: Props) {
               {teluguData?.schedule?.prelimsExamDate && (
                 <a
                   href="#exam-schedule"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50/90 px-3 py-1.5 text-xs font-bold text-amber-950 hover:bg-amber-100 transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-teal-300 bg-teal-50/80 px-3 py-1.5 text-xs font-bold text-teal-950 hover:bg-teal-100 transition shadow-2xs"
                 >
-                  <span className="h-2 w-2 rounded-full bg-amber-600 animate-pulse" aria-hidden="true" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-700" aria-hidden="true" />
                   PWT Exam Date: {teluguData.schedule.prelimsExamDate}
                 </a>
               )}
@@ -318,7 +328,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   href="#exam-schedule"
                   className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 transition shadow-2xs text-center"
                 >
-                  Important Exam Dates ↓
+                  Vacancies &amp; Dates ↓
                 </a>
               )}
               
@@ -328,7 +338,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         </div>
       </section>
 
-      {/* Sticky Table of Contents / Testbook-Style Jump Navigation */}
+      {/* Sticky Table of Contents / Proportional Navigation */}
       <nav
         aria-label="Exam guide navigation"
         className="sticky top-0 z-30 border-y border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs"
@@ -340,51 +350,69 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </span>
             <a
               href="#papers"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+              className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
             >
-              <span>📑</span>
-              <span>Mock Tests ({tests.length})</span>
+              Mock Tests ({tests.length})
             </a>
             {teluguData?.schedule && (
               <a
                 href="#exam-schedule"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
               >
-                <span>📅</span>
-                <span>Important Dates</span>
+                Vacancies &amp; Dates
               </a>
             )}
             {teluguData?.pattern && (
               <a
                 href="#exam-pattern"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
               >
-                <span>📋</span>
-                <span>Pattern &amp; Syllabus</span>
+                Exam Pattern
+              </a>
+            )}
+            {teluguData?.pattern?.subjects && teluguData.pattern.subjects.length > 0 && (
+              <a
+                href="#curriculum-topics"
+                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+              >
+                Curriculum Topics
+              </a>
+            )}
+            {teluguData?.pattern?.physicalStandards && teluguData.pattern.physicalStandards.length > 0 && (
+              <a
+                href="#physical-standards"
+                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+              >
+                Physical Standards
+              </a>
+            )}
+            {teluguData?.schedule?.ageLimits && teluguData.schedule.ageLimits.length > 0 && (
+              <a
+                href="#age-limits"
+                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+              >
+                Age Limit &amp; Rules
               </a>
             )}
             {teluguData?.jobProfile && (
               <a
                 href="#job-profile"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
               >
-                <span>💼</span>
-                <span>Salary &amp; Duties</span>
+                Salary &amp; Duties
               </a>
             )}
             <a
               href="#why-varadhi-heading"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+              className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
             >
-              <span>⭐</span>
-              <span>Why Varadhi</span>
+              Why Varadhi
             </a>
             <a
               href="#exam-faqs"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
+              className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
             >
-              <span>❓</span>
-              <span>FAQs ({questions.length})</span>
+              FAQs ({questions.length})
             </a>
           </div>
         </div>
@@ -563,7 +591,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                             className={`shrink-0 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${
                               isFree
                                 ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                : "bg-amber-50 text-amber-900 border border-amber-200"
+                                : "bg-slate-100 text-slate-800 border border-slate-200"
                             }`}
                           >
                             {isFree ? "Free" : "Included"}
@@ -626,7 +654,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           )}
         </section>
 
-        {/* Important Dates & Notification Schedule */}
+        {/* Important Dates, Notification & Vacancy Details */}
         {teluguData?.schedule && (
           <section
             id="exam-schedule"
@@ -642,68 +670,125 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   id="exam-schedule-heading"
                   className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900"
                 >
-                  {statePrefixedName} Exam Date &amp; Notification Schedule 2026
+                  {statePrefixedName} Notification &amp; Examination Schedule 2026
                 </h2>
               </div>
-              <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3.5 py-1 text-xs font-bold text-emerald-900">
-                Official PWT Exam Date: {teluguData.schedule.prelimsExamDate}
-              </span>
+              {teluguData.schedule.totalVacancies ? (
+                <span className="rounded-full bg-teal-50 border border-teal-200 px-3.5 py-1 text-xs font-bold text-teal-900">
+                  Total {teluguData.schedule.totalVacancies.toLocaleString()} Vacancies
+                </span>
+              ) : (
+                <span className="rounded-full bg-slate-100 border border-slate-200 px-3.5 py-1 text-xs font-bold text-slate-800">
+                  PWT Exam Date: {teluguData.schedule.prelimsExamDate}
+                </span>
+              )}
             </div>
 
             <p className="mt-2.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600">
-              Check the official examination timeline, preliminary written test (PWT) date, hall ticket release dates, and selection stages for {statePrefixedName} recruitment.
+              {teluguData.schedule.notificationNumber
+                ? `Official Notification (${teluguData.schedule.notificationNumber}) issued by ${teluguData.schedule.authority}. Check post-wise vacancies, pay scales, timeline dates, and recruitment stages.`
+                : `Check the official examination timeline, preliminary written test (PWT) date, hall ticket release dates, and selection stages for ${statePrefixedName} recruitment.`}
             </p>
 
             {/* Quick Metrics Cards */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-amber-300 hover:shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
                 <div>
-                  <span className="inline-flex rounded-md bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-900">
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+                    Total Vacancies
+                  </span>
+                  <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    {teluguData.schedule.totalVacancies ? `${teluguData.schedule.totalVacancies.toLocaleString()} Posts` : "7,112 Posts"}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs font-semibold text-slate-600">Across Police, TGSPF, Fire &amp; Prisons</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700">
                     PWT Exam Date
                   </span>
                   <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
                     {teluguData.schedule.prelimsExamDate}
                   </p>
                 </div>
-                <p className="mt-2 text-xs font-semibold text-amber-800">{teluguData.schedule.prelimsSession}</p>
+                <p className="mt-2 text-xs font-semibold text-slate-600">{teluguData.schedule.prelimsSession}</p>
               </div>
 
               <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
                 <div>
-                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-                    Admit Card
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+                    Pay Scale
                   </span>
                   <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                    {teluguData.schedule.hallTicketRelease}
+                    {teluguData.jobProfile?.payScale ?? "₹24,280 – ₹72,850"}
                   </p>
                 </div>
-                <p className="mt-2 text-xs text-slate-500 font-medium">Download via {teluguData.schedule.officialWebsite.replace("https://www.", "")}</p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
-                <div>
-                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-                    Exam Duration
-                  </span>
-                  <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                    {teluguData.schedule.prelimsDuration}
-                  </p>
-                </div>
-                <p className="mt-2 text-xs text-slate-500 font-medium">Timed session test</p>
+                <p className="mt-2 text-xs text-slate-500 font-medium">Revised State Pay Scale</p>
               </div>
 
               <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
                 <div>
                   <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-800">
-                    Recruitment Post
+                    Official Portal
                   </span>
                   <p className="font-display mt-2.5 text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    {teluguData.schedule.postName}
+                    {teluguData.schedule.officialWebsite.replace("https://www.", "")}
                   </p>
                 </div>
                 <p className="mt-2 text-xs font-semibold text-teal-800">{teluguData.schedule.authority}</p>
               </div>
             </div>
+
+            {/* Official Vacancy Distribution Table */}
+            {teluguData.schedule.vacancies && teluguData.schedule.vacancies.length > 0 && (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+                <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Official Post-wise Vacancy Distribution ({teluguData.schedule.notificationNumber ?? "TSLPRB 2026"})
+                  </h3>
+                  <span className="rounded-full bg-teal-50 border border-teal-200/70 px-2.5 py-0.5 text-[10px] font-bold text-teal-800">
+                    {teluguData.schedule.totalVacancies?.toLocaleString()} Total Posts
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200/90 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                        <th className="py-2.5 px-4 w-16">Code</th>
+                        <th className="py-2.5 px-4">Post Name</th>
+                        <th className="py-2.5 px-4">Department</th>
+                        <th className="py-2.5 px-4">Eligibility</th>
+                        <th className="py-2.5 px-4 text-right">Vacancies</th>
+                        <th className="py-2.5 px-4 text-right">Pay Scale</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {teluguData.schedule.vacancies.map((vac) => (
+                        <tr key={vac.postCode} className="hover:bg-slate-50/60 transition">
+                          <td className="py-2.5 px-4 font-mono font-bold text-slate-700">{vac.postCode}</td>
+                          <td className="py-2.5 px-4 font-semibold text-slate-900">{vac.postName}</td>
+                          <td className="py-2.5 px-4 text-slate-600 text-xs">{vac.department}</td>
+                          <td className="py-2.5 px-4 text-slate-600 text-xs">{vac.genderEligibility}</td>
+                          <td className="py-2.5 px-4 text-right font-bold text-slate-900">{vac.vacancies.toLocaleString()}</td>
+                          <td className="py-2.5 px-4 text-right font-mono text-xs font-semibold text-slate-700">{vac.payScale}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold text-slate-900">
+                        <td colSpan={4} className="py-3 px-4 text-xs uppercase tracking-wider text-slate-700">Total Notified Vacancies</td>
+                        <td className="py-3 px-4 text-right font-bold text-teal-900 text-sm">
+                          {teluguData.schedule.vacancies.reduce((acc, v) => acc + v.vacancies, 0).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-4 text-right text-xs font-semibold text-slate-600">₹24,280 – ₹72,850</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* Events Timeline Table */}
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90">
@@ -728,7 +813,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                         className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                           evt.status === "Completed"
                             ? "bg-slate-100 text-slate-700 border border-slate-200"
-                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                            : "bg-teal-50 text-teal-800 border border-teal-200"
                         }`}
                       >
                         {evt.status}
@@ -741,7 +826,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
               <p className="text-xs sm:text-sm text-teal-950 font-medium">
-                🎯 Build speed and exam temperament for the <strong>{teluguData.schedule.prelimsExamDate}</strong> OMR test with our free timed tests.
+                Build speed and exam temperament for the <strong>{teluguData.schedule.prelimsExamDate}</strong> OMR test with our free timed tests.
               </p>
               <a
                 href="#papers"
@@ -762,7 +847,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   {teluguData.pattern.authority}
                 </p>
                 <h2 id="exam-pattern-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">
-                  {statePrefixedName} Exam Pattern &amp; Structure
+                  {statePrefixedName} Exam Pattern &amp; Selection Structure 2026
                 </h2>
               </div>
             </div>
@@ -813,6 +898,44 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </div>
             </div>
 
+            {/* Minimum Qualifying Marks Table */}
+            {teluguData.pattern.qualifyingMarks && teluguData.pattern.qualifyingMarks.length > 0 && (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+                <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Official Minimum Qualifying Marks (PWT &amp; FWE Stages)
+                  </h3>
+                  <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-700">
+                    Para 16(A) Official Rules
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200/90 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                        <th className="py-2.5 px-4">Community Category</th>
+                        <th className="py-2.5 px-4">PWT Qualifying %</th>
+                        <th className="py-2.5 px-4">PWT Minimum Marks</th>
+                        <th className="py-2.5 px-4">FWE Qualifying %</th>
+                        <th className="py-2.5 px-4">FWE Minimum Marks</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {teluguData.pattern.qualifyingMarks.map((qm) => (
+                        <tr key={qm.category} className="hover:bg-slate-50/60 transition">
+                          <td className="py-2.5 px-4 font-semibold text-slate-900">{qm.category}</td>
+                          <td className="py-2.5 px-4 font-bold text-teal-800">{qm.pwtPercentage}</td>
+                          <td className="py-2.5 px-4 font-mono text-slate-700">{qm.pwtMarks}</td>
+                          <td className="py-2.5 px-4 font-bold text-teal-800">{qm.fwePercentage}</td>
+                          <td className="py-2.5 px-4 font-mono text-slate-700">{qm.fweMarks}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Quick Highlights / At a Glance Table (Testbook Style) */}
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
               <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-2">
@@ -853,7 +976,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     Marking Scheme
                   </span>
                   <span className="sm:col-span-8 lg:col-span-9 text-xs sm:text-sm font-semibold text-slate-800">
-                    1 Mark per correct answer · Deducts {teluguData.pattern.negativeMarking} per wrong answer
+                    1 Mark per correct answer · Deducts {teluguData.pattern.negativeMarking}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 items-center hover:bg-slate-50/60 transition">
@@ -869,7 +992,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
             {/* Official Subject Curriculum & Topics */}
             {teluguData.pattern.subjects && teluguData.pattern.subjects.length > 0 && (
-              <div className="mt-6">
+              <div id="curriculum-topics" className="mt-6 scroll-mt-24">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-teal-800">
                   Official Subject Breakdown &amp; Curriculum Topics
                 </h3>
@@ -931,14 +1054,14 @@ export default async function ExamPage({ params, searchParams }: Props) {
             {typeof teluguData.pattern.totalQuestions === "number" && typeof teluguData.pattern.durationMinutes === "number" && (
               <div className="mt-6 rounded-2xl border border-teal-200/90 bg-gradient-to-r from-teal-50/70 via-[#f4faf7] to-white p-4 sm:p-5">
                 <div className="flex items-start gap-3">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-100 text-teal-800 text-sm font-bold">
-                    💡
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-100 text-teal-900 text-xs font-bold uppercase">
+                    Tips
                   </span>
                   <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                     <strong className="text-teal-950 font-bold">Aspirant Strategy &amp; Time Management:</strong>{" "}
                     With {teluguData.pattern.totalQuestions} questions to solve in {teluguData.pattern.durationMinutes} minutes, candidates have approximately{" "}
                     <strong>{Math.round((Number(teluguData.pattern.durationMinutes) * 60) / Number(teluguData.pattern.totalQuestions))} seconds per question</strong>.
-                    Regular practice with timed bilingual mock tests on Varadhi Prep trains your speed, prevents negative marking traps, and builds authentic exam discipline.
+                    Regular practice with timed bilingual mock tests on Varadhi Prep trains your speed, prevents negative marking penalties (0.20 marks deducted per wrong answer), and builds authentic exam discipline.
                   </div>
                 </div>
               </div>
@@ -946,6 +1069,164 @@ export default async function ExamPage({ params, searchParams }: Props) {
           </section>
         )}
 
+        {/* Physical Standards & Efficiency Test (PMT & PET) */}
+        {teluguData?.pattern?.physicalStandards && teluguData.pattern.physicalStandards.length > 0 && (
+          <section
+            id="physical-standards"
+            aria-labelledby="physical-standards-heading"
+            className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  PMT &amp; PET Events
+                </p>
+                <h2
+                  id="physical-standards-heading"
+                  className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900"
+                >
+                  {statePrefixedName} Physical Measurement (PMT) &amp; Efficiency Test (PET) Standards
+                </h2>
+              </div>
+              <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-800">
+                Annexure I &amp; Para 16(B)
+              </span>
+            </div>
+
+            <p className="mt-2.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600">
+              Official physical measurement standards and physical efficiency test (PET) criteria for candidates qualifying the Preliminary Written Test (PWT).
+            </p>
+
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+              <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Prescribed Physical Standards &amp; Qualifying Distances
+                </h3>
+                <span className="rounded-full bg-teal-50 border border-teal-200/70 px-2.5 py-0.5 text-[10px] font-bold text-teal-800">
+                  RFID &amp; Digital Sensor Tested
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200/90 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                      <th className="py-2.5 px-4">Event / Test</th>
+                      <th className="py-2.5 px-4">Men Candidates</th>
+                      <th className="py-2.5 px-4">Women Candidates</th>
+                      <th className="py-2.5 px-4">Nature &amp; Scoring</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {teluguData.pattern.physicalStandards.map((ps) => (
+                      <tr key={ps.event} className="hover:bg-slate-50/60 transition">
+                        <td className="py-2.5 px-4 font-semibold text-slate-900">{ps.event}</td>
+                        <td className="py-2.5 px-4 font-mono font-medium text-slate-800">{ps.menStandard}</td>
+                        <td className="py-2.5 px-4 font-mono font-medium text-slate-800">{ps.womenStandard}</td>
+                        <td className="py-2.5 px-4 text-xs font-medium text-slate-600">{ps.nature}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Age Limit & Relaxations */}
+        {teluguData?.schedule?.ageLimits && teluguData.schedule.ageLimits.length > 0 && (
+          <section
+            id="age-limits"
+            aria-labelledby="age-limits-heading"
+            className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                  Eligibility Criteria
+                </p>
+                <h2
+                  id="age-limits-heading"
+                  className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900"
+                >
+                  {statePrefixedName} Age Limit, Qualifications &amp; Relaxations (GO Ms No. 87)
+                </h2>
+              </div>
+              <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-bold text-teal-900">
+                +5 Years Raised by Govt Order
+              </span>
+            </div>
+
+            <p className="mt-2.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600">
+              Government of Telangana vide GO Ms No. 87 GA (Services-A) Dept raised the upper age limit by 5 years for direct recruitment in uniformed services.
+            </p>
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5">
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    Education
+                  </span>
+                  <p className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    Intermediate (10+2) Pass
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-500 font-medium">Recognized State Board as on 29-07-2026</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    General Age Range
+                  </span>
+                  <p className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    18 to 27 Years (OC)
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-500 font-medium">As on 01-07-2026 (+5 years under GO 87)</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    Technical Driving License
+                  </span>
+                  <p className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    Valid LMV License
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-500 font-medium">Mandatory for Fire Fighter (Post Code 26)</p>
+              </div>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+              <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Category-wise Upper Age Limits &amp; Legal Basis
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200/90 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                      <th className="py-2.5 px-4">Category</th>
+                      <th className="py-2.5 px-4">Eligible Age Range</th>
+                      <th className="py-2.5 px-4">Government Order / Legal Basis</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {teluguData.schedule.ageLimits.map((al) => (
+                      <tr key={al.category} className="hover:bg-slate-50/60 transition">
+                        <td className="py-2.5 px-4 font-semibold text-slate-900">{al.category}</td>
+                        <td className="py-2.5 px-4 font-mono font-bold text-teal-800">{al.ageRange}</td>
+                        <td className="py-2.5 px-4 text-xs text-slate-600">{al.basis}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Job Profile, Duties & Eligibility */}
         {teluguData?.jobProfile && (
@@ -1077,6 +1358,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             )}
           </section>
         )}
+
         {/* Why Aspirants Choose Varadhi Prep */}
         <section aria-labelledby="why-varadhi-heading" className="rounded-2xl border border-teal-100/90 bg-gradient-to-b from-teal-50/50 via-white to-white p-6 sm:p-8 shadow-2xs">
           <div className="max-w-3xl">
@@ -1091,28 +1373,36 @@ export default async function ExamPage({ params, searchParams }: Props) {
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">⏱️</span>
+              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
+                01
+              </span>
               <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Timed Exam Simulator</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Experience real 3-hour exam pressure with countdown timers and instant question review to build the speed required for your OMR test.
               </p>
             </div>
             <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">🌐</span>
+              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
+                02
+              </span>
               <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Dual-Language Switch</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Instantly switch questions between English and Telugu at any second to verify terminology and practice in your preferred medium.
               </p>
             </div>
             <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">🎯</span>
+              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
+                03
+              </span>
               <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">{examNegativeSummary.cardTitle}</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 {examNegativeSummary.cardDescription}
               </p>
             </div>
             <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="grid h-10 w-10 place-items-center rounded-xl border border-teal-100 bg-teal-50 text-teal-800 text-lg shadow-2xs transition group-hover:bg-teal-100" aria-hidden="true">💡</span>
+              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
+                04
+              </span>
               <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Detailed Bilingual Solutions</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                 Access step-by-step explanations in Telugu and English for every single question immediately upon submission.
@@ -1140,8 +1430,8 @@ export default async function ExamPage({ params, searchParams }: Props) {
       </div>
     </main>
   );
-}
 
+}
 function studentTestTitle(
   test: { series_number: number | null },
   examName: string,

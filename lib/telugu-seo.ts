@@ -1,3 +1,33 @@
+export type VacancyDetail = {
+  postCode: string;
+  postName: string;
+  department: string;
+  vacancies: number;
+  payScale: string;
+  genderEligibility: string;
+};
+
+export type QualifyingMarkDetail = {
+  category: string;
+  pwtPercentage: string;
+  pwtMarks: string;
+  fwePercentage: string;
+  fweMarks: string;
+};
+
+export type PhysicalStandardDetail = {
+  event: string;
+  menStandard: string;
+  womenStandard: string;
+  nature: string;
+};
+
+export type AgeLimitDetail = {
+  category: string;
+  ageRange: string;
+  basis: string;
+};
+
 export type ExamPatternInfo = {
   authority: string;
   totalQuestions?: number | null;
@@ -12,6 +42,8 @@ export type ExamPatternInfo = {
     teluguName: string;
     description: string;
   }>;
+  qualifyingMarks?: QualifyingMarkDetail[];
+  physicalStandards?: PhysicalStandardDetail[];
 };
 
 export type ExamScheduleInfo = {
@@ -22,6 +54,11 @@ export type ExamScheduleInfo = {
   prelimsDuration: string;
   hallTicketRelease: string;
   officialWebsite: string;
+  notificationNumber?: string;
+  notificationDate?: string;
+  totalVacancies?: number;
+  vacancies?: VacancyDetail[];
+  ageLimits?: AgeLimitDetail[];
   notificationRelease?: string;
   applicationStart?: string;
   applicationEnd?: string;
@@ -68,10 +105,10 @@ export type ExamTeluguSeo = {
 
 const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ పోలీస్ కానిస్టేబుల్",
-  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్, సిలబస్ & పరీక్ష తేదీ 2026 (TGPRB OMR విధానం)",
+  teluguTitle: "తెలంగాణ పోలీస్ కానిస్టేబుల్ 7,112 పోస్టుల నోటిఫికేషన్, సిలబస్, పరీక్ష తేదీ & ఉచిత మాక్ టెస్ట్ 2026 (TSLPRB OMR విధానం)",
   bilingualPageTitle: "Telangana Police / TG Police Constable Free Mock Test 2026, Syllabus & Exam Date | తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
   bilingualDescription:
-    "TG Police Constable exam syllabus 2026, PWT exam date (20 Dec 2026), OMR pattern & free mock tests in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్, పరీక్ష తేదీ & మాక్ టెస్ట్‌లు.",
+    "TS Police Constable Notification 2026 (Rc No. 189/Rect./Rect.2/2026) for 7,112 vacancies. Official PWT syllabus, OMR pattern, age limit (GO Ms 87), physical standards & free bilingual mock tests in Telugu & English. తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్, పరీక్ష తేదీ & మాక్ టెస్ట్‌లు.",
   keywords: [
     "Telangana constable exam date",
     "Telangana police mock test",
@@ -110,6 +147,25 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "police constable model papers with solutions in telugu",
     "TG Police Constable online test series",
     "Telangana police constable previous papers online",
+    "TS Police Constable Notification 2026 PDF",
+    "TSLPRB Constable 7112 Vacancies",
+    "Telangana Police Constable Notification 2026",
+    "TS Police Constable Syllabus in Telugu PDF",
+    "TS Police Constable Exam Pattern 200 Questions",
+    "TS Police Constable Age Limit GO Ms 87",
+    "TS Police Constable Negative Marking 20%",
+    "TS Police Constable Qualifying Marks 2026",
+    "TS Police Constable PET PMT Standards",
+    "TS Police Constable 1600 meters Run Time",
+    "TS Police Constable Pay Scale 24280-72850",
+    "TS Police Constable Selection Process PWT PMT PET FWE",
+    "TSLPRB Police Constable Free Mock Test 2026",
+    "tgprb.in police constable notification download",
+    "Telangana police constable qualifying marks PWT FWE",
+    "Telangana police constable duties and responsibilities",
+    "TG police constable salary and pay scale",
+    "Telangana constable job profile",
+    "Telangana police constable eligibility criteria age limit",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్",
     "తెలంగాణ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్ 2026",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ 2026",
@@ -125,29 +181,29 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     "తెలంగాణ పోలీస్ ఎగ్జామ్ టెస్ట్ సిరీస్",
     "తెలంగాణ పోలీస్ OMR పరీక్ష విధానం",
     "TG police constable offline OMR mock test",
-    "Telangana police constable duties and responsibilities",
-    "TG police constable salary and pay scale",
-    "Telangana constable job profile",
-    "Telangana police constable eligibility criteria age limit",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ 2026",
+    "తెలంగాణ కానిస్టేబుల్ 7112 పోస్టుల వివరాలు",
+    "తెలంగాణ కానిస్టేబుల్ సిలబస్ తెలుగులో 200 ప్రశ్నలు",
+    "తెలంగాణ పోలీస్ ఈవెంట్స్ 1600 మీటర్లు రన్ టైమింగ్స్",
+    "తెలంగాణ పోలీస్ కానిస్టేబుల్ అర్హతలు వయోపరిమితి జీతం",
     "తెలంగాణ పోలీస్ కానిస్టేబుల్ విధులు జీతం",
     "తెలంగాణ కానిస్టేబుల్ జాబ్ ప్రొఫైల్ అర్హతలు",
-
   ],
   jobProfile: {
-    roleTitle: "SCT Police Constable (Civil / AR / TSRTC / TSSP)",
-    department: "Telangana State Police Department (Home Department)",
-    payScale: "₹24,280 – ₹72,850 (RPS Pay Scale)",
-    grossSalaryMonthly: "₹34,000 – ₹39,000 / month (approx. with DA, HRA & Special Allowances)",
+    roleTitle: "SCT Police Constable (Civil / AR / SAR CPL / SPF / Fire / Warder)",
+    department: "Telangana State Police & Allied Departments (Home Department)",
+    payScale: "₹24,280 – ₹72,850",
+    grossSalaryMonthly: "₹34,000 – ₹39,000 / month (approx. with DA, HRA & Allowances)",
     eligibility: {
-      ageLimit: "18 to 25 Years for General/UR candidates (up to 5 years relaxation for BC/SC/ST/EWS and departmental exemptions).",
-      education: "Must have passed Intermediate (10+2) or its equivalent examination conducted by the Board of Intermediate Education or recognized State Board.",
-      physicalStandards: "Men (Civil/AR): Height ≥ 167.6 cm, Chest ≥ 86.3 cm (5 cm expansion). Women: Height ≥ 152.5 cm. PMT/PET includes 1600m / 800m run, Long Jump, and Shot Put.",
+      ageLimit: "18 to 27 Years for General/OC (Prescribed 18–22 + 5 years relaxation under GO Ms No. 87). Up to 32 years for BC/SC/ST/EWS.",
+      education: "Must have passed Intermediate (10+2) or equivalent recognized by State Government as on 29th July 2026. Higher qualifications allowed on par. Valid LMV license required for Fire Fighter.",
+      physicalStandards: "Men: Height ≥ 167.6 cm (160 cm for Agency ST). Women: Height ≥ 152.5 cm (150 cm for Agency ST). PET: 1600m / 800m run, Long Jump, Shot Put.",
     },
     duties: [
       {
         title: "Law & Order Maintenance & Beat Patrolling",
         teluguTitle: "శాంతిభద్రతల పరిరక్షణ & బీట్ పెట్రోలింగ్",
-        description: "Executing regular day and night foot and vehicle beats in station jurisdiction, surveillance on anti-social elements, crime prevention, and maintaining public order during festivals, rallies, and elections.",
+        description: "Executing regular day and night foot and mobile beats in station jurisdiction, surveillance on anti-social elements, crime prevention, and maintaining public order during festivals, rallies, and elections.",
       },
       {
         title: "Crime Scene Support & Station Sentry Duty",
@@ -157,7 +213,7 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
       {
         title: "Emergency Response & Dial 100 / 112 Mobile Patrol",
         teluguTitle: "డయల్ 100 అత్యవసర ప్రతిస్పందన",
-        description: "Serving as frontline emergency responders in Blue Colts and Patrol Mobiles, reaching distress locations swiftly upon receiving Dial 100 calls to provide citizen assistance.",
+        description: "Serving as frontline emergency responders in Blue Colts and Patrol Mobiles, reaching distress locations swiftly upon receiving Dial 100 calls to provide immediate citizen assistance.",
       },
       {
         title: "Court Duty, Summons Delivery & Prisoner Escort",
@@ -179,210 +235,360 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
     ],
   },
   schedule: {
-    authority: "TGPRB (Telangana State Level Police Recruitment Board)",
-    postName: "SCT Police Constable (Civil / AR / TSRTC / TSSP)",
+    authority: "TSLPRB (Telangana State Level Police Recruitment Board)",
+    postName: "SCT Police Constable (Civil / AR / SAR CPL), TGSPF Constable, Fire Fighter & Warders",
+    notificationNumber: "Rc No. 189 / Rect. / Rect.2 / 2026",
+    notificationDate: "29th July 2026",
+    totalVacancies: 7112,
     prelimsExamDate: "20 December 2026 (Sunday)",
     prelimsSession: "Forenoon Session (10:00 AM – 1:00 PM)",
     prelimsDuration: "3 Hours (180 Minutes)",
     hallTicketRelease: "7–10 Days Before PWT Exam Date",
     officialWebsite: "https://www.tgprb.in",
+    vacancies: [
+      {
+        postCode: "21",
+        postName: "SCT Police Constable (Civil)",
+        department: "Telangana Police Department",
+        vacancies: 3697,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Men & Women",
+      },
+      {
+        postCode: "22",
+        postName: "SCT Police Constable (AR)",
+        department: "Telangana Police Department",
+        vacancies: 1052,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Men & Women",
+      },
+      {
+        postCode: "23",
+        postName: "SCT Police Constable (SAR CPL)",
+        department: "Telangana Police Department",
+        vacancies: 24,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Men Only",
+      },
+      {
+        postCode: "25",
+        postName: "SCT Constable",
+        department: "Telangana Special Protection Force (TGSPF)",
+        vacancies: 1380,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Men & Women",
+      },
+      {
+        postCode: "26",
+        postName: "Fire Fighter",
+        department: "Telangana Disaster Response & Fire Services",
+        vacancies: 751,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Men & Women (Requires LMV License)",
+      },
+      {
+        postCode: "27",
+        postName: "Warder (Male)",
+        department: "Telangana Prisons & Correctional Services",
+        vacancies: 196,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Men Only",
+      },
+      {
+        postCode: "28",
+        postName: "Warder (Female)",
+        department: "Telangana Prisons & Correctional Services",
+        vacancies: 12,
+        payScale: "₹24,280 – ₹72,850",
+        genderEligibility: "Women Only",
+      },
+    ],
+    ageLimits: [
+      {
+        category: "General / Open Competition (OC)",
+        ageRange: "18 to 27 Years",
+        basis: "Base 18–22 years as on 01-07-2026 + 5 years general relaxation under GO Ms No. 87 dated 18-05-2026",
+      },
+      {
+        category: "BC, SC, ST & EWS Candidates",
+        ageRange: "18 to 32 Years",
+        basis: "5 years additional statutory reservation relaxation on top of GO Ms No. 87",
+      },
+      {
+        category: "Home Guards (Min. 360 days in 2 years)",
+        ageRange: "18 to 45 Years",
+        basis: "Base 18–40 years + 5 years general relaxation under GO Ms No. 87",
+      },
+      {
+        category: "Telangana State Govt Employees",
+        ageRange: "Up to 5 Years Relaxation",
+        basis: "Length of regular service (excluding Corporations/Public Undertakings)",
+      },
+      {
+        category: "Ex-Servicemen & NCC Instructors",
+        ageRange: "3 Years + Length of Service",
+        basis: "Rendered in Armed Forces / whole-time NCC Cadet Corps Instructors",
+      },
+      {
+        category: "Widows & Divorced Women (Unremarried)",
+        ageRange: "Up to 40 Years (45 for SC/ST)",
+        basis: "Eligible for Post Codes 21, 22, 25, 26 and 28 under rules",
+      },
+    ],
     events: [
       {
-        title: "Official Notification & Online Applications",
-        teluguTitle: "అధికారిక నోటిఫికేషన్ & దరఖాస్తుల ప్రక్రియ",
-        date: "Released by TGPRB",
+        title: "Official Notification (Rc No. 189/Rect./Rect.2/2026)",
+        teluguTitle: "అధికారిక నోటిఫికేషన్ విడుదల (7,112 ఖాళీలు)",
+        date: "29 July 2026",
         status: "Completed",
-        detail: "Online registration completed on the official tgprb.in portal.",
+        detail: "TSLPRB issued notification for 7,112 posts across Police, TGSPF, Fire Services & Prisons.",
+      },
+      {
+        title: "Online Application Registration (www.tgprb.in)",
+        teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల నమోదు ప్రక్రియ",
+        date: "Completed on Portal",
+        status: "Completed",
+        detail: "Part-I online registration completed using Mobile Number as User ID.",
       },
       {
         title: "Preliminary Written Test (PWT) Hall Ticket Download",
         teluguTitle: "ప్రిలిమినరీ రాత పరీక్ష హాల్ టికెట్ విడుదల",
         date: "December 2026 (7-10 days prior)",
         status: "Upcoming",
-        detail: "Admit cards downloadable online via mobile number and registration login.",
+        detail: "Admit cards downloadable online via mobile number and registration login on tgprb.in.",
       },
       {
         title: "Preliminary Written Test (PWT) Exam Date",
         teluguTitle: "ప్రిలిమినరీ రాత పరీక్ష (PWT) నిర్వహణ తేదీ",
         date: "20 December 2026 (Sunday)",
         status: "Upcoming",
-        detail: "Offline OMR Based Written Test, 200 Questions, 200 Marks, 0.25 Negative Marking.",
+        detail: "Offline OMR Written Test, 200 Questions, 200 Marks, 3 Hours, 20% negative marking.",
       },
       {
         title: "Physical Measurement Test (PMT) & Physical Efficiency Test (PET)",
         teluguTitle: "శారీరక కొలతలు & దేహదారుఢ్య పరీక్షలు (PMT / PET)",
         date: "Scheduled post PWT results",
         status: "Upcoming",
-        detail: "1600m / 800m running, long jump, and shot put for qualified candidates.",
+        detail: "1600m / 800m run, Long Jump (4m/2.5m), and Shot Put (6m/4m) for PWT qualified candidates.",
       },
       {
         title: "Final Written Examination (FWE)",
         teluguTitle: "తుది రాత పరీక్ష (Final Written Exam)",
         date: "Post-PMT/PET Timeline",
         status: "Upcoming",
-        detail: "Final merit ranking and selection examination stage.",
+        detail: "Final merit ranking examination: 200 Marks for Civil/Fire/Warder, 100 Marks for AR/SPF.",
       },
     ],
   },
   pattern: {
-    authority: "TGPRB (Telangana State Level Police Recruitment Board)",
+    authority: "TSLPRB (Telangana State Level Police Recruitment Board)",
     totalQuestions: 200,
     totalMarks: 200,
     durationMinutes: 180,
-    negativeMarking: "0.25 (1/4 mark deducted per wrong answer)",
-    medium: "Bilingual (Telugu & English)",
-    mode: "OMR Based Written Test (Offline OMR Sheet)",
+    negativeMarking: "0.20 (20% negative mark per wrong answer)",
+    medium: "Bilingual (English & Telugu / Urdu)",
+    mode: "OMR Based Written Test (Offline OMR Sheet with Ball Point Pen)",
     stages: [
-      "Stage 1: Preliminary Written Test (PWT) - 200 Marks (Offline OMR Sheet)",
+      "Stage 1: Preliminary Written Test (PWT) - 200 Marks (1 Paper, 3 Hours, Offline OMR)",
       "Stage 2: Physical Measurement Test (PMT) & Physical Efficiency Test (PET)",
-      "Stage 3: Final Written Examination (FWE) - Offline OMR Sheet",
+      "Stage 3: Final Written Examination (FWE) - 200 Marks (Civil/Fire/Warder) / 100 Marks (AR/SPF)",
+    ],
+    qualifyingMarks: [
+      {
+        category: "Open Competition (OC) & EWS",
+        pwtPercentage: "30%",
+        pwtMarks: "60 Marks / 200",
+        fwePercentage: "40%",
+        fweMarks: "80 Marks / 200 (Civil/Fire) | 40 Marks / 100 (AR/SPF)",
+      },
+      {
+        category: "Backward Classes (BC)",
+        pwtPercentage: "25%",
+        pwtMarks: "50 Marks / 200",
+        fwePercentage: "35%",
+        fweMarks: "70 Marks / 200 (Civil/Fire) | 35 Marks / 100 (AR/SPF)",
+      },
+      {
+        category: "SC / ST / Ex-Servicemen / Home Guards",
+        pwtPercentage: "20%",
+        pwtMarks: "40 Marks / 200",
+        fwePercentage: "30%",
+        fweMarks: "60 Marks / 200 (Civil/Fire) | 30 Marks / 100 (AR/SPF)",
+      },
+    ],
+    physicalStandards: [
+      {
+        event: "Height (General Candidates)",
+        menStandard: "Minimum 167.6 cms",
+        womenStandard: "Minimum 152.5 cms",
+        nature: "Physical Measurement Test (PMT)",
+      },
+      {
+        event: "Height (ST & Aboriginals in Agency Areas)",
+        menStandard: "Minimum 160.0 cms",
+        womenStandard: "Minimum 150.0 cms",
+        nature: "Relaxed PMT Standard (GO Ms No. 24)",
+      },
+      {
+        event: "1600m Run (Men) / 800m Run (Women)",
+        menStandard: "Max 7 mins 15 secs (Ex-SM: 9m 30s)",
+        womenStandard: "Max 5 mins 20 secs",
+        nature: "Qualifying (Civil/Fire/Warder) | Graded up to 100 Marks (AR/SAR/TGSPF)",
+      },
+      {
+        event: "Long Jump",
+        menStandard: "Minimum 4.00 meters (Ex-SM: 3.50m)",
+        womenStandard: "Minimum 2.50 meters",
+        nature: "Qualifying in nature",
+      },
+      {
+        event: "Shot Put",
+        menStandard: "Minimum 6.00 meters (Weight: 7.26 Kgs)",
+        womenStandard: "Minimum 4.00 meters (Weight: 4.00 Kgs)",
+        nature: "Qualifying in nature",
+      },
+      {
+        event: "Medical Eye Sight",
+        menStandard: "Distant 6/6, Near 0/5 (Snellen)",
+        womenStandard: "Distant 6/6, Near 0/5 (Snellen)",
+        nature: "Free from colour blindness & morbid conditions",
+      },
     ],
     subjects: [
       {
-        name: "Arithmetic & Quantitative Aptitude",
-        teluguName: "అర్థమెటిక్ & సంఖ్యా సామర్థ్యం",
-        description: "Number systems, percentages, averages, ratio & proportion, profit & loss, time & work, simple & compound interest, data interpretation.",
+        name: "English",
+        teluguName: "ఇంగ్లీష్ లాంగ్వేజ్ (ఆబ్జెక్టివ్)",
+        description: "Comprehension passage, vocabulary, synonyms & antonyms, spotting errors, grammar rules, prepositions, active & passive voice, sentence correction.",
       },
       {
-        name: "Test of Reasoning & Mental Ability",
-        teluguName: "రీజనింగ్ & మెంటల్ ఎబిలిటీ",
-        description: "Analogy, series completion, coding-decoding, blood relations, direction sense, syllogisms, puzzle tests, non-verbal reasoning.",
+        name: "Arithmetic",
+        teluguName: "అర్థమెటిక్ & సంఖ్యా సామర్థ్యం",
+        description: "Number systems, LCM & HCF, fractions & decimals, percentages, averages, ratio & proportion, profit & loss, simple & compound interest, time & work, time & distance.",
       },
       {
         name: "General Science",
         teluguName: "జనరల్ సైన్స్",
-        description: "Everyday science observation, basic concepts of physics, chemistry, biology, scientific inventions, environmental studies.",
+        description: "Everyday science observations, fundamental physics, chemistry in daily life, human anatomy, diseases & prevention, botany, zoology, environmental science.",
       },
       {
-        name: "History of India & Indian Culture",
-        teluguName: "భారత దేశ చరిత్ర & సంస్కృతి",
-        description: "Ancient, medieval, and modern Indian history, socio-cultural movements, freedom struggle, prominent national leaders.",
+        name: "History of India, Indian Culture & Indian National Movement",
+        teluguName: "భారత దేశ చరిత్ర, సంస్కృతి & జాతీయోద్యమం",
+        description: "Ancient civilizations, medieval India, Mughal administration, British rule, 1857 Revolt, socio-religious movements, freedom struggle, prominent national leaders.",
       },
       {
-        name: "Telangana History, Movement & State Formation",
-        teluguName: "తెలంగాణ చరిత్ర, ఉద్యమం & రాష్ట్ర ఆవిర్భావం",
-        description: "Satavahanas, Kakatiyas, Asaf Jahis, Telangana Armed Struggle, 1969 agitation, Telangana statehood movement & cultural heritage.",
-      },
-      {
-        name: "Indian Geography, Polity & Economy",
-        teluguName: "భారత భూగోళశాస్త్రం, రాజనీతి & ఆర్థిక వ్యవస్థ",
-        description: "Physical geography of India & Telangana, Indian Constitution, political system, fundamental rights, economic planning & development.",
+        name: "Principles of Geography, Indian Geography, Polity & Economy",
+        teluguName: "భౌగోళిక సూత్రాలు, భారత భూగోళం, రాజనీతి & ఆర్థిక వ్యవస్థ",
+        description: "Physical geography, Indian physiography, rivers, climate, Constitution of India, fundamental rights & duties, Parliament, Judiciary, planning & Indian economy.",
       },
       {
         name: "Current Events of National & International Importance",
-        teluguName: "సమకాలీన అంశాలు (కరెంట్ అఫైర్స్)",
-        description: "Recent national & global developments, awards, sports, appointments, science & tech milestones, state welfare schemes.",
+        teluguName: "సమకాలీన అంశాలు (జాతీయ & అంతర్జాతీయ కరెంట్ అఫైర్స్)",
+        description: "Recent national & international developments, major summits, sports tournaments, prestigious awards, science & technology breakthroughs, government welfare schemes.",
+      },
+      {
+        name: "Test of Reasoning / Mental Ability",
+        teluguName: "రీజనింగ్ & మెంటల్ ఎబిలిటీ",
+        description: "Analogy, series completion, coding-decoding, blood relations, direction sense, syllogisms, Venn diagrams, non-verbal patterns, spatial visualization.",
+      },
+      {
+        name: "Contents Pertaining to the State of Telangana",
+        teluguName: "తెలంగాణ చరిత్ర, ఉద్యమం, సంస్కృతి & ప్రత్యేకతలు",
+        description: "History of Telangana (Satavahanas, Kakatiyas, Qutb Shahis, Asaf Jahis), Telangana armed struggle, 1969 agitation, statehood movement (1948–2014), art, literature, fairs, festivals, geography & state schemes.",
+      },
+      {
+        name: "Personality Test (Ethics & Sensitivity - FWE Stage)",
+        teluguName: "వ్యక్తిత్వ పరీక్ష (ఎథిక్స్ & సామాజిక అవగాహన)",
+        description: "Ethics, sensitivity to gender and weaker sections, social awareness, emotional intelligence, empathetic public policing demeanor.",
       },
     ],
   },
   englishFaqs: [
     {
-      question: "What is the Telangana Police Constable exam date for 2026?",
+      question: "How many total vacancies are announced in the TS Police Constable Notification 2026?",
       answer:
-        "The Telangana State Level Police Recruitment Board (TGPRB / TSLPRB) Preliminary Written Test (PWT) for SCT Police Constable (Civil and equivalent) is scheduled for 20 December 2026 (Sunday) in the forenoon session (10:00 AM – 1:00 PM). Candidates should practice full-length 200-question timed mock tests on Varadhi Prep to prepare for the offline OMR sheet format.",
+        "The Telangana State Level Police Recruitment Board (TSLPRB) notification (Rc No. 189 / Rect. / Rect.2 / 2026) announces a total of 7,112 vacancies: 3,697 SCT Police Constable (Civil), 1,052 SCT Police Constable (AR), 24 SCT Police Constable (SAR CPL), 1,380 SCT Constable in TGSPF, 751 Fire Fighters, and 208 Warders in Prisons Department.",
     },
     {
-      question: "When will the Telangana Police Constable hall ticket 2026 be released?",
+      question: "What is the pay scale for Telangana Police Constable posts?",
       answer:
-        "The TGPRB Police Constable Preliminary Written Test admit card / hall ticket will be made available for download on the official website (tgprb.in / tslprb.in) approximately 7 to 10 days before the exam date. Registered candidates can log in with their phone number and password to print their hall ticket.",
+        "As officially notified, the revised pay scale for SCT Police Constable (Civil/AR/SAR CPL), TGSPF Constable, Fire Fighter, and Warders is ₹24,280 – ₹72,850. The gross monthly salary is approximately ₹34,000 to ₹39,000 per month including DA, HRA, and state police allowances.",
     },
     {
-      question: "What is the official syllabus for Telangana Police Constable Preliminary Written Test (PWT)?",
+      question: "What is the age limit for TS Police Constable 2026? Is there any age relaxation?",
       answer:
-        "The official PWT syllabus comprises 200 objective multiple-choice questions for 200 marks (3 hours duration) across: (1) Arithmetic and Test of Reasoning / Mental Ability (approx. 100 questions); and (2) General Studies (approx. 100 questions) including General Science, Indian History, Telangana Movement and State Formation, Indian Geography, Polity, Economy, and Current Affairs. Negative marking of 0.25 is deducted for each incorrect answer.",
+        "Candidates must be between 18 to 22 years of age as on 1st July 2026. However, the Government of Telangana vide GO Ms No. 87, GA (Services-A) Dept dated 18-05-2026 has raised the upper age limit by 5 years for direct recruitment to uniformed services. Thus, General/OC candidates can apply up to 27 years. SC, ST, BC, and EWS candidates receive an additional 5-year relaxation up to 32 years. Home Guards can apply up to 45 years.",
     },
     {
-      question: "Is the official Telangana Police Constable exam conducted online (CBT) or offline (OMR)?",
+      question: "What is the official exam pattern for TS Police Constable Preliminary Written Test (PWT)?",
       answer:
-        "The official Telangana Police Constable Preliminary Written Test (PWT) and Final Written Examination (FWE) conducted by TGPRB (TSLPRB) are offline OMR-based written tests where candidates bubble answers on an OMR answer sheet. Varadhi Prep provides online mock tests strictly modeled after the official 200-question, 3-hour, 0.25-negative-marking OMR pattern to build speed, accuracy, and exam discipline.",
+        "The PWT consists of 1 paper with 200 objective multiple-choice questions for 200 marks, with a duration of 3 hours (180 minutes). The exam is conducted offline on an OMR sheet using blue or black ballpoint pen. For each incorrect answer, 20% of full marks (0.20 marks) is deducted as negative marking.",
     },
     {
-      question: "How can I practice Telangana Police Constable mock tests for free on Varadhi Prep?",
+      question: "What are the minimum qualifying marks in TS Police Constable PWT and FWE?",
       answer:
-        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and click on any published mock test to start practicing immediately with full timer and instant bilingual explanations without any payment.",
+        "For the Preliminary Written Test (PWT): 30% for OC and EWS (60 marks out of 200); 25% for BC (50 marks); and 20% for SC, ST, Ex-Servicemen, and Home Guards (40 marks). For the Final Written Examination (FWE): 40% for OC/EWS, 35% for BC, and 30% for SC/ST/Ex-Servicemen.",
     },
     {
-      question: "What is the exam pattern for Telangana Police Constable Preliminary Written Test (PWT)?",
+      question: "What are the physical standards and events for TS Police Constable PMT & PET?",
       answer:
-        "The PWT consists of 200 objective multiple-choice questions for 200 marks with a duration of 3 hours (180 minutes) on an offline OMR sheet. There is a negative marking of 0.25 marks for every incorrect answer.",
+        "Men must meet a minimum height of 167.6 cm (160 cm for Agency ST) and qualify the 1600m Run in 7 mins 15 secs (Ex-SM: 9m 30s), Long Jump of 4.00 meters, and Shot Put (7.26 kg) of 6.00 meters. Women must meet a minimum height of 152.5 cm (150 cm for Agency ST) and qualify the 800m Run in 5 mins 20 secs, Long Jump of 2.50 meters, and Shot Put (4 kg) of 4.00 meters.",
     },
     {
-      question: "Are the mock test questions available in both Telugu and English?",
+      question: "What is the syllabus for the TS Police Constable Preliminary Written Test (Annexure II)?",
       answer:
-        "Yes, every mock test on Varadhi Prep features full bilingual support. You can toggle between Telugu and English question views and review detailed explanations in both languages.",
+        "The PWT syllabus (Intermediate Standard) covers 8 subjects: (1) English, (2) Arithmetic, (3) General Science, (4) History of India & Indian Culture, (5) Principles of Geography, Indian Geography, Polity & Economy, (6) Current Events of National & International Importance, (7) Test of Reasoning / Mental Ability, and (8) Contents pertaining to the State of Telangana.",
     },
     {
-      question: "Is there negative marking in the Telangana Police Constable mock tests?",
+      question: "Is there negative marking in the Telangana Police Constable exam?",
       answer:
-        "Yes, all Varadhi Prep Telangana Police Constable mock tests accurately simulate the official TGPRB/TSLPRB rule of 0.25 negative marks per incorrect attempt, ensuring realistic score estimation.",
+        "Yes. As per Para 16(A)(3) of the official TSLPRB notification, 20% of full marks (0.20 mark) is deducted as negative mark for each wrong bubble on the OMR answer sheet. Unanswered questions receive zero marks.",
     },
     {
-      question: "What subjects are covered in the Telangana Police Constable mock test series?",
+      question: "How can I practice TS Police Constable mock tests for free on Varadhi Prep?",
       answer:
-        "The test series covers Arithmetic, Test of Reasoning, General Science, History of India, Telangana History & Movement, Indian Geography, Polity, Economy, and Current Affairs as per the official TGPRB syllabus.",
-    },
-    {
-      question: "Are these mock tests updated according to the latest TG Police Constable notification and syllabus?",
-      answer:
-        "Yes, all mock tests on Varadhi Prep are strictly mapped to the latest TGPRB notification syllabus, including 200 objective questions, 3-hour duration, and official 0.25 negative marking rules.",
+        "Select the Telangana Police Constable exam on Varadhi Prep, choose the Preliminary Written Test (PWT) paper, and practice timed 200-question bilingual mock tests strictly matching the official TSLPRB OMR scheme with instant explanations at zero cost.",
     },
   ],
   teluguFaqs: [
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష తేదీ (Exam Date 2026) ఎప్పుడు?",
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ 2026 లో మొత్తం ఎన్ని ఖాళీలు ఉన్నాయి?",
       answer:
-        "తెలంగాణ స్టేట్ లెవల్ పోలీస్ రిక్రూట్‌మెంట్ బోర్డ్ (TGPRB/TSLPRB) కానిస్టేబుల్ ప్రిలిమినరీ రాత పరీక్ష (PWT) 20 డిసెంబర్ 2026 (ఆదివారం) ఉదయం సెషన్‌లో నిర్వహించబడుతుంది. అభ్యర్థులు అధికారిక ఓఎంఆర్ విధానం ప్రకారం 200 ప్రశ్నలు, 3 గంటల సమయం మరియు 0.25 నెగెటివ్ మార్కింగ్ గల పూర్తి మాక్ టెస్ట్‌లను వరధి ప్రెప్‌లో ఉచితంగా సాధన చేయవచ్చు.",
+        "తెలంగాణ స్టేట్ లెవల్ పోలీస్ రిక్రూట్‌మెంట్ బోర్డ్ (TSLPRB నోటిఫికేషన్ Rc No. 189/Rect./Rect.2/2026) ప్రకారం మొత్తం 7,112 పోస్టులు భర్తీ చేయబడుతున్నాయి. ఇందులో పోలీస్ కానిస్టేబుల్ సివిల్ 3,697, ఏఆర్ 1,052, ఎస్ఏఆర్ సిపీఎల్ 24, టిజిఎస్పీఎఫ్ కానిస్టేబుల్ 1,380, ఫైర్ ఫైటర్ 751, జైళ్ల శాఖ వార్డర్ పోస్టులు 208 ఉన్నాయి.",
     },
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ హాల్ టికెట్లు ఎప్పుడు విడుదలవుతాయి?",
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ వేతన స్కేలు (Pay Scale & Salary) ఎంత?",
       answer:
-        "అధికారిక TGPRB నిబంధనల ప్రకారం పరీక్ష తేదీకి సుమారు 7 నుండి 10 రోజుల ముందు అధికారిక పోర్టల్ (tgprb.in) లో పోలీస్ కానిస్టేబుల్ హాల్ టికెట్లు అందుబాటులో ఉంచబడతాయి. అభ్యర్థులు తమ మొబైల్ నంబర్ మరియు పాస్‌వర్డ్ ద్వారా లాగిన్ అయి అడ్మిట్ కార్డును డౌన్‌లోడ్ చేసుకోవచ్చు.",
+        "అధికారిక నోటిఫికేషన్ ప్రకారం పోలీస్ కానిస్టేబుల్, ఎస్పీఎఫ్, ఫైర్ ఫైటర్ మరియు వార్డర్ పోస్టులన్నింటికీ అధికారిక పే స్కేలు ₹24,280 – ₹72,850. డీఏ, హెచ్ఆర్ఏ మరియు పోలీస్ అలవెన్సులతో కలిపి ప్రారంభ స్థూల వేతనం నెలకు సుమారు ₹34,000 నుండి ₹39,000 వరకు ఉంటుంది.",
     },
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ సిలబస్ మరియు మార్కుల కేటాయింపు ఏమిటి?",
+      question: "తెలంగాణ కానిస్టేబుల్ వయోపరిమితి ఎంత? జీవో 87 ప్రకారం ఎంత సడలింపు ఉంది?",
       answer:
-        "ప్రిలిమ్స్ (PWT) పరీక్ష మొత్తం 200 మార్కులకు (200 ప్రశ్నలు) 3 గంటల వ్యవధిలో జరుగుతుంది. ఇందులో అర్థమెటిక్ & రీజనింగ్ (దాదాపు 100 ప్రశ్నలు), జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ ఉద్యమం & రాష్ట్ర ఆవిర్భావం, భూగోళశాస్త్రం, రాజ్యాంగం, ఆర్థిక వ్యవస్థ మరియు కరెంట్ అఫైర్స్ (దాదాపు 100 ప్రశ్నలు) ఉంటాయి. ప్రతి తప్పు సమాధానానికి 0.25 నెగెటివ్ మార్కు ఉంటుంది.",
+        "సాధారణ నిబంధనల ప్రకారం 01-07-2026 నాటికి 18 నుండి 22 సంవత్సరాలు ఉండాలి. అయితే తెలంగాణ ప్రభుత్వం జీవో ఎంఎస్ నం. 87 (తేదీ: 18-05-2026) ద్వారా యూనిఫామ్ సర్వీసుల అభ్యర్థులకు గరిష్ట వయోపరిమితిని 5 సంవత్సరాలు పెంచింది. దీనితో జనరల్/ఓసీ అభ్యర్థులు 27 సంవత్సరాల వరకు దరఖాస్తు చేసుకోవచ్చు. బీసీ, ఎస్సీ, ఎస్టీ, ఈడబ్ల్యూఎస్ అభ్యర్థులకు అదనంగా మరో 5 ఏళ్ల సడలింపుతో 32 సంవత్సరాల వరకు అర్హత ఉంటుంది.",
     },
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ పరీక్ష విధానం ఏమిటి? ఇది ఆన్‌లైన్ (CBT) పరీక్షా లేక OMR పరీక్షా?",
+      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ (PWT) పరీక్ష విధానం మరియు నెగెటివ్ మార్కింగ్ ఎంత?",
       answer:
-        "తెలంగాణ స్టేట్ లెవల్ పోలీస్ రిక్రూట్‌మెంట్ బోర్డ్ (TGPRB/TSLPRB) నిర్వహించే కానిస్టేబుల్ ప్రిలిమ్స్ (PWT) మరియు మెయిన్స్ (FWE) పరీక్షలు ఆఫ్‌లైన్ OMR షీట్ ఆధారిత రాత పరీక్షలు (Offline OMR Based Exam). అభ్యర్థులు ఓఎంఆర్ షీట్‌పై సరైన సమాధానాలను బబ్లింగ్ చేయాల్సి ఉంటుంది. వరధి ప్రెప్ (Varadhi Prep) ఈ పరీక్ష సిలబస్, 200 ప్రశ్నలు, 3 గంటల సమయం మరియు 0.25 నెగెటివ్ మార్కింగ్ నిబంధనలకు అనుగుణంగా ఆన్‌లైన్ ప్రాక్టీస్ టెస్టులను ఉచితంగా అందిస్తుంది.",
+        "ప్రిలిమ్స్ రాత పరీక్ష (PWT) ఒకే పేపర్‌గా 200 ఆబ్జెక్టివ్ ప్రశ్నలతో 200 మార్కులకు 3 గంటల (180 నిమిషాలు) వ్యవధిలో ఆఫ్‌లైన్ ఓఎంఆర్ షీట్‌పై నిర్వహించబడుతుంది. ప్రతి తప్పు సమాధానానికి 20% మార్కులు (అంటే 0.20 మార్కు) నెగెటివ్ మార్కింగ్‌గా తీసివేయబడుతుంది.",
     },
     {
-      question: "ఈ పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మాధ్యమంలో అందుబాటులో ఉన్నాయా?",
+      question: "ప్రిలిమ్స్ (PWT) మరియు మెయిన్స్ (FWE) పరీక్షల్లో క్వాలిఫైయింగ్ మార్కులు ఎంత?",
       answer:
-        "అవును, వరధి ప్రెప్ (Varadhi Prep) లోని అన్ని పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు తెలుగు మరియు ఇంగ్లీష్ (Bilingual) మాధ్యమంలో ప్రశ్నలు మరియు పూర్తి వివరణాత్మక సమాధానాలతో లభిస్తాయి.",
+        "ప్రిలిమ్స్ రాత పరీక్షలో కనీస అర్హత మార్కులు: ఓసీ & ఈడబ్ల్యూఎస్ అభ్యర్థులకు 30% (60 మార్కులు); బీసీలకు 25% (50 మార్కులు); ఎస్సీ, ఎస్టీ, మాజీ సైనికులు, హోంగార్డులకు 20% (40 మార్కులు). మెయిన్స్ పరీక్షలో ఓసీలకు 40%, బీసీలకు 35%, ఎస్సీ/ఎస్టీలకు 30% మార్కులు సాధించాలి.",
     },
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ మరియు నోటిఫికేషన్ వివరాలు ఏమిటి?",
+      question: "పోలీస్ ఈవెంట్స్ (PMT & PET) శారీరక కొలతలు మరియు ఈవెంట్స్ ప్రమాణాలు ఏమిటి?",
       answer:
-        "TGPRB తాజా నిబంధనల ప్రకారం ప్రిలిమినరీ పరీక్ష (PWT) లో 200 ప్రశ్నలు, 200 మార్కులు ఉంటాయి. సమయం 3 గంటలు. ఇందులో అర్థమెటిక్, రీజనింగ్, జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ ఉద్యమం & చరిత్ర, భూగోళశాస్త్రం, రాజ్యాంగం మరియు కరెంట్ అఫైర్స్ సిలబస్‌గా ఉంటాయి.",
+        "పురుష అభ్యర్థుల ఎత్తు కనీసం 167.6 సెం.మీ (ఏజెన్సీ ఎస్టీలకు 160 సెం.మీ). 1600 మీటర్ల పరుగును 7 నిమిషాల 15 సెకన్లలో పూర్తి చేయాలి. లాంగ్ జంప్ 4.00 మీటర్లు, షాట్‌పుట్ (7.26 కేజీలు) 6.00 మీటర్లు వేయాలి. మహిళా అభ్యర్థుల ఎత్తు కనీసం 152.5 సెం.మీ (ఏజెన్సీ ఎస్టీలకు 150 సెం.మీ). 800 మీటర్ల పరుగును 5 నిమిషాల 20 సెకన్లలో, లాంగ్ జంప్ 2.50 మీటర్లు, షాట్‌పుట్ (4 కేజీలు) 4.00 మీటర్లు సాధించాలి.",
     },
     {
-      question: "తెలంగాణ పోలీస్ కానిస్టేబుల్ ప్రిలిమ్స్ (PWT) లో నెగెటివ్ మార్కింగ్ విధానం ఉందా?",
+      question: "వరధి ప్రెప్‌లో తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్‌లు ఎలా రాయాలి?",
       answer:
-        "అవును. అధికారిక TGPRB నిబంధనల ప్రకారం ప్రతి తప్పు సమాధానానికి 0.25 (1/4 వంతు) నెగెటివ్ మార్కు తీసివేయబడుతుంది. మా టెస్ట్‌లలో కూడా ఈ నెగెటివ్ మార్కింగ్ అమలు చేయబడుతుంది.",
-    },
-    {
-      question: "పోలీస్ కానిస్టేబుల్ పేపర్ 1 లో ఏయే సబ్జెక్టులు ఉంటాయి?",
-      answer:
-        "పేపర్ 1 లో అర్థమెటిక్, రీజనింగ్, జనరల్ సైన్స్, భారత దేశ చరిత్ర, తెలంగాణ చరిత్ర & ఉద్యమం, భారత రాజ్యాంగం మరియు కరెంట్ అఫైర్స్ సబ్జెక్టులు ఉంటాయి. ప్రతి సబ్జెక్ట్‌కు ప్రత్యేక ప్రాక్టీస్ టెస్ట్‌లు కూడా అందుబాటులో ఉన్నాయి.",
-    },
-    {
-      question: "టెస్ట్ రాసిన వెంటనే మార్కులు మరియు వివరణలు తెలుసుకోవచ్చా?",
-      answer:
-        "అవును. టెస్ట్ సబ్మిట్ చేసిన వెంటనే మీ మొత్తం స్కోర్, సమయం, సబ్జెక్ట్ వారీగా సాధించిన మార్కులు మరియు ప్రతి ప్రశ్నకు స్పష్టమైన వివరణలు మీ స్టూడెంట్ డ్యాష్‌బోర్డ్‌లో చూడవచ్చు.",
-    },
-    {
-      question: "వరధి ప్రెప్‌లో పోలీస్ కానిస్టేబుల్ మాక్ టెస్ట్‌లు ఉచితంగా రాయవచ్చా?",
-      answer:
-        "అవును! వరధి ప్రెప్‌లో పోలీస్ కానిస్టేబుల్ ప్రాక్టీస్ టెస్ట్‌లు మరియు మునుపటి పేపర్ల ఆధారిత మోడల్ టెస్ట్‌లు అభ్యర్థులందరికీ ఉచితంగా అందుబాటులో ఉన్నాయి.",
+        "వరధి ప్రెప్ (Varadhi Prep) వెబ్‌సైట్‌లో తెలంగాణ పోలీస్ కానిస్టేబుల్ పేజీకి వెళ్లి, ప్రిలిమినరీ రాత పరీక్ష (PWT) పేపర్‌ను ఎంచుకుని, అధికారిక 200 ప్రశ్నలు, 3 గంటల టైమర్ మరియు 0.20 నెగెటివ్ మార్కింగ్ గల టెస్ట్‌లను తెలుగు & ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా సాధన చేయవచ్చు.",
     },
   ],
 };
 
-
-export const TG_TET_SEO: ExamTeluguSeo = {
+const TG_TET_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ టెట్ (TG-TET 2026)",
   teluguTitle: "తెలంగాణ టెట్ 2026 ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్ & సిలబస్",
   bilingualPageTitle: "TG-TET 2026 Free Mock Test & Syllabus | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు",
