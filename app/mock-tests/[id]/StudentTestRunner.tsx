@@ -926,7 +926,12 @@ export function StudentTestRunner({
                       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
                         {key}
                       </span>
-                      <span lang={teluguOption ? "te" : undefined} className={`min-w-0 flex-1 whitespace-pre-line text-sm sm:text-base font-normal sm:font-medium leading-normal text-slate-800 font-exam ${teluguOption ? "font-telugu" : ""} break-words [overflow-wrap:anywhere]`}>
+                      <span
+                        lang={teluguOption ? "te" : undefined}
+                        className={`min-w-0 flex-1 whitespace-pre-line ${
+                          teluguOption ? "text-[15px] sm:text-base font-telugu" : "text-sm sm:text-base"
+                        } font-normal sm:font-medium text-slate-800 font-exam break-words [overflow-wrap:anywhere]`}
+                      >
                         {text}
                       </span>
                     </label>

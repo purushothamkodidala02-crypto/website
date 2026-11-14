@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
 import { PendingSubmitButton } from "@/components/feedback/PendingSubmitButton";
 import { beginMockTest } from "./start-actions";
 import {
@@ -247,11 +248,13 @@ export function TestStartActions({
             className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
           >
             {isSubmitting ? (
-              <span>Preparing retake…</span>
+              <span className="inline-flex items-center justify-center gap-2">
+                <LoadingSpinner className="h-4 w-4 shrink-0 text-white" />
+                <span>Preparing retake…</span>
+              </span>
             ) : (
               <span>Retake test</span>
             )}
-            <span className="transition-transform group-hover:translate-x-0.5">→</span>
           </PendingSubmitButton>
           {startError && (
             <aside role="alert" className="mt-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-900">
@@ -271,11 +274,13 @@ export function TestStartActions({
           className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
           {isSubmitting ? (
-            <span>Starting test…</span>
+            <span className="inline-flex items-center justify-center gap-2">
+              <LoadingSpinner className="h-4 w-4 shrink-0 text-white" />
+              <span>Starting test…</span>
+            </span>
           ) : (
             <span>Start test</span>
           )}
-          <span className="transition-transform group-hover:translate-x-0.5">→</span>
         </PendingSubmitButton>
         {startError && (
           <aside role="alert" className="mt-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-900">
@@ -299,11 +304,13 @@ export function TestStartActions({
           className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-800 px-6 py-3.5 text-center text-sm sm:text-base font-bold text-white shadow-md shadow-teal-900/15 transition-all hover:from-teal-800 hover:to-emerald-900 hover:shadow-lg hover:shadow-teal-900/25 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
           {isSubmitting ? (
-            <span>Resuming test…</span>
+            <span className="inline-flex items-center justify-center gap-2">
+              <LoadingSpinner className="h-4 w-4 shrink-0 text-white" />
+              <span>Resuming test…</span>
+            </span>
           ) : (
             <span>Resume test</span>
           )}
-          <span className="transition-transform group-hover:translate-x-0.5">→</span>
         </PendingSubmitButton>
       </form>
       <form action={restartAction}
@@ -326,7 +333,10 @@ export function TestStartActions({
           className="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-5 py-3 text-center text-xs sm:text-sm font-semibold shadow-2xs transition hover:border-slate-400 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
         >
           {isSubmitting ? (
-            <span>Restarting test…</span>
+            <span className="inline-flex items-center justify-center gap-2">
+              <LoadingSpinner className="h-4 w-4 shrink-0 text-slate-600" />
+              <span>Restarting test…</span>
+            </span>
           ) : (
             <span>Restart test</span>
           )}

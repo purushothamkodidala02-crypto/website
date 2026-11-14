@@ -3,8 +3,9 @@
 :root {
   --background: #f6faf8;
   --foreground: #132621;
-  --font-ui: var(--font-varadhi-ui), "Segoe UI Variable Text", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: var(--font-varadhi-ui), "Aptos Display", "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-telugu: var(--font-telugu-noto), "Noto Sans Telugu", "Nirmala UI", Gautami, sans-serif;
+  --font-ui: var(--font-varadhi-ui), var(--font-telugu), "Segoe UI Variable Text", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-varadhi-ui), var(--font-telugu), "Aptos Display", "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-brand: Georgia, "Times New Roman", serif;
 }
 
@@ -69,14 +70,30 @@ img {
   letter-spacing: -0.025em;
 }
 
-.font-telugu {
-  font-family: "Nirmala UI", "Noto Sans Telugu", Gautami, sans-serif;
-  line-height: 1.8;
-  letter-spacing: normal;
+.font-telugu,
+:lang(te),
+[lang="te"] {
+  font-family: var(--font-telugu) !important;
+  line-height: 1.85 !important;
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-telugu p,
+.font-telugu span,
+.font-telugu label,
+:lang(te) p,
+:lang(te) span,
+:lang(te) label,
+[lang="te"] p,
+[lang="te"] span,
+[lang="te"] label {
+  line-height: 1.85 !important;
 }
 
 .font-exam {
-  font-family: "Times New Roman", Times, Georgia, serif;
+  font-family: var(--font-varadhi-ui), var(--font-telugu), "Times New Roman", Times, Georgia, serif;
 }
 
 * {

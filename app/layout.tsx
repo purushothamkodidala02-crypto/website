@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_Telugu } from "next/font/google";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
@@ -22,6 +22,13 @@ const inter = Inter({
   preload: true,
   variable: "--font-varadhi-ui",
   fallback: ["Segoe UI", "Arial", "sans-serif"],
+});
+
+const notoSansTelugu = Noto_Sans_Telugu({
+  subsets: ["telugu"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-telugu-noto",
 });
 
 export const metadata: Metadata = {
@@ -114,7 +121,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
+    <html lang="en" className={`${inter.variable} ${notoSansTelugu.variable} antialiased`}>
       <head>
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
