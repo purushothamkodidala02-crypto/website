@@ -1,11 +1,23 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache, updateTag } from "next/cache";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createPublicClient } from "@/lib/supabase/public";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
+
+export function safeRevalidateCatalogTag() {
+  try {
+    updateTag(PUBLIC_CATALOG_TAG);
+  } catch {
+    try {
+      revalidateTag(PUBLIC_CATALOG_TAG, "max");
+    } catch (tagErr) {
+      console.warn("Failed to revalidate public catalog tag:", tagErr);
+    }
+  }
+}
 
 function hasCatalogSupabaseEnv() {
   return Boolean(
@@ -202,4 +214,3 @@ export const getDashboardCatalogData = unstable_cache(
   ["dashboard-catalog-v1"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
-

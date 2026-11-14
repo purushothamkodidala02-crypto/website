@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const productionOrigins = [
   "varadhiprep.in",
   "www.varadhiprep.in",
+  "*.varadhiprep.in",
+  "localhost:3000",
+  "127.0.0.1:3000",
+  "*.vercel.app",
   process.env.VERCEL_PROJECT_PRODUCTION_URL,
   process.env.VERCEL_URL,
 ].filter((origin): origin is string => Boolean(origin));
