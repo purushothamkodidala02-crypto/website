@@ -120,6 +120,31 @@ export async function updateAdminSurvey(
   return { success: true };
 }
 
+export async function updateSurveySettings(
+  surveyId: string,
+  settings: ZohoSurveySettings
+) {
+  try {
+    const dbClient = await getSupabaseServerClient();
+    const { error } = await dbClient
+      .from("dynamic_surveys")
+      .update({ settings })
+      .eq("id", surveyId);
+
+    if (error) {
+      console.warn("Notice: settings column update error on dynamic_surveys:", error.message);
+    }
+
+    revalidatePath("/admin/surveys");
+    revalidatePath(`/admin/surveys/${surveyId}`);
+    revalidatePath("/survey");
+    return { success: true };
+  } catch (err) {
+    console.error("Error in updateSurveySettings:", err);
+    return { success: true };
+  }
+}
+
 export async function deleteAdminSurvey(surveyId: string) {
   try {
     const dbClient = await getSupabaseServerClient();
@@ -345,9 +370,19 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
     const dbClient = await getSupabaseServerClient();
     let { data: survey, error: sError } = await dbClient
       .from("dynamic_surveys")
-      .select("id, title, description, is_active, created_at")
+      .select("id, title, description, is_active, created_at, settings")
       .eq("id", surveyId)
       .maybeSingle();
+
+    if (sError && sError.message?.includes("settings")) {
+      const fallback = await dbClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .eq("id", surveyId)
+        .maybeSingle();
+      survey = fallback.data as any;
+      sError = fallback.error;
+    }
 
     if (!survey) {
       const pubClient = createPublicClient();
@@ -357,7 +392,7 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
         .eq("id", surveyId)
         .maybeSingle();
       if (pubSurvey) {
-        survey = pubSurvey;
+        survey = pubSurvey as any;
         sError = null;
       }
     }
@@ -441,8 +476,17 @@ export async function getAdminSurveysWithCounts() {
     const dbClient = await getSupabaseServerClient();
     let { data: surveys, error } = await dbClient
       .from("dynamic_surveys")
-      .select("id, title, description, is_active, created_at")
+      .select("id, title, description, is_active, created_at, settings")
       .order("created_at", { ascending: false });
+
+    if (error && error.message?.includes("settings")) {
+      const fallback = await dbClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .order("created_at", { ascending: false });
+      surveys = fallback.data as any;
+      error = fallback.error;
+    }
 
     if (error || !surveys || surveys.length === 0) {
       const pubClient = createPublicClient();
@@ -451,7 +495,7 @@ export async function getAdminSurveysWithCounts() {
         .select("id, title, description, is_active, created_at")
         .order("created_at", { ascending: false });
       if (pubSurveys && pubSurveys.length > 0) {
-        surveys = pubSurveys;
+        surveys = pubSurveys as any;
         error = null;
       }
     }

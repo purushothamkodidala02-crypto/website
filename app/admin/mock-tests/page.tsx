@@ -40,7 +40,7 @@ export default async function MockTestsPage({
     supabase.from("exam_groups").select("id, exam_id, name, slug").order("display_order"),
     supabase.from("exams").select("id, state_id, name, slug").order("display_order"),
     supabase.from("exam_specializations").select("id, exam_group_id, name").order("display_order"),
-    supabase.from("subject_sections").select("id, subject_id, name, slug").eq("is_active", true).order("display_order"),
+    supabase.from("subject_sections").select("id, subject_id, name, slug, is_active").order("display_order"),
     supabase.rpc("get_admin_mock_test_summaries"),
     supabase.from("mock_test_notifications").select("mock_test_id, recipient_count, sent_at").order("sent_at", { ascending: false }),
     getAdminAttemptCountsByMockTestId(),
@@ -60,6 +60,7 @@ export default async function MockTestsPage({
   const paperById = new Map(papers.map((paper) => [paper.id, paper]));
   const examById = new Map(exams.map((exam) => [exam.id, exam]));
   const subjectById = new Map(subjects.map((subject) => [subject.id, subject]));
+  const sectionById = new Map(sections.map((section) => [section.id, section]));
   const categoryOptions = categories.map((item) => ({ id: item.id, stateId: item.state_id, name: item.name }));
   const examOptions = exams.map((item) => ({ id: item.id, categoryId: item.exam_id, name: item.name }));
   const specializationOptions = specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }));
@@ -94,6 +95,7 @@ export default async function MockTestsPage({
     const category = exam ? categoryById.get(exam.exam_id) : undefined;
     const state = category ? stateById.get(category.state_id) : undefined;
     const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
+    const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
     const summary = summaryByTestId.get(test.id);
     const notification = notificationMap.get(test.id);
     const exemption = attemptExemptions.get(test.id);
@@ -120,6 +122,9 @@ export default async function MockTestsPage({
       durationMinutes: test.duration_minutes,
       scope: test.test_scope as "paper" | "subject",
       subjectName: subject?.name ?? null,
+      subjectSectionId: test.subject_section_id ?? null,
+      sectionName: section?.name ?? null,
+      sectionSlug: section?.slug ?? null,
       status: test.status as "draft" | "published" | "archived",
       questionCount: Number(summary?.question_count ?? 0),
       targetQuestionCount: Number(test.target_question_count),
@@ -227,7 +232,7 @@ export default async function MockTestsPage({
             specializations={specializationOptions}
             papers={paperOptions}
             subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))}
-            sections={sections.map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))}
+            sections={sections.filter((s) => s.is_active !== false).map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))}
             existingSeries={tests
               .filter((test) => !test.superseded_by_mock_test_id)
               .map((test) => ({
