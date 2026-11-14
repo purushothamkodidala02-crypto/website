@@ -273,7 +273,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                 </span>
               )}
               <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 shadow-2xs">
-                Official Syllabus Pattern
+                Online Mock Tests
               </span>
             </div>
 
@@ -339,85 +339,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         </div>
       </section>
 
-      {/* Sticky Table of Contents / Proportional Navigation */}
-      <nav
-        aria-label="Exam guide navigation"
-        className="sticky top-0 z-30 border-y border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 no-scrollbar text-xs font-semibold text-slate-700 whitespace-nowrap">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 hidden sm:inline">
-              Contents:
-            </span>
-            <a
-              href="#papers"
-              className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-            >
-              Mock Tests ({tests.length})
-            </a>
-            {teluguData?.schedule && (
-              <a
-                href="#exam-schedule"
-                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-              >
-                Vacancies &amp; Dates
-              </a>
-            )}
-            {teluguData?.pattern && (
-              <a
-                href="#exam-pattern"
-                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-              >
-                Exam Pattern
-              </a>
-            )}
-            {teluguData?.pattern?.subjects && teluguData.pattern.subjects.length > 0 && (
-              <a
-                href="#curriculum-topics"
-                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-              >
-                Curriculum Topics
-              </a>
-            )}
-            {teluguData?.pattern?.physicalStandards && teluguData.pattern.physicalStandards.length > 0 && (
-              <a
-                href="#physical-standards"
-                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-              >
-                Physical Standards
-              </a>
-            )}
-            {ageLimits && ageLimits.length > 0 && (
-              <a
-                href="#age-limits"
-                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-              >
-                Age Limit &amp; Rules
-              </a>
-            )}
-            {teluguData?.jobProfile && (
-              <a
-                href="#job-profile"
-                className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-              >
-                Salary &amp; Duties
-              </a>
-            )}
-            <a
-              href="#why-varadhi-heading"
-              className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-            >
-              Why Varadhi
-            </a>
-            <a
-              href="#exam-faqs"
-              className="inline-flex items-center rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
-            >
-              FAQs ({questions.length})
-            </a>
-          </div>
-        </div>
-      </nav>
+      
 
       <div className="mx-auto max-w-7xl space-y-8 sm:space-y-10 px-4 py-6 sm:px-8 sm:py-10">
         <CatalogSteps
@@ -510,7 +432,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
                       )}
                     </div>
                     <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs gap-2">
-                      <span className="font-semibold text-slate-500 truncate">Official Exam Syllabus</span>
+                      <span className="font-semibold text-slate-500 truncate">Practice Series</span>
                       <span className="inline-flex items-center gap-1 font-bold text-teal-800 group-hover:translate-x-1 transition shrink-0">
                         Open paper →
                       </span>
@@ -1351,57 +1273,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
           </section>
         )}
 
-        {/* Why Aspirants Choose Varadhi Prep */}
-        <section aria-labelledby="why-varadhi-heading" className="rounded-2xl border border-teal-100/90 bg-gradient-to-b from-teal-50/50 via-white to-white p-6 sm:p-8 shadow-2xs">
-          <div className="max-w-3xl">
-            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">High-Performance Practice</p>
-            <h2 id="why-varadhi-heading" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-950">
-              Why Aspirants Choose Varadhi Prep Mock Tests
-            </h2>
-            <p className="mt-2 text-xs sm:text-sm text-slate-600">
-              Engineered to give competitive exam candidates in Telangana and Andhra Pradesh an authentic testing edge.
-            </p>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
-                01
-              </span>
-              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Timed Exam Simulator</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                Experience real 3-hour exam pressure with countdown timers and instant question review to build the speed required for your OMR test.
-              </p>
-            </div>
-            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
-                02
-              </span>
-              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Dual-Language Switch</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                Instantly switch questions between English and Telugu at any second to verify terminology and practice in your preferred medium.
-              </p>
-            </div>
-            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
-                03
-              </span>
-              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">{examNegativeSummary.cardTitle}</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                {examNegativeSummary.cardDescription}
-              </p>
-            </div>
-            <div className="group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-xs">
-              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-800">
-                04
-              </span>
-              <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-teal-950 transition">Detailed Bilingual Solutions</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                Access step-by-step explanations in Telugu and English for every single question immediately upon submission.
-              </p>
-            </div>
-          </div>
-        </section>
+        
 
         {/* Frequently Asked Questions */}
         <section id="exam-faqs" aria-labelledby="faq-title" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
