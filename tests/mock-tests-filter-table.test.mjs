@@ -70,3 +70,61 @@ test("mock test filter blanks and SearchableSelect retain values on selection an
     "CreateMockTestForm should not wipe fields if same exam is clicked"
   );
 });
+
+test("ExistingMockTestsTable displays sub-topic tag and uses clean Mock Test label heading without repeating exam & paper", async () => {
+  const [existingTableSrc, adminPageSrc, manageActionsSrc] = await Promise.all([
+    read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
+    read("app/admin/mock-tests/page.tsx"),
+    read("app/admin/mock-tests/manage-actions.ts"),
+  ]);
+
+  // 1. ExistingMockTestsTable displays sub-topic section tag when present
+  assert.match(
+    existingTableSrc,
+    /test\.sectionName\s*&&\s*\(/,
+    "ExistingMockTestsTable should render tag badge for sub-topic / section"
+  );
+  assert.match(
+    existingTableSrc,
+    /sectionName\?\:\s*string\s*\|\s*null/,
+    "ExistingMockTest type should include optional sectionName"
+  );
+
+  // 2. Heading uses clean mock test label instead of repeating exam and paper
+  assert.match(
+    existingTableSrc,
+    /\{mockTestLabel\(test\.seriesNumber\)\}/,
+    "ExistingMockTestsTable should display clean Mock Test label in card heading"
+  );
+
+  // 3. Search query includes section name for sub-topic matching
+  assert.match(
+    existingTableSrc,
+    /test\.sectionName\s*\?\?\s*""/,
+    "ExistingMockTestsTable search filter should include sectionName"
+  );
+
+  // 4. Admin mock tests page resolves subject sections for mappedTests
+  assert.match(
+    adminPageSrc,
+    /const\s+section\s*=\s*test\.subject_section_id\s*\?\s*sectionById\.get\(test\.subject_section_id\)\s*:\s*undefined/,
+    "Admin mock tests page should resolve section from sectionById"
+  );
+  assert.match(
+    adminPageSrc,
+    /sectionName:\s*section\?\.name\s*\?\?\s*null/,
+    "Admin mock tests page should map sectionName onto mappedTests"
+  );
+
+  // 5. Title sync in manage-actions preserves subject sections
+  assert.match(
+    manageActionsSrc,
+    /subject_section_id/,
+    "syncAllMockTestTitles should select subject_section_id"
+  );
+  assert.match(
+    manageActionsSrc,
+    /sectionName:\s*section\?\.name/,
+    "syncAllMockTestTitles should preserve sectionName in buildMockTestTitle"
+  );
+});

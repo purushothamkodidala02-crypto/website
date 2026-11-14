@@ -10,6 +10,7 @@ import {
   deleteSurveyQuestion,
   reorderSurveyQuestions,
   updateAdminSurvey,
+  updateSurveySettings,
   deleteAdminSurvey,
   toggleSurveyStatus,
   deleteSurveyResponse,
@@ -19,6 +20,7 @@ import {
   type AdminSurveyQuestion,
 } from "@/app/actions/surveys-admin";
 import { BackButton } from "@/components/admin/BackButton";
+import { ZohoSurveySettingsPanel } from "@/components/admin/ZohoSurveySettingsPanel";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 export default function AdminSurveyEditor({ params }: { params: Promise<{ id: string }> }) {
@@ -32,6 +34,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
   const [loadingResponses, setLoadingResponses] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [activeTab, setActiveTab] = useState<"split" | "questions" | "settings" | "responses">("split");
 
   // Edit Survey Title / Description State
   const [isEditingSurvey, setIsEditingSurvey] = useState(false);
@@ -602,14 +605,77 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 min-w-0">
-        {/* Left Side: Question Editor */}
-        <section className="min-w-0 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
-              Survey Questions ({questions.length})
-            </h2>
-            <span className="text-xs text-slate-500">
+      {/* Zoho Survey Platform Navigation Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/90 pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("split")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition active:scale-95 touch-manipulation whitespace-nowrap ${
+            activeTab === "split"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+          }`}
+        >
+          <span>📑</span> All-In-One (Questions & Responses)
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("questions")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition active:scale-95 touch-manipulation whitespace-nowrap ${
+            activeTab === "questions"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+          }`}
+        >
+          <span>📋</span> Questions Builder ({questions.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("settings")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition active:scale-95 touch-manipulation whitespace-nowrap ${
+            activeTab === "settings"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+          }`}
+        >
+          <span>⚙️</span> Survey Settings (Zoho-style)
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("responses")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition active:scale-95 touch-manipulation whitespace-nowrap ${
+            activeTab === "responses"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+          }`}
+        >
+          <span>📊</span> Responses & Analytics ({responses.length})
+        </button>
+      </div>
+
+      {activeTab === "settings" && (
+        <div className="space-y-4">
+          <ZohoSurveySettingsPanel
+            surveyId={survey.id}
+            surveyTitle={survey.title}
+            initialSettings={survey.settings}
+            onSave={async (newSettings) => {
+              await updateSurveySettings(survey.id, newSettings);
+              setSurvey((prev) => (prev ? { ...prev, settings: newSettings } : null));
+            }}
+          />
+        </div>
+      )}
+
+      {activeTab !== "settings" && (
+        <div className={`grid gap-6 sm:gap-8 min-w-0 ${activeTab === "split" ? "lg:grid-cols-2" : "grid-cols-1"}`}>
+          {(activeTab === "split" || activeTab === "questions") && (
+            <section className="min-w-0 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                  Survey Questions ({questions.length})
+                </h2>
+                <span className="text-xs text-slate-500">
               Arrange and configure questions
             </span>
           </div>
@@ -872,8 +938,9 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             </button>
           </form>
         </section>
+      )}
 
-        {/* Right Side: Collected Responses */}
+      {(activeTab === "split" || activeTab === "responses") && (
         <section className="min-w-0 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -1078,7 +1145,9 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
             )}
           </div>
         </section>
-      </div>
+      )}
     </div>
+  )}
+</div>
   );
 }

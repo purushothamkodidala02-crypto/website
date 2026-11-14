@@ -493,19 +493,20 @@ export async function syncAllMockTestTitles(): Promise<SyncMockTestTitlesResult>
 
     const { data: mockTests, error: fetchError } = await supabase
       .from("mock_tests")
-      .select("id, paper_id, subject_id, series_number, title");
+      .select("id, paper_id, subject_id, subject_section_id, series_number, title");
 
     if (fetchError || !mockTests) {
       return { success: false, message: fetchError?.message ?? "Failed to fetch mock tests.", updatedCount: 0 };
     }
 
-    const [papersRes, specializationsRes, examsRes, categoriesRes, statesRes, subjectsRes] = await Promise.all([
+    const [papersRes, specializationsRes, examsRes, categoriesRes, statesRes, subjectsRes, sectionsRes] = await Promise.all([
       supabase.from("papers").select("id, exam_group_id, specialization_id, name"),
       supabase.from("exam_specializations").select("id, name"),
       supabase.from("exam_groups").select("id, exam_id, name"),
       supabase.from("exams").select("id, state_id, name"),
       supabase.from("exam_states").select("id, code"),
       supabase.from("subjects").select("id, name"),
+      supabase.from("subject_sections").select("id, name"),
     ]);
 
     const paperMap = new Map((papersRes.data ?? []).map((p) => [p.id, p]));
@@ -514,6 +515,7 @@ export async function syncAllMockTestTitles(): Promise<SyncMockTestTitlesResult>
     const categoryMap = new Map((categoriesRes.data ?? []).map((c) => [c.id, c]));
     const stateMap = new Map((statesRes.data ?? []).map((s) => [s.id, s]));
     const subjectMap = new Map((subjectsRes.data ?? []).map((sb) => [sb.id, sb]));
+    const sectionMap = new Map((sectionsRes.data ?? []).map((sc) => [sc.id, sc]));
 
     let updatedCount = 0;
     for (const test of mockTests) {
@@ -523,6 +525,7 @@ export async function syncAllMockTestTitles(): Promise<SyncMockTestTitlesResult>
       const state = category ? stateMap.get(category.state_id) : undefined;
       const specialization = paper?.specialization_id ? specializationMap.get(paper.specialization_id) : undefined;
       const subject = test.subject_id ? subjectMap.get(test.subject_id) : undefined;
+      const section = test.subject_section_id ? sectionMap.get(test.subject_section_id) : undefined;
 
       if (state && exam && paper) {
         const canonicalTitle = buildMockTestTitle({
@@ -530,6 +533,7 @@ export async function syncAllMockTestTitles(): Promise<SyncMockTestTitlesResult>
           examName: exam.name,
           paperName: specialization?.name ?? paper.name,
           subjectName: subject?.name,
+          sectionName: section?.name,
           seriesNumber: Number(test.series_number ?? 1),
         });
 

@@ -312,9 +312,10 @@ export default function AdminSurveysList() {
               return (
                 <div
                   key={survey.id}
-                  className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition sm:flex-row sm:items-start"
+                  className="flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition"
                 >
-                  <div className="min-w-0 flex-1 space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="min-w-0 flex-1 space-y-2.5">
                     {isEditing ? (
                       <div className="space-y-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
                         <label className="block text-xs font-bold text-slate-800">Survey Title</label>

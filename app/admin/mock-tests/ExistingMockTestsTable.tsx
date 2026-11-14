@@ -13,7 +13,7 @@ import {
 } from "@/components/admin/LocationFilters";
 import type { MockTestStatus } from "@/types/mock-test";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
-import { studentFacingMockTestTitle } from "@/lib/exam-catalog";
+import { mockTestLabel, studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { mockTestUrl } from "@/lib/public-urls";
 import { MockTestManagementButtons } from "./MockTestManagementButtons";
 import { NotifyStudentsModal } from "./NotifyStudentsModal";
@@ -40,6 +40,9 @@ type ExistingMockTest = {
   durationMinutes: number;
   scope: "paper" | "subject";
   subjectName: string | null;
+  subjectSectionId?: string | null;
+  sectionName?: string | null;
+  sectionSlug?: string | null;
   status: MockTestStatus;
   questionCount: number;
   targetQuestionCount: number;
@@ -110,7 +113,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       (!location.paperId || test.paperId === location.paperId) &&
       (status === "all" || test.status === status) &&
       (scope === "all" || test.scope === scope) &&
-      (!query || `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""}`.toLowerCase().includes(query)),
+      (!query || `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""}`.toLowerCase().includes(query)),
     );
   }, [location, search, stateId, status, scope, tests]);
 
@@ -371,7 +374,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by test title, exam name, paper, or subject..."
+              placeholder="Search by test title, exam name, paper, subject, or topic..."
               className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
             />
           </div>
@@ -437,6 +440,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                           {test.subjectName}
                         </span>
                       )}
+                      {test.sectionName && (
+                        <span className="rounded-md border border-purple-200/70 bg-purple-50/50 px-2 py-0.5 text-[11px] font-semibold text-purple-800 break-words">
+                          {test.sectionName}
+                        </span>
+                      )}
                       <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 shrink-0">
                         {test.scope === "paper" ? "Paper-wise" : "Subject-wise"}
                       </span>
@@ -467,12 +475,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   {/* Test Title & Description */}
                   <div className="mt-2.5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
                     <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                      {studentFacingMockTestTitle({
-                        examName: test.examName,
-                        paperLabel: test.paperLabel,
-                        seriesNumber: test.seriesNumber,
-                        subjectName: test.subjectName,
-                      })}
+                      {mockTestLabel(test.seriesNumber)}
                     </h3>
                   </div>
 
@@ -592,6 +595,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                         paperLabel: test.paperLabel,
                         seriesNumber: test.seriesNumber,
                         subjectName: test.subjectName,
+                        sectionName: test.sectionName,
                       })}
                       isDraft={test.status === "draft"}
                       hasNotificationHistory={Boolean(test.lastNotifiedAt)}
