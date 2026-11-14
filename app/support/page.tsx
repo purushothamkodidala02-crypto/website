@@ -339,67 +339,8 @@ export default function SupportPage() {
                   <span>Privacy Policy</span>
                   <span className="text-slate-400 group-hover:text-teal-700 group-hover:translate-x-0.5 transition" aria-hidden="true">→</span>
                 </Link>
-                <Link
-                  href="/refunds-and-cancellations"
-                  className="flex items-center justify-between py-2.5 font-bold text-teal-800 hover:text-teal-950 group transition"
-                >
-                  <span>Refunds and Cancellations</span>
-                  <span className="text-slate-400 group-hover:text-teal-700 group-hover:translate-x-0.5 transition" aria-hidden="true">→</span>
-                </Link>
               </div>
             </div>
-
-            {/* Popular Exam Series Links Matching Home Page */}
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs">
-              <h2 className="font-display text-base font-bold text-slate-900">Target State Exams &amp; Guides</h2>
-              <p className="mt-1 text-xs text-slate-500">
-                Direct access to syllabus mock tests &amp; physical standards:
-              </p>
-              <div className="mt-3.5 flex flex-col gap-2.5 text-xs sm:text-sm">
-                <div className="rounded-xl border border-teal-200/90 bg-teal-50/40 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-teal-950">TG Police Constable</span>
-                    <span className="rounded-full bg-teal-100 border border-teal-200 px-2 py-0.5 text-[10px] font-bold text-teal-900">Exam Guide</span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-teal-800">
-                    <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:underline">
-                      PET Standards →
-                    </Link>
-                    <span className="text-slate-300">•</span>
-                    <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-pattern" className="hover:underline">
-                      Exam Pattern →
-                    </Link>
-                    <span className="text-slate-300">•</span>
-                    <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:underline">
-                      Mock Tests →
-                    </Link>
-                  </div>
-                </div>
-
-                <Link
-                  href="/mock-tests/telangana/tg-tet-2026"
-                  className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-950 transition"
-                >
-                  <span>TG TET 2026 Practice Papers</span>
-                  <span className="text-teal-700" aria-hidden="true">→</span>
-                </Link>
-                <Link
-                  href="/mock-tests/telangana"
-                  className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-950 transition"
-                >
-                  <span>Telangana Competitive Exams (TGPSC)</span>
-                  <span className="text-teal-700" aria-hidden="true">→</span>
-                </Link>
-                <Link
-                  href="/mock-tests/andhra-pradesh"
-                  className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-950 transition"
-                >
-                  <span>Andhra Pradesh Exams (APPSC)</span>
-                  <span className="text-teal-700" aria-hidden="true">→</span>
-                </Link>
-              </div>
-            </div>
-
           </div>
 
         </section>
