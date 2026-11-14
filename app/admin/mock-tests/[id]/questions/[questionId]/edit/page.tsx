@@ -40,7 +40,17 @@ export default async function EditMockTestQuestionPage({
       .from("mock_test_questions")
       .select("id, question_id, question_order, marks, negative_marks, questions(id, subject_id, question_text, is_active, expires_on)")
       .eq("mock_test_id", mockTestId)
-      .order("question_order", { ascending: true }),
+      .order("question_order", { ascending: true })
+      .then(async (res) => {
+        if (!res.data) {
+          return supabase
+            .from("mock_test_questions")
+            .select("id, question_id, question_order, marks, negative_marks")
+            .eq("mock_test_id", mockTestId)
+            .order("question_order", { ascending: true });
+        }
+        return res;
+      }),
     supabase
       .from("questions")
       .select(

@@ -50,11 +50,12 @@ export async function updateQuestion(
   formData: FormData,
   mockTestId?: string,
 ): Promise<UpdateQuestionState> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, message: "You must be logged in." };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, message: "You must be logged in." };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -327,4 +328,14 @@ export async function updateQuestion(
       : "Question updated in this Mock Test.";
   }
   return { success: true, message: successMessage };
+  } catch (err) {
+    console.error("Unexpected error in updateQuestion action:", err);
+    return {
+      success: false,
+      message:
+        err instanceof Error
+          ? err.message
+          : "Temporary problem saving question. Please try again.",
+    };
+  }
 }
