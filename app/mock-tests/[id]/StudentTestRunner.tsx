@@ -796,7 +796,7 @@ export function StudentTestRunner({
     setPausing(false);
   }
 
-  const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} />;
+  const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
@@ -1309,7 +1309,7 @@ export function StudentTestRunner({
   </main>;
 }
 
-function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked, onSelect }: { questions: TestQuestion[]; currentIndex: number; answers: Record<string, Answer>; reviewIds: Set<string>; locked: boolean; onSelect: (index: number) => void }) {
+function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked, onSelect, onFinish }: { questions: TestQuestion[]; currentIndex: number; answers: Record<string, Answer>; reviewIds: Set<string>; locked: boolean; onSelect: (index: number) => void; onFinish?: () => void }) {
   const answeredCount = Object.keys(answers).length;
   const remainingCount = questions.length - answeredCount;
 
