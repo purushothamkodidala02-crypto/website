@@ -19,6 +19,7 @@ import {
   type AdminSurveyQuestion,
 } from "@/app/actions/surveys-admin";
 import { BackButton } from "@/components/admin/BackButton";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 export default function AdminSurveyEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id: surveyId } = use(params);
@@ -60,11 +61,59 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
   const [isDeletingSurvey, setIsDeletingSurvey] = useState(false);
   const [deletingResponseId, setDeletingResponseId] = useState<string | null>(null);
 
+  const fetchSurveySafely = useCallback(async (id: string) => {
+    try {
+      const data = await getAdminSurveyDetail(id);
+      if (data.survey) return data;
+    } catch (err) {
+      console.warn("getAdminSurveyDetail failed, falling back to browser Supabase:", err);
+    }
+
+    try {
+      const supabase = createBrowserClient();
+      const [{ data: survey }, { data: questions }, { data: responses }] = await Promise.all([
+        supabase
+          .from("dynamic_surveys")
+          .select("id, title, description, is_active, created_at")
+          .eq("id", id)
+          .maybeSingle(),
+        supabase
+          .from("dynamic_survey_questions")
+          .select("id, survey_id, question_text, question_type, options, display_order, is_required")
+          .eq("survey_id", id)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("dynamic_survey_responses")
+          .select("id, submitted_at, user_id, answers:dynamic_survey_answers(question_id, answer_text)")
+          .eq("survey_id", id)
+          .order("submitted_at", { ascending: false }),
+      ]);
+
+      if (survey) {
+        return {
+          survey,
+          questions: (questions as AdminSurveyQuestion[]) || [],
+          responses: (responses as any[]) || [],
+          error: null,
+        };
+      }
+    } catch (err) {
+      console.warn("Browser Supabase survey detail fallback failed:", err);
+    }
+
+    return {
+      survey: null,
+      questions: [],
+      responses: [],
+      error: "Survey not found.",
+    };
+  }, []);
+
   const fetchSurveyData = useCallback(async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const data = await getAdminSurveyDetail(surveyId);
+      const data = await fetchSurveySafely(surveyId);
       if (data.error || !data.survey) {
         setErrorMessage(data.error || "Survey not found.");
       } else {
@@ -79,7 +128,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
     } finally {
       setLoading(false);
     }
-  }, [surveyId]);
+  }, [surveyId, fetchSurveySafely]);
 
   const loadResponsesOnly = useCallback(async () => {
     setLoadingResponses(true);
@@ -101,7 +150,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
     }
     void (async () => {
       try {
-        const data = await getAdminSurveyDetail(surveyId);
+        const data = await fetchSurveySafely(surveyId);
         if (!ignore) {
           if (data.error || !data.survey) {
             setErrorMessage(data.error || "Survey not found.");
@@ -124,7 +173,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
     return () => {
       ignore = true;
     };
-  }, [surveyId]);
+  }, [surveyId, fetchSurveySafely]);
 
   // Survey Meta Handlers
   const handleToggleSurveyStatus = async () => {

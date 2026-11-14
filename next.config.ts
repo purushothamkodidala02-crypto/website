@@ -2,8 +2,13 @@ import type { NextConfig } from "next";
 
 const productionOrigins = [
   "varadhiprep.in",
+  "https://varadhiprep.in",
   "www.varadhiprep.in",
+  "https://www.varadhiprep.in",
   "*.varadhiprep.in",
+  "varadhi.kodidalanani.workers.dev",
+  "https://varadhi.kodidalanani.workers.dev",
+  "*.workers.dev",
   "localhost:3000",
   "127.0.0.1:3000",
   "*.vercel.app",

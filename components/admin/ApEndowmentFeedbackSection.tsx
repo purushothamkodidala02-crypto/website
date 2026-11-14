@@ -15,26 +15,86 @@ export function ApEndowmentFeedbackSection() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const fetchFeedbackSafely = useCallback(async (): Promise<ApEndowmentFeedbackSummary> => {
+    const emptySummary: ApEndowmentFeedbackSummary = {
+      totalResponses: 0,
+      paper1Count: 0,
+      paper2Count: 0,
+      bothCount: 0,
+      recentResponses: [],
+    };
+
+    // Strategy 1: Server Action
+    try {
+      const res = await getApEndowmentFeedbackSummaryAction();
+      if (res && res.totalResponses !== undefined) {
+        return res;
+      }
+    } catch (err) {
+      console.warn("Server action getApEndowmentFeedbackSummaryAction failed:", err);
+    }
+
+    // Strategy 2: Dedicated HTTP GET API route
+    try {
+      const apiRes = await fetch("/api/admin/feedback", { cache: "no-store" });
+      if (apiRes.ok) {
+        const apiJson = await apiRes.json();
+        if (apiJson && apiJson.totalResponses !== undefined) {
+          return apiJson;
+        }
+      }
+    } catch (err) {
+      console.warn("API /api/admin/feedback failed:", err);
+    }
+
+    return emptySummary;
+  }, []);
+
   const loadData = useCallback(async () => {
     setLoading(true);
-    const res = await getApEndowmentFeedbackSummaryAction();
-    setData(res);
-    setLoading(false);
-  }, []);
+    try {
+      const res = await fetchFeedbackSafely();
+      setData(res);
+    } catch {
+      setData({
+        totalResponses: 0,
+        paper1Count: 0,
+        paper2Count: 0,
+        bothCount: 0,
+        recentResponses: [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchFeedbackSafely]);
 
   useEffect(() => {
     setIsExpired(Date.now() > AP_EO_CAMPAIGN_EXPIRY_MS);
     let ignore = false;
-    void getApEndowmentFeedbackSummaryAction().then((res) => {
-      if (!ignore) {
-        setData(res);
-        setLoading(false);
+    void (async () => {
+      try {
+        const res = await fetchFeedbackSafely();
+        if (!ignore) {
+          setData(res);
+          setLoading(false);
+        }
+      } catch {
+        if (!ignore) {
+          setData({
+            totalResponses: 0,
+            paper1Count: 0,
+            paper2Count: 0,
+            bothCount: 0,
+            recentResponses: [],
+          });
+          setLoading(false);
+        }
       }
-    });
+    })();
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [fetchFeedbackSafely]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this student feedback response?")) {

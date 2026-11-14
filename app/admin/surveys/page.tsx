@@ -11,6 +11,7 @@ import {
 } from "@/app/actions/surveys-admin";
 import { useRouter } from "next/navigation";
 import { ApEndowmentFeedbackSection } from "@/components/admin/ApEndowmentFeedbackSection";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 type SurveyItem = {
   id: string;
@@ -41,18 +42,57 @@ export default function AdminSurveysList() {
 
   const router = useRouter();
 
+  const fetchSurveysSafely = useCallback(async (): Promise<SurveyItem[]> => {
+    // Strategy 1: Server action getAdminSurveysWithCounts
+    try {
+      const data = await getAdminSurveysWithCounts();
+      if (data && data.length > 0) return data;
+    } catch (err) {
+      console.warn("Server action getAdminSurveysWithCounts failed, falling back:", err);
+    }
+
+    // Strategy 2: Dedicated HTTP GET API route
+    try {
+      const res = await fetch("/api/admin/surveys", { cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.surveys && json.surveys.length > 0) {
+          return json.surveys;
+        }
+      }
+    } catch (err) {
+      console.warn("API /api/admin/surveys failed:", err);
+    }
+
+    // Strategy 3: Direct browser Supabase client
+    try {
+      const supabase = createBrowserClient();
+      const { data: clientSurveys, error } = await supabase
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .order("created_at", { ascending: false });
+      if (!error && clientSurveys && clientSurveys.length > 0) {
+        return clientSurveys.map((s) => ({ ...s, response_count: 0 }));
+      }
+    } catch (err) {
+      console.warn("Browser Supabase fallback failed:", err);
+    }
+
+    return [];
+  }, []);
+
   const refreshSurveys = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getAdminSurveysWithCounts();
-      setSurveys(data || []);
+      const data = await fetchSurveysSafely();
+      setSurveys(data);
       setErrorMsg("");
     } catch {
       setErrorMsg("Failed to load surveys. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchSurveysSafely]);
 
   useEffect(() => {
     let ignore = false;
@@ -62,9 +102,10 @@ export default function AdminSurveysList() {
     }
     void (async () => {
       try {
-        const data = await getAdminSurveysWithCounts();
+        const data = await fetchSurveysSafely();
         if (!ignore) {
-          setSurveys(data || []);
+          setSurveys(data);
+          setErrorMsg("");
           setLoading(false);
         }
       } catch {
@@ -77,7 +118,7 @@ export default function AdminSurveysList() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [fetchSurveysSafely]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

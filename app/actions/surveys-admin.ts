@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { revalidatePath } from "next/cache";
 
 async function getSupabaseServerClient() {
@@ -302,11 +303,24 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
 }> {
   try {
     const dbClient = await getSupabaseServerClient();
-    const { data: survey, error: sError } = await dbClient
+    let { data: survey, error: sError } = await dbClient
       .from("dynamic_surveys")
       .select("id, title, description, is_active, created_at")
       .eq("id", surveyId)
       .maybeSingle();
+
+    if (!survey) {
+      const pubClient = createPublicClient();
+      const { data: pubSurvey } = await pubClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .eq("id", surveyId)
+        .maybeSingle();
+      if (pubSurvey) {
+        survey = pubSurvey;
+        sError = null;
+      }
+    }
 
     if (sError || !survey) {
       return {
@@ -317,7 +331,7 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
       };
     }
 
-    const [{ data: questions, error: qError }, responses] = await Promise.all([
+    let [{ data: questions, error: qError }, responses] = await Promise.all([
       dbClient
         .from("dynamic_survey_questions")
         .select("id, survey_id, question_text, question_type, options, display_order, is_required")
@@ -325,6 +339,18 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
         .order("display_order", { ascending: true }),
       getAdminSurveyResponses(surveyId),
     ]);
+
+    if (!questions || questions.length === 0) {
+      const pubClient = createPublicClient();
+      const { data: pubQuestions } = await pubClient
+        .from("dynamic_survey_questions")
+        .select("id, survey_id, question_text, question_type, options, display_order, is_required")
+        .eq("survey_id", surveyId)
+        .order("display_order", { ascending: true });
+      if (pubQuestions && pubQuestions.length > 0) {
+        questions = pubQuestions;
+      }
+    }
 
     if (qError) {
       console.error("Error loading survey questions:", qError);
@@ -338,6 +364,29 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
     };
   } catch (err) {
     console.error("Error in getAdminSurveyDetail:", err);
+    try {
+      const pubClient = createPublicClient();
+      const { data: pubSurvey } = await pubClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .eq("id", surveyId)
+        .maybeSingle();
+      if (pubSurvey) {
+        const { data: pubQuestions } = await pubClient
+          .from("dynamic_survey_questions")
+          .select("id, survey_id, question_text, question_type, options, display_order, is_required")
+          .eq("survey_id", surveyId)
+          .order("display_order", { ascending: true });
+        return {
+          survey: pubSurvey,
+          questions: (pubQuestions as AdminSurveyQuestion[]) || [],
+          responses: [],
+          error: null,
+        };
+      }
+    } catch {
+      // Ignore
+    }
     return {
       survey: null,
       questions: [],
@@ -350,22 +399,38 @@ export async function getAdminSurveyDetail(surveyId: string): Promise<{
 export async function getAdminSurveysWithCounts() {
   try {
     const dbClient = await getSupabaseServerClient();
-    const { data: surveys, error } = await dbClient
+    let { data: surveys, error } = await dbClient
       .from("dynamic_surveys")
       .select("id, title, description, is_active, created_at")
       .order("created_at", { ascending: false });
 
+    if (error || !surveys || surveys.length === 0) {
+      const pubClient = createPublicClient();
+      const { data: pubSurveys } = await pubClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .order("created_at", { ascending: false });
+      if (pubSurveys && pubSurveys.length > 0) {
+        surveys = pubSurveys;
+        error = null;
+      }
+    }
+
     if (error || !surveys) return [];
 
     // Fetch response counts
-    const { data: responses } = await dbClient
-      .from("dynamic_survey_responses")
-      .select("survey_id");
-
     const counts: Record<string, number> = {};
-    (responses || []).forEach((r: { survey_id: string }) => {
-      counts[r.survey_id] = (counts[r.survey_id] || 0) + 1;
-    });
+    try {
+      const { data: responses } = await dbClient
+        .from("dynamic_survey_responses")
+        .select("survey_id");
+
+      (responses || []).forEach((r: { survey_id: string }) => {
+        counts[r.survey_id] = (counts[r.survey_id] || 0) + 1;
+      });
+    } catch {
+      // Ignore count fetch errors
+    }
 
     return surveys.map((s) => ({
       ...s,
@@ -373,6 +438,18 @@ export async function getAdminSurveysWithCounts() {
     }));
   } catch (err) {
     console.error("Error in getAdminSurveysWithCounts:", err);
+    try {
+      const pubClient = createPublicClient();
+      const { data: fallbackSurveys } = await pubClient
+        .from("dynamic_surveys")
+        .select("id, title, description, is_active, created_at")
+        .order("created_at", { ascending: false });
+      if (fallbackSurveys) {
+        return fallbackSurveys.map((s) => ({ ...s, response_count: 0 }));
+      }
+    } catch {
+      // Ignore
+    }
     return [];
   }
 }
