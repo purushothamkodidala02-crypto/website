@@ -123,7 +123,17 @@ export async function updateQuestion(
       db.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
       db.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
     ]);
-    if (!assignment) return { success: false, message: "This Question is not assigned to the selected Mock Test." };
+    if (!assignment) {
+      const { data: fallbackList } = await db
+        .from("mock_test_questions")
+        .select("id")
+        .eq("mock_test_id", mockTestId)
+        .eq("question_id", questionId)
+        .limit(1);
+      if (!fallbackList || fallbackList.length === 0) {
+        return { success: false, message: "This Question is not assigned to the selected Mock Test." };
+      }
+    }
     hasAttempts = (attemptCount ?? 0) > 0 || mockTest.status !== "draft";
   }
 
@@ -360,15 +370,13 @@ export async function updateQuestion(
 
   try {
     revalidatePath("/admin/questions");
-    revalidatePath(`/admin/questions/${questionId}/edit`);
     revalidatePath("/admin/mock-tests");
     if (mockTestId) {
       revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
-      revalidatePath(`/admin/mock-tests/${mockTestId}/questions/${questionId}/edit`);
+      revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
       if (copiedQuestionId) {
         revalidatePath(`/admin/mock-tests/${mockTestId}/questions/${copiedQuestionId}/edit`);
       }
-      revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
     }
   } catch (revalErr) {
     console.warn("revalidatePath caught error:", revalErr);

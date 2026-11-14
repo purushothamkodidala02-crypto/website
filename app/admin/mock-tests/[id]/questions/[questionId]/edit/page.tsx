@@ -70,9 +70,20 @@ export default async function EditMockTestQuestionPage({
   const questionsPath = mockTestQuestionsHref(mockTestId, mockTestsPath);
 
   const assignments = assignmentsResult.data ?? [];
-  const currentAssignment = assignments.find((a) => a.question_id === questionId);
+  let currentAssignment = assignments.find((a) => a.question_id === questionId);
   if (!currentAssignment) {
-    redirect(questionsPath);
+    const { data: directAssignment } = await db
+      .from("mock_test_questions")
+      .select("id, question_id, question_order, marks, negative_marks")
+      .eq("mock_test_id", mockTestId)
+      .eq("question_id", questionId)
+      .maybeSingle();
+
+    if (!directAssignment) {
+      redirect(questionsPath);
+    }
+    currentAssignment = directAssignment;
+    assignments.push(directAssignment);
   }
 
   const currentMarks = Number.isFinite(Number(currentAssignment.marks))
@@ -183,15 +194,19 @@ export default async function EditMockTestQuestionPage({
       ? returnTo
       : questionsPath;
 
-  const returnToParam =
+  const rawReturnTo =
     typeof returnTo === "string"
       ? returnTo
       : Array.isArray(returnTo)
         ? returnTo[0]
         : undefined;
-  const returnToQuery = returnToParam
-    ? `?returnTo=${encodeURIComponent(returnToParam)}`
-    : "";
+  // Guard against runaway multi-encoded URL nesting
+  const safeReturnTo = rawReturnTo && rawReturnTo.length < 500 && !rawReturnTo.includes("%2525")
+    ? rawReturnTo
+    : returningToPreview
+      ? mockTestPreviewHref(mockTestId, mockTestsPath, currentIndex + 1)
+      : questionsPath;
+  const returnToQuery = safeReturnTo ? `?returnTo=${encodeURIComponent(safeReturnTo)}` : "";
 
   const prevHref = prevItem
     ? `/admin/mock-tests/${mockTestId}/questions/${prevItem.question_id}/edit${returnToQuery}`

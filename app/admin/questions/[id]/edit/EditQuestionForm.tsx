@@ -68,8 +68,26 @@ export function EditQuestionForm({
     [question.id],
   );
 
+  const safeAction = useCallback(
+    async (previousState: UpdateQuestionState, formData: FormData) => {
+      try {
+        return await updateQuestionAction(previousState, formData);
+      } catch (err) {
+        console.error("Question save network/server error caught:", err);
+        return {
+          success: false,
+          message:
+            err instanceof Error
+              ? err.message
+              : "Temporary problem saving question. Please check your connection and try again.",
+        };
+      }
+    },
+    [updateQuestionAction],
+  );
+
   const [state, action, pending] = useActionState(
-    updateQuestionAction,
+    safeAction,
     initialState,
   );
   const [subjectId, setSubjectId] = useState(question.subject_id);
