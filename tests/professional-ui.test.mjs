@@ -26,6 +26,8 @@ test("student test actions clearly distinguish starting, resuming, and restartin
 
   assert.match(actions, />\s*Start test\s*</);
   assert.match(actions, />\s*Resume test\s*</);
+  assert.doesNotMatch(actions, /Resume test[\s\S]{0,50}→/);
+  assert.match(actions, /<LoadingSpinner[\s\S]*?Resuming test…/);
   assert.match(actions, />\s*Restart test\s*</);
   assert.match(actions, /Restart this test\?/);
   assert.match(details, /Resume to keep your progress/);
