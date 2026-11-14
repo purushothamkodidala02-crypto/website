@@ -34,6 +34,18 @@ export async function checkApEndowmentFeedbackEligibilityAction(): Promise<ApEnd
 
   try {
     const supabase = await createClient();
+
+    // Check if campaign was deactivated by admin
+    const { data: surveyStatus } = await supabase
+      .from("dynamic_surveys")
+      .select("is_active")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (surveyStatus && surveyStatus.is_active === false) {
+      return { eligible: false, reason: "campaign_expired" };
+    }
+
     const {
       data: { user },
       error: authError,
@@ -127,6 +139,18 @@ export async function submitApEndowmentFeedbackAction(
 
   try {
     const supabase = await createClient();
+
+    // Check if campaign was deactivated by admin
+    const { data: surveyStatus } = await supabase
+      .from("dynamic_surveys")
+      .select("is_active")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (surveyStatus && surveyStatus.is_active === false) {
+      return { success: false, message: "This feedback campaign is currently paused." };
+    }
+
     const {
       data: { user },
       error: authError,
@@ -473,5 +497,77 @@ export async function deleteApEndowmentFeedbackAction(feedbackId: string) {
   } catch (err) {
     console.error("Error deleting feedback entry:", err);
     return { success: false, error: "Failed to delete feedback." };
+  }
+}
+
+export async function clearAllApEndowmentResponsesAction() {
+  try {
+    const supabase = await getSupabaseServerClient();
+    await supabase.from("ap_endowment_feedback").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+
+    const { data: survey } = await supabase
+      .from("dynamic_surveys")
+      .select("id")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (survey?.id) {
+      await supabase.from("dynamic_survey_answers").delete().eq("survey_id", survey.id);
+      await supabase.from("dynamic_survey_responses").delete().eq("survey_id", survey.id);
+    }
+
+    revalidatePath("/admin/surveys");
+    return { success: true };
+  } catch (err) {
+    console.error("Error clearing all AP Endowment feedback responses:", err);
+    return { success: false, error: "Failed to clear responses." };
+  }
+}
+
+export async function toggleApEndowmentStatusAction(isActive: boolean) {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: survey } = await supabase
+      .from("dynamic_surveys")
+      .select("id")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (survey?.id) {
+      await supabase
+        .from("dynamic_surveys")
+        .update({ is_active: isActive })
+        .eq("id", survey.id);
+    }
+
+    revalidatePath("/admin/surveys");
+    return { success: true, isActive };
+  } catch (err) {
+    console.error("Error toggling AP Endowment survey status:", err);
+    return { success: false, isActive: false };
+  }
+}
+
+export async function updateApEndowmentMetaAction(title: string, description: string) {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: survey } = await supabase
+      .from("dynamic_surveys")
+      .select("id")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (survey?.id) {
+      await supabase
+        .from("dynamic_surveys")
+        .update({ title: title.trim(), description: description.trim() })
+        .eq("id", survey.id);
+    }
+
+    revalidatePath("/admin/surveys");
+    return { success: true };
+  } catch (err) {
+    console.error("Error updating AP Endowment survey meta:", err);
+    return { success: false, error: "Failed to update survey meta." };
   }
 }

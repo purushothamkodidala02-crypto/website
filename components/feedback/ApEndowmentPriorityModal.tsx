@@ -27,8 +27,14 @@ export function ApEndowmentPriorityModal() {
       return;
     }
 
-    // 2. Check if student already submitted or skipped on this browser
+    // 2. Check if student already submitted or skipped on this browser, or if admin deactivated/deleted
     if (typeof window !== "undefined") {
+      if (localStorage.getItem("varadhi_ap_endowment_survey_active") === "false") {
+        return;
+      }
+      if (localStorage.getItem("varadhi_ap_endowment_survey_deleted") === "true") {
+        return;
+      }
       const hasSubmitted = localStorage.getItem(STORAGE_SUBMITTED);
       const hasDismissed = localStorage.getItem(STORAGE_DISMISSED);
 
