@@ -264,6 +264,12 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       const patternText = teluguData?.pattern
         ? `${teluguData.pattern.authority} ${teluguData.pattern.stages.join(" ")} ${teluguData.pattern.subjects.map((sub) => `${sub.name} ${sub.teluguName} ${sub.description}`).join(" ")}`
         : "";
+      const scheduleText = teluguData?.schedule
+        ? `${teluguData.schedule.authority} ${teluguData.schedule.postName} ${teluguData.schedule.prelimsExamDate} ${teluguData.schedule.events.map((e) => `${e.title} ${e.teluguTitle} ${e.detail}`).join(" ")}`
+        : "";
+      const jobProfileText = teluguData?.jobProfile
+        ? `${teluguData.jobProfile.roleTitle} ${teluguData.jobProfile.department} ${teluguData.jobProfile.payScale} ${teluguData.jobProfile.grossSalaryMonthly} ${teluguData.jobProfile.eligibility.education} ${teluguData.jobProfile.eligibility.ageLimit} ${teluguData.jobProfile.duties.map((d) => `${d.title} ${d.teluguTitle ?? ""} ${d.description}`).join(" ")}`
+        : "";
       const searchable = expandSearchableText([
         state?.name,
         state?.code,
@@ -273,8 +279,10 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
         teluguData?.teluguName,
         teluguData?.keywords.join(" "),
         patternText,
+        scheduleText,
+        jobProfileText,
         subjectTextByExam.get(exam.id)?.join(" "),
-        "exam syllabus pattern mock test",
+        "exam syllabus pattern mock test timeline duties salary",
       ]);
       return [exam.id, { state, category, teluguData, searchable }] as const;
     }),
@@ -337,7 +345,9 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
       examMeta?.teluguData?.keywords.join(" "),
       examMeta?.teluguData?.pattern?.authority,
       examMeta?.teluguData?.pattern?.subjects.map((sub) => `${sub.name} ${sub.teluguName}`).join(" "),
-      "exam syllabus pattern mock test",
+      examMeta?.teluguData?.jobProfile?.roleTitle,
+      examMeta?.teluguData?.schedule?.postName,
+      "exam syllabus pattern mock test timeline duties salary",
     ]);
     const score = scoreCatalogMatch(searchable, query, primary);
     if (score > 0) {

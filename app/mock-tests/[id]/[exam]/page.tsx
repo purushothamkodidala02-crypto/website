@@ -207,6 +207,25 @@ export default async function ExamPage({ params, searchParams }: Props) {
       }
     : null;
 
+  const occupationJsonLd = teluguData?.jobProfile
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Occupation",
+        name: teluguData.jobProfile.roleTitle,
+        description: `${teluguData.jobProfile.roleTitle} in ${teluguData.jobProfile.department}. Roles, duties, eligibility, and pay scale.`,
+        estimatedSalary: {
+          "@type": "MonetaryAmountDistribution",
+          name: "Gross Monthly Salary",
+          currency: "INR",
+        },
+        responsibilities: teluguData.jobProfile.duties.map(
+          (d) => `${d.title}${d.teluguTitle ? ` (${d.teluguTitle})` : ""}: ${d.description}`,
+        ),
+        occupationalCategory: "Public Administration and Government Services",
+        qualifications: `${teluguData.jobProfile.eligibility.education} Age Limit: ${teluguData.jobProfile.eligibility.ageLimit}`,
+      }
+    : null;
+
   const structuredData = [
     ...collectionStructuredData(seo.title, seo.description, canonical, [
       { name: "Home", path: "/" },
@@ -216,6 +235,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
     ]),
     courseJsonLd,
     ...(eventJsonLd ? [eventJsonLd] : []),
+    ...(occupationJsonLd ? [occupationJsonLd] : []),
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
     { "@context": "https://schema.org", "@type": "ItemList", name: examHeading, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined; const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
   ];
