@@ -465,6 +465,46 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                   })()
                 : "Full-length papers and targeted subject practice for Telangana and Andhra Pradesh competitive exams with real exam timing and scoring."}
             </p>
+
+            {selectedExam && selectedState && (
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Official Guide:</span>
+                <Link
+                  href={examUrl(selectedState.slug, selectedExam.slug)}
+                  className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 font-semibold text-teal-900 hover:bg-teal-100 transition"
+                >
+                  Exam Overview →
+                </Link>
+                {(selectedExam.slug.includes("police") || selectedExam.name.toLowerCase().includes("police") || selectedExam.name.toLowerCase().includes("constable")) && (
+                  <>
+                    <Link
+                      href={`${examUrl(selectedState.slug, selectedExam.slug)}#physical-standards`}
+                      className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 font-semibold text-teal-900 hover:bg-teal-100 transition"
+                    >
+                      PMT &amp; PET Standards →
+                    </Link>
+                    <Link
+                      href={`${examUrl(selectedState.slug, selectedExam.slug)}#exam-schedule`}
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      7,112 Vacancies →
+                    </Link>
+                    <Link
+                      href={`${examUrl(selectedState.slug, selectedExam.slug)}#age-limits`}
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      Age Limits (GO 87) →
+                    </Link>
+                  </>
+                )}
+                <Link
+                  href={`${examUrl(selectedState.slug, selectedExam.slug)}#exam-pattern`}
+                  className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Pattern &amp; Marking Scheme →
+                </Link>
+              </div>
+            )}
           </div>
           <form action="/mock-tests" method="get" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             {selectedState && <input type="hidden" name="state" value={selectedState.slug} />}
@@ -557,6 +597,17 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
                         >
                           Explore {item.exam.name} Tests →
                         </Link>
+                        {(item.exam.slug.includes("police") ||
+                          item.exam.name.toLowerCase().includes("police") ||
+                          item.exam.name.toLowerCase().includes("constable")) && (
+                          <Link
+                            href={`${examUrl(item.state.slug, item.exam.slug)}#physical-standards`}
+                            prefetch={false}
+                            className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-semibold text-teal-800 transition shadow-2xs"
+                          >
+                            PET Standards →
+                          </Link>
+                        )}
                       </div>
                     </div>
                   );})}
@@ -1049,9 +1100,21 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
-              <span className="text-xs font-semibold text-slate-500 leading-snug">
-                {test.negativeMarks > 0 ? `-${formatMarkValue(test.negativeMarks)} Negative · Bilingual` : "No Negative · Bilingual"}
-              </span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-semibold text-slate-500 leading-snug">
+                  {test.negativeMarks > 0 ? `-${formatMarkValue(test.negativeMarks)} Negative · Bilingual` : "No Negative · Bilingual"}
+                </span>
+                {(test.exam.slug.includes("police") ||
+                  test.exam.name.toLowerCase().includes("police") ||
+                  test.exam.name.toLowerCase().includes("constable")) && (
+                  <Link
+                    href={`${examUrl(test.state.slug, test.exam.slug)}#physical-standards`}
+                    className="text-[11px] font-semibold text-teal-800 hover:text-teal-950 transition hover:underline"
+                  >
+                    PET Standards &amp; Events →
+                  </Link>
+                )}
+              </div>
               <div className="shrink-0 ml-auto">
                 <MockTestCardAction
                   testId={test.id}

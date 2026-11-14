@@ -258,6 +258,54 @@ export default function SupportPage() {
                     Reviewing marks, negative marking calculations, bookmarked questions, and private mistake reviews.
                   </p>
                 </div>
+
+                <div className="sm:col-span-2 rounded-xl border border-teal-200/90 bg-teal-50/30 p-4 transition-all duration-200 hover:border-teal-400 hover:shadow-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid h-8 w-8 place-items-center rounded-lg border border-teal-200 bg-teal-100/80 text-teal-900">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-950">Official Recruitment, Syllabus &amp; PET Standards</h3>
+                        <p className="text-[11px] text-teal-800 font-semibold">TSLPRB · TGPSC · APPSC Standards</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-teal-100 border border-teal-200 px-2.5 py-0.5 text-[10px] font-bold text-teal-950 shrink-0">
+                      Verified Data
+                    </span>
+                  </div>
+                  <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
+                    Guidance on official recruitment notifications (e.g. TG Police Rc No. 189/2026), 7,112 cadre vacancies, GO Ms 87 5-year age relaxations, physical measurement &amp; efficiency test (PET) standards, and syllabus topics.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-teal-800">
+                    <Link
+                      href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards"
+                      className="rounded-lg bg-white border border-teal-200 px-2.5 py-1 hover:bg-teal-50 transition"
+                    >
+                      Police PET Standards →
+                    </Link>
+                    <Link
+                      href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule"
+                      className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
+                    >
+                      7,112 Vacancy Breakdown →
+                    </Link>
+                    <Link
+                      href="/mock-tests/telangana/police-constable-free-mock-test#age-limits"
+                      className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
+                    >
+                      Age Limits (GO 87) →
+                    </Link>
+                    <Link
+                      href="/mock-tests"
+                      className="rounded-lg bg-white border border-slate-200 px-2.5 py-1 hover:bg-slate-50 text-slate-700 transition"
+                    >
+                      Exam Directory →
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -350,18 +398,31 @@ export default function SupportPage() {
 
             {/* Popular Exam Series Links Matching Home Page */}
             <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs">
-              <h2 className="font-display text-base font-bold text-slate-900">Target State Exams</h2>
+              <h2 className="font-display text-base font-bold text-slate-900">Target State Exams &amp; Guides</h2>
               <p className="mt-1 text-xs text-slate-500">
-                Direct access to syllabus-aligned mock tests:
+                Direct access to syllabus mock tests &amp; physical standards:
               </p>
-              <div className="mt-3.5 flex flex-col gap-2 text-xs sm:text-sm">
-                <Link
-                  href="/mock-tests/telangana/police-constable-free-mock-test"
-                  className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-950 transition"
-                >
-                  <span>TG Police Constable Mock Tests</span>
-                  <span className="text-teal-700" aria-hidden="true">→</span>
-                </Link>
+              <div className="mt-3.5 flex flex-col gap-2.5 text-xs sm:text-sm">
+                <div className="rounded-xl border border-teal-200/90 bg-teal-50/40 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-teal-950">TG Police Constable</span>
+                    <span className="rounded-full bg-teal-100 border border-teal-200 px-2 py-0.5 text-[10px] font-bold text-teal-900">7,112 Posts</span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-teal-800">
+                    <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:underline">
+                      PET Standards →
+                    </Link>
+                    <span className="text-slate-300">•</span>
+                    <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" className="hover:underline">
+                      Vacancies →
+                    </Link>
+                    <span className="text-slate-300">•</span>
+                    <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:underline">
+                      Mock Tests →
+                    </Link>
+                  </div>
+                </div>
+
                 <Link
                   href="/mock-tests/telangana/tg-tet-2026"
                   className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-950 transition"
@@ -413,6 +474,8 @@ export default function SupportPage() {
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Quick links</p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
               <Link href="/mock-tests/telangana/police-constable-free-mock-test" className="hover:text-white transition">Police Constable</Link>
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test#physical-standards" className="hover:text-white transition">Police PET Standards</Link>
+              <Link href="/mock-tests/telangana/police-constable-free-mock-test#exam-schedule" className="hover:text-white transition">Police 7,112 Vacancies</Link>
               <Link href="/mock-tests/telangana/tg-tet-2026" className="hover:text-white transition">TG TET 2026</Link>
               <Link href="/mock-tests/telangana" className="hover:text-white transition">Telangana Exams</Link>
               <Link href="/mock-tests/andhra-pradesh" className="hover:text-white transition">Andhra Pradesh Exams</Link>
