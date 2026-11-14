@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   normalizeQuestionImageUrl,
   questionMediaPath,
@@ -12,7 +13,11 @@ import { syncQuestionToAttemptSessions } from "@/lib/questions/sync-attempt-sess
 import type { CorrectAnswer, QuestionLifecycle } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 
-export type UpdateQuestionState = { success: boolean; message: string };
+export type UpdateQuestionState = {
+  success: boolean;
+  message: string;
+  newQuestionId?: string;
+};
 
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
 const lifecycles: QuestionLifecycle[] = ["permanent", "review", "expires"];
@@ -66,6 +71,10 @@ export async function updateQuestion(
     return { success: false, message: "You are not authorized to update Questions." };
   }
 
+  const db = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminClient()
+    : supabase;
+
   const subjectId = String(formData.get("subject_id") ?? "").trim();
   const correctAnswer = String(formData.get("correct_answer") ?? "") as CorrectAnswer;
   const lifecycle = String(
@@ -86,13 +95,13 @@ export async function updateQuestion(
   }
 
   const [{ data: subject }, { data: existingQuestion }, { data: mockTest }] = await Promise.all([
-    supabase
+    db
       .from("subjects")
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    supabase.from("questions").select("id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
-    mockTestId ? supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, replaces_mock_test_id, superseded_by_mock_test_id").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
+    db.from("questions").select("id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
+    mockTestId ? db.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, replaces_mock_test_id, superseded_by_mock_test_id").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
     return { success: false, message: "The selected Subject could not be found." };
@@ -102,8 +111,8 @@ export async function updateQuestion(
     if (!mockTest) return { success: false, message: "The selected Mock Test could not be found." };
     if (subject.paper_id !== mockTest.paper_id || (mockTest.test_scope === "subject" && subject.id !== mockTest.subject_id)) return { success: false, message: "This Question must stay inside this Mock Test's Paper and Subject." };
     const [{ count: attemptCount }, { data: assignment }] = await Promise.all([
-      supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
-      supabase.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
+      db.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
+      db.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
     ]);
     if (!assignment) return { success: false, message: "This Question is not assigned to the selected Mock Test." };
     hasAttempts = (attemptCount ?? 0) > 0 || mockTest.status !== "draft";
@@ -135,20 +144,20 @@ export async function updateQuestion(
 
   // Paper series duplicate check for question update (only when question text was actually modified)
   if (!questionTextUnchanged) {
-    const { data: subjectData } = await supabase
+    const { data: subjectData } = await db
       .from("subjects")
       .select("id, name, paper_id")
       .eq("id", subjectId)
       .single();
 
     if (subjectData?.paper_id) {
-      const { data: siblingSubjects } = await supabase
+      const { data: siblingSubjects } = await db
         .from("subjects")
         .select("id, name")
         .eq("paper_id", subjectData.paper_id);
       const siblingSubjectIds = (siblingSubjects ?? []).map((s) => s.id);
 
-      const { data: existingQuestions } = await supabase
+      const { data: existingQuestions } = await db
         .from("questions")
         .select(`
           id,
@@ -227,7 +236,7 @@ export async function updateQuestion(
     return { success: false, message: normalizedImage.error };
   }
   const uploadedImage = imageFile instanceof File && imageFile.size > 0
-    ? await uploadQuestionImage(supabase, user.id, imageFile)
+    ? await uploadQuestionImage(db, user.id, imageFile)
     : { url: removeImage ? null : normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };
 
@@ -256,35 +265,37 @@ export async function updateQuestion(
     };
 
   let copiedForThisMock = false;
+  let copiedQuestionId: string | undefined;
   let updateError: { message: string } | null = null;
   if (mockTestId && !hasAttempts) {
-    const { count: otherAssignmentCount } = await supabase.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("question_id", questionId).neq("mock_test_id", mockTestId);
+    const { count: otherAssignmentCount } = await db.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("question_id", questionId).neq("mock_test_id", mockTestId);
     if ((otherAssignmentCount ?? 0) > 0) {
-      const { data: copiedQuestion, error: copyError } = await supabase.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
+      const { data: copiedQuestion, error: copyError } = await db.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
       if (copyError || !copiedQuestion) {
-        await removeQuestionImage(supabase, uploadedImage.path);
+        await removeQuestionImage(db, uploadedImage.path);
         return { success: false, message: copyError?.message ?? "The separate Question copy could not be created." };
       }
-      const { error: assignmentError } = await supabase.from("mock_test_questions").update({ question_id: copiedQuestion.id }).eq("mock_test_id", mockTestId).eq("question_id", questionId);
+      const { error: assignmentError } = await db.from("mock_test_questions").update({ question_id: copiedQuestion.id }).eq("mock_test_id", mockTestId).eq("question_id", questionId);
       if (assignmentError) {
-        await supabase.from("questions").delete().eq("id", copiedQuestion.id);
-        await removeQuestionImage(supabase, uploadedImage.path);
+        await db.from("questions").delete().eq("id", copiedQuestion.id);
+        await removeQuestionImage(db, uploadedImage.path);
         return { success: false, message: assignmentError.message };
       }
       copiedForThisMock = true;
+      copiedQuestionId = copiedQuestion.id;
     }
   }
   if (!copiedForThisMock) {
-    const { error } = await supabase.from("questions").update(nextQuestion).eq("id", questionId);
+    const { error } = await db.from("questions").update(nextQuestion).eq("id", questionId);
     updateError = error;
   }
 
   if (updateError) {
-    await removeQuestionImage(supabase, uploadedImage.path);
+    await removeQuestionImage(db, uploadedImage.path);
     return { success: false, message: updateError.message };
   }
   if (!copiedForThisMock && existingQuestion.image_url && existingQuestion.image_url !== uploadedImage.url) {
-    await removeQuestionImage(supabase, questionMediaPath(existingQuestion.image_url));
+    await removeQuestionImage(db, questionMediaPath(existingQuestion.image_url));
   }
 
   // Synchronize clarifying updates (diagram image, typos, explanations, answer key) to student attempt sessions:
@@ -309,12 +320,20 @@ export async function updateQuestion(
     existingQuestion.correct_answer,
   );
 
-  revalidatePath("/admin/questions");
-  revalidatePath(`/admin/questions/${questionId}/edit`);
-  revalidatePath("/admin/mock-tests");
-  if (mockTestId) {
-    revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
-    revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
+  try {
+    revalidatePath("/admin/questions");
+    revalidatePath(`/admin/questions/${questionId}/edit`);
+    revalidatePath("/admin/mock-tests");
+    if (mockTestId) {
+      revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
+      revalidatePath(`/admin/mock-tests/${mockTestId}/questions/${questionId}/edit`);
+      if (copiedQuestionId) {
+        revalidatePath(`/admin/mock-tests/${mockTestId}/questions/${copiedQuestionId}/edit`);
+      }
+      revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
+    }
+  } catch (revalErr) {
+    console.warn("revalidatePath caught error:", revalErr);
   }
 
   let successMessage = "Question updated in English and Telugu.";
@@ -327,7 +346,7 @@ export async function updateQuestion(
       ? "Question updated only in this Mock Test. A separate copy was kept for its other use."
       : "Question updated in this Mock Test.";
   }
-  return { success: true, message: successMessage };
+  return { success: true, message: successMessage, newQuestionId: copiedQuestionId };
   } catch (err) {
     console.error("Unexpected error in updateQuestion action:", err);
     return {

@@ -480,7 +480,7 @@ function StudyQuestionCard({
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${badgeStyle}`}>
                       {key}
                     </span>
-                    <span className={`min-w-0 flex-1 pt-0.5 leading-relaxed font-medium font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+                    <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 tracking-[0.01em] font-medium font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
                       {label}
                     </span>
                     {statusBadge}

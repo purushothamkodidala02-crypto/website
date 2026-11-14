@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminTaxonomy } from "@/lib/admin/taxonomy";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Question } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 import { EditQuestionForm } from "./EditQuestionForm";
@@ -21,20 +22,22 @@ export default async function EditQuestionPage({
       ? returnTo
       : "/admin/questions";
   const supabase = await createClient();
+  const db = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
+
   const [questionResult, sessionResult, assignmentsResult, taxonomy] =
     await Promise.all([
-      supabase
+      db
         .from("questions")
         .select(
           "id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at",
         )
         .eq("id", id)
         .maybeSingle(),
-      supabase
+      db
         .from("test_attempt_session_questions")
         .select("session_id", { count: "exact", head: true })
         .eq("question_id", id),
-      supabase
+      db
         .from("mock_test_questions")
         .select("mock_test_id, question_order, mock_tests(id, title, status)")
         .eq("question_id", id)

@@ -94,6 +94,17 @@ img {
 
 .font-exam {
   font-family: var(--font-varadhi-ui), var(--font-telugu), "Times New Roman", Times, Georgia, serif;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-exam p,
+.font-exam span,
+.font-exam label {
+  line-height: inherit;
+  letter-spacing: inherit;
 }
 
 * {

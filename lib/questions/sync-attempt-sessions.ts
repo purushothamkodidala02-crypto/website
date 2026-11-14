@@ -93,31 +93,68 @@ export async function syncQuestionToAttemptSessions(
       if (attemptIds.length > 0) {
         const { data: attempts } = await admin
           .from("test_attempts")
-          .select("id, session_id")
+          .select("id, session_id, mock_test_id")
           .in("id", attemptIds);
 
         const sessionIds = (attempts ?? [])
           .map((a) => a.session_id)
           .filter(Boolean) as string[];
 
-        const { data: sessionQuestions } = await admin
-          .from("test_attempt_session_questions")
-          .select("session_id, marks, negative_marks")
-          .eq("question_id", questionId)
-          .in("session_id", sessionIds);
+        const mockTestIds = [
+          ...new Set((attempts ?? []).map((a) => a.mock_test_id).filter(Boolean)),
+        ];
+
+        // Fetch fallback marking weightage from mock_test_questions per mock test
+        // so AEE (e.g. 2 marks for Paper 2, 1 mark for Paper 1) are accurately scored
+        let mockMarksMap = new Map<string, { marks: number; negativeMarks: number }>();
+        if (mockTestIds.length > 0) {
+          const { data: mtqs } = await admin
+            .from("mock_test_questions")
+            .select("mock_test_id, marks, negative_marks")
+            .eq("question_id", questionId)
+            .in("mock_test_id", mockTestIds);
+
+          mockMarksMap = new Map(
+            (mtqs ?? []).map((m) => [
+              m.mock_test_id,
+              {
+                marks: Number.isFinite(Number(m.marks)) ? Number(m.marks) : 1,
+                negativeMarks: Number.isFinite(Number(m.negative_marks)) ? Number(m.negative_marks) : 0,
+              },
+            ]),
+          );
+        }
+
+        let sessionQuestions: Array<{ session_id: string; marks: number | string; negative_marks: number | string }> = [];
+        if (sessionIds.length > 0) {
+          const { data } = await admin
+            .from("test_attempt_session_questions")
+            .select("session_id, marks, negative_marks")
+            .eq("question_id", questionId)
+            .in("session_id", sessionIds);
+          sessionQuestions = data ?? [];
+        }
 
         const sessionMarksMap = new Map(
-          (sessionQuestions ?? []).map((sq) => [sq.session_id, sq]),
+          sessionQuestions.map((sq) => [sq.session_id, sq]),
         );
-        const attemptSessionMap = new Map(
-          (attempts ?? []).map((a) => [a.id, a.session_id]),
+        const attemptMap = new Map(
+          (attempts ?? []).map((a) => [a.id, a]),
         );
 
         for (const resp of affectedResponses ?? []) {
-          const sessionId = attemptSessionMap.get(resp.attempt_id);
-          const sq = sessionId ? sessionMarksMap.get(sessionId) : null;
-          const marks = Number(sq?.marks ?? 1);
-          const negativeMarks = Number(sq?.negative_marks ?? 0);
+          const attempt = attemptMap.get(resp.attempt_id);
+          const fallback = attempt?.mock_test_id
+            ? mockMarksMap.get(attempt.mock_test_id)
+            : undefined;
+          const defaultMarks = fallback?.marks ?? 1;
+          const defaultNegativeMarks = fallback?.negativeMarks ?? 0;
+
+          const sq = attempt?.session_id ? sessionMarksMap.get(attempt.session_id) : null;
+          const parsedMarks = Number(sq?.marks);
+          const parsedNegativeMarks = Number(sq?.negative_marks);
+          const marks = Number.isFinite(parsedMarks) ? parsedMarks : defaultMarks;
+          const negativeMarks = Number.isFinite(parsedNegativeMarks) ? parsedNegativeMarks : defaultNegativeMarks;
 
           const isCorrect = resp.selected_answer === newKey;
           const marksAwarded = resp.selected_answer

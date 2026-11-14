@@ -389,7 +389,7 @@ function OptionRow({
       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-black ${badgeStyle}`}>
         {optionKey}
       </span>
-      <span className={`min-w-0 flex-1 pt-0.5 text-sm sm:text-base font-medium leading-relaxed font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+      <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base font-medium leading-relaxed sm:leading-7 tracking-[0.01em] font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
         {label}
       </span>
       {statusText && (

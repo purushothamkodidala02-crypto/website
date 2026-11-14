@@ -47,12 +47,16 @@ export function EditQuestionForm({
   mockTestId,
   hasAttempts,
   navigation,
+  marks,
+  negativeMarks,
 }: {
   question: Question;
   subjects: SubjectOption[];
   mockTestId?: string;
   hasAttempts?: boolean;
   navigation?: MockTestQuestionNav;
+  marks?: number;
+  negativeMarks?: number;
 }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -132,13 +136,17 @@ export function EditQuestionForm({
   // Handle save success navigation
   useEffect(() => {
     if (state.success) {
+      if (state.newQuestionId && mockTestId) {
+        router.replace(`/admin/mock-tests/${mockTestId}/questions/${state.newQuestionId}/edit`);
+        return;
+      }
       if (submitIntent === "save_and_next" && navigation?.nextHref) {
         router.push(navigation.nextHref);
       } else if (submitIntent === "save_and_return" && navigation?.backHref) {
         router.push(navigation.backHref);
       }
     }
-  }, [state.success, submitIntent, navigation, router]);
+  }, [state.success, state.newQuestionId, mockTestId, submitIntent, navigation, router]);
 
   // Keyboard navigation and shortcuts:
   // - Right / Left arrow keys: Navigate to Next / Prev question (when not editing text)
@@ -233,6 +241,11 @@ export function EditQuestionForm({
         <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
           Question {navigation.currentQuestionNumber} of {navigation.totalCount}
         </span>
+        {typeof marks === "number" && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-teal-100 border border-teal-300 px-2.5 py-0.5 text-xs font-bold text-teal-900">
+            {marks.toFixed(2)} Mark{marks === 1 ? "" : "s"}{typeof negativeMarks === "number" && negativeMarks > 0 ? ` (-${negativeMarks.toFixed(2)})` : ""}
+          </span>
+        )}
         {hasUnsavedChanges && (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900 animate-pulse">
             ● Unsaved edits
@@ -436,6 +449,15 @@ export function EditQuestionForm({
       <div className={navigation && showQuestionNavigator ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
         <div className="min-w-0">
           <section className="rounded-3xl border bg-white p-6 shadow-sm sm:p-7">
+            {typeof marks === "number" && (
+              <div className="mb-4 inline-flex items-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-3.5 py-1.5 text-xs font-bold text-teal-900">
+                <span>🎯 Marking Weightage:</span>
+                <span className="font-extrabold">+{marks.toFixed(2)} Mark{marks === 1 ? "" : "s"}</span>
+                {typeof negativeMarks === "number" && negativeMarks > 0 && (
+                  <span className="text-rose-700">(-{negativeMarks.toFixed(2)} negative)</span>
+                )}
+              </div>
+            )}
             <form
               ref={formRef}
               action={action}

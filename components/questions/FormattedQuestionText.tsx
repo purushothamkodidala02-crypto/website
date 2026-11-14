@@ -540,21 +540,21 @@ export function FormattedQuestionText({
       matchingLayout;
 
     return (
-      <div lang={isTelugu ? "te" : undefined} className={`@container font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}>
-        <div className="space-y-1.5">
-          {heading.map((line, index) => <p key={`${index}-${line}`} className="font-semibold text-slate-950">{line}</p>)}
+      <div lang={isTelugu ? "te" : "en"} className={`@container font-medium ${isTelugu ? "font-telugu" : ""} ${className}`}>
+        <div className="space-y-2">
+          {heading.map((line, index) => <p key={`${index}-${line}`} className="font-semibold text-slate-950 leading-relaxed sm:leading-8">{line}</p>)}
         </div>
         <div className="mt-4 grid grid-cols-1 @[460px]:grid-cols-2 gap-3 sm:gap-4">
           <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 shadow-sm [overflow-wrap:anywhere]">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{leftTitle}</p>
-            <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{leftItems.map((line) => renderListItem(line))}</div>
+            <div className="space-y-2.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 break-normal">{leftItems.map((line) => renderListItem(line))}</div>
           </div>
           <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 shadow-sm [overflow-wrap:anywhere]">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{rightTitle}</p>
-            <div className="space-y-2 text-sm sm:text-base leading-relaxed break-normal">{rightItems.map((line) => renderListItem(line))}</div>
+            <div className="space-y-2.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 break-normal">{rightItems.map((line) => renderListItem(line))}</div>
           </div>
         </div>
-        {instruction.length > 0 && <div className="mt-4 space-y-1.5 leading-relaxed text-slate-900">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
+        {instruction.length > 0 && <div className="mt-4 space-y-2 leading-relaxed sm:leading-7 text-slate-900">{instruction.map((line) => <p key={line}>{line}</p>)}</div>}
       </div>
     );
   }
@@ -562,7 +562,7 @@ export function FormattedQuestionText({
   if (passageLayout) {
     const { heading, passage, questionPrompt } = passageLayout;
     return (
-      <div lang={isTelugu ? "te" : undefined} className={`font-medium break-words ${isTelugu ? "font-telugu" : ""} ${className}`}>
+      <div lang={isTelugu ? "te" : "en"} className={`font-medium break-words ${isTelugu ? "font-telugu" : ""} ${className}`}>
         {heading.length > 0 && (
           <div className="space-y-1">
             {heading.map((line, index) => (
@@ -579,14 +579,14 @@ export function FormattedQuestionText({
             </svg>
             <span>{isTelugu ? "పఠన గద్యం (Reading Passage)" : "Reading Passage"}</span>
           </div>
-          <div className="space-y-3 text-base sm:text-[17px] text-slate-800 font-normal">
+          <div className="space-y-3.5 text-base sm:text-[17px] text-slate-800 font-normal leading-relaxed sm:leading-8">
             {passage.map((p, idx) => (
               <p key={idx}>{p}</p>
             ))}
           </div>
         </div>
         {questionPrompt.length > 0 && (
-          <div className="mt-4 space-y-1.5 leading-relaxed text-slate-950 text-base sm:text-lg">
+          <div className="mt-4 space-y-2 leading-relaxed sm:leading-8 text-slate-950 text-base sm:text-lg">
             {questionPrompt.map((line, idx) => (
               <p key={idx}>{line}</p>
             ))}
@@ -598,8 +598,8 @@ export function FormattedQuestionText({
 
   return (
     <div
-      lang={isTelugu ? "te" : undefined}
-      className={`space-y-2.5 font-medium break-words ${isTelugu ? "font-telugu leading-[1.85]" : ""} ${className ?? ""}`}
+      lang={isTelugu ? "te" : "en"}
+      className={`space-y-3 font-medium break-words ${isTelugu ? "font-telugu leading-[1.85]" : "leading-relaxed sm:leading-8 tracking-[0.01em]"} ${className ?? ""}`}
     >
       {lines.map((line, index) => {
         const labelled = line.match(labelledSection);
@@ -621,7 +621,7 @@ export function FormattedQuestionText({
               key={`${index}-${line}`}
               className="my-2 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 sm:p-4"
             >
-              <p className="leading-relaxed text-slate-950">
+              <p className="leading-relaxed sm:leading-8 text-slate-950">
                 <strong className="font-bold text-slate-950 mr-2">
                   {label}:
                 </strong>
@@ -635,7 +635,7 @@ export function FormattedQuestionText({
 
         if (isHeading) {
           return (
-            <p key={`${index}-${line}`} className="font-bold text-slate-950">
+            <p key={`${index}-${line}`} className="font-bold text-slate-950 leading-relaxed sm:leading-8">
               {line}
             </p>
           );
@@ -683,8 +683,8 @@ export function FormattedQuestionText({
             key={`${index}-${line}`}
             className={
               isInstruction && index > 0
-                ? "pt-2 leading-relaxed text-slate-950"
-                : "leading-relaxed text-slate-950"
+                ? "pt-2 leading-relaxed sm:leading-8 text-slate-950"
+                : "leading-relaxed sm:leading-8 text-slate-950"
             }
           >
             {line}

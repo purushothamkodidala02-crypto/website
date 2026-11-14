@@ -1020,14 +1020,14 @@ export function StudentTestRunner({
               </div>
               <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-medium leading-relaxed sm:leading-8 text-slate-950" />
               {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-[32dvh] sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
-              <div className="mt-4 sm:mt-5 grid gap-2 sm:gap-2.5">
+              <div className="mt-4 sm:mt-5 grid gap-2.5 sm:gap-3">
                 {options.map(([key, text]) => {
                   const selected = answers[current.question_id] === key;
                   const teluguOption = containsTeluguText(text);
                   return (
                     <label
                       key={key}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border p-2.5 sm:p-3 transition hover:border-teal-400 ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 sm:p-3.5 transition hover:border-teal-400 ${
                         selected
                           ? "border-teal-600 bg-teal-50/90 shadow-sm ring-1 ring-teal-500"
                           : "border-slate-200/90 bg-white hover:bg-slate-50/70"
@@ -1062,13 +1062,13 @@ export function StudentTestRunner({
                           });
                         }}
                       />
-                      <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
+                      <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition mt-0.5 ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
                         {key}
                       </span>
                       <span
-                        lang={teluguOption ? "te" : undefined}
-                        className={`min-w-0 flex-1 whitespace-pre-line ${
-                          teluguOption ? "text-[15px] sm:text-base font-telugu" : "text-sm sm:text-base"
+                        lang={teluguOption ? "te" : "en"}
+                        className={`min-w-0 flex-1 whitespace-pre-line text-[15px] sm:text-base leading-relaxed sm:leading-7 tracking-[0.01em] ${
+                          teluguOption ? "font-telugu" : ""
                         } font-normal sm:font-medium text-slate-800 font-exam break-words [overflow-wrap:anywhere]`}
                       >
                         {text}
