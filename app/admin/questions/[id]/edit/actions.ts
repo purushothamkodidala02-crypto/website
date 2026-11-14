@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
+  isUploadFile,
   normalizeQuestionImageUrl,
   questionMediaPath,
   removeQuestionImage,
@@ -17,6 +18,7 @@ export type UpdateQuestionState = {
   success: boolean;
   message: string;
   newQuestionId?: string;
+  imageUrl?: string | null;
 };
 
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
@@ -262,10 +264,11 @@ export async function updateQuestion(
   const imageFile = formData.get("question_image");
   const removeImage = formData.get("remove_image") === "on";
   const normalizedImage = normalizeQuestionImageUrl(formData.get("image_url"));
-  if (!removeImage && normalizedImage.error && (!(imageFile instanceof File) || imageFile.size === 0)) {
+  const hasUploadedFile = isUploadFile(imageFile);
+  if (!removeImage && normalizedImage.error && !hasUploadedFile) {
     return { success: false, message: normalizedImage.error };
   }
-  const uploadedImage = imageFile instanceof File && imageFile.size > 0
+  const uploadedImage = hasUploadedFile
     ? await uploadQuestionImage(db, user.id, imageFile)
     : { url: removeImage ? null : normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };
@@ -370,9 +373,11 @@ export async function updateQuestion(
 
   try {
     revalidatePath("/admin/questions");
+    revalidatePath(`/admin/questions/${questionId}/edit`);
     revalidatePath("/admin/mock-tests");
     if (mockTestId) {
       revalidatePath(`/admin/mock-tests/${mockTestId}/questions`);
+      revalidatePath(`/admin/mock-tests/${mockTestId}/questions/${questionId}/edit`);
       revalidatePath(`/admin/mock-tests/${mockTestId}/preview`);
       if (copiedQuestionId) {
         revalidatePath(`/admin/mock-tests/${mockTestId}/questions/${copiedQuestionId}/edit`);
@@ -392,7 +397,12 @@ export async function updateQuestion(
       ? "Question updated only in this Mock Test. A separate copy was kept for its other use."
       : "Question updated in this Mock Test.";
   }
-  return { success: true, message: successMessage, newQuestionId: copiedQuestionId };
+  return {
+    success: true,
+    message: successMessage,
+    newQuestionId: copiedQuestionId,
+    imageUrl: nextQuestion.image_url,
+  };
   } catch (err) {
     console.error("Unexpected error in updateQuestion action:", err);
     return {

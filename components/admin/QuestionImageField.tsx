@@ -59,6 +59,21 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
   const [processing, setProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sync state whenever currentUrl changes from parent or after a successful save
+  useEffect(() => {
+    setUrl(currentUrl ?? "");
+    setFilePreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return "";
+    });
+    setRemove(false);
+    setFileMessage("");
+    setFileError("");
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }, [currentUrl]);
+
   useEffect(() => () => {
     if (filePreview) URL.revokeObjectURL(filePreview);
   }, [filePreview]);
@@ -77,8 +92,12 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
 
   return (
     <fieldset className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-      <legend className="px-2 text-sm font-black text-slate-950">Question image or graph <span className="font-normal text-slate-500">(optional)</span></legend>
-      <p className="text-sm leading-6 text-slate-600">Upload a PNG, JPG, or WebP file up to 2 MB, or paste a public HTTPS image URL.</p>
+      <legend className="px-2 text-sm font-black text-slate-950">
+        Question image or graph <span className="font-normal text-slate-500">(optional)</span>
+      </legend>
+      <p className="text-sm leading-6 text-slate-600">
+        Upload a PNG, JPG, or WebP file up to 2 MB, or paste a public HTTPS image URL.
+      </p>
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <label className="block text-sm font-bold">
           Upload image
@@ -105,14 +124,20 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
               try {
                 const prepared = await optimizeImage(file);
                 if (prepared !== file) {
-                  const transfer = new DataTransfer();
-                  transfer.items.add(prepared);
-                  input.files = transfer.files;
-                  setFileMessage(`Optimized from ${fileSize(file.size)} to ${fileSize(prepared.size)} for a faster upload.`);
+                  try {
+                    const transfer = new DataTransfer();
+                    transfer.items.add(prepared);
+                    input.files = transfer.files;
+                    setFileMessage(`Optimized from ${fileSize(file.size)} to ${fileSize(prepared.size)} for a faster upload.`);
+                  } catch {
+                    // If DataTransfer is unsupported in this browser environment, keep original file
+                    setFileMessage(`${file.name} is ready to upload (${fileSize(file.size)}).`);
+                  }
                 } else {
                   setFileMessage(`${file.name} is ready to upload (${fileSize(file.size)}).`);
                 }
                 setFilePreview(URL.createObjectURL(prepared));
+                setUrl(""); // Clears conflicting manual URL so uploaded file takes precedence
                 setRemove(false);
               } catch (error) {
                 input.value = "";
@@ -134,7 +159,20 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
             type="url"
             inputMode="url"
             value={url}
-            onChange={(event) => { setUrl(event.target.value); setRemove(false); }}
+            onChange={(event) => {
+              const val = event.target.value;
+              setUrl(val);
+              setRemove(false);
+              if (val.trim()) {
+                if (filePreview) URL.revokeObjectURL(filePreview);
+                setFilePreview("");
+                setFileMessage("");
+                setFileError("");
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                }
+              }
+            }}
             placeholder="https://example.com/question-graph.webp"
             className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal"
           />
@@ -142,7 +180,28 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
       </div>
       {currentUrl && (
         <label className="mt-4 flex items-center gap-3 text-sm font-bold text-red-700">
-          <input name="remove_image" type="checkbox" checked={remove} onChange={(event) => setRemove(event.target.checked)} className="h-4 w-4" />
+          <input
+            name="remove_image"
+            type="checkbox"
+            checked={remove}
+            onChange={(event) => {
+              const isChecked = event.target.checked;
+              setRemove(isChecked);
+              if (isChecked) {
+                if (filePreview) URL.revokeObjectURL(filePreview);
+                setFilePreview("");
+                setFileMessage("");
+                setFileError("");
+                setUrl("");
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                }
+              } else {
+                setUrl(currentUrl ?? "");
+              }
+            }}
+            className="h-4 w-4"
+          />
           Remove the current question image
         </label>
       )}

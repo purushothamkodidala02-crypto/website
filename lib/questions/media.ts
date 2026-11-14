@@ -10,8 +10,39 @@ const allowedImageTypes = new Map([
   ["image/jpeg", "jpg"],
   ["image/jpg", "jpg"],
   ["image/png", "png"],
+  ["image/x-png", "png"],
   ["image/webp", "webp"],
 ]);
+
+export function isUploadFile(value: unknown): value is File {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "size" in value &&
+    typeof (value as { size: unknown }).size === "number" &&
+    (value as { size: number }).size > 0 &&
+    "arrayBuffer" in value &&
+    typeof (value as { arrayBuffer: unknown }).arrayBuffer === "function"
+  );
+}
+
+export function resolveImageDetails(file: { type?: string; name?: string }): { extension: string; contentType: string } | null {
+  const type = (file.type || "").toLowerCase().trim();
+  const direct = allowedImageTypes.get(type);
+  if (direct) {
+    return {
+      extension: direct,
+      contentType: type === "image/jpg" ? "image/jpeg" : type === "image/x-png" ? "image/png" : type,
+    };
+  }
+
+  const name = (file.name || "").toLowerCase().trim();
+  if (/\.jpe?g$/i.test(name)) return { extension: "jpg", contentType: "image/jpeg" };
+  if (/\.png$/i.test(name)) return { extension: "png", contentType: "image/png" };
+  if (/\.webp$/i.test(name)) return { extension: "webp", contentType: "image/webp" };
+
+  return null;
+}
 
 export function normalizeQuestionImageUrl(value: unknown) {
   const candidate = String(value ?? "").trim();
@@ -33,20 +64,19 @@ export async function uploadQuestionImage(
   userId: string,
   file: File,
 ) {
-  const extension = allowedImageTypes.get(file.type);
-  if (!extension) {
+  const details = resolveImageDetails(file);
+  if (!details) {
     return { url: null, path: null, error: "Use a PNG, JPG, or WebP question image." };
   }
   if (file.size > MAX_QUESTION_IMAGE_BYTES) {
     return { url: null, path: null, error: "Question images must be 2 MB or smaller." };
   }
 
-  const path = `${userId}/${randomUUID()}.${extension}`;
+  const path = `${userId}/${randomUUID()}.${details.extension}`;
   const bytes = Buffer.from(await file.arrayBuffer());
-  const contentType = file.type === "image/jpg" ? "image/jpeg" : file.type;
   const { error } = await supabase.storage.from(QUESTION_MEDIA_BUCKET).upload(path, bytes, {
     cacheControl: "31536000",
-    contentType,
+    contentType: details.contentType,
     upsert: false,
   });
   if (error) {

@@ -603,7 +603,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 font-semibold text-xs transition"
                 >
-                  <span>Board Server Mirror ↗</span>
+                  <span>View ↗</span>
                 </a>
               </div>
             </div>
@@ -1121,7 +1121,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 rounded bg-white hover:bg-gray-100 text-gray-700 font-semibold px-3 py-2 transition text-xs border border-gray-300"
                     >
-                      <span>Board Mirror ↗</span>
+                      <span>View ↗</span>
                     </a>
                   </div>
                 </div>
@@ -1151,7 +1151,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 rounded bg-white hover:bg-gray-50 text-gray-600 font-medium px-2.5 py-2 transition text-xs border border-gray-200"
                     >
-                      <span>Mirror ↗</span>
+                      <span>View ↗</span>
                     </a>
                   </div>
                 </div>
@@ -1292,7 +1292,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-2 px-3 text-xs font-semibold transition"
                 >
-                  <span>Board Server Mirror ↗</span>
+                  <span>View ↗</span>
                 </a>
               </div>
             </div>
