@@ -120,6 +120,7 @@ export type SubmitApEndowmentFeedbackInput = {
   specificTopics?: string;
   studentName?: string;
   studentPhone?: string;
+  dynamicAnswers?: Record<string, string>;
 };
 
 export type SubmitApEndowmentFeedbackResult = {
@@ -264,6 +265,12 @@ export async function submitApEndowmentFeedbackAction(
         const answersToInsert: Array<{ response_id: string; question_id: string; answer_text: string }> = [];
 
         for (const q of surveyQuestions) {
+          const dynamicAns = input.dynamicAnswers?.[q.id];
+          if (dynamicAns !== undefined) {
+            answersToInsert.push({ response_id: resp.id, question_id: q.id, answer_text: dynamicAns });
+            continue;
+          }
+
           const text = q.question_text.toLowerCase();
           if (text.includes("paper")) {
             answersToInsert.push({ response_id: resp.id, question_id: q.id, answer_text: paperChoice });
@@ -589,5 +596,111 @@ export async function updateApEndowmentMetaAction(title: string, description: st
   } catch (err) {
     console.error("Error updating AP Endowment survey meta:", err);
     return { success: false, error: "Failed to update survey meta." };
+  }
+}
+
+export type DynamicSurveyQuestionItem = {
+  id: string;
+  survey_id: string;
+  question_text: string;
+  question_type: string;
+  options: string[] | null;
+  display_order: number;
+  is_required?: boolean;
+};
+
+export async function getOrCreateApEndowmentSurveyIdAction(): Promise<string | null> {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: existingSurvey } = await supabase
+      .from("dynamic_surveys")
+      .select("id")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (existingSurvey?.id) {
+      return existingSurvey.id;
+    }
+
+    const { data: newSurvey } = await supabase
+      .from("dynamic_surveys")
+      .insert({
+        title: "AP Endowment Officer — Subject Priority Responses",
+        description: "Student feedback on Paper 1 and Paper 2 subjects to prioritize for upcoming mock tests.",
+        is_active: true,
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (newSurvey?.id) {
+      await supabase.from("dynamic_survey_questions").insert([
+        {
+          survey_id: newSurvey.id,
+          question_text: "Choose the Paper",
+          question_type: "radio",
+          options: [
+            "Paper 1 - General Studies & Mental Ability",
+            "Paper 2 - Hindu Philosophy & Temple System",
+            "Both Paper 1 & Paper 2",
+          ],
+          display_order: 1,
+          is_required: true,
+        },
+        {
+          survey_id: newSurvey.id,
+          question_text: "Which subject or topic should we focus on?",
+          question_type: "text",
+          options: null,
+          display_order: 2,
+          is_required: true,
+        },
+        {
+          survey_id: newSurvey.id,
+          question_text: "Any specific chapters or details? (Optional)",
+          question_type: "textarea",
+          options: null,
+          display_order: 3,
+          is_required: false,
+        },
+      ]);
+      return newSurvey.id;
+    }
+
+    return null;
+  } catch (err) {
+    console.warn("getOrCreateApEndowmentSurveyIdAction error:", err);
+    return null;
+  }
+}
+
+export async function getApEndowmentDynamicQuestionsAction(): Promise<{
+  surveyId: string | null;
+  questions: DynamicSurveyQuestionItem[];
+}> {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: existingSurvey } = await supabase
+      .from("dynamic_surveys")
+      .select("id")
+      .ilike("title", "%Endowment%Priority%")
+      .maybeSingle();
+
+    if (!existingSurvey?.id) {
+      return { surveyId: null, questions: [] };
+    }
+
+    const { data: questions } = await supabase
+      .from("dynamic_survey_questions")
+      .select("id, survey_id, question_text, question_type, options, display_order, is_required")
+      .eq("survey_id", existingSurvey.id)
+      .order("display_order", { ascending: true });
+
+    return {
+      surveyId: existingSurvey.id,
+      questions: (questions as DynamicSurveyQuestionItem[]) || [],
+    };
+  } catch (err) {
+    console.warn("getApEndowmentDynamicQuestionsAction error:", err);
+    return { surveyId: null, questions: [] };
   }
 }
