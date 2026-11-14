@@ -336,11 +336,11 @@ export default async function ExamPage({ params, searchParams }: Props) {
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 no-scrollbar text-xs font-semibold text-slate-700 whitespace-nowrap">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 hidden sm:inline">
-              Jump to:
+              Contents:
             </span>
             <a
               href="#papers"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-teal-50 text-teal-900 border border-teal-200/80 hover:bg-teal-100 transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
             >
               <span>📑</span>
               <span>Mock Tests ({tests.length})</span>
@@ -348,7 +348,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             {teluguData?.schedule && (
               <a
                 href="#exam-schedule"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
               >
                 <span>📅</span>
                 <span>Important Dates</span>
@@ -357,7 +357,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             {teluguData?.pattern && (
               <a
                 href="#exam-pattern"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
               >
                 <span>📋</span>
                 <span>Pattern &amp; Syllabus</span>
@@ -366,7 +366,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
             {teluguData?.jobProfile && (
               <a
                 href="#job-profile"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
               >
                 <span>💼</span>
                 <span>Salary &amp; Duties</span>
@@ -374,14 +374,14 @@ export default async function ExamPage({ params, searchParams }: Props) {
             )}
             <a
               href="#why-varadhi-heading"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
             >
               <span>⭐</span>
               <span>Why Varadhi</span>
             </a>
             <a
               href="#exam-faqs"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-900 hover:border-teal-300 text-slate-700 border border-slate-200/90 transition shadow-2xs"
             >
               <span>❓</span>
               <span>FAQs ({questions.length})</span>
@@ -655,37 +655,53 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </p>
 
             {/* Quick Metrics Cards */}
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="rounded-2xl border border-amber-200/90 bg-amber-50/50 p-4 transition hover:border-amber-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">PWT Exam Date</span>
-                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
-                  {teluguData.schedule.prelimsExamDate}
-                </p>
-                <p className="mt-0.5 text-xs text-amber-900 font-semibold">{teluguData.schedule.prelimsSession}</p>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-amber-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-900">
+                    PWT Exam Date
+                  </span>
+                  <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    {teluguData.schedule.prelimsExamDate}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs font-semibold text-amber-800">{teluguData.schedule.prelimsSession}</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Hall Ticket Download</span>
-                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
-                  {teluguData.schedule.hallTicketRelease}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">Download via {teluguData.schedule.officialWebsite.replace("https://www.", "")}</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    Admit Card
+                  </span>
+                  <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    {teluguData.schedule.hallTicketRelease}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-500 font-medium">Download via {teluguData.schedule.officialWebsite.replace("https://www.", "")}</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Exam Duration</span>
-                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">
-                  {teluguData.schedule.prelimsDuration}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">Timed 180 Minutes (Forenoon)</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    Exam Duration
+                  </span>
+                  <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    {teluguData.schedule.prelimsDuration}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-500 font-medium">Timed session test</p>
               </div>
 
-              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-4 transition hover:border-teal-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Recruitment Post</span>
-                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-teal-950">
-                  {teluguData.schedule.postName}
-                </p>
-                <p className="mt-0.5 text-xs text-teal-800 font-semibold">TG Police Department</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-800">
+                    Recruitment Post
+                  </span>
+                  <p className="font-display mt-2.5 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    {teluguData.schedule.postName}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs font-semibold text-teal-800">{teluguData.schedule.authority}</p>
               </div>
             </div>
 
@@ -752,36 +768,36 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </div>
 
             {/* Pattern Metric Cards */}
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-slate-500">Questions</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalQuestions} Qs</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">Multiple Choice (MCQ)</p>
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3">
+              <div className="rounded-xl border border-slate-200/90 bg-white p-3 sm:p-3.5 text-center transition hover:border-teal-300 hover:shadow-2xs flex flex-col justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Questions</p>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">{teluguData.pattern.totalQuestions} Qs</p>
+                <p className="mt-0.5 text-[11px] font-medium text-slate-400">Multiple Choice</p>
               </div>
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-slate-500">Total Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.totalMarks} Marks</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">1 Mark Each</p>
+              <div className="rounded-xl border border-slate-200/90 bg-white p-3 sm:p-3.5 text-center transition hover:border-teal-300 hover:shadow-2xs flex flex-col justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Marks</p>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">{teluguData.pattern.totalMarks} Marks</p>
+                <p className="mt-0.5 text-[11px] font-medium text-slate-400">1 Mark Each</p>
               </div>
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-slate-500">Duration</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">{teluguData.pattern.durationMinutes} Mins</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">3 Hours Timed</p>
+              <div className="rounded-xl border border-slate-200/90 bg-white p-3 sm:p-3.5 text-center transition hover:border-teal-300 hover:shadow-2xs flex flex-col justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Duration</p>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-slate-900">{teluguData.pattern.durationMinutes} Mins</p>
+                <p className="mt-0.5 text-[11px] font-medium text-slate-400">Timed Practice</p>
               </div>
-              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-teal-800">Negative Marks</p>
-                <p className="font-display mt-1 text-lg sm:text-xl font-bold text-teal-950">{patternNegativeDisplay.headline}</p>
-                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">{patternNegativeDisplay.detail}</p>
+              <div className="rounded-xl border border-teal-200/80 bg-teal-50/40 p-3 sm:p-3.5 text-center transition hover:border-teal-400 hover:shadow-2xs flex flex-col justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Negative Marks</p>
+                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-teal-950">{patternNegativeDisplay.headline}</p>
+                <p className="mt-0.5 text-[11px] font-semibold text-teal-700">{patternNegativeDisplay.detail}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-slate-500">Languages</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-slate-900">{teluguData.pattern.medium}</p>
-                <p className="mt-0.5 text-[10px] font-medium text-slate-500">English &amp; Telugu</p>
+              <div className="rounded-xl border border-slate-200/90 bg-white p-3 sm:p-3.5 text-center transition hover:border-teal-300 hover:shadow-2xs flex flex-col justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Languages</p>
+                <p className="font-display mt-1.5 text-sm sm:text-base font-bold text-slate-900">{teluguData.pattern.medium}</p>
+                <p className="mt-0.5 text-[11px] font-medium text-slate-400">Bilingual</p>
               </div>
-              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3.5 text-center transition hover:border-teal-300">
-                <p className="text-xs font-semibold text-teal-800">Official Mode</p>
-                <p className="font-display mt-1 text-sm sm:text-base font-bold text-teal-950">{teluguData.pattern.mode}</p>
-                <p className="mt-0.5 text-[10px] font-semibold text-teal-700">Official Format</p>
+              <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-3 sm:p-3.5 text-center transition hover:border-teal-300 hover:shadow-2xs flex flex-col justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">Official Mode</p>
+                <p className="font-display mt-1.5 text-sm sm:text-base font-bold text-slate-900">{teluguData.pattern.mode}</p>
+                <p className="mt-0.5 text-[11px] font-medium text-slate-500">Official Format</p>
               </div>
             </div>
 
@@ -798,34 +814,53 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </div>
 
             {/* Quick Highlights / At a Glance Table (Testbook Style) */}
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-[#fafcfb]">
-              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/90">
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+              <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
                   {statePrefixedName} Examination Overview &amp; Key Highlights
                 </h3>
+                <span className="rounded-full bg-teal-50 border border-teal-200/70 px-2.5 py-0.5 text-[10px] font-bold text-teal-800">
+                  Verified Official Pattern
+                </span>
               </div>
-              <div className="divide-y divide-slate-100 text-xs sm:text-sm">
-                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
-                  <span className="font-semibold text-slate-500">Recruitment Authority</span>
-                  <span className="sm:col-span-2 font-bold text-slate-900">{teluguData.pattern.authority}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
-                  <span className="font-semibold text-slate-500">Official Medium</span>
-                  <span className="sm:col-span-2 font-medium text-slate-800">{teluguData.pattern.medium}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
-                  <span className="font-semibold text-slate-500">Examination Format</span>
-                  <span className="sm:col-span-2 font-medium text-slate-800">{teluguData.pattern.mode}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
-                  <span className="font-semibold text-slate-500">Marking Scheme</span>
-                  <span className="sm:col-span-2 font-medium text-slate-800">
-                    1 Mark per correct answer · Deducts {teluguData.pattern.negativeMarking} per incorrect attempt
+              <div className="divide-y divide-slate-100">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 items-center hover:bg-slate-50/60 transition">
+                  <span className="sm:col-span-4 lg:col-span-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Recruitment Authority
+                  </span>
+                  <span className="sm:col-span-8 lg:col-span-9 text-xs sm:text-sm font-bold text-slate-900">
+                    {teluguData.pattern.authority}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
-                  <span className="font-semibold text-slate-500">Practice Availability</span>
-                  <span className="sm:col-span-2 font-bold text-teal-800">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 items-center bg-slate-50/30 hover:bg-slate-50/60 transition">
+                  <span className="sm:col-span-4 lg:col-span-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Official Medium
+                  </span>
+                  <span className="sm:col-span-8 lg:col-span-9 text-xs sm:text-sm font-semibold text-slate-800">
+                    {teluguData.pattern.medium}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 items-center hover:bg-slate-50/60 transition">
+                  <span className="sm:col-span-4 lg:col-span-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Examination Format
+                  </span>
+                  <span className="sm:col-span-8 lg:col-span-9 text-xs sm:text-sm font-semibold text-slate-800">
+                    {teluguData.pattern.mode}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 items-center bg-slate-50/30 hover:bg-slate-50/60 transition">
+                  <span className="sm:col-span-4 lg:col-span-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Marking Scheme
+                  </span>
+                  <span className="sm:col-span-8 lg:col-span-9 text-xs sm:text-sm font-semibold text-slate-800">
+                    1 Mark per correct answer · Deducts {teluguData.pattern.negativeMarking} per wrong answer
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 items-center hover:bg-slate-50/60 transition">
+                  <span className="sm:col-span-4 lg:col-span-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Online Practice
+                  </span>
+                  <span className="sm:col-span-8 lg:col-span-9 text-xs sm:text-sm font-bold text-teal-800">
                     Free Full-Length Bilingual Mock Tests on Varadhi Prep
                   </span>
                 </div>
@@ -847,15 +882,15 @@ export default async function ExamPage({ params, searchParams }: Props) {
                     return (
                       <div
                         key={sub.name}
-                        className="rounded-2xl border border-slate-200/90 bg-[#fbfdfc] p-4.5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between"
+                        className="rounded-2xl border border-slate-200/90 bg-white p-4.5 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
+                              <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-800">
                                 Subject 0{idx + 1}
                               </span>
-                              <h4 className="font-bold text-slate-900 text-sm sm:text-base mt-0.5">
+                              <h4 className="font-bold text-slate-900 text-sm sm:text-base mt-1.5 leading-snug">
                                 {sub.name}
                               </h4>
                               {sub.teluguName && (
@@ -866,20 +901,20 @@ export default async function ExamPage({ params, searchParams }: Props) {
                             </div>
                             <a
                               href="#papers"
-                              className="shrink-0 rounded-lg bg-teal-50 border border-teal-200 px-2.5 py-1 text-[11px] font-bold text-teal-800 hover:bg-teal-100 transition"
+                              className="shrink-0 inline-flex items-center gap-1 rounded-lg bg-slate-50 hover:bg-teal-800 hover:text-white border border-slate-200/90 hover:border-teal-800 px-2.5 py-1 text-xs font-bold text-slate-700 transition shadow-2xs"
                             >
                               Practice →
                             </a>
                           </div>
                           
                           {/* Textbook-Style Topic Pills */}
-                          <div className="mt-3 flex flex-wrap gap-1.5">
+                          <div className="mt-3.5 flex flex-wrap gap-1.5">
                             {topicPills.map((topic, tIdx) => (
                               <span
                                 key={tIdx}
-                                className="inline-flex items-center rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-2xs"
+                                className="inline-flex items-center rounded-md border border-slate-200/70 bg-slate-50/70 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-950 px-2.5 py-1 text-xs font-medium text-slate-700 transition shadow-2xs"
                               >
-                                <span className="mr-1 text-teal-600 font-bold">•</span>
+                                <span className="mr-1.5 text-teal-700 font-bold" aria-hidden="true">•</span>
                                 {topic}
                               </span>
                             ))}
@@ -941,58 +976,80 @@ export default async function ExamPage({ params, searchParams }: Props) {
             </p>
 
             {/* Salary & Eligibility Cards */}
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-4 transition hover:border-teal-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">Pay Scale &amp; Salary</span>
-                <p className="font-display mt-1.5 text-base sm:text-lg font-bold text-teal-950">
-                  {teluguData.jobProfile.payScale}
-                </p>
-                <p className="mt-0.5 text-xs text-teal-800 font-semibold">{teluguData.jobProfile.grossSalaryMonthly}</p>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5">
+              <div className="rounded-2xl border border-teal-200/80 bg-teal-50/30 p-4 sm:p-5 transition hover:border-teal-400 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-800">
+                    Pay Scale &amp; Salary
+                  </span>
+                  <p className="font-display mt-2.5 text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    {teluguData.jobProfile.payScale}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs font-semibold text-teal-800">{teluguData.jobProfile.grossSalaryMonthly}</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Age Limit &amp; Relaxations</span>
-                <p className="font-display mt-1.5 text-sm sm:text-base font-bold text-slate-900">
-                  {teluguData.jobProfile.eligibility.ageLimit}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">As per official notification guidelines</p>
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    Age Limit &amp; Relaxations
+                  </span>
+                  <p className="font-display mt-2.5 text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                    {teluguData.jobProfile.eligibility.ageLimit}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-400 font-medium">Official notification rules apply</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/90 bg-[#f9fbfa] p-4 transition hover:border-teal-300">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Educational Qualification</span>
-                <p className="font-display mt-1.5 text-sm sm:text-base font-bold text-slate-900">
-                  {teluguData.jobProfile.eligibility.education}
-                </p>
-                {teluguData.jobProfile.eligibility.physicalStandards && (
-                  <p className="mt-1 text-xs text-slate-500 font-medium">
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between">
+                <div>
+                  <span className="inline-flex rounded-md bg-slate-100 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    Educational Qualification
+                  </span>
+                  <p className="font-display mt-2.5 text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                    {teluguData.jobProfile.eligibility.education}
+                  </p>
+                </div>
+                {teluguData.jobProfile.eligibility.physicalStandards ? (
+                  <p className="mt-2 text-xs text-slate-500 font-medium">
                     {teluguData.jobProfile.eligibility.physicalStandards}
                   </p>
+                ) : (
+                  <p className="mt-2 text-xs text-slate-400 font-medium">Standard state eligibility</p>
                 )}
               </div>
             </div>
 
             {/* Core Duties & Responsibilities List */}
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90">
-              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/90">
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+              <div className="bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/90">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
                   Core Roles &amp; Responsibilities (విధి నిర్వహణ &amp; బాధ్యతలు)
                 </h3>
               </div>
-              <div className="divide-y divide-slate-100 bg-white">
+              <div className="divide-y divide-slate-100">
                 {teluguData.jobProfile.duties.map((duty, idx) => (
-                  <div key={idx} className="p-4 hover:bg-slate-50/60 transition">
-                    <div className="flex items-center gap-2">
-                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-teal-100/80 text-teal-800 text-xs font-black">
+                  <div key={idx} className="p-4 sm:p-4.5 hover:bg-slate-50/50 transition">
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-teal-50 text-teal-800 border border-teal-200/70 text-xs font-bold mt-0.5">
                         {idx + 1}
                       </span>
-                      <h4 className="font-bold text-slate-900 text-sm">
-                        {duty.title}
-                        {duty.teluguTitle && <span className="ml-1.5 text-xs font-semibold text-teal-800">({duty.teluguTitle})</span>}
-                      </h4>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <h4 className="font-bold text-slate-900 text-sm">
+                            {duty.title}
+                          </h4>
+                          {duty.teluguTitle && (
+                            <span className="text-xs font-semibold text-teal-800">
+                              ({duty.teluguTitle})
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                          {duty.description}
+                        </p>
+                      </div>
                     </div>
-                    <p className="mt-1.5 ml-8 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      {duty.description}
-                    </p>
                   </div>
                 ))}
               </div>
