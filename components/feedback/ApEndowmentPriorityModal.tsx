@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import {
   checkApEndowmentFeedbackEligibilityAction,
   submitApEndowmentFeedbackAction,
+  DEFAULT_SURVEY_CONDITIONS,
+  type ApEndowmentSurveyConditions,
 } from "@/app/actions/ap-endowment-feedback";
 import { AP_EO_CAMPAIGN_EXPIRY_MS } from "@/lib/campaigns/ap-endowment";
 
@@ -27,7 +29,7 @@ export function ApEndowmentPriorityModal() {
       return;
     }
 
-    // 2. Check if student already submitted or skipped on this browser, or if admin deactivated/deleted
+    // 2. Check Zoho survey conditions:
     if (typeof window !== "undefined") {
       if (localStorage.getItem("varadhi_ap_endowment_survey_active") === "false") {
         return;
@@ -35,11 +37,45 @@ export function ApEndowmentPriorityModal() {
       if (localStorage.getItem("varadhi_ap_endowment_survey_deleted") === "true") {
         return;
       }
-      const hasSubmitted = localStorage.getItem(STORAGE_SUBMITTED);
-      const hasDismissed = localStorage.getItem(STORAGE_DISMISSED);
 
-      if (hasSubmitted || hasDismissed) {
-        return;
+      let conditions: ApEndowmentSurveyConditions = DEFAULT_SURVEY_CONDITIONS;
+      try {
+        const saved = localStorage.getItem("varadhi_ap_endowment_survey_conditions");
+        if (saved) {
+          conditions = { ...DEFAULT_SURVEY_CONDITIONS, ...JSON.parse(saved) };
+        }
+      } catch {
+        // default conditions
+      }
+
+      // Condition 1: Check if student already submitted
+      const submittedTimeStr = localStorage.getItem(STORAGE_SUBMITTED);
+      if (submittedTimeStr) {
+        if (!conditions.reappearIfSubmitted) {
+          return; // No: do not show again once submitted
+        }
+        const submittedTime = Number(submittedTimeStr) || 0;
+        const daysPassed = (Date.now() - submittedTime) / (1000 * 60 * 60 * 24);
+        if (daysPassed < conditions.submittedIntervalDays) {
+          return; // Interval has not yet elapsed
+        }
+      }
+
+      // Condition 2: Check if student skipped / dismissed
+      const dismissedTimeStr = localStorage.getItem(STORAGE_DISMISSED);
+      if (dismissedTimeStr) {
+        if (!conditions.reappearIfSkipped) {
+          return; // No: do not show again once skipped
+        }
+        const skipCount = Number(localStorage.getItem("varadhi_ap_eo_feedback_skip_count") || "1");
+        if (conditions.maxSkipAppearances > 0 && skipCount >= conditions.maxSkipAppearances) {
+          return; // Exceeded maximum appearances
+        }
+        const dismissedTime = Number(dismissedTimeStr) || new Date(dismissedTimeStr).getTime() || 0;
+        const hoursPassed = (Date.now() - dismissedTime) / (1000 * 60 * 60);
+        if (hoursPassed < conditions.skipIntervalHours) {
+          return; // Interval between appearances has not yet elapsed
+        }
       }
     }
 
@@ -53,7 +89,7 @@ export function ApEndowmentPriorityModal() {
       if (!res.eligible) {
         // If already submitted in database, save flag in localStorage so we don't query again
         if (res.reason === "already_submitted") {
-          localStorage.setItem(STORAGE_SUBMITTED, "true");
+          localStorage.setItem(STORAGE_SUBMITTED, String(Date.now()));
         }
         return;
       }
@@ -79,9 +115,11 @@ export function ApEndowmentPriorityModal() {
 
   const handleDismiss = () => {
     setIsOpen(false);
-    // Mark as dismissed so it will never show again to this student
+    // Mark as dismissed and increment skip count according to Zoho rules
     if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_DISMISSED, new Date().toISOString());
+      const currentCount = Number(localStorage.getItem("varadhi_ap_eo_feedback_skip_count") || "0");
+      localStorage.setItem("varadhi_ap_eo_feedback_skip_count", String(currentCount + 1));
+      localStorage.setItem(STORAGE_DISMISSED, String(Date.now()));
     }
   };
 
@@ -111,9 +149,9 @@ export function ApEndowmentPriorityModal() {
     }
 
     setIsSuccess(true);
-    // Mark as submitted so it never appears again
+    // Mark as submitted with timestamp
     if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_SUBMITTED, "true");
+      localStorage.setItem(STORAGE_SUBMITTED, String(Date.now()));
     }
 
     setTimeout(() => {

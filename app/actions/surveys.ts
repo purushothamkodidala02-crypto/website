@@ -92,7 +92,7 @@ export async function submitDynamicSurvey(
 
           if (firstQuestion?.id) {
             answerInserts.push({
-              response_id: response.id,
+              response_id: responseId,
               question_id: firstQuestion.id,
               answer_text: `[Respondent Contact: ${contactText}]`,
             });

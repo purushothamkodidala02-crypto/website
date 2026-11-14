@@ -548,6 +548,36 @@ export async function toggleApEndowmentStatusAction(isActive: boolean) {
   }
 }
 
+export type ApEndowmentSurveyConditions = {
+  reappearIfSubmitted: boolean;
+  submittedIntervalDays: number;
+  reappearIfSkipped: boolean;
+  maxSkipAppearances: number;
+  skipIntervalHours: number;
+};
+
+export const DEFAULT_SURVEY_CONDITIONS: ApEndowmentSurveyConditions = {
+  reappearIfSubmitted: false,
+  submittedIntervalDays: 7,
+  reappearIfSkipped: true,
+  maxSkipAppearances: 2,
+  skipIntervalHours: 24,
+};
+
+let cachedConditions: ApEndowmentSurveyConditions = { ...DEFAULT_SURVEY_CONDITIONS };
+
+export async function getApEndowmentSurveyConditionsAction(): Promise<ApEndowmentSurveyConditions> {
+  return cachedConditions;
+}
+
+export async function saveApEndowmentSurveyConditionsAction(
+  conditions: ApEndowmentSurveyConditions
+): Promise<{ success: boolean }> {
+  cachedConditions = { ...DEFAULT_SURVEY_CONDITIONS, ...conditions };
+  revalidatePath("/admin/surveys");
+  return { success: true };
+}
+
 export async function updateApEndowmentMetaAction(title: string, description: string) {
   try {
     const supabase = await getSupabaseServerClient();
