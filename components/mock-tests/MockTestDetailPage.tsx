@@ -6,7 +6,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { displayMockTestHeading, formatFullMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
 import { absoluteUrl } from "@/lib/site";
-import { examUrl, paperUrl } from "@/lib/public-urls";
+import { paperUrl } from "@/lib/public-urls";
 import { resolveSeoFields } from "@/lib/seo-fields";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -809,15 +809,6 @@ export async function MockTestDetailsPage({
   const paperTitle = paperDisplay?.shortLabel ?? paper?.name;
   const resolvedBackLabel = backLabel || "Back to mock tests";
 
-  const examGuideUrl =
-    state?.slug && examGroup?.slug ? examUrl(state.slug, examGroup.slug) : null;
-  const isPoliceExam = Boolean(
-    examGroup?.slug.includes("police") ||
-    examGroup?.slug.includes("constable") ||
-    examGroup?.name.toLowerCase().includes("police") ||
-    examGroup?.name.toLowerCase().includes("constable")
-  );
-
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -1003,33 +994,6 @@ export async function MockTestDetailsPage({
                       ? `Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with -${formatMarkValue(negativeMarks)} negative marking and instant detailed solutions.`
                       : "Complete syllabus mock test prepared according to the latest official examination pattern. Practise under timed conditions with no negative marking and instant detailed solutions.")}
               </p>
-
-              {examGuideUrl && (
-                <div className="mt-3.5 flex flex-wrap items-center gap-2">
-                  <Link
-                    href={examGuideUrl}
-                    className="inline-flex items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-900 hover:bg-teal-100 transition"
-                  >
-                    Official Exam Guide &amp; Vacancies →
-                  </Link>
-                  {isPoliceExam && (
-                    <>
-                      <Link
-                        href={`${examGuideUrl}#physical-standards`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-                      >
-                        PET Standards →
-                      </Link>
-                      <Link
-                        href={`${examGuideUrl}#exam-schedule`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-                      >
-                        7,112 Vacancies →
-                      </Link>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* Top Primary Start Action (Appears on top of page) */}
@@ -1080,207 +1044,6 @@ export async function MockTestDetailsPage({
             ))}
           </div>
         </section>
-
-        {/* Official Recruitment, Physical Standards (PET) & Exam Pattern Reference */}
-        {examGuideUrl && (
-          <section className="mt-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-teal-800">
-                  {state?.code ?? "State"} · {examGroup?.name ?? "Recruitment"} Official Guide
-                </p>
-                <h2 className="font-display mt-1 text-lg sm:text-xl font-bold text-slate-900">
-                  {isPoliceExam
-                    ? "Physical Standards (PET/PMT), Vacancy Details & Exam Scheme"
-                    : "Official Exam Pattern, Curriculum & Selection Standards"}
-                </h2>
-              </div>
-              <Link
-                href={examGuideUrl}
-                prefetch={false}
-                className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-teal-800 hover:text-teal-950 transition"
-              >
-                Full Exam Guide <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {isPoliceExam ? (
-                <>
-                  <Link
-                    href={`${examGuideUrl}#physical-standards`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] font-bold text-teal-900">
-                        Physical Efficiency
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        PET &amp; PMT Standards
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        1600m / 800m Run, Long Jump, Shot Put &amp; Height criteria for Men &amp; Women.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      View PET Standards <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-
-                  <Link
-                    href={`${examGuideUrl}#exam-schedule`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                        7,112 Posts
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        Cadre-wise Vacancies
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        Civil (3,697), AR (1,052), TGSPF (1,380), Fire (751) &amp; Prisons (208) distribution.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      View Vacancies &amp; Pay <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-
-                  <Link
-                    href={`${examGuideUrl}#age-limits`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                        GO Ms No. 87
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        Age Limits &amp; Relaxations
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        18–27 years base with 5-year upper age relaxation up to 32/37/45 years.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      Check Age Criteria <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-
-                  <Link
-                    href={`${examGuideUrl}#exam-pattern`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] font-bold text-teal-900">
-                        20% Negative
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        PWT &amp; FWE Pattern
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        200 questions, 200 marks, 3 hours duration with -0.20 marks deduction.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      View Scheme &amp; Marks <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href={`${examGuideUrl}#exam-pattern`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] font-bold text-teal-900">
-                        Examination Pattern
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        Scoring &amp; Timing Scheme
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        Official question counts, section marks, and negative marking rules.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      View Pattern <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-
-                  <Link
-                    href={`${examGuideUrl}#curriculum-topics`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                        Curriculum
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        Subject &amp; Unit Coverage
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        Detailed topic breakdown across all papers and target subjects.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      View Curriculum <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-
-                  <Link
-                    href={`${examGuideUrl}#exam-schedule`}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                        Timeline
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        Recruitment Schedule
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        Important dates, hall ticket notifications, and selection stages.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      View Timeline <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-
-                  <Link
-                    href={examGuideUrl}
-                    prefetch={false}
-                    className="group rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 transition hover:border-teal-400 hover:bg-white hover:shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <span className="inline-flex rounded-md bg-teal-50 border border-teal-200/80 px-2 py-0.5 text-[10px] font-bold text-teal-900">
-                        Test Series
-                      </span>
-                      <h3 className="font-display mt-2 text-sm font-bold text-slate-900 group-hover:text-teal-900 transition">
-                        All Practice Papers
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                        Full-length mock tests and chapter-wise tests for {examGroup?.name ?? "this exam"}.
-                      </p>
-                    </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800 group-hover:translate-x-0.5 transition">
-                      Browse Papers <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </section>
-        )}
 
         {/* Instructions and Start Action Station */}
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_21rem] lg:items-start">
@@ -1491,59 +1254,6 @@ export async function MockTestDetailsPage({
                       ? "Start a new attempt; your earlier submitted result remains saved."
                       : "Select Start test when you are ready."}
               </p>
-
-              {/* Official Exam & Physical Standards Quick Nav */}
-              {examGuideUrl && (
-                <div className="rounded-xl border border-slate-200/90 bg-slate-50/70 p-3.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
-                    Official Exam Reference
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    Review selection rules and standards:
-                  </p>
-                  <div className="mt-2.5 flex flex-col gap-2 text-xs font-semibold text-teal-800">
-                    {isPoliceExam && (
-                      <>
-                        <Link
-                          href={`${examGuideUrl}#physical-standards`}
-                          className="flex items-center justify-between hover:text-teal-950 transition"
-                        >
-                          <span>PMT &amp; PET Physical Standards</span>
-                          <span aria-hidden="true">→</span>
-                        </Link>
-                        <Link
-                          href={`${examGuideUrl}#exam-schedule`}
-                          className="flex items-center justify-between hover:text-teal-950 transition"
-                        >
-                          <span>7,112 Vacancy Breakdown</span>
-                          <span aria-hidden="true">→</span>
-                        </Link>
-                        <Link
-                          href={`${examGuideUrl}#age-limits`}
-                          className="flex items-center justify-between hover:text-teal-950 transition"
-                        >
-                          <span>Age Limits (GO 87 Relaxation)</span>
-                          <span aria-hidden="true">→</span>
-                        </Link>
-                      </>
-                    )}
-                    <Link
-                      href={`${examGuideUrl}#exam-pattern`}
-                      className="flex items-center justify-between hover:text-teal-950 transition"
-                    >
-                      <span>Exam Pattern &amp; Marking Scheme</span>
-                      <span aria-hidden="true">→</span>
-                    </Link>
-                    <Link
-                      href={`${examGuideUrl}#curriculum-topics`}
-                      className="flex items-center justify-between hover:text-teal-950 transition"
-                    >
-                      <span>Curriculum &amp; Topic Coverage</span>
-                      <span aria-hidden="true">→</span>
-                    </Link>
-                  </div>
-                </div>
-              )}
             </div>
           </aside>
         </div>
