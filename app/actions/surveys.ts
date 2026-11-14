@@ -79,8 +79,26 @@ export async function submitDynamicSurvey(
         .filter(Boolean)
         .join(" | ");
 
-      if (contactText && answerInserts.length > 0) {
-        answerInserts[answerInserts.length - 1].answer_text += `\n[Respondent Contact: ${contactText}]`;
+      if (contactText) {
+        if (answerInserts.length > 0) {
+          answerInserts[answerInserts.length - 1].answer_text += `\n[Respondent Contact: ${contactText}]`;
+        } else {
+          // If no specific question was answered, attach contact info to the first question of this survey
+          const { data: firstQuestion } = await dbClient
+            .from("dynamic_survey_questions")
+            .select("id")
+            .eq("survey_id", surveyId)
+            .limit(1)
+            .maybeSingle();
+
+          if (firstQuestion?.id) {
+            answerInserts.push({
+              response_id: response.id,
+              question_id: firstQuestion.id,
+              answer_text: `[Respondent Contact: ${contactText}]`,
+            });
+          }
+        }
       }
     }
 
@@ -141,7 +159,7 @@ export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
 
 export async function getSurveyById(surveyId: string): Promise<DynamicSurveyData | null> {
   try {
-    const dbClient = createPublicClient();
+    const dbClient = await getSupabaseServerClient();
     const { data: survey, error } = await dbClient
       .from("dynamic_surveys")
       .select("id, title, description, is_active")

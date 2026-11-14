@@ -3,6 +3,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+async function getSupabaseServerClient() {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      return createAdminClient();
+    } catch {
+      // Fall through to regular client
+    }
+  }
+  return await createClient();
+}
+
 // Campaign runs for 7 days (1 week) from activation
 // Expiry: Friday, November 20, 2026 at 23:59:59 IST
 export const AP_EO_CAMPAIGN_EXPIRY_MS = new Date("2026-11-20T23:59:59+05:30").getTime();
@@ -284,10 +296,11 @@ export async function getApEndowmentFeedbackSummaryAction(): Promise<ApEndowment
   };
 
   try {
-    const supabase = await createClient();
+    const supabase = await getSupabaseServerClient();
+    const userClient = await createClient();
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } = await userClient.auth.getUser();
 
     if (!user) return empty;
 
@@ -365,6 +378,22 @@ export async function getApEndowmentFeedbackSummaryAction(): Promise<ApEndowment
       : { data: [] };
 
     const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+    const emailMap = new Map<string, string>();
+
+    if (userIds.length > 0) {
+      try {
+        const { data: emailRows } = await supabase.rpc("get_admin_user_emails", {
+          requested_user_ids: userIds.slice(0, 200),
+        });
+        if (emailRows) {
+          (emailRows as Array<{ user_id: string; email: string }>).forEach((row) => {
+            if (row.email) emailMap.set(row.user_id, row.email.trim());
+          });
+        }
+      } catch {
+        // Fallback silently if RPC is not accessible
+      }
+    }
 
     let p1 = 0;
     let p2 = 0;
@@ -377,15 +406,22 @@ export async function getApEndowmentFeedbackSummaryAction(): Promise<ApEndowment
       let paperChoice = "Paper 2 - Hindu Philosophy & Temple System";
       let subjectFocus = "";
       let specificTopics = "";
+      let noteName = "";
+      let noteContact = "";
 
       for (const a of answers) {
         const text = a.answer_text || "";
+        const match = text.match(/\[Student:\s*(.*?)\s*\|\s*Contact:\s*(.*?)\]/);
+        if (match) {
+          noteName = match[1];
+          noteContact = match[2];
+        }
         if (text.includes("Paper 1") || text.includes("Paper 2") || text.includes("Both")) {
-          paperChoice = text;
+          paperChoice = text.replace(/\[Student:.*?\]/, "").trim();
         } else if (!subjectFocus) {
-          subjectFocus = text;
+          subjectFocus = text.replace(/\[Student:.*?\]/, "").trim();
         } else {
-          specificTopics = text;
+          specificTopics = text.replace(/\[Student:.*?\]/, "").trim();
         }
       }
 
@@ -394,11 +430,17 @@ export async function getApEndowmentFeedbackSummaryAction(): Promise<ApEndowment
       else if (choiceLower.includes("paper 1") || choiceLower.includes("general studies")) p1++;
       else if (choiceLower.includes("paper 2") || choiceLower.includes("hindu")) p2++;
 
+      const email =
+        (r.user_id ? emailMap.get(r.user_id) : null) ||
+        (noteContact && noteContact.includes("@") ? noteContact : null) ||
+        "N/A";
+      const phone = prof?.phone || (!noteContact.includes("@") && noteContact ? noteContact : undefined);
+
       return {
         id: r.id,
-        studentName: prof?.full_name || "Registered Student",
-        studentEmail: prof?.email || "N/A",
-        studentPhone: prof?.phone_number || undefined,
+        studentName: prof?.full_name || noteName || "Registered Student",
+        studentEmail: email,
+        studentPhone: phone,
         paperChoice,
         subjectFocus: subjectFocus || "Mock Test Priority",
         specificTopics: specificTopics || undefined,
@@ -416,5 +458,20 @@ export async function getApEndowmentFeedbackSummaryAction(): Promise<ApEndowment
   } catch (err) {
     console.error("Error getting AP Endowment feedback summary:", err);
     return empty;
+  }
+}
+
+export async function deleteApEndowmentFeedbackAction(feedbackId: string) {
+  try {
+    const supabase = await getSupabaseServerClient();
+    await supabase.from("ap_endowment_feedback").delete().eq("id", feedbackId);
+    await supabase.from("dynamic_survey_answers").delete().eq("response_id", feedbackId);
+    await supabase.from("dynamic_survey_responses").delete().eq("id", feedbackId);
+
+    revalidatePath("/admin/surveys");
+    return { success: true };
+  } catch (err) {
+    console.error("Error deleting feedback entry:", err);
+    return { success: false, error: "Failed to delete feedback." };
   }
 }

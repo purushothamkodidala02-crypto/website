@@ -19,7 +19,7 @@ const PATH_TITLES: Record<string, { parent?: string; title: string }> = {
   "/admin/access": { parent: "Commerce", title: "Exam Series & Access" },
   "/admin/students": { parent: "Users", title: "Registrations & Sales" },
   "/admin/results": { parent: "Assessments", title: "Results & Analytics" },
-  "/admin/surveys": { parent: "Feedback", title: "Student Surveys" },
+  "/admin/surveys": { parent: "Feedback", title: "Student Surveys & Feedback" },
 };
 
 function getBreadcrumb(pathname: string): { parent?: string; title: string } {

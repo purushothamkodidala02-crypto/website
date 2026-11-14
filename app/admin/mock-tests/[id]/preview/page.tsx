@@ -1,27 +1,74 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { StudentPreview, type PreviewQuestion } from "./StudentPreview";
 import { mockTestQuestionsHref, mockTestsListReturnTo } from "@/lib/admin/mock-test-navigation";
 import { BackButton } from "@/components/admin/BackButton";
 
-export default async function MockTestStudentPreviewPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ question?: string | string[]; returnTo?: string | string[] }> }) {
+export default async function MockTestStudentPreviewPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ question?: string | string[]; returnTo?: string | string[] }>;
+}) {
   const { id } = await params;
   const { question, returnTo } = await searchParams;
   const initialQuestion = typeof question === "string" && /^\d+$/.test(question) ? Number(question) : 1;
   const supabase = await createClient();
+  const db = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
+
   const [testResult, assignmentsResult, attemptCountResult, subjectsResult] = await Promise.all([
-    supabase.from("mock_tests").select("id, title, status").eq("id", id).maybeSingle(),
-    supabase.from("mock_test_questions").select("question_id, question_order, marks, negative_marks").eq("mock_test_id", id).order("question_order"),
-    supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", id),
-    supabase.from("subjects").select("id, content_language_mode, display_order"),
+    db.from("mock_tests").select("id, title, status").eq("id", id).maybeSingle(),
+    db.from("mock_test_questions").select("question_id, question_order, marks, negative_marks").eq("mock_test_id", id).order("question_order"),
+    db.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", id),
+    db.from("subjects").select("id, content_language_mode, display_order"),
   ]);
+
   if (!testResult.data) notFound();
-  if (assignmentsResult.error) throw new Error("Questions could not be loaded for preview.");
+
   const assignments = assignmentsResult.data ?? [];
-  const questionsResult = assignments.length ? await supabase.from("questions").select("id, subject_id, question_text, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url").in("id", assignments.map((assignment) => assignment.question_id)) : { data: [], error: null };
-  if (questionsResult.error) throw new Error("Question content could not be loaded for preview.");
-  const questionById = new Map((questionsResult.data ?? []).map((item) => [item.id, item]));
+  const questionIds = [...new Set(assignments.map((assignment) => assignment.question_id))];
+
+  // Batch query questions in chunks of 40 to avoid URL query string limits on large tests
+  const questionsData: Array<{
+    id: string;
+    subject_id: string;
+    question_text: string;
+    option_a: string;
+    option_b: string;
+    option_c: string;
+    option_d: string;
+    question_text_te: string | null;
+    option_a_te: string | null;
+    option_b_te: string | null;
+    option_c_te: string | null;
+    option_d_te: string | null;
+    correct_answer: "A" | "B" | "C" | "D";
+    explanation: string | null;
+    explanation_te: string | null;
+    image_url: string | null;
+  }> = [];
+
+  if (questionIds.length > 0) {
+    const chunkSize = 40;
+    for (let i = 0; i < questionIds.length; i += chunkSize) {
+      const chunk = questionIds.slice(i, i + chunkSize);
+      const { data: qRows, error: qErr } = await db
+        .from("questions")
+        .select("id, subject_id, question_text, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url")
+        .in("id", chunk);
+      if (qErr) {
+        console.warn("Could not load questions batch for preview:", qErr.message);
+      }
+      if (qRows) {
+        questionsData.push(...(qRows as typeof questionsData));
+      }
+    }
+  }
+
+  const questionById = new Map(questionsData.map((item) => [item.id, item]));
   const languageBySubject = new Map((subjectsResult.data ?? []).map((subject) => [subject.id, subject.content_language_mode as PreviewQuestion["languageMode"]]));
   const subjectDisplayOrder = new Map((subjectsResult.data ?? []).map((subject) => [subject.id, Number(subject.display_order ?? 999)]));
   const sortedAssignments = [...assignments].sort((a, b) => {
@@ -32,13 +79,58 @@ export default async function MockTestStudentPreviewPage({ params, searchParams 
     if (orderA !== orderB) return orderA - orderB;
     return a.question_order - b.question_order;
   });
-  const questions: PreviewQuestion[] = sortedAssignments.flatMap((assignment) => { const item = questionById.get(assignment.question_id); return item ? [{ id: item.id, marks: Number(assignment.marks), negativeMarks: Number(assignment.negative_marks), questionText: item.question_text, optionA: item.option_a, optionB: item.option_b, optionC: item.option_c, optionD: item.option_d, questionTextTe: item.question_text_te, optionATe: item.option_a_te, optionBTe: item.option_b_te, optionCTe: item.option_c_te, optionDTe: item.option_d_te, correctAnswer: item.correct_answer, explanation: item.explanation, explanationTe: item.explanation_te, imageUrl: item.image_url, languageMode: languageBySubject.get(item.subject_id) ?? "bilingual" }] : []; });
+  const questions: PreviewQuestion[] = sortedAssignments.flatMap((assignment) => {
+    const item = questionById.get(assignment.question_id);
+    if (!item) return [];
+    const m = Number(assignment.marks);
+    const nm = Number(assignment.negative_marks);
+    return [{
+      id: item.id,
+      marks: Number.isFinite(m) ? m : 1,
+      negativeMarks: Number.isFinite(nm) ? nm : 0,
+      questionText: item.question_text,
+      optionA: item.option_a,
+      optionB: item.option_b,
+      optionC: item.option_c,
+      optionD: item.option_d,
+      questionTextTe: item.question_text_te,
+      optionATe: item.option_a_te,
+      optionBTe: item.option_b_te,
+      optionCTe: item.option_c_te,
+      optionDTe: item.option_d_te,
+      correctAnswer: item.correct_answer,
+      explanation: item.explanation,
+      explanationTe: item.explanation_te,
+      imageUrl: item.image_url,
+      languageMode: languageBySubject.get(item.subject_id) ?? "bilingual",
+    }];
+  });
   const listReturnTo = mockTestsListReturnTo(returnTo);
   const questionsHref = mockTestQuestionsHref(id, listReturnTo);
   const settingsHref = `/admin/mock-tests/${id}/edit?returnTo=${encodeURIComponent(listReturnTo)}`;
   const isDraft = testResult.data.status === "draft";
   const studentAttemptCount = attemptCountResult.count ?? 0;
   const canEdit = true;
-  return <main><div className="flex flex-wrap items-center justify-between gap-3"><BackButton fallbackHref={questionsHref} label="← Back" className="text-sm font-semibold text-teal-700 hover:underline" /><Link href={settingsHref} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">Mock Test Settings</Link></div><p className="mt-5 text-xs font-black uppercase tracking-[0.14em] text-teal-700">Quality check</p><h1 className="mt-2 text-3xl font-black text-slate-950">Student Preview</h1><p className="mt-2 max-w-3xl text-slate-600">Review exactly how students will read each question, including images and mobile-friendly navigation. The answer key and explanations below are visible only to administrators.</p>{!isDraft && <p className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm font-medium leading-6 text-sky-950"><span className="font-bold">Live Mock Test: </span>This mock test is published{studentAttemptCount > 0 ? ` with ${studentAttemptCount} student ${studentAttemptCount === 1 ? "attempt" : "attempts"}` : ""}. You can click <strong>Edit this question</strong> on any question to add diagram images, fix options, or update explanations. Updates will safely reflect in student reviews.</p>}<StudentPreview mockTestId={id} questions={questions} canEdit={canEdit} backHref={questionsHref} listReturnTo={listReturnTo} initialQuestion={initialQuestion} /></main>;
+  return (
+    <main>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <BackButton fallbackHref={questionsHref} label="← Back" className="text-sm font-semibold text-teal-700 hover:underline" />
+        <Link href={settingsHref} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">
+          Mock Test Settings
+        </Link>
+      </div>
+      <p className="mt-5 text-xs font-black uppercase tracking-[0.14em] text-teal-700">Quality check</p>
+      <h1 className="mt-2 text-3xl font-black text-slate-950">Student Preview</h1>
+      <p className="mt-2 max-w-3xl text-slate-600">
+        Review exactly how students will read each question, including images and mobile-friendly navigation. The answer key and explanations below are visible only to administrators.
+      </p>
+      {!isDraft && (
+        <p className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm font-medium leading-6 text-sky-950">
+          <span className="font-bold">Live Mock Test: </span>
+          This mock test is published{studentAttemptCount > 0 ? ` with ${studentAttemptCount} student ${studentAttemptCount === 1 ? "attempt" : "attempts"}` : ""}. You can click <strong>Edit this question</strong> on any question to add diagram images, fix options, or update explanations. Updates will safely reflect in student reviews.
+        </p>
+      )}
+      <StudentPreview mockTestId={id} questions={questions} canEdit={canEdit} backHref={questionsHref} listReturnTo={listReturnTo} initialQuestion={initialQuestion} />
+    </main>
+  );
 }
-

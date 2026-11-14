@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   getApEndowmentFeedbackSummaryAction,
+  deleteApEndowmentFeedbackAction,
   type ApEndowmentFeedbackSummary,
   AP_EO_CAMPAIGN_EXPIRY_MS,
 } from "@/app/actions/ap-endowment-feedback";
@@ -11,6 +12,15 @@ export function ApEndowmentFeedbackSection() {
   const [data, setData] = useState<ApEndowmentFeedbackSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [isExpired, setIsExpired] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const res = await getApEndowmentFeedbackSummaryAction();
+    setData(res);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     setIsExpired(Date.now() > AP_EO_CAMPAIGN_EXPIRY_MS);
@@ -25,6 +35,30 @@ export function ApEndowmentFeedbackSection() {
       ignore = true;
     };
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this student feedback response?")) {
+      return;
+    }
+    setDeletingId(id);
+    await deleteApEndowmentFeedbackAction(id);
+    await loadData();
+    setDeletingId(null);
+  };
+
+  const filteredResponses = useMemo(() => {
+    if (!data?.recentResponses) return [];
+    if (!searchTerm.trim()) return data.recentResponses;
+    const term = searchTerm.toLowerCase().trim();
+    return data.recentResponses.filter((r) =>
+      r.studentName.toLowerCase().includes(term) ||
+      r.studentEmail.toLowerCase().includes(term) ||
+      (r.studentPhone && r.studentPhone.toLowerCase().includes(term)) ||
+      r.paperChoice.toLowerCase().includes(term) ||
+      r.subjectFocus.toLowerCase().includes(term) ||
+      (r.specificTopics && r.specificTopics.toLowerCase().includes(term))
+    );
+  }, [data, searchTerm]);
 
   const handleExportCSV = () => {
     if (!data || data.recentResponses.length === 0) return;
@@ -89,9 +123,17 @@ export function ApEndowmentFeedbackSection() {
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               type="button"
+              onClick={loadData}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-white hover:bg-amber-50 px-3.5 py-2 text-xs sm:text-sm font-bold text-amber-900 shadow-2xs transition active:scale-95 touch-manipulation"
+            >
+              {loading ? "…" : "↻ Refresh"}
+            </button>
+            <button
+              type="button"
               onClick={handleExportCSV}
               disabled={loading || !data || data.totalResponses === 0}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-40 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-40 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-xs transition active:scale-95 touch-manipulation"
             >
               📥 Export CSV
             </button>
@@ -138,8 +180,35 @@ export function ApEndowmentFeedbackSection() {
         </div>
       </div>
 
-      {/* Responses Table */}
-      <div className="p-4 sm:p-6">
+      {/* Responses Table & Search */}
+      <div className="p-4 sm:p-6 space-y-4">
+        {data && data.recentResponses.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by student, email, phone, topic…"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 pl-9 text-xs sm:text-sm text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none"
+              />
+              <span className="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2.5 top-2 text-xs font-bold text-slate-400 hover:text-slate-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <span className="text-xs text-slate-500">
+              Showing {filteredResponses.length} of {data.recentResponses.length} responses
+            </span>
+          </div>
+        )}
+
         {loading ? (
           <p className="py-8 text-center text-xs sm:text-sm font-semibold text-slate-500">
             Loading student responses…
@@ -151,6 +220,10 @@ export function ApEndowmentFeedbackSection() {
               When students who have attempted AP Endowment Officer mock tests visit the site, they will see the form. Their priorities will appear here.
             </p>
           </div>
+        ) : filteredResponses.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs sm:text-sm text-slate-500">
+            No responses matching &ldquo;{searchTerm}&rdquo;
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
@@ -160,11 +233,12 @@ export function ApEndowmentFeedbackSection() {
                   <th className="pb-3 pr-3">Student</th>
                   <th className="pb-3 pr-3">Paper Choice</th>
                   <th className="pb-3 pr-3">Priority Subject Focus</th>
-                  <th className="pb-3">Notes / Specific Topics</th>
+                  <th className="pb-3 pr-3">Notes / Specific Topics</th>
+                  <th className="pb-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {data.recentResponses.map((r) => (
+                {filteredResponses.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50/70 transition">
                     <td className="py-3 pr-3 whitespace-nowrap text-xs text-slate-500">
                       {new Date(r.createdAt).toLocaleDateString("en-IN", {
@@ -176,6 +250,11 @@ export function ApEndowmentFeedbackSection() {
                     <td className="py-3 pr-3">
                       <span className="block font-bold text-slate-900">{r.studentName}</span>
                       <span className="block text-xs text-slate-500">{r.studentEmail}</span>
+                      {r.studentPhone && (
+                        <span className="inline-block mt-0.5 rounded bg-teal-50 px-1.5 py-0.5 text-[10px] font-semibold text-teal-800">
+                          📱 {r.studentPhone.startsWith("+") ? r.studentPhone : `+91 ${r.studentPhone}`}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 pr-3 whitespace-nowrap">
                       <span
@@ -197,8 +276,19 @@ export function ApEndowmentFeedbackSection() {
                     <td className="py-3 pr-3 font-semibold text-slate-900 break-words">
                       {r.subjectFocus}
                     </td>
-                    <td className="py-3 text-xs text-slate-600 break-words">
+                    <td className="py-3 pr-3 text-xs text-slate-600 break-words">
                       {r.specificTopics || <span className="text-slate-400 italic">None</span>}
+                    </td>
+                    <td className="py-3 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(r.id)}
+                        disabled={deletingId === r.id}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 transition"
+                        title="Delete feedback response"
+                      >
+                        ✕
+                      </button>
                     </td>
                   </tr>
                 ))}

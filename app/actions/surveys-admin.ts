@@ -26,17 +26,107 @@ export type AdminSurveyResponse = {
   answers: Array<{ question_id: string; answer_text: string }>;
 };
 
-export async function createAdminSurvey(title: string) {
+export type AdminSurveyDetail = {
+  id: string;
+  title: string;
+  description?: string | null;
+  is_active: boolean;
+  created_at?: string;
+};
+
+export type AdminSurveyQuestion = {
+  id: string;
+  survey_id: string;
+  question_text: string;
+  question_type: string;
+  options: string[] | null;
+  display_order: number;
+  is_required?: boolean;
+};
+
+export async function createAdminSurvey(title: string, description: string = "") {
   const dbClient = await getSupabaseServerClient();
   const { data, error } = await dbClient
     .from("dynamic_surveys")
-    .insert({ title, description: "" })
+    .insert({ title: title.trim(), description: description.trim() })
     .select("id")
     .single();
 
   if (error) return { error: error.message };
   revalidatePath("/admin/surveys");
+  revalidatePath("/survey");
   return { id: data.id };
+}
+
+export async function updateAdminSurvey(
+  surveyId: string,
+  input: { title?: string; description?: string }
+) {
+  const dbClient = await getSupabaseServerClient();
+  const updates: Record<string, string> = {};
+  if (input.title !== undefined) updates.title = input.title.trim();
+  if (input.description !== undefined) updates.description = input.description.trim();
+
+  const { error } = await dbClient
+    .from("dynamic_surveys")
+    .update(updates)
+    .eq("id", surveyId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/admin/surveys");
+  revalidatePath(`/admin/surveys/${surveyId}`);
+  revalidatePath("/survey");
+  return { success: true };
+}
+
+export async function deleteAdminSurvey(surveyId: string) {
+  try {
+    const dbClient = await getSupabaseServerClient();
+
+    // 1. Fetch responses for survey
+    const { data: responses } = await dbClient
+      .from("dynamic_survey_responses")
+      .select("id")
+      .eq("survey_id", surveyId);
+
+    const responseIds = (responses || []).map((r: { id: string }) => r.id);
+
+    // 2. Delete child answers
+    if (responseIds.length > 0) {
+      await dbClient
+        .from("dynamic_survey_answers")
+        .delete()
+        .in("response_id", responseIds);
+    }
+
+    // 3. Delete responses
+    await dbClient
+      .from("dynamic_survey_responses")
+      .delete()
+      .eq("survey_id", surveyId);
+
+    // 4. Delete questions
+    await dbClient
+      .from("dynamic_survey_questions")
+      .delete()
+      .eq("survey_id", surveyId);
+
+    // 5. Delete survey
+    const { error } = await dbClient
+      .from("dynamic_surveys")
+      .delete()
+      .eq("id", surveyId);
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/admin/surveys");
+    revalidatePath("/survey");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err) {
+    console.error("Error in deleteAdminSurvey:", err);
+    return { error: err instanceof Error ? err.message : "Failed to delete survey." };
+  }
 }
 
 export async function toggleSurveyStatus(surveyId: string, isActive: boolean) {
@@ -64,7 +154,8 @@ export async function saveSurveyQuestion(
   questionText: string,
   questionType: string,
   options: string[],
-  displayOrder: number
+  displayOrder: number,
+  isRequired: boolean = false
 ) {
   const dbClient = await getSupabaseServerClient();
   const { error } = await dbClient.from("dynamic_survey_questions").insert({
@@ -73,19 +164,187 @@ export async function saveSurveyQuestion(
     question_type: questionType,
     options: options.length > 0 ? options : null,
     display_order: displayOrder,
+    is_required: isRequired,
   });
 
   revalidatePath(`/admin/surveys/${surveyId}`);
   revalidatePath("/survey");
-  return { success: !error };
+  return { success: !error, error: error?.message };
+}
+
+export async function updateSurveyQuestion(
+  questionId: string,
+  surveyId: string,
+  input: {
+    questionText: string;
+    questionType: string;
+    options: string[];
+    isRequired?: boolean;
+  }
+) {
+  const dbClient = await getSupabaseServerClient();
+  const { error } = await dbClient
+    .from("dynamic_survey_questions")
+    .update({
+      question_text: input.questionText.trim(),
+      question_type: input.questionType,
+      options: input.options.length > 0 ? input.options : null,
+      is_required: input.isRequired ?? false,
+    })
+    .eq("id", questionId)
+    .eq("survey_id", surveyId);
+
+  revalidatePath(`/admin/surveys/${surveyId}`);
+  revalidatePath("/survey");
+  return { success: !error, error: error?.message };
 }
 
 export async function deleteSurveyQuestion(questionId: string, surveyId: string) {
   const dbClient = await getSupabaseServerClient();
-  await dbClient.from("dynamic_survey_questions").delete().eq("id", questionId);
+  try {
+    // Clean up answers referencing this question first
+    await dbClient
+      .from("dynamic_survey_answers")
+      .delete()
+      .eq("question_id", questionId);
+  } catch {
+    // Ignore error if answers cannot be deleted directly
+  }
+
+  const { error } = await dbClient
+    .from("dynamic_survey_questions")
+    .delete()
+    .eq("id", questionId)
+    .eq("survey_id", surveyId);
+
   revalidatePath(`/admin/surveys/${surveyId}`);
   revalidatePath("/survey");
-  return { success: true };
+  return { success: !error, error: error?.message };
+}
+
+export async function reorderSurveyQuestions(
+  surveyId: string,
+  questionOrders: Array<{ id: string; display_order: number }>
+) {
+  const dbClient = await getSupabaseServerClient();
+  try {
+    await Promise.all(
+      questionOrders.map((q) =>
+        dbClient
+          .from("dynamic_survey_questions")
+          .update({ display_order: q.display_order })
+          .eq("id", q.id)
+          .eq("survey_id", surveyId)
+      )
+    );
+    revalidatePath(`/admin/surveys/${surveyId}`);
+    revalidatePath("/survey");
+    return { success: true };
+  } catch (err) {
+    console.error("Error reordering questions:", err);
+    return { success: false };
+  }
+}
+
+export async function deleteSurveyResponse(responseId: string, surveyId: string) {
+  const dbClient = await getSupabaseServerClient();
+  try {
+    await dbClient.from("dynamic_survey_answers").delete().eq("response_id", responseId);
+    const { error } = await dbClient
+      .from("dynamic_survey_responses")
+      .delete()
+      .eq("id", responseId)
+      .eq("survey_id", surveyId);
+
+    revalidatePath(`/admin/surveys/${surveyId}`);
+    revalidatePath("/admin/surveys");
+    return { success: !error, error: error?.message };
+  } catch (err) {
+    console.error("Error deleting survey response:", err);
+    return { success: false, error: "Failed to delete response." };
+  }
+}
+
+export async function clearAllSurveyResponses(surveyId: string) {
+  const dbClient = await getSupabaseServerClient();
+  try {
+    const { data: responses } = await dbClient
+      .from("dynamic_survey_responses")
+      .select("id")
+      .eq("survey_id", surveyId);
+
+    const responseIds = (responses || []).map((r: { id: string }) => r.id);
+    if (responseIds.length > 0) {
+      await dbClient
+        .from("dynamic_survey_answers")
+        .delete()
+        .in("response_id", responseIds);
+    }
+    await dbClient
+      .from("dynamic_survey_responses")
+      .delete()
+      .eq("survey_id", surveyId);
+
+    revalidatePath(`/admin/surveys/${surveyId}`);
+    revalidatePath("/admin/surveys");
+    return { success: true };
+  } catch (err) {
+    console.error("Error clearing survey responses:", err);
+    return { success: false, error: "Failed to clear responses." };
+  }
+}
+
+export async function getAdminSurveyDetail(surveyId: string): Promise<{
+  survey: AdminSurveyDetail | null;
+  questions: AdminSurveyQuestion[];
+  responses: AdminSurveyResponse[];
+  error?: string | null;
+}> {
+  try {
+    const dbClient = await getSupabaseServerClient();
+    const { data: survey, error: sError } = await dbClient
+      .from("dynamic_surveys")
+      .select("id, title, description, is_active, created_at")
+      .eq("id", surveyId)
+      .maybeSingle();
+
+    if (sError || !survey) {
+      return {
+        survey: null,
+        questions: [],
+        responses: [],
+        error: sError?.message || "Survey not found.",
+      };
+    }
+
+    const [{ data: questions, error: qError }, responses] = await Promise.all([
+      dbClient
+        .from("dynamic_survey_questions")
+        .select("id, survey_id, question_text, question_type, options, display_order, is_required")
+        .eq("survey_id", surveyId)
+        .order("display_order", { ascending: true }),
+      getAdminSurveyResponses(surveyId),
+    ]);
+
+    if (qError) {
+      console.error("Error loading survey questions:", qError);
+    }
+
+    return {
+      survey,
+      questions: (questions as AdminSurveyQuestion[]) || [],
+      responses: responses || [],
+      error: null,
+    };
+  } catch (err) {
+    console.error("Error in getAdminSurveyDetail:", err);
+    return {
+      survey: null,
+      questions: [],
+      responses: [],
+      error: err instanceof Error ? err.message : "Failed to load survey.",
+    };
+  }
 }
 
 export async function getAdminSurveysWithCounts() {

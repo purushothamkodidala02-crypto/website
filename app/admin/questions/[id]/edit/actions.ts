@@ -100,7 +100,7 @@ export async function updateQuestion(
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    db.from("questions").select("id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
+    db.from("questions").select("id, subject_id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
     mockTestId ? db.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, replaces_mock_test_id, superseded_by_mock_test_id").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
@@ -109,7 +109,13 @@ export async function updateQuestion(
   let hasAttempts = false;
   if (mockTestId) {
     if (!mockTest) return { success: false, message: "The selected Mock Test could not be found." };
-    if (subject.paper_id !== mockTest.paper_id || (mockTest.test_scope === "subject" && subject.id !== mockTest.subject_id)) return { success: false, message: "This Question must stay inside this Mock Test's Paper and Subject." };
+    if (
+      subjectId !== existingQuestion.subject_id &&
+      mockTest.paper_id &&
+      subject.paper_id !== mockTest.paper_id
+    ) {
+      return { success: false, message: "This Question must stay inside this Mock Test's Paper." };
+    }
     const [{ count: attemptCount }, { data: assignment }] = await Promise.all([
       db.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId),
       db.from("mock_test_questions").select("id").eq("mock_test_id", mockTestId).eq("question_id", questionId).maybeSingle(),
