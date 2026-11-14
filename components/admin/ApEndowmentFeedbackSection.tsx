@@ -332,9 +332,9 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
   }
 
   return (
-    <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition">
+    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:border-slate-300 hover:shadow-xs transition">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-2">
+        <div className="min-w-0 flex-1 space-y-2.5">
           {isEditing ? (
             <div className="space-y-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
               <label className="block text-xs font-bold text-slate-800">Survey Title</label>
@@ -380,15 +380,23 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
                     Draft
                   </span>
                 )}
-                <span className="inline-flex items-center rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium">
-                  {loading ? "…" : data?.totalResponses ?? 0}{" "}
-                  {(data?.totalResponses ?? 0) === 1 ? "response" : "responses"}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowResponses((prev) => !prev)}
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium hover:bg-slate-100 transition cursor-pointer"
+                  title="Click to toggle quick table preview"
+                >
+                  <span>
+                    {loading ? "…" : data?.totalResponses ?? 0}{" "}
+                    {(data?.totalResponses ?? 0) === 1 ? "response" : "responses"}
+                  </span>
+                  <span className="text-[10px] text-slate-400">{showResponses ? "▲" : "▼"}</span>
+                </button>
                 <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                  AP Endowment Officer
+                  AP Endowment
                 </span>
                 <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
-                  {isExpired ? "Campaign Expired" : "Targeted 1-Week Campaign"}
+                  {isExpired ? "Campaign Expired" : "1-Week Campaign"}
                 </span>
               </div>
 
@@ -419,12 +427,20 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
                     Open public page ↗
                   </a>
                 )}
+                <span className="text-slate-300">•</span>
+                <button
+                  type="button"
+                  onClick={() => setShowResponses((prev) => !prev)}
+                  className="font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 transition"
+                >
+                  {showResponses ? "Hide quick table ▲" : "View quick table ▾"}
+                </button>
               </div>
             </>
           )}
         </div>
 
-        {/* Buttons Row - all in the exact same size with whitespace-nowrap */}
+        {/* Buttons Row - exactly 6 buttons identical to Survey 2 */}
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto shrink-0 sm:self-center">
           <button
             type="button"
@@ -473,15 +489,6 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
             title="Delete entire survey and its responses"
           >
             {isDeleting ? "Deleting…" : "🗑️ Delete"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowResponses((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
-            title="Preview student responses inline"
-          >
-            {showResponses ? "Hide Table" : "👁️ View Table"}
           </button>
 
           <Link
@@ -693,48 +700,47 @@ export function ApEndowmentFeedbackSection({ surveyIndex = 1 }: { surveyIndex?: 
         </div>
       )}
 
-      {/* Quick Stats Grid - Light cement boxes */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-1">
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
-          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            {loading ? "…" : data?.totalResponses ?? 0}
-          </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Total Responses
-          </span>
-        </div>
-
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
-          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            {loading ? "…" : data?.paper1Count ?? 0}
-          </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Paper 1 Focus
-          </span>
-        </div>
-
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
-          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            {loading ? "…" : data?.paper2Count ?? 0}
-          </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Paper 2 Focus
-          </span>
-        </div>
-
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
-          <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            {loading ? "…" : data?.bothCount ?? 0}
-          </strong>
-          <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Both Papers
-          </span>
-        </div>
-      </div>
-
-      {/* Responses Table & Search */}
+      {/* Responses Table & Quick Stats (Collapsible on demand) */}
       {showResponses && (
         <div className="border-t border-slate-200 pt-4 space-y-4">
+          {/* Quick Stats Grid - Light cement boxes */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+              <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {loading ? "…" : data?.totalResponses ?? 0}
+              </strong>
+              <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Total Responses
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+              <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {loading ? "…" : data?.paper1Count ?? 0}
+              </strong>
+              <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Paper 1 Focus
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+              <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {loading ? "…" : data?.paper2Count ?? 0}
+              </strong>
+              <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Paper 2 Focus
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 sm:p-3.5 text-center shadow-2xs hover:bg-slate-50 transition">
+              <strong className="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {loading ? "…" : data?.bothCount ?? 0}
+              </strong>
+              <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Both Papers
+              </span>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-sm">
               <input
