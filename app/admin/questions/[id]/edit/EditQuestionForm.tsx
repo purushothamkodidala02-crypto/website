@@ -63,8 +63,13 @@ export function EditQuestionForm({
   const activePaletteItemRef = useRef<HTMLAnchorElement | null>(null);
   const paletteContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const updateQuestionAction = useMemo(
+    () => updateQuestion.bind(null, question.id),
+    [question.id],
+  );
+
   const [state, action, pending] = useActionState(
-    (previousState: UpdateQuestionState, formData: FormData) => updateQuestion(question.id, previousState, formData, mockTestId),
+    updateQuestionAction,
     initialState,
   );
   const [subjectId, setSubjectId] = useState(question.subject_id);
@@ -93,7 +98,7 @@ export function EditQuestionForm({
     }
   }, []);
 
-  const hasUnsavedChanges = isDirty && !state.success;
+  const hasUnsavedChanges = isDirty;
 
   // Keep active question scrolled into view in palette
   useEffect(() => {
@@ -136,6 +141,7 @@ export function EditQuestionForm({
   // Handle save success navigation
   useEffect(() => {
     if (state.success) {
+      setIsDirty(false);
       if (state.newQuestionId && mockTestId) {
         router.replace(`/admin/mock-tests/${mockTestId}/questions/${state.newQuestionId}/edit`);
         return;
@@ -465,6 +471,7 @@ export function EditQuestionForm({
               onInput={() => setIsDirty(true)}
               className="space-y-6"
             >
+              <input type="hidden" name="mock_test_id" value={mockTestId ?? ""} />
               <label className="block text-sm font-bold">
                 Question classification
                 <SearchableSelect
@@ -499,7 +506,7 @@ export function EditQuestionForm({
               question={question.question_text}
               options={[question.option_a, question.option_b, question.option_c, question.option_d]}
               explanation={question.explanation ?? ""}
-              required
+              required={languageMode === "english"}
             />
           )}
           {showTelugu && (
@@ -514,7 +521,7 @@ export function EditQuestionForm({
                 question.option_d_te ?? (languageMode === "telugu" ? question.option_d : ""),
               ]}
               explanation={question.explanation_te ?? (languageMode === "telugu" ? question.explanation ?? "" : "")}
-              required
+              required={languageMode === "telugu"}
               lang="te"
             />
           )}
@@ -592,6 +599,32 @@ export function EditQuestionForm({
               Save Question
             </PendingButtonContent>
           </button>
+          {navigation?.nextHref && (
+            <button
+              type="submit"
+              onClick={() => setSubmitIntent("save_and_next")}
+              disabled={pending}
+              aria-busy={pending && submitIntent === "save_and_next"}
+              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-xs hover:bg-slate-50 disabled:opacity-50 transition"
+            >
+              <PendingButtonContent pending={pending && submitIntent === "save_and_next"} pendingLabel="Saving…">
+                Save &amp; Next (Q{navigation.nextQuestionNumber}) →
+              </PendingButtonContent>
+            </button>
+          )}
+          {navigation?.backHref && (
+            <button
+              type="submit"
+              onClick={() => setSubmitIntent("save_and_return")}
+              disabled={pending}
+              aria-busy={pending && submitIntent === "save_and_return"}
+              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-50 transition"
+            >
+              <PendingButtonContent pending={pending && submitIntent === "save_and_return"} pendingLabel="Saving…">
+                Save &amp; Return
+              </PendingButtonContent>
+            </button>
+          )}
         </div>
 
         {state.message && (

@@ -53,7 +53,7 @@ export async function updateQuestion(
   questionId: string,
   _previous: UpdateQuestionState,
   formData: FormData,
-  mockTestId?: string,
+  mockTestIdArg?: string,
 ): Promise<UpdateQuestionState> {
   try {
     const supabase = await createClient();
@@ -74,6 +74,9 @@ export async function updateQuestion(
   const db = process.env.SUPABASE_SERVICE_ROLE_KEY
     ? createAdminClient()
     : supabase;
+
+  const formMockTestId = String(formData.get("mock_test_id") ?? "").trim() || undefined;
+  const mockTestId = mockTestIdArg || formMockTestId;
 
   const subjectId = String(formData.get("subject_id") ?? "").trim();
   const correctAnswer = String(formData.get("correct_answer") ?? "") as CorrectAnswer;
@@ -128,14 +131,21 @@ export async function updateQuestion(
     subject.content_language_mode as SubjectContentLanguageMode;
   const english = languageValues(formData, "");
   const telugu = languageValues(formData, "_te");
-  if (languageMode !== "telugu" && !languageIsComplete(english)) {
+
+  const englishComplete = languageIsComplete(english);
+  const teluguComplete = languageIsComplete(telugu);
+
+  if (languageMode === "english" && !englishComplete) {
     return { success: false, message: "Complete the English question and all four options." };
   }
-  if (languageMode !== "english" && !languageIsComplete(telugu)) {
+  if (languageMode === "telugu" && !teluguComplete) {
     return { success: false, message: "Complete the Telugu question and all four options." };
   }
+  if (languageMode === "bilingual" && !englishComplete && !teluguComplete) {
+    return { success: false, message: "Complete the question and all four options in English or Telugu." };
+  }
 
-  const canonical = languageMode === "telugu" ? telugu : english;
+  const canonical = (languageMode === "telugu" || (!englishComplete && teluguComplete)) ? telugu : english;
   if (new Set(canonical.options.map((item) => item.toLocaleLowerCase())).size !== 4) {
     return { success: false, message: "All four answer options must be different." };
   }
@@ -150,88 +160,92 @@ export async function updateQuestion(
 
   // Paper series duplicate check for question update (only when question text was actually modified)
   if (!questionTextUnchanged) {
-    const { data: subjectData } = await db
-      .from("subjects")
-      .select("id, name, paper_id")
-      .eq("id", subjectId)
-      .single();
-
-    if (subjectData?.paper_id) {
-      const { data: siblingSubjects } = await db
+    try {
+      const { data: subjectData } = await db
         .from("subjects")
-        .select("id, name")
-        .eq("paper_id", subjectData.paper_id);
-      const siblingSubjectIds = (siblingSubjects ?? []).map((s) => s.id);
+        .select("id, name, paper_id")
+        .eq("id", subjectId)
+        .single();
 
-      const { data: existingQuestions } = await db
-        .from("questions")
-        .select(`
-          id,
-          question_text,
-          question_text_te,
-          subject_id,
-          mock_test_questions (
-            mock_test_id,
-            mock_tests (
-              id,
-              title,
-              replaces_mock_test_id,
-              superseded_by_mock_test_id
+      if (subjectData?.paper_id) {
+        const { data: siblingSubjects } = await db
+          .from("subjects")
+          .select("id, name")
+          .eq("paper_id", subjectData.paper_id);
+        const siblingSubjectIds = (siblingSubjects ?? []).map((s) => s.id);
+
+        const { data: existingQuestions } = await db
+          .from("questions")
+          .select(`
+            id,
+            question_text,
+            question_text_te,
+            subject_id,
+            mock_test_questions (
+              mock_test_id,
+              mock_tests (
+                id,
+                title,
+                replaces_mock_test_id,
+                superseded_by_mock_test_id
+              )
             )
-          )
-        `)
-        .in("subject_id", siblingSubjectIds)
-        .neq("id", questionId)
-        .eq("is_active", true);
+          `)
+          .in("subject_id", siblingSubjectIds)
+          .neq("id", questionId)
+          .eq("is_active", true);
 
-      const match = (existingQuestions ?? []).find((q) => {
-        const normDbEn = normalizeText(q.question_text);
-        const normDbTe = normalizeText(q.question_text_te);
-        if (normNewEn && normDbEn && normNewEn.length >= 10 && normNewEn === normDbEn) return true;
-        if (normNewTe && normDbTe && normNewTe.length >= 10 && normNewTe === normDbTe) return true;
-        return false;
-      });
+        const match = (existingQuestions ?? []).find((q) => {
+          const normDbEn = normalizeText(q.question_text);
+          const normDbTe = normalizeText(q.question_text_te);
+          if (normNewEn && normDbEn && normNewEn.length >= 10 && normNewEn === normDbEn) return true;
+          if (normNewTe && normDbTe && normNewTe.length >= 10 && normNewTe === normDbTe) return true;
+          return false;
+        });
 
-      if (match) {
-        type MockTestRef = { id: string; title: string; replaces_mock_test_id?: string | null; superseded_by_mock_test_id?: string | null };
-        const assignedTests: MockTestRef[] = [];
-        for (const mtq of match.mock_test_questions ?? []) {
-          const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
-          if (rawMtq.mock_tests?.title) {
-            assignedTests.push(rawMtq.mock_tests);
+        if (match) {
+          type MockTestRef = { id: string; title: string; replaces_mock_test_id?: string | null; superseded_by_mock_test_id?: string | null };
+          const assignedTests: MockTestRef[] = [];
+          for (const mtq of match.mock_test_questions ?? []) {
+            const rawMtq = mtq as unknown as { mock_tests: MockTestRef | null };
+            if (rawMtq.mock_tests?.title) {
+              assignedTests.push(rawMtq.mock_tests);
+            }
           }
-        }
 
-        if (mockTestId) {
-          const testMeta = mockTest as { replaces_mock_test_id?: string | null; superseded_by_mock_test_id?: string | null } | null;
-          const relatedTestIds = new Set([
-            mockTestId,
-            testMeta?.replaces_mock_test_id,
-            testMeta?.superseded_by_mock_test_id,
-          ].filter(Boolean));
+          if (mockTestId) {
+            const testMeta = mockTest as { replaces_mock_test_id?: string | null; superseded_by_mock_test_id?: string | null } | null;
+            const relatedTestIds = new Set([
+              mockTestId,
+              testMeta?.replaces_mock_test_id,
+              testMeta?.superseded_by_mock_test_id,
+            ].filter(Boolean));
 
-          const otherTest = assignedTests.find((t) => !relatedTestIds.has(t.id));
-          if (otherTest) {
+            const otherTest = assignedTests.find((t) => !relatedTestIds.has(t.id));
+            if (otherTest) {
+              return {
+                success: false,
+                message: `This question text already exists in "${otherTest.title}" in this paper series.`,
+              };
+            }
+            const inThisTest = assignedTests.some((t) => t.id === mockTestId);
+            if (inThisTest) {
+              return {
+                success: false,
+                message: "Another question in this Mock Test already has this exact text.",
+              };
+            }
+          } else {
+            const matchSubjectName = siblingSubjects?.find((s) => s.id === match.subject_id)?.name ?? "Subject";
             return {
               success: false,
-              message: `This question text already exists in "${otherTest.title}" in this paper series.`,
+              message: `This question text already exists under ${matchSubjectName}.`,
             };
           }
-          const inThisTest = assignedTests.some((t) => t.id === mockTestId);
-          if (inThisTest) {
-            return {
-              success: false,
-              message: "Another question in this Mock Test already has this exact text.",
-            };
-          }
-        } else {
-          const matchSubjectName = siblingSubjects?.find((s) => s.id === match.subject_id)?.name ?? "Subject";
-          return {
-            success: false,
-            message: `This question text already exists under ${matchSubjectName}.`,
-          };
         }
       }
+    } catch (dupCheckError) {
+      console.warn("Question duplicate check failed to complete:", dupCheckError);
     }
   }
 
@@ -253,14 +267,32 @@ export async function updateQuestion(
       option_b: canonical.options[1],
       option_c: canonical.options[2],
       option_d: canonical.options[3],
-      question_text_te: languageMode === "english" ? null : telugu.question,
-      option_a_te: languageMode === "english" ? null : telugu.options[0],
-      option_b_te: languageMode === "english" ? null : telugu.options[1],
-      option_c_te: languageMode === "english" ? null : telugu.options[2],
-      option_d_te: languageMode === "english" ? null : telugu.options[3],
+      question_text_te:
+        languageMode === "english"
+          ? null
+          : (telugu.question || null),
+      option_a_te:
+        languageMode === "english"
+          ? null
+          : (telugu.options[0] || null),
+      option_b_te:
+        languageMode === "english"
+          ? null
+          : (telugu.options[1] || null),
+      option_c_te:
+        languageMode === "english"
+          ? null
+          : (telugu.options[2] || null),
+      option_d_te:
+        languageMode === "english"
+          ? null
+          : (telugu.options[3] || null),
       correct_answer: correctAnswer,
-      explanation: canonical.explanation,
-      explanation_te: languageMode === "english" ? null : telugu.explanation,
+      explanation: english.explanation || canonical.explanation,
+      explanation_te:
+        languageMode === "english"
+          ? null
+          : (telugu.explanation || null),
       image_url: uploadedImage.url,
       source_reference:
         String(formData.get("source_reference") ?? "").trim() || null,
