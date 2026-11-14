@@ -325,6 +325,64 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </div>
       </header>
 
+      {/* Sticky Chapter Sub-Navigation Bar */}
+      <nav
+        aria-label="Chapter quick navigation"
+        className="sticky top-[57px] z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs"
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs font-semibold text-slate-700">
+            <span className="hidden xl:inline-flex text-[11px] font-bold uppercase tracking-wider text-slate-700 shrink-0 mr-1">
+              Chapters:
+            </span>
+            <a href="#schedule" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              1. Dates
+            </a>
+            <a href="#vacancies" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-blue-50 hover:text-blue-900 transition font-bold text-blue-900">
+              2. Vacancies (7,112)
+            </a>
+            <a href="#fees" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              3. Fees
+            </a>
+            <a href="#salary" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              4. Salary
+            </a>
+            <a href="#eligibility" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              5. Age &amp; GO 87
+            </a>
+            <a href="#selection" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              6. Selection
+            </a>
+            <a href="#physical" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              7. PMT &amp; PET
+            </a>
+            <a href="#pattern" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              8. Exam Pattern
+            </a>
+            <a href="#syllabus" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              9. Syllabus
+            </a>
+            <a href="#how-to-apply" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              10. How to Apply
+            </a>
+            <a href="#duties" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              11. Duties
+            </a>
+            <a href="#faqs" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
+              12. FAQs
+            </a>
+          </div>
+          <div className="shrink-0 hidden sm:block">
+            <Link
+              href="/mock-tests/telangana/police-constable-free-mock-test"
+              className="inline-flex items-center gap-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 text-xs font-bold transition shadow-2xs"
+            >
+              Practice Mock Tests →
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Headline Section with Clean Slate & Subtle Corporate Indigo Tone */}
       <section className="border-b border-slate-200/90 bg-gradient-to-b from-white via-slate-50/70 to-[#f8fafc]">
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -448,693 +506,673 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </div>
       </section>
 
-      {/* Main Full-Screen Content Layout */}
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:items-start">
+      {/* Main Full-Width Content Layout */}
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 space-y-8">
 
-          {/* Left Column (Primary Article Flow) - 8 Columns */}
-          <article className="lg:col-span-8 space-y-7">
+        {/* 1. Important Dates & Timeline Roadmap */}
+        <section id="schedule" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Official Schedule</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              1. Important Dates &amp; Recruitment Schedule
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Chronological schedule of key events for TSLPRB Police Constable Recruitment 2026.
+            </p>
+          </div>
 
-            {/* 1. Important Dates & Timeline Roadmap */}
-            <section id="schedule" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Official Schedule</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  1. Important Dates &amp; Recruitment Schedule
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Chronological schedule of key events for TSLPRB Police Constable Recruitment 2026.
-                </p>
-              </div>
-
-              <div className="mt-6 space-y-3">
-                {SCHEDULE_EVENTS.map((evt, idx) => (
-                  <div
-                    key={evt.title}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 hover:border-blue-300 hover:bg-blue-50/30 transition"
-                  >
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
-                        0{idx + 1}
-                      </span>
-                      <div>
-                        <h3 className="font-display text-sm sm:text-base font-bold text-slate-900">
-                          {evt.title}
-                        </h3>
-                        {evt.teluguTitle && (
-                          <p className="text-xs font-semibold text-blue-900 mt-0.5">
-                            {evt.teluguTitle}
-                          </p>
-                        )}
-                        <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                          {evt.detail}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-3 sm:mt-0 sm:ml-4 sm:text-right shrink-0">
-                      <span className="inline-block rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-2xs">
-                        {evt.date}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 2. 7,112 Cadre Vacancy Distribution */}
-            <section id="vacancies" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Post Matrix</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  2. Cadre-Wise Vacancy Breakdown (Total 7,112 Posts)
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Official cadre distribution as sanctioned in TSLPRB Notification Rc No. 189/Rect./Rect.2/2026.
-                </p>
-              </div>
-
-              <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200/90">
-                <table className="w-full min-w-[600px] text-left text-xs sm:text-sm divide-y divide-slate-200">
-                  <thead className="bg-slate-50/90 font-bold text-slate-700 text-xs uppercase tracking-wider">
-                    <tr>
-                      <th className="px-4 py-3 border-r border-slate-200/80">Code</th>
-                      <th className="px-4 py-3 border-r border-slate-200/80">Cadre &amp; Post Name</th>
-                      <th className="px-4 py-3 border-r border-slate-200/80">Department</th>
-                      <th className="px-4 py-3 border-r border-slate-200/80">Eligibility</th>
-                      <th className="px-4 py-3 text-right font-bold">Vacancies</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {VACANCIES.map((v, idx) => {
-                      const pct = Math.round((v.vacancies / TOTAL_VACANCIES) * 100);
-                      return (
-                        <tr key={v.postCode} className={idx % 2 === 1 ? "bg-slate-50/40" : "bg-white"}>
-                          <td className="px-4 py-2.5 font-semibold border-r border-slate-100">
-                            <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-800 font-bold font-mono">
-                              {v.postCode}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2.5 font-semibold text-slate-900 border-r border-slate-100">
-                            {v.postName}
-                          </td>
-                          <td className="px-4 py-2.5 text-slate-600 border-r border-slate-100">
-                            {v.department}
-                          </td>
-                          <td className="px-4 py-2.5 text-slate-600 border-r border-slate-100">
-                            <span className="inline-block rounded-md bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200/70">
-                              {v.genderEligibility}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2.5 text-right">
-                            <span className="font-bold text-slate-900 text-sm">
-                              {v.vacancies.toLocaleString("en-IN")}
-                            </span>
-                            <span className="block text-[10px] text-slate-400">
-                              ({pct}% of total)
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="bg-slate-50 font-bold text-slate-900 border-t-2 border-slate-200">
-                    <tr>
-                      <td colSpan={4} className="px-4 py-3 text-right border-r border-slate-200 uppercase tracking-wider text-xs font-bold text-slate-700">
-                        Total Notified Vacancies
-                      </td>
-                      <td className="px-4 py-3 text-right text-emerald-950 text-base font-extrabold">
-                        {TOTAL_VACANCIES.toLocaleString("en-IN")} Posts
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </section>
-
-            {/* 3. Application Fee Structure */}
-            <section id="fees" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Fee Details</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  3. Application Fee Structure &amp; Concessions
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Prescribed examination fee for online registration via payment gateway.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-5 flex flex-col justify-between">
-                  <div>
-                    <span className="inline-block rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800">
-                      General / OC &amp; BC
-                    </span>
-                    <p className="font-display mt-2 text-3xl font-extrabold text-slate-900">₹800</p>
-                    <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                      For OC, BC, and EWS candidates belonging to the State of Telangana.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-200/70 text-[11px] text-slate-500 font-medium">
-                    Online Mode: UPI / Net Banking / Debit Card
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-5 flex flex-col justify-between shadow-2xs">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="inline-block rounded-md border border-emerald-300 bg-emerald-100 text-emerald-950 px-2 py-0.5 text-[11px] font-bold">
-                        TS SC &amp; ST (50% Concession)
-                      </span>
-                    </div>
-                    <p className="font-display mt-2 text-3xl font-extrabold text-emerald-950">₹400</p>
-                    <p className="mt-2 text-xs text-emerald-900 leading-relaxed font-medium">
-                      Concession rate for Scheduled Castes and Scheduled Tribes belonging to Telangana State.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-emerald-200 text-[11px] text-emerald-900 font-semibold">
-                    Must possess valid Telangana Community Certificate
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-5 flex flex-col justify-between">
-                  <div>
-                    <span className="inline-block rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800">
-                      All Other States
-                    </span>
-                    <p className="font-display mt-2 text-3xl font-extrabold text-slate-900">₹800</p>
-                    <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                      Candidates belonging to States other than Telangana must pay full fee regardless of category.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-200/70 text-[11px] text-slate-500 font-medium">
-                    Treated under Open Competition (OC)
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 4. Pay Scale & In-Hand Salary */}
-            <section id="salary" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Remuneration</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  4. Pay Scale &amp; Monthly Salary Structure
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Revised RPS scale, allowances, and net monthly take-home salary breakdown.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
-                <div className="rounded-xl border border-slate-200/90 p-5 bg-slate-50/60">
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Revised RPS Scale</span>
-                  <p className="font-display mt-1 text-2xl font-extrabold text-slate-900">₹24,280 – ₹72,850</p>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                    Governed by Telangana State Revised Pay Rules. Basic salary begins at ₹24,280 with annual grade increments reaching up to ₹72,850.
-                  </p>
-                </div>
-                <div className="rounded-xl border border-blue-200/80 p-5 bg-blue-50/40">
-                  <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Estimated Monthly Gross</span>
-                  <p className="font-display mt-1 text-2xl font-extrabold text-blue-950">₹34,000 – ₹39,000 / month</p>
-                  <p className="mt-2 text-xs leading-relaxed text-blue-900/90 font-medium">
-                    Includes Basic Pay + Dearness Allowance (DA) + House Rent Allowance (11% to 24% by city) + Medical &amp; Uniform Kit Allowance.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* 5. Eligibility Criteria & Age Limits */}
-            <section id="eligibility" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Eligibility</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  5. Age Limits &amp; G.O. Ms No. 87 5-Year Age Relaxation
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Age benchmarked as of 1st July 2026. The Government of Telangana issued G.O. Ms No. 87 granting a 5-year upper age relaxation.
-                </p>
-              </div>
-
-              <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200/90">
-                <table className="w-full min-w-[550px] text-left text-xs sm:text-sm divide-y divide-slate-200">
-                  <thead className="bg-slate-50/90 font-bold text-slate-700 text-xs uppercase tracking-wider">
-                    <tr>
-                      <th className="px-4 py-3 border-r border-slate-200/80">Category</th>
-                      <th className="px-4 py-3 border-r border-slate-200/80">Permissible Age Range</th>
-                      <th className="px-4 py-3">Statutory Basis &amp; Relaxation Rule</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {AGE_LIMITS.map((a, idx) => (
-                      <tr key={a.category} className={idx % 2 === 1 ? "bg-slate-50/40" : "bg-white"}>
-                        <td className="px-4 py-3 font-semibold text-slate-900 border-r border-slate-100">{a.category}</td>
-                        <td className="px-4 py-3 font-bold text-blue-950 border-r border-slate-100 whitespace-nowrap">{a.ageRange}</td>
-                        <td className="px-4 py-3 text-slate-600 text-xs leading-relaxed">{a.basis}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-xs text-slate-700 space-y-2 leading-relaxed">
-                <p><strong>Educational Qualification:</strong> Must have passed Intermediate (10+2) or its equivalent recognized by the Telangana State Board of Intermediate Education as on 29th July 2026.</p>
-                <p><strong>SC / ST Concession:</strong> Must have passed SSC (10th) and appeared for both 1st and 2nd year Intermediate examinations.</p>
-              </div>
-            </section>
-
-            {/* 6. Selection Process Flow */}
-            <section id="selection" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Selection Stages</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  6. 4-Stage Selection Procedure
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Stage-by-stage progression from screening prelims to final merit list.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {SELECTION_STAGES.map((st) => (
-                  <div key={st.stage} className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-4.5 flex flex-col justify-between hover:border-blue-300 hover:bg-blue-50/20 transition">
-                    <div>
-                      <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-900">
-                        {st.stage}
-                      </span>
-                      <h3 className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900">{st.title}</h3>
-                      <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">{st.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 7. PMT & PET Physical Standards */}
-            <section id="physical" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Physical Tests</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  7. Physical Measurements (PMT) &amp; Physical Efficiency (PET)
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Prescribed physical standards and RFID-monitored athletic events.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="rounded-xl border border-slate-200/90 overflow-hidden bg-white">
-                  <div className="bg-slate-50 px-4 py-3 font-bold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-200">
-                    Physical Measurement Standards (PMT)
-                  </div>
-                  <div className="p-4 space-y-3.5 text-xs sm:text-sm text-slate-600">
-                    <div className="border-b border-slate-100 pb-3">
-                      <strong className="block text-slate-900 font-bold">Men (General, BC, SC):</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 167.6 cms</p>
-                      <p className="text-xs text-slate-600">Chest: Minimum 86.3 cms (5 cms minimum expansion)</p>
-                    </div>
-                    <div className="border-b border-slate-100 pb-3">
-                      <strong className="block text-slate-900 font-bold">Men (ST &amp; Agency Aboriginal Tribes):</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 160.0 cms</p>
-                      <p className="text-xs text-slate-600">Chest: Minimum 80.0 cms (3 cms expansion)</p>
-                    </div>
-                    <div className="border-b border-slate-100 pb-3">
-                      <strong className="block text-slate-900 font-bold">Women (General, BC, SC):</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 152.5 cms</p>
-                    </div>
-                    <div>
-                      <strong className="block text-slate-900 font-bold">Women (ST &amp; Agency Aboriginal Tribes):</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 150.0 cms</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-blue-200/80 overflow-hidden bg-white">
-                  <div className="bg-blue-50/70 px-4 py-3 font-bold text-xs text-blue-950 uppercase tracking-wider border-b border-blue-100">
-                    Physical Efficiency Test Events (PET)
-                  </div>
-                  <div className="p-4 space-y-3.5 text-xs sm:text-sm text-slate-600">
-                    <div className="border-b border-slate-100 pb-3">
-                      <strong className="block text-slate-900 font-bold">1600 Meters Run (Men Candidates):</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Max Time: 7 Minutes 15 Seconds (Mandatory Qualifying Event)</p>
-                    </div>
-                    <div className="border-b border-slate-100 pb-3">
-                      <strong className="block text-slate-900 font-bold">800 Meters Run (Women Candidates):</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Max Time: 5 Minutes 20 Seconds (Mandatory Qualifying Event)</p>
-                    </div>
-                    <div className="border-b border-slate-100 pb-3">
-                      <strong className="block text-slate-900 font-bold">Long Jump:</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Men: Minimum 4.00 Meters | Women: Minimum 2.50 Meters</p>
-                    </div>
-                    <div>
-                      <strong className="block text-slate-900 font-bold">Shot Put:</strong>
-                      <p className="text-xs text-slate-600 mt-0.5">Men (7.26 Kg): Min 6.00 Meters | Women (4 Kg): Min 4.00 Meters</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 8. Exam Pattern & Qualifying Marks */}
-            <section id="pattern" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Exam Scheme</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  8. Written Examination Pattern &amp; Qualifying Marks
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  OMR test configuration, time allotment, and Para 16(A) minimum qualifying marks.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-3.5">
-                  <span className="text-[10px] font-bold uppercase text-slate-500 block">Total Questions</span>
-                  <strong className="mt-1 text-lg font-extrabold text-slate-900 block">200 Qs</strong>
-                </div>
-                <div className="rounded-xl border border-blue-200/80 bg-blue-50/40 p-3.5">
-                  <span className="text-[10px] font-bold uppercase text-blue-800 block">Total Marks</span>
-                  <strong className="mt-1 text-lg font-extrabold text-blue-950 block">200 Marks</strong>
-                </div>
-                <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-3.5">
-                  <span className="text-[10px] font-bold uppercase text-slate-500 block">Duration</span>
-                  <strong className="mt-1 text-lg font-extrabold text-slate-900 block">3 Hours (180 M)</strong>
-                </div>
-                <div className="rounded-xl border border-rose-200/80 bg-rose-50/40 p-3.5">
-                  <span className="text-[10px] font-bold uppercase text-rose-800 block">Negative Marking</span>
-                  <strong className="mt-1 text-lg font-extrabold text-rose-950 block">20% (-0.20)</strong>
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-xl border border-slate-200/90 overflow-hidden">
-                <div className="bg-slate-50 px-4 py-2.5 font-bold text-xs text-slate-700 uppercase tracking-wider border-b border-slate-200">
-                  Category Minimum Qualifying Marks (Para 16(A))
-                </div>
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-center bg-white">
-                  {QUALIFYING_MARKS.map((qm) => (
-                    <div key={qm.category} className="rounded-lg border border-slate-200 bg-slate-50/50 p-3.5">
-                      <span className="text-xs font-semibold text-slate-700 block">{qm.category}</span>
-                      <strong className="text-lg font-bold text-slate-900 block mt-1">{qm.pwtPercentage}</strong>
-                      <span className="text-[11px] text-blue-900 font-bold block">{qm.pwtMarks}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* 9. Annexure-II Syllabus */}
-            <section id="syllabus" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Annexure-II Curriculum</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  9. Complete Subject-wise Syllabus (PWT &amp; FWE)
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Standard Intermediate level curriculum prescribed in official notification.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {SUBJECTS.map((sub, idx) => (
-                  <div key={sub.name} className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-4.5 hover:border-blue-300 hover:bg-blue-50/20 transition flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="grid h-6 w-6 place-items-center rounded-md border border-blue-200 bg-blue-50 text-xs font-bold text-blue-900">
-                          {idx + 1}
-                        </span>
-                        <h3 className="font-display text-sm font-bold text-slate-900">{sub.name}</h3>
-                      </div>
-                      <span className="text-[11px] font-semibold text-blue-900 block mt-1">{sub.teluguName}</span>
-                      <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                        {sub.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 10. Step-by-Step Online Application Guide */}
-            <section id="how-to-apply" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Application Steps</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  10. Step-by-Step Online Application Process
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Official procedures for candidate registration and submission.
-                </p>
-              </div>
-
-              <div className="mt-6 space-y-3 text-xs sm:text-sm text-slate-600">
-                <div className="flex gap-3.5 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
-                    1
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {SCHEDULE_EVENTS.map((evt, idx) => (
+              <div
+                key={evt.title}
+                className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 hover:border-blue-300 hover:bg-blue-50/30 transition gap-3"
+              >
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
+                    0{idx + 1}
                   </span>
                   <div>
-                    <strong className="text-slate-900 block font-semibold">Portal Access:</strong>
-                    <p className="text-slate-600 mt-0.5">Navigate to the official TSLPRB portal at <strong>www.tgprb.in</strong>.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3.5 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
-                    2
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block font-semibold">Mobile Registration &amp; User ID:</strong>
-                    <p className="text-slate-600 mt-0.5">Use your primary active mobile phone number to authenticate via OTP.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3.5 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
-                    3
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block font-semibold">Online Fee Payment:</strong>
-                    <p className="text-slate-600 mt-0.5">Pay ₹800 (for OC/BC) or ₹400 (for TS SC/ST) online using Net Banking, UPI, or Debit card.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3.5 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
-                    4
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block font-semibold">Part-I Application Submission:</strong>
-                    <p className="text-slate-600 mt-0.5">Fill academic qualifications, post cadre preferences, and upload photo/signature.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3.5 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
-                    5
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block font-semibold">Download Acknowledgment:</strong>
-                    <p className="text-slate-600 mt-0.5">Save and print your completed application PDF with the unique Reference Number.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 11. Police Duties & Hierarchy */}
-            <section id="duties" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Career &amp; Duties</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  11. Police Constable Responsibilities &amp; Promotion Ladder
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Operational expectations, law &amp; order responsibilities, and promotional hierarchy.
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-                <div className="space-y-3">
-                  <strong className="block text-slate-900 font-bold text-sm">Key Station Responsibilities:</strong>
-                  {DUTIES.map((d) => (
-                    <div key={d.title} className="rounded-lg border border-slate-200/90 p-3.5 bg-slate-50/50">
-                      <span className="font-semibold text-slate-900 block">{d.title}</span>
-                      {d.teluguTitle && <span className="text-[11px] font-semibold text-blue-900 block mt-0.5">{d.teluguTitle}</span>}
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">{d.description}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div>
-                  <strong className="block text-slate-900 font-bold text-sm mb-3">Police Career Advancement:</strong>
-                  <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4 space-y-3 text-xs sm:text-sm">
-                    {CAREER_GROWTH.map((step, idx) => (
-                      <div key={step} className="flex items-center gap-3">
-                        <span className="grid h-6 w-6 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span className="font-semibold text-slate-800">{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 12. Bilingual FAQs */}
-            <section id="faqs" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-              <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">FAQs</span>
-                <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
-                  12. Frequently Asked Questions (English &amp; Telugu)
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Official answers to common questions about eligibility, events, and examination patterns.
-                </p>
-              </div>
-
-              <div className="mt-6 space-y-3.5">
-                {BILINGUAL_FAQS.map((faq) => (
-                  <div key={faq.question} className="rounded-xl border border-slate-200/90 p-4 bg-slate-50/50 hover:border-slate-300 transition">
                     <h3 className="font-display text-sm sm:text-base font-bold text-slate-900">
-                      {faq.question}
+                      {evt.title}
                     </h3>
-                    {faq.teluguQuestion && (
-                      <p className="mt-1 text-xs font-semibold text-blue-900">
-                        {faq.teluguQuestion}
+                    {evt.teluguTitle && (
+                      <p className="text-xs font-semibold text-blue-900 mt-0.5">
+                        {evt.teluguTitle}
                       </p>
                     )}
-                    <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      {faq.answer}
+                    <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                      {evt.detail}
                     </p>
-                    {faq.teluguAnswer && (
-                      <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                        {faq.teluguAnswer}
-                      </p>
-                    )}
+                  </div>
+                </div>
+                <div className="sm:text-right shrink-0">
+                  <span className="inline-block rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-2xs">
+                    {evt.date}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 2. 7,112 Cadre Vacancy Distribution */}
+        <section id="vacancies" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Post Matrix</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              2. Cadre-Wise Vacancy Breakdown (Total 7,112 Posts)
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Official cadre distribution as sanctioned in TSLPRB Notification Rc No. 189/Rect./Rect.2/2026.
+            </p>
+          </div>
+
+          <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200/90">
+            <table className="w-full min-w-[700px] text-left text-xs sm:text-sm divide-y divide-slate-200">
+              <thead className="bg-slate-50/90 font-bold text-slate-700 text-xs uppercase tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Code</th>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Cadre &amp; Post Name</th>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Department</th>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Gender Eligibility</th>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Share</th>
+                  <th className="px-5 py-3.5 text-right font-bold">Vacancies</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {VACANCIES.map((v, idx) => {
+                  const pct = Math.round((v.vacancies / TOTAL_VACANCIES) * 100);
+                  return (
+                    <tr key={v.postCode} className={idx % 2 === 1 ? "bg-slate-50/40 hover:bg-blue-50/30" : "bg-white hover:bg-blue-50/30"}>
+                      <td className="px-5 py-3 font-semibold border-r border-slate-100">
+                        <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-800 font-bold font-mono">
+                          {v.postCode}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 font-semibold text-slate-900 border-r border-slate-100">
+                        {v.postName}
+                      </td>
+                      <td className="px-5 py-3 text-slate-600 border-r border-slate-100">
+                        {v.department}
+                      </td>
+                      <td className="px-5 py-3 text-slate-600 border-r border-slate-100">
+                        <span className="inline-block rounded-md bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700 border border-slate-200/70">
+                          {v.genderEligibility}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-slate-500 border-r border-slate-100 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden hidden sm:block">
+                            <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${Math.max(pct, 2)}%` }} />
+                          </div>
+                          <span className="text-xs font-semibold text-slate-700">{pct}%</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <span className="font-bold text-slate-900 text-sm">
+                          {v.vacancies.toLocaleString("en-IN")}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot className="bg-slate-50 font-bold text-slate-900 border-t-2 border-slate-200">
+                <tr>
+                  <td colSpan={5} className="px-5 py-3.5 text-right border-r border-slate-200 uppercase tracking-wider text-xs font-bold text-slate-700">
+                    Total Notified Vacancies
+                  </td>
+                  <td className="px-5 py-3.5 text-right text-emerald-950 text-base font-extrabold">
+                    {TOTAL_VACANCIES.toLocaleString("en-IN")} Posts
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+        {/* Full-Width Exam Preparation Callout Banner Immediately After Section 2 */}
+        <section className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 text-white shadow-md border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+                Full-Length Bilingual Test Series
+              </span>
+              <span className="rounded-md bg-white/10 text-slate-200 px-2.5 py-0.5 text-[11px] font-medium">
+                58 Full Papers &bull; 11,600 Questions
+              </span>
+            </div>
+            <h3 className="font-display mt-2.5 text-xl sm:text-2xl font-bold leading-snug">
+              Practice All 58 Full-Length Telangana Police Constable Mock Tests
+            </h3>
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Prepare for the 200-question, 180-minute Preliminary Written Test with authentic OMR countdown timers, 0.20 negative marking deduction, and bilingual English &amp; Telugu step-by-step answer explanations on Varadhi Prep.
+            </p>
+          </div>
+          <div className="shrink-0 flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/mock-tests/telangana/police-constable-free-mock-test"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold px-5 py-3 text-sm transition shadow-sm text-center"
+            >
+              Start 58 Mock Tests Free →
+            </Link>
+            <a
+              href="https://www.tgprb.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold px-4 py-3 text-xs border border-white/20 transition text-center"
+            >
+              TSLPRB Portal (tgprb.in) ↗
+            </a>
+          </div>
+        </section>
+
+        {/* 3. Application Fee Structure */}
+        <section id="fees" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Fee Details</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              3. Application Fee Structure &amp; Concessions
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Prescribed examination fee for online registration via payment gateway.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4.5">
+            <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-5 flex flex-col justify-between">
+              <div>
+                <span className="inline-block rounded-md border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-800">
+                  General / OC &amp; BC
+                </span>
+                <p className="font-display mt-2 text-3xl font-extrabold text-slate-900">₹800</p>
+                <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                  For OC, BC, and EWS candidates belonging to the State of Telangana.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-200/70 text-[11px] text-slate-500 font-medium">
+                Online Mode: UPI / Net Banking / Debit Card
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-5 flex flex-col justify-between shadow-2xs">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="inline-block rounded-md border border-emerald-300 bg-emerald-100 text-emerald-950 px-2.5 py-0.5 text-[11px] font-bold">
+                    TS SC &amp; ST (50% Concession)
+                  </span>
+                </div>
+                <p className="font-display mt-2 text-3xl font-extrabold text-emerald-950">₹400</p>
+                <p className="mt-2 text-xs text-emerald-900 leading-relaxed font-medium">
+                  Concession rate for Scheduled Castes and Scheduled Tribes belonging to Telangana State.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-emerald-200 text-[11px] text-emerald-900 font-semibold">
+                Must possess valid Telangana Community Certificate
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-5 flex flex-col justify-between">
+              <div>
+                <span className="inline-block rounded-md border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-800">
+                  All Other States
+                </span>
+                <p className="font-display mt-2 text-3xl font-extrabold text-slate-900">₹800</p>
+                <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                  Candidates belonging to States other than Telangana must pay full fee regardless of category.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-200/70 text-[11px] text-slate-500 font-medium">
+                Treated under Open Competition (OC)
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Pay Scale & Monthly Salary */}
+        <section id="salary" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Remuneration</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              4. Pay Scale &amp; Monthly Salary Structure
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Revised RPS scale, allowances, and net monthly take-home salary breakdown.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4.5 text-xs sm:text-sm">
+            <div className="rounded-xl border border-slate-200/90 p-5 bg-slate-50/60">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Revised RPS Scale</span>
+              <p className="font-display mt-1 text-2xl font-extrabold text-slate-900">₹24,280 – ₹72,850</p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                Governed by Telangana State Revised Pay Rules. Basic salary begins at ₹24,280 with annual grade increments reaching up to ₹72,850.
+              </p>
+            </div>
+            <div className="rounded-xl border border-blue-200/80 p-5 bg-blue-50/40">
+              <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Estimated Monthly Gross</span>
+              <p className="font-display mt-1 text-2xl font-extrabold text-blue-950">₹34,000 – ₹39,000 / mo</p>
+              <p className="mt-2 text-xs leading-relaxed text-blue-900/90 font-medium">
+                Includes Basic Pay + Dearness Allowance (DA) + House Rent Allowance (11% to 24% by city) + Medical &amp; Uniform Kit Allowance.
+              </p>
+            </div>
+            <div className="rounded-xl border border-emerald-200/80 p-5 bg-emerald-50/40">
+              <span className="text-[11px] font-bold text-emerald-950 uppercase tracking-wider">Perks &amp; Entitlements</span>
+              <p className="font-display mt-1 text-2xl font-extrabold text-emerald-950">EHS &amp; Pension</p>
+              <p className="mt-2 text-xs leading-relaxed text-emerald-900 font-medium">
+                Comprehensive cashless healthcare under Employee Health Scheme (EHS), contributory pension, annual leaves, and special duty allowances.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Eligibility Criteria & Age Limits */}
+        <section id="eligibility" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Eligibility</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              5. Age Limits &amp; G.O. Ms No. 87 5-Year Age Relaxation
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Age benchmarked as of 1st July 2026. The Government of Telangana issued G.O. Ms No. 87 granting a 5-year upper age relaxation.
+            </p>
+          </div>
+
+          <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200/90">
+            <table className="w-full min-w-[650px] text-left text-xs sm:text-sm divide-y divide-slate-200">
+              <thead className="bg-slate-50/90 font-bold text-slate-700 text-xs uppercase tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Category</th>
+                  <th className="px-5 py-3.5 border-r border-slate-200/80">Permissible Age Range</th>
+                  <th className="px-5 py-3.5">Statutory Basis &amp; Relaxation Rule</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {AGE_LIMITS.map((a, idx) => (
+                  <tr key={a.category} className={idx % 2 === 1 ? "bg-slate-50/40" : "bg-white"}>
+                    <td className="px-5 py-3 font-semibold text-slate-900 border-r border-slate-100">{a.category}</td>
+                    <td className="px-5 py-3 font-bold text-blue-950 border-r border-slate-100 whitespace-nowrap">{a.ageRange}</td>
+                    <td className="px-5 py-3 text-slate-600 text-xs leading-relaxed">{a.basis}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+              <strong className="block text-slate-900 font-bold text-sm">Educational Qualification:</strong>
+              <p>Must have passed Intermediate (10+2) or its equivalent recognized by the Telangana State Board of Intermediate Education as on 29th July 2026.</p>
+            </div>
+            <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4 text-xs text-blue-950 space-y-1.5 leading-relaxed">
+              <strong className="block text-blue-950 font-bold text-sm">SC / ST Concession &amp; Technical Requirements:</strong>
+              <p>SC &amp; ST candidates must have passed SSC (10th) and appeared for both 1st &amp; 2nd year Intermediate exams. Fire Fighter posts mandate a valid Light Motor Vehicle (LMV) license.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Selection Process Flow */}
+        <section id="selection" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Selection Stages</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              6. 4-Stage Selection Procedure
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Stage-by-stage progression from screening prelims to final merit list.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {SELECTION_STAGES.map((st) => (
+              <div key={st.stage} className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-4.5 flex flex-col justify-between hover:border-blue-300 hover:bg-blue-50/20 transition">
+                <div>
+                  <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-900">
+                    {st.stage}
+                  </span>
+                  <h3 className="font-display mt-2 text-sm sm:text-base font-bold text-slate-900">{st.title}</h3>
+                  <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">{st.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. PMT & PET Physical Standards */}
+        <section id="physical" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Physical Tests</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              7. Physical Measurements (PMT) &amp; Physical Efficiency (PET)
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Prescribed physical standards and RFID-monitored athletic events.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-xl border border-slate-200/90 overflow-hidden bg-white">
+              <div className="bg-slate-50 px-4 py-3 font-bold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-200">
+                Physical Measurement Standards (PMT)
+              </div>
+              <div className="p-4 sm:p-5 space-y-3.5 text-xs sm:text-sm text-slate-600">
+                <div className="border-b border-slate-100 pb-3">
+                  <strong className="block text-slate-900 font-bold">Men (General, BC, SC):</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 167.6 cms</p>
+                  <p className="text-xs text-slate-600">Chest: Minimum 86.3 cms (5 cms minimum expansion)</p>
+                </div>
+                <div className="border-b border-slate-100 pb-3">
+                  <strong className="block text-slate-900 font-bold">Men (ST &amp; Agency Aboriginal Tribes):</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 160.0 cms</p>
+                  <p className="text-xs text-slate-600">Chest: Minimum 80.0 cms (3 cms expansion)</p>
+                </div>
+                <div className="border-b border-slate-100 pb-3">
+                  <strong className="block text-slate-900 font-bold">Women (General, BC, SC):</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 152.5 cms</p>
+                </div>
+                <div>
+                  <strong className="block text-slate-900 font-bold">Women (ST &amp; Agency Aboriginal Tribes):</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Height: Minimum 150.0 cms</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-blue-200/80 overflow-hidden bg-white">
+              <div className="bg-blue-50/70 px-4 py-3 font-bold text-xs text-blue-950 uppercase tracking-wider border-b border-blue-100">
+                Physical Efficiency Test Events (PET)
+              </div>
+              <div className="p-4 sm:p-5 space-y-3.5 text-xs sm:text-sm text-slate-600">
+                <div className="border-b border-slate-100 pb-3">
+                  <strong className="block text-slate-900 font-bold">1600 Meters Run (Men Candidates):</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Max Time: 7 Minutes 15 Seconds (Mandatory Qualifying Event &bull; Graded for AR/TSSP)</p>
+                </div>
+                <div className="border-b border-slate-100 pb-3">
+                  <strong className="block text-slate-900 font-bold">800 Meters Run (Women Candidates):</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Max Time: 5 Minutes 20 Seconds (Mandatory Qualifying Event &bull; Graded for AR/TSSP)</p>
+                </div>
+                <div className="border-b border-slate-100 pb-3">
+                  <strong className="block text-slate-900 font-bold">Long Jump:</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Men: Minimum 4.00 Meters | Women: Minimum 2.50 Meters (Qualifying)</p>
+                </div>
+                <div>
+                  <strong className="block text-slate-900 font-bold">Shot Put:</strong>
+                  <p className="text-xs text-slate-600 mt-0.5">Men (7.26 Kg): Min 6.00 Meters | Women (4 Kg): Min 4.00 Meters (Qualifying)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 8. Exam Pattern & Qualifying Marks */}
+        <section id="pattern" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Exam Scheme</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              8. Written Examination Pattern &amp; Qualifying Marks
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              OMR test configuration, time allotment, and Para 16(A) minimum qualifying marks.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-center">
+            <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-4">
+              <span className="text-[10px] font-bold uppercase text-slate-500 block">Total Questions</span>
+              <strong className="mt-1 text-xl font-extrabold text-slate-900 block">200 Qs</strong>
+              <span className="text-[11px] text-slate-500 block mt-0.5">Objective MCQs</span>
+            </div>
+            <div className="rounded-xl border border-blue-200/80 bg-blue-50/40 p-4">
+              <span className="text-[10px] font-bold uppercase text-blue-800 block">Total Marks</span>
+              <strong className="mt-1 text-xl font-extrabold text-blue-950 block">200 Marks</strong>
+              <span className="text-[11px] text-blue-700 block mt-0.5">1 Mark Per Question</span>
+            </div>
+            <div className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-4">
+              <span className="text-[10px] font-bold uppercase text-slate-500 block">Duration</span>
+              <strong className="mt-1 text-xl font-extrabold text-slate-900 block">3 Hours</strong>
+              <span className="text-[11px] text-slate-500 block mt-0.5">180 Minutes Timed</span>
+            </div>
+            <div className="rounded-xl border border-rose-200/80 bg-rose-50/40 p-4">
+              <span className="text-[10px] font-bold uppercase text-rose-800 block">Negative Marking</span>
+              <strong className="mt-1 text-xl font-extrabold text-rose-950 block">20% (-0.20)</strong>
+              <span className="text-[11px] text-rose-700 block mt-0.5">Per Wrong Answer</span>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-xl border border-slate-200/90 overflow-hidden">
+            <div className="bg-slate-50 px-5 py-3 font-bold text-xs text-slate-700 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
+              <span>Category Minimum Qualifying Marks (Para 16(A))</span>
+              <span className="text-[11px] font-normal text-slate-500">Applies to both PWT and FWE</span>
+            </div>
+            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm text-center bg-white">
+              {QUALIFYING_MARKS.map((qm) => (
+                <div key={qm.category} className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                  <span className="text-xs font-semibold text-slate-700 block">{qm.category}</span>
+                  <strong className="text-2xl font-extrabold text-slate-900 block mt-1.5">{qm.pwtPercentage}</strong>
+                  <span className="text-xs text-blue-900 font-bold block mt-1">{qm.pwtMarks}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 9. Annexure-II Syllabus */}
+        <section id="syllabus" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Annexure-II Curriculum</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              9. Complete Subject-wise Syllabus (PWT &amp; FWE)
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Standard Intermediate level curriculum prescribed in official notification across 8 key subjects.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4.5">
+            {SUBJECTS.map((sub, idx) => (
+              <div key={sub.name} className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-5 hover:border-blue-300 hover:bg-blue-50/20 transition flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-7 w-7 place-items-center rounded-lg border border-blue-200 bg-blue-50 text-xs font-bold text-blue-900">
+                      0{idx + 1}
+                    </span>
+                    <h3 className="font-display text-sm sm:text-base font-bold text-slate-900">{sub.name}</h3>
+                  </div>
+                  <span className="text-xs font-semibold text-blue-900 block mt-1.5">{sub.teluguName}</span>
+                  <p className="mt-2.5 text-xs text-slate-600 leading-relaxed">
+                    {sub.description}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-200/70">
+                  <Link
+                    href="/mock-tests/telangana/police-constable-free-mock-test"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:text-blue-950 transition"
+                  >
+                    Practice {sub.name} Questions &rarr;
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 10. Step-by-Step Online Application Guide */}
+        <section id="how-to-apply" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Application Steps</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              10. Step-by-Step Online Application Process
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Official procedures for candidate registration and submission on the official portal.
+            </p>
+          </div>
+
+          <div className="mt-6 space-y-3.5 text-xs sm:text-sm text-slate-600">
+            <div className="flex gap-4 p-4 rounded-xl border border-slate-200/80 bg-slate-50/60 items-start">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
+                1
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Portal Access:</strong>
+                <p className="text-slate-600 mt-0.5">Navigate to the official TSLPRB portal at <strong>www.tgprb.in</strong>.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 p-4 rounded-xl border border-slate-200/80 bg-slate-50/60 items-start">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
+                2
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Mobile Registration &amp; User ID:</strong>
+                <p className="text-slate-600 mt-0.5">Use your primary active mobile phone number to authenticate via OTP.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 p-4 rounded-xl border border-slate-200/80 bg-slate-50/60 items-start">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
+                3
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Online Fee Payment:</strong>
+                <p className="text-slate-600 mt-0.5">Pay ₹800 (for OC/BC) or ₹400 (for TS SC/ST) online using Net Banking, UPI, or Debit card.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 p-4 rounded-xl border border-slate-200/80 bg-slate-50/60 items-start">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
+                4
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Part-I Application Submission:</strong>
+                <p className="text-slate-600 mt-0.5">Fill academic qualifications, post cadre preferences, and upload photo/signature.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 p-4 rounded-xl border border-slate-200/80 bg-slate-50/60 items-start">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs">
+                5
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-semibold">Download Acknowledgment:</strong>
+                <p className="text-slate-600 mt-0.5">Save and print your completed application PDF with the unique Reference Number.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 11. Police Duties & Hierarchy */}
+        <section id="duties" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Career &amp; Duties</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              11. Police Constable Responsibilities &amp; Promotion Ladder
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Operational expectations, law &amp; order responsibilities, and promotional hierarchy.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs sm:text-sm">
+            <div className="space-y-3">
+              <strong className="block text-slate-900 font-bold text-sm">Key Station Responsibilities:</strong>
+              {DUTIES.map((d) => (
+                <div key={d.title} className="rounded-xl border border-slate-200/90 p-4 bg-slate-50/50">
+                  <span className="font-semibold text-slate-900 block">{d.title}</span>
+                  {d.teluguTitle && <span className="text-xs font-semibold text-blue-900 block mt-0.5">{d.teluguTitle}</span>}
+                  <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">{d.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <strong className="block text-slate-900 font-bold text-sm mb-3">Police Career Advancement Ladder:</strong>
+              <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-5 space-y-3.5 text-xs sm:text-sm">
+                {CAREER_GROWTH.map((step, idx) => (
+                  <div key={step} className="flex items-center gap-3.5">
+                    <span className="grid h-7 w-7 place-items-center rounded-full border border-blue-200 bg-blue-50 text-blue-900 font-bold text-xs shrink-0">
+                      0{idx + 1}
+                    </span>
+                    <span className="font-semibold text-slate-800">{step}</span>
                   </div>
                 ))}
               </div>
-            </section>
-
-          </article>
-
-          {/* Right Column (Desktop Sticky Chapter Navigator & Practice Action) - 4 Columns */}
-          <aside className="lg:col-span-4 space-y-5 lg:sticky lg:top-20">
-
-            {/* Free Mock Test Practice Callout Card */}
-            <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white p-6 shadow-md border border-slate-800">
-              <span className="inline-block rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                Exam Preparation
-              </span>
-              <h3 className="font-display mt-2.5 text-lg font-bold leading-snug">
-                Practice 58 Full-Length Mock Tests Free
-              </h3>
-              <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-                Train for the 200-question, 3-hour Preliminary Written Test with authentic OMR countdown timers, 0.20 negative marking, and bilingual step-by-step solutions.
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="/mock-tests/telangana/police-constable-free-mock-test"
-                  className="block w-full text-center rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 text-xs transition shadow-sm"
-                >
-                  Start Practicing Mock Tests →
-                </Link>
-              </div>
             </div>
+          </div>
+        </section>
 
-            {/* Quick Chapter Navigator Sidebar */}
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="font-display text-sm font-bold uppercase tracking-wider text-slate-900">
-                  Contents &amp; Chapters
-                </h3>
-                <span className="rounded-md border border-slate-200 bg-slate-50 text-slate-700 px-2 py-0.5 text-[10px] font-bold">12 Sections</span>
-              </div>
-              <div className="mt-3 flex flex-col gap-1 text-xs font-medium text-slate-700">
-                <a href="#schedule" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>1. Important Dates &amp; Timeline</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#vacancies" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>2. 7,112 Cadre Vacancies</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#fees" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>3. Application Fees</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#salary" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>4. Pay Scale &amp; Salary</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#eligibility" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>5. Age Limits &amp; G.O. 87</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#selection" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>6. 4-Stage Selection Procedure</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#physical" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>7. PMT &amp; PET Physical Events</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#pattern" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>8. Written Exam Pattern</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#syllabus" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>9. Annexure-II Syllabus</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#how-to-apply" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>10. How to Apply Online</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#duties" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>11. Police Hierarchy &amp; Duties</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-                <a href="#faqs" className="rounded-lg px-3 py-1.5 hover:bg-blue-50/70 hover:text-blue-950 transition flex items-center justify-between">
-                  <span>12. Bilingual FAQs</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </a>
-              </div>
-            </div>
+        {/* 12. Bilingual FAQs */}
+        <section id="faqs" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">FAQs</span>
+            <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
+              12. Frequently Asked Questions (English &amp; Telugu)
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Official answers to common questions about eligibility, events, and examination patterns.
+            </p>
+          </div>
 
-            {/* Official Portal Reference Card */}
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
-                Official Verification
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {BILINGUAL_FAQS.map((faq) => (
+              <div key={faq.question} className="rounded-xl border border-slate-200/90 p-5 bg-slate-50/50 hover:border-slate-300 transition flex flex-col justify-between">
+                <div>
+                  <h3 className="font-display text-sm sm:text-base font-bold text-slate-900">
+                    {faq.question}
+                  </h3>
+                  {faq.teluguQuestion && (
+                    <p className="mt-1.5 text-xs font-semibold text-blue-900">
+                      {faq.teluguQuestion}
+                    </p>
+                  )}
+                  <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                  {faq.teluguAnswer && (
+                    <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                      {faq.teluguAnswer}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Critical Candidate Notes & Official Portal Reference Card */}
+        <section className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="space-y-2 text-xs text-slate-700">
+            <strong className="block text-slate-900 font-bold text-sm">Critical Candidate Notes:</strong>
+            <p>&bull; <strong>Negative Marking:</strong> 20% mark (0.20) is deducted per wrong answer in the PWT.</p>
+            <p>&bull; <strong>1600m Run:</strong> Mandatory qualifying event for Men candidates (7 mins 15 secs).</p>
+            <p>&bull; <strong>800m Run:</strong> Mandatory qualifying event for Women candidates (5 mins 20 secs).</p>
+            <p>&bull; <strong>Age Relief:</strong> G.O. Ms No. 87 provides +5 years across all categories.</p>
+          </div>
+
+          <div className="rounded-xl border border-blue-200/80 bg-blue-50/40 p-5 flex flex-col justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-900 block">
+                Official Verification Portal
               </span>
-              <h4 className="font-display mt-1 text-sm font-bold text-slate-900">
-                TSLPRB Official Recruitment Portal
+              <h4 className="font-display mt-1 text-base font-bold text-slate-900">
+                TSLPRB Official Recruitment Website
               </h4>
               <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                Candidate registrations, hall ticket downloads, and key objection windows are conducted exclusively on the official recruitment website.
+                Online applications, hall tickets, and key objection windows are processed exclusively on the official recruitment website.
               </p>
-              <div className="mt-4">
-                <a
-                  href="https://www.tgprb.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/90 text-slate-800 font-bold py-2 text-xs transition shadow-2xs"
-                >
-                  Visit tgprb.in Portal &rarr;
-                </a>
-              </div>
             </div>
-
-            {/* Key Examination Reminder Box */}
-            <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-5 shadow-xs text-xs text-slate-700 space-y-2">
-              <strong className="block text-blue-950 font-bold text-sm">Critical Candidate Notes:</strong>
-              <p>&bull; <strong>Negative Marking:</strong> 20% mark (0.20) is deducted per wrong answer in the PWT.</p>
-              <p>&bull; <strong>1600m Run:</strong> Mandatory qualifying event for Men candidates (7 mins 15 secs).</p>
-              <p>&bull; <strong>800m Run:</strong> Mandatory qualifying event for Women candidates (5 mins 20 secs).</p>
-              <p>&bull; <strong>Age Relief:</strong> G.O. Ms No. 87 provides +5 years across all categories.</p>
+            <div className="mt-4">
+              <a
+                href="https://www.tgprb.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 text-xs transition shadow-2xs"
+              >
+                Visit tgprb.in Official Portal &rarr;
+              </a>
             </div>
+          </div>
+        </section>
 
-          </aside>
-
-        </div>
       </div>
 
       {/* Modern Clean Footer */}
