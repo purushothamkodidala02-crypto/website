@@ -73,7 +73,7 @@ export async function POST(
     }
 
     const { data, error } = rpcResult;
-    const session = data?.[0] as { session_id?: string } | undefined;
+    const session = data?.[0] as { session_id?: string; expires_at?: string } | undefined;
 
     if (error || !session?.session_id) {
       const errorMsg = error?.message || "Failed to start mock test session.";
@@ -110,6 +110,7 @@ export async function POST(
     return NextResponse.json({
       ok: true,
       sessionId: session.session_id,
+      expiresAt: session.expires_at,
       url: attemptUrl,
     });
   } catch (err) {

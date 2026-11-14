@@ -57,6 +57,8 @@ type Props = {
   paperName?: string;
   subjectName?: string;
   stateCode?: string;
+  initialPaused?: boolean;
+  initialRemainingSeconds?: number;
 };
 
 function secondsLeft(expiresAt: string) { return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)); }
@@ -83,6 +85,8 @@ export function StudentTestRunner({
   paperName,
   subjectName,
   stateCode,
+  initialPaused = false,
+  initialRemainingSeconds,
 }: Props) {
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
@@ -93,7 +97,12 @@ export function StudentTestRunner({
   const [reviewIds, setReviewIds] = useState<Set<string>>(
     () => new Set(questions.filter((item) => item.marked_for_review).map((item) => item.question_id)),
   );
-  const [remaining, setRemaining] = useState<number | null>(null);
+  const [remaining, setRemaining] = useState<number | null>(() => {
+    if (initialPaused && typeof initialRemainingSeconds === "number") {
+      return Math.max(0, initialRemainingSeconds);
+    }
+    return Math.max(0, secondsLeft(expiresAt));
+  });
   const [language, setLanguage] = useState<"en" | "te">("en");
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [navigatorOpenDesktop, setNavigatorOpenDesktop] = useState(true);
@@ -101,7 +110,7 @@ export function StudentTestRunner({
   const [submitting, setSubmitting] = useState(false);
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [pausing, setPausing] = useState(false);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(Boolean(initialPaused));
   const [pauseError, setPauseError] = useState("");
   const [submission, setSubmission] = useState<SubmitAttemptResult | null>(null);
   const isFullscreen = useSyncExternalStore(
@@ -626,29 +635,168 @@ export function StudentTestRunner({
     if (pauseControlDisabled) return;
     setPauseError("");
     setPausing(true);
-    await flushSaves();
+
+    // Race flushSaves with 80ms timeout so in-flight retry chains never stall pause/resume
+    await Promise.race([
+      flushSaves(),
+      new Promise((resolve) => setTimeout(resolve, 80)),
+    ]);
+
     if (paused) {
-      const result = await resumeAttempt(mockTestId, sessionId, deviceIdRef.current);
-      if (result.success && result.expiresAt) {
-        setDeadline(result.expiresAt);
+      // RESUME FLOW
+      let resumedExpiresAt: string | null = null;
+      let errMsg = "";
+
+      // 1. Direct Client Supabase RPC (fastest ~40ms)
+      try {
+        const supabase = createClient();
+        let clientRpc = await supabase.rpc("start_mock_test_session", {
+          requested_mock_test_id: mockTestId,
+          requested_device_token: deviceIdRef.current || null,
+        });
+        if (clientRpc.error) {
+          clientRpc = await supabase.rpc("start_mock_test_session", {
+            requested_mock_test_id: mockTestId,
+          });
+        }
+        const exp = clientRpc.data?.[0]?.expires_at;
+        if (exp) {
+          resumedExpiresAt = exp;
+        } else if (clientRpc.error?.message) {
+          errMsg = clientRpc.error.message;
+        }
+      } catch {
+        // Fall through to Route Handler
+      }
+
+      // 2. Direct Route Handler API (/api/mock-tests/[id]/start)
+      if (!resumedExpiresAt) {
+        try {
+          const res = await fetch(`/api/mock-tests/${mockTestId}/start`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: "resume", deviceId: deviceIdRef.current }),
+          });
+          if (res.ok) {
+            const json = await res.json().catch(() => null);
+            if (json?.ok && json?.expiresAt) {
+              resumedExpiresAt = json.expiresAt;
+            } else if (json?.error) {
+              errMsg = json.error;
+            }
+          }
+        } catch {
+          // Fall through to Server Action
+        }
+      }
+
+      // 3. Server Action fallback
+      if (!resumedExpiresAt) {
+        try {
+          const result = await resumeAttempt(mockTestId, sessionId, deviceIdRef.current);
+          if (result.success && result.expiresAt) {
+            resumedExpiresAt = result.expiresAt;
+          } else if (result.message) {
+            errMsg = result.message;
+          }
+        } catch {
+          // Fall through
+        }
+      }
+
+      if (resumedExpiresAt) {
+        setDeadline(resumedExpiresAt);
         setPaused(false);
       } else {
-        setPauseError(result.message);
+        setPauseError(errMsg || "This attempt could not be resumed. Refresh the page to continue.");
       }
       setPausing(false);
       return;
     }
-    const result = await pauseAttempt(sessionId, answers);
-    if (result.success) {
-      if (typeof result.remaining === "number") setRemaining(result.remaining);
+
+    // PAUSE FLOW
+    let pausedRemainingSec: number | null = null;
+    let errMsg = "";
+
+    // 1. Direct Client Supabase RPC (fastest ~40ms)
+    try {
+      const supabase = createClient();
+
+      if (answers && Object.keys(answers).length > 0) {
+        void supabase.rpc("save_mock_test_session_answers", {
+          requested_session_id: sessionId,
+          submitted_answers: answers,
+        });
+      }
+
+      const rpcRes = await supabase.rpc("pause_mock_test_session", {
+        requested_session_id: sessionId,
+      });
+
+      if (!rpcRes.error && typeof rpcRes.data === "number") {
+        pausedRemainingSec = rpcRes.data;
+      } else {
+        const { data: sess } = await supabase
+          .from("test_attempt_sessions")
+          .select("remaining_seconds, session_state")
+          .eq("id", sessionId)
+          .maybeSingle();
+
+        if (sess?.session_state === "paused" && typeof sess.remaining_seconds === "number") {
+          pausedRemainingSec = sess.remaining_seconds;
+        } else if (rpcRes.error?.message) {
+          errMsg = rpcRes.error.message;
+        }
+      }
+    } catch {
+      // Fall through to Route Handler
+    }
+
+    // 2. Direct Route Handler API (/api/mock-tests/[id]/pause)
+    if (pausedRemainingSec === null) {
+      try {
+        const res = await fetch(`/api/mock-tests/${mockTestId}/pause`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId, answers, deviceId: deviceIdRef.current }),
+        });
+        if (res.ok) {
+          const json = await res.json().catch(() => null);
+          if (json?.ok && typeof json.remaining === "number") {
+            pausedRemainingSec = json.remaining;
+          } else if (json?.error) {
+            errMsg = json.error;
+          }
+        }
+      } catch {
+        // Fall through to Server Action
+      }
+    }
+
+    // 3. Server Action fallback
+    if (pausedRemainingSec === null) {
+      try {
+        const result = await pauseAttempt(sessionId, answers);
+        if (result.success) {
+          pausedRemainingSec = typeof result.remaining === "number" ? result.remaining : (remaining ?? 0);
+        } else if (result.message) {
+          errMsg = result.message;
+        }
+      } catch {
+        // Fall through
+      }
+    }
+
+    if (pausedRemainingSec !== null) {
+      setRemaining(pausedRemainingSec);
       setPaused(true);
     } else {
-      setPauseError(result.message);
+      setPauseError(errMsg || "The attempt could not be paused. Please try again.");
     }
     setPausing(false);
   }
 
-  const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
+  const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} />;
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
@@ -833,13 +981,23 @@ export function StudentTestRunner({
 
           {pauseError && <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs sm:text-sm font-semibold text-red-700">{pauseError}</p>}
           {paused && (
-            <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/90 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 shadow-2xs">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                ⏸
-              </span>
-              <span>
-                Test paused · Answers and time are saved. Click <strong className="font-bold text-slate-900">Resume</strong> on the timer when you are ready.
-              </span>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-amber-300 bg-amber-50/90 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-amber-950 shadow-2xs">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-200 text-amber-900 text-xs font-bold">
+                  ⏸
+                </span>
+                <span>
+                  Test paused · Answers and time are saved. Click <strong className="font-bold text-slate-900">Resume</strong> on the timer when you are ready.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => void togglePause()}
+                disabled={pausing}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-teal-800 hover:bg-teal-900 active:bg-teal-950 text-white px-3 py-1.5 text-xs font-bold transition shadow-xs disabled:opacity-50"
+              >
+                {pausing ? "Resuming..." : "Resume test now"}
+              </button>
             </div>
           )}
 
@@ -1086,7 +1244,7 @@ export function StudentTestRunner({
             <div className="min-w-0 flex-1">
               <h2 className="text-base sm:text-lg font-black text-slate-900">Questions Palette</h2>
               <p className="mt-0.5 text-xs font-bold text-teal-800 leading-snug break-words">{title}</p>
-              <p className="text-[11px] font-semibold text-slate-500">Tap to jump • Submit test anytime</p>
+              <p className="text-[11px] font-semibold text-slate-500">Tap question number to jump</p>
             </div>
             <button
               type="button"
@@ -1151,7 +1309,7 @@ export function StudentTestRunner({
   </main>;
 }
 
-function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked, onSelect, onFinish }: { questions: TestQuestion[]; currentIndex: number; answers: Record<string, Answer>; reviewIds: Set<string>; locked: boolean; onSelect: (index: number) => void; onFinish: () => void }) {
+function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked, onSelect }: { questions: TestQuestion[]; currentIndex: number; answers: Record<string, Answer>; reviewIds: Set<string>; locked: boolean; onSelect: (index: number) => void }) {
   const answeredCount = Object.keys(answers).length;
   const remainingCount = questions.length - answeredCount;
 
@@ -1203,14 +1361,6 @@ function QuestionNavigator({ questions, currentIndex, answers, reviewIds, locked
           <Legend color="bg-amber-100" label="Marked for review" />
           <Legend color="bg-slate-100" label="Not answered" />
         </div>
-        <button
-          type="button"
-          onClick={onFinish}
-          disabled={locked}
-          className="mt-2.5 w-full rounded-xl bg-teal-700 hover:bg-teal-800 text-white px-4 py-2.5 text-sm font-black shadow-sm transition disabled:opacity-50"
-        >
-          Submit / Finish test
-        </button>
       </div>
     </div>
   );

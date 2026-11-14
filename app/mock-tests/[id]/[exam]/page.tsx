@@ -328,6 +328,68 @@ export default async function ExamPage({ params, searchParams }: Props) {
         </div>
       </section>
 
+      {/* Sticky Table of Contents / Testbook-Style Jump Navigation */}
+      <nav
+        aria-label="Exam guide navigation"
+        className="sticky top-0 z-30 border-y border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 no-scrollbar text-xs font-semibold text-slate-700 whitespace-nowrap">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 hidden sm:inline">
+              Jump to:
+            </span>
+            <a
+              href="#papers"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-teal-50 text-teal-900 border border-teal-200/80 hover:bg-teal-100 transition shadow-2xs"
+            >
+              <span>📑</span>
+              <span>Mock Tests ({tests.length})</span>
+            </a>
+            {teluguData?.schedule && (
+              <a
+                href="#exam-schedule"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+              >
+                <span>📅</span>
+                <span>Important Dates</span>
+              </a>
+            )}
+            {teluguData?.pattern && (
+              <a
+                href="#exam-pattern"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+              >
+                <span>📋</span>
+                <span>Pattern &amp; Syllabus</span>
+              </a>
+            )}
+            {teluguData?.jobProfile && (
+              <a
+                href="#job-profile"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+              >
+                <span>💼</span>
+                <span>Salary &amp; Duties</span>
+              </a>
+            )}
+            <a
+              href="#why-varadhi-heading"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+            >
+              <span>⭐</span>
+              <span>Why Varadhi</span>
+            </a>
+            <a
+              href="#exam-faqs"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+            >
+              <span>❓</span>
+              <span>FAQs ({questions.length})</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
       <div className="mx-auto max-w-7xl space-y-8 sm:space-y-10 px-4 py-6 sm:px-8 sm:py-10">
         <CatalogSteps
           state={{ value: context.state.name, href: "/mock-tests" }}
@@ -735,6 +797,41 @@ export default async function ExamPage({ params, searchParams }: Props) {
               </div>
             </div>
 
+            {/* Quick Highlights / At a Glance Table (Testbook Style) */}
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-[#fafcfb]">
+              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/90">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  {statePrefixedName} Examination Overview &amp; Key Highlights
+                </h3>
+              </div>
+              <div className="divide-y divide-slate-100 text-xs sm:text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
+                  <span className="font-semibold text-slate-500">Recruitment Authority</span>
+                  <span className="sm:col-span-2 font-bold text-slate-900">{teluguData.pattern.authority}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
+                  <span className="font-semibold text-slate-500">Official Medium</span>
+                  <span className="sm:col-span-2 font-medium text-slate-800">{teluguData.pattern.medium}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
+                  <span className="font-semibold text-slate-500">Examination Format</span>
+                  <span className="sm:col-span-2 font-medium text-slate-800">{teluguData.pattern.mode}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
+                  <span className="font-semibold text-slate-500">Marking Scheme</span>
+                  <span className="sm:col-span-2 font-medium text-slate-800">
+                    1 Mark per correct answer · Deducts {teluguData.pattern.negativeMarking} per incorrect attempt
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 hover:bg-white transition">
+                  <span className="font-semibold text-slate-500">Practice Availability</span>
+                  <span className="sm:col-span-2 font-bold text-teal-800">
+                    Free Full-Length Bilingual Mock Tests on Varadhi Prep
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Official Subject Curriculum & Topics */}
             {teluguData.pattern.subjects && teluguData.pattern.subjects.length > 0 && (
               <div className="mt-6">
@@ -742,37 +839,72 @@ export default async function ExamPage({ params, searchParams }: Props) {
                   Official Subject Breakdown &amp; Curriculum Topics
                 </h3>
                 <div className="mt-3.5 grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {teluguData.pattern.subjects.map((sub, idx) => (
-                    <div
-                      key={sub.name}
-                      className="rounded-2xl border border-slate-200/90 bg-[#fbfdfc] p-4.5 transition hover:border-teal-300 hover:shadow-xs"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
-                            Subject 0{idx + 1}
-                          </span>
-                          <h4 className="font-bold text-slate-900 text-sm sm:text-base mt-0.5">
-                            {sub.name}
-                          </h4>
-                          {sub.teluguName && (
-                            <p className="text-xs font-semibold text-teal-900 mt-0.5">
-                              {sub.teluguName}
-                            </p>
-                          )}
+                  {teluguData.pattern.subjects.map((sub, idx) => {
+                    const topicPills = sub.description
+                      .split(/[,;]/)
+                      .map((t) => t.trim())
+                      .filter((t) => t.length > 0);
+                    return (
+                      <div
+                        key={sub.name}
+                        className="rounded-2xl border border-slate-200/90 bg-[#fbfdfc] p-4.5 transition hover:border-teal-300 hover:shadow-xs flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
+                                Subject 0{idx + 1}
+                              </span>
+                              <h4 className="font-bold text-slate-900 text-sm sm:text-base mt-0.5">
+                                {sub.name}
+                              </h4>
+                              {sub.teluguName && (
+                                <p className="text-xs font-semibold text-teal-900 mt-0.5">
+                                  {sub.teluguName}
+                                </p>
+                              )}
+                            </div>
+                            <a
+                              href="#papers"
+                              className="shrink-0 rounded-lg bg-teal-50 border border-teal-200 px-2.5 py-1 text-[11px] font-bold text-teal-800 hover:bg-teal-100 transition"
+                            >
+                              Practice →
+                            </a>
+                          </div>
+                          
+                          {/* Textbook-Style Topic Pills */}
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {topicPills.map((topic, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className="inline-flex items-center rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-2xs"
+                              >
+                                <span className="mr-1 text-teal-600 font-bold">•</span>
+                                {topic}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <a
-                          href="#papers"
-                          className="shrink-0 rounded-lg bg-teal-50 border border-teal-200 px-2.5 py-1 text-[11px] font-bold text-teal-800 hover:bg-teal-100 transition"
-                        >
-                          Practice →
-                        </a>
                       </div>
-                      <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
-                        {sub.description}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Textbook Study & Preparation Strategy Note */}
+            {typeof teluguData.pattern.totalQuestions === "number" && typeof teluguData.pattern.durationMinutes === "number" && (
+              <div className="mt-6 rounded-2xl border border-teal-200/90 bg-gradient-to-r from-teal-50/70 via-[#f4faf7] to-white p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-teal-100 text-teal-800 text-sm font-bold">
+                    💡
+                  </span>
+                  <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                    <strong className="text-teal-950 font-bold">Aspirant Strategy &amp; Time Management:</strong>{" "}
+                    With {teluguData.pattern.totalQuestions} questions to solve in {teluguData.pattern.durationMinutes} minutes, candidates have approximately{" "}
+                    <strong>{Math.round((Number(teluguData.pattern.durationMinutes) * 60) / Number(teluguData.pattern.totalQuestions))} seconds per question</strong>.
+                    Regular practice with timed bilingual mock tests on Varadhi Prep trains your speed, prevents negative marking traps, and builds authentic exam discipline.
+                  </div>
                 </div>
               </div>
             )}
@@ -933,7 +1065,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
         </section>
 
         {/* Frequently Asked Questions */}
-        <section aria-labelledby="faq-title" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
+        <section id="exam-faqs" aria-labelledby="faq-title" className="rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/90 shadow-2xs [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
           <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Frequently Asked Questions</p>
           <h2 id="faq-title" className="font-display mt-1 text-2xl font-bold sm:text-3xl text-slate-900">About {examHeading}</h2>
           <div className="mt-6 divide-y divide-slate-100">

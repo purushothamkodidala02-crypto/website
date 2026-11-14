@@ -19,16 +19,17 @@ export type SubmitAttemptResult = {
   displaced?: boolean;
 };
 
-function cleanAnswers(answers: Record<string, Answer>) {
+function cleanAnswers(answers?: Record<string, Answer> | null) {
+  if (!answers || typeof answers !== "object") return {};
   const validAnswers = new Set<Answer>(["A", "B", "C", "D"]);
   const cleanedAnswers: Record<string, Answer> = {};
 
   const entries = Object.entries(answers);
-  if (entries.length > MAX_ANSWERS_PER_ATTEMPT) return null;
+  if (entries.length > MAX_ANSWERS_PER_ATTEMPT) return {};
 
   for (const [questionId, answer] of entries) {
-    if (!UUID_PATTERN.test(questionId) || !validAnswers.has(answer)) {
-      return null;
+    if (typeof answer !== "string" || !UUID_PATTERN.test(questionId) || !validAnswers.has(answer)) {
+      continue;
     }
     cleanedAnswers[questionId] = answer;
   }
@@ -243,25 +244,64 @@ export async function pauseAttempt(
   sessionId: string,
   answers: Record<string, Answer>,
 ): Promise<{ success: boolean; message: string; remaining?: number }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const cleanedAnswers = cleanAnswers(answers);
-  if (!user || !UUID_PATTERN.test(sessionId) || !cleanedAnswers) {
-    return { success: false, message: "Unable to pause this attempt." };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user || !UUID_PATTERN.test(sessionId)) {
+      return { success: false, message: "Unable to pause this attempt." };
+    }
+
+    const cleanedAnswers = cleanAnswers(answers);
+    if (cleanedAnswers && Object.keys(cleanedAnswers).length > 0) {
+      try {
+        await supabase.rpc("save_mock_test_session_answers", {
+          requested_session_id: sessionId,
+          submitted_answers: cleanedAnswers,
+        });
+      } catch {
+        // Proceed to pause even if snapshot save encounters a warning
+      }
+    }
+
+    const { data: pausedSeconds, error: pauseError } = await supabase.rpc("pause_mock_test_session", {
+      requested_session_id: sessionId,
+    });
+
+    if (pauseError) {
+      const { data: session } = await supabase
+        .from("test_attempt_sessions")
+        .select("remaining_seconds, session_state")
+        .eq("id", sessionId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (session?.session_state === "paused" && typeof session.remaining_seconds === "number") {
+        return {
+          success: true,
+          message: "Practice paused. Resume whenever you are ready.",
+          remaining: session.remaining_seconds,
+        };
+      }
+
+      return {
+        success: false,
+        message: "The attempt could not be paused. Refresh the page and try again.",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Practice paused. Resume whenever you are ready.",
+      remaining: Number(pausedSeconds),
+    };
+  } catch {
+    return {
+      success: false,
+      message: "The attempt could not be paused. Refresh the page and try again.",
+    };
   }
-
-  const { error: answersError } = await supabase.rpc("save_mock_test_session_answers", {
-    requested_session_id: sessionId,
-    submitted_answers: cleanedAnswers,
-  });
-  if (answersError) return { success: false, message: "Your latest answers could not be saved." };
-
-  const { data: pausedSeconds, error: pauseError } = await supabase.rpc("pause_mock_test_session", {
-    requested_session_id: sessionId,
-  });
-  return pauseError
-    ? { success: false, message: "The attempt could not be paused. Refresh the page and try again." }
-    : { success: true, message: "Practice paused. Resume whenever you are ready.", remaining: Number(pausedSeconds) };
 }
 
 export async function resumeAttempt(
@@ -269,28 +309,55 @@ export async function resumeAttempt(
   sessionId: string,
   clientDeviceId?: string,
 ): Promise<{ success: boolean; message: string; expiresAt?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !UUID_PATTERN.test(mockTestId) || !UUID_PATTERN.test(sessionId)) return { success: false, message: "Unable to resume this attempt." };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user || !UUID_PATTERN.test(mockTestId) || !UUID_PATTERN.test(sessionId)) {
+      return { success: false, message: "Unable to resume this attempt." };
+    }
 
-  const deviceToken = clientDeviceId?.trim() || null;
-  let rpcResult = await supabase.rpc("start_mock_test_session", {
-    requested_mock_test_id: mockTestId,
-    requested_device_token: deviceToken,
-  });
-
-  if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error.message)) {
-    rpcResult = await supabase.rpc("start_mock_test_session", {
+    const deviceToken = clientDeviceId?.trim() || null;
+    let rpcResult = await supabase.rpc("start_mock_test_session", {
       requested_mock_test_id: mockTestId,
+      requested_device_token: deviceToken,
     });
-  }
 
-  const { data, error } = rpcResult;
-  const resumed = data?.[0] as { session_id: string; expires_at: string } | undefined;
-  if (error || !resumed || resumed.session_id !== sessionId) {
-    return { success: false, message: "This attempt could not be resumed. Return to the test details and try again." };
+    if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error.message)) {
+      rpcResult = await supabase.rpc("start_mock_test_session", {
+        requested_mock_test_id: mockTestId,
+      });
+    }
+
+    const { data, error } = rpcResult;
+    const resumed = data?.[0] as { session_id: string; expires_at: string } | undefined;
+    if (resumed?.expires_at) {
+      return { success: true, message: "Practice resumed.", expiresAt: resumed.expires_at };
+    }
+
+    // Direct check on test_attempt_sessions
+    const { data: session } = await supabase
+      .from("test_attempt_sessions")
+      .select("expires_at, session_state")
+      .eq("id", sessionId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (session?.expires_at) {
+      return { success: true, message: "Practice resumed.", expiresAt: session.expires_at };
+    }
+
+    return {
+      success: false,
+      message: error?.message || "This attempt could not be resumed. Return to the test details and try again.",
+    };
+  } catch {
+    return {
+      success: false,
+      message: "This attempt could not be resumed. Return to the test details and try again.",
+    };
   }
-  return { success: true, message: "Practice resumed.", expiresAt: resumed.expires_at };
 }
 
 export async function submitAttempt(

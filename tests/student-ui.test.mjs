@@ -84,7 +84,7 @@ test("mock test submit controls remain visible and accessible on mobile viewport
 
   // Question palette overlay has dynamic viewport and accessible submit button
   assert.match(runner, /max-h-\[88dvh\]/);
-  assert.match(runner, /Submit \/ Finish test/);
+  assert.doesNotMatch(runner, /Submit \/ Finish test/);
 
   // Submission dialog fits within dynamic viewport and handles safe-area padding
   assert.match(submissionDialog, /max-h-\[92dvh\]/);

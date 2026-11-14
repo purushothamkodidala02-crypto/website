@@ -74,7 +74,7 @@ export default async function TakeMockTestPage({
     return getMockTestPublicContextById(id);
   });
   const sessionPromise = isValidSession
-    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
+    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at, remaining_seconds").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
     : Promise.resolve({ data: null });
   const attemptPromise = isValidSession
     ? supabase.from("test_attempts").select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions").eq("session_id", requestedSessionId).maybeSingle()
@@ -184,7 +184,7 @@ export default async function TakeMockTestPage({
 
   // 3. If the session has reached or passed deadline, finalize submission immediately and show results
   // eslint-disable-next-line react-hooks/purity -- Server component evaluating expiration timestamp dynamically at request time
-  const isExpired = new Date(session.expires_at).getTime() <= Date.now();
+  const isExpired = session.session_state !== "paused" && new Date(session.expires_at).getTime() <= Date.now();
   if (isExpired) {
     const { data: submitData } = await supabase.rpc("submit_mock_test_attempt", {
       requested_session_id: session.id,
@@ -229,7 +229,7 @@ export default async function TakeMockTestPage({
     );
   }
 
-  if (session.session_state !== "active") {
+  if (session.session_state !== "active" && session.session_state !== "paused") {
     return (
       <SubmissionResult
         publicTestPath={testPath}
@@ -256,6 +256,8 @@ export default async function TakeMockTestPage({
       title={testTitle}
       sessionId={session.id}
       expiresAt={session.expires_at}
+      initialPaused={session.session_state === "paused"}
+      initialRemainingSeconds={typeof session.remaining_seconds === "number" ? session.remaining_seconds : undefined}
       questions={questions}
       bookmarkedQuestionIds={bookmarkedQuestionIds}
       studentEmail={user.email ?? user.user_metadata?.email ?? ""}
