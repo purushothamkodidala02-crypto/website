@@ -51,17 +51,17 @@ export default function LogoutButton({
       title="Logout"
       className={
         className ??
-        "inline-flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 disabled:opacity-50"
+        "inline-flex h-9 sm:h-10 min-h-[38px] sm:min-h-[40px] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 sm:px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 active:scale-[0.98] disabled:opacity-50"
       }
     >
       <span className="inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap">
         {loading ? (
-          <LoadingSpinner className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+          <LoadingSpinner className="h-4 w-4 shrink-0 text-rose-600" />
         ) : (
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 fill-none stroke-current"
+            className="h-4 w-4 shrink-0 fill-none stroke-current"
             strokeWidth="2"
           >
             <path
@@ -71,7 +71,7 @@ export default function LogoutButton({
             />
           </svg>
         )}
-        <span className="hidden min-[400px]:inline">{loading ? "Logging out…" : "Logout"}</span>
+        <span className="inline font-bold">{loading ? "Logging out…" : "Logout"}</span>
       </span>
     </button>
   );
