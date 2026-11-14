@@ -325,64 +325,6 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </div>
       </header>
 
-      {/* Sticky Chapter Sub-Navigation Bar */}
-      <nav
-        aria-label="Chapter quick navigation"
-        className="sticky top-[57px] z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs"
-      >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs font-semibold text-slate-700">
-            <span className="hidden xl:inline-flex text-[11px] font-bold uppercase tracking-wider text-slate-700 shrink-0 mr-1">
-              Chapters:
-            </span>
-            <a href="#schedule" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              1. Dates
-            </a>
-            <a href="#vacancies" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-blue-50 hover:text-blue-900 transition font-bold text-blue-900">
-              2. Vacancies (7,112)
-            </a>
-            <a href="#fees" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              3. Fees
-            </a>
-            <a href="#salary" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              4. Salary
-            </a>
-            <a href="#eligibility" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              5. Age &amp; GO 87
-            </a>
-            <a href="#selection" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              6. Selection
-            </a>
-            <a href="#physical" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              7. PMT &amp; PET
-            </a>
-            <a href="#pattern" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              8. Exam Pattern
-            </a>
-            <a href="#syllabus" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              9. Syllabus
-            </a>
-            <a href="#how-to-apply" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              10. How to Apply
-            </a>
-            <a href="#duties" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              11. Duties
-            </a>
-            <a href="#faqs" className="shrink-0 rounded-lg px-2.5 py-1 hover:bg-slate-100 hover:text-slate-900 transition">
-              12. FAQs
-            </a>
-          </div>
-          <div className="shrink-0 hidden sm:block">
-            <Link
-              href="/mock-tests/telangana/police-constable-free-mock-test"
-              className="inline-flex items-center gap-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 text-xs font-bold transition shadow-2xs"
-            >
-              Practice Mock Tests →
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Headline Section with Clean Slate & Subtle Corporate Indigo Tone */}
       <section className="border-b border-slate-200/90 bg-gradient-to-b from-white via-slate-50/70 to-[#f8fafc]">
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -510,7 +452,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 space-y-8">
 
         {/* 1. Important Dates & Timeline Roadmap */}
-        <section id="schedule" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="schedule" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Official Schedule</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -556,7 +498,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 2. 7,112 Cadre Vacancy Distribution */}
-        <section id="vacancies" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="vacancies" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Post Matrix</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -685,7 +627,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 3. Application Fee Structure */}
-        <section id="fees" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="fees" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Fee Details</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -747,7 +689,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 4. Pay Scale & Monthly Salary */}
-        <section id="salary" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="salary" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Remuneration</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -784,7 +726,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 5. Eligibility Criteria & Age Limits */}
-        <section id="eligibility" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="eligibility" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Eligibility</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -829,7 +771,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 6. Selection Process Flow */}
-        <section id="selection" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="selection" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Selection Stages</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -856,7 +798,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 7. PMT & PET Physical Standards */}
-        <section id="physical" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="physical" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Physical Tests</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -921,7 +863,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 8. Exam Pattern & Qualifying Marks */}
-        <section id="pattern" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="pattern" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Exam Scheme</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -973,7 +915,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 9. Annexure-II Syllabus */}
-        <section id="syllabus" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="syllabus" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Annexure-II Curriculum</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -1013,7 +955,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 10. Step-by-Step Online Application Guide */}
-        <section id="how-to-apply" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="how-to-apply" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Application Steps</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -1078,7 +1020,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 11. Police Duties & Hierarchy */}
-        <section id="duties" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="duties" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Career &amp; Duties</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
@@ -1118,7 +1060,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
         </section>
 
         {/* 12. Bilingual FAQs */}
-        <section id="faqs" className="scroll-mt-28 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <section id="faqs" className="scroll-mt-20 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
           <div className="border-l-4 border-blue-600 pl-4 border-b border-slate-100 pb-3.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">FAQs</span>
             <h2 className="font-display mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">
