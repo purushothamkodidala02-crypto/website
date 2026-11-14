@@ -5,8 +5,8 @@ import {
   getApEndowmentFeedbackSummaryAction,
   deleteApEndowmentFeedbackAction,
   type ApEndowmentFeedbackSummary,
-  AP_EO_CAMPAIGN_EXPIRY_MS,
 } from "@/app/actions/ap-endowment-feedback";
+import { AP_EO_CAMPAIGN_EXPIRY_MS } from "@/lib/campaigns/ap-endowment";
 
 export function ApEndowmentFeedbackSection() {
   const [data, setData] = useState<ApEndowmentFeedbackSummary | null>(null);

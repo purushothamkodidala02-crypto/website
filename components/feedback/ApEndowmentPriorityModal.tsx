@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import {
   checkApEndowmentFeedbackEligibilityAction,
   submitApEndowmentFeedbackAction,
-  AP_EO_CAMPAIGN_EXPIRY_MS,
 } from "@/app/actions/ap-endowment-feedback";
+import { AP_EO_CAMPAIGN_EXPIRY_MS } from "@/lib/campaigns/ap-endowment";
 
 const STORAGE_SUBMITTED = "varadhi_ap_eo_feedback_submitted";
 const STORAGE_DISMISSED = "varadhi_ap_eo_feedback_dismissed";
