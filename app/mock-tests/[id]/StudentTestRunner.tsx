@@ -810,7 +810,7 @@ export function StudentTestRunner({
     {/* Middle Movable / Independently Scrollable Section */}
     <div className="relative flex flex-1 min-h-0 w-full overflow-hidden">
       {/* Scrollable Question Workspace (Independent Scroll) */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5 [@media(max-height:540px)]:py-1.5">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5 pb-8 sm:pb-6 [@media(max-height:540px)]:py-1.5">
         <div className={`mx-auto w-full transition-all duration-300 ${navigatorOpenDesktop ? "max-w-5xl 2xl:max-w-6xl" : "max-w-6xl 2xl:max-w-7xl"}`}>
           {!isFullscreen && isBigDisplay && showFullscreenNotice && (
             <aside
@@ -944,6 +944,52 @@ export function StudentTestRunner({
                 </button>
               </div>
             </div>
+
+            {/* Quick Next / Prev Action Bar inside Question Card for Mobile & Touch */}
+            <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 md:hidden">
+              <button
+                type="button"
+                onClick={() => setIndex((value) => Math.max(0, value - 1))}
+                disabled={index === 0 || locked}
+                className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-30 active:scale-95 transition"
+                title="Previous question"
+              >
+                <span className="text-sm font-bold">←</span>
+                <span>Prev</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setNavigatorOpen(true)}
+                className="flex items-center gap-1 rounded-xl bg-teal-50 border border-teal-200/80 px-2.5 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-100 active:scale-95 transition"
+                title="View all questions"
+              >
+                <span>Q {index + 1}/{questions.length}</span>
+              </button>
+
+              {index === questions.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirming(true)}
+                  disabled={locked}
+                  className="flex items-center gap-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 px-4 py-2 text-xs font-black text-white shadow-sm disabled:opacity-50 active:scale-95 transition"
+                >
+                  <span>Submit test</span>
+                  <span className="text-sm font-bold">✓</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))}
+                  disabled={locked}
+                  className="flex items-center gap-1.5 rounded-xl bg-[#0a2922] hover:bg-[#11382f] px-4 py-2 text-xs font-bold text-white shadow-sm disabled:opacity-50 active:scale-95 transition"
+                  title="Save and move to next question"
+                >
+                  <span>Save &amp; next</span>
+                  <span className="text-sm font-bold">→</span>
+                </button>
+              )}
+            </div>
           </section>
 
           {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
@@ -996,6 +1042,7 @@ export function StudentTestRunner({
     >
       <div className="mx-auto flex w-full max-w-[1720px] 2xl:max-w-[1850px] items-center justify-between gap-1.5 min-[380px]:gap-2 sm:gap-3">
         <button type="button" title="Previous question (← Arrow)" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0 || locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40 sm:px-4 sm:py-2.5">
+          <span className="text-xs font-bold md:hidden">←</span>
           <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 shadow-sm transition group-hover:border-slate-300 group-hover:bg-white md:inline-block">←</kbd>
           <span className="min-[360px]:hidden">Prev</span>
           <span className="hidden min-[360px]:inline">Previous</span>
@@ -1032,9 +1079,10 @@ export function StudentTestRunner({
             <span className="hidden min-[360px]:inline">Submit test</span>
           </button>
         ) : (
-          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
+          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
             <span className="min-[360px]:hidden">Next</span>
             <span className="hidden min-[360px]:inline">Save &amp; next</span>
+            <span className="text-xs font-bold md:hidden">→</span>
             <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-300 shadow-sm transition group-hover:border-slate-600 group-hover:bg-slate-700 md:inline-block">→</kbd>
           </button>
         )}
