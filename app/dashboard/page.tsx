@@ -436,9 +436,11 @@ export default async function Dashboard({
                                 {paperLabel}
                               </span>
                             </div>
+                            {false && (
                             <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0 ${test.access_type === "free" ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60" : "bg-amber-50 text-amber-900 border border-amber-200/60"}`}>
                               {test.access_type === "free" ? "Free" : "Paid series"}
                             </span>
+                            )}
                           </div>
                           <h3 className="mt-3.5 text-base sm:text-lg font-black leading-snug text-slate-950 break-words">
                             {parsed.primaryTitle}

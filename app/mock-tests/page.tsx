@@ -1019,6 +1019,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                   </div>
                 </div>
 
+                {false && (
                 <span
                   className={`shrink-0 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${
                     isFree
@@ -1028,6 +1029,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                 >
                   {isFree ? "Free" : "Paid series"}
                 </span>
+                )}
               </div>
 
               <div className="mt-3.5 flex items-center justify-between gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-xs border border-slate-100 min-w-0 max-w-full">
