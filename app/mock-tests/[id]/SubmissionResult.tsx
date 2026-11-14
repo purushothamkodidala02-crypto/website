@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
 import { parseMockTestTitle } from "@/lib/exam-catalog";
 import type { SubmitAttemptResult } from "./attempt-actions";
 import { addLocalAttemptedTestId, getLocalRecentPractice, setLocalRecentPractice } from "@/lib/storage/student-practice-storage";
+import { createClient } from "@/lib/supabase/client";
 
 type SubmissionResultProps = {
   publicTestPath: string;
@@ -21,13 +22,19 @@ type SubmissionResultProps = {
 export function SubmissionResult({
   publicTestPath,
   title,
-  result,
+  result: initialResult,
   onRetry,
   mockTestId,
   folderUrl,
   folderName,
   isTimeUp = false,
 }: SubmissionResultProps) {
+  const [result, setResult] = useState<SubmitAttemptResult>(initialResult);
+
+  useEffect(() => {
+    setResult(initialResult);
+  }, [initialResult]);
+
   useEffect(() => {
     void exitFullscreenSafely();
     if (mockTestId && (result.success || typeof result.score === "number")) {
@@ -41,6 +48,34 @@ export function SubmissionResult({
           submittedAt: new Date().toISOString(),
         });
       }
+    } else if (mockTestId && typeof result.score !== "number") {
+      const supabase = createClient();
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!data?.session?.user) return;
+        void supabase
+          .from("test_attempts")
+          .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+          .eq("mock_test_id", mockTestId)
+          .eq("user_id", data.session.user.id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+          .then(({ data: attempt }) => {
+            if (attempt && typeof attempt.score === "number") {
+              setResult({
+                success: true,
+                message: "Attempt submitted successfully.",
+                attemptId: String(attempt.id),
+                score: Number(attempt.score ?? 0),
+                totalMarks: Number(attempt.total_marks ?? 0),
+                correctAnswers: Number(attempt.correct_answers ?? 0),
+                incorrectAnswers: Number(attempt.incorrect_answers ?? 0),
+                unansweredQuestions: Number(attempt.unanswered_questions ?? 0),
+              });
+              addLocalAttemptedTestId(mockTestId);
+            }
+          });
+      });
     }
   }, [mockTestId, result]);
 

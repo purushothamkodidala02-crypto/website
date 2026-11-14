@@ -227,17 +227,111 @@ export function StudentTestRunner({
         flushSaves(),
         new Promise((resolve) => setTimeout(resolve, 120)),
       ]);
-      const res = await submitAttempt(sessionId, answers);
-      if (!res.success) {
-        console.warn("submitAttempt returned unsuccessful:", res.message);
+
+      let res: SubmitAttemptResult | null = null;
+
+      // 1. Direct REST Route Handler submission (bypasses Cloudflare Error 1101 on Server Actions)
+      try {
+        const apiRes = await fetch(`/api/mock-tests/${mockTestId}/submit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            answers,
+            deviceId: deviceIdRef.current,
+          }),
+        });
+        if (apiRes.ok) {
+          const json = await apiRes.json().catch(() => null);
+          if (json?.success && typeof json.score === "number") {
+            res = json;
+          }
+        }
+      } catch {
+        // Fall through to client RPC fallback
+      }
+
+      // 2. Direct client-side Supabase RPC fallback
+      if (!res || !res.success) {
+        try {
+          const supabase = createClient();
+          const rpcRes = await supabase.rpc("submit_mock_test_attempt", {
+            requested_session_id: sessionId,
+            submitted_answers: answers,
+          });
+          const result = rpcRes.data?.[0];
+          if (!rpcRes.error && result && typeof result.score === "number") {
+            res = {
+              success: true,
+              message: "Attempt submitted successfully.",
+              attemptId: String(result.attempt_id),
+              score: Number(result.score ?? 0),
+              totalMarks: Number(result.total_marks ?? 0),
+              correctAnswers: Number(result.correct_answers ?? 0),
+              incorrectAnswers: Number(result.incorrect_answers ?? 0),
+              unansweredQuestions: Number(result.unanswered_questions ?? 0),
+            };
+          }
+        } catch {
+          // Fall through to server action
+        }
+      }
+
+      // 3. Server action fallback
+      if (!res || !res.success) {
+        try {
+          const serverActionRes = await submitAttempt(sessionId, answers);
+          if (serverActionRes.success && typeof serverActionRes.score === "number") {
+            res = serverActionRes;
+          }
+        } catch {
+          // Server action failed (e.g. Next-Action error)
+        }
+      }
+
+      // 4. Verify existing attempt in Supabase if not yet resolved
+      if (!res || !res.success) {
+        try {
+          const supabase = createClient();
+          const { data: attempt } = await supabase
+            .from("test_attempts")
+            .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+            .eq("session_id", sessionId)
+            .maybeSingle();
+
+          if (attempt && typeof attempt.score === "number") {
+            res = {
+              success: true,
+              message: "Attempt submitted successfully.",
+              attemptId: String(attempt.id),
+              score: Number(attempt.score ?? 0),
+              totalMarks: Number(attempt.total_marks ?? 0),
+              correctAnswers: Number(attempt.correct_answers ?? 0),
+              incorrectAnswers: Number(attempt.incorrect_answers ?? 0),
+              unansweredQuestions: Number(attempt.unanswered_questions ?? 0),
+            };
+          }
+        } catch {
+          // Proceed to final fallback check
+        }
+      }
+
+      if (!res || !res.success) {
         const verified = await verifySubmittedAttempt(sessionId);
         if (verified.success && verified.attempt) {
-          setSubmission(verified.attempt);
-        } else {
-          setSubmission(res);
+          res = verified.attempt;
         }
-      } else {
+      }
+
+      if (res && (res.success || typeof res.score === "number")) {
         setSubmission(res);
+      } else {
+        setSubmission(
+          res ?? {
+            success: false,
+            message: "Your answers are saved in your account. Check your result in the dashboard.",
+          },
+        );
       }
     } catch (err) {
       console.error("Error submitting test attempt:", err);
@@ -261,7 +355,7 @@ export function StudentTestRunner({
       setSubmitting(false);
       void exitFullscreenSafely();
     }
-  }, [answers, flushSaves, sessionId, submission, submitting]);
+  }, [answers, flushSaves, mockTestId, sessionId, submission, submitting]);
 
   useEffect(() => {
     if (submission || paused) return;
@@ -284,7 +378,24 @@ export function StudentTestRunner({
     if (submission || paused || pausing || submitting || isDisplaced) return;
     const sync = async () => {
       if (!deviceIdRef.current) deviceIdRef.current = getClientDeviceId();
-      const result = await syncAttemptTimer(sessionId, deviceIdRef.current);
+      let result: { success: boolean; remaining?: number; displaced?: boolean } | null = null;
+      try {
+        const supabase = createClient();
+        const rpcRes = await supabase.rpc("sync_mock_test_session_timer", {
+          requested_session_id: sessionId,
+          requested_device_token: deviceIdRef.current || null,
+        });
+        if (rpcRes.error && rpcRes.error.message?.includes("DISPLACED")) {
+          result = { success: false, displaced: true };
+        } else if (!rpcRes.error && typeof rpcRes.data === "number") {
+          result = { success: true, remaining: rpcRes.data };
+        }
+      } catch {
+        // Fall back to server action
+      }
+      if (!result) {
+        result = await syncAttemptTimer(sessionId, deviceIdRef.current);
+      }
       if (result.displaced) {
         void handleDisplaced();
         return;
@@ -302,7 +413,32 @@ export function StudentTestRunner({
     if (submission || paused || pausing || submitting || isDisplaced) return;
     const heartbeat = async () => {
       if (!deviceIdRef.current) deviceIdRef.current = getClientDeviceId();
-      const status = await checkAttemptDeviceStatus(sessionId, deviceIdRef.current);
+      let status: { active: boolean; displaced: boolean } | null = null;
+      try {
+        const supabase = createClient();
+        const { data: session } = await supabase
+          .from("test_attempt_sessions")
+          .select("active_device_token, session_state, submitted_at")
+          .eq("id", sessionId)
+          .maybeSingle();
+
+        if (session) {
+          const isDisplaced = Boolean(
+            session.active_device_token &&
+            deviceIdRef.current &&
+            session.active_device_token !== deviceIdRef.current,
+          );
+          status = {
+            active: session.session_state === "active" && !session.submitted_at,
+            displaced: isDisplaced,
+          };
+        }
+      } catch {
+        // Fall back to server action
+      }
+      if (!status) {
+        status = await checkAttemptDeviceStatus(sessionId, deviceIdRef.current);
+      }
       if (status.displaced) {
         void handleDisplaced();
       }
@@ -446,14 +582,44 @@ export function StudentTestRunner({
     });
     queueSave(
       `review:${current.question_id}`,
-      () => saveReviewState(sessionId, current.question_id, marked),
+      async () => {
+        try {
+          const supabase = createClient();
+          const rpcRes = await supabase.rpc("save_mock_test_review_mark", {
+            requested_session_id: sessionId,
+            requested_question_id: current.question_id,
+            requested_mark: marked,
+          });
+          if (!rpcRes.error) return { success: true };
+        } catch {
+          // Fall back to server action
+        }
+        return saveReviewState(sessionId, current.question_id, marked);
+      },
     );
   }
   function clearAnswer() {
     setAnswers((value) => { const next = { ...value }; delete next[current.question_id]; return next; });
     queueSave(
       `answer:${current.question_id}`,
-      () => saveAttemptProgress(sessionId, current.question_id, null, deviceIdRef.current),
+      async () => {
+        try {
+          const supabase = createClient();
+          const rpcRes = await supabase.rpc("save_mock_test_answer_update", {
+            requested_session_id: sessionId,
+            requested_question_id: current.question_id,
+            requested_answer: null,
+            requested_device_token: deviceIdRef.current || null,
+          });
+          if (rpcRes.error && rpcRes.error.message?.includes("DISPLACED")) {
+            return { success: false, displaced: true };
+          }
+          if (!rpcRes.error) return { success: true };
+        } catch {
+          // Fall back to server action
+        }
+        return saveAttemptProgress(sessionId, current.question_id, null, deviceIdRef.current);
+      },
     );
   }
   async function togglePause() {
@@ -486,19 +652,48 @@ export function StudentTestRunner({
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
-  return <main ref={containerRef} className="student-page relative flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] min-h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-slate-100">
+  return <main ref={containerRef} className="student-page fixed inset-0 flex h-[100dvh] max-h-[100dvh] min-h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-slate-100">
     <ScreenWatermark text={watermarkText} />
     <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md text-slate-900 shadow-xs">
       <div className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1850px] py-1.5 pl-[max(0.625rem,env(safe-area-inset-left,0px))] pr-[max(0.625rem,env(safe-area-inset-right,0px))] sm:py-2 sm:pl-[max(1.25rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.25rem,env(safe-area-inset-right,0px))] lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))] [@media(max-height:540px)]:py-1">
         <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-3">
           
-          {/* Box 1: Question Indicator */}
-          <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-xs">
-            <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
-              <span className="min-[420px]:hidden">Q{index + 1}</span>
-              <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
-              <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
-            </h1>
+          {/* Box 1: Question Indicator with Quick Navigation Arrows for Mobile */}
+          <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-1.5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/90 p-0.5 sm:px-3 sm:py-2 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setIndex((value) => Math.max(0, value - 1))}
+              disabled={index === 0 || locked}
+              aria-label="Previous question"
+              title="Previous question"
+              className="grid h-7 w-7 sm:hidden place-items-center rounded-lg text-slate-700 hover:bg-white active:bg-slate-200 disabled:opacity-20 transition"
+            >
+              <span className="text-xs font-bold leading-none">‹</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setNavigatorOpen(true)}
+              className="flex items-center px-1.5 py-1 text-left sm:p-0 rounded-lg sm:rounded-none hover:bg-white/70 sm:hover:bg-transparent transition cursor-pointer md:cursor-default"
+              title="Tap to open Questions Palette"
+            >
+              <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
+                <span className="min-[420px]:hidden">Q{index + 1}</span>
+                <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
+                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
+              </h1>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))}
+              disabled={index === questions.length - 1 || locked}
+              aria-label="Next question"
+              title="Next question"
+              className="grid h-7 w-7 sm:hidden place-items-center rounded-lg text-slate-700 hover:bg-white active:bg-slate-200 disabled:opacity-20 transition"
+            >
+              <span className="text-xs font-bold leading-none">›</span>
+            </button>
           </div>
 
           {/* Box 2: Attempted Questions Progress & Stats (Desktop/Tablet) */}
@@ -708,7 +903,24 @@ export function StudentTestRunner({
                         disabled={locked}
                         onChange={() => {
                           setAnswers((value) => ({ ...value, [current.question_id]: key }));
-                          queueSave(`answer:${current.question_id}`, () => saveAttemptProgress(sessionId, current.question_id, key, deviceIdRef.current));
+                          queueSave(`answer:${current.question_id}`, async () => {
+                            try {
+                              const supabase = createClient();
+                              const rpcRes = await supabase.rpc("save_mock_test_answer_update", {
+                                requested_session_id: sessionId,
+                                requested_question_id: current.question_id,
+                                requested_answer: key,
+                                requested_device_token: deviceIdRef.current || null,
+                              });
+                              if (rpcRes.error && rpcRes.error.message?.includes("DISPLACED")) {
+                                return { success: false, displaced: true };
+                              }
+                              if (!rpcRes.error) return { success: true };
+                            } catch {
+                              // Fall back to server action
+                            }
+                            return saveAttemptProgress(sessionId, current.question_id, key, deviceIdRef.current);
+                          });
                         }}
                       />
                       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
