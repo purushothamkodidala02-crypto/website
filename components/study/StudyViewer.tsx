@@ -512,8 +512,33 @@ function StudyQuestionCard({
             {/* Options */}
             <div className="mt-5 space-y-2.5">
               {options.map(([key, label]) => {
+                const isPracticeUnanswered = Boolean(isPracticeMode && !userSelectedOption && !isRevealed);
+
+                if (isPracticeUnanswered) {
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => onSelectOption?.(key as "A" | "B" | "C" | "D")}
+                      className="group flex w-full items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:p-3.5 text-left text-sm transition hover:border-teal-500 hover:bg-teal-50/50 hover:shadow-xs active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer"
+                    >
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-xs font-black text-slate-700 group-hover:bg-teal-700 group-hover:text-white transition">
+                        {key}
+                      </span>
+                      <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 font-normal font-exam text-slate-900 ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+                        {label}
+                      </span>
+                      <span className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-500 group-hover:border-teal-300 group-hover:bg-teal-100 group-hover:text-teal-900 transition">
+                        {showTelugu ? "ఎంచుకోండి" : "Select"}
+                      </span>
+                    </button>
+                  );
+                }
+
                 const isCorrect = key === row.correct_answer;
-                const isSelected = key === row.last_selected_answer;
+                const isSelected = isPracticeMode
+                  ? key === userSelectedOption
+                  : key === row.last_selected_answer;
 
                 let cardStyle = "border-slate-200 bg-white text-slate-800";
                 let badgeStyle = "bg-slate-100 text-slate-700";
@@ -524,7 +549,7 @@ function StudyQuestionCard({
                   badgeStyle = "bg-emerald-700 text-white";
                   statusBadge = (
                     <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-emerald-900">
-                      {showTelugu ? "✓ మీ సమాధానం · సరైనది" : "✓ Your Answer · Correct"}
+                      {isPracticeMode ? "🎉 " : ""}{showTelugu ? "✓ మీ సమాధానం · సరైనది" : "✓ Your Answer · Correct"}
                     </span>
                   );
                 } else if (isCorrect) {
@@ -540,7 +565,7 @@ function StudyQuestionCard({
                   badgeStyle = "bg-red-700 text-white";
                   statusBadge = (
                     <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-red-200/80 px-2 py-0.5 text-[11px] font-black uppercase text-red-900">
-                      {showTelugu ? "✕ మీ సమాధానం" : "✕ Your Answer"}
+                      {showTelugu ? "✕ మీ ఎంపిక" : "✕ Your Choice"}
                     </span>
                   );
                 }
@@ -561,53 +586,106 @@ function StudyQuestionCard({
                 );
               })}
             </div>
+
+            {/* In-Practice Motivational Banner */}
+            {isPracticeMode && userSelectedOption && (
+              <div className={`mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-3.5 text-xs font-bold shadow-2xs ${
+                userSelectedOption === row.correct_answer
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-900"
+                  : "border-amber-300 bg-amber-50 text-amber-900"
+              }`}>
+                <span className="flex items-center gap-2">
+                  <span className="text-base">{userSelectedOption === row.correct_answer ? "🎉" : "💡"}</span>
+                  <span>
+                    {userSelectedOption === row.correct_answer
+                      ? (showTelugu ? "అద్భుతం! ఈ రివిజన్ ప్రశ్నను సరిగ్గా సమాధానం ఇచ్చారు." : "Excellent! You solved this question correctly on your revision.")
+                      : (showTelugu ? "మంచి ప్రయత్నం! కాన్సెప్ట్ అర్థం చేసుకోవడానికి కుడివైపున వివరణను చూడండి." : "Good attempt! Review the explanation on the right to master this topic.")}
+                  </span>
+                </span>
+                {hasNext && onNext && (
+                  <button
+                    type="button"
+                    onClick={onNext}
+                    className="shrink-0 rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-slate-800 transition"
+                  >
+                    {showTelugu ? "తర్వాతి ప్రశ్న →" : "Next Question →"}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Right Pane: Explanation & Analysis */}
         <div className="min-w-0 lg:col-span-5 bg-slate-50/40 p-4 sm:p-6 lg:p-7 lg:max-h-[max(22rem,calc(100dvh-250px))] [@media(max-height:600px)]:max-h-none lg:overflow-y-auto overscroll-contain flex flex-col justify-between gap-5">
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="grid h-6 w-6 place-items-center rounded-md bg-teal-600 text-white text-xs font-black">
-                  💡
-                </span>
-                <h3 className="text-xs font-black uppercase tracking-wider text-teal-900">
-                  {showTelugu ? "వివరణ (Explanation)" : "Explanation & Key Concept"}
-                </h3>
+          {isPracticeMode && !userSelectedOption && !isRevealed ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-2xs space-y-3.5 my-auto">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-teal-50 text-2xl shadow-2xs">
+                🎯
               </div>
-              {row.last_selected_answer && (
-                <span className="text-[11px] font-semibold text-slate-500">
-                  {showTelugu ? "మీ ఎంపిక: " : "You chose: "}
-                  <strong className={row.last_selected_answer === row.correct_answer ? "text-emerald-700" : "text-red-700"}>
-                    {showTelugu ? `ఆప్షన్ ${row.last_selected_answer}` : `Option ${row.last_selected_answer}`}
-                  </strong>
-                </span>
+              <div className="space-y-1">
+                <h4 className="text-sm font-black text-slate-900">
+                  {showTelugu ? "ప్రాక్టీస్ మోడ్ (రివిజన్ క్విజ్)" : "Practice Mode Active"}
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto">
+                  {showTelugu
+                    ? "ఎడమవైపున్న ఆప్షన్లలో ఒకదాన్ని ఎంచుకోండి. వెంటనే మీ సమాధానం సరిచూడబడుతుంది."
+                    : "Test your active recall! Select an option on the left, or reveal the explanation below."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onReveal}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-800 shadow-2xs hover:bg-slate-100 hover:border-slate-400 transition"
+              >
+                <span>👁️</span>
+                <span>{showTelugu ? "సమాధానం & వివరణ చూపించు" : "Reveal Answer & Explanation"}</span>
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+                  <span className="grid h-6 w-6 place-items-center rounded-md bg-teal-600 text-white text-xs font-black">
+                    💡
+                  </span>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-teal-900">
+                    {showTelugu ? "వివరణ (Explanation)" : "Explanation & Key Concept"}
+                  </h3>
+                </div>
+                {(isPracticeMode ? userSelectedOption : row.last_selected_answer) && (
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    {showTelugu ? "మీ ఎంపిక: " : "You chose: "}
+                    <strong className={(isPracticeMode ? userSelectedOption : row.last_selected_answer) === row.correct_answer ? "text-emerald-700" : "text-red-700"}>
+                      {showTelugu ? `ఆప్షన్ ${(isPracticeMode ? userSelectedOption : row.last_selected_answer)}` : `Option ${(isPracticeMode ? userSelectedOption : row.last_selected_answer)}`}
+                    </strong>
+                  </span>
+                )}
+              </div>
+
+              {explanation ? (
+                <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
+                  <FormattedQuestionText
+                    text={explanation}
+                    className={`font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-2xs">
+                  <p className="text-sm font-semibold text-slate-600">
+                    {showTelugu
+                      ? "ఈ ప్రశ్నకు వివరణ ఇంకా జోడించబడలేదు."
+                      : "No detailed explanation has been added for this question yet."}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {showTelugu
+                      ? "సమస్య ఉంటే లేదా వివరణ కోరడానికి పైన ఉన్న Report బటన్‌ను ఉపయోగించండి."
+                      : "Use the Report button in the header if you notice an issue or want to request an explanation."}
+                  </p>
+                </div>
               )}
             </div>
-
-            {explanation ? (
-              <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
-                <FormattedQuestionText
-                  text={explanation}
-                  className={`font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
-                />
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-2xs">
-                <p className="text-sm font-semibold text-slate-600">
-                  {showTelugu
-                    ? "ఈ ప్రశ్నకు వివరణ ఇంకా జోడించబడలేదు."
-                    : "No detailed explanation has been added for this question yet."}
-                </p>
-                <p className="mt-1 text-xs text-slate-400">
-                  {showTelugu
-                    ? "సమస్య ఉంటే లేదా వివరణ కోరడానికి పైన ఉన్న Report బటన్‌ను ఉపయోగించండి."
-                    : "Use the Report button in the header if you notice an issue or want to request an explanation."}
-                </p>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Quick summary strip */}
           <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-2xs">

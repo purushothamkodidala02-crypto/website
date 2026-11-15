@@ -181,6 +181,27 @@ export default async function Dashboard({
     name: user.user_metadata?.name,
     email: user.email,
   });
+
+  // Calculate study streak from recent attempts
+  const studyStreak = (() => {
+    if (attempts.length === 0) return 0;
+    const attemptDates = new Set(
+      attempts
+        .filter((a) => Boolean(a.submitted_at))
+        .map((a) => new Date(a.submitted_at).toISOString().slice(0, 10))
+    );
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (!attemptDates.has(today) && !attemptDates.has(yesterday)) return 0;
+    let streak = 0;
+    let current = attemptDates.has(today) ? new Date() : new Date(Date.now() - 86400000);
+    while (attemptDates.has(current.toISOString().slice(0, 10))) {
+      streak++;
+      current = new Date(current.getTime() - 86400000);
+    }
+    return streak;
+  })();
+
   // counts are resolved directly from promises above
   const isPaidEnabled = paidSalesEnabled === true;
 
@@ -221,6 +242,19 @@ export default async function Dashboard({
     },
   ] as const;
 
+  // Exam Readiness & Cut-Off Predictor calculations
+  const avgAccuracy = totalAttempts > 0 ? Number(attemptSummary.average_score) : 0;
+  const cutOffBenchmark = 40; // 40% qualifying threshold for TSLPRB / APPSC
+  const meritBenchmark = 55; // 55% competitive selection rank benchmark
+  const isCutOffCleared = avgAccuracy >= cutOffBenchmark;
+  const isMeritCleared = avgAccuracy >= meritBenchmark;
+
+  const weakestSubject = subjectAnalytics.length > 0
+    ? [...subjectAnalytics]
+        .filter((s) => s.answered_questions >= 2)
+        .sort((a, b) => Number(a.accuracy) - Number(b.accuracy))[0] ?? subjectAnalytics[0]
+    : null;
+
   const latestAttempts = attempts.slice(0, 5);
 
   return (
@@ -247,10 +281,17 @@ export default async function Dashboard({
                     </p>
                   )}
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/80 bg-teal-50 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-800 shrink-0">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                  Active Prep
-                </span>
+                {studyStreak > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold text-amber-900 shrink-0 shadow-2xs">
+                    <span>🔥</span>
+                    <span>{studyStreak}-Day Streak</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/80 bg-teal-50 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-800 shrink-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+                    Active Prep
+                  </span>
+                )}
                 {page > 1 && (
                   <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-amber-800 shrink-0">
                     Page {page} of {totalPages}
@@ -340,56 +381,209 @@ export default async function Dashboard({
           <>
             {/* Quick Revision Hub */}
             <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <Link
-                href="/dashboard/study-book"
-                prefetch={true}
-                className="group rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-red-200 hover:shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-red-600">Personal Revision</span>
-                  {mistakesCount > 0 ? (
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-800">
-                      {mistakesCount} questions
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
-                      Clear
-                    </span>
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-red-200 hover:shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-red-600">Personal Revision</span>
+                    {mistakesCount > 0 ? (
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-800">
+                        {mistakesCount} questions
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                        Clear
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="mt-2.5 text-base sm:text-lg font-black text-slate-900">Mistake Book</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Revisit questions answered incorrectly. Study step-by-step explanations and clear weak topics.
+                  </p>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+                  <Link
+                    href="/dashboard/study-book"
+                    prefetch={true}
+                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition"
+                  >
+                    <span>👁️ Review mistakes</span>
+                    <span>&rarr;</span>
+                  </Link>
+                  {mistakesCount > 0 && (
+                    <Link
+                      href="/dashboard/study-book?view=mistakes&mode=practice"
+                      prefetch={true}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-1.5 text-xs font-black text-white shadow-2xs hover:bg-red-700 active:scale-95 transition"
+                    >
+                      <span>🎯</span>
+                      <span>Practice Quiz (రివిజన్ క్విజ్)</span>
+                    </Link>
                   )}
                 </div>
-                <h2 className="mt-2.5 text-base sm:text-lg font-black text-slate-900 group-hover:text-red-700 transition">Mistake Book</h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Revisit questions answered incorrectly. Study step-by-step explanations and clear weak topics.
-                </p>
-                <span className="mt-3.5 inline-flex items-center gap-1 text-xs font-bold text-red-700">
-                  Review mistakes &rarr;
-                </span>
-              </Link>
-              <Link
-                href="/dashboard/study-book?view=bookmarks"
-                prefetch={true}
-                className="group rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-teal-200 hover:shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-teal-700">Saved Questions</span>
-                  {bookmarksCount > 0 ? (
-                    <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800">
-                      {bookmarksCount} questions
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
-                      0 saved
-                    </span>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-teal-200 hover:shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-teal-700">Saved Questions</span>
+                    {bookmarksCount > 0 ? (
+                      <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800">
+                        {bookmarksCount} questions
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                        0 saved
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="mt-2.5 text-base sm:text-lg font-black text-slate-900">Bookmarks</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    High-yield and challenging questions kept together for targeted pre-exam revision.
+                  </p>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+                  <Link
+                    href="/dashboard/study-book?view=bookmarks"
+                    prefetch={true}
+                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition"
+                  >
+                    <span>👁️ Open bookmarks</span>
+                    <span>&rarr;</span>
+                  </Link>
+                  {bookmarksCount > 0 && (
+                    <Link
+                      href="/dashboard/study-book?view=bookmarks&mode=practice"
+                      prefetch={true}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-3 py-1.5 text-xs font-black text-white shadow-2xs hover:bg-teal-800 active:scale-95 transition"
+                    >
+                      <span>🎯</span>
+                      <span>Practice Saved</span>
+                    </Link>
                   )}
                 </div>
-                <h2 className="mt-2.5 text-base sm:text-lg font-black text-slate-900 group-hover:text-teal-700 transition">Bookmarks</h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  High-yield and challenging questions kept together for targeted pre-exam revision.
-                </p>
-                <span className="mt-3.5 inline-flex items-center gap-1 text-xs font-bold text-teal-700">
-                  Open bookmarks &rarr;
-                </span>
-              </Link>
+              </div>
+            </section>
+
+            {/* Exam Readiness & Cut-Off Predictor */}
+            <section className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-teal-600 text-white text-xs font-black">
+                    🎯
+                  </span>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 block">
+                      Exam Readiness &amp; Cut-Off Predictor
+                    </span>
+                    <h2 className="text-sm sm:text-base font-black text-slate-950">
+                      TSLPRB &amp; APPSC Score Calibration
+                    </h2>
+                  </div>
+                </div>
+
+                {totalAttempts === 0 ? (
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-bold text-slate-600">
+                    Needs Mock Attempt
+                  </span>
+                ) : isMeritCleared ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-extrabold text-emerald-900">
+                    <span>🏆</span>
+                    <span>Merit List Contender (≥55%)</span>
+                  </span>
+                ) : isCutOffCleared ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-900">
+                    <span>🟡</span>
+                    <span>Cut-Off Qualified (≥40%)</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-50 px-2.5 py-0.5 text-[11px] font-extrabold text-rose-900">
+                    <span>⚠️</span>
+                    <span>Below Cut-Off Baseline (&lt;40%)</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Progress & Milestone Gauge */}
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span>
+                    Your Accuracy: <strong className="text-slate-950 text-sm font-black">{totalAttempts > 0 ? `${avgAccuracy.toFixed(1)}%` : "—"}</strong>
+                  </span>
+                  <div className="flex items-center gap-3 text-[11px]">
+                    <span className="inline-flex items-center gap-1 text-slate-500">
+                      <span className="h-2 w-2 rounded-full bg-amber-400" />
+                      Cut-off: 40%
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-slate-500">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      Merit: 55%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative h-4 w-full overflow-hidden rounded-full bg-slate-100 border border-slate-200/80">
+                  {/* Background Zones */}
+                  <div className="absolute inset-y-0 left-0 w-[40%] bg-rose-100/60" title="Below Cut-Off" />
+                  <div className="absolute inset-y-0 left-[40%] w-[15%] bg-amber-100/70" title="Cut-Off Qualified" />
+                  <div className="absolute inset-y-0 left-[55%] right-0 bg-emerald-100/60" title="Merit Rank Zone" />
+
+                  {/* Marker lines */}
+                  <div className="absolute inset-y-0 left-[40%] w-0.5 bg-amber-500/80 z-10" />
+                  <div className="absolute inset-y-0 left-[55%] w-0.5 bg-emerald-600/80 z-10" />
+
+                  {/* Student Score Fill */}
+                  {totalAttempts > 0 && (
+                    <div
+                      className={`relative h-full transition-all duration-500 rounded-full ${
+                        isMeritCleared
+                          ? "bg-emerald-600"
+                          : isCutOffCleared
+                          ? "bg-amber-500"
+                          : "bg-rose-500"
+                      }`}
+                      style={{ width: `${Math.min(100, Math.max(0, avgAccuracy))}%` }}
+                    />
+                  )}
+                </div>
+
+                <div className="flex justify-between text-[10px] font-semibold text-slate-400 px-0.5">
+                  <span>0%</span>
+                  <span className="text-amber-700 font-bold">40% Min Cut-Off</span>
+                  <span className="text-emerald-700 font-bold">55% Merit Target</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              {/* Status explanation & Weak Subject recommendation */}
+              <div className="mt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs">
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-slate-800">
+                    {totalAttempts === 0
+                      ? "Submit 1 mock test to calculate your official readiness benchmark and score projection."
+                      : isMeritCleared
+                      ? `Outstanding! At ${avgAccuracy.toFixed(1)}% accuracy, you comfortably exceed the competitive selection threshold.`
+                      : isCutOffCleared
+                      ? `Good foundation! You have cleared the 40% qualifying bar. Target +${(meritBenchmark - avgAccuracy).toFixed(1)}% more to secure top merit.`
+                      : `Current average (${avgAccuracy.toFixed(1)}%) needs attention. Clear weak topics to cross the 40% qualification cut-off.`}
+                  </p>
+                  {weakestSubject && (
+                    <p className="text-[11px] text-slate-500">
+                      ⚡ Fastest Rank Booster: <strong>{weakestSubject.subject_name}</strong> is at {Number(weakestSubject.accuracy).toFixed(0)}% accuracy ({weakestSubject.correct_answers}/{weakestSubject.answered_questions} correct).
+                    </p>
+                  )}
+                </div>
+
+                {mistakesCount > 0 && (
+                  <Link
+                    href="/dashboard/study-book?view=mistakes&mode=practice"
+                    prefetch={true}
+                    className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-teal-800 px-3.5 py-2 text-xs font-black text-white shadow-2xs hover:bg-teal-900 active:scale-95 transition"
+                  >
+                    <span>🎯 Re-Attempt Mistakes</span>
+                    <span>&rarr;</span>
+                  </Link>
+                )}
+              </div>
             </section>
 
             {/* Available Practice Tests */}
