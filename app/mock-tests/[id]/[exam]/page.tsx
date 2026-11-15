@@ -179,6 +179,7 @@ export default async function ExamPage({ params, searchParams }: Props) {
       priceCurrency: "INR",
       category: "Free",
     },
+    ...(teluguData?.keywords ? { keywords: teluguData.keywords.join(", ") } : {}),
   };
 
   const eventJsonLd = teluguData?.schedule?.prelimsExamDate
@@ -228,12 +229,18 @@ export default async function ExamPage({ params, searchParams }: Props) {
     : null;
 
   const structuredData = [
-    ...collectionStructuredData(seo.title, seo.description, canonical, [
-      { name: "Home", path: "/" },
-      { name: "Mock tests", path: "/mock-tests" },
-      { name: context.state.name, path: stateUrl(context.state.slug) },
-      { name: context.exam.name, path: canonical },
-    ]),
+    ...collectionStructuredData(
+      seo.title,
+      seo.description,
+      canonical,
+      [
+        { name: "Home", path: "/" },
+        { name: "Mock tests", path: "/mock-tests" },
+        { name: context.state.name, path: stateUrl(context.state.slug) },
+        { name: context.exam.name, path: canonical },
+      ],
+      teluguData?.keywords,
+    ),
     courseJsonLd,
     ...(eventJsonLd ? [eventJsonLd] : []),
     ...(occupationJsonLd ? [occupationJsonLd] : []),

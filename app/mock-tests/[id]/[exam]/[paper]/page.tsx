@@ -35,6 +35,8 @@ function resolvePaperFallbacks(c: NonNullable<Awaited<ReturnType<typeof resolveP
 
   const keywords = isPolice
     ? [
+        "police constable mock test",
+        "police test online",
         `${c.state.name} police constable ${c.paper?.name} mock test`,
         "Telangana police constable OMR test",
         "TG Police Constable OMR exam pattern",
@@ -86,13 +88,19 @@ export default async function PaperPage({ params, searchParams }: Props) {
   return (
     <>
       <JsonLd
-        data={collectionStructuredData(seo.title, seo.description, canonical, [
-          { name: "Home", path: "/" },
-          { name: "Mock tests", path: "/mock-tests" },
-          { name: c.state.name, path: stateUrl(c.state.slug) },
-          { name: c.exam.name, path: examUrl(c.state.slug, c.exam.slug) },
-          { name: c.paper.name, path: canonical },
-        ])}
+        data={collectionStructuredData(
+          seo.title,
+          seo.description,
+          canonical,
+          [
+            { name: "Home", path: "/" },
+            { name: "Mock tests", path: "/mock-tests" },
+            { name: c.state.name, path: stateUrl(c.state.slug) },
+            { name: c.exam.name, path: examUrl(c.state.slug, c.exam.slug) },
+            { name: c.paper.name, path: canonical },
+          ],
+          fallbacks.keywords,
+        )}
       />
       {await MockTestsPage({
         searchParams: Promise.resolve({

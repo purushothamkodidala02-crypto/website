@@ -111,6 +111,8 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
   bilingualDescription:
     "Telangana Police Constable free bilingual mock tests in Telugu and English. తెలంగాణ పోలీస్ కానిస్టేబుల్ ఉచిత మాక్ టెస్ట్‌లు.",
   keywords: [
+    "police constable mock test",
+    "police test online",
     "Telangana police mock test",
     "Telangana constable mock test",
     "Telangana police exam mock test",

@@ -71,6 +71,7 @@ export function collectionStructuredData(
   description: string,
   canonical: string,
   crumbs: Array<{ name: string; path: string }>,
+  keywords?: string[] | string,
 ) {
   return [
     {
@@ -81,6 +82,7 @@ export function collectionStructuredData(
       url: absoluteUrl(canonical),
       educationalUse: "Practice",
       isPartOf: { "@type": "WebSite", name: "Varadhi Prep", url: absoluteUrl("/") },
+      ...(keywords ? { keywords: Array.isArray(keywords) ? keywords.join(", ") : keywords } : {}),
     },
     {
       "@context": "https://schema.org",
