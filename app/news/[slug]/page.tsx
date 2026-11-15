@@ -645,7 +645,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       />
 
       {/* Full-Screen Broadsheet Top Rule */}
-      <div className="h-1 w-full bg-[#0b2545]" />
+      <div className="h-1.5 w-full bg-[#0b2545]" />
 
       {/* Full-Screen Newspaper Header (Daily Dispatch & Moneycontrol Style) */}
       <header className="border-b border-gray-200 bg-white w-full">
@@ -732,61 +732,61 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </div>
             <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4 text-left">
               
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Total Vacancies</span>
-                <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">7,112</strong>
-                <span className="text-xs text-gray-600 block">Post Codes 21–28</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Vacancies</span>
+                <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">7,112</strong>
+                <span className="text-xs text-slate-600 block">Post Codes 21–28</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">PWT Exam Date</span>
-                <strong className="text-lg sm:text-xl font-bold text-gray-900 block mt-0.5">20 Dec 2026</strong>
-                <span className="text-xs text-gray-600 block">10 AM – 1 PM</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">PWT Exam Date</span>
+                <strong className="text-lg sm:text-xl font-bold text-[#0b2545] block mt-0.5">20 Dec 2026</strong>
+                <span className="text-xs text-slate-600 block">10 AM – 1 PM</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Age (General)</span>
-                <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">18 – 27 Yrs</strong>
-                <span className="text-xs text-gray-600 block">G.O. Ms 87 (+5Y)</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Age (General)</span>
+                <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">18 – 27 Yrs</strong>
+                <span className="text-xs text-slate-600 block">G.O. Ms 87 (+5Y)</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">In-Hand Salary</span>
-                <strong className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 leading-snug">~₹32.5k–₹35.5k</strong>
-                <span className="text-xs text-gray-600 block">Pay Scale ₹24.2k–₹72.8k</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">In-Hand Salary</span>
+                <strong className="text-sm sm:text-base font-bold text-[#0b2545] block mt-0.5 leading-snug">~₹32.5k–₹35.5k</strong>
+                <span className="text-xs text-slate-600 block">Pay Scale ₹24.2k–₹72.8k</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Qualification</span>
-                <strong className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 leading-snug">10+2 Intermediate</strong>
-                <span className="text-xs text-gray-600 block">Board of Inter.</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Qualification</span>
+                <strong className="text-sm sm:text-base font-bold text-[#0b2545] block mt-0.5 leading-snug">10+2 Intermediate</strong>
+                <span className="text-xs text-slate-600 block">Board of Inter.</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Negative Mark</span>
-                <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">0.20 Marks</strong>
-                <span className="text-xs text-gray-600 block">20% deduction</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Negative Mark</span>
+                <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">0.20 Marks</strong>
+                <span className="text-xs text-slate-600 block">20% deduction</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Selection</span>
-                <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">4 Stages</strong>
-                <span className="text-xs text-gray-600 block">PWT &rarr; PMT/PET &rarr; FWE</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Selection</span>
+                <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">4 Stages</strong>
+                <span className="text-xs text-slate-600 block">PWT &rarr; PMT/PET &rarr; FWE</span>
               </div>
 
-              <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Exam Fee</span>
-                <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">₹800 / ₹400</strong>
-                <span className="text-xs text-gray-600 block">50% SC/ST Relief</span>
+              <div className="rounded-lg border border-slate-200/90 bg-white p-3 hover:border-slate-300 transition shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Exam Fee</span>
+                <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">₹800 / ₹400</strong>
+                <span className="text-xs text-slate-600 block">50% SC/ST Relief</span>
               </div>
 
             </div>
 
             {/* Official Gazette PDF Banner */}
-            <div className="mt-4 pt-3.5 border-t border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 rounded border border-gray-200">
+            <div className="mt-4 pt-3.5 border-t border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-2xs">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
-                  <span className="text-slate-700 font-bold text-xs">PDF</span>
+                <div className="h-10 w-10 rounded-lg bg-[#0b2545]/5 border border-[#0b2545]/15 flex items-center justify-center shrink-0">
+                  <span className="text-[#0b2545] font-bold text-xs">PDF</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 text-sm">
@@ -809,7 +809,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 font-semibold text-xs transition"
+                  className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3 py-2 font-semibold text-xs transition"
                 >
                   <span>View ↗</span>
                 </a>
@@ -850,20 +850,22 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     <div
                       key={evt.title}
                       className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                        isCurrent ? "bg-[#f8fafc]" : "bg-white"
+                        isCurrent ? "bg-[#f8fafc] border-l-4 border-l-[#0b2545]" : "bg-white"
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <span className="grid h-6 w-6 shrink-0 place-items-center rounded bg-gray-100 font-mono text-xs font-bold text-gray-800 mt-0.5 border border-gray-200">
+                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded font-mono text-xs font-bold mt-0.5 border ${
+                          isCurrent ? "bg-[#0b2545] text-white border-[#0b2545]" : "bg-slate-100 text-slate-800 border-slate-200"
+                        }`}>
                           {idx + 1}
                         </span>
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="text-sm sm:text-base font-bold text-gray-900">{evt.title}</h3>
-                            <span className={`rounded px-2 py-0.5 text-[11px] font-semibold border ${
+                            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
                               isCurrent
                                 ? "bg-[#0b2545] text-white border-[#0b2545]"
-                                : "bg-gray-100 text-gray-700 border-gray-200"
+                                : "bg-slate-100 text-slate-700 border-slate-200"
                             }`}>
                               {evt.status}
                             </span>
@@ -1256,7 +1258,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs divide-y divide-gray-200">
-                      <thead className="bg-gray-100 text-gray-800 font-bold uppercase tracking-wide">
+                      <thead className="bg-[#f1f5f9] text-[#0f172a] font-bold uppercase tracking-wide">
                         <tr>
                           <th className="px-3 py-2 border-r border-gray-200">Time Duration</th>
                           <th className="px-3 py-2 border-r border-gray-200 text-center">Marks</th>
@@ -1267,7 +1269,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         {MEN_RUN_SLABS.map((sl, idx) => (
                           <tr key={idx} className={idx % 2 === 1 ? "bg-slate-50/50" : "bg-white"}>
                             <td className="px-3 py-2 border-r border-gray-200 font-mono">{sl.timing}</td>
-                            <td className="px-3 py-2 border-r border-gray-200 text-center font-bold text-gray-900">{sl.marks}</td>
+                            <td className="px-3 py-2 border-r border-gray-200 text-center font-bold text-[#0b2545]">{sl.marks}</td>
                             <td className="px-3 py-2">{sl.status}</td>
                           </tr>
                         ))}
@@ -1284,7 +1286,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs divide-y divide-gray-200">
-                      <thead className="bg-gray-100 text-gray-800 font-bold uppercase tracking-wide">
+                      <thead className="bg-[#f1f5f9] text-[#0f172a] font-bold uppercase tracking-wide">
                         <tr>
                           <th className="px-3 py-2 border-r border-gray-200">Time Duration</th>
                           <th className="px-3 py-2 border-r border-gray-200 text-center">Marks</th>
@@ -1295,7 +1297,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         {WOMEN_RUN_SLABS.map((sl, idx) => (
                           <tr key={idx} className={idx % 2 === 1 ? "bg-slate-50/50" : "bg-white"}>
                             <td className="px-3 py-2 border-r border-gray-200 font-mono">{sl.timing}</td>
-                            <td className="px-3 py-2 border-r border-gray-200 text-center font-bold text-gray-900">{sl.marks}</td>
+                            <td className="px-3 py-2 border-r border-gray-200 text-center font-bold text-[#0b2545]">{sl.marks}</td>
                             <td className="px-3 py-2">{sl.status}</td>
                           </tr>
                         ))}
@@ -1419,16 +1421,16 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded border border-gray-200 bg-white p-4">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">Local Cadre Quota</span>
-                  <strong className="text-2xl font-bold text-gray-900 block mt-1">95% Reserved</strong>
+                <div className="rounded-lg border border-slate-200 border-t-4 border-t-[#0b2545] bg-white p-4 shadow-2xs">
+                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Local Cadre Quota</span>
+                  <strong className="text-2xl font-bold text-[#0b2545] block mt-1">95% Reserved</strong>
                   <p className="mt-1 text-xs text-gray-600 leading-relaxed">
                     95% of vacancies in District Cadres (Post Code 21 Civil and Post Code 22 AR) are strictly reserved exclusively for candidates who belong to that local district.
                   </p>
                 </div>
-                <div className="rounded border border-gray-200 bg-white p-4">
-                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Open Competition Quota</span>
-                  <strong className="text-2xl font-bold text-gray-900 block mt-1">5% Unreserved</strong>
+                <div className="rounded-lg border border-slate-200 border-t-4 border-t-[#0b2545] bg-white p-4 shadow-2xs">
+                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Open Competition Quota</span>
+                  <strong className="text-2xl font-bold text-[#0b2545] block mt-1">5% Unreserved</strong>
                   <p className="mt-1 text-xs text-gray-600 leading-relaxed">
                     5% of vacancies are open competition (unreserved), where candidates from all 33 districts of Telangana and eligible non-local candidates compete purely on merit.
                   </p>
@@ -1490,24 +1492,24 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               {/* 4 Stat Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5 text-center">
+                <div className="rounded-lg border border-slate-200/90 bg-white p-3.5 text-center shadow-2xs">
                   <span className="text-xs font-semibold uppercase text-gray-500 block">Questions</span>
-                  <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">200 MCQs</strong>
+                  <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">200 MCQs</strong>
                   <span className="text-xs text-gray-600">Objective type</span>
                 </div>
-                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5 text-center">
+                <div className="rounded-lg border border-slate-200/90 bg-white p-3.5 text-center shadow-2xs">
                   <span className="text-xs font-semibold uppercase text-gray-500 block">Total Marks</span>
-                  <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">200 Marks</strong>
+                  <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">200 Marks</strong>
                   <span className="text-xs text-gray-600">1 mark per Q</span>
                 </div>
-                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5 text-center">
+                <div className="rounded-lg border border-slate-200/90 bg-white p-3.5 text-center shadow-2xs">
                   <span className="text-xs font-semibold uppercase text-gray-500 block">Duration</span>
-                  <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">3 Hours</strong>
+                  <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">3 Hours</strong>
                   <span className="text-xs text-gray-600">180 minutes</span>
                 </div>
-                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5 text-center">
+                <div className="rounded-lg border border-slate-200/90 bg-white p-3.5 text-center shadow-2xs">
                   <span className="text-xs font-semibold uppercase text-gray-500 block">Negative Mark</span>
-                  <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">0.20 Marks</strong>
+                  <strong className="text-xl sm:text-2xl font-bold text-[#0b2545] block mt-0.5">0.20 Marks</strong>
                   <span className="text-xs text-gray-600">20% deduction</span>
                 </div>
               </div>
@@ -1596,7 +1598,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs sm:text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 bg-gray-50/70 text-gray-700 text-xs font-semibold">
+                      <tr className="border-b border-slate-200 bg-[#f1f5f9] text-[#0f172a] text-xs font-bold uppercase tracking-wide">
                         <th className="px-3.5 py-2.5">#</th>
                         <th className="px-3.5 py-2.5">Subject / Paper</th>
                         <th className="px-3.5 py-2.5">Telugu Title</th>
@@ -1606,19 +1608,19 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     </thead>
                     <tbody className="divide-y divide-gray-200 text-gray-800">
                       {SUBJECTS.map((sub) => (
-                        <tr key={sub.number} className="hover:bg-gray-50/50 transition">
+                        <tr key={sub.number} className="hover:bg-slate-50/60 transition">
                           <td className="px-3.5 py-2.5 font-mono text-gray-500 font-medium">{sub.number}</td>
                           <td className="px-3.5 py-2.5 font-bold text-gray-900">{sub.name}</td>
                           <td className="px-3.5 py-2.5 font-telugu text-gray-700 text-xs sm:text-sm">{sub.teluguName}</td>
                           <td className="px-3.5 py-2.5 text-gray-600 text-xs">{sub.level}</td>
-                          <td className="px-3.5 py-2.5 text-right font-bold text-gray-900">{sub.weightage}</td>
+                          <td className="px-3.5 py-2.5 text-right font-bold text-[#0b2545]">{sub.weightage}</td>
                         </tr>
                       ))}
-                      <tr className="bg-slate-50/80 font-bold text-gray-900 border-t-2 border-gray-300">
+                      <tr className="bg-[#0b2545]/5 font-bold text-[#0b2545] border-t-2 border-[#0b2545]/20">
                         <td colSpan={4} className="px-3.5 py-3 text-right uppercase tracking-wider text-xs">
                           Total Examination Marks (PWT &amp; FWE Civil)
                         </td>
-                        <td className="px-3.5 py-3 text-right text-sm font-bold text-slate-900">
+                        <td className="px-3.5 py-3 text-right text-sm font-bold text-[#0b2545]">
                           200 Questions / 200 Marks
                         </td>
                       </tr>
@@ -1643,7 +1645,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Verbal Reasoning Column */}
-                    <div className="rounded border border-gray-200 bg-gray-50/50 p-4">
+                    <div className="rounded-lg border border-slate-200 bg-white p-4.5 shadow-2xs">
                       <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
                         <h4 className="font-bold text-xs sm:text-sm text-gray-900 uppercase tracking-wider">
                           Part A: Verbal Reasoning (15 &ndash; 17 Marks)
@@ -1691,7 +1693,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     </div>
 
                     {/* Non-Verbal Reasoning Column */}
-                    <div className="rounded border border-gray-200 bg-gray-50/50 p-4">
+                    <div className="rounded-lg border border-slate-200 bg-white p-4.5 shadow-2xs">
                       <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
                         <h4 className="font-bold text-xs sm:text-sm text-gray-900 uppercase tracking-wider">
                           Part B: Non-Verbal Reasoning (8 &ndash; 10 Marks)
@@ -1747,16 +1749,16 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {SUBJECTS.map((sub) => (
-                  <div key={sub.number} className="rounded border border-gray-200 bg-[#f9fafb] p-4.5 flex flex-col justify-between">
+                  <div key={sub.number} className="rounded-lg border border-slate-200/90 bg-[#f8fafc] p-4.5 hover:border-slate-300 transition flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="inline-block rounded bg-gray-200 px-2 py-0.5 text-xs font-bold font-mono text-gray-900">
+                          <span className="inline-block rounded bg-slate-200 px-2 py-0.5 text-xs font-bold font-mono text-slate-900">
                             {sub.number}
                           </span>
                           <h3 className="text-sm sm:text-base font-bold text-gray-900">{sub.name}</h3>
                         </div>
-                        <span className="rounded bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-800 shrink-0">
+                        <span className="rounded bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-[#0b2545] shadow-2xs shrink-0">
                           {sub.weightage}
                         </span>
                       </div>
@@ -1788,21 +1790,21 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               {/* Fee Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded border border-gray-200 bg-white p-4.5">
-                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">General / OC, BC &amp; Other States</span>
-                  <strong className="text-2xl sm:text-3xl font-bold text-gray-900 block mt-1">₹800</strong>
+                <div className="rounded-lg border border-slate-200 border-t-4 border-t-[#0b2545] bg-white p-4.5 shadow-2xs">
+                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">General / OC, BC &amp; Other States</span>
+                  <strong className="text-2xl sm:text-3xl font-bold text-[#0b2545] block mt-1">₹800</strong>
                   <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed">
                     Payable online via Net Banking, UPI, or Debit/Credit card.
                   </p>
                 </div>
-                <div className="rounded border border-gray-200 bg-white p-4.5">
+                <div className="rounded-lg border border-slate-200 border-t-4 border-t-[#0b2545] bg-white p-4.5 shadow-2xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">TS SC &amp; ST Candidates</span>
-                    <span className="rounded bg-gray-200 text-gray-800 text-[10px] px-2 py-0.5 font-bold">
+                    <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">TS SC &amp; ST Candidates</span>
+                    <span className="rounded bg-slate-100 text-slate-800 text-[10px] px-2 py-0.5 font-bold border border-slate-200">
                       50% Concession
                     </span>
                   </div>
-                  <strong className="text-2xl sm:text-3xl font-bold text-gray-900 block mt-1">₹400</strong>
+                  <strong className="text-2xl sm:text-3xl font-bold text-[#0b2545] block mt-1">₹400</strong>
                   <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed">
                     Applicable for candidates belonging to Telangana with valid community certificates.
                   </p>
@@ -2140,8 +2142,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </div>
 
             {/* Official Website & Helpline Widget */}
-            <div className="rounded border border-gray-200 bg-white p-5 text-xs text-gray-600 shadow-2xs">
-              <h3 className="font-bold text-gray-900 text-sm mb-1.5">Official Board Portal</h3>
+            <div className="rounded-lg border border-slate-200 border-t-4 border-t-[#0b2545] bg-white p-5 text-xs text-gray-600 shadow-2xs">
+              <h3 className="font-bold text-[#0b2545] text-sm mb-1.5">Official Board Portal</h3>
               <p className="leading-relaxed">
                 Candidate registration, hall tickets, and results are published on the official board website:
               </p>
