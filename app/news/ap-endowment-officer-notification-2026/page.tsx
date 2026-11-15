@@ -78,31 +78,38 @@ const SCHEDULE_EVENTS = [
   },
   {
     title: "Detailed Notification Publication",
-    teluguTitle: "సవివర నోటిఫికేషన్ విడుదల గడువు",
-    date: "On or before 16 October 2026",
-    status: "Active Stage",
-    detail: "Detailed breakup of vacancies, community reservations, age limits, and online application guidelines on psc.ap.gov.in.",
+    teluguTitle: "సవివర నోటిఫికేషన్ విడుదల (No. 23/2026)",
+    date: "16 October 2026",
+    status: "Completed",
+    detail: "Detailed breakup of vacancies, community reservations, age limits, and online guidelines published on psc.ap.gov.in.",
   },
   {
     title: "Online Application Window",
-    teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల స్వీకరణ",
-    date: "16 Oct 2026 – 05 Nov 2026 (11:59 PM)",
-    status: "Upcoming",
-    detail: "Online registration and submission of applications through APPSC One Time Profile Registration (OTPR).",
+    teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల గడువు (ముగిసింది)",
+    date: "16 Oct 2026 – 05 Nov 2026 (Extended to 12 Nov 2026)",
+    status: "Concluded",
+    detail: "Online registration and application submissions through APPSC One Time Profile Registration (OTPR) concluded on 12 November 2026.",
   },
   {
     title: "Crucial Reckoning Date",
     teluguTitle: "అర్హతల నిర్ధారణ కీలక తేదీ",
     date: "16 October 2026",
-    status: "Upcoming",
-    detail: "Crucial date for reckoning educational qualifications, age limits, and community certificates.",
+    status: "Reckoned",
+    detail: "Crucial date for reckoning educational qualifications, age limits, and community certificates under notification guidelines.",
+  },
+  {
+    title: "Written Examination (CBRT) Schedule Announcement",
+    teluguTitle: "రాత పరీక్ష షెడ్యూల్ ప్రకటన",
+    date: "Expected in Nov / Dec 2026",
+    status: "Active Stage",
+    detail: "APPSC is finalizing the district-level Computer-Based Recruitment Test (CBRT) examination centers and timetable.",
   },
   {
     title: "Hall Ticket / Admit Card Release",
     teluguTitle: "హాల్ టికెట్ల డౌన్‌లోడ్",
     date: "10 Days Before Exam",
     status: "Upcoming",
-    detail: "Admit cards made accessible on candidate login portal on psc.ap.gov.in.",
+    detail: "Admit cards will be made accessible on candidate login portal on psc.ap.gov.in.",
   },
   {
     title: "Single-Level Written Test (CBRT)",
@@ -722,7 +729,7 @@ export default function ApEndowmentOfficerNotificationPage() {
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
-                As per APPSC Brief Notification No. 23/2026, dated 15/09/2026, the commission has invited online applications for direct recruitment to the post of Executive Officer Grade-III in A.P. Endowments Subordinate Service. Below are the key recruitment milestones:
+                As per APPSC Brief Notification No. 23/2026 and Detailed Notification published on 16/10/2026, online applications for direct recruitment to the post of Executive Officer Grade-III concluded in mid-November 2026. The commission is now finalizing the Computer-Based Written Test (CBRT) examination timetable. Below is the updated official recruitment tracker:
               </p>
               <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                 <div className="overflow-x-auto">
@@ -743,7 +750,7 @@ export default function ApEndowmentOfficerNotificationPage() {
                           <td className="px-4 py-3.5 font-semibold text-[#0055a2] border-r border-slate-200">{evt.date}</td>
                           <td className="px-4 py-3.5 text-right">
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                              evt.status === "Completed"
+                              evt.status === "Completed" || evt.status === "Concluded" || evt.status === "Reckoned"
                                 ? "bg-slate-100 text-slate-700 border border-slate-200"
                                 : evt.status === "Active Stage"
                                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
