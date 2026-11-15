@@ -633,7 +633,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   ];
 
   return (
-    <main className="min-h-screen w-full bg-[#fae7e0] text-[#1a1a1a] antialiased">
+    <main className="min-h-screen w-full bg-[#eaf4fa] text-[#1a1a1a] antialiased">
       <JsonLd data={jsonLd} />
 
       {/* Direct Google Font Preload for Mandali (TV9 Telugu Font) */}
@@ -645,10 +645,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       />
 
       {/* Full-Screen Broadsheet Top Rule */}
-      <div className="h-1.5 w-full bg-[#0b2545]" />
+      <div className="h-1.5 w-full bg-gradient-to-r from-[#0055a2] via-[#0055a2] to-[#fb8916]" />
 
       {/* Full-Screen Newspaper Header (Daily Dispatch & Moneycontrol Style) */}
-      <header className="border-b border-slate-300 bg-white w-full">
+      <header className="border-b border-[#cde7f7] bg-white w-full">
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-3.5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2" aria-label="Varadhi Prep home">
             <BrandLockup />
@@ -658,7 +658,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             <a
               href="/docs/telangana-police-constable-notification-2026-official.pdf"
               download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3.5 py-2 font-semibold transition text-xs sm:text-sm shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#0055a2] bg-white hover:bg-[#0055a2] text-[#0055a2] hover:text-white px-3.5 py-2 font-bold transition text-xs sm:text-sm shadow-2xs"
               title="Download Official Notification PDF (748 KB)"
             >
               <svg className="w-4 h-4 text-slate-700 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -668,7 +668,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </a>
             <Link
               href="/mock-tests/telangana/police-constable-free-mock-test"
-              className="inline-flex items-center rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white px-3.5 sm:px-4 py-2 font-semibold transition text-xs sm:text-sm shadow-sm"
+              className="inline-flex items-center rounded-lg bg-[#fb8916] hover:bg-[#e2740a] text-white px-3.5 sm:px-4 py-2 font-bold transition text-xs sm:text-sm shadow-sm"
             >
               Practice Mock Tests &rarr;
             </Link>
@@ -677,12 +677,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       </header>
 
       {/* Full-Screen Editorial Article Header */}
-      <article className="border-b border-slate-300 bg-[#fae7e0] w-full">
+      <article className="border-b border-[#cde7f7] bg-[#eaf4fa] w-full">
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6 sm:py-8">
           
           {/* Breadcrumb Navigation */}
           <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-600">
-            <Link href="/" className="hover:text-[#0b2545] transition font-medium">
+            <Link href="/" className="hover:text-[#0055a2] transition font-medium">
               Home
             </Link>
             <span>/</span>
@@ -693,7 +693,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
           {/* Editorial Category Tag */}
           <div className="mt-3.5">
-            <span className="text-xs font-black uppercase tracking-wider text-[#0b2545]">
+            <span className="text-xs font-black uppercase tracking-wider text-[#0055a2]">
               Telangana State Recruitment &bull; Official Notification
             </span>
           </div>
@@ -709,7 +709,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
 
           {/* Author Byline & Timestamp */}
-          <div className="mt-4 pt-3 border-t border-slate-300/80 flex flex-wrap items-center justify-between gap-y-2 text-xs sm:text-sm text-slate-700">
+          <div className="mt-4 pt-3 border-t border-[#cde7f7]/80 flex flex-wrap items-center justify-between gap-y-2 text-xs sm:text-sm text-slate-700">
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <span className="font-bold text-slate-950">Varadhi News Desk</span>
               <span className="text-slate-400">&bull;</span>
@@ -723,11 +723,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           </div>
 
           {/* Full-Width Moneycontrol "Key Highlights & Exam Snapshot" Box */}
-          <div className="mt-8 rounded-xl border border-slate-300 bg-white p-5 sm:p-7 w-full shadow-sm">
+          <div className="mt-8 rounded-xl border border-[#cde7f7] bg-white p-5 sm:p-7 w-full shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3.5 mb-5">
               <div className="flex items-center gap-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-600 ring-4 ring-amber-100" />
-                <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#0b2545]">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#fb8916] ring-4 ring-[#ffe8cc]" />
+                <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#0055a2]">
                   Key Highlights &amp; Exam Snapshot
                 </h2>
               </div>
@@ -738,61 +738,61 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
               
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Vacancies</span>
-                <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">7,112</strong>
+                <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">7,112</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">Post Codes 21–28</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">PWT Exam Date</span>
-                <strong className="text-xl sm:text-2xl font-black text-[#0b2545] block mt-1">20 Dec 2026</strong>
+                <strong className="text-xl sm:text-2xl font-black text-[#0055a2] block mt-1">20 Dec 2026</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">10 AM – 1 PM</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Age (General)</span>
-                <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">18 – 27 Yrs</strong>
+                <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">18 – 27 Yrs</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">G.O. Ms 87 (+5Y)</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">In-Hand Salary</span>
-                <strong className="text-base sm:text-lg font-black text-[#0b2545] block mt-1 leading-snug">~₹32.5k–₹35.5k</strong>
+                <strong className="text-base sm:text-lg font-black text-[#0055a2] block mt-1 leading-snug">~₹32.5k–₹35.5k</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">Scale ₹24.2k–₹72.8k</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Qualification</span>
-                <strong className="text-base sm:text-lg font-black text-[#0b2545] block mt-1 leading-snug">10+2 Intermediate</strong>
+                <strong className="text-base sm:text-lg font-black text-[#0055a2] block mt-1 leading-snug">10+2 Intermediate</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">Board of Inter.</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Negative Mark</span>
-                <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">0.20 Marks</strong>
+                <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">0.20 Marks</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">20% deduction</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Selection</span>
-                <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">4 Stages</strong>
+                <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">4 Stages</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">PWT &rarr; PMT/PET &rarr; FWE</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 hover:border-slate-300 hover:bg-white hover:shadow-xs transition">
+              <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-4 sm:p-5 hover:border-[#cde7f7] hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Exam Fee</span>
-                <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">₹800 / ₹400</strong>
+                <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">₹800 / ₹400</strong>
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">50% SC/ST Relief</span>
               </div>
 
             </div>
 
             {/* Official Gazette PDF Banner */}
-            <div className="mt-6 pt-4 border-t border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/70 p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs">
+            <div className="mt-6 pt-4 border-t border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#f4f9fd] p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs">
               <div className="flex items-center gap-3.5">
-                <div className="h-11 w-11 rounded-lg bg-[#0b2545]/8 border border-[#0b2545]/20 flex items-center justify-center shrink-0">
-                  <span className="text-[#0b2545] font-black text-sm">PDF</span>
+                <div className="h-11 w-11 rounded-lg bg-[#0055a2]/8 border border-[#0055a2]/20 flex items-center justify-center shrink-0">
+                  <span className="text-[#0055a2] font-black text-sm">PDF</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-950 text-sm sm:text-base">
@@ -807,7 +807,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <a
                   href="/docs/telangana-police-constable-notification-2026-official.pdf"
                   download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white px-4 py-2.5 font-semibold text-xs sm:text-sm transition shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0055a2] hover:bg-[#003e78] text-white px-4 py-2.5 font-semibold text-xs sm:text-sm transition shadow-sm"
                 >
                   <span>📥 Download Official PDF (748 KB)</span>
                 </a>
@@ -815,7 +815,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3.5 py-2.5 font-semibold text-xs sm:text-sm transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#cde7f7] bg-white hover:bg-slate-50 text-slate-800 px-3.5 py-2.5 font-semibold text-xs sm:text-sm transition shadow-2xs"
                 >
                   <span>View ↗</span>
                 </a>
@@ -834,13 +834,13 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           <div className="lg:col-span-8 xl:col-span-9 2xl:col-span-9 space-y-9">
 
             {/* Lead Story Paragraph */}
-            <p className="text-base sm:text-lg leading-[1.8] text-slate-800 font-normal border-l-4 border-l-[#0b2545] p-5 sm:p-6 bg-white rounded-xl border border-slate-300 shadow-xs">
+            <p className="text-base sm:text-lg leading-[1.8] text-slate-800 font-normal border-l-4 border-l-[#fb8916] p-5 sm:p-6 bg-white rounded-xl border border-[#cde7f7] shadow-xs">
               The Telangana State Level Police Recruitment Board (TSLPRB) has announced 7,112 Police Constable vacancies across Civil (Post Code 21), Armed Reserve (Post Code 22), SAR CPL (Post Code 23), TSSP Battalions (Post Code 24), Disaster Response &amp; Fire Services (Post Code 26), and Prison Warders (Post Codes 27 &amp; 28). This comprehensive guide provides the complete syllabus with marks-wise weightage, post-wise vacancy distribution, monthly in-hand salary calculations, 6/6 medical eye sight criteria, 100-mark PET physical timing slabs, 95% local reservation rules, and required certificate verification documents.
             </p>
 
             {/* Section 1: Important Dates & Timeline */}
             <section id="schedule" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   1. Important Dates &amp; Recruitment Roadmap
                 </h2>
@@ -849,19 +849,19 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 Official chronological schedule published by the recruitment board.
               </p>
 
-              <div className="border border-slate-300 rounded-xl divide-y divide-slate-200 bg-white overflow-hidden shadow-xs">
+              <div className="border border-[#cde7f7] rounded-xl divide-y divide-slate-200 bg-white overflow-hidden shadow-xs">
                 {SCHEDULE_EVENTS.map((evt, idx) => {
                   const isCurrent = evt.status === "Active Stage";
                   return (
                     <div
                       key={evt.title}
                       className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                        isCurrent ? "bg-[#f8fafc] border-l-4 border-l-[#0b2545]" : "bg-white hover:bg-slate-50/50 transition"
+                        isCurrent ? "bg-[#f8fafc] border-l-4 border-l-[#0055a2]" : "bg-white hover:bg-slate-50/50 transition"
                       }`}
                     >
                       <div className="flex items-start gap-3.5">
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg font-mono text-xs sm:text-sm font-bold mt-0.5 border ${
-                          isCurrent ? "bg-[#0b2545] text-white border-[#0b2545]" : "bg-slate-100 text-slate-800 border-slate-200"
+                          isCurrent ? "bg-[#0055a2] text-white border-[#0055a2]" : "bg-slate-100 text-slate-800 border-slate-200"
                         }`}>
                           {idx + 1}
                         </span>
@@ -888,7 +888,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         </div>
                       </div>
                       <div className="sm:text-right shrink-0 pl-10 sm:pl-0">
-                        <span className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm font-bold text-slate-900 shadow-2xs">
+                        <span className="inline-block rounded-lg border border-[#cde7f7] bg-white px-3 py-1.5 text-xs sm:text-sm font-bold text-slate-900 shadow-2xs">
                           {evt.date}
                         </span>
                       </div>
@@ -900,7 +900,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 2: Cadre-Wise Vacancy Breakdown (Moneycontrol Style Data Table) */}
             <section id="vacancies" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   2. Cadre-Wise Vacancy Breakdown &amp; Post Codes (Total 7,112 Posts)
                 </h2>
@@ -914,7 +914,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 tabIndex={0}
                 role="region"
                 aria-label="Cadre-wise vacancy breakdown table"
-                className="overflow-x-auto rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-400 w-full shadow-xs bg-white"
+                className="overflow-x-auto rounded-xl border border-[#cde7f7] focus:outline-none focus:ring-1 focus:ring-slate-400 w-full shadow-xs bg-white"
               >
                 <table className="w-full min-w-[660px] text-left text-sm divide-y divide-slate-200">
                   <thead className="bg-[#f1f5f9] font-bold text-slate-950 text-xs sm:text-sm uppercase tracking-wider">
@@ -931,7 +931,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     {VACANCIES.map((v, idx) => (
                       <tr key={v.postCode} className={idx % 2 === 1 ? "bg-slate-50/60 hover:bg-slate-100/60 transition" : "bg-white hover:bg-slate-100/60 transition"}>
                         <td className="px-4 py-3.5 font-mono text-xs sm:text-sm font-bold text-slate-900 border-r border-slate-200">
-                          <span className="inline-block rounded-md bg-[#0b2545]/8 text-[#0b2545] border border-[#0b2545]/20 px-2.5 py-1">
+                          <span className="inline-block rounded-md bg-[#0055a2]/8 text-[#0055a2] border border-[#0055a2]/20 px-2.5 py-1">
                             Post Code {v.postCode}
                           </span>
                         </td>
@@ -957,12 +957,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-[#0b2545]/5 font-bold text-[#0b2545] border-t-2 border-[#0b2545]/20">
+                  <tfoot className="bg-[#0055a2]/5 font-bold text-[#0055a2] border-t-2 border-[#0055a2]/20">
                     <tr>
-                      <td colSpan={5} className="px-4 py-4 text-right border-r border-[#0b2545]/20 text-xs sm:text-sm uppercase tracking-wider font-extrabold text-[#0b2545]">
+                      <td colSpan={5} className="px-4 py-4 text-right border-r border-[#0055a2]/20 text-xs sm:text-sm uppercase tracking-wider font-extrabold text-[#0055a2]">
                         Total Sanctioned Posts Across All 7 Cadres
                       </td>
-                      <td className="px-4 py-4 text-right text-[#0b2545] text-lg sm:text-xl font-black">
+                      <td className="px-4 py-4 text-right text-[#0055a2] text-lg sm:text-xl font-black">
                         {TOTAL_VACANCIES.toLocaleString("en-IN")} Posts
                       </td>
                     </tr>
@@ -972,25 +972,25 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               {/* Cadre Roles Explanation Cards */}
               <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-800">
-                <div className="rounded-xl border border-slate-300 bg-white p-4.5 sm:p-5 shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4.5 sm:p-5 shadow-xs">
                   <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 21: Police Constable (Civil) - 4,965 Posts (69.8%)</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     Primary station policing cadre for men and women. Posted across local police stations, traffic wings, cyber cells, and investigation bureaus. 95% District Cadre reservation applies.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-4.5 sm:p-5 shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4.5 sm:p-5 shadow-xs">
                   <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 22: Police Constable (Armed Reserve - AR) - 1,250 Posts (17.6%)</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     District armed reserves for VIP security, prisoner escorts, vital installations protection, law and order emergencies, and crowd control. Men and women eligible.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-4.5 sm:p-5 shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4.5 sm:p-5 shadow-xs">
                   <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 24: Police Constable (TSSP Battalions) - 500 Posts (7.0%)</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     Telangana State Special Police (TSSP 1st to 13th Battalions). Tactical strike reserve deployed for anti-extremist combing operations, elections, and interstate border duties.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-4.5 sm:p-5 shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4.5 sm:p-5 shadow-xs">
                   <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Codes 26, 27 &amp; 28: Fire Fighters &amp; Warders - 297 Posts</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     225 Fire Fighters (Disaster Response &amp; Fire Services) with mandatory LMV license, 62 Warder (Male), and 10 Warder (Female) in Prisons &amp; Correctional Services.
@@ -1001,7 +1001,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 3: Salary Structure, In-Hand Pay Scale & Allowances */}
             <section id="salary" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   3. Salary Structure, In-Hand Pay Scale &amp; Monthly Allowances
                 </h2>
@@ -1012,7 +1012,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Gross Salary Components Table */}
-                <div className="rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                   <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
                     <span>Monthly Earnings (Gross Breakdown)</span>
                     <span className="text-xs rounded-md bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-1 font-semibold">RPS Grade</span>
@@ -1033,19 +1033,19 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </div>
 
                 {/* Deductions & Net Take-Home Pay Table */}
-                <div className="rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                   <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
                     <span>Deductions &amp; Net In-Hand Salary</span>
-                    <span className="text-xs rounded-md bg-[#0b2545]/10 text-[#0b2545] border border-[#0b2545]/20 px-2.5 py-1 font-bold">Take-Home</span>
+                    <span className="text-xs rounded-md bg-[#0055a2]/10 text-[#0055a2] border border-[#0055a2]/20 px-2.5 py-1 font-bold">Take-Home</span>
                   </div>
                   <div className="divide-y divide-slate-200 text-sm sm:text-base">
                     {SALARY_DEDUCTIONS.map((sd, i) => (
-                      <div key={i} className={`p-3.5 flex justify-between items-start gap-2 ${i >= 4 ? "bg-[#0b2545]/8 border-t-2 border-[#0b2545]/20" : i === 3 ? "bg-slate-50 font-bold" : ""}`}>
+                      <div key={i} className={`p-3.5 flex justify-between items-start gap-2 ${i >= 4 ? "bg-[#0055a2]/8 border-t-2 border-[#0055a2]/20" : i === 3 ? "bg-slate-50 font-bold" : ""}`}>
                         <div>
-                          <span className={i >= 4 ? "font-black text-base sm:text-lg text-[#0b2545]" : "font-semibold text-slate-900"}>{sd.item}</span>
+                          <span className={i >= 4 ? "font-black text-base sm:text-lg text-[#0055a2]" : "font-semibold text-slate-900"}>{sd.item}</span>
                           <span className="block text-xs sm:text-sm text-slate-600 font-normal mt-0.5">{sd.note}</span>
                         </div>
-                        <span className={`shrink-0 font-mono ${i >= 4 ? "text-lg sm:text-xl font-black text-[#0b2545]" : i === 3 ? "font-bold text-slate-950" : "font-semibold text-slate-800"}`}>
+                        <span className={`shrink-0 font-mono ${i >= 4 ? "text-lg sm:text-xl font-black text-[#0055a2]" : i === 3 ? "font-bold text-slate-950" : "font-semibold text-slate-800"}`}>
                           {sd.amount}
                         </span>
                       </div>
@@ -1055,9 +1055,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
 
               {/* Additional Perks & Telugu Explanation */}
-              <div className="mt-5 rounded-xl border border-slate-300 bg-white p-5 sm:p-6 text-sm text-slate-800 space-y-3 shadow-xs">
+              <div className="mt-5 rounded-xl border border-[#cde7f7] bg-white p-5 sm:p-6 text-sm text-slate-800 space-y-3 shadow-xs">
                 <div className="flex items-center gap-2.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#0b2545]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#0055a2]" />
                   <strong className="text-slate-950 text-base font-bold">Additional Service Perks &amp; Career Progression:</strong>
                 </div>
                 <p className="leading-relaxed text-sm sm:text-base text-slate-700">
@@ -1071,7 +1071,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 4: Age Limits & G.O. Ms No. 87 Relaxation */}
             <section id="eligibility" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   4. Age Limits &amp; G.O. Ms No. 87 (+5 Years Age Relaxation)
                 </h2>
@@ -1085,7 +1085,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 tabIndex={0}
                 role="region"
                 aria-label="Age limit category-wise table"
-                className="overflow-x-auto rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-400 w-full shadow-xs bg-white"
+                className="overflow-x-auto rounded-xl border border-[#cde7f7] focus:outline-none focus:ring-1 focus:ring-slate-400 w-full shadow-xs bg-white"
               >
                 <table className="w-full min-w-[550px] text-left text-sm divide-y divide-slate-200">
                   <thead className="bg-[#f1f5f9] font-bold text-slate-950 text-xs sm:text-sm uppercase tracking-wider">
@@ -1101,7 +1101,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         <th scope="row" className="px-4 py-3.5 font-bold text-slate-950 border-r border-slate-200 font-sans text-sm">
                           {a.category}
                         </th>
-                        <td className="px-4 py-3.5 border-r border-slate-200 whitespace-nowrap text-sm sm:text-base font-black text-[#0b2545]">
+                        <td className="px-4 py-3.5 border-r border-slate-200 whitespace-nowrap text-sm sm:text-base font-black text-[#0055a2]">
                           {a.ageRange}
                         </td>
                         <td className="px-4 py-3.5 text-slate-700 text-xs sm:text-sm leading-relaxed font-normal">
@@ -1115,22 +1115,22 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               {/* Educational Criteria & Special Category Reservations Callouts */}
               <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs">
-                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Prescribed Qualification</span>
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-5 shadow-xs">
+                  <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">Prescribed Qualification</span>
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg mt-1">Intermediate (10+2) Pass</h3>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                     Must have passed Intermediate (10+2) or equivalent recognized by the Telangana State Board of Intermediate Education as on 29th July 2026.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs">
-                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">SC / ST &amp; Technical Requirements</span>
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-5 shadow-xs">
+                  <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">SC / ST &amp; Technical Requirements</span>
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg mt-1">SSC Pass + Inter Appearance</h3>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                     SC &amp; ST candidates who passed SSC (10th) and appeared for both 1st &amp; 2nd year Intermediate exams are eligible. Fire Fighter posts require a valid LMV license.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs">
-                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Special Reservation Quotas</span>
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-5 shadow-xs">
+                  <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">Special Reservation Quotas</span>
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg mt-1">Horizontal Quotas</h3>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                     Special reservation quotas apply for Children of Police Personnel (CPP), Children of Deceased Police Personnel (CDI), Sports Persons (MSP), NCC, and Home Guards (min. 360 days active duty).
@@ -1141,7 +1141,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 5: 4-Stage Selection Procedure */}
             <section id="selection" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   5. 4-Stage Selection Procedure &amp; Marking Methodology
                 </h2>
@@ -1152,10 +1152,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {SELECTION_STAGES.map((st) => (
-                  <div key={st.step} className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs flex flex-col justify-between hover:shadow-sm transition">
+                  <div key={st.step} className="rounded-xl border border-[#cde7f7] bg-white p-5 shadow-xs flex flex-col justify-between hover:shadow-sm transition">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-[#0b2545] uppercase tracking-wider">{st.step}</span>
+                        <span className="text-xs font-mono font-bold text-[#0055a2] uppercase tracking-wider">{st.step}</span>
                         <span className="text-xs font-bold border border-slate-200 bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md">
                           {st.weightage}
                         </span>
@@ -1173,7 +1173,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
 
               {/* Critical Marking Difference Callout */}
-              <div className="mt-5 rounded-xl border border-slate-300 border-l-4 border-l-[#0b2545] bg-white p-5 sm:p-6 text-sm text-slate-800 shadow-xs">
+              <div className="mt-5 rounded-xl border border-[#cde7f7] border-l-4 border-l-[#0055a2] bg-white p-5 sm:p-6 text-sm text-slate-800 shadow-xs">
                 <strong className="block text-slate-950 font-bold text-base mb-2">
                   ⚖️ Critical Selection Distinction: Civil (Post 21) vs Armed Reserve / TSSP (Posts 22, 23, 24)
                 </strong>
@@ -1188,7 +1188,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 6: PMT Standards & PET 100-Marks Slabs */}
             <section id="physical" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   6. Physical Measurements (PMT) &amp; PET 100-Mark Scoring Slabs
                 </h2>
@@ -1200,10 +1200,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               {/* Basic PMT Standards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                 {/* Men Standards */}
-                <div className="rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                   <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex items-center justify-between">
                     <span>Men Candidates Standards (PMT &amp; Events)</span>
-                    <span className="rounded-md bg-white border border-slate-300 text-slate-900 text-xs px-2.5 py-1 font-bold">1600m Run</span>
+                    <span className="rounded-md bg-white border border-[#cde7f7] text-slate-900 text-xs px-2.5 py-1 font-bold">1600m Run</span>
                   </div>
                   <div className="p-4 sm:p-5 space-y-3.5 text-sm sm:text-base text-slate-800 divide-y divide-slate-100">
                     <div>
@@ -1230,10 +1230,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </div>
 
                 {/* Women Standards */}
-                <div className="rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                   <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex items-center justify-between">
                     <span>Women Candidates Standards (PMT &amp; Events)</span>
-                    <span className="rounded-md bg-white border border-slate-300 text-slate-900 text-xs px-2.5 py-1 font-bold">800m Run</span>
+                    <span className="rounded-md bg-white border border-[#cde7f7] text-slate-900 text-xs px-2.5 py-1 font-bold">800m Run</span>
                   </div>
                   <div className="p-4 sm:p-5 space-y-3.5 text-sm sm:text-base text-slate-800 divide-y divide-slate-100">
                     <div>
@@ -1258,10 +1258,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               {/* Official PET 100-Mark Scoring Slabs Tables */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Men 1600m Table */}
-                <div className="rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                   <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
                     <span>Men 1600m Run Scoring Slabs (Posts 22, 23, 24)</span>
-                    <span className="text-xs bg-[#0b2545]/10 text-[#0b2545] font-bold px-2.5 py-1 rounded-md border border-[#0b2545]/20">100 Marks</span>
+                    <span className="text-xs bg-[#0055a2]/10 text-[#0055a2] font-bold px-2.5 py-1 rounded-md border border-[#0055a2]/20">100 Marks</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs sm:text-sm divide-y divide-slate-200">
@@ -1276,7 +1276,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         {MEN_RUN_SLABS.map((sl, idx) => (
                           <tr key={idx} className={idx % 2 === 1 ? "bg-slate-50/60 hover:bg-slate-100/60 transition" : "bg-white hover:bg-slate-100/60 transition"}>
                             <td className="px-3.5 py-2.5 border-r border-slate-200 font-mono font-medium text-slate-900">{sl.timing}</td>
-                            <td className="px-3.5 py-2.5 border-r border-slate-200 text-center font-black text-[#0b2545] text-sm sm:text-base">{sl.marks}</td>
+                            <td className="px-3.5 py-2.5 border-r border-slate-200 text-center font-black text-[#0055a2] text-sm sm:text-base">{sl.marks}</td>
                             <td className="px-3.5 py-2.5 text-slate-700 font-medium">{sl.status}</td>
                           </tr>
                         ))}
@@ -1286,10 +1286,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </div>
 
                 {/* Women 800m Table */}
-                <div className="rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                   <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
                     <span>Women 800m Run Scoring Slabs (Posts 22, 23, 24)</span>
-                    <span className="text-xs bg-[#0b2545]/10 text-[#0b2545] font-bold px-2.5 py-1 rounded-md border border-[#0b2545]/20">100 Marks</span>
+                    <span className="text-xs bg-[#0055a2]/10 text-[#0055a2] font-bold px-2.5 py-1 rounded-md border border-[#0055a2]/20">100 Marks</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs sm:text-sm divide-y divide-slate-200">
@@ -1304,7 +1304,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         {WOMEN_RUN_SLABS.map((sl, idx) => (
                           <tr key={idx} className={idx % 2 === 1 ? "bg-slate-50/60 hover:bg-slate-100/60 transition" : "bg-white hover:bg-slate-100/60 transition"}>
                             <td className="px-3.5 py-2.5 border-r border-slate-200 font-mono font-medium text-slate-900">{sl.timing}</td>
-                            <td className="px-3.5 py-2.5 border-r border-slate-200 text-center font-black text-[#0b2545] text-sm sm:text-base">{sl.marks}</td>
+                            <td className="px-3.5 py-2.5 border-r border-slate-200 text-center font-black text-[#0055a2] text-sm sm:text-base">{sl.marks}</td>
                             <td className="px-3.5 py-2.5 text-slate-700 font-medium">{sl.status}</td>
                           </tr>
                         ))}
@@ -1317,7 +1317,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 7: Medical Standards & Eye Sight (Visual Acuity) Guidelines */}
             <section id="medical" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   7. Medical Standards &amp; Eye Sight (Visual Acuity 6/6) Criteria
                 </h2>
@@ -1331,7 +1331,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 tabIndex={0}
                 role="region"
                 aria-label="Medical standards and eye sight table"
-                className="overflow-x-auto rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-400 w-full mb-5 shadow-xs bg-white"
+                className="overflow-x-auto rounded-xl border border-[#cde7f7] focus:outline-none focus:ring-1 focus:ring-slate-400 w-full mb-5 shadow-xs bg-white"
               >
                 <table className="w-full min-w-[620px] text-left text-sm sm:text-base divide-y divide-slate-200">
                   <thead className="bg-[#f1f5f9] font-bold text-slate-950 text-xs sm:text-sm uppercase tracking-wider">
@@ -1364,9 +1364,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
 
               {/* Disqualifying Physical Conditions */}
-              <div className="rounded-xl border border-slate-300 border-l-4 border-l-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
+              <div className="rounded-xl border border-[#cde7f7] border-l-4 border-l-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#0b2545]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#0055a2]" />
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg">
                     Disqualifying Medical &amp; Physical Conditions
                   </h3>
@@ -1376,7 +1376,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {PHYSICAL_DEFECTS_DISQUALIFIED.map((pd, i) => (
-                    <div key={i} className="rounded-lg border border-slate-200 bg-slate-50/70 p-3.5 shadow-2xs">
+                    <div key={i} className="rounded-lg border border-slate-200 bg-[#f4f9fd] p-3.5 shadow-2xs">
                       <strong className="text-slate-950 font-bold block text-sm sm:text-base">{i + 1}. {pd.defect}</strong>
                       <span className="text-slate-700 block mt-1 text-xs sm:text-sm leading-relaxed">{pd.impact}</span>
                     </div>
@@ -1387,7 +1387,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 8: Driving License Bonus Marks & Weightage */}
             <section id="driving" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   8. Driving License Bonus Marks &amp; Weightage
                 </h2>
@@ -1396,9 +1396,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 Special bonus mark allocation for candidates holding valid motor vehicle driving licenses.
               </p>
 
-              <div className="rounded-xl border border-slate-300 bg-white p-5 sm:p-6 space-y-4 text-sm sm:text-base text-slate-800 shadow-xs">
+              <div className="rounded-xl border border-[#cde7f7] bg-white p-5 sm:p-6 space-y-4 text-sm sm:text-base text-slate-800 shadow-xs">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="inline-block rounded-md bg-[#0b2545] text-white text-xs font-bold px-3 py-1">
+                  <span className="inline-block rounded-md bg-[#0055a2] text-white text-xs font-bold px-3 py-1">
                     +3 Marks Weightage
                   </span>
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg">
@@ -1418,7 +1418,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 9: 95% Local Reservation (Presidential Order 2018) */}
             <section id="reservation" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   9. 95% Local Reservation &amp; Presidential Order 2018 Norms
                 </h2>
@@ -1428,23 +1428,23 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
-                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Local Cadre Quota</span>
-                  <strong className="text-3xl sm:text-4xl font-black text-[#0b2545] block mt-1.5">95% Reserved</strong>
+                <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
+                  <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">Local Cadre Quota</span>
+                  <strong className="text-3xl sm:text-4xl font-black text-[#0055a2] block mt-1.5">95% Reserved</strong>
                   <p className="mt-2 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                     95% of vacancies in District Cadres (Post Code 21 Civil and Post Code 22 AR) are strictly reserved exclusively for candidates who belong to that local district.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
-                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Open Competition Quota</span>
-                  <strong className="text-3xl sm:text-4xl font-black text-[#0b2545] block mt-1.5">5% Unreserved</strong>
+                <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
+                  <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">Open Competition Quota</span>
+                  <strong className="text-3xl sm:text-4xl font-black text-[#0055a2] block mt-1.5">5% Unreserved</strong>
                   <p className="mt-2 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                     5% of vacancies are open competition (unreserved), where candidates from all 33 districts of Telangana and eligible non-local candidates compete purely on merit.
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-xl border border-slate-300 bg-white p-5 sm:p-6 text-sm sm:text-base text-slate-800 space-y-3 shadow-xs">
+              <div className="mt-5 rounded-xl border border-[#cde7f7] bg-white p-5 sm:p-6 text-sm sm:text-base text-slate-800 space-y-3 shadow-xs">
                 <h3 className="font-bold text-slate-950 text-base sm:text-lg">How is Local Candidature Determined?</h3>
                 <p className="leading-relaxed text-slate-700">
                   <strong>School Study Rule:</strong> A candidate is regarded as a local candidate to a district if they studied in an educational institution in that district for a minimum period of <strong>not less than 4 consecutive academic years</strong> ending with the academic year in which they first appeared for the 7th class examination (Classes 1st to 7th).
@@ -1457,7 +1457,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 10: Documents & Certificate Verification Checklist */}
             <section id="documents" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   10. Mandatory Document Verification Checklist (Part-II Application &amp; DV)
                 </h2>
@@ -1466,11 +1466,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 Comprehensive checklist of official certificates required during Part-II online upload and in-person Certificate Verification.
               </p>
 
-              <div className="divide-y divide-slate-200 border border-slate-300 rounded-xl overflow-hidden bg-white shadow-xs">
+              <div className="divide-y divide-slate-200 border border-[#cde7f7] rounded-xl overflow-hidden bg-white shadow-xs">
                 {DOCUMENTS_CHECKLIST.map((doc, idx) => (
                   <div key={idx} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
                     <div className="flex items-start gap-3.5">
-                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0 mt-0.5">
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
                       <div>
@@ -1488,7 +1488,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 11: Exam Pattern & Minimum Qualifying Marks */}
             <section id="pattern" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   11. Written Examination Scheme &amp; Minimum Qualifying Marks
                 </h2>
@@ -1499,30 +1499,30 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               {/* 4 Stat Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="rounded-xl border border-slate-300 bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Questions</span>
-                  <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">200 MCQs</strong>
+                  <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">200 MCQs</strong>
                   <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">Objective type</span>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Marks</span>
-                  <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">200 Marks</strong>
+                  <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">200 Marks</strong>
                   <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">1 mark per Q</span>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Duration</span>
-                  <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">3 Hours</strong>
+                  <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">3 Hours</strong>
                   <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">180 minutes</span>
                 </div>
-                <div className="rounded-xl border border-slate-300 bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
+                <div className="rounded-xl border border-[#cde7f7] bg-white p-4 sm:p-5 text-center shadow-xs hover:shadow-sm transition">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Negative Mark</span>
-                  <strong className="text-2xl sm:text-3xl font-black text-[#0b2545] block mt-1">0.20 Marks</strong>
+                  <strong className="text-2xl sm:text-3xl font-black text-[#0055a2] block mt-1">0.20 Marks</strong>
                   <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">20% deduction</span>
                 </div>
               </div>
 
               {/* Qualifying Marks Table */}
-              <div className="mt-5 rounded-xl border border-slate-300 overflow-hidden shadow-xs bg-white">
+              <div className="mt-5 rounded-xl border border-[#cde7f7] overflow-hidden shadow-xs bg-white">
                 <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
                   <span>Category-Wise Minimum Qualifying Marks</span>
                   <span className="text-xs font-semibold text-slate-700">Applies to PWT &amp; FWE</span>
@@ -1532,7 +1532,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     <div key={qm.category} className="p-4 sm:p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-sm sm:text-base hover:bg-slate-50/50 transition">
                       <span className="font-bold text-slate-950">{qm.category}</span>
                       <div className="flex items-center gap-3">
-                        <span className="rounded-lg bg-[#0b2545]/8 text-[#0b2545] px-3 py-1 text-xs sm:text-sm font-bold border border-[#0b2545]/20">
+                        <span className="rounded-lg bg-[#0055a2]/8 text-[#0055a2] px-3 py-1 text-xs sm:text-sm font-bold border border-[#0055a2]/20">
                           PWT: {qm.pwtPercent} ({qm.pwtMinMarks})
                         </span>
                         <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs sm:text-sm font-semibold text-slate-800 border border-slate-200">
@@ -1547,7 +1547,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 12: Syllabus & Marks-Wise Weightage */}
             <section id="syllabus" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   12. TS Constable Syllabus: Marks Wise Weightage, Reasoning Syllabus &amp; Telugu PDF Download
                 </h2>
@@ -1557,11 +1557,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </p>
 
               {/* Component 1: Official TS Constable Syllabus PDF Download in Telugu */}
-              <div className="rounded-xl border border-slate-300 border-l-4 border-l-[#0b2545] bg-white p-5 sm:p-6 mb-6 shadow-xs">
+              <div className="rounded-xl border border-[#cde7f7] border-l-4 border-l-[#0055a2] bg-white p-5 sm:p-6 mb-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-[#0b2545] text-white text-xs px-2.5 py-1 font-bold uppercase tracking-wider">Official Syllabus</span>
+                      <span className="rounded-md bg-[#0055a2] text-white text-xs px-2.5 py-1 font-bold uppercase tracking-wider">Official Syllabus</span>
                       <span className="text-xs sm:text-sm text-slate-600 font-medium">Bilingual &bull; Telugu &amp; English</span>
                     </div>
                     <h3 className="font-brand text-base sm:text-lg font-bold text-slate-950 mt-1.5">
@@ -1576,7 +1576,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition shadow-2xs"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#cde7f7] bg-white hover:bg-slate-50 text-slate-800 px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition shadow-2xs"
                       title="View Official TSLPRB Gazette Mirror"
                     >
                       View ↗
@@ -1584,8 +1584,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     <a
                       href="/docs/telangana-police-constable-notification-2026-official.pdf"
                       download="TSLPRB_Police_Constable_Syllabus_Telugu_Official.pdf"
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white px-4 py-2.5 text-xs sm:text-sm font-semibold transition shadow-sm"
-                      title="Download TS Constable Syllabus PDF in Telugu (748 KB)"
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#fb8916] hover:bg-[#e2740a] text-white px-4 py-2.5 text-xs sm:text-sm font-bold transition shadow-sm" title="Download TS Constable Syllabus PDF in Telugu (748 KB)"
                     >
                       <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -1597,7 +1596,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
 
               {/* Component 2: TS Constable Syllabus Marks Wise & Weightage Marks Table */}
-              <div className="mb-6 rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+              <div className="mb-6 rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                 <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <span>TS Constable Syllabus Marks Wise &amp; Weightage Marks (200 Questions / 200 Marks)</span>
                   <span className="text-xs font-semibold text-slate-700">Duration: 3 Hours (180 Mins) &bull; Negative: 0.20 Marks</span>
@@ -1620,14 +1619,14 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                           <td className="px-4 py-3 font-bold text-slate-950 border-r border-slate-200">{sub.name}</td>
                           <td lang="te" className="px-4 py-3 font-telugu text-slate-900 border-r border-slate-200 text-sm sm:text-base font-medium">{sub.teluguName}</td>
                           <td className="px-4 py-3 text-slate-600 text-xs sm:text-sm border-r border-slate-200">{sub.level}</td>
-                          <td className="px-4 py-3 text-right font-black text-[#0b2545] text-base sm:text-lg">{sub.weightage}</td>
+                          <td className="px-4 py-3 text-right font-black text-[#0055a2] text-base sm:text-lg">{sub.weightage}</td>
                         </tr>
                       ))}
-                      <tr className="bg-[#0b2545]/5 font-bold text-[#0b2545] border-t-2 border-[#0b2545]/20">
-                        <td colSpan={4} className="px-4 py-4 text-right uppercase tracking-wider text-xs sm:text-sm font-extrabold border-r border-[#0b2545]/20">
+                      <tr className="bg-[#0055a2]/5 font-bold text-[#0055a2] border-t-2 border-[#0055a2]/20">
+                        <td colSpan={4} className="px-4 py-4 text-right uppercase tracking-wider text-xs sm:text-sm font-extrabold border-r border-[#0055a2]/20">
                           Total Examination Marks (PWT &amp; FWE Civil)
                         </td>
-                        <td className="px-4 py-4 text-right text-base sm:text-lg font-black text-[#0b2545]">
+                        <td className="px-4 py-4 text-right text-base sm:text-lg font-black text-[#0055a2]">
                           200 Questions / 200 Marks
                         </td>
                       </tr>
@@ -1640,10 +1639,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
 
               {/* Component 3: TS Constable Reasoning Syllabus (Deep-Dive Blueprint) */}
-              <div className="mb-6 rounded-xl border border-slate-300 overflow-hidden bg-white shadow-xs">
+              <div className="mb-6 rounded-xl border border-[#cde7f7] overflow-hidden bg-white shadow-xs">
                 <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex items-center justify-between">
                   <span>TS Constable Reasoning Syllabus (Mental Ability &bull; 25 Marks Weightage)</span>
-                  <span className="rounded-md bg-[#0b2545]/10 text-[#0b2545] border border-[#0b2545]/20 text-xs px-2.5 py-1 font-bold">25 Marks</span>
+                  <span className="rounded-md bg-[#0055a2]/10 text-[#0055a2] border border-[#0055a2]/20 text-xs px-2.5 py-1 font-bold">25 Marks</span>
                 </div>
                 <div className="p-5 sm:p-6">
                   <p className="text-sm sm:text-base text-slate-800 mb-5 leading-relaxed">
@@ -1652,92 +1651,92 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Verbal Reasoning Column */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 shadow-2xs">
+                    <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-5 shadow-2xs">
                       <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-3.5">
                         <h4 className="font-bold text-sm sm:text-base text-slate-950 uppercase tracking-wider">
                           Part A: Verbal Reasoning (15 &ndash; 17 Marks)
                         </h4>
-                        <span className="text-xs font-bold text-[#0b2545]">High Weightage</span>
+                        <span className="text-xs font-bold text-[#0055a2]">High Weightage</span>
                       </div>
                       <ul className="space-y-2 text-xs sm:text-sm text-slate-800 leading-relaxed">
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Analogies:</strong> Word analogy, letter/alphabet analogy, number analogy &amp; paired relations.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Coding &amp; Decoding:</strong> Letter shifting, numeric coding, substitution &amp; deciphering coded messages.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Series Completion:</strong> Number series, alphabetical series, alternating series &amp; missing term identification.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Blood Relations:</strong> Deciphering family relationships, tree diagrams &amp; coded relation statements.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Direction &amp; Distance:</strong> 8-point compass navigation, turning angles &amp; Pythagoras distance problems.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Syllogisms &amp; Venn Diagrams:</strong> Two-statement deductions, Euler circle overlaps &amp; set relations.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Ranking &amp; Seating Arrangement:</strong> Left/right rank calculations, circular &amp; linear row orders.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Arithmetical Reasoning:</strong> Age word problems, mathematical symbol interchanging &amp; balance equations.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Clocks &amp; Calendars:</strong> Minute-hour hand angle calculation, leap year &amp; odd-day counting.</span>
                         </li>
                       </ul>
                     </div>
 
                     {/* Non-Verbal Reasoning Column */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 shadow-2xs">
+                    <div className="rounded-xl border border-slate-200 bg-[#f4f9fd] p-5 shadow-2xs">
                       <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-3.5">
                         <h4 className="font-bold text-sm sm:text-base text-slate-950 uppercase tracking-wider">
                           Part B: Non-Verbal Reasoning (8 &ndash; 10 Marks)
                         </h4>
-                        <span className="text-xs font-bold text-[#0b2545]">Spatial Focus</span>
+                        <span className="text-xs font-bold text-[#0055a2]">Spatial Focus</span>
                       </div>
                       <ul className="space-y-2 text-xs sm:text-sm text-slate-800 leading-relaxed">
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Spatial Visualization:</strong> Mental rotation, figure matching &amp; perspective transformation.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Mirror &amp; Water Images:</strong> Lateral inversion of alphanumeric characters, symbols &amp; compound shapes.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Paper Folding &amp; Cutting:</strong> Symmetric unfolding &amp; punched hole location mapping.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Embedded Figures:</strong> Finding hidden geometric patterns embedded within complex figures.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Pattern &amp; Figure Completion:</strong> Quadrant filling &amp; grid continuation logic.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Cubes &amp; Dice:</strong> Opposite face determination, standard vs general dice, and net box folding.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Non-Verbal Series:</strong> Clockwise/anticlockwise icon rotation &amp; stroke progression sequences.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-[#0b2545] font-bold text-base">&bull;</span>
+                          <span className="text-[#0055a2] font-bold text-base">&bull;</span>
                           <span><strong>Counting of Figures:</strong> Triangles, squares, straight lines &amp; rectangle counting formulas.</span>
                         </li>
                       </ul>
@@ -1756,7 +1755,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {SUBJECTS.map((sub) => (
-                  <div key={sub.number} className="rounded-xl border border-slate-300 bg-white p-5 hover:border-slate-400 shadow-xs hover:shadow-sm transition flex flex-col justify-between">
+                  <div key={sub.number} className="rounded-xl border border-[#cde7f7] bg-white p-5 hover:border-slate-400 shadow-xs hover:shadow-sm transition flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
@@ -1765,7 +1764,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                           </span>
                           <h3 className="text-base sm:text-lg font-bold text-slate-950">{sub.name}</h3>
                         </div>
-                        <span className="rounded-md bg-white border border-slate-200 px-2.5 py-1 text-xs font-bold text-[#0b2545] shadow-2xs shrink-0">
+                        <span className="rounded-md bg-white border border-slate-200 px-2.5 py-1 text-xs font-bold text-[#0055a2] shadow-2xs shrink-0">
                           {sub.weightage}
                         </span>
                       </div>
@@ -1786,7 +1785,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 13: Application Fee Structure & Apply Steps */}
             <section id="fees" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   13. Application Fee &amp; How to Apply Online
                 </h2>
@@ -1797,21 +1796,21 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               {/* Fee Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
-                  <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">General / OC, BC &amp; Other States</span>
-                  <strong className="text-3xl sm:text-4xl font-black text-[#0b2545] block mt-1.5">₹800</strong>
+                <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
+                  <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">General / OC, BC &amp; Other States</span>
+                  <strong className="text-3xl sm:text-4xl font-black text-[#0055a2] block mt-1.5">₹800</strong>
                   <p className="text-xs sm:text-sm text-slate-700 mt-2 leading-relaxed font-normal">
                     Payable online via Net Banking, UPI, or Debit/Credit card.
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
+                <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">TS SC &amp; ST Candidates</span>
+                    <span className="text-xs font-bold text-[#0055a2] uppercase tracking-wider block">TS SC &amp; ST Candidates</span>
                     <span className="rounded-md bg-amber-50 text-amber-900 border border-amber-300 text-xs px-2.5 py-1 font-bold">
                       50% Concession
                     </span>
                   </div>
-                  <strong className="text-3xl sm:text-4xl font-black text-[#0b2545] block mt-1.5">₹400</strong>
+                  <strong className="text-3xl sm:text-4xl font-black text-[#0055a2] block mt-1.5">₹400</strong>
                   <p className="text-xs sm:text-sm text-slate-700 mt-2 leading-relaxed font-normal">
                     Applicable for candidates belonging to Telangana with valid community certificates.
                   </p>
@@ -1823,25 +1822,25 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">
                   Summary of Application Steps
                 </h3>
-                <ol className="divide-y divide-slate-200 border border-slate-300 rounded-xl overflow-hidden text-sm sm:text-base text-slate-800 bg-white shadow-xs">
+                <ol className="divide-y divide-slate-200 border border-[#cde7f7] rounded-xl overflow-hidden text-sm sm:text-base text-slate-800 bg-white shadow-xs">
                   <li className="p-4 sm:p-4.5 flex items-start gap-3.5">
-                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0">1</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0">1</span>
                     <span>Visit the official recruitment portal at <strong className="text-slate-950">www.tgprb.in</strong>.</span>
                   </li>
                   <li className="p-4 sm:p-4.5 bg-slate-50/50 flex items-start gap-3.5">
-                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0">2</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0">2</span>
                     <span>Authenticate your mobile number via OTP to create candidate credentials.</span>
                   </li>
                   <li className="p-4 sm:p-4.5 flex items-start gap-3.5">
-                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0">3</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0">3</span>
                     <span>Complete online examination fee payment (₹800 or ₹400).</span>
                   </li>
                   <li className="p-4 sm:p-4.5 bg-slate-50/50 flex items-start gap-3.5">
-                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0">4</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0">4</span>
                     <span>Fill Part-I application details, post preferences, and upload photo/signature.</span>
                   </li>
                   <li className="p-4 sm:p-4.5 flex items-start gap-3.5">
-                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0">5</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0">5</span>
                     <span>Submit and download the final acknowledgment form with reference number.</span>
                   </li>
                 </ol>
@@ -1850,7 +1849,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 14: Official Links & Original PDF Hub */}
             <section id="links" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   14. Official Notification PDF &amp; Direct Links
                 </h2>
@@ -1859,12 +1858,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 Verified direct downloads of the original government recruitment gazette, press release, and official portal.
               </p>
 
-              <div className="divide-y divide-slate-200 border border-slate-300 rounded-xl overflow-hidden text-sm sm:text-base bg-white shadow-xs">
+              <div className="divide-y divide-slate-200 border border-[#cde7f7] rounded-xl overflow-hidden text-sm sm:text-base bg-white shadow-xs">
                 {/* 1. Official Notification PDF */}
                 <div className="p-4 sm:p-5 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-3.5">
-                    <div className="h-11 w-11 rounded-lg bg-[#0b2545]/8 border border-[#0b2545]/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[#0b2545] font-black text-sm uppercase">PDF</span>
+                    <div className="h-11 w-11 rounded-lg bg-[#0055a2]/8 border border-[#0055a2]/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[#0055a2] font-black text-sm uppercase">PDF</span>
                     </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -1885,7 +1884,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     <a
                       href="/docs/telangana-police-constable-notification-2026-official.pdf"
                       download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white font-semibold px-4 py-2.5 transition text-xs sm:text-sm shadow-sm"
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#0055a2] hover:bg-[#003e78] text-white font-semibold px-4 py-2.5 transition text-xs sm:text-sm shadow-sm"
                     >
                       <span>📥 Download PDF (748 KB)</span>
                     </a>
@@ -1893,7 +1892,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-800 font-semibold px-3.5 py-2.5 transition text-xs sm:text-sm border border-slate-300 shadow-2xs"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-800 font-semibold px-3.5 py-2.5 transition text-xs sm:text-sm border border-[#cde7f7] shadow-2xs"
                     >
                       <span>View ↗</span>
                     </a>
@@ -1915,7 +1914,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     <a
                       href="/docs/telangana-police-constable-2026-press-note.pdf"
                       download="TSLPRB_Constable_2026_Press_Note.pdf"
-                      className="inline-flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2.5 transition text-xs sm:text-sm border border-slate-300"
+                      className="inline-flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2.5 transition text-xs sm:text-sm border border-[#cde7f7]"
                     >
                       <span>📥 Press Note PDF</span>
                     </a>
@@ -1940,7 +1939,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     href="https://www.tgprb.in"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 transition text-xs sm:text-sm border border-slate-300"
+                    className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 transition text-xs sm:text-sm border border-[#cde7f7]"
                   >
                     Visit tgprb.in &rarr;
                   </a>
@@ -1951,7 +1950,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-slate-950 text-base sm:text-lg">58 Full-Length Bilingual Mock Tests</h3>
-                      <span className="rounded-md bg-[#0b2545]/10 text-[#0b2545] border border-[#0b2545]/20 text-xs px-2.5 py-1 font-bold">
+                      <span className="rounded-md bg-[#0055a2]/10 text-[#0055a2] border border-[#0055a2]/20 text-xs px-2.5 py-1 font-bold">
                         Free Access
                       </span>
                     </div>
@@ -1959,7 +1958,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </div>
                   <Link
                     href="/mock-tests/telangana/police-constable-free-mock-test"
-                    className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white font-semibold px-4 py-2.5 transition text-xs sm:text-sm shadow-sm"
+                    className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-[#fb8916] hover:bg-[#e2740a] text-white font-bold px-4 py-2.5 transition text-xs sm:text-sm shadow-sm"
                   >
                     Practice Free Tests &rarr;
                   </Link>
@@ -1985,7 +1984,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Section 15: Frequently Asked Questions */}
             <section id="faqs" className="scroll-mt-6">
-              <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
+              <div className="border-b-2 border-[#0055a2] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   15. Frequently Asked Questions (English &amp; Telugu)
                 </h2>
@@ -1996,9 +1995,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
               <div className="space-y-4">
                 {BILINGUAL_FAQS.map((faq, idx) => (
-                  <div key={idx} className="rounded-xl border border-slate-300 bg-white p-5 sm:p-6 shadow-xs hover:shadow-sm transition">
+                  <div key={idx} className="rounded-xl border border-[#cde7f7] bg-white p-5 sm:p-6 shadow-xs hover:shadow-sm transition">
                     <div className="flex items-start gap-3.5">
-                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b2545] text-white font-bold text-xs sm:text-sm shrink-0 mt-0.5">
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0055a2] text-white font-bold text-xs sm:text-sm shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
                       <div>
@@ -2026,11 +2025,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </section>
 
             {/* Official Source & Reference */}
-            <section className="rounded-xl border border-slate-300 bg-white p-5 sm:p-6 text-sm sm:text-base text-slate-700 leading-relaxed shadow-xs">
+            <section className="rounded-xl border border-[#cde7f7] bg-white p-5 sm:p-6 text-sm sm:text-base text-slate-700 leading-relaxed shadow-xs">
               <strong className="block text-slate-950 font-bold mb-1.5 text-base sm:text-lg">
                 Official Information Source:
               </strong>
-              This recruitment guide is compiled from official notifications and Government Orders issued by the Telangana State Level Police Recruitment Board. For direct candidate login and official announcements, visit the official portal at <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-[#0b2545] underline font-bold hover:text-[#071a32]">www.tgprb.in</a>.
+              This recruitment guide is compiled from official notifications and Government Orders issued by the Telangana State Level Police Recruitment Board. For direct candidate login and official announcements, visit the official portal at <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-[#0055a2] underline font-bold hover:text-[#003e78]">www.tgprb.in</a>.
             </section>
 
           </div>
@@ -2039,9 +2038,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           <aside className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 space-y-6 lg:sticky lg:top-16">
 
             {/* Official PDF Download Card */}
-            <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
+            <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
               <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                <span className="rounded-md bg-[#0b2545] text-white text-xs font-bold px-2.5 py-1 uppercase tracking-wide">
+                <span className="rounded-md bg-[#0055a2] text-white text-xs font-bold px-2.5 py-1 uppercase tracking-wide">
                   Official PDF
                 </span>
                 <span className="text-xs font-mono font-bold text-slate-600">7,112 Posts</span>
@@ -2056,7 +2055,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <a
                   href="/docs/telangana-police-constable-notification-2026-official.pdf"
                   download="TSLPRB_Police_Constable_Notification_2026_Official.pdf"
-                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white py-3 px-4 text-xs sm:text-sm font-semibold transition shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#0055a2] hover:bg-[#003e78] text-white py-3 px-4 text-xs sm:text-sm font-semibold transition shadow-sm"
                 >
                   <span>📥 Download Official PDF (748 KB)</span>
                 </a>
@@ -2064,7 +2063,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 py-2.5 px-4 text-xs sm:text-sm font-semibold transition shadow-2xs"
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-[#cde7f7] bg-white hover:bg-slate-50 text-slate-800 py-2.5 px-4 text-xs sm:text-sm font-semibold transition shadow-2xs"
                 >
                   <span>View ↗</span>
                 </a>
@@ -2072,9 +2071,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </div>
 
             {/* Quick Summary Card */}
-            <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
+            <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
               <div className="border-b border-slate-200 pb-3">
-                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#0b2545]">
+                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#0055a2]">
                   Quick Facts Overview
                 </h3>
               </div>
@@ -2089,7 +2088,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </div>
                 <div className="flex justify-between items-center">
                   <dt className="text-slate-600 font-medium">Total Posts</dt>
-                  <dd className="font-bold text-[#0b2545]">7,112 Posts</dd>
+                  <dd className="font-bold text-[#0055a2]">7,112 Posts</dd>
                 </div>
                 <div className="flex justify-between items-center">
                   <dt className="text-slate-600 font-medium">PWT Exam Date</dt>
@@ -2119,8 +2118,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             </div>
 
             {/* Free Mock Test Practice Widget */}
-            <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#0b2545] block">
+            <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#0055a2] block">
                 Free Practice Series
               </span>
               <h3 className="mt-1.5 text-lg sm:text-xl font-bold text-slate-950 font-brand">
@@ -2131,25 +2130,25 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </p>
               <ul className="mt-3.5 space-y-2 text-xs sm:text-sm text-slate-700">
                 <li className="flex items-center gap-2">
-                  <span className="text-[#0b2545] font-black">&bull;</span> 200 Questions timed for 180 mins
+                  <span className="text-[#0055a2] font-black">&bull;</span> 200 Questions timed for 180 mins
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#0b2545] font-black">&bull;</span> Genuine 0.20 negative marking
+                  <span className="text-[#0055a2] font-black">&bull;</span> Genuine 0.20 negative marking
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#0b2545] font-black">&bull;</span> Step-by-step bilingual explanations
+                  <span className="text-[#0055a2] font-black">&bull;</span> Step-by-step bilingual explanations
                 </li>
               </ul>
               <Link
                 href="/mock-tests/telangana/police-constable-free-mock-test"
-                className="mt-5 block w-full rounded-lg bg-[#0b2545] hover:bg-[#071a32] text-white text-center py-3 text-sm font-bold transition shadow-sm"
+                className="mt-5 block w-full rounded-lg bg-[#fb8916] hover:bg-[#e2740a] text-white text-center py-3 text-sm font-bold transition shadow-sm"
               >
                 Practice Free Tests &rarr;
               </Link>
             </div>
 
             {/* Official Website & Helpline Widget */}
-            <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 text-sm text-slate-700 shadow-xs">
+            <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 text-sm text-slate-700 shadow-xs">
               <h3 className="font-bold text-slate-950 text-base mb-2">Official Board Portal</h3>
               <p className="leading-relaxed text-xs sm:text-sm text-slate-600">
                 Candidate registration, hall tickets, and results are published on the official board website:
@@ -2158,33 +2157,33 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 href="https://www.tgprb.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-block text-xs sm:text-sm font-bold text-[#0b2545] underline hover:text-[#071a32]"
+                className="mt-3 inline-block text-xs sm:text-sm font-bold text-[#0055a2] underline hover:text-[#003e78]"
               >
                 https://www.tgprb.in &rarr;
               </a>
             </div>
 
             {/* Table of Contents Quick Links */}
-            <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#0b2545] bg-white p-5 sm:p-6 shadow-xs">
-              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#0b2545] border-b border-slate-200 pb-3">
+            <div className="rounded-xl border border-[#cde7f7] border-t-4 border-t-[#0055a2] bg-white p-5 sm:p-6 shadow-xs">
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#0055a2] border-b border-slate-200 pb-3">
                 In This Article
               </h3>
               <ul className="mt-3.5 space-y-2.5 text-xs sm:text-sm text-slate-700">
-                <li><a href="#schedule" className="hover:text-[#0b2545] transition font-medium">1. Important Dates</a></li>
-                <li><a href="#vacancies" className="hover:text-[#0b2545] transition font-medium">2. Cadre-Wise Vacancies &amp; Post Codes</a></li>
-                <li><a href="#salary" className="hover:text-[#0b2545] transition font-medium">3. Salary Structure &amp; In-Hand Pay</a></li>
-                <li><a href="#eligibility" className="hover:text-[#0b2545] transition font-medium">4. Age &amp; G.O. Ms 87</a></li>
-                <li><a href="#selection" className="hover:text-[#0b2545] transition font-medium">5. Selection Procedure &amp; Marking</a></li>
-                <li><a href="#physical" className="hover:text-[#0b2545] transition font-medium">6. PMT &amp; PET 100-Mark Slabs</a></li>
-                <li><a href="#medical" className="hover:text-[#0b2545] transition font-medium">7. Medical Standards &amp; Eye Sight 6/6</a></li>
-                <li><a href="#driving" className="hover:text-[#0b2545] transition font-medium">8. Driving License Bonus (+3 Marks)</a></li>
-                <li><a href="#reservation" className="hover:text-[#0b2545] transition font-medium">9. 95% Local Reservation Rules</a></li>
-                <li><a href="#documents" className="hover:text-[#0b2545] transition font-medium">10. Certificate Verification Checklist</a></li>
-                <li><a href="#pattern" className="hover:text-[#0b2545] transition font-medium">11. Exam Pattern &amp; Qualifying Marks</a></li>
-                <li><a href="#syllabus" className="hover:text-[#0b2545] transition font-medium">12. Syllabus, Marks Wise &amp; Telugu PDF</a></li>
-                <li><a href="#fees" className="hover:text-[#0b2545] transition font-medium">13. Application Fee &amp; Steps</a></li>
-                <li><a href="#links" className="hover:text-[#0b2545] transition font-medium">14. Official Notification PDF &amp; Links</a></li>
-                <li><a href="#faqs" className="hover:text-[#0b2545] transition font-medium">15. Frequently Asked Questions</a></li>
+                <li><a href="#schedule" className="hover:text-[#0055a2] transition font-medium">1. Important Dates</a></li>
+                <li><a href="#vacancies" className="hover:text-[#0055a2] transition font-medium">2. Cadre-Wise Vacancies &amp; Post Codes</a></li>
+                <li><a href="#salary" className="hover:text-[#0055a2] transition font-medium">3. Salary Structure &amp; In-Hand Pay</a></li>
+                <li><a href="#eligibility" className="hover:text-[#0055a2] transition font-medium">4. Age &amp; G.O. Ms 87</a></li>
+                <li><a href="#selection" className="hover:text-[#0055a2] transition font-medium">5. Selection Procedure &amp; Marking</a></li>
+                <li><a href="#physical" className="hover:text-[#0055a2] transition font-medium">6. PMT &amp; PET 100-Mark Slabs</a></li>
+                <li><a href="#medical" className="hover:text-[#0055a2] transition font-medium">7. Medical Standards &amp; Eye Sight 6/6</a></li>
+                <li><a href="#driving" className="hover:text-[#0055a2] transition font-medium">8. Driving License Bonus (+3 Marks)</a></li>
+                <li><a href="#reservation" className="hover:text-[#0055a2] transition font-medium">9. 95% Local Reservation Rules</a></li>
+                <li><a href="#documents" className="hover:text-[#0055a2] transition font-medium">10. Certificate Verification Checklist</a></li>
+                <li><a href="#pattern" className="hover:text-[#0055a2] transition font-medium">11. Exam Pattern &amp; Qualifying Marks</a></li>
+                <li><a href="#syllabus" className="hover:text-[#0055a2] transition font-medium">12. Syllabus, Marks Wise &amp; Telugu PDF</a></li>
+                <li><a href="#fees" className="hover:text-[#0055a2] transition font-medium">13. Application Fee &amp; Steps</a></li>
+                <li><a href="#links" className="hover:text-[#0055a2] transition font-medium">14. Official Notification PDF &amp; Links</a></li>
+                <li><a href="#faqs" className="hover:text-[#0055a2] transition font-medium">15. Frequently Asked Questions</a></li>
               </ul>
             </div>
 
@@ -2194,17 +2193,17 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       </div>
 
       {/* Broadsheet Newspaper Editorial Footer */}
-      <footer className="mt-16 border-t border-slate-300 bg-[#ebd7cf] py-10 text-center text-xs sm:text-sm text-slate-700 w-full shadow-inner">
+      <footer className="mt-16 border-t-4 border-t-[#fb8916] bg-[#002b54] py-10 text-center text-xs sm:text-sm text-slate-200 w-full shadow-inner">
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-2">
-          <p className="font-bold text-slate-900 text-sm sm:text-base">
+          <p className="font-bold text-white text-sm sm:text-base">
             Varadhi Prep &bull; Examination Information &amp; Practice Portal
           </p>
-          <p className="text-slate-600">
+          <p className="text-slate-300">
             Official examination details sourced directly from Telangana State Level Police Recruitment Board announcements.
           </p>
           <p>
             Official Board Portal:{" "}
-            <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-[#0b2545] underline hover:text-[#071a32] font-bold">
+            <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-[#fb8916] underline hover:text-[#ffaa44] font-bold">
               www.tgprb.in
             </a>
           </p>
