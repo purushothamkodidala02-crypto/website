@@ -71,20 +71,6 @@ insert into public.primary_exam_pages (
   1
 ),
 (
-  'Andhra Pradesh Police Constable Notification 2026',
-  'ఆంధ్రప్రదేశ్ పోలీస్ కానిస్టేబుల్ రిక్రూట్‌మెంట్ నోటిఫికేషన్',
-  'Andhra Pradesh',
-  'live',
-  '200 OK',
-  '15 Nov 2026',
-  '15 Nov 2026',
-  'https://varadhiprep.in/news/andhra-police-constable-notification-2026',
-  '6,100+ Posts',
-  'APSLPRB Constable civil & armed reserve cadre breakdown, age criteria, physical efficiency standards, syllabus marks-wise distribution, and practice test series.',
-  ARRAY['APSLPRB Cadre', 'Physical Efficiency Standards', 'Bilingual Mock Tests', 'State-Specific Syllabus'],
-  2
-),
-(
   'AP Endowment Officer Notification 2026',
   'ఆంధ్రప్రదేశ్ దేవాదాయ శాఖ ఎగ్జిక్యూటివ్ ఆఫీసర్ నోటిఫికేషన్ 2026',
   'Andhra Pradesh',
@@ -96,7 +82,7 @@ insert into public.primary_exam_pages (
   '104 Posts',
   'APSSC Executive Officer Grade-III Notification No. 23/2026, Paper-I GS & Paper-II Hindu Philosophy weightage, Act 30/1987, and official Gazette PDF download.',
   ARRAY['APPSC Cadre-III', 'Hindu Philosophy Paper-II', 'Timed Mock Tests', 'Official Gazette PDF'],
-  3
+  2
 )
 on conflict (url) do update set
   title = excluded.title,

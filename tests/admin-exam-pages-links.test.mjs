@@ -17,7 +17,7 @@ test("Admin Exam Pages has dynamic link upload and removal features", async () =
   assert.match(manager, /\+ Upload Link/);
   assert.match(manager, /deletePrimaryExamPage/);
   assert.match(manager, /Remove/);
-  assert.match(manager, /https:\/\/varadhiprep\.in\/news\/andhra-police-constable-notification-2026/);
+  assert.match(manager, /https:\/\/varadhiprep\.in\/news\/ap-endowment-officer-notification-2026/);
 
   // Actions provide createPrimaryExamPage and deletePrimaryExamPage
   assert.match(actions, /export async function createPrimaryExamPage/);
@@ -31,35 +31,14 @@ test("Admin Exam Pages has dynamic link upload and removal features", async () =
   assert.match(page, /primaryPages=\{primaryPages\}/);
 });
 
-test("Andhra Police Constable Notification 2026 news page and redirects exist", async () => {
-  const [newsPage, rootRedirect, slugAliases, sitemap] = await Promise.all([
-    read("app/news/andhra-police-constable-notification-2026/page.tsx"),
-    read("app/andhra-police-constable-notification-2026/page.tsx"),
+test("Andhra Police Constable Notification 2026 news page and redirects are removed", async () => {
+  const [slugAliases, sitemap] = await Promise.all([
     read("app/news/[slug]/page.tsx"),
     read("app/sitemap.ts"),
   ]);
 
-  // News page content and SEO
-  assert.match(newsPage, /Andhra Pradesh Police Constable Notification 2026/);
-  assert.match(newsPage, /ఆంధ్రప్రదేశ్ పోలీస్ కానిస్టేబుల్/);
-  assert.match(newsPage, /APSLPRB/);
-  assert.match(newsPage, /6,100\+/);
-  assert.match(newsPage, /₹25,220/);
-  assert.match(newsPage, /₹80,910/);
-  assert.match(newsPage, /1600m/i);
-  assert.match(newsPage, /"@type":\s*"NewsArticle"/);
-  assert.match(newsPage, /"@type":\s*"JobPosting"/);
-  assert.match(newsPage, /"@type":\s*"FAQPage"/);
-
-  // Root redirect
-  assert.match(rootRedirect, /permanentRedirect\(["']\/news\/andhra-police-constable-notification-2026["']\)/);
-
-  // Slug aliases
-  assert.match(slugAliases, /AP_POLICE_ALIASES/);
-  assert.match(slugAliases, /andhra-police-constable-notification-2026/);
-
-  // Sitemap
-  assert.match(sitemap, /\/news\/andhra-police-constable-notification-2026/);
+  assert.doesNotMatch(slugAliases, /andhra-police-constable-notification-2026/);
+  assert.doesNotMatch(sitemap, /\/news\/andhra-police-constable-notification-2026/);
 });
 
 test("Database migration creates primary_exam_pages with RLS and seed data", async () => {
@@ -69,5 +48,6 @@ test("Database migration creates primary_exam_pages with RLS and seed data", asy
   assert.match(migration, /alter table public\.primary_exam_pages enable row level security/);
   assert.match(migration, /create policy "Anyone can view primary exam pages"/);
   assert.match(migration, /create policy "Admins can manage primary exam pages"/);
-  assert.match(migration, /https:\/\/varadhiprep\.in\/news\/andhra-police-constable-notification-2026/);
+  assert.match(migration, /https:\/\/varadhiprep\.in\/news\/telangana-police-constable-notification-2026/);
+  assert.doesNotMatch(migration, /https:\/\/varadhiprep\.in\/news\/andhra-police-constable-notification-2026/);
 });

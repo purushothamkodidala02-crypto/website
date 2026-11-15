@@ -149,7 +149,7 @@ function UploadPrimaryPageForm({ onCancel }: { onCancel: () => void }) {
             name="url"
             type="text"
             required
-            placeholder="https://varadhiprep.in/news/andhra-police-constable-notification-2026"
+            placeholder="https://varadhiprep.in/news/ap-endowment-officer-notification-2026"
             className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-mono text-slate-900"
           />
           <span className="mt-1 block text-[11px] font-normal text-slate-500">
@@ -278,20 +278,6 @@ const FALLBACK_PAGES: PrimaryPage[] = [
     vacancies: "7,112 Posts",
     description: "Official recruitment breakdown for Post Codes 21–28, revised pay scale (₹24,280–₹72,850), 100-mark PMT/PET events, complete syllabus weightage, and 58 bilingual mock tests.",
     highlights: ["Post Codes 21–28", "₹24,280 – ₹72,850 Scale", "58 Free Mock Tests", "Official PDF Mirror (748 KB)"],
-  },
-  {
-    id: "ap-police-constable-2026",
-    title: "Andhra Pradesh Police Constable Notification 2026",
-    teluguTitle: "ఆంధ్రప్రదేశ్ పోలీస్ కానిస్టేబుల్ రిక్రూట్‌మెంట్ నోటిఫికేషన్",
-    state: "Andhra Pradesh",
-    status: "live",
-    statusCode: "200 OK",
-    publishedDate: "15 Nov 2026",
-    lastUpdated: "15 Nov 2026",
-    url: "https://varadhiprep.in/news/andhra-police-constable-notification-2026",
-    vacancies: "6,100+ Posts",
-    description: "APSLPRB Constable civil & armed reserve cadre breakdown, age criteria, physical efficiency standards, syllabus marks-wise distribution, and practice test series.",
-    highlights: ["APSLPRB Cadre", "Physical Efficiency Standards", "Bilingual Mock Tests", "State-Specific Syllabus"],
   },
   {
     id: "ap-endowment-officer-2026",
