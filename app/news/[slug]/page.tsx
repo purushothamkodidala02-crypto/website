@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = "Telangana Police Constable Notification 2026 (7,112 Posts): Syllabus Marks Wise & Weightage, Reasoning Syllabus, Telugu PDF Download";
   const description =
-    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/2026) for 7,112 posts. Check TS constable syllabus marks wise, TS constable syllabus weightage marks, comprehensive TS constable reasoning syllabus, and get TS constable syllabus PDF download in Telugu (748 KB). Includes salary in-hand, medical 6/6 standards, and PET 100-mark slabs.";
+    "TSLPRB Telangana Police Constable Notification 2026 for 7,112 posts. Check TS constable syllabus marks wise, TS constable syllabus weightage marks, comprehensive TS constable reasoning syllabus, and get TS constable syllabus PDF download in Telugu (748 KB). Includes salary in-hand, medical 6/6 standards, and PET 100-mark slabs.";
   const canonical = absoluteUrl(`/news/${PRIMARY_SLUG}`);
 
   return {
@@ -108,13 +108,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// ── Official Recruitment Data (TSLPRB Rc No. 189/Rect./Rect.2/2026) ────
+// ── Official Recruitment Data (7,112 Vacancies) ────
 
 const VACANCIES = [
-  { postCode: "21", postName: "SCT Police Constable (Civil)", department: "Police Department", cadreType: "District Cadre (95% Local)", genderEligibility: "Men & Women", vacancies: 4965, share: "69.8%", roleSummary: "Law & order, crime investigation, public order, and citizen safety in police stations." },
-  { postCode: "22", postName: "SCT Police Constable (AR - Armed Reserve)", department: "Police Department", cadreType: "District Cadre (95% Local)", genderEligibility: "Men & Women", vacancies: 1250, share: "17.6%", roleSummary: "Armed reserve units, VIP escort, bandobast security, and riot control management." },
-  { postCode: "23", postName: "SCT Police Constable (SAR CPL)", department: "Police Department", cadreType: "Special Armed Reserve (State)", genderEligibility: "Men Only", vacancies: 100, share: "1.4%", roleSummary: "Special Armed Reserve Central Police Lines for specialized state-wide emergency deployments." },
-  { postCode: "24", postName: "SCT Police Constable (TSSP / TGSPF)", department: "Police Department", cadreType: "Battalion Cadre (Statewide)", genderEligibility: "Men Only", vacancies: 500, share: "7.0%", roleSummary: "Telangana State Special Police active battalions for anti-extremist & border security operations." },
+  { postCode: "21", postName: "Police Constable (Civil)", department: "Police Department", cadreType: "District Cadre (95% Local)", genderEligibility: "Men & Women", vacancies: 4965, share: "69.8%", roleSummary: "Law & order, crime investigation, public order, and citizen safety in police stations." },
+  { postCode: "22", postName: "Police Constable (Armed Reserve - AR)", department: "Police Department", cadreType: "District Cadre (95% Local)", genderEligibility: "Men & Women", vacancies: 1250, share: "17.6%", roleSummary: "Armed reserve units, VIP escort, bandobast security, and riot control management." },
+  { postCode: "23", postName: "Police Constable (SAR CPL)", department: "Police Department", cadreType: "Special Armed Reserve (State)", genderEligibility: "Men Only", vacancies: 100, share: "1.4%", roleSummary: "Special Armed Reserve Central Police Lines for specialized state-wide emergency deployments." },
+  { postCode: "24", postName: "Police Constable (TSSP Battalions)", department: "Police Department", cadreType: "Battalion Cadre (Statewide)", genderEligibility: "Men Only", vacancies: 500, share: "7.0%", roleSummary: "Telangana State Special Police active battalions for security and tactical deployments." },
   { postCode: "26", postName: "Fire Fighter (Driver Operator)", department: "Disaster Response & Fire Services", cadreType: "Multi-Zonal Cadre", genderEligibility: "Men (Valid LMV)", vacancies: 225, share: "3.2%", roleSummary: "Fire tender operation, firefighting operations, disaster mitigation, and emergency rescue." },
   { postCode: "27", postName: "Warder (Male)", department: "Prisons & Correctional Services", cadreType: "Zonal Cadre", genderEligibility: "Men Only", vacancies: 62, share: "0.9%", roleSummary: "Security, reformatory programs, and inmate custody in central and district jails." },
   { postCode: "28", postName: "Warder (Female)", department: "Prisons & Correctional Services", cadreType: "Zonal Cadre", genderEligibility: "Women Only", vacancies: 10, share: "0.1%", roleSummary: "Custodial surveillance, inmate welfare, and correctional tasks in women prisons." },
@@ -128,7 +128,7 @@ const SCHEDULE_EVENTS = [
     teluguTitle: "అధికారిక నోటిఫికేషన్ విడుదల",
     date: "29 July 2026",
     status: "Completed",
-    detail: "TSLPRB issued notification Rc No. 189/Rect./Rect.2/2026 sanctioning 7,112 posts across 7 cadres.",
+    detail: "Recruitment board sanctioned 7,112 posts across 7 cadres.",
   },
   {
     title: "Online Application Window",
@@ -182,7 +182,7 @@ const SCHEDULE_EVENTS = [
 ];
 
 const SALARY_COMPONENTS = [
-  { item: "Pay Scale (Revised Pay Scales)", amount: "₹24,280 – ₹72,850", note: "Sanctioned RPS grade for SCT Police Constable" },
+  { item: "Pay Scale (Revised Pay Scales)", amount: "₹24,280 – ₹72,850", note: "Sanctioned RPS grade for Police Constable" },
   { item: "Basic Pay (Initial Entry Level)", amount: "₹24,280", note: "Starting basic pay at minimum of scale" },
   { item: "Dearness Allowance (DA @ ~33.67%)", amount: "₹8,175", note: "Applicable state DA percentage revised periodically" },
   { item: "House Rent Allowance (HRA - Hyderabad/GHMC @ 24%)", amount: "₹5,827", note: "24% for Hyderabad; 16% for District HQs (~₹3,885); 12% for rural areas (~₹2,914)" },
@@ -207,7 +207,7 @@ const AGE_LIMITS = [
   {
     category: "General / Open Competition (OC)",
     ageRange: "18 to 27 Years",
-    detail: "Base 18–22 years + 5 years general relaxation under G.O. Ms No. 87 GA (Services-A) Dept.",
+    detail: "Base 18–22 years + 5 years general relaxation under G.O. Ms No. 87.",
   },
   {
     category: "BC (Backward Classes - A, B, C, D, E)",
@@ -306,31 +306,31 @@ const MEDICAL_STANDARDS = [
   { parameter: "Color Vision (Ishihara 38 Plates)", rightEye: "Normal Color Perception", leftEye: "Normal Color Perception", rule: "Strict disqualification for Color Blindness (Red-Green deficiency) or partial color blindness." },
   { parameter: "Field of Vision", rightEye: "Full Normal Field", leftEye: "Full Normal Field", rule: "Each eye must have an uninterrupted full field of vision." },
   { parameter: "Night Vision (Nyctalopia)", rightEye: "Normal", leftEye: "Normal", rule: "Night blindness is a strict ground for rejection." },
-  { parameter: "Squint (Strabismus)", rightEye: "No Squint", leftEye: "No Squint", rule: "Presence of squint or any morbid eye condition leads to immediate rejection." },
-  { parameter: "Corneal Refractive Surgery (LASIK / PRK)", rightEye: "Evaluated by Board", leftEye: "Evaluated by Board", rule: "Candidates must pass detailed slit lamp and dilated fundus examination." },
+  { parameter: "Squint (Strabismus)", rightEye: "No Squint", leftEye: "No Squint", rule: "Presence of squint or chronic eye disorders leads to immediate disqualification." },
+  { parameter: "Corneal Refractive Surgery (LASIK / PRK)", rightEye: "Evaluated by Board", leftEye: "Evaluated by Board", rule: "Subject to medical board evaluation for clear vision." },
 ];
 
 const PHYSICAL_DEFECTS_DISQUALIFIED = [
-  { defect: "Knock Knees (Genu Valgum)", impact: "Inability to march, run, or stand at attention without knees rubbing or touching." },
-  { defect: "Flat Foot (Pes Planus)", impact: "Absence of normal medial foot arch leading to severe musculoskeletal fatigue during patrolling." },
-  { defect: "Varicose Veins in Lower Limbs", impact: "Dilated tortuous veins in legs pose risk of thrombophlebitis during prolonged standing duties." },
-  { defect: "Pigeon Chest & Deformed Ribcage", impact: "Abnormal ribcage contours restricting chest expansion below the mandatory 5 cm threshold." },
-  { defect: "Hammer Toes & Digit Loss", impact: "Deformed toes or loss of fingers that impede weapon handling, running, or boot endurance." },
-  { defect: "Fractured Limbs / Joint Stiffness", impact: "Any malunited bone fracture or restricted range of motion in elbow, shoulder, knee, or ankle." },
-  { defect: "Stammering / Speech Defect", impact: "Severe speech impediment interfering with wireless radio communication and commanding." },
-  { defect: "Decayed Teeth & Chronic Otitis Media", impact: "Severe dental caries or chronic ear discharge with perforation of the eardrum causing hearing loss." },
+  { defect: "Knock Knees", impact: "Inability to run, march, or stand at attention without knees touching." },
+  { defect: "Flat Foot", impact: "Absence of normal foot arch causing severe fatigue during long standing or running." },
+  { defect: "Varicose Veins", impact: "Swollen or twisted veins in legs that impair running and long standing endurance." },
+  { defect: "Pigeon Chest & Ribcage Deformity", impact: "Abnormal ribcage contour restricting chest expansion below the mandatory 5 cm threshold." },
+  { defect: "Deformed Toes or Missing Fingers", impact: "Toe or finger deformities that impede weapon handling, running, or boot endurance." },
+  { defect: "Joint Stiffness or Unhealed Fractures", impact: "Any malunited bone fracture or restricted range of motion in elbow, shoulder, knee, or ankle." },
+  { defect: "Severe Speech Impediment", impact: "Severe stammering that interferes with radio communication and commanding duties." },
+  { defect: "Ear Discharge or Hearing Defects", impact: "Chronic ear infection, perforated eardrum, or hearing loss." },
 ];
 
 const DOCUMENTS_CHECKLIST = [
   { item: "SSC (10th Class) Marks Memo", purpose: "Authentic proof of Date of Birth (DOB), candidate name, and father's name.", issuingAuthority: "State Board of Secondary Education" },
   { item: "Intermediate (10+2) Pass Certificate & Memo", purpose: "Proof of prescribed minimum educational qualification.", issuingAuthority: "Telangana State Board of Intermediate Education or equivalent" },
-  { item: "Study / Bonafide Certificates (Classes 1st to 7th)", purpose: "Mandatory for establishing 95% Local Candidature under Presidential Order 2018 (minimum 4 consecutive years).", issuingAuthority: "Heads of Recognized Schools" },
+  { item: "Study / Bonafide Certificates (Classes 1st to 7th)", purpose: "Mandatory for establishing 95% Local Candidature (minimum 4 consecutive years of study).", issuingAuthority: "Heads of Recognized Schools" },
   { item: "Residence Certificate (If privately studied)", purpose: "For candidates who did not study in school for 4 consecutive years; certifies 4-year local stay.", issuingAuthority: "Tahsildar / Mandal Revenue Officer (MRO)" },
   { item: "Community / Caste Certificate (SC / ST / BC)", purpose: "Claiming statutory age relaxation and category reservation benefits.", issuingAuthority: "MeeSeva / Revenue Department, Govt of Telangana" },
   { item: "Non-Creamy Layer (NCL) Certificate", purpose: "Mandatory for BC candidates claiming Backward Class reservation; must be issued within valid financial year.", issuingAuthority: "Competent Revenue Authority (Tahsildar)" },
   { item: "Economically Weaker Section (EWS) Certificate", purpose: "Income and Asset Certificate for claiming 10% EWS reservation.", issuingAuthority: "Tahsildar / Competent Revenue Officer" },
   { item: "Agency / Scheduled Area ST Certificate", purpose: "Claiming PMT height relaxations (160 cm for men, 150 cm for women) in notified Scheduled Areas.", issuingAuthority: "Tahsildar / Project Officer ITDA" },
-  { item: "Valid Driving License (LMV / HMV)", purpose: "Claiming 3 bonus marks / weightage under Para 17 and mandatory for Fire Fighter posts.", issuingAuthority: "Regional Transport Authority (RTA)" },
+  { item: "Valid Driving License (LMV / HMV)", purpose: "Claiming 3 bonus marks for Civil/AR/TSSP posts, and mandatory qualification for Fire Fighter posts.", issuingAuthority: "Regional Transport Authority (RTA)" },
   { item: "Home Guard Service Certificate", purpose: "Claiming Home Guard age relaxation (up to 45 years) with proof of minimum 360 days service.", issuingAuthority: "Superintendent of Police / Unit Head" },
   { item: "Discharge Book / Ex-Servicemen Certificate", purpose: "Claiming Ex-Servicemen age relaxation and reservation quota.", issuingAuthority: "Zilla Sainik Welfare Officer / Armed Forces Unit" },
 ];
@@ -410,10 +410,10 @@ const SUBJECTS = [
 
 const BILINGUAL_FAQS = [
   {
-    question: "What is the official notification number and vacancy count for Telangana Police Constable 2026?",
-    answer: "The official notification is Rc No. 189 / Rect. / Rect.2 / 2026 issued by TSLPRB. It sanctions a total of 7,112 vacancies: SCT Constable Civil (Post Code 21 - 4,965), AR (Post Code 22 - 1,250), SAR CPL (Post Code 23 - 100), TSSP/TGSPF (Post Code 24 - 500), Fire Fighters (Post Code 26 - 225), Warder Male (Post Code 27 - 62), and Warder Female (Post Code 28 - 10).",
-    teluguQuestion: "తెలంగాణ కానిస్టేబుల్ 2026 నోటిఫికేషన్ నంబర్ మరియు మొత్తం ఖాళీల సంఖ్య ఎంత?",
-    teluguAnswer: "అధికారిక నోటిఫికేషన్ నంబర్ Rc No. 189 / Rect. / Rect.2 / 2026. దీని ద్వారా మొత్తం 7,112 పోస్టులను భర్తీ చేస్తున్నారు (పోస్ట్ కోడ్ 21 సివిల్ 4,965, పోస్ట్ కోడ్ 22 ఏఆర్ 1,250, పోస్ట్ కోడ్ 23 సార్ సిపిఎల్ 100, పోస్ట్ కోడ్ 24 టిఎస్ఎస్పి 500, పోస్ట్ కోడ్ 26 ఫైర్ 225, పోస్ట్ కోడ్ 27 & 28 జైలు వార్డర్స్ 72).",
+    question: "What is the official vacancy count for Telangana Police Constable 2026?",
+    answer: "TSLPRB has sanctioned a total of 7,112 vacancies: Police Constable Civil (Post Code 21 - 4,965), AR (Post Code 22 - 1,250), SAR CPL (Post Code 23 - 100), TSSP Battalions (Post Code 24 - 500), Fire Fighters (Post Code 26 - 225), Warder Male (Post Code 27 - 62), and Warder Female (Post Code 28 - 10).",
+    teluguQuestion: "తెలంగాణ కానిస్టేబుల్ 2026 నోటిఫికేషన్‌లో మొత్తం ఖాళీల సంఖ్య ఎంత?",
+    teluguAnswer: "తెలంగాణ పోలీస్ రిక్రూట్‌మెంట్ బోర్డు ద్వారా మొత్తం 7,112 పోస్టులను భర్తీ చేస్తున్నారు (పోస్ట్ కోడ్ 21 సివిల్ 4,965, పోస్ట్ కోడ్ 22 ఏఆర్ 1,250, పోస్ట్ కోడ్ 23 సార్ సిపిఎల్ 100, పోస్ట్ కోడ్ 24 టిఎస్ఎస్పి 500, పోస్ట్ కోడ్ 26 ఫైర్ 225, పోస్ట్ కోడ్ 27 & 28 జైలు వార్డర్స్ 72).",
   },
   {
     question: "What is the monthly in-hand take-home salary and pay scale for a Telangana Police Constable?",
@@ -434,8 +434,8 @@ const BILINGUAL_FAQS = [
     teluguAnswer: "సివిల్ కానిస్టేబుల్ (పోస్ట్ కోడ్ 21) కు ఈవెంట్స్ కేవలం క్వాలిఫైయింగ్ మాత్రమే (మెయిన్స్ 200 మార్కులు). అయితే ఏఆర్, సార్ సిపిఎల్, టీఎస్‌ఎస్‌పీ పోస్టులకు 1600 మీటర్ల / 800 మీటర్ల పరుగుకు సమయాన్ని బట్టి 100 మార్కులు కేటాయిస్తారు. మెయిన్స్ పరీక్ష 100 మార్కులు + ఈవెంట్స్ 100 మార్కులు కలిపి మొత్తం 200 మార్కులకు తుది మెరిట్ జాబితా తీస్తారు.",
   },
   {
-    question: "What bonus marks are awarded for driving licenses under Para 17?",
-    answer: "Candidates who possess a valid Light Motor Vehicle (LMV) or Heavy Motor Vehicle (HMV) driving license continuously for at least 2 years prior to the notification date receive 3 bonus marks / weightage added to their final aggregate score for Post Codes 21, 22, 23, and 24. For Post Code 26 (Fire Fighter), an LMV license is a mandatory qualification.",
+    question: "What bonus marks are awarded for holding a driving license?",
+    answer: "Candidates who possess a valid Light Motor Vehicle (LMV) or Heavy Motor Vehicle (HMV) driving license continuously for at least 2 years prior to the notification date receive 3 bonus marks added to their final score for Post Codes 21, 22, 23, and 24. For Post Code 26 (Fire Fighter), an LMV license is a mandatory qualification.",
     teluguQuestion: "డ్రైవింగ్ లైసెన్స్ ఉన్నవారికి ఎన్ని బోనస్ మార్కులు లేదా వెయిటేజీ లభిస్తుంది?",
     teluguAnswer: "నోటిఫికేషన్ తేదీ నాటికి కనీసం 2 సంవత్సరాల నుండి చెల్లుబాటు అయ్యే ఎల్‌ఎమ్‌వి లేదా హెచ్‌ఎమ్‌వి డ్రైవింగ్ లైసెన్స్ ఉన్న అభ్యర్థులకు పోస్ట్ కోడ్ 21, 22, 23, 24 ఎంపికలో 3 బోనస్ మార్కులు (వెయిటేజీ) లభిస్తాయి. ఫైర్ ఫైటర్ (పోస్ట్ 26) కు డ్రైవింగ్ లైసెన్స్ తప్పనిసరి.",
   },
@@ -483,9 +483,9 @@ const BILINGUAL_FAQS = [
   },
   {
     question: "Where can I find the official TS Constable syllabus PDF download in Telugu?",
-    answer: "You can download the official TS Constable syllabus PDF in Telugu and English directly on Varadhi Prep from the Official Notification & Annexure-II Syllabus PDF link (748 KB) or via the TSLPRB official website at www.tgprb.in. The Annexure-II syllabus is officially bilingual and provides the complete topic list in both Telugu and English.",
+    answer: "You can download the official TS Constable syllabus PDF in Telugu and English directly on Varadhi Prep from the Official Notification & Syllabus PDF link (748 KB) or via the TSLPRB official website at www.tgprb.in. The syllabus is officially bilingual and provides the complete topic list in both Telugu and English.",
     teluguQuestion: "తెలంగాణ కానిస్టేబుల్ సిలబస్ పీడీఎఫ్ డౌన్‌లోడ్ తెలుగులో (TS Constable Syllabus PDF Download in Telugu) ఎలా పొందాలి?",
-    teluguAnswer: "వరధి ప్రెప్ వెబ్‌సైట్‌లో అధికారిక అనెక్సర్-II సిలబస్ పీడీఎఫ్ (748 KB) మరియు నోటిఫికేషన్ పత్రాన్ని తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా డౌన్‌లోడ్ చేసుకోవచ్చు. లేదా అధికారిక వెబ్‌సైట్ www.tgprb.in నుండి కూడా డౌన్‌లోడ్ చేసుకోవచ్చు.",
+    teluguAnswer: "వరధి ప్రెప్ వెబ్‌సైట్‌లో అధికారిక సిలబస్ పీడీఎఫ్ (748 KB) మరియు నోటిఫికేషన్ పత్రాన్ని తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా డౌన్‌లోడ్ చేసుకోవచ్చు. లేదా అధికారిక వెబ్‌సైట్ www.tgprb.in నుండి కూడా డౌన్‌లోడ్ చేసుకోవచ్చు.",
   },
   {
     question: "What topics are included in the TS Constable reasoning syllabus?",
@@ -512,7 +512,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       "@type": "NewsArticle",
       headline: "Telangana Police Constable Notification 2026: 7,112 Posts, Official PDF Download, Syllabus, Salary & Dates",
       description:
-        "Official Telangana State Level Police Recruitment Board (TSLPRB) notification Rc No. 189/Rect./Rect.2/2026 for 7,112 posts with complete syllabus, post-wise vacancies (Post Codes 21-28), salary breakdown, medical eye sight 6/6 standards, PET 100-mark scoring slabs, and official PDF download.",
+        "Official Telangana State Level Police Recruitment Board (TSLPRB) notification for 7,112 posts with complete syllabus, post-wise vacancies (Post Codes 21-28), salary breakdown, medical eye sight 6/6 standards, PET 100-mark scoring slabs, and official PDF download.",
       url: canonical,
       mainEntityOfPage: {
         "@type": "WebPage",
@@ -551,11 +551,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       "@type": "JobPosting",
       title: "Telangana Police Constable (Civil, AR, SAR CPL, TSSP) - 7,112 Vacancies",
       description:
-        "Direct recruitment for 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables (Civil Post Code 21, AR Post Code 22, SAR CPL Post Code 23, TSSP Post Code 24), Fire Fighters (Post Code 26), and Warders (Post Codes 27 & 28) in Telangana State under TSLPRB Notification Rc No. 189 / Rect. / Rect.2 / 2026.",
+        "Direct recruitment for 7,112 posts of Police Constables (Civil Post Code 21, AR Post Code 22, SAR CPL Post Code 23, TSSP Battalions Post Code 24), Fire Fighters (Post Code 26), and Warders (Post Codes 27 & 28) by the Telangana State Level Police Recruitment Board.",
       identifier: {
         "@type": "PropertyValue",
         name: "TSLPRB",
-        value: "Rc No. 189 / Rect. / Rect.2 / 2026",
+        value: "TSLPRB Police Constable 2026",
       },
       datePosted: "2026-07-29",
       validThrough: "2026-12-31T23:59:59+05:30",
@@ -715,7 +715,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               <span className="text-slate-300">&bull;</span>
               <span>Updated: Nov 14, 2026, 05:30 PM IST</span>
               <span className="text-slate-300">&bull;</span>
-              <span>Notification Rc No. 189 / Rect. / Rect.2 / 2026</span>
+              <span>Official Recruitment Notification</span>
             </div>
             <div className="text-slate-600 font-semibold">
               <span>6 min read</span>
@@ -796,10 +796,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-950 text-sm sm:text-base">
-                    Original Gazette Notification Document: Rc No. 189 / Rect. / Rect.2 / 2026
+                    Official Police Constable Recruitment Document (7,112 Posts)
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                    Official 36-page TSLPRB Gazette publication &bull; Includes Cadre Breakdowns, Annexure-II Syllabus, PMT/PET Standards &bull; 748 KB
+                    Official 36-page TSLPRB Notification &bull; Includes Cadre Breakdowns, Complete Syllabus, PMT/PET Standards &bull; 748 KB
                   </p>
                 </div>
               </div>
@@ -835,7 +835,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Lead Story Paragraph */}
             <p className="text-base sm:text-lg leading-[1.8] text-slate-800 font-normal border-l-4 border-l-[#0b2545] pl-4 sm:pl-5 py-2 bg-slate-50/70 rounded-r-lg">
-              The Telangana State Level Police Recruitment Board (TSLPRB) has formally announced Notification Rc No. 189/Rect./Rect.2/2026 for direct recruitment to 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables across Civil (Post Code 21), Armed Reserve (Post Code 22), SAR CPL (Post Code 23), TSSP/TGSPF (Post Code 24), Disaster Response &amp; Fire Services (Post Code 26), and Prison Warders (Post Codes 27 &amp; 28). This comprehensive handbook details the cadre breakdowns, month-wise salary structure with in-hand calculations, 6/6 medical visual acuity guidelines, 100-mark PET timing slabs, 95% Presidential Order local reservation norms, and complete certificate verification checklist.
+              The Telangana State Level Police Recruitment Board (TSLPRB) has announced 7,112 Police Constable vacancies across Civil (Post Code 21), Armed Reserve (Post Code 22), SAR CPL (Post Code 23), TSSP Battalions (Post Code 24), Disaster Response &amp; Fire Services (Post Code 26), and Prison Warders (Post Codes 27 &amp; 28). This comprehensive guide provides the complete syllabus with marks-wise weightage, post-wise vacancy distribution, monthly in-hand salary calculations, 6/6 medical eye sight criteria, 100-mark PET physical timing slabs, 95% local reservation rules, and required certificate verification documents.
             </p>
 
             {/* Section 1: Important Dates & Timeline */}
@@ -906,7 +906,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
-                Official distribution of 7,112 vacancies across Post Codes 21 to 28 under TSLPRB Notification Rc No. 189/Rect./Rect.2/2026.
+                Official distribution of 7,112 vacancies across Civil, Armed Reserve, TSSP Battalions, Fire Services, and Prison Warders.
               </p>
 
               {/* Accessible Data Table following Modern Web Guidance */}
@@ -973,19 +973,19 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               {/* Cadre Roles Explanation Cards */}
               <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-800">
                 <div className="rounded-xl border border-slate-200 bg-[#f8fafc] p-4.5 sm:p-5 shadow-2xs">
-                  <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 21: SCT PC (Civil) - 4,965 Posts (69.8%)</strong>
+                  <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 21: Police Constable (Civil) - 4,965 Posts (69.8%)</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     Primary station policing cadre for men and women. Posted across local police stations, traffic wings, cyber cells, and investigation bureaus. 95% District Cadre reservation applies.
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-[#f8fafc] p-4.5 sm:p-5 shadow-2xs">
-                  <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 22: SCT PC (Armed Reserve - AR) - 1,250 Posts (17.6%)</strong>
+                  <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 22: Police Constable (Armed Reserve - AR) - 1,250 Posts (17.6%)</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     District armed reserves for VIP security, prisoner escorts, vital installations protection, law and order emergencies, and crowd control. Men and women eligible.
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-[#f8fafc] p-4.5 sm:p-5 shadow-2xs">
-                  <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 24: SCT PC (TSSP / Battalions) - 500 Posts (7.0%)</strong>
+                  <strong className="text-slate-950 font-bold text-sm sm:text-base block">Post Code 24: Police Constable (TSSP Battalions) - 500 Posts (7.0%)</strong>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     Telangana State Special Police (TSSP 1st to 13th Battalions). Tactical strike reserve deployed for anti-extremist combing operations, elections, and interstate border duties.
                   </p>
@@ -1133,7 +1133,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   <span className="text-xs font-bold text-[#0b2545] uppercase tracking-wider block">Special Reservation Quotas</span>
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg mt-1">Horizontal Quotas</h3>
                   <p className="mt-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
-                    Special reservation quotas apply for CPP (Children of Police Personnel), CDI, MSP (Meritorious Sports Persons), NCC, and Home Guards (min. 360 days active duty).
+                    Special reservation quotas apply for Children of Police Personnel (CPP), Children of Deceased Police Personnel (CDI), Sports Persons (MSP), NCC, and Home Guards (min. 360 days active duty).
                   </p>
                 </div>
               </div>
@@ -1178,10 +1178,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   ⚖️ Critical Selection Distinction: Civil (Post 21) vs Armed Reserve / TSSP (Posts 22, 23, 24)
                 </strong>
                 <p className="leading-relaxed">
-                  <strong>For SCT PC Civil (Post Code 21), Fire Fighters (Post 26), and Warders (Posts 27 &amp; 28):</strong> Physical Efficiency Test (PET) is strictly <em>qualifying</em> in nature. Final selection is decided 100% on marks scored in the 200-mark Final Written Examination (FWE).
+                  <strong>For Police Constable Civil (Post Code 21), Fire Fighters (Post 26), and Warders (Posts 27 &amp; 28):</strong> Physical Efficiency Test (PET) is strictly <em>qualifying</em> in nature. Final selection is decided 100% on marks scored in the 200-mark Final Written Examination (FWE).
                 </p>
                 <p className="mt-1.5 leading-relaxed">
-                  <strong>For SCT PC AR (Post Code 22), SAR CPL (Post 23), and TSSP (Post Code 24):</strong> The PET 1600m run (men) or 800m run (women) carries <strong>100 marks</strong> towards final merit! Final selection is out of 200 marks total: FWE (100 Marks) + PET Run (100 Marks). Running faster directly boosts candidate rank.
+                  <strong>For Police Constable AR (Post Code 22), SAR CPL (Post 23), and TSSP Battalions (Post Code 24):</strong> The PET 1600m run (men) or 800m run (women) carries <strong>100 marks</strong> towards final merit! Final selection is out of 200 marks total: FWE (100 Marks) + PET Run (100 Marks). Running faster directly boosts candidate rank.
                 </p>
               </div>
             </section>
@@ -1363,16 +1363,16 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </table>
               </div>
 
-              {/* Disqualifying Physical Infirmities */}
+              {/* Disqualifying Physical Conditions */}
               <div className="rounded-xl border border-slate-200 border-l-4 border-l-[#0b2545] bg-[#f8fafc] p-5 sm:p-6 shadow-2xs">
                 <div className="flex items-center gap-2.5 mb-3">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#0b2545]" />
                   <h3 className="font-bold text-slate-950 text-base sm:text-lg">
-                    Strict Disqualifying Physical Infirmities (Medical Examination)
+                    Disqualifying Medical &amp; Physical Conditions
                   </h3>
                 </div>
                 <p className="text-sm sm:text-base text-slate-700 mb-4 leading-relaxed">
-                  During the comprehensive medical board evaluation at Gandhi Hospital / Osmania General Hospital, candidates exhibiting any of the following bodily defects or medical infirmities are declared permanently unfit:
+                  During the official medical board examination, candidates having any of the following physical conditions are disqualified:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {PHYSICAL_DEFECTS_DISQUALIFIED.map((pd, i) => (
@@ -1389,7 +1389,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             <section id="driving" className="scroll-mt-6">
               <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                  8. Driving License Bonus Marks &amp; Weightage (Para 17)
+                  8. Driving License Bonus Marks &amp; Weightage
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
@@ -1406,7 +1406,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </h3>
                 </div>
                 <p className="leading-relaxed text-slate-700">
-                  As per Para 17 of TSLPRB Notification Rc No. 189/Rect./Rect.2/2026, candidates who possess an Light Motor Vehicle (LMV) Driving License (or Heavy Motor Vehicle - HMV) continuously for a minimum period of <strong>two years</strong> prior to the notification date (i.e., on or before 29th July 2024) are awarded <strong>3 Bonus Marks</strong> in the selection process for Post Codes 21 (Civil), 22 (AR), 23 (SAR CPL), and 24 (TSSP).
+                  Candidates who have held a valid Light Motor Vehicle (LMV) or Heavy Motor Vehicle (HMV) driving license continuously for a minimum period of <strong>two years</strong> prior to the notification date (issued on or before 29th July 2024) are awarded <strong>3 Bonus Marks</strong> in the final selection for Civil, AR, SAR CPL, and TSSP posts.
                 </p>
                 <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-slate-700">
                   <li>The driving license must be issued by a competent Regional Transport Authority (RTA) in India.</li>
@@ -1424,7 +1424,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
-                Telangana State Public Employment (Organization of Local Cadres and Regulation of Direct Recruitment) Order, 2018.
+                Under the Telangana Presidential Order (New Zonal System), local district candidates receive 95% reservation in district-level constable posts.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1494,7 +1494,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
-                Preliminary Written Test (PWT) and statutory Rule 16(A) minimum qualifying score requirements.
+                Preliminary Written Test (PWT) scheme and category-wise minimum qualifying scores.
               </p>
 
               {/* 4 Stat Cards */}
@@ -1524,7 +1524,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               {/* Qualifying Marks Table */}
               <div className="mt-5 rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
                 <div className="bg-[#f1f5f9] px-4 py-3.5 font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wider border-b border-slate-200 flex justify-between items-center">
-                  <span>Minimum Qualifying Marks (Statutory Rule 16(A))</span>
+                  <span>Category-Wise Minimum Qualifying Marks</span>
                   <span className="text-xs font-semibold text-slate-700">Applies to PWT &amp; FWE</span>
                 </div>
                 <div className="divide-y divide-slate-200 bg-white">
@@ -1545,7 +1545,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 12: Annexure-II Syllabus & Marks-Wise Weightage */}
+            {/* Section 12: Syllabus & Marks-Wise Weightage */}
             <section id="syllabus" className="scroll-mt-6">
               <div className="border-b-2 border-[#0b2545] pb-2 mb-4">
                 <h2 className="font-brand text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
@@ -1553,7 +1553,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
-                Official curriculum prescribed by TSLPRB under Annexure-II for the 200-question Preliminary Written Test (PWT) and Final Written Examination (FWE). Below is the comprehensive TS constable syllabus marks wise breakdown, subject weightage marks, in-depth TS constable reasoning syllabus, and the official TS constable syllabus PDF download in Telugu.
+                Official curriculum prescribed by TSLPRB for the 200-question Preliminary Written Test (PWT) and Final Written Examination (FWE). Below is the comprehensive TS constable syllabus marks wise breakdown, subject weightage marks, in-depth TS constable reasoning syllabus, and the official TS constable syllabus PDF download in Telugu.
               </p>
 
               {/* Component 1: Official TS Constable Syllabus PDF Download in Telugu */}
@@ -1561,14 +1561,14 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-[#0b2545] text-white text-xs px-2.5 py-1 font-bold uppercase tracking-wider">Annexure-II Official</span>
+                      <span className="rounded-md bg-[#0b2545] text-white text-xs px-2.5 py-1 font-bold uppercase tracking-wider">Official Syllabus</span>
                       <span className="text-xs sm:text-sm text-slate-600 font-medium">Bilingual &bull; Telugu &amp; English</span>
                     </div>
                     <h3 className="font-brand text-base sm:text-lg font-bold text-slate-950 mt-1.5">
                       TS Constable Syllabus PDF Download in Telugu &amp; English
                     </h3>
                     <p lang="te" className="font-telugu text-base sm:text-lg text-slate-900 mt-1 leading-[1.8] font-medium">
-                      తెలంగాణ పోలీస్ కానిస్టేబుల్ పూర్తి సిలబస్ పీడీఎఫ్ (అనెక్సర్-2) ను తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా డౌన్‌లోడ్ చేసుకోండి.
+                      తెలంగాణ పోలీస్ కానిస్టేబుల్ పూర్తి సిలబస్ పీడీఎఫ్ ను తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా డౌన్‌లోడ్ చేసుకోండి.
                     </p>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0">
@@ -1751,7 +1751,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">
                   Detailed Syllabus Topics for All 8 Subjects
                 </h3>
-                <span className="text-xs text-slate-500 font-medium">Annexure-II Prescribed Standard</span>
+                <span className="text-xs text-slate-500 font-medium">Prescribed Standard</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1868,16 +1868,16 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-slate-950 text-base sm:text-lg">TSLPRB Official Gazette Notification (Rc No. 189/2026)</h3>
+                        <h3 className="font-bold text-slate-950 text-base sm:text-lg">Official Police Constable Notification PDF</h3>
                         <span className="rounded-md bg-amber-50 text-amber-900 border border-amber-300 text-xs px-2.5 py-1 font-bold uppercase tracking-wide">
                           Official PDF
                         </span>
                       </div>
                       <p lang="te" className="font-telugu text-sm sm:text-base text-slate-900 mt-1 font-medium">
-                        తెలంగాణ కానిస్టేబుల్ 7,112 పోస్టుల ఒరిజినల్ అఫీషియల్ గెజిట్ నోటిఫికేషన్
+                        తెలంగాణ కానిస్టేబుల్ 7,112 పోస్టుల అధికారిక నోటిఫికేషన్ పీడీఎఫ్
                       </p>
                       <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                        Complete 36-page document: Cadres, G.O. 87 age rules, PMT/PET standards &amp; Annexure-II syllabus &bull; 748 KB
+                        Complete 36-page document: Cadres, age relaxation rules, PMT/PET physical standards &amp; complete syllabus &bull; 748 KB
                       </p>
                     </div>
                   </div>
@@ -2025,12 +2025,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Official Source & Legal Note */}
+            {/* Official Source & Reference */}
             <section className="rounded-xl border border-slate-200 bg-[#f8fafc] p-5 sm:p-6 text-sm sm:text-base text-slate-700 leading-relaxed shadow-2xs">
               <strong className="block text-slate-950 font-bold mb-1.5 text-base sm:text-lg">
-                Official Gazette Reference:
+                Official Information Source:
               </strong>
-              This news briefing is curated from official TSLPRB Notification Rc No. 189/Rect./Rect.2/2026 and G.O. Ms No. 87 issued by the Government of Telangana. For direct candidate login and hall ticket releases, visit the official website at <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-[#0b2545] underline font-bold hover:text-[#071a32]">www.tgprb.in</a>.
+              This recruitment guide is compiled from official notifications and Government Orders issued by the Telangana State Level Police Recruitment Board. For direct candidate login and official announcements, visit the official portal at <a href="https://www.tgprb.in" target="_blank" rel="noopener noreferrer" className="text-[#0b2545] underline font-bold hover:text-[#071a32]">www.tgprb.in</a>.
             </section>
 
           </div>
@@ -2038,16 +2038,16 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           {/* Sticky Sidebar Column (30%) - Full Height Alignment */}
           <aside className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 space-y-6 lg:sticky lg:top-16">
 
-            {/* Official Gazette PDF Download Card */}
+            {/* Official PDF Download Card */}
             <div className="rounded-xl border border-slate-200 border-t-4 border-t-[#0b2545] bg-[#f8fafc] p-5 sm:p-6 shadow-2xs">
               <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-3">
                 <span className="rounded-md bg-[#0b2545] text-white text-xs font-bold px-2.5 py-1 uppercase tracking-wide">
                   Official PDF
                 </span>
-                <span className="text-xs font-mono font-bold text-slate-600">Rc No. 189/2026</span>
+                <span className="text-xs font-mono font-bold text-slate-600">7,112 Posts</span>
               </div>
               <h3 className="mt-3 text-base sm:text-lg font-bold text-slate-950 leading-snug">
-                Original Gazette Notification PDF
+                Official Notification Document
               </h3>
               <p lang="te" className="font-telugu text-sm sm:text-base text-slate-800 mt-1.5 leading-[1.7] font-medium">
                 పోలీస్ కానిస్టేబుల్ 7,112 పోస్టుల అధికారిక నోటిఫికేషన్ పీడీఎఫ్ డాక్యుమెంట్
@@ -2080,8 +2080,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
               <dl className="mt-4 space-y-3.5 text-xs sm:text-sm">
                 <div className="flex justify-between items-center">
-                  <dt className="text-slate-600 font-medium">Notification</dt>
-                  <dd className="font-bold text-slate-950">Rc No. 189/2026</dd>
+                  <dt className="text-slate-600 font-medium">Recruitment</dt>
+                  <dd className="font-bold text-slate-950">Police Constable 2026</dd>
                 </div>
                 <div className="flex justify-between items-center">
                   <dt className="text-slate-600 font-medium">Board</dt>
@@ -2200,7 +2200,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             Varadhi Prep &bull; Examination Information &amp; Practice Portal
           </p>
           <p className="text-slate-600">
-            Official examination details sourced directly from TSLPRB Notification Rc No. 189 / Rect. / Rect.2 / 2026.
+            Official examination details sourced directly from Telangana State Level Police Recruitment Board announcements.
           </p>
           <p>
             Official Board Portal:{" "}
