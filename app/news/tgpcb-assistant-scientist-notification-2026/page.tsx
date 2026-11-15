@@ -10,44 +10,46 @@ const PRIMARY_SLUG = "tgpcb-assistant-scientist-notification-2026";
 const CANONICAL_PATH = `/news/${PRIMARY_SLUG}`;
 
 export const metadata: Metadata = {
-  title: "TGPSC TGPCB Assistant Scientist (Analyst Grade-II) Notification 2026: 20 Posts, Chemistry Syllabus & Pay Scale",
+  title: "TGPSC TGPCB Assistant Scientist Cutoff Marks 2026 & Notification: 20 Posts, Chemistry Syllabus & Selected Candidates",
   description:
-    "Telangana Pollution Control Board (TGPCB / TSPCB) Assistant Scientist (Analyst Grade-II) recruitment under TGPSC. Check 20 vacancies, B.Sc. Chemistry degree eligibility, 300-mark CBRT exam scheme, Paper-II Chemistry syllabus (Inorganic, Physical, Organic, Environmental & Analytical), in-hand salary (₹45,960–₹1,24,150), and selection list updates.",
+    "Official TGPSC TGPCB Assistant Scientist (Analyst Grade-II) 2026 Cut-Off Marks and Selected Candidates List (Notification No. 01/OG/PC/2026). Check OC (228.80), OCW (225.78), BC-B (225.79), BC-D (223.77), BC-A (222.85), SC (202.79), ST (207.68), EWS (210.68) cutoffs, 19 selected candidate marks table, and Paper-II Chemistry syllabus.",
   keywords: [
+    "TGPCB Assistant Scientist Cutoff Marks 2026",
     "TGPSC TGPCB Assistant Scientist Notification 2026",
     "Telangana Pollution Control Board Analyst Grade 2 Recruitment",
+    "TGPCB Assistant Scientist Selected Candidates Marks List",
+    "TGPCB Assistant Scientist Cutoff Marks",
+    "TSPCB Analyst Grade II exam pattern cut off",
     "TGPCB Assistant Scientist Chemistry Syllabus",
-    "TSPCB Analyst Grade II exam pattern",
     "TGPCB Assistant Scientist salary in hand pay scale",
     "TGPSC Assistant Scientist 20 vacancies",
-    "TGPCB Chemistry Paper 2 syllabus PDF",
-    "తెలంగాణ పొల్యూషన్ కంట్రోల్ బోర్డ్ అసిస్టెంట్ సైంటిస్ట్ నోటిఫికేషన్",
+    "తెలంగాణ పొల్యూషన్ కంట్రోల్ బోర్డ్ అసిస్టెంట్ సైంటిస్ట్ కటాఫ్ మార్కులు 2026",
     "TGPCB అనలిస్ట్ గ్రేడ్ 2 సిలబస్ పరీక్ష విధానం",
-    "TGPSC Assistant Scientist provisional selection list",
+    "TGPSC Assistant Scientist provisional selection list 2026",
     "TGPCB Assistant Scientist mock tests in Telugu and English",
   ],
   alternates: { canonical: absoluteUrl(CANONICAL_PATH) },
   openGraph: {
     type: "article",
     url: absoluteUrl(CANONICAL_PATH),
-    title: "TGPCB Assistant Scientist (Analyst Grade-II) Notification 2026: 20 Posts, Syllabus & Pay Scale",
+    title: "TGPCB Assistant Scientist Cutoff Marks 2026 & Notification: 20 Posts, Syllabus & Selection List",
     description:
-      "Comprehensive recruitment guide for 20 Assistant Scientist (Analyst Grade-II) posts in Telangana Pollution Control Board with complete Chemistry degree syllabus, 300-mark scheme, salary structure, and selection updates.",
+      "Official TGPSC Cutoff Marks and 19 selected candidates marks list for Assistant Scientist (Analyst Grade-II) in Telangana Pollution Control Board (Notification No. 01/OG/PC/2026). Complete Chemistry degree syllabus & pay scale.",
     siteName: "Varadhi Prep",
     images: [
       {
         url: absoluteUrl("/opengraph-image"),
         width: 1200,
         height: 630,
-        alt: "TGPCB Assistant Scientist Analyst Grade II Notification 2026 - Varadhi Prep",
+        alt: "TGPCB Assistant Scientist Cutoff Marks 2026 - Varadhi Prep",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TGPCB Assistant Scientist (Analyst Grade-II) Recruitment 2026 (20 Posts)",
+    title: "TGPCB Assistant Scientist Cutoff Marks 2026 (Notification No. 01/OG/PC/2026)",
     description:
-      "Official TGPSC guide for 20 TGPCB Assistant Scientist vacancies, B.Sc Chemistry eligibility, 300-mark CBRT scheme, and in-hand salary breakdown.",
+      "Official TGPSC 2026 Cutoff Marks: OC 228.80, OCW 225.78, BC-B 225.79, SC 202.79, ST 207.68. Full 19 selected candidates marks breakdown & Chemistry syllabus.",
     images: [absoluteUrl("/opengraph-image")],
   },
 };
@@ -58,9 +60,9 @@ const TOTAL_VACANCIES = 20;
 
 const SCHEDULE_EVENTS = [
   {
-    title: "Official Notification Announcement",
-    teluguTitle: "అధికారిక నోటిఫికేషన్ ప్రకటన (TGPSC)",
-    date: "2026 Notification Cycle",
+    title: "Official Notification No. 01/OG/PC/2026 Issued",
+    teluguTitle: "అధికారిక నోటిఫికేషన్ విడుదల (నెం. 01/OG/PC/2026)",
+    date: "20 April 2026",
     status: "Completed",
     detail: "TGPSC released direct recruitment for 20 posts of Assistant Scientist (Analyst Grade-II) in TGPCB.",
   },
@@ -69,7 +71,7 @@ const SCHEDULE_EVENTS = [
     teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల స్వీకరణ",
     date: "Concluded",
     status: "Completed",
-    detail: "Online registration and submission through One Time Registration (OTR) on tgpsc.gov.in.",
+    detail: "Online registration and submission through One Time Registration (OTR) on websitenew.tgpsc.gov.in.",
   },
   {
     title: "Written Examination (CBRT Mode)",
@@ -82,16 +84,166 @@ const SCHEDULE_EVENTS = [
     title: "Certificate Verification & Medical Evaluation",
     teluguTitle: "ధ్రువపత్రాల పరిశీలన & వైద్య పరీక్షలు",
     date: "November 2026",
-    status: "Active Stage",
+    status: "Completed",
     detail: "Shortlisted candidates attended original certificate scrutiny and medical board verification at TGPSC office.",
   },
   {
-    title: "Provisional Selection List Declaration",
-    teluguTitle: "తాత్కాలిక ఎంపిక జాబితా విడుదల",
-    date: "November / December 2026",
-    status: "Published / Active",
-    detail: "TGPSC released provisional list of hall tickets of candidates picked for appointment in TGPCB central/regional labs.",
+    title: "Official Selected Candidates & Cut-Off Marks Released",
+    teluguTitle: "అధికారిక కటాఫ్ మార్కులు & ఎంపికైన అభ్యర్థుల జాబితా విడుదల",
+    date: "14 November 2026",
+    status: "Official & Published",
+    detail: "TGPSC released official Press Note with marks of 19 selected candidates and community-wise cut-offs under Notification No. 01/OG/PC/2026.",
   },
+];
+
+// ── Official 2026 Cut-Off Marks (Notification No. 01/OG/PC/2026) ────
+
+const COMMUNITY_CUTOFFS = [
+  {
+    category: "Open Competition Carry Forward (OC-UR-CF)",
+    selectionCategory: "OC-UR-CF",
+    cutoffMarks: "248.91275",
+    grlRank: 1,
+    htno: "2620114891",
+    gender: "Male",
+    candidateCommunity: "BC-A",
+    percentage: "82.97%",
+    description: "State 1st Ranker / Highest mark overall selected against OC Carry Forward vacancy",
+  },
+  {
+    category: "Open Competition General (OC-UR)",
+    selectionCategory: "OC-UR",
+    cutoffMarks: "228.79866",
+    grlRank: 8,
+    htno: "2620119565",
+    gender: "Male",
+    candidateCommunity: "BC-D",
+    percentage: "76.27%",
+    description: "Last selected candidate under open general merit (Open Competition cutoff)",
+  },
+  {
+    category: "Open Competition Women (OCW-UR)",
+    selectionCategory: "OCW-UR",
+    cutoffMarks: "225.77852",
+    grlRank: 10,
+    htno: "2620115302",
+    gender: "Female",
+    candidateCommunity: "BC-D",
+    percentage: "75.26%",
+    description: "Last female candidate selected under Open Competition Women quota",
+  },
+  {
+    category: "Backward Class - B (BCB-UR)",
+    selectionCategory: "BCB-UR",
+    cutoffMarks: "225.79195",
+    grlRank: 9,
+    htno: "2620106702",
+    gender: "Male",
+    candidateCommunity: "BC-B",
+    percentage: "75.26%",
+    description: "BC-B communal quota cutoff (candidates also qualified in OC merit up to 239.86)",
+  },
+  {
+    category: "Backward Class - D (BCD-UR)",
+    selectionCategory: "BCD-UR",
+    cutoffMarks: "223.76510",
+    grlRank: 16,
+    htno: "2620107811",
+    gender: "Female",
+    candidateCommunity: "BC-D",
+    percentage: "74.59%",
+    description: "BC-D communal reservation cutoff mark",
+  },
+  {
+    category: "Backward Class - A (BCA-UR)",
+    selectionCategory: "BCA-UR",
+    cutoffMarks: "222.84564",
+    grlRank: 17,
+    htno: "2620108940",
+    gender: "Male",
+    candidateCommunity: "BC-A",
+    percentage: "74.28%",
+    description: "BC-A communal quota cutoff (top BC-A secured State 1st Rank 248.91 in OC)",
+  },
+  {
+    category: "Scheduled Caste Group-2 (SC-GR2-UR)",
+    selectionCategory: "SC-GR2-UR",
+    cutoffMarks: "222.84564",
+    grlRank: 18,
+    htno: "2620110880",
+    gender: "Male",
+    candidateCommunity: "SC-GR-2",
+    percentage: "74.28%",
+    description: "SC Categorization Group-2 communal cutoff mark",
+  },
+  {
+    category: "SC Group-3 Carry Forward (SC-GR3-UR-CF)",
+    selectionCategory: "SC-GR3-UR-CF",
+    cutoffMarks: "239.73826",
+    grlRank: 4,
+    htno: "2620106669",
+    gender: "Male",
+    candidateCommunity: "SC-GR-3",
+    percentage: "79.91%",
+    description: "SC Categorization Group-3 Carry Forward roster point (Rank 4 overall)",
+  },
+  {
+    category: "Scheduled Caste Group-3 (SC-GR3-UR)",
+    selectionCategory: "SC-GR3-UR",
+    cutoffMarks: "202.78523",
+    grlRank: 104,
+    htno: "2620104957",
+    gender: "Male",
+    candidateCommunity: "SC-GR-3",
+    percentage: "67.60%",
+    description: "SC Categorization Group-3 regular communal cutoff mark (lowest selected mark)",
+  },
+  {
+    category: "Scheduled Tribe (ST-UR)",
+    selectionCategory: "ST-UR",
+    cutoffMarks: "207.68456",
+    grlRank: 71,
+    htno: "2620100099",
+    gender: "Male",
+    candidateCommunity: "ST",
+    percentage: "69.23%",
+    description: "ST communal cutoff mark (top ST candidate also qualified in OC merit with 232.76, Rank 5)",
+  },
+  {
+    category: "Economically Weaker Section (EWS-UR)",
+    selectionCategory: "EWS-UR",
+    cutoffMarks: "210.68456",
+    grlRank: 54,
+    htno: "2620103820",
+    gender: "Male",
+    candidateCommunity: "OC",
+    percentage: "70.23%",
+    description: "Economically Weaker Section (EWS) reservation cutoff mark",
+  },
+];
+
+// ── Complete 19 Selected Candidates (Official TGPSC Press Note) ────
+
+const SELECTED_CANDIDATES = [
+  { slNo: 1, grlRank: 1, htno: "2620114891", marks: "248.91275", gender: "M", community: "BC-A", ews: "-", selectedCategory: "OC-UR-CF" },
+  { slNo: 2, grlRank: 2, htno: "2620113661", marks: "239.85906", gender: "M", community: "BC-B", ews: "-", selectedCategory: "OC-UR" },
+  { slNo: 3, grlRank: 3, htno: "2620113002", marks: "239.78523", gender: "F", community: "OC", ews: "No", selectedCategory: "OC-UR" },
+  { slNo: 4, grlRank: 4, htno: "2620106669", marks: "239.73826", gender: "M", community: "SC-GR-3", ews: "-", selectedCategory: "SC-GR3-UR-CF" },
+  { slNo: 5, grlRank: 5, htno: "2620115968", marks: "232.75839", gender: "M", community: "ST", ews: "-", selectedCategory: "OC-UR" },
+  { slNo: 6, grlRank: 6, htno: "2620106442", marks: "231.85235", gender: "M", community: "OC", ews: "Yes", selectedCategory: "OC-UR" },
+  { slNo: 7, grlRank: 7, htno: "2620119328", marks: "229.79866", gender: "M", community: "BC-B", ews: "-", selectedCategory: "OC-UR" },
+  { slNo: 8, grlRank: 8, htno: "2620119565", marks: "228.79866", gender: "M", community: "BC-D", ews: "-", selectedCategory: "OC-UR" },
+  { slNo: 9, grlRank: 9, htno: "2620106702", marks: "225.79195", gender: "M", community: "BC-B", ews: "-", selectedCategory: "BCB-UR" },
+  { slNo: 10, grlRank: 10, htno: "2620115302", marks: "225.77852", gender: "F", community: "BC-D", ews: "-", selectedCategory: "OCW-UR" },
+  { slNo: 11, grlRank: 16, htno: "2620107811", marks: "223.76510", gender: "F", community: "BC-D", ews: "-", selectedCategory: "BCD-UR" },
+  { slNo: 12, grlRank: 17, htno: "2620108940", marks: "222.84564", gender: "M", community: "BC-A", ews: "-", selectedCategory: "BCA-UR" },
+  { slNo: 13, grlRank: 18, htno: "2620110880", marks: "222.84564", gender: "M", community: "SC-GR-2", ews: "-", selectedCategory: "SC-GR2-UR" },
+  { slNo: 14, grlRank: 30, htno: "2620111291", marks: "217.75168", gender: "F", community: "ST", ews: "-", selectedCategory: "ST-UR" },
+  { slNo: 15, grlRank: 43, htno: "2620102448", marks: "213.80537", gender: "M", community: "OC", ews: "Yes", selectedCategory: "EWS-UR" },
+  { slNo: 16, grlRank: 52, htno: "2620111222", marks: "210.81879", gender: "M", community: "ST", ews: "-", selectedCategory: "ST-UR" },
+  { slNo: 17, grlRank: 54, htno: "2620103820", marks: "210.68456", gender: "M", community: "OC", ews: "Yes", selectedCategory: "EWS-UR" },
+  { slNo: 18, grlRank: 71, htno: "2620100099", marks: "207.68456", gender: "M", community: "ST", ews: "-", selectedCategory: "ST-UR" },
+  { slNo: 19, grlRank: 104, htno: "2620104957", marks: "202.78523", gender: "M", community: "SC-GR-3", ews: "-", selectedCategory: "SC-GR3-UR" },
 ];
 
 const SALARY_COMPONENTS = [
@@ -120,6 +272,18 @@ const AGE_CRITERIA = [
 ];
 
 const BILINGUAL_FAQS = [
+  {
+    question: "What are the official cut-off marks for TGPCB Assistant Scientist (Analyst Grade-II) 2026?",
+    answer: "As per the official TGPSC Press Note (Notification No. 01/OG/PC/2026, dated 20/04/2026): The Open Competition (OC-UR General) cut-off is 228.79866 out of 300 marks (76.27%). Open Competition Women (OCW-UR) cut-off is 225.77852 (75.26%). Communal cut-offs: BC-B (225.79195), BC-D (223.76510), BC-A (222.84564), SC Group-2 (222.84564), SC Group-3 regular (202.78523), SC Group-3 Carry Forward (239.73826), ST (207.68456), and EWS (210.68456). The highest mark overall is 248.91275 (82.97%) by Rank 1 in OC-UR-CF.",
+    teluguQuestion: "TGPCB అసిస్టెంట్ సైంటిస్ట్ (అనలిస్ట్ గ్రేడ్-2) 2026 అధికారిక కటాఫ్ మార్కులు ఎంత?",
+    teluguAnswer: "TGPSC అధికారిక ప్రెస్ నోట్ (నోటిఫికేషన్ నెం. 01/OG/PC/2026) ప్రకారం: ఓపెన్ కాంపిటీషన్ (OC-UR జనరల్) కటాఫ్ మార్కులు 228.79866 / 300 (76.27%). ఓసీ మహిళల కటాఫ్ 225.77852. ఇతర వర్గాల కటాఫ్‌లు: బీసీ-బి (225.79195), బీసీ-డి (223.76510), బీసీ-ఎ (222.84564), ఎస్సీ గ్రూప్-2 (222.84564), ఎస్సీ గ్రూప్-3 రెగ్యులర్ (202.78523), ఎస్సీ గ్రూప్-3 క్యారీ ఫార్వర్డ్ (239.73826), ఎస్టీ (207.68456), మరియు ఈడబ్ల్యూఎస్ (210.68456). స్టేట్ ఫస్ట్ ర్యాంకర్ మార్కులు 248.91275.",
+  },
+  {
+    question: "Who is the topper in TGPCB Assistant Scientist 2026 and what is the highest mark?",
+    answer: "Hall Ticket Number 2620114891 (BC-A Male candidate) secured the State First Rank (GRL Rank 1) with an outstanding score of 248.91275 marks out of 300 (82.97%), selected under the OC-UR-CF vacancy.",
+    teluguQuestion: "TGPCB అసిస్టెంట్ సైంటిస్ట్ 2026 రాత పరీక్షలో స్టేట్ టాపర్ ఎవరు? అత్యధిక మార్కులు ఎంత?",
+    teluguAnswer: "హాల్ టికెట్ నంబర్ 2620114891 (BC-A పురుష అభ్యర్థి) 300 మార్కులకు గాను 248.91275 మార్కులు (82.97%) సాధించి స్టేట్ ఫస్ట్ ర్యాంక్ (GRL Rank 1) కైవసం చేసుకున్నారు. ఈ అభ్యర్థి OC-UR-CF కేటగిరీ కింద ఎంపికయ్యారు.",
+  },
   {
     question: "What is the total vacancy count and pay scale for TGPCB Assistant Scientist (Analyst Grade-II)?",
     answer: "TGPSC advertised 20 vacancies for the post of Assistant Scientist (Analyst Grade-II) in the Telangana Pollution Control Board (TGPCB / TSPCB). The sanctioned scale of pay is ₹45,960 – ₹1,24,150/-, yielding an initial gross monthly salary of ~₹73,465 and an estimated net take-home in-hand salary of ~₹65,921 per month in Hyderabad.",
@@ -375,7 +539,7 @@ export default function TgpcbAssistantScientistPage() {
               <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Vacancies</span>
                 <strong className="text-2xl sm:text-3xl font-black text-emerald-900 block mt-1">{TOTAL_VACANCIES} Posts</strong>
-                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">Analyst Grade-II</span>
+                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">19 Candidates Selected</span>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
@@ -384,30 +548,31 @@ export default function TgpcbAssistantScientistPage() {
                 <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">Gross ~₹73,465/mo</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Written Marks</span>
-                <strong className="text-2xl sm:text-3xl font-black text-emerald-900 block mt-1">300 Marks</strong>
-                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">Paper-I 150 + Paper-II 150</span>
+              <div className="rounded-xl border-2 border-emerald-400 bg-emerald-50/70 p-4 sm:p-5 hover:border-emerald-500 hover:bg-white hover:shadow-xs transition">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 block">2026 OC Cut-Off Mark</span>
+                <strong className="text-xl sm:text-2xl font-black text-emerald-950 block mt-1">228.80 <span className="text-xs font-bold text-emerald-700">/ 300</span></strong>
+                <span className="text-xs sm:text-sm text-emerald-800 font-medium block mt-1">76.27% • Rank 8 (OC-UR)</span>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Educational Degree</span>
-                <strong className="text-xl sm:text-2xl font-black text-emerald-900 block mt-1">B.Sc. Chemistry</strong>
-                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">Recognized University</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">2026 Highest Mark</span>
+                <strong className="text-xl sm:text-2xl font-black text-emerald-900 block mt-1">248.91 <span className="text-xs font-bold text-slate-500">/ 300</span></strong>
+                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">82.97% • State Rank 1</span>
               </div>
             </div>
 
             {/* Quick Links Row */}
             <div className="mt-5 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-slate-700">Quick Syllabus Jump:</span>
+                <span className="font-semibold text-slate-700">Quick Jump:</span>
+                <a href="#official-cutoffs" className="rounded-md bg-emerald-800 text-white px-2.5 py-1 font-bold hover:bg-emerald-900 shadow-2xs">⭐ Official 2026 Cut-Offs &amp; Marks</a>
                 <a href="#inorganic-chem" className="rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 font-bold text-emerald-800 hover:bg-emerald-100">Inorganic Chemistry</a>
                 <a href="#physical-chem" className="rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 font-bold text-emerald-800 hover:bg-emerald-100">Physical Chemistry</a>
                 <a href="#organic-chem" className="rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 font-bold text-emerald-800 hover:bg-emerald-100">Organic Chemistry</a>
                 <a href="#environmental-chem" className="rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 font-bold text-emerald-800 hover:bg-emerald-100">Environmental &amp; Analytical</a>
               </div>
               <div className="text-slate-600 font-medium">
-                CBRT Exam: 24 Oct 2026 &bull; Verification: Nov 2026
+                Official Press Note &bull; Notification No. 01/OG/PC/2026
               </div>
             </div>
           </div>
@@ -429,15 +594,16 @@ export default function TgpcbAssistantScientistPage() {
               <ol className="grid sm:grid-cols-2 gap-2 text-xs sm:text-sm text-slate-700">
                 <li><a href="#overview" className="hover:text-emerald-700 hover:underline">1. Recruitment Overview &amp; Key Parameters</a></li>
                 <li><a href="#schedule" className="hover:text-emerald-700 hover:underline">2. Chronology &amp; Selection Timetable</a></li>
-                <li><a href="#eligibility" className="hover:text-emerald-700 hover:underline">3. Educational Qualification &amp; Degree Criteria</a></li>
-                <li><a href="#age-limit" className="hover:text-emerald-700 hover:underline">4. Age Limit &amp; 10-Year Relaxation</a></li>
-                <li><a href="#fees" className="hover:text-emerald-700 hover:underline">5. Application &amp; Examination Fees</a></li>
-                <li><a href="#exam-scheme" className="hover:text-emerald-700 hover:underline">6. Scheme of Examination (300 Marks CBRT)</a></li>
-                <li><a href="#paper1-syllabus" className="hover:text-emerald-700 hover:underline">7. Paper-I: General Studies Detailed Syllabus</a></li>
-                <li><a href="#paper2-syllabus" className="hover:text-emerald-700 hover:underline">8. Paper-II: Chemistry Degree Level Syllabus</a></li>
-                <li><a href="#duties" className="hover:text-emerald-700 hover:underline">9. Role &amp; Laboratory Responsibilities in TGPCB</a></li>
-                <li><a href="#salary" className="hover:text-emerald-700 hover:underline">10. Salary Structure &amp; In-Hand Pay Breakdown</a></li>
-                <li><a href="#faqs" className="hover:text-emerald-700 hover:underline">11. Bilingual Frequently Asked Questions</a></li>
+                <li><a href="#official-cutoffs" className="hover:text-emerald-700 hover:underline font-bold text-emerald-800">3. Official 2026 Cut-Off Marks &amp; Selection List ⭐</a></li>
+                <li><a href="#eligibility" className="hover:text-emerald-700 hover:underline">4. Educational Qualification &amp; Degree Criteria</a></li>
+                <li><a href="#age-limit" className="hover:text-emerald-700 hover:underline">5. Age Limit &amp; 10-Year Relaxation</a></li>
+                <li><a href="#fees" className="hover:text-emerald-700 hover:underline">6. Application &amp; Examination Fees</a></li>
+                <li><a href="#exam-scheme" className="hover:text-emerald-700 hover:underline">7. Scheme of Examination (300 Marks CBRT)</a></li>
+                <li><a href="#paper1-syllabus" className="hover:text-emerald-700 hover:underline">8. Paper-I: General Studies Detailed Syllabus</a></li>
+                <li><a href="#paper2-syllabus" className="hover:text-emerald-700 hover:underline">9. Paper-II: Chemistry Degree Level Syllabus</a></li>
+                <li><a href="#duties" className="hover:text-emerald-700 hover:underline">10. Role &amp; Laboratory Responsibilities in TGPCB</a></li>
+                <li><a href="#salary" className="hover:text-emerald-700 hover:underline">11. Salary Structure &amp; In-Hand Pay Breakdown</a></li>
+                <li><a href="#faqs" className="hover:text-emerald-700 hover:underline">12. Bilingual Frequently Asked Questions (with 2026 Cutoff)</a></li>
               </ol>
             </section>
 
@@ -526,11 +692,145 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 3: Educational Qualification */}
+            {/* Section 3: Official 2026 Cut-Off Marks & Selected Candidates */}
+            <section id="official-cutoffs" className="rounded-2xl border-2 border-emerald-300 bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-100 pb-3 mb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-300">
+                      Official Commission Release
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500">Notification No. 01/OG/PC/2026</span>
+                  </div>
+                  <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mt-1.5 flex items-center gap-2.5">
+                    <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
+                    3. Official 2026 Cut-Off Marks &amp; Selected Candidates Merit List
+                  </h2>
+                </div>
+                <span className="text-xs font-bold text-emerald-900 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full self-start sm:self-auto">
+                  300 Marks CBRT Basis
+                </span>
+              </div>
+
+              <p lang="te" className="font-telugu text-base sm:text-lg text-emerald-950 mb-3 leading-relaxed">
+                తెలంగాణ పబ్లిక్ సర్వీస్ కమిషన్ (TGPSC) విడుదల చేసిన అధికారిక ప్రెస్ నోట్ (నోటిఫికేషన్ నెం. 01/OG/PC/2026) ప్రకారం ఎంపికైన 19 మంది అభ్యర్థుల మార్కులు మరియు కేటగిరీల వారీగా అధికారిక కటాఫ్ మార్కుల పూర్తి వివరాలు క్రింద ఇవ్వబడ్డాయి:
+              </p>
+
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed mb-5">
+                The Telangana Public Service Commission (TGPSC) officially published the marks of candidates picked for appointment to the post of <strong>Assistant Scientist (Analyst Grade-II) in Telangana Pollution Control Board</strong> (Notification No. 01/OG/PC/2026, dated 20/04/2026). A total of <strong>19 candidates</strong> have been selected under State-wide Unreserved merit and communal roster points based on normalized scores out of <strong>300 marks</strong> in the CBRT examination.
+              </p>
+
+              {/* Category-Wise Cut-Off Summary Table */}
+              <div className="mb-6">
+                <h3 className="font-brand text-base sm:text-lg font-bold text-slate-950 mb-2.5 flex items-center gap-2">
+                  <span className="text-emerald-700 font-mono">▸</span>
+                  Official Category-Wise Cut-Off Marks (Last Selected Candidate)
+                </h3>
+                <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+                  <table className="min-w-full text-xs sm:text-sm text-left divide-y divide-slate-200">
+                    <thead className="bg-[#e9f6f2] text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                      <tr>
+                        <th className="px-3.5 py-3">Category / Quota</th>
+                        <th className="px-3 py-3">Roster Point</th>
+                        <th className="px-3 py-3 text-right">Cut-Off Marks (/300)</th>
+                        <th className="px-3 py-3 text-right">Percentage</th>
+                        <th className="px-3 py-3 text-center">GRL Rank</th>
+                        <th className="px-3.5 py-3">Hall Ticket No.</th>
+                        <th className="px-3.5 py-3">Analysis &amp; Selection Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {COMMUNITY_CUTOFFS.map((item, idx) => (
+                        <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/60"}>
+                          <td className="px-3.5 py-2.5 font-bold text-slate-950">{item.category}</td>
+                          <td className="px-3 py-2.5 font-mono text-emerald-800 font-bold text-xs">{item.selectionCategory}</td>
+                          <td className="px-3 py-2.5 font-mono font-black text-emerald-900 text-right text-sm">{item.cutoffMarks}</td>
+                          <td className="px-3 py-2.5 font-mono text-slate-700 text-right font-semibold">{item.percentage}</td>
+                          <td className="px-3 py-2.5 font-mono text-center font-bold text-slate-800">{item.grlRank}</td>
+                          <td className="px-3.5 py-2.5 font-mono text-xs text-slate-600">{item.htno}</td>
+                          <td className="px-3.5 py-2.5 text-xs text-slate-600">{item.description}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Complete 19 Selected Candidates Table */}
+              <div className="mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-200 pb-2 mb-2.5">
+                  <h3 className="font-brand text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                    <span className="text-emerald-700 font-mono">▸</span>
+                    Full Selection Merit List: All 19 Appointed Candidates &amp; Marks
+                  </h3>
+                  <span className="text-xs text-slate-500 font-medium">Rank 1 to 104 • 19 Selected Candidates</span>
+                </div>
+
+                <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-[460px] overflow-y-auto">
+                  <table className="min-w-full text-xs text-left divide-y divide-slate-200">
+                    <thead className="bg-slate-100 text-slate-900 font-bold uppercase tracking-wider text-[11px] sticky top-0 z-10 shadow-2xs">
+                      <tr>
+                        <th className="px-3 py-2.5">Sl.</th>
+                        <th className="px-3 py-2.5">GRL Rank</th>
+                        <th className="px-3.5 py-2.5">Hall Ticket No.</th>
+                        <th className="px-3.5 py-2.5 text-right">Marks (/300)</th>
+                        <th className="px-2.5 py-2.5 text-center">Gender</th>
+                        <th className="px-3 py-2.5">Community</th>
+                        <th className="px-2.5 py-2.5 text-center">EWS</th>
+                        <th className="px-3.5 py-2.5">Selected Category</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {SELECTED_CANDIDATES.map((cand) => (
+                        <tr key={cand.slNo} className={cand.slNo === 1 ? "bg-amber-50/60 font-semibold" : cand.slNo % 2 === 0 ? "bg-slate-50/50" : "bg-white"}>
+                          <td className="px-3 py-2 font-mono text-slate-500">{cand.slNo}</td>
+                          <td className="px-3 py-2 font-mono font-bold text-slate-900">
+                            {cand.grlRank === 1 ? <span className="text-amber-700 font-black">Rank 1 🏆</span> : `Rank ${cand.grlRank}`}
+                          </td>
+                          <td className="px-3.5 py-2 font-mono font-semibold text-slate-900">{cand.htno}</td>
+                          <td className="px-3.5 py-2 font-mono font-bold text-emerald-900 text-right">{cand.marks}</td>
+                          <td className="px-2.5 py-2 text-center text-slate-700">{cand.gender === "M" ? "Male" : "Female"}</td>
+                          <td className="px-3 py-2 font-medium text-slate-700">{cand.community}</td>
+                          <td className="px-2.5 py-2 text-center text-slate-500">{cand.ews}</td>
+                          <td className="px-3.5 py-2 font-mono font-bold text-xs text-emerald-800">{cand.selectedCategory}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Analytical Highlights Grid */}
+              <div className="grid sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5">
+                  <span className="text-xs font-bold text-emerald-900 uppercase block mb-1">State Topper (Rank 1)</span>
+                  <strong className="text-lg font-black text-emerald-950 block">248.91275 / 300</strong>
+                  <p className="text-xs text-emerald-800 mt-1">HTNO 2620114891 (BC-A Male) secured 82.97%, selected under OC-UR-CF vacancy.</p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                  <span className="text-xs font-bold text-slate-700 uppercase block mb-1">Open Merit Cut-Off (OC-UR)</span>
+                  <strong className="text-lg font-black text-slate-900 block">228.79866 / 300</strong>
+                  <p className="text-xs text-slate-600 mt-1">GRL Rank 8 secured 76.27%. Meritorious candidates from BC-B, OC, ST, and BC-D competed in open quota.</p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                  <span className="text-xs font-bold text-slate-700 uppercase block mb-1">Lowest Selected Score</span>
+                  <strong className="text-lg font-black text-slate-900 block">202.78523 / 300</strong>
+                  <p className="text-xs text-slate-600 mt-1">GRL Rank 104 (SC Group-3 Male) secured 67.60%, qualifying under SC-GR3-UR quota.</p>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600">
+                <strong>Source:</strong> Telangana Public Service Commission (TGPSC) Official Press Note: Selection list &amp; marks for Assistant Scientist (Analyst Grade-II) in TGPCB (Notification No. 01/OG/PC/2026, dated 20/04/2026), accessed via websitenew.tgpsc.gov.in.
+              </div>
+            </section>
+
+            {/* Section 4: Educational Qualification */}
             <section id="eligibility" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                3. Educational Qualification &amp; Degree Criteria
+                4. Educational Qualification &amp; Degree Criteria
               </h2>
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
                 Under the Service Rules of the Telangana Pollution Control Board, applicants must possess:
@@ -546,11 +846,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 4: Age Limit */}
+            {/* Section 5: Age Limit */}
             <section id="age-limit" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                4. Age Limit &amp; 10-Year Relaxation (G.O.Ms.No.86)
+                5. Age Limit &amp; 10-Year Relaxation (G.O.Ms.No.86)
               </h2>
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
                 The age is reckoned as on <strong>01/07/2026</strong>. In accordance with <strong>G.O.Ms.No.86, G.A.(Ser.A) Dept, Dt. 18/05/2026</strong>, the upper age limit for direct recruitment has been enhanced by <strong>10 years</strong> (from 34 to 44 years):
@@ -570,11 +870,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 5: Application & Exam Fees */}
+            {/* Section 6: Application & Exam Fees */}
             <section id="fees" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                5. Application Processing Fee &amp; Examination Fee
+                6. Application Processing Fee &amp; Examination Fee
               </h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -594,11 +894,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 6: Scheme of Examination */}
+            {/* Section 7: Scheme of Examination */}
             <section id="exam-scheme" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                6. Scheme of Examination (300 Total Marks)
+                7. Scheme of Examination (300 Total Marks)
               </h2>
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
                 The written examination is conducted in <strong>Computer Based Recruitment Test (CBRT)</strong> objective format for a total of <strong>300 marks</strong>:
@@ -664,11 +964,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 7: Paper-I Syllabus */}
+            {/* Section 8: Paper-I Syllabus */}
             <section id="paper1-syllabus" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                7. Paper-I: General Studies &amp; General Abilities Detailed Syllabus (15 Units)
+                8. Paper-I: General Studies &amp; General Abilities Detailed Syllabus (15 Units)
               </h2>
               <div className="grid gap-2.5 text-xs sm:text-sm">
                 {[
@@ -695,11 +995,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 8: Paper-II Chemistry Syllabus */}
+            {/* Section 9: Paper-II Chemistry Syllabus */}
             <section id="paper2-syllabus" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20 space-y-6">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-1 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                8. Paper-II: Chemistry Detailed Syllabus (Degree Level • 150 Marks)
+                9. Paper-II: Chemistry Detailed Syllabus (Degree Level • 150 Marks)
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
                 150 objective questions carrying 1 mark each. Conducted in English. Comprises four core branches with specific weightage on environmental analytics:
@@ -766,11 +1066,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 9: TGPCB Duties */}
+            {/* Section 10: TGPCB Duties */}
             <section id="duties" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                9. Key Job Duties in TGPCB Laboratories
+                10. Key Job Duties in TGPCB Laboratories
               </h2>
               <div className="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm text-slate-700">
                 <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
@@ -792,11 +1092,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 10: Salary Structure */}
+            {/* Section 11: Salary Structure */}
             <section id="salary" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                10. Salary Structure &amp; Monthly In-Hand Pay Breakdown
+                11. Salary Structure &amp; Monthly In-Hand Pay Breakdown
               </h2>
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
                 The post carries the state pay scale of <strong>₹45,960 – ₹1,24,150/-</strong>. Below is the realistic monthly earnings breakdown for postings in Hyderabad (24% HRA):
@@ -849,11 +1149,11 @@ export default function TgpcbAssistantScientistPage() {
               </div>
             </section>
 
-            {/* Section 11: Bilingual FAQs */}
+            {/* Section 12: Bilingual FAQs */}
             <section id="faqs" className="rounded-2xl border border-[#c8ebe1] bg-white p-5 sm:p-7 shadow-sm scroll-mt-20">
               <h2 className="font-brand text-xl sm:text-2xl font-bold text-slate-950 mb-3 flex items-center gap-2.5">
                 <span className="h-6 w-1.5 rounded-full bg-emerald-600" />
-                11. Frequently Asked Questions (Bilingual &bull; English &amp; తెలుగు)
+                12. Frequently Asked Questions (Bilingual &bull; English &amp; తెలుగు)
               </h2>
               <div className="space-y-4">
                 {BILINGUAL_FAQS.map((faq, idx) => (
@@ -902,6 +1202,50 @@ export default function TgpcbAssistantScientistPage() {
                   <span className="font-medium text-slate-500">Exam Scheme:</span>
                   <span className="font-bold text-slate-900">300 Marks CBRT</span>
                 </div>
+              </div>
+
+              {/* Official 2026 Cutoff Summary Badge */}
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800 block mb-1.5">
+                  ⭐ Official 2026 Cut-Off Marks
+                </span>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">Topper (Rank 1):</span>
+                    <span className="font-mono font-black text-emerald-950">248.91</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">OC General:</span>
+                    <span className="font-mono font-bold text-slate-900">228.80</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">OC Women:</span>
+                    <span className="font-mono font-bold text-slate-900">225.78</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">BC-B / BC-D:</span>
+                    <span className="font-mono font-bold text-slate-900">225.79 / 223.77</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">BC-A / SC-GR2:</span>
+                    <span className="font-mono font-bold text-slate-900">222.85</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">EWS Cutoff:</span>
+                    <span className="font-mono font-bold text-slate-900">210.68</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">ST Cutoff:</span>
+                    <span className="font-mono font-bold text-slate-900">207.68</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600 font-medium">SC-GR3 Cutoff:</span>
+                    <span className="font-mono font-bold text-slate-900">202.79</span>
+                  </div>
+                </div>
+                <a href="#official-cutoffs" className="mt-2.5 block text-center text-[11px] font-bold text-emerald-800 hover:underline">
+                  View Full 19 Selected List &rarr;
+                </a>
               </div>
 
               <div className="mt-5 space-y-2.5">

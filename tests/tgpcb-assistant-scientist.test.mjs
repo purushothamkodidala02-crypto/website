@@ -8,7 +8,7 @@ test("TGPCB Assistant Scientist (Analyst Grade-II) Notification 2026 broadsheet 
   const page = await read("app/news/tgpcb-assistant-scientist-notification-2026/page.tsx");
 
   // Metadata & SEO
-  assert.match(page, /title:\s*["']TGPSC TGPCB Assistant Scientist \(Analyst Grade-II\) Notification 2026/);
+  assert.match(page, /title:\s*["']TGPSC TGPCB Assistant Scientist Cutoff Marks 2026/);
   assert.match(page, /తెలంగాణ పొల్యూషన్ కంట్రోల్ బోర్డ్/);
   assert.match(page, /PRIMARY_SLUG\s*=\s*["']tgpcb-assistant-scientist-notification-2026["']/);
 
@@ -19,12 +19,31 @@ test("TGPCB Assistant Scientist (Analyst Grade-II) Notification 2026 broadsheet 
   assert.match(page, /"@type":\s*["']BreadcrumbList["']/);
 
   // Snapshot metrics (20 posts, pay scale ₹45,960–₹1,24,150, 300 marks)
-  assert.match(page, /20 Vacancies/);
+  assert.match(page, /TOTAL_VACANCIES\s*=\s*20/);
   assert.match(page, /₹45,960/);
   assert.match(page, /₹1,24,150/);
   assert.match(page, /300 Marks/);
   assert.match(page, /B\.Sc\./);
   assert.match(page, /Chemistry/);
+
+  // Official 2026 Cutoff Marks & TGPSC Notification No. 01/OG/PC/2026
+  assert.match(page, /01\/OG\/PC\/2026/);
+  assert.match(page, /248\.91275/); // Topper / OC-UR-CF
+  assert.match(page, /228\.79866/); // OC General Cutoff
+  assert.match(page, /225\.77852/); // OC Women Cutoff
+  assert.match(page, /225\.79195/); // BC-B Cutoff
+  assert.match(page, /223\.76510/); // BC-D Cutoff
+  assert.match(page, /222\.84564/); // BC-A & SC-GR2 Cutoff
+  assert.match(page, /210\.68456/); // EWS Cutoff
+  assert.match(page, /207\.68456/); // ST Cutoff
+  assert.match(page, /202\.78523/); // SC-GR3 Regular Cutoff
+  assert.match(page, /239\.73826/); // SC-GR3 Carry Forward
+
+  // Selected candidates table with 19 rows
+  assert.match(page, /2620114891/); // State 1st Rank HTNO
+  assert.match(page, /2620113661/); // Rank 2 HTNO
+  assert.match(page, /2620104957/); // Rank 104 HTNO
+  assert.match(page, /19 Selected Candidates/);
 
   // Age relaxation (G.O.Ms.No.86 10 years up to 44)
   assert.match(page, /44 Years/);
