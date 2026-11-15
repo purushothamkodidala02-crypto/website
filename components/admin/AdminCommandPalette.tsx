@@ -20,7 +20,7 @@ const COMMANDS: CommandItem[] = [
     id: "nav-overview",
     title: "Overview",
     category: "Navigation",
-    description: "Main administration dashboard and KPI overview",
+    description: "Main administration dashboard and metrics overview",
     href: "/admin",
     icon: "overview",
   },
