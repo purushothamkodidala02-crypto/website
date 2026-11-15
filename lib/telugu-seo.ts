@@ -389,7 +389,7 @@ const TG_TET_SEO: ExamTeluguSeo = {
 
 export const APPSC_ENDOWMENT_SEO: ExamTeluguSeo = {
   teluguName: "ఎండోమెంట్ ఆఫీసర్ (APPSC Endowment Officer)",
-  teluguTitle: "ఆంధ్రప్రదేశ్ ఎండోమెంట్ ఆఫీసర్ ఉచిత మాక్ టెస్ట్‌లు & జాబ్ ప్రొఫైల్",
+  teluguTitle: "ఆంధ్రప్రదేశ్ ఎండోమెంట్ ఆఫీసర్ ఉచిత మాక్ టెస్ట్‌లు",
   bilingualPageTitle: "APPSC Endowment Officer Free Mock Test | ఎండోమెంట్ ఆఫీసర్ ఆన్‌లైన్ టెస్ట్",
   bilingualDescription:
     "Free APPSC Endowment Officer (Grade 3) mock tests in Telugu & English. Practice Paper 1 GS & Paper 2 Hindu Philosophy. ఎండోమెంట్ ఆఫీసర్ ఆన్‌లైన్ మాక్ టెస్ట్‌లు.",
@@ -420,51 +420,6 @@ export const APPSC_ENDOWMENT_SEO: ExamTeluguSeo = {
     "ఎండోమెంట్ ఆఫీసర్ పేపర్ 2 మోడల్ పేపర్స్",
     "వరధి ప్రెప్ ఎండోమెంట్ ఆఫీసర్ మాక్ టెస్ట్",
   ],
-  jobProfile: {
-    roleTitle: "Executive Officer Grade-III (దేవాదాయ శాఖ ఎగ్జిక్యూటివ్ ఆఫీసర్)",
-    department: "Endowments Department, Government of Andhra Pradesh",
-    payScale: "₹25,220 – ₹80,910 (RPS Pay Scale)",
-    grossSalaryMonthly: "₹36,000 – ₹42,000 / month (approx. starting pay with DA & HRA)",
-    eligibility: {
-      ageLimit: "18 to 42 Years (standard age relaxation up to 5 years for BC/SC/ST/EWS candidates).",
-      education: "Must possess a Bachelor's Degree from a recognized University. Candidates must profess Hindu religion as mandated under Section 29 of the Endowments Act 30 of 1987.",
-    },
-    duties: [
-      {
-        title: "Temple Administration & Agama Ritual Oversight",
-        teluguTitle: "ఆలయ పరిపాలన & నిత్యపూజా కైంకర్యాల పర్యవేక్షణ",
-        description: "Managing daily administrative functioning of designated Category-III Hindu temples, ensuring strict adherence to Agama shastras and hereditary temple customs during daily nitya pujas, archanas, and special festive utsavams.",
-      },
-      {
-        title: "Hundi Opening, Cash Chest & Accounts Audit",
-        teluguTitle: "హుండీ లెక్కింపు, ఆదాయం & ఆడిట్ రికార్డులు",
-        description: "Supervising scheduled opening of temple hundis in the presence of official panchas and bank personnel, ensuring secure transit of cash and gold offerings to designated temple bank accounts, and maintaining accounts for statutory government audits.",
-      },
-      {
-        title: "Temple Agricultural Lands & Real Estate Protection",
-        teluguTitle: "ఆలయ భూములు, స్థిరాస్తుల రక్షణ & లీజుల వేలం",
-        description: "Safeguarding endowments agricultural lands, commercial complexes, and kalyana mandapams from illegal encroachments, maintaining the temple asset register, and conducting transparent public lease auctions.",
-      },
-      {
-        title: "Pilgrim Amenities, Queue Lines & Festival Arrangements",
-        teluguTitle: "యాత్రికుల సౌకర్యాలు, దర్శన క్యూలైన్లు & తిరునాళ్ల నిర్వహణ",
-        description: "Overseeing drinking water facilities, hygienic sanitation, free prasadam preparation, smooth darshan queue management, and coordination with police and revenue officials during Brahmotsavams and major jatras.",
-      },
-      {
-        title: "Nitya Annadanam Scheme & Donor Relations",
-        teluguTitle: "నిత్యాన్నదానం ట్రస్ట్ నిర్వహణ & దాతల సమన్వయం",
-        description: "Managing permanent endowment deposits (Sashwatha Annadanam), supervising clean and hygienic food preparation in free feeding halls, issuing official receipts to devotees, and maintaining transparent donor registers.",
-      },
-    ],
-    careerGrowth: [
-      "Executive Officer Grade-III",
-      "Executive Officer Grade-II",
-      "Executive Officer Grade-I",
-      "Assistant Commissioner of Endowments",
-      "Deputy Commissioner of Endowments",
-      "Joint Commissioner of Endowments",
-    ],
-  },
   englishFaqs: [
     {
       question: "What are the job duties and responsibilities of an APPSC Endowment Officer (Grade-III)?",
