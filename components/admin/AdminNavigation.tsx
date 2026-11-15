@@ -216,11 +216,14 @@ export function NavigationLinks({
   return (
     <div className="space-y-5">
       {ADMIN_SECTIONS.map((section) => {
+        const isSurveysActive = pathname.startsWith("/admin/surveys");
+        const isReportsActive = pathname.startsWith("/admin/question-reports");
+
         const sectionHasUpdates = section.links.some((l) =>
           l.href === "/admin/question-reports"
-            ? badges.openReports > 0
+            ? !isReportsActive && badges.openReports > 0
             : l.href === "/admin/surveys"
-              ? badges.newSurveys > 0
+              ? !isSurveysActive && badges.newSurveys > 0
               : false
         );
 
@@ -339,7 +342,7 @@ export function AdminNavigation(props: {
 
     isFetchingRef.current = true;
     try {
-      const lastSeenSurveys =
+      let lastSeenSurveys =
         typeof window !== "undefined"
           ? localStorage.getItem("varadhi_admin_surveys_last_seen")
           : null;
@@ -347,6 +350,20 @@ export function AdminNavigation(props: {
         typeof window !== "undefined"
           ? localStorage.getItem("varadhi_admin_reports_last_seen")
           : null;
+
+      if (pathname.startsWith("/admin/surveys")) {
+        lastSeenSurveys = new Date().toISOString();
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("varadhi_admin_surveys_last_seen", lastSeenSurveys);
+          } catch {}
+        }
+      } else if (!lastSeenSurveys && typeof window !== "undefined") {
+        lastSeenSurveys = new Date().toISOString();
+        try {
+          localStorage.setItem("varadhi_admin_surveys_last_seen", lastSeenSurveys);
+        } catch {}
+      }
 
       const data = await getAdminNavBadges(lastSeenSurveys);
       lastFetchedRef.current = Date.now();
@@ -428,6 +445,7 @@ export function AdminNavigation(props: {
         try {
           localStorage.setItem("varadhi_admin_surveys_last_seen", new Date().toISOString());
         } catch {}
+        setBadges((prev) => (prev.newSurveys > 0 ? { ...prev, newSurveys: 0 } : prev));
       }
       if (pathname.startsWith("/admin/question-reports")) {
         try {

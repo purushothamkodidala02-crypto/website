@@ -37,17 +37,29 @@ export async function getAdminNavBadges(
     if (badgeCache && now - badgeCache.timestamp < CACHE_TTL_MS) {
       // Re-calculate newCount based on user's lastSeenSurveysTime if present
       if (lastSeenSurveysTime) {
+        const lastSeenMs = new Date(lastSeenSurveysTime).getTime();
+        const latestMs = badgeCache.data.surveys.latestSubmittedAt
+          ? new Date(badgeCache.data.surveys.latestSubmittedAt).getTime()
+          : 0;
+
         return {
           ...badgeCache.data,
           surveys: {
             ...badgeCache.data.surveys,
-            newCount: badgeCache.data.surveys.latestSubmittedAt && badgeCache.data.surveys.latestSubmittedAt > lastSeenSurveysTime
-              ? badgeCache.data.surveys.newCount
-              : 0,
+            newCount:
+              !isNaN(lastSeenMs) && !isNaN(latestMs) && latestMs > lastSeenMs
+                ? badgeCache.data.surveys.newCount
+                : 0,
           },
         };
       }
-      return badgeCache.data;
+      return {
+        ...badgeCache.data,
+        surveys: {
+          ...badgeCache.data.surveys,
+          newCount: 0,
+        },
+      };
     }
 
     const supabase = await createClient();
@@ -101,8 +113,17 @@ export async function getAdminNavBadges(
     const totalCount = surveysRes.count ?? surveyRows.length;
     const latestSubmittedAt = surveyRows[0]?.submitted_at ?? null;
 
-    const newCutoff = lastSeenSurveysTime || new Date(now - 24 * 60 * 60 * 1000).toISOString();
-    const newCount = surveyRows.filter((r) => r.submitted_at && r.submitted_at > newCutoff).length;
+    let newCount = 0;
+    if (lastSeenSurveysTime) {
+      const lastSeenMs = new Date(lastSeenSurveysTime).getTime();
+      if (!isNaN(lastSeenMs)) {
+        newCount = surveyRows.filter((r) => {
+          if (!r.submitted_at) return false;
+          const subMs = new Date(r.submitted_at).getTime();
+          return !isNaN(subMs) && subMs > lastSeenMs;
+        }).length;
+      }
+    }
 
     const result: AdminNavBadges = {
       reports: {
