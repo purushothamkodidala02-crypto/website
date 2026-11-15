@@ -39,6 +39,22 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
   const router = useRouter();
   const searchParams = useSearchParams();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [practiceMode, setPracticeMode] = useState<boolean>(() => {
+    return searchParams.get("mode") === "practice";
+  });
+  const [practiceAnswers, setPracticeAnswers] = useState<Record<string, "A" | "B" | "C" | "D">>({});
+  const [revealedAnswers, setRevealedAnswers] = useState<Record<string, boolean>>({});
+
+  const handleSelectOption = useCallback((qId: string, option: "A" | "B" | "C" | "D") => {
+    setPracticeAnswers((prev) => ({ ...prev, [qId]: option }));
+  }, []);
+
+  const handleReveal = useCallback((qId: string) => {
+    setRevealedAnswers((prev) => ({ ...prev, [qId]: true }));
+  }, []);
+
+  const answeredQuestionsCount = Object.keys(practiceAnswers).length;
+  const practiceScore = rows.filter((r) => practiceAnswers[r.question_id] === r.correct_answer).length;
   const [language, setLanguage] = useState<"english" | "telugu">(() => {
     return rows[initialIndex]?.content_language_mode === "telugu" ? "telugu" : "english";
   });
@@ -200,12 +216,43 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           </button>
 
           <div className="hidden md:flex items-center gap-2 pl-1 text-xs font-bold text-slate-600">
-            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className="h-full bg-teal-600 transition-all duration-300"
-                style={{ width: `${((currentIndex + 1) / rows.length) * 100}%` }}
-              />
+            {/* Mode Selector: Review vs Practice Quiz */}
+            <div className="inline-flex rounded-xl bg-slate-200/90 p-0.5" role="group" aria-label="Viewer mode">
+              <button
+                type="button"
+                onClick={() => setPracticeMode(false)}
+                aria-pressed={!practiceMode}
+                className={`rounded-lg px-2.5 py-1 text-xs font-black transition ${
+                  !practiceMode
+                    ? "bg-white text-slate-950 shadow-xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                👁️ Review
+              </button>
+              <button
+                type="button"
+                onClick={() => setPracticeMode(true)}
+                aria-pressed={practiceMode}
+                className={`rounded-lg px-2.5 py-1 text-xs font-black transition ${
+                  practiceMode
+                    ? "bg-teal-700 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                🎯 Practice Quiz
+              </button>
             </div>
+
+            {practiceMode && answeredQuestionsCount > 0 && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-900 shadow-2xs">
+                <span>Score:</span>
+                <strong className="text-emerald-700">{practiceScore} / {answeredQuestionsCount}</strong>
+                <span className="text-[11px] font-semibold text-emerald-800">
+                  ({Math.round((practiceScore / answeredQuestionsCount) * 100)}%)
+                </span>
+              </span>
+            )}
           </div>
         </div>
 
@@ -275,6 +322,11 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
               let btnStyle = "border-slate-200 bg-white text-slate-700 hover:border-slate-400";
               if (isCurrent) {
                 btnStyle = "border-[#0a2922] bg-[#0a2922] text-white shadow-xs ring-2 ring-emerald-500";
+              } else if (practiceMode && practiceAnswers[r.question_id]) {
+                const isCorrect = practiceAnswers[r.question_id] === r.correct_answer;
+                btnStyle = isCorrect
+                  ? "border-emerald-400 bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs"
+                  : "border-red-400 bg-red-100 text-red-900 font-extrabold shadow-2xs";
               } else if (isMistake) {
                 btnStyle = "border-red-200 bg-red-50 text-red-800 hover:bg-red-100";
               } else {
@@ -315,6 +367,13 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           canSwitchLanguage={canSwitchLanguage}
           effectiveLanguage={effectiveLanguage}
           onLanguageChange={setLanguage}
+          isPracticeMode={practiceMode}
+          userSelectedOption={practiceAnswers[currentRow.question_id]}
+          isRevealed={revealedAnswers[currentRow.question_id] === true}
+          onSelectOption={(opt) => handleSelectOption(currentRow.question_id, opt)}
+          onReveal={() => handleReveal(currentRow.question_id)}
+          onNext={() => handleNavigate(currentIndex + 1)}
+          hasNext={currentIndex < rows.length - 1}
         />
       </div>
 
@@ -338,6 +397,13 @@ function StudyQuestionCard({
   canSwitchLanguage,
   effectiveLanguage,
   onLanguageChange,
+  isPracticeMode,
+  userSelectedOption,
+  isRevealed,
+  onSelectOption,
+  onReveal,
+  onNext,
+  hasNext,
 }: {
   row: StudyRow;
   index: number;
@@ -345,6 +411,13 @@ function StudyQuestionCard({
   canSwitchLanguage: boolean;
   effectiveLanguage: "english" | "telugu";
   onLanguageChange: (lang: "english" | "telugu") => void;
+  isPracticeMode?: boolean;
+  userSelectedOption?: "A" | "B" | "C" | "D";
+  isRevealed?: boolean;
+  onSelectOption?: (option: "A" | "B" | "C" | "D") => void;
+  onReveal?: () => void;
+  onNext?: () => void;
+  hasNext?: boolean;
 }) {
   const questionText = (showTelugu && row.question_text_te) ? row.question_text_te : row.question_text;
   const options = [
