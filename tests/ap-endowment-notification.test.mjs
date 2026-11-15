@@ -52,8 +52,6 @@ test("AP Endowment Officer Notification 2026 broadsheet page exists and has comp
   // In-site PDF Viewing and Download
   assert.match(page, /\/docs\/appsc-endowment-officer-notification-2026-official\.pdf/);
   assert.match(page, /download="APPSC-Endowment-Officer-Notification-23-2026-Official\.pdf"/);
-  assert.match(page, /<iframe[\s\S]*?src="\/docs\/appsc-endowment-officer-notification-2026-official\.pdf#toolbar=1/);
-  assert.match(page, /id="pdf-viewer"/);
 });
 
 test("Official APPSC Endowment Officer PDF document exists under public docs", async () => {

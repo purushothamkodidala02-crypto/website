@@ -740,12 +740,6 @@ export default function ApEndowmentOfficerNotificationPage() {
                   </svg>
                   <span>Download PDF</span>
                 </a>
-                <a
-                  href="#pdf-viewer"
-                  className="inline-flex items-center gap-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 font-semibold transition text-xs shadow-2xs"
-                >
-                  <span>Read In-Page ↓</span>
-                </a>
               </div>
             </div>
           </div>
@@ -776,7 +770,7 @@ export default function ApEndowmentOfficerNotificationPage() {
                 <li><a href="#paper2-weightage" className="hover:text-[#0055a2] hover:underline">9. Paper-II Hindu Philosophy Weightage</a></li>
                 <li><a href="#act-matrix" className="hover:text-[#0055a2] hover:underline">10. Endowments Act 1987 Sections Master</a></li>
                 <li><a href="#cpt" className="hover:text-[#0055a2] hover:underline">11. Computer Proficiency Test (CPT)</a></li>
-                <li><a href="#downloads" className="hover:text-[#0055a2] hover:underline">12. Official PDF Download &amp; In-Page Viewer</a></li>
+                <li><a href="#downloads" className="hover:text-[#0055a2] hover:underline">12. Official PDF Download Center</a></li>
                 <li><a href="#faqs" className="hover:text-[#0055a2] hover:underline">13. Bilingual Frequently Asked Questions</a></li>
               </ol>
             </nav>
@@ -1231,7 +1225,7 @@ export default function ApEndowmentOfficerNotificationPage() {
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-700 mb-5 leading-relaxed">
-                Access the official APPSC Brief Notification No. 23/2026 directly on Varadhi Prep. You can inspect the complete 11-page Gazette document below using our embedded reader, open it in fullscreen, or download it to your device for offline reference:
+                Access the official APPSC Brief Notification No. 23/2026 directly on Varadhi Prep. You can view the complete 11-page Gazette document in a new tab or download it directly to your device for offline reference:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-[#cde7f7] bg-white p-5 shadow-xs flex flex-col justify-between">
@@ -1277,73 +1271,6 @@ export default function ApEndowmentOfficerNotificationPage() {
                   >
                     Solve 2023 Papers as Mock Tests &rarr;
                   </Link>
-                </div>
-              </div>
-
-              {/* In-Site Interactive PDF Viewer */}
-              <div id="pdf-viewer" className="mt-8 rounded-xl border border-[#cde7f7] bg-white overflow-hidden shadow-xs scroll-mt-6">
-                <div className="bg-[#f8fafc] border-b border-slate-200 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-red-100 border border-red-200 text-red-700 flex items-center justify-center font-black text-xs shrink-0">
-                      PDF
-                    </div>
-                    <div>
-                      <h3 className="font-brand font-bold text-slate-950 text-sm sm:text-base leading-snug">
-                        APPSC Brief Notification No. 23/2026 (Official Gazette Document)
-                      </h3>
-                      <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
-                        Complete 11-page notification • In-page document viewer
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 self-end sm:self-auto">
-                    <a
-                      href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3 py-1.5 text-xs font-bold transition shadow-2xs"
-                    >
-                      <span>Fullscreen ↗</span>
-                    </a>
-                    <a
-                      href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
-                      download="APPSC-Endowment-Officer-Notification-23-2026-Official.pdf"
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#0055a2] hover:bg-[#004280] text-white px-3 py-1.5 text-xs font-bold transition shadow-2xs"
-                    >
-                      <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                      <span>Download</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div className="w-full bg-slate-100 flex items-center justify-center min-h-[550px] sm:min-h-[700px]">
-                  <iframe
-                    src="/docs/appsc-endowment-officer-notification-2026-official.pdf#toolbar=1&navpanes=0"
-                    className="w-full h-[550px] sm:h-[720px] lg:h-[800px] border-0"
-                    title="Official APPSC Executive Officer Grade-III Notification 23/2026 PDF Viewer"
-                  />
-                </div>
-
-                <div className="bg-[#f8fafc] border-t border-slate-200 px-4 py-2.5 text-center text-xs text-slate-600 flex flex-wrap items-center justify-center gap-2">
-                  <span>Trouble viewing the document?</span>
-                  <a
-                    href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#0055a2] hover:underline font-bold"
-                  >
-                    Open full PDF in a new window ↗
-                  </a>
-                  <span>or</span>
-                  <a
-                    href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
-                    download="APPSC-Endowment-Officer-Notification-23-2026-Official.pdf"
-                    className="text-[#0055a2] hover:underline font-bold"
-                  >
-                    Download directly to your device ↓
-                  </a>
                 </div>
               </div>
             </section>
