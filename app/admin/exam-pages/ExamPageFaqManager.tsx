@@ -8,11 +8,14 @@ import { formatExamHeading } from "@/lib/exam-catalog";
 import { examUrl } from "@/lib/public-urls";
 import {
   createExamPageFaq,
+  createPrimaryExamPage,
   deleteExamPageFaq,
+  deletePrimaryExamPage,
   updateExamPageContent,
   updateExamPageFaq,
   type ExamPageContentActionState,
   type FaqActionState,
+  type PrimaryPageActionState,
 } from "./actions";
 
 type State = { id: string; name: string; code: string; slug: string };
@@ -29,8 +32,24 @@ type Exam = {
 type Faq = { id: string; exam_group_id: string; question: string; answer: string; display_order: number };
 type NewFaq = Pick<Faq, "question" | "answer" | "display_order">;
 
+export type PrimaryPage = {
+  id: string;
+  title: string;
+  teluguTitle: string;
+  state: string;
+  status: "live" | "upcoming";
+  statusCode: string;
+  publishedDate: string;
+  lastUpdated: string;
+  url: string;
+  vacancies: string;
+  description: string;
+  highlights: string[];
+};
+
 const initialFaqState: FaqActionState = { success: false, message: "" };
 const initialContentState: ExamPageContentActionState = { success: false, message: "" };
+const initialPrimaryPageState: PrimaryPageActionState = { success: false, message: "" };
 
 function Message({ state }: { state: { success: boolean; message: string } }) {
   return state.message ? (
@@ -104,6 +123,139 @@ function FaqForm({ examId, faq, initial }: { examId: string; faq?: Faq; initial?
   );
 }
 
+function UploadPrimaryPageForm({ onCancel }: { onCancel: () => void }) {
+  const [state, formAction, pending] = useActionState(createPrimaryExamPage, initialPrimaryPageState);
+
+  return (
+    <form action={formAction} className="rounded-2xl border-2 border-teal-300 bg-teal-50/70 p-5 sm:p-6 shadow-sm space-y-4">
+      <div className="flex items-center justify-between border-b border-teal-200 pb-3">
+        <div>
+          <h3 className="text-base sm:text-lg font-bold text-slate-950">Upload / Add Recruitment Link</h3>
+          <p className="text-xs text-slate-600">Register a public recruitment notification URL for display and quick student tracking.</p>
+        </div>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-100"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block text-xs font-bold text-slate-900 sm:col-span-2">
+          Notification Link URL *
+          <input
+            name="url"
+            type="text"
+            required
+            placeholder="https://varadhiprep.in/news/andhra-police-constable-notification-2026"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-mono text-slate-900"
+          />
+          <span className="mt-1 block text-[11px] font-normal text-slate-500">
+            Absolute URL (https://varadhiprep.in/...) or root path (/news/...)
+          </span>
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900">
+          Official Title (English) *
+          <input
+            name="title"
+            type="text"
+            required
+            placeholder="Andhra Pradesh Police Constable Notification 2026"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900"
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900">
+          Regional Title (Telugu Script)
+          <input
+            name="telugu_title"
+            type="text"
+            placeholder="ఆంధ్రప్రదేశ్ పోలీస్ కానిస్టేబుల్ రిక్రూట్‌మెంట్ నోటిఫికేషన్"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-telugu"
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900">
+          State
+          <select
+            name="state"
+            defaultValue="Andhra Pradesh"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-semibold"
+          >
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Central / National">Central / National</option>
+          </select>
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900">
+          Status
+          <select
+            name="status"
+            defaultValue="live"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-semibold"
+          >
+            <option value="live">Live (200 OK)</option>
+            <option value="upcoming">Upcoming Pipeline</option>
+          </select>
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900">
+          Vacancies / Category Badge
+          <input
+            name="vacancies"
+            type="text"
+            placeholder="6,100+ Posts"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900"
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900">
+          Feature Highlights (comma separated)
+          <input
+            name="highlights"
+            type="text"
+            placeholder="APSLPRB Cadre, Physical Standards, 58 Mocks"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900"
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-slate-900 sm:col-span-2">
+          Description
+          <textarea
+            name="description"
+            rows={3}
+            placeholder="Official recruitment breakdown for Civil & APSP cadres, PMT/PET standards, marks weightage, and online mock tests."
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900"
+          />
+        </label>
+      </div>
+
+      <div className="flex items-center gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50 shadow-xs"
+        >
+          {pending ? "Uploading Link…" : "Upload Link"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <Message state={state} />
+    </form>
+  );
+}
+
 function standardQuestions(examName: string): NewFaq[] {
   return [
     { question: `Where can I take ${examName} mock tests?`, answer: `Choose a paper on the ${examName} page, open an available test, and start practising on Varadhi Prep.`, display_order: 0 },
@@ -112,22 +264,7 @@ function standardQuestions(examName: string): NewFaq[] {
   ];
 }
 
-type PrimaryPage = {
-  id: string;
-  title: string;
-  teluguTitle: string;
-  state: "Telangana" | "Andhra Pradesh";
-  status: "live" | "upcoming";
-  statusCode: string;
-  publishedDate: string;
-  lastUpdated: string;
-  url: string;
-  vacancies: string;
-  description: string;
-  highlights: string[];
-};
-
-const PRIMARY_PAGES: PrimaryPage[] = [
+const FALLBACK_PAGES: PrimaryPage[] = [
   {
     id: "ts-police-constable-2026",
     title: "Telangana Police Constable Notification 2026",
@@ -147,20 +284,47 @@ const PRIMARY_PAGES: PrimaryPage[] = [
     title: "Andhra Pradesh Police Constable Notification 2026",
     teluguTitle: "ఆంధ్రప్రదేశ్ పోలీస్ కానిస్టేబుల్ రిక్రూట్‌మెంట్ నోటిఫికేషన్",
     state: "Andhra Pradesh",
-    status: "upcoming",
-    statusCode: "Upcoming Pipeline",
-    publishedDate: "Upcoming 2026 Cycle",
-    lastUpdated: "Draft Template Ready",
+    status: "live",
+    statusCode: "200 OK",
+    publishedDate: "15 Nov 2026",
+    lastUpdated: "15 Nov 2026",
     url: "https://varadhiprep.in/news/andhra-police-constable-notification-2026",
-    vacancies: "Upcoming Release",
+    vacancies: "6,100+ Posts",
     description: "APSLPRB Constable civil & armed reserve cadre breakdown, age criteria, physical efficiency standards, syllabus marks-wise distribution, and practice test series.",
     highlights: ["APSLPRB Cadre", "Physical Efficiency Standards", "Bilingual Mock Tests", "State-Specific Syllabus"],
   },
+  {
+    id: "ap-endowment-officer-2026",
+    title: "AP Endowment Officer Notification 2026",
+    teluguTitle: "ఆంధ్రప్రదేశ్ దేవాదాయ శాఖ ఎగ్జిక్యూటివ్ ఆఫీసర్ నోటిఫికేషన్ 2026",
+    state: "Andhra Pradesh",
+    status: "live",
+    statusCode: "200 OK",
+    publishedDate: "15 Nov 2026",
+    lastUpdated: "15 Nov 2026",
+    url: "https://varadhiprep.in/news/ap-endowment-officer-notification-2026",
+    vacancies: "104 Posts",
+    description: "APSSC Executive Officer Grade-III Notification No. 23/2026, Paper-I GS & Paper-II Hindu Philosophy weightage, Act 30/1987, and official Gazette PDF download.",
+    highlights: ["APPSC Cadre-III", "Hindu Philosophy Paper-II", "Timed Mock Tests", "Official Gazette PDF"],
+  },
 ];
 
-export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: State[]; boards: Board[]; exams: Exam[]; faqs: Faq[] }) {
+export function ExamPageFaqManager({
+  states,
+  boards,
+  exams,
+  faqs,
+  primaryPages = FALLBACK_PAGES,
+}: {
+  states: State[];
+  boards: Board[];
+  exams: Exam[];
+  faqs: Faq[];
+  primaryPages?: PrimaryPage[];
+}) {
   const [activeTab, setActiveTab] = useState<"primary" | "catalog">("primary");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [stateId, setStateId] = useState(states[0]?.id ?? "");
   const [boardId, setBoardId] = useState("");
@@ -170,6 +334,9 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
   const selectedState = states.find((state) => state.id === stateId);
   const selected = exams.find((exam) => exam.id === examId);
   const examFaqs = faqs.filter((faq) => faq.exam_group_id === examId).sort((a, b) => a.display_order - b.display_order || a.question.localeCompare(b.question));
+
+  const pagesList = primaryPages.length > 0 ? primaryPages : FALLBACK_PAGES;
+  const liveCount = pagesList.filter((p) => p.status === "live").length;
 
   const copyToClipboard = (text: string) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -197,15 +364,22 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
               Public pages
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
-              Centralized registry of primary recruitment notification pages and student landing URLs.
+              Centralized registry of primary recruitment notification pages and student landing URLs. Upload and manage links directly.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800">
               <span className="h-2 w-2 rounded-full bg-emerald-600" />
-              1 Live Page (200 OK)
+              {liveCount} Live {liveCount === 1 ? "Page" : "Pages"} (200 OK)
             </span>
+            <button
+              type="button"
+              onClick={() => setIsUploading((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs transition"
+            >
+              {isUploading ? "✕ Close Upload" : "+ Upload Link"}
+            </button>
           </div>
         </div>
 
@@ -220,7 +394,7 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/80"
             }`}
           >
-            <span>📰 Primary Recruitment Pages ({PRIMARY_PAGES.length})</span>
+            <span>📰 Primary Recruitment Pages ({pagesList.length})</span>
           </button>
           <button
             type="button"
@@ -241,7 +415,7 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
         <div className="space-y-5">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">
-              Primary Exam Notification Links
+              Primary Exam Notification Links ({pagesList.length})
             </h2>
             {copiedUrl && (
               <span className="text-xs font-bold text-emerald-700 animate-fade-in">
@@ -250,8 +424,13 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
             )}
           </div>
 
+          {/* Upload Link Form */}
+          {isUploading && (
+            <UploadPrimaryPageForm onCancel={() => setIsUploading(false)} />
+          )}
+
           <div className="space-y-4">
-            {PRIMARY_PAGES.map((page) => (
+            {pagesList.map((page) => (
               <article
                 key={page.id}
                 className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs hover:border-slate-300 transition"
@@ -273,15 +452,21 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
                         {page.statusCode}
                       </span>
                     )}
-                    <span className="rounded-md bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800 border border-teal-200/80">
-                      {page.vacancies}
-                    </span>
+                    {page.vacancies && (
+                      <span className="rounded-md bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800 border border-teal-200/80">
+                        {page.vacancies}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-3 text-xs text-slate-500">
-                    <span>Published: <strong className="text-slate-800 font-bold">{page.publishedDate}</strong></span>
-                    <span>&bull;</span>
-                    <span>Updated: <strong className="text-slate-800 font-bold">{page.lastUpdated}</strong></span>
+                    {page.publishedDate && (
+                      <span>Published: <strong className="text-slate-800 font-bold">{page.publishedDate}</strong></span>
+                    )}
+                    {page.publishedDate && page.lastUpdated && <span>&bull;</span>}
+                    {page.lastUpdated && (
+                      <span>Updated: <strong className="text-slate-800 font-bold">{page.lastUpdated}</strong></span>
+                    )}
                   </div>
                 </div>
 
@@ -290,22 +475,28 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
                   <h3 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight">
                     {page.title}
                   </h3>
-                  <p lang="te" className="font-telugu text-sm sm:text-base text-slate-700 mt-1">
-                    {page.teluguTitle}
-                  </p>
-                  <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-3xl">
-                    {page.description}
-                  </p>
+                  {page.teluguTitle && (
+                    <p lang="te" className="font-telugu text-sm sm:text-base text-slate-700 mt-1 font-normal">
+                      {page.teluguTitle}
+                    </p>
+                  )}
+                  {page.description && (
+                    <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-3xl">
+                      {page.description}
+                    </p>
+                  )}
                 </div>
 
                 {/* Feature Tags */}
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {page.highlights.map((h, i) => (
-                    <span key={i} className="rounded-md bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200/80">
-                      {h}
-                    </span>
-                  ))}
-                </div>
+                {page.highlights && page.highlights.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {page.highlights.map((h, i) => (
+                      <span key={i} className="rounded-md bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200/80">
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 {/* Primary URL Row & Quick Actions */}
                 <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/70">
@@ -318,7 +509,7 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
                     </code>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => copyToClipboard(page.url)}
@@ -326,20 +517,36 @@ export function ExamPageFaqManager({ states, boards, exams, faqs }: { states: St
                     >
                       {copiedUrl === page.url ? "Copied! ✓" : "Copy Link"}
                     </button>
-                    {page.status === "live" ? (
-                      <a
-                        href={page.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-xl bg-slate-950 text-white hover:bg-slate-800 px-3.5 py-2 text-xs font-bold transition shadow-xs"
+
+                    <a
+                      href={page.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`rounded-xl px-3.5 py-2 text-xs font-bold transition shadow-xs ${
+                        page.status === "live"
+                          ? "bg-slate-950 text-white hover:bg-slate-800"
+                          : "border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                      }`}
+                    >
+                      {page.status === "live" ? "Open Live ↗" : "Preview ↗"}
+                    </a>
+
+                    <form action={deletePrimaryExamPage} className="inline-block">
+                      <input type="hidden" name="id" value={page.id} />
+                      <input type="hidden" name="url" value={page.url} />
+                      <button
+                        type="submit"
+                        onClick={(e) => {
+                          if (!confirm(`Are you sure you want to remove "${page.title}" from exam pages?`)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className="rounded-xl border border-red-200 bg-white px-3.5 py-2 text-xs font-bold text-red-700 hover:bg-red-50 hover:border-red-300 transition shadow-2xs"
+                        title="Remove link from exam pages"
                       >
-                        Open Live ↗
-                      </a>
-                    ) : (
-                      <span className="rounded-xl bg-slate-200 text-slate-600 px-3.5 py-2 text-xs font-semibold cursor-not-allowed">
-                        Upcoming ↗
-                      </span>
-                    )}
+                        Remove
+                      </button>
+                    </form>
                   </div>
                 </div>
               </article>

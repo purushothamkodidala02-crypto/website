@@ -20,6 +20,13 @@ const AP_ENDOWMENT_ALIASES = new Set([
   "ap-endowments-officer-notification-2026",
   "ap-endowment-officer-notification-2026",
 ]);
+const AP_POLICE_ALIASES = new Set([
+  "andhra-police-constable-notification-2026",
+  "andhra-pradesh-police-constable-notification-2026",
+  "ap-police-constable-notification-2026",
+  "apslprb-police-constable-notification-2026",
+  "andhra-police-constable-notification",
+]);
 
 export async function generateStaticParams() {
   return [
@@ -38,6 +45,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (AP_ENDOWMENT_ALIASES.has(slug)) {
     return {
       title: "Redirecting to AP Endowment Officer Notification 2026...",
+      robots: { index: false, follow: true },
+    };
+  }
+  if (AP_POLICE_ALIASES.has(slug)) {
+    return {
+      title: "Redirecting to Andhra Pradesh Police Constable Notification 2026...",
       robots: { index: false, follow: true },
     };
   }
@@ -512,6 +525,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   const { slug } = await params;
   if (AP_ENDOWMENT_ALIASES.has(slug)) {
     permanentRedirect("/news/ap-endowment-officer-notification-2026");
+  }
+  if (AP_POLICE_ALIASES.has(slug)) {
+    permanentRedirect("/news/andhra-police-constable-notification-2026");
   }
   if (slug !== PRIMARY_SLUG && !ALIAS_SLUGS.has(slug)) {
     notFound();

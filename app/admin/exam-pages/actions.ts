@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type FaqActionState = { success: boolean; message: string };
 export type ExamPageContentActionState = { success: boolean; message: string };
+export type PrimaryPageActionState = { success: boolean; message: string };
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -86,5 +87,95 @@ export async function deleteExamPageFaq(formData: FormData) {
   const { supabase, error } = await requireAdmin();
   if (error) return;
   await supabase.from("exam_page_faqs").delete().eq("id", faqId);
+  refresh();
+}
+
+function readPrimaryPage(formData: FormData) {
+  const url = String(formData.get("url") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim();
+  const teluguTitle = String(formData.get("telugu_title") ?? "").trim();
+  const state = String(formData.get("state") ?? "Andhra Pradesh").trim();
+  const status = String(formData.get("status") ?? "live").trim() === "upcoming" ? "upcoming" : "live";
+  const statusCode = String(formData.get("status_code") ?? (status === "live" ? "200 OK" : "Upcoming Pipeline")).trim();
+  const vacancies = String(formData.get("vacancies") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const publishedDate = String(formData.get("published_date") ?? "").trim() || "15 Nov 2026";
+  const lastUpdated = String(formData.get("last_updated") ?? "").trim() || "15 Nov 2026";
+  const highlightsRaw = String(formData.get("highlights") ?? "").trim();
+  const highlights = highlightsRaw
+    ? highlightsRaw.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean)
+    : [];
+  const displayOrder = Number(formData.get("display_order") ?? 0);
+
+  if (!url || (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("/"))) {
+    return { error: "Please enter a valid URL (e.g. https://varadhiprep.in/news/... or /news/...)." } as const;
+  }
+  if (title.length < 3 || title.length > 300) {
+    return { error: "Title must be between 3 and 300 characters." } as const;
+  }
+
+  return {
+    url,
+    title,
+    teluguTitle,
+    state,
+    status,
+    statusCode,
+    vacancies,
+    description,
+    publishedDate,
+    lastUpdated,
+    highlights,
+    displayOrder: Number.isInteger(displayOrder) && displayOrder >= 0 ? displayOrder : 0,
+  } as const;
+}
+
+export async function createPrimaryExamPage(
+  _previous: PrimaryPageActionState,
+  formData: FormData,
+): Promise<PrimaryPageActionState> {
+  const values = readPrimaryPage(formData);
+  if ("error" in values && typeof values.error === "string") {
+    return { success: false, message: values.error };
+  }
+  const { supabase, error } = await requireAdmin();
+  if (error) return { success: false, message: error };
+
+  const { error: insertError } = await supabase
+    .from("primary_exam_pages")
+    .upsert(
+      {
+        url: values.url,
+        title: values.title,
+        telugu_title: values.teluguTitle,
+        state: values.state,
+        status: values.status,
+        status_code: values.statusCode,
+        vacancies: values.vacancies,
+        description: values.description,
+        published_date: values.publishedDate,
+        last_updated: values.lastUpdated,
+        highlights: values.highlights,
+        display_order: values.displayOrder,
+      },
+      { onConflict: "url" },
+    );
+
+  if (insertError) return { success: false, message: insertError.message };
+  refresh();
+  return { success: true, message: `Notification link "${values.title}" uploaded successfully!` };
+}
+
+export async function deletePrimaryExamPage(formData: FormData) {
+  const id = String(formData.get("id") ?? "").trim();
+  const url = String(formData.get("url") ?? "").trim();
+  const { supabase, error } = await requireAdmin();
+  if (error) return;
+
+  if (/^[0-9a-f-]{36}$/i.test(id)) {
+    await supabase.from("primary_exam_pages").delete().eq("id", id);
+  } else if (url) {
+    await supabase.from("primary_exam_pages").delete().eq("url", url);
+  }
   refresh();
 }
