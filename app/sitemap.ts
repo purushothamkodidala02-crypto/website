@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   add("/", 1, "weekly");
   add("/mock-tests", 0.9, "daily");
   add("/news/telangana-police-constable-notification-2026", 1.0, "daily", new Date().toISOString());
+  add("/news/ap-endowment-officer-notification-2026", 1.0, "daily", new Date().toISOString());
   entries.set("/support", { url: absoluteUrl("/support"), priority: 0.5, changeFrequency: "yearly" });
   entries.set("/terms-and-conditions", { url: absoluteUrl("/terms-and-conditions"), priority: 0.3, changeFrequency: "yearly" });
   entries.set("/privacy-policy", { url: absoluteUrl("/privacy-policy"), priority: 0.3, changeFrequency: "yearly" });

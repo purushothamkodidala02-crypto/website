@@ -13,6 +13,13 @@ const ALIAS_SLUGS = new Set([
   "ts-police-constable-notification-2026",
   "tslprb-police-constable-notification-2026",
 ]);
+const AP_ENDOWMENT_ALIASES = new Set([
+  "ap-endowment-officer-notification",
+  "ap-endowment-officer-grade-3-notification-2026",
+  "appsc-endowment-officer-notification-2026",
+  "ap-endowments-officer-notification-2026",
+  "ap-endowment-officer-notification-2026",
+]);
 
 export async function generateStaticParams() {
   return [
@@ -28,6 +35,12 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  if (AP_ENDOWMENT_ALIASES.has(slug)) {
+    return {
+      title: "Redirecting to AP Endowment Officer Notification 2026...",
+      robots: { index: false, follow: true },
+    };
+  }
   if (slug !== PRIMARY_SLUG && !ALIAS_SLUGS.has(slug)) {
     return { title: "News Not Found", robots: { index: false, follow: false } };
   }
@@ -497,6 +510,9 @@ const BILINGUAL_FAQS = [
 
 export default async function TelanganaPoliceNotificationPage({ params }: Props) {
   const { slug } = await params;
+  if (AP_ENDOWMENT_ALIASES.has(slug)) {
+    permanentRedirect("/news/ap-endowment-officer-notification-2026");
+  }
   if (slug !== PRIMARY_SLUG && !ALIAS_SLUGS.has(slug)) {
     notFound();
   }
