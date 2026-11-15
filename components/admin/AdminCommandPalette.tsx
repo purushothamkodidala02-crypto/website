@@ -84,7 +84,7 @@ const COMMANDS: CommandItem[] = [
     id: "nav-exam-pages",
     title: "Public Pages",
     category: "Navigation",
-    description: "Manage public landing pages, recruitment notifications, and governance policies",
+    description: "Manage public landing pages, recruitment notifications, and student links",
     href: "/admin/exam-pages",
     icon: "portal",
   },

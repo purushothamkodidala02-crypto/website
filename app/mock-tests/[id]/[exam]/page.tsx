@@ -55,6 +55,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     keywords: teluguData?.keywords,
     canonical,
     indexable: isIndexableCollectionQuery(await searchParams),
+    image: absoluteUrl(`${canonical}/opengraph-image`),
   });
 }
 
@@ -160,24 +161,78 @@ export default async function ExamPage({ params, searchParams }: Props) {
     ...teluguFaqItems,
   ].map((item) => ({ question: item.question, answer: item.answer }));
 
+  const quizJsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["LearningResource", "Quiz"],
+    name: `${statePrefixedName} Mock Test Series`,
+    description: seo.description,
+    url: absoluteUrl(canonical),
+    inLanguage: ["en-IN", "te-IN"],
+    isAccessibleForFree: true,
+    learningResourceType: "Mock Test",
+    educationalUse: "Practice",
+    educationalLevel: "Competitive Examination",
+    about: [
+      {
+        "@type": "Thing",
+        name: `${context.state.name} Public Service Commission`,
+      },
+      {
+        "@type": "Thing",
+        name: context.exam.name,
+      },
+      ...papers.map((p) => ({
+        "@type": "Thing",
+        name: p.name,
+      })),
+    ],
+    assesses: papers.map((p) => p.name),
+    provider: {
+      "@type": "Organization",
+      name: "Varadhi Prep",
+      url: absoluteUrl("/"),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Varadhi Prep",
+      url: absoluteUrl("/"),
+    },
+    potentialAction: {
+      "@type": "Action",
+      name: `Practice ${context.exam.name} Free Mock Tests`,
+      target: absoluteUrl(canonical),
+    },
+    ...(teluguData?.keywords ? { keywords: teluguData.keywords.join(", ") } : {}),
+  };
+
   const courseJsonLd = {
     "@context": "https://schema.org",
     "@type": "Course",
     name: seo.title,
     description: seo.description,
+    url: absoluteUrl(canonical),
+    courseCode: context.exam.slug.toUpperCase(),
     provider: {
       "@type": "Organization",
       name: "Varadhi Prep",
       url: absoluteUrl("/"),
     },
     educationalLevel: "Competitive Examination",
-    inLanguage: ["en", "te"],
+    inLanguage: ["en-IN", "te-IN"],
     isAccessibleForFree: true,
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "Online",
+      courseWorkload: "PT150M",
+      inLanguage: ["en-IN", "te-IN"],
+    },
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "INR",
       category: "Free",
+      availability: "https://schema.org/InStock",
+      url: absoluteUrl(canonical),
     },
     ...(teluguData?.keywords ? { keywords: teluguData.keywords.join(", ") } : {}),
   };
@@ -215,16 +270,74 @@ export default async function ExamPage({ params, searchParams }: Props) {
         "@type": "Occupation",
         name: teluguData.jobProfile.roleTitle,
         description: `${teluguData.jobProfile.roleTitle} in ${teluguData.jobProfile.department}. Roles, duties, eligibility, and pay scale.`,
-        estimatedSalary: {
-          "@type": "MonetaryAmountDistribution",
-          name: "Gross Monthly Salary",
-          currency: "INR",
+        estimatedSalary: [
+          {
+            "@type": "MonetaryAmountDistribution",
+            name: "Gross Monthly Salary",
+            currency: "INR",
+            unitText: "MONTH",
+            minValue: 36000,
+            maxValue: 42000,
+          },
+          {
+            "@type": "MonetaryAmountDistribution",
+            name: "Basic Pay Scale",
+            currency: "INR",
+            unitText: "MONTH",
+            minValue: 25220,
+            maxValue: 80910,
+          },
+        ],
+        hiringOrganization: {
+          "@type": "GovernmentOrganization",
+          name: teluguData.jobProfile.department,
         },
         responsibilities: teluguData.jobProfile.duties.map(
           (d) => `${d.title}${d.teluguTitle ? ` (${d.teluguTitle})` : ""}: ${d.description}`,
         ),
         occupationalCategory: "Public Administration and Government Services",
         qualifications: `${teluguData.jobProfile.eligibility.education} Age Limit: ${teluguData.jobProfile.eligibility.ageLimit}`,
+      }
+    : null;
+
+  const papersItemListJsonLd = papers.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: `${examHeading} Examination Papers`,
+        numberOfItems: papers.length,
+        itemListElement: papers.map((paper, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: paperDisplayById.get(paper.id)?.label ? `${paperDisplayById.get(paper.id)!.label}: ${paper.name}` : paper.name,
+          url: absoluteUrl(paperUrl(context.state.slug, context.exam!.slug, paper.slug)),
+        })),
+      }
+    : null;
+
+  const testsItemListJsonLd = tests.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: `${examHeading} Practice Tests`,
+        numberOfItems: tests.length,
+        itemListElement: tests.slice(0, 12).map((test, index) => {
+          const paper = papers.find((item) => item.id === test.paper_id)!;
+          const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
+          const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
+          return {
+            "@type": "ListItem",
+            position: index + 1,
+            name: studentTestTitle(
+              test,
+              context.exam!.name,
+              paperDisplayById.get(paper.id)?.shortLabel ?? paper.name,
+              subject?.name,
+              section?.name,
+            ),
+            url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)),
+          };
+        }),
       }
     : null;
 
@@ -241,11 +354,21 @@ export default async function ExamPage({ params, searchParams }: Props) {
       ],
       teluguData?.keywords,
     ),
+    quizJsonLd,
     courseJsonLd,
     ...(eventJsonLd ? [eventJsonLd] : []),
     ...(occupationJsonLd ? [occupationJsonLd] : []),
-    { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: questions.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
-    { "@context": "https://schema.org", "@type": "ItemList", name: examHeading, numberOfItems: tests.length, itemListElement: tests.slice(0, 12).map((test, index) => { const paper = papers.find((item) => item.id === test.paper_id)!; const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined; const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined; return { "@type": "ListItem", position: index + 1, name: studentTestTitle(test, context.exam!.name, paperDisplayById.get(paper.id)?.shortLabel ?? paper.name, subject?.name, section?.name), url: absoluteUrl(mockTestUrl(context.state.slug, context.exam!.slug, paper.slug, test.slug)) }; }) },
+    ...(papersItemListJsonLd ? [papersItemListJsonLd] : []),
+    ...(testsItemListJsonLd ? [testsItemListJsonLd] : []),
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: questions.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    },
   ];
 
   return (

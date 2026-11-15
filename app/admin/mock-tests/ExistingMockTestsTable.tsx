@@ -83,6 +83,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const [search, setSearch] = useState(initialSearch);
   const [status, setStatus] = useState<MockTestStatus | "all">(initialStatus);
   const [scope, setScope] = useState<"all" | "paper" | "subject">(initialScope);
+  const [quickPreset, setQuickPreset] = useState<"all" | "needs-questions" | "ready-to-publish">("all");
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
@@ -124,24 +125,54 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     setScope((prev) => (prev === clickedScope ? "all" : clickedScope));
   };
 
+  const readyDraftsCount = tests.filter(
+    (test) =>
+      test.status === "draft" &&
+      test.questionCount === test.targetQuestionCount &&
+      test.questionCount - test.usableQuestionCount === 0,
+  ).length;
+
+  const incompleteDraftsCount = tests.filter(
+    (test) =>
+      test.status === "draft" &&
+      (test.questionCount < test.targetQuestionCount ||
+        test.questionCount - test.usableQuestionCount > 0),
+  ).length;
+
   const filtered = useMemo(() => {
     const rawQuery = search.trim().toLowerCase();
     const queryWords = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
-    return tests.filter((test) =>
-      (!stateId || test.stateId === stateId) &&
-      (!location.categoryId || test.categoryId === location.categoryId) &&
-      (!location.examId || test.examId === location.examId) &&
-      (!location.specializationId || test.specializationId === location.specializationId) &&
-      (!location.paperId || test.paperId === location.paperId) &&
-      (status === "all" || test.status === status) &&
-      (scope === "all" || test.scope === scope) &&
-      (queryWords.length === 0 ||
-        (() => {
-          const haystack = `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""}`.toLowerCase();
-          return haystack.includes(rawQuery) || queryWords.every((word) => haystack.includes(word));
-        })()),
-    );
-  }, [location, search, stateId, status, scope, tests]);
+    return tests.filter((test) => {
+      if (quickPreset === "needs-questions") {
+        const isNeeds =
+          test.status === "draft" &&
+          (test.questionCount < test.targetQuestionCount ||
+            test.questionCount - test.usableQuestionCount > 0);
+        if (!isNeeds) return false;
+      } else if (quickPreset === "ready-to-publish") {
+        const isReady =
+          test.status === "draft" &&
+          test.questionCount === test.targetQuestionCount &&
+          test.questionCount - test.usableQuestionCount === 0;
+        if (!isReady) return false;
+      }
+
+      return (
+        (!stateId || test.stateId === stateId) &&
+        (!location.categoryId || test.categoryId === location.categoryId) &&
+        (!location.examId || test.examId === location.examId) &&
+        (!location.specializationId || test.specializationId === location.specializationId) &&
+        (!location.paperId || test.paperId === location.paperId) &&
+        (status === "all" || test.status === status) &&
+        (scope === "all" || test.scope === scope) &&
+        (queryWords.length === 0 ||
+          (() => {
+            const haystack = `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""}`.toLowerCase();
+            return haystack.includes(rawQuery) || queryWords.every((word) => haystack.includes(word));
+          })())
+      );
+    });
+  }, [location, search, stateId, status, scope, quickPreset, tests]);
 
   const counts = {
     all: tests.length,
@@ -294,39 +325,85 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </p>
         )}
 
-        {/* Clean Status Tabs */}
-        <div className="mt-5 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center p-1 rounded-xl bg-slate-200/60 border border-slate-200">
-          {([
-            ["all", "All Tests", counts.all],
-            ["published", "Published", counts.published],
-            ["draft", "Drafts", counts.draft],
-            ["archived", "Hidden", counts.archived],
-          ] as const).map(([value, label, count]) => {
-            const isActive = status === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setStatus(value)}
-                className={`flex items-center justify-center sm:justify-start gap-2 rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-semibold transition ${
-                  isActive
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                }`}
-              >
-                <span>{label}</span>
-                <span
-                  className={`rounded-full px-1.5 py-0.2 text-[11px] font-bold ${
+        {/* Clean Status Tabs & Zoho Quick Views */}
+        <div className="mt-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center p-1 rounded-xl bg-slate-200/60 border border-slate-200">
+            {([
+              ["all", "All Tests", counts.all],
+              ["published", "Published", counts.published],
+              ["draft", "Drafts", counts.draft],
+              ["archived", "Hidden", counts.archived],
+            ] as const).map(([value, label, count]) => {
+              const isActive = status === value && quickPreset === "all";
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    setStatus(value);
+                    setQuickPreset("all");
+                  }}
+                  className={`flex items-center justify-center sm:justify-start gap-2 rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-semibold transition ${
                     isActive
-                      ? "bg-slate-100 text-slate-800"
-                      : "bg-slate-200/80 text-slate-600"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
                   }`}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{label}</span>
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 text-[11px] font-bold ${
+                      isActive
+                        ? "bg-slate-100 text-slate-800"
+                        : "bg-slate-200/80 text-slate-600"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Zoho-style Saved Filter Presets */}
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-1 rounded-xl">
+            <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 px-2 hidden sm:inline">
+              ⚡ Quick Views:
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setQuickPreset((prev) => (prev === "needs-questions" ? "all" : "needs-questions"));
+                setStatus("draft");
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                quickPreset === "needs-questions"
+                  ? "bg-amber-600 text-white shadow-2xs"
+                  : "border border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100"
+              }`}
+            >
+              <span>⚠️ Needs Questions</span>
+              <span className="rounded-full bg-amber-200/90 px-1.5 py-0.2 text-[10px] font-bold text-amber-950">
+                {incompleteDraftsCount}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setQuickPreset((prev) => (prev === "ready-to-publish" ? "all" : "ready-to-publish"));
+                setStatus("draft");
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                quickPreset === "ready-to-publish"
+                  ? "bg-emerald-700 text-white shadow-2xs"
+                  : "border border-emerald-200 bg-emerald-50/80 text-emerald-900 hover:bg-emerald-100"
+              }`}
+            >
+              <span>✅ Ready to Publish</span>
+              <span className="rounded-full bg-emerald-200/90 px-1.5 py-0.2 text-[10px] font-bold text-emerald-950">
+                {readyDraftsCount}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

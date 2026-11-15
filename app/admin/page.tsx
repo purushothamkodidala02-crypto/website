@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { indiaDateKey } from "@/lib/date";
 import { parseMockTestTitle, studentFacingMockTestTitle } from "@/lib/exam-catalog";
 import { buildPaperDisplayMap, type OrderedPaper } from "@/lib/papers";
+import { AdminQuickCandidateLookup } from "@/components/admin/AdminQuickCandidateLookup";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -252,6 +253,122 @@ export default async function AdminDashboard() {
       </section>
 
       {/* ========================================================
+          2B. ZOHO-STYLE PUBLISHING LIFECYCLE PIPELINE
+      ======================================================== */}
+      <section className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-teal-100 bg-slate-50/60 px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-800 text-white font-black text-xs">
+              ⚡
+            </span>
+            <div>
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
+                Mock Test Publishing Pipeline
+              </h2>
+              <p className="text-xs text-slate-500">
+                Zoho-style stage tracker for test readiness and releases
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/mock-tests"
+              className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
+            >
+              All {tests.length} Tests &rarr;
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid gap-4 p-5 sm:p-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Stage 1: Drafting / Incomplete */}
+          <div className="rounded-2xl border border-amber-200/80 bg-amber-50/40 p-4 transition hover:bg-amber-50/70">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-amber-800">
+                1. Drafting &amp; Assembly
+              </span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-900 border border-amber-200">
+                {draftsNeedingWork.length}
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-black text-slate-900">{draftsNeedingWork.length}</p>
+            <p className="mt-1 text-xs text-slate-500">Tests missing questions or valid marks.</p>
+            <Link
+              href="/admin/mock-tests?status=draft"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-amber-900 hover:underline"
+            >
+              <span>Inspect Drafts</span>
+              <span>&rarr;</span>
+            </Link>
+          </div>
+
+          {/* Stage 2: Ready for Sign-off */}
+          <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-4 transition hover:bg-emerald-50/70">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
+                2. Ready to Release
+              </span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-900 border border-emerald-200">
+                {readyDraftsCount}
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-black text-slate-900">{readyDraftsCount}</p>
+            <p className="mt-1 text-xs text-slate-500">100% questions ready for 1-click publish.</p>
+            <Link
+              href="/admin/mock-tests?status=draft"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-900 hover:underline"
+            >
+              <span>Review &amp; Publish</span>
+              <span>&rarr;</span>
+            </Link>
+          </div>
+
+          {/* Stage 3: Live in Production */}
+          <div className="rounded-2xl border border-teal-200/80 bg-teal-50/40 p-4 transition hover:bg-teal-50/70">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-teal-800">
+                3. Live Production
+              </span>
+              <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-black text-teal-900 border border-teal-200">
+                {published.length}
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-black text-slate-900">{published.length}</p>
+            <p className="mt-1 text-xs text-slate-500">Actively visible and testable by students.</p>
+            <Link
+              href="/admin/mock-tests?status=published"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-900 hover:underline"
+            >
+              <span>Manage Live Tests</span>
+              <span>&rarr;</span>
+            </Link>
+          </div>
+
+          {/* Stage 4: Archived / Hidden */}
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 transition hover:bg-slate-100/60">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-600">
+                4. Archived / Hidden
+              </span>
+              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-black text-slate-700 border border-slate-300">
+                {hidden.length}
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-black text-slate-900">{hidden.length}</p>
+            <p className="mt-1 text-xs text-slate-500">Archived tests with preserved attempts.</p>
+            <Link
+              href="/admin/mock-tests?status=archived"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:underline"
+            >
+              <span>View Archived</span>
+              <span>&rarr;</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
           3. OPERATIONS & RECENT TESTS DUAL GRID
       ======================================================== */}
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -434,6 +551,13 @@ export default async function AdminDashboard() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* ========================================================
+          3B. INSTANT STUDENT & CANDIDATE LOOKUP (ZOHO CRM STYLE)
+      ======================================================== */}
+      <section>
+        <AdminQuickCandidateLookup />
       </section>
 
       {/* ========================================================

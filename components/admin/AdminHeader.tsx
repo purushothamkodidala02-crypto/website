@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/admin/LogoutButton";
@@ -88,6 +89,22 @@ export function AdminHeader({
 }) {
   const pathname = usePathname();
   const breadcrumb = getBreadcrumb(pathname);
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const quickCreateRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (quickCreateRef.current && !quickCreateRef.current.contains(e.target as Node)) {
+        setQuickCreateOpen(false);
+      }
+    };
+    if (quickCreateOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [quickCreateOpen]);
 
   const identity = resolveStudentDisplayInfo({
     fullName: adminName && adminName !== "Administrator" ? adminName : undefined,
@@ -170,6 +187,100 @@ export function AdminHeader({
 
       {/* Right: Security, Student Portal, User Profile, Sign Out */}
       <div className="flex min-w-0 items-center gap-2 sm:gap-2.5 shrink-0">
+        {/* Zoho-style Quick Action Launcher */}
+        <div className="relative shrink-0" ref={quickCreateRef}>
+          <button
+            type="button"
+            onClick={() => setQuickCreateOpen((prev) => !prev)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-xl bg-teal-800 px-3 text-xs font-bold text-white shadow-2xs transition hover:bg-teal-900 active:scale-95"
+            title="Zoho-style Quick Actions"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span className="hidden sm:inline">Quick Action</span>
+            <svg
+              className={`h-3 w-3 transition-transform ${quickCreateOpen ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          {quickCreateOpen && (
+            <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl border border-teal-100 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5 z-50 animate-in fade-in zoom-in-95">
+              <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-teal-800 border-b border-slate-100">
+                ⚡ Operational Shortcuts
+              </div>
+              <div className="py-1">
+                <Link
+                  href="/admin/questions#add-one-question"
+                  onClick={() => setQuickCreateOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-950 transition"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                    </svg>
+                  </span>
+                  <span>New Question</span>
+                </Link>
+                <Link
+                  href="/admin/mock-tests"
+                  onClick={() => setQuickCreateOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-950 transition"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </span>
+                  <span>New Mock Test</span>
+                </Link>
+                <Link
+                  href="/admin/excel-import-guide"
+                  onClick={() => setQuickCreateOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-950 transition"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                  </span>
+                  <span>Excel Question Import</span>
+                </Link>
+                <Link
+                  href="/admin/students"
+                  onClick={() => setQuickCreateOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-950 transition"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                  </span>
+                  <span>Broadcast Notice / Email</span>
+                </Link>
+                <Link
+                  href="/admin/access"
+                  onClick={() => setQuickCreateOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-950 transition"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                    </svg>
+                  </span>
+                  <span>Exam Series & Pricing</span>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* MFA Active Badge */}
         <span
           title="Session secured with Two-Factor Authentication (AAL2)"

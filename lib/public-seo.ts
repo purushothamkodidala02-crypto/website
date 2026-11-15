@@ -7,12 +7,14 @@ export function publicCollectionMetadata({
   canonical,
   indexable = true,
   keywords,
+  image,
 }: {
   title: string;
   description: string;
   canonical: string;
   indexable?: boolean;
   keywords?: string[];
+  image?: string;
 }): Metadata {
   const brand = " | Varadhi Prep";
   let metadataTitle: Metadata["title"] = title;
@@ -34,15 +36,57 @@ export function publicCollectionMetadata({
   }
 
   const safeDescription = trimMetaDescription(description, 160);
+  const ogImageUrl = image || absoluteUrl("/opengraph-image");
+  const titleString = typeof metadataTitle === "string" ? metadataTitle : metadataTitle.absolute;
 
   return {
     title: metadataTitle,
     description: safeDescription,
     keywords,
-    alternates: { canonical },
-    robots: indexable ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } } : { index: false, follow: true },
-    openGraph: { type: "website", url: canonical, title, description: safeDescription, siteName: "Varadhi Prep", images: ["/opengraph-image"] },
-    twitter: { card: "summary_large_image", title, description: safeDescription, images: ["/opengraph-image"] },
+    alternates: {
+      canonical,
+      languages: {
+        "en-IN": canonical,
+        "te-IN": canonical,
+        "x-default": canonical,
+      },
+    },
+    robots: indexable
+      ? {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        }
+      : { index: false, follow: true },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title: titleString,
+      description: safeDescription,
+      siteName: "Varadhi Prep",
+      locale: "en_IN",
+      alternateLocale: ["te_IN"],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: titleString,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: titleString,
+      description: safeDescription,
+      images: [ogImageUrl],
+    },
   };
 }
 
@@ -80,8 +124,13 @@ export function collectionStructuredData(
       name,
       description,
       url: absoluteUrl(canonical),
+      inLanguage: ["en-IN", "te-IN"],
       educationalUse: "Practice",
       isPartOf: { "@type": "WebSite", name: "Varadhi Prep", url: absoluteUrl("/") },
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["h1", "#frequently-asked-questions", "#papers"],
+      },
       ...(keywords ? { keywords: Array.isArray(keywords) ? keywords.join(", ") : keywords } : {}),
     },
     {

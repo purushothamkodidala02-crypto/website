@@ -48,9 +48,15 @@ export function resolveSeoFields(
   const hasTeluguInFallback = fallback.title && /[\u0C00-\u0C7F]/.test(fallback.title);
   const hasTeluguInDb = rawTitle && /[\u0C00-\u0C7F]/.test(rawTitle);
 
+  // If fallback description is bilingual (contains Telugu script \u0C00-\u0C7F) and entity description lacks Telugu,
+  // prefer the rich bilingual fallback for optimal search visibility across English & Telugu queries.
+  const hasTeluguInFallbackDesc = fallback.description && /[\u0C00-\u0C7F]/.test(fallback.description);
+  const hasTeluguInDbDesc = rawDesc && /[\u0C00-\u0C7F]/.test(rawDesc);
+
   const useFallbackTitle =
     !rawTitle || isLegacyTitle || (hasTeluguInFallback && !hasTeluguInDb);
-  const useFallbackDesc = !rawDesc || isLegacyDesc;
+  const useFallbackDesc =
+    !rawDesc || isLegacyDesc || (hasTeluguInFallbackDesc && !hasTeluguInDbDesc);
 
   return {
     title: useFallbackTitle ? fallback.title : rawTitle,

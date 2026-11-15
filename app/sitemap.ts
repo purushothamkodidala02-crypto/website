@@ -36,10 +36,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const state = stateById.get(category.state_id);
     if (state) add(categoryUrl(state.slug, category.slug), 0.75, "weekly");
   }
+  // Explicit high-priority index for APPSC Endowment Officer
+  add("/mock-tests/andhra-pradesh/appsc-endowment-officer-mock-test", 0.95, "daily", new Date().toISOString());
+
   for (const exam of catalog.exams) {
     const category = categoryById.get(exam.exam_id);
     const state = category ? stateById.get(category.state_id) : undefined;
-    if (state) add(examUrl(state.slug, exam.slug), 0.9, "daily");
+    const isEndowment = exam.slug.includes("endowment");
+    if (state) add(examUrl(state.slug, exam.slug), isEndowment ? 0.95 : 0.9, "daily", (exam as { updated_at?: string }).updated_at || new Date().toISOString());
   }
   for (const specialization of catalog.specializations) {
     const exam = examById.get(specialization.exam_group_id);
@@ -51,7 +55,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const exam = examById.get(paper.exam_group_id);
     const category = exam ? categoryById.get(exam.exam_id) : undefined;
     const state = category ? stateById.get(category.state_id) : undefined;
-    if (exam && state) add(paperUrl(state.slug, exam.slug, paper.slug), 0.85, "daily");
+    if (exam && state) {
+      add(
+        paperUrl(state.slug, exam.slug, paper.slug),
+        0.85,
+        "daily",
+        (paper as { updated_at?: string }).updated_at || new Date().toISOString()
+      );
+    }
   }
   for (const subject of catalog.subjects) {
     const paper = paperById.get(subject.paper_id);
