@@ -633,7 +633,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   ];
 
   return (
-    <main className="min-h-screen w-full bg-[#e2e6ea] text-[#1a1a1a] antialiased">
+    <main className="min-h-screen w-full bg-[#fae7e0] text-[#1a1a1a] antialiased">
       <JsonLd data={jsonLd} />
 
       {/* Direct Google Font Preload for Mandali (TV9 Telugu Font) */}
@@ -677,7 +677,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       </header>
 
       {/* Full-Screen Editorial Article Header */}
-      <article className="border-b border-slate-300 bg-[#e2e6ea] w-full">
+      <article className="border-b border-slate-300 bg-[#fae7e0] w-full">
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6 sm:py-8">
           
           {/* Breadcrumb Navigation */}
@@ -2194,7 +2194,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       </div>
 
       {/* Broadsheet Newspaper Editorial Footer */}
-      <footer className="mt-16 border-t border-slate-300 bg-[#d8dce2] py-10 text-center text-xs sm:text-sm text-slate-700 w-full shadow-inner">
+      <footer className="mt-16 border-t border-slate-300 bg-[#ebd7cf] py-10 text-center text-xs sm:text-sm text-slate-700 w-full shadow-inner">
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-2">
           <p className="font-bold text-slate-900 text-sm sm:text-base">
             Varadhi Prep &bull; Examination Information &amp; Practice Portal
