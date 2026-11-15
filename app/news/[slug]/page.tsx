@@ -32,9 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "News Not Found", robots: { index: false, follow: false } };
   }
 
-  const title = "Telangana Police Constable Notification 2026 (7,112 Posts): Download Official PDF, Syllabus & Dates";
+  const title = "Telangana Police Constable Notification 2026 (7,112 Posts): Download Official PDF, Syllabus, Salary & Dates";
   const description =
-    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/2026) issued for 7,112 vacancies. Download official PDF (748 KB), check cadre-wise vacancies, G.O. Ms 87 age limits, PMT/PET standards, Annexure-II syllabus, and apply online at tgprb.in.";
+    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/2026) issued for 7,112 vacancies. Download official PDF (748 KB), check cadre-wise vacancies (Post Codes 21-28), monthly salary in-hand, medical eye sight 6/6 standards, PET 100-mark slabs, certificates required, and G.O. Ms 87 & 122 age limits.";
   const canonical = absoluteUrl(`/news/${PRIMARY_SLUG}`);
 
   return {
@@ -45,16 +45,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "TS Police Constable Notification 2026 PDF",
       "TS Police Constable Notification 2026 PDF download",
       "TSLPRB Police Constable 7112 Vacancies",
+      "TS Police Constable Post Code 21 Civil 22 AR 24 TSSP",
+      "Telangana Police Constable Salary in hand pay scale",
+      "TS Police Constable Medical Standards Eye Sight 6/6",
+      "TS Police Constable Color Blindness test Ishihara",
+      "TS Police Constable PET Marks 1600m run timings",
+      "TS Police Constable 800m run timings women marks table",
+      "TS Police Constable certificate verification documents required",
+      "TS Police Constable 95 percent local reservation presidential order",
+      "TS Police Constable driving license bonus marks weightage",
       "Telangana Police Constable Syllabus 2026",
       "TS Police Constable PWT Exam Pattern",
       "TS Police Constable Age Limit GO Ms 87",
       "TS Police Constable PET PMT Standards",
-      "TS Police Constable Salary Pay Scale",
       "TG Police Constable Notification 2026",
       "TS Police Constable Apply Online 2026",
       "TSLPRB Constable official website tgprb in",
       "తెలంగాణ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ 2026",
       "తెలంగాణ కానిస్టేబుల్ 7112 పోస్టుల వివరాలు",
+      "తెలంగాణ పోలీస్ కానిస్టేబుల్ శాలరీ పే స్కేల్ వివరాలు",
+      "పోలీస్ కానిస్టేబుల్ మెడికల్ టెస్ట్ & కంటి చూపు 6/6 నిబంధనలు",
+      "1600 మీటర్ల పరుగు ఈవెంట్స్ మార్కుల పట్టిక",
+      "సర్టిఫికెట్ వెరిఫికేషన్ అవసరమైన డాక్యుమెంట్లు",
       "తెలంగాణ పోలీస్ సిలబస్ 2026",
       "తెలంగాణ కానిస్టేబుల్ అధికారిక నోటిఫికేషన్ పీడీఎఫ్ డౌన్‌లోడ్",
       "TG Police Constable mock test in Telugu",
@@ -87,13 +99,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // ── Official Recruitment Data (TSLPRB Rc No. 189/Rect./Rect.2/2026) ────
 
 const VACANCIES = [
-  { postCode: "21", postName: "SCT Police Constable (Civil)", department: "Police Department", genderEligibility: "Men & Women", vacancies: 4965, share: "69.8%" },
-  { postCode: "22", postName: "SCT Police Constable (AR - Armed Reserve)", department: "Police Department", genderEligibility: "Men & Women", vacancies: 1250, share: "17.6%" },
-  { postCode: "23", postName: "SCT Police Constable (SAR CPL)", department: "Police Department", genderEligibility: "Men Only", vacancies: 100, share: "1.4%" },
-  { postCode: "24", postName: "SCT Police Constable (TSSP / TGSPF)", department: "Police Department", genderEligibility: "Men Only", vacancies: 500, share: "7.0%" },
-  { postCode: "26", postName: "Fire Fighter (Driver Operator)", department: "Disaster Response & Fire Services", genderEligibility: "Men (Valid LMV)", vacancies: 225, share: "3.2%" },
-  { postCode: "27", postName: "Warder (Male)", department: "Prisons & Correctional Services", genderEligibility: "Men Only", vacancies: 62, share: "0.9%" },
-  { postCode: "28", postName: "Warder (Female)", department: "Prisons & Correctional Services", genderEligibility: "Women Only", vacancies: 10, share: "0.1%" },
+  { postCode: "21", postName: "SCT Police Constable (Civil)", department: "Police Department", cadreType: "District Cadre (95% Local)", genderEligibility: "Men & Women", vacancies: 4965, share: "69.8%", roleSummary: "Law & order, crime investigation, public order, and citizen safety in police stations." },
+  { postCode: "22", postName: "SCT Police Constable (AR - Armed Reserve)", department: "Police Department", cadreType: "District Cadre (95% Local)", genderEligibility: "Men & Women", vacancies: 1250, share: "17.6%", roleSummary: "Armed reserve units, VIP escort, bandobast security, and riot control management." },
+  { postCode: "23", postName: "SCT Police Constable (SAR CPL)", department: "Police Department", cadreType: "Special Armed Reserve (State)", genderEligibility: "Men Only", vacancies: 100, share: "1.4%", roleSummary: "Special Armed Reserve Central Police Lines for specialized state-wide emergency deployments." },
+  { postCode: "24", postName: "SCT Police Constable (TSSP / TGSPF)", department: "Police Department", cadreType: "Battalion Cadre (Statewide)", genderEligibility: "Men Only", vacancies: 500, share: "7.0%", roleSummary: "Telangana State Special Police active battalions for anti-extremist & border security operations." },
+  { postCode: "26", postName: "Fire Fighter (Driver Operator)", department: "Disaster Response & Fire Services", cadreType: "Multi-Zonal Cadre", genderEligibility: "Men (Valid LMV)", vacancies: 225, share: "3.2%", roleSummary: "Fire tender operation, firefighting operations, disaster mitigation, and emergency rescue." },
+  { postCode: "27", postName: "Warder (Male)", department: "Prisons & Correctional Services", cadreType: "Zonal Cadre", genderEligibility: "Men Only", vacancies: 62, share: "0.9%", roleSummary: "Security, reformatory programs, and inmate custody in central and district jails." },
+  { postCode: "28", postName: "Warder (Female)", department: "Prisons & Correctional Services", cadreType: "Zonal Cadre", genderEligibility: "Women Only", vacancies: 10, share: "0.1%", roleSummary: "Custodial surveillance, inmate welfare, and correctional tasks in women prisons." },
 ];
 
 const TOTAL_VACANCIES = 7112;
@@ -157,6 +169,28 @@ const SCHEDULE_EVENTS = [
   },
 ];
 
+const SALARY_COMPONENTS = [
+  { item: "Pay Scale (Revised Pay Scales)", amount: "₹24,280 – ₹72,850", note: "Sanctioned RPS grade for SCT Police Constable" },
+  { item: "Basic Pay (Initial Entry Level)", amount: "₹24,280", note: "Starting basic pay at minimum of scale" },
+  { item: "Dearness Allowance (DA @ ~33.67%)", amount: "₹8,175", note: "Applicable state DA percentage revised periodically" },
+  { item: "House Rent Allowance (HRA - Hyderabad/GHMC @ 24%)", amount: "₹5,827", note: "24% for Hyderabad; 16% for District HQs (~₹3,885); 12% for rural areas (~₹2,914)" },
+  { item: "City Compensatory Allowance (CCA)", amount: "₹400 – ₹700", note: "Tier-wise city posting compensatory allowance" },
+  { item: "Police Uniform / Kit Maintenance Allowance", amount: "₹500", note: "Monthly sanctioned police uniform allowance" },
+  { item: "Gross Monthly Salary (Hyderabad / GHMC)", amount: "₹39,182", note: "Gross pay before mandatory state deductions" },
+  { item: "Gross Monthly Salary (District Headquarters)", amount: "₹37,240", note: "Gross pay in district headquarters / municipal corporations" },
+  { item: "Gross Monthly Salary (Other Rural Centers)", amount: "₹36,269", note: "Gross pay in sub-divisions and mandals" },
+];
+
+const SALARY_DEDUCTIONS = [
+  { item: "Contributory Pension Scheme (CPS / PRAN - 10% of Basic+DA)", amount: "₹3,245", note: "Government contributes matching 14% to pension corpus" },
+  { item: "Professional Tax (PT)", amount: "₹200", note: "Statutory state municipal tax" },
+  { item: "Employee Health Scheme (EHS) / TSGLI", amount: "₹300", note: "Cashless healthcare coverage for employee & family" },
+  { item: "Total Monthly Deductions", amount: "₹3,745", note: "Total deductions deducted from gross salary" },
+  { item: "Net In-Hand Salary (Take-Home in Hyderabad)", amount: "₹35,437", note: "Net credited into bank account every month" },
+  { item: "Net In-Hand Salary (Take-Home in District HQs)", amount: "₹33,495", note: "Net take-home pay in major towns and district centers" },
+  { item: "Net In-Hand Salary (Take-Home in Rural Areas)", amount: "₹32,524", note: "Net take-home pay in mandal headquarters" },
+];
+
 const AGE_LIMITS = [
   {
     category: "General / Open Competition (OC)",
@@ -201,29 +235,92 @@ const SELECTION_STAGES = [
     name: "Preliminary Written Test (PWT)",
     teluguName: "ప్రిలిమినరీ రాత పరీక్ష",
     description: "Screening test consisting of 200 objective questions for 200 marks (3 hours) on OMR sheet. Negative marking of 0.20 marks (20%) per incorrect answer.",
-    weightage: "Screening Only",
+    weightage: "Screening Only (Qualifying for Stage 2)",
   },
   {
     step: "Stage 2",
     name: "Physical Measurement Test (PMT)",
     teluguName: "శారీరక కొలతల పరీక్ష",
-    description: "Biometric and digital measurement of height and chest (for men) and height (for women). Candidates must satisfy the mandatory minimum thresholds.",
-    weightage: "Mandatory Qualifying",
+    description: "Digital sensor measurement of height and chest (for men) and height (for women). Candidates must satisfy the mandatory minimum thresholds.",
+    weightage: "Mandatory Qualifying (No Marks)",
   },
   {
     step: "Stage 3",
     name: "Physical Efficiency Test (PET)",
     teluguName: "శారీరక సామర్థ్య పరీక్ష (ఈవెంట్స్)",
-    description: "RFID-monitored athletic events: 1600m run (men) or 800m run (women), followed by long jump and shot put. Run timings carry marks for AR & TSSP cadres.",
-    weightage: "Graded for AR/TSSP (100 Marks)",
+    description: "RFID-monitored athletic events: 1600m run (men) or 800m run (women), followed by Long Jump and Shot Put. Crucial: The run event carries 100 marks for AR & TSSP cadres!",
+    weightage: "Qualifying for Civil/Fire | 100 Marks for AR/TSSP",
   },
   {
     step: "Stage 4",
     name: "Final Written Examination (FWE)",
     teluguName: "చివరి రాత పరీక్ష (మెయిన్స్)",
     description: "Final written examination. 200 marks for Civil, Fire, and Warder posts; 100 marks for AR, SAR CPL, and TSSP posts.",
-    weightage: "100% for Civil | 50% for AR/TSSP",
+    weightage: "Civil: 200 Marks | AR/TSSP: 100 Marks (Total: 200 with PET)",
   },
+];
+
+const MEN_RUN_SLABS = [
+  { timing: "4 Minutes 15 Seconds or less", marks: "100 Marks", status: "Exceptional / Maximum" },
+  { timing: "4 Min 16 Sec to 4 Min 35 Sec", marks: "95 Marks", status: "Very Good" },
+  { timing: "4 Min 36 Sec to 4 Min 55 Sec", marks: "90 Marks", status: "Very Good" },
+  { timing: "4 Min 56 Sec to 5 Min 15 Sec", marks: "85 Marks", status: "Good" },
+  { timing: "5 Min 16 Sec to 5 Min 35 Sec", marks: "80 Marks", status: "Good" },
+  { timing: "5 Min 36 Sec to 5 Min 55 Sec", marks: "75 Marks", status: "Above Average" },
+  { timing: "5 Min 56 Sec to 6 Min 15 Sec", marks: "70 Marks", status: "Average" },
+  { timing: "6 Min 16 Sec to 6 Min 35 Sec", marks: "65 Marks", status: "Satisfactory" },
+  { timing: "6 Min 36 Sec to 6 Min 55 Sec", marks: "60 Marks", status: "Fair" },
+  { timing: "6 Min 56 Sec to 7 Min 15 Sec", marks: "50 Marks", status: "Qualifying Threshold" },
+  { timing: "More than 7 Min 15 Seconds", marks: "0 Marks", status: "Disqualified" },
+];
+
+const WOMEN_RUN_SLABS = [
+  { timing: "3 Minutes 05 Seconds or less", marks: "100 Marks", status: "Exceptional / Maximum" },
+  { timing: "3 Min 06 Sec to 3 Min 20 Sec", marks: "95 Marks", status: "Very Good" },
+  { timing: "3 Min 21 Sec to 3 Min 35 Sec", marks: "90 Marks", status: "Very Good" },
+  { timing: "3 Min 36 Sec to 3 Min 50 Sec", marks: "85 Marks", status: "Good" },
+  { timing: "3 Min 51 Sec to 4 Min 05 Sec", marks: "80 Marks", status: "Good" },
+  { timing: "4 Min 06 Sec to 4 Min 20 Sec", marks: "75 Marks", status: "Above Average" },
+  { timing: "4 Min 21 Sec to 4 Min 35 Sec", marks: "70 Marks", status: "Average" },
+  { timing: "4 Min 36 Sec to 4 Min 50 Sec", marks: "65 Marks", status: "Satisfactory" },
+  { timing: "4 Min 51 Sec to 5 Min 05 Sec", marks: "60 Marks", status: "Fair" },
+  { timing: "5 Min 06 Sec to 5 Min 20 Sec", marks: "50 Marks", status: "Qualifying Threshold" },
+  { timing: "More than 5 Min 20 Seconds", marks: "0 Marks", status: "Disqualified" },
+];
+
+const MEDICAL_STANDARDS = [
+  { parameter: "Distant Vision (Without Glasses)", rightEye: "6/6 (Snellen)", leftEye: "6/6 (Snellen)", rule: "Must be 6/6 uncorrected in both eyes without spectacles or contact lenses." },
+  { parameter: "Near Vision (Without Glasses)", rightEye: "0/5 (Snellen)", leftEye: "0/5 (Snellen)", rule: "Must be 0/5 uncorrected in both eyes." },
+  { parameter: "Color Vision (Ishihara 38 Plates)", rightEye: "Normal Color Perception", leftEye: "Normal Color Perception", rule: "Strict disqualification for Color Blindness (Red-Green deficiency) or partial color blindness." },
+  { parameter: "Field of Vision", rightEye: "Full Normal Field", leftEye: "Full Normal Field", rule: "Each eye must have an uninterrupted full field of vision." },
+  { parameter: "Night Vision (Nyctalopia)", rightEye: "Normal", leftEye: "Normal", rule: "Night blindness is a strict ground for rejection." },
+  { parameter: "Squint (Strabismus)", rightEye: "No Squint", leftEye: "No Squint", rule: "Presence of squint or any morbid eye condition leads to immediate rejection." },
+  { parameter: "Corneal Refractive Surgery (LASIK / PRK)", rightEye: "Evaluated by Board", leftEye: "Evaluated by Board", rule: "Candidates must pass detailed slit lamp and dilated fundus examination." },
+];
+
+const PHYSICAL_DEFECTS_DISQUALIFIED = [
+  { defect: "Knock Knees (Genu Valgum)", impact: "Inability to march, run, or stand at attention without knees rubbing or touching." },
+  { defect: "Flat Foot (Pes Planus)", impact: "Absence of normal medial foot arch leading to severe musculoskeletal fatigue during patrolling." },
+  { defect: "Varicose Veins in Lower Limbs", impact: "Dilated tortuous veins in legs pose risk of thrombophlebitis during prolonged standing duties." },
+  { defect: "Pigeon Chest & Deformed Ribcage", impact: "Abnormal ribcage contours restricting chest expansion below the mandatory 5 cm threshold." },
+  { defect: "Hammer Toes & Digit Loss", impact: "Deformed toes or loss of fingers that impede weapon handling, running, or boot endurance." },
+  { defect: "Fractured Limbs / Joint Stiffness", impact: "Any malunited bone fracture or restricted range of motion in elbow, shoulder, knee, or ankle." },
+  { defect: "Stammering / Speech Defect", impact: "Severe speech impediment interfering with wireless radio communication and commanding." },
+  { defect: "Decayed Teeth & Chronic Otitis Media", impact: "Severe dental caries or chronic ear discharge with perforation of the eardrum causing hearing loss." },
+];
+
+const DOCUMENTS_CHECKLIST = [
+  { item: "SSC (10th Class) Marks Memo", purpose: "Authentic proof of Date of Birth (DOB), candidate name, and father's name.", issuingAuthority: "State Board of Secondary Education" },
+  { item: "Intermediate (10+2) Pass Certificate & Memo", purpose: "Proof of prescribed minimum educational qualification.", issuingAuthority: "Telangana State Board of Intermediate Education or equivalent" },
+  { item: "Study / Bonafide Certificates (Classes 1st to 7th)", purpose: "Mandatory for establishing 95% Local Candidature under Presidential Order 2018 (minimum 4 consecutive years).", issuingAuthority: "Heads of Recognized Schools" },
+  { item: "Residence Certificate (If privately studied)", purpose: "For candidates who did not study in school for 4 consecutive years; certifies 4-year local stay.", issuingAuthority: "Tahsildar / Mandal Revenue Officer (MRO)" },
+  { item: "Community / Caste Certificate (SC / ST / BC)", purpose: "Claiming statutory age relaxation and category reservation benefits.", issuingAuthority: "MeeSeva / Revenue Department, Govt of Telangana" },
+  { item: "Non-Creamy Layer (NCL) Certificate", purpose: "Mandatory for BC candidates claiming Backward Class reservation; must be issued within valid financial year.", issuingAuthority: "Competent Revenue Authority (Tahsildar)" },
+  { item: "Economically Weaker Section (EWS) Certificate", purpose: "Income and Asset Certificate for claiming 10% EWS reservation.", issuingAuthority: "Tahsildar / Competent Revenue Officer" },
+  { item: "Agency / Scheduled Area ST Certificate", purpose: "Claiming PMT height relaxations (160 cm for men, 150 cm for women) in notified Scheduled Areas.", issuingAuthority: "Tahsildar / Project Officer ITDA" },
+  { item: "Valid Driving License (LMV / HMV)", purpose: "Claiming 3 bonus marks / weightage under Para 17 and mandatory for Fire Fighter posts.", issuingAuthority: "Regional Transport Authority (RTA)" },
+  { item: "Home Guard Service Certificate", purpose: "Claiming Home Guard age relaxation (up to 45 years) with proof of minimum 360 days service.", issuingAuthority: "Superintendent of Police / Unit Head" },
+  { item: "Discharge Book / Ex-Servicemen Certificate", purpose: "Claiming Ex-Servicemen age relaxation and reservation quota.", issuingAuthority: "Zilla Sainik Welfare Officer / Armed Forces Unit" },
 ];
 
 const QUALIFYING_MARKS = [
@@ -286,21 +383,51 @@ const SUBJECTS = [
 const BILINGUAL_FAQS = [
   {
     question: "What is the official notification number and vacancy count for Telangana Police Constable 2026?",
-    answer: "The official notification is Rc No. 189 / Rect. / Rect.2 / 2026 issued by TSLPRB. It sanctions a total of 7,112 vacancies: SCT Constable Civil (4,965), AR (1,250), SAR CPL (100), TSSP/TGSPF (500), Fire Fighters (225), Warder Male (62), and Warder Female (10).",
+    answer: "The official notification is Rc No. 189 / Rect. / Rect.2 / 2026 issued by TSLPRB. It sanctions a total of 7,112 vacancies: SCT Constable Civil (Post Code 21 - 4,965), AR (Post Code 22 - 1,250), SAR CPL (Post Code 23 - 100), TSSP/TGSPF (Post Code 24 - 500), Fire Fighters (Post Code 26 - 225), Warder Male (Post Code 27 - 62), and Warder Female (Post Code 28 - 10).",
     teluguQuestion: "తెలంగాణ కానిస్టేబుల్ 2026 నోటిఫికేషన్ నంబర్ మరియు మొత్తం ఖాళీల సంఖ్య ఎంత?",
-    teluguAnswer: "అధికారిక నోటిఫికేషన్ నంబర్ Rc No. 189 / Rect. / Rect.2 / 2026. దీని ద్వారా మొత్తం 7,112 పోస్టులను భర్తీ చేస్తున్నారు (సివిల్ 4,965, ఏఆర్ 1,250, సార్ సిపిఎల్ 100, టిఎస్ఎస్పి 500, ఫైర్ 225, జైలు వార్డర్స్ 72).",
+    teluguAnswer: "అధికారిక నోటిఫికేషన్ నంబర్ Rc No. 189 / Rect. / Rect.2 / 2026. దీని ద్వారా మొత్తం 7,112 పోస్టులను భర్తీ చేస్తున్నారు (పోస్ట్ కోడ్ 21 సివిల్ 4,965, పోస్ట్ కోడ్ 22 ఏఆర్ 1,250, పోస్ట్ కోడ్ 23 సార్ సిపిఎల్ 100, పోస్ట్ కోడ్ 24 టిఎస్ఎస్పి 500, పోస్ట్ కోడ్ 26 ఫైర్ 225, పోస్ట్ కోడ్ 27 & 28 జైలు వార్డర్స్ 72).",
   },
   {
-    question: "What are the age limits and relaxation under G.O. Ms No. 87?",
+    question: "What is the monthly in-hand take-home salary and pay scale for a Telangana Police Constable?",
+    answer: "The official pay scale is ₹24,280 – ₹72,850 under the Revised Pay Scales (RPS). Factoring in Basic Pay (₹24,280), DA (~33.67% = ₹8,175), HRA (24% in Hyderabad = ₹5,827; 16% in district HQs = ₹3,885), CCA, and uniform allowance, the initial gross salary ranges from ₹36,269 to ₹39,182. After mandatory CPS pension (₹3,245), PT (₹200), and EHS health insurance deductions, the net take-home salary is approximately ₹32,500 to ₹35,500 per month.",
+    teluguQuestion: "తెలంగాణ కానిస్టేబుల్ పే స్కేల్ మరియు ప్రతి నెలా చేతికి వచ్చే (ఇన్-హ్యాండ్) నికర వేతనం ఎంత?",
+    teluguAnswer: "అధికారిక పే స్కేలు ₹24,280 – ₹72,850. ప్రారంభ బేసిక్ పే ₹24,280, డీఏ (33.67%), హెచ్‌ఆర్‌ఏ (హైదరాబాద్‌లో 24%, జిల్లాల్లో 16%) కలిపి మొత్తం స్థూల వేతనం నెలకు ₹36,269 నుండి ₹39,182 వరకు ఉంటుంది. సీపీఎస్ పెన్షన్, పీటీ, ఈహెచ్ఎస్ మినహాయింపులు పోను చేతికి వచ్చే నికర ఇన్-హ్యాండ్ శాలరీ నెలకు సుమారు ₹32,500 నుండి ₹35,500 వరకు అందుతుంది.",
+  },
+  {
+    question: "What are the medical standards and eye sight (visual acuity) requirements?",
+    answer: "Distant Vision must be 6/6 uncorrected in both eyes without glasses or contact lenses. Near Vision must be 0/5 in both eyes. Candidates must possess full field of vision. Color blindness (tested via Ishihara plates), night blindness, squint, knock-knees, flat foot, and varicose veins are strict grounds for disqualification by the Medical Board.",
+    teluguQuestion: "పోలీస్ కానిస్టేబుల్ మెడికల్ పరీక్షలో కంటి చూపు (విజువల్ స్టాండర్డ్స్) మరియు అనర్హత నిబంధనలు ఏమిటి?",
+    teluguAnswer: "అభ్యర్థులకు రెండు కళ్లలోనూ కళ్లద్దాలు లేకుండా డిస్టెంట్ విజన్ 6/6 మరియు నియర్ విజన్ 0/5 ఉండాలి. కలర్ బ్లైండ్‌నెస్ (ఇషిహారా టెస్ట్), రేచీకటి, మెల్లకన్ను, నాక్ నీస్ (మోకాళ్లు రాపిడి), ఫ్లాట్ ఫుట్, మరియు వెరికోస్ వెయిన్స్ ఉన్న అభ్యర్థులను మెడికల్ బోర్డు అనర్హులుగా ప్రకటిస్తుంది.",
+  },
+  {
+    question: "How do PET marks work for AR, SAR CPL, and TSSP (Post Codes 22, 23, 24)?",
+    answer: "For Civil Constable (Post Code 21), Fire Fighters, and Warders, the PET 1600m/800m run is qualifying only, and selection is 100% on the 200-mark FWE. But for AR (22), SAR CPL (23), and TSSP (24), the 1600m run (men) or 800m run (women) carries 100 marks based on timing slabs! The final merit is calculated for 200 marks total: FWE (100 Marks) + PET Run (100 Marks).",
+    teluguQuestion: "ఏఆర్ మరియు టీఎస్‌ఎస్‌పీ (పోస్ట్ కోడ్స్ 22, 23, 24) పోస్టులకు ఈవెంట్స్ 100 మార్కుల విధానం ఎలా ఉంటుంది?",
+    teluguAnswer: "సివిల్ కానిస్టేబుల్ (పోస్ట్ కోడ్ 21) కు ఈవెంట్స్ కేవలం క్వాలిఫైయింగ్ మాత్రమే (మెయిన్స్ 200 మార్కులు). అయితే ఏఆర్, సార్ సిపిఎల్, టీఎస్‌ఎస్‌పీ పోస్టులకు 1600 మీటర్ల / 800 మీటర్ల పరుగుకు సమయాన్ని బట్టి 100 మార్కులు కేటాయిస్తారు. మెయిన్స్ పరీక్ష 100 మార్కులు + ఈవెంట్స్ 100 మార్కులు కలిపి మొత్తం 200 మార్కులకు తుది మెరిట్ జాబితా తీస్తారు.",
+  },
+  {
+    question: "What bonus marks are awarded for driving licenses under Para 17?",
+    answer: "Candidates who possess a valid Light Motor Vehicle (LMV) or Heavy Motor Vehicle (HMV) driving license continuously for at least 2 years prior to the notification date receive 3 bonus marks / weightage added to their final aggregate score for Post Codes 21, 22, 23, and 24. For Post Code 26 (Fire Fighter), an LMV license is a mandatory qualification.",
+    teluguQuestion: "డ్రైవింగ్ లైసెన్స్ ఉన్నవారికి ఎన్ని బోనస్ మార్కులు లేదా వెయిటేజీ లభిస్తుంది?",
+    teluguAnswer: "నోటిఫికేషన్ తేదీ నాటికి కనీసం 2 సంవత్సరాల నుండి చెల్లుబాటు అయ్యే ఎల్‌ఎమ్‌వి లేదా హెచ్‌ఎమ్‌వి డ్రైవింగ్ లైసెన్స్ ఉన్న అభ్యర్థులకు పోస్ట్ కోడ్ 21, 22, 23, 24 ఎంపికలో 3 బోనస్ మార్కులు (వెయిటేజీ) లభిస్తాయి. ఫైర్ ఫైటర్ (పోస్ట్ 26) కు డ్రైవింగ్ లైసెన్స్ తప్పనిసరి.",
+  },
+  {
+    question: "How does the 95% Local Reservation work under Presidential Order 2018?",
+    answer: "Under the Presidential Order 2018 (New Zonal System), 95% of vacancies in District Cadres (Civil & AR) are strictly reserved for candidates who are local to that specific district (studied for at least 4 consecutive years between Classes 1 to 7 in that district). The remaining 5% vacancies are open to Open Competition (OC) across all districts and states.",
+    teluguQuestion: "ప్రెసిడెన్షియల్ ఆర్డర్ 2018 ప్రకారం 95% స్థానిక రిజర్వేషన్ ఎలా వర్తిస్తుంది?",
+    teluguAnswer: "రాష్ట్రపతి ఉత్తర్వులు 2018 (కొత్త జోనల్ విధానం) ప్రకారం జిల్లా క్యాడర్ పోస్టులలో (సివిల్ & ఏఆర్) 95 శాతం ఖాళీలు ఆయా జిల్లా స్థానిక అభ్యర్థులకే (1 నుండి 7వ తరగతి వరకు వరుసగా 4 ఏళ్లు ఆ జిల్లాలో చదివిన వారికి) రిజర్వ్ చేయబడతాయి. మిగిలిన 5 శాతం పోస్టులు ఓపెన్ కాంపిటీషన్ (ఓసీ) కింద అన్ని జిల్లాల అభ్యర్థులకు అందుబాటులో ఉంటాయి.",
+  },
+  {
+    question: "What certificates are required for Part-II application and Certificate Verification (DV)?",
+    answer: "11 key documents: SSC memo (DOB proof), Intermediate marks memo & pass certificate, Study/Bonafide certificates from Class 1st to 7th (for 95% local status), Community/Caste certificate (SC/ST/BC), Non-Creamy Layer (NCL) certificate for BCs, EWS certificate, Agency ST certificate, valid driving license (if claiming 3 bonus marks), Ex-Servicemen discharge book, Home Guard service certificate, and TS Govt employee service certificate.",
+    teluguQuestion: "పార్ట్-2 దరఖాస్తు మరియు సర్టిఫికెట్ వెరిఫికేషన్ (డీవీ) కోసం ఏఏ ఒరిజినల్ డాక్యుమెంట్లు కావాలి?",
+    teluguAnswer: "10వ తరగతి మార్కుల మెమో (పుట్టిన తేదీ కోసం), ఇంటర్మీడియట్ పాస్ సర్టిఫికెట్ & మెమో, 1 నుండి 7వ తరగతి వరకు స్టడీ/బోనఫైడ్ సర్టిఫికెట్లు (95% లోకల్ రిజర్వేషన్ కోసం), కుల ధ్రువీకరణ పత్రం (ఎస్సీ/ఎస్టీ/బీసీ), బీసీలకు నాన్-క్రీమీ లేయర్ (NCL), ఈడబ్ల్యూఎస్ సర్టిఫికెట్, ఏజెన్సీ ఎస్టీ సర్టిఫికెట్, డ్రైవింగ్ లైసెన్స్ (బోనస్ మార్కుల కోసం), మాజీ సైనికుల డిశ్చార్జ్ బుక్, మరియు హోంగార్డు సర్వీస్ సర్టిఫికెట్.",
+  },
+  {
+    question: "What are the age limits and relaxation under G.O. Ms No. 87 and G.O. Ms 122?",
     answer: "The base age is 18 to 22 years (as of 1 July 2026). Under G.O. Ms No. 87, the Telangana Government sanctioned a 5-year upper age relaxation. General/OC candidates can apply up to 27 years. BC, SC, ST, and EWS candidates receive an additional 5-year statutory reservation relaxation, making them eligible up to 32 years. Home Guards can apply up to 45 years.",
     teluguQuestion: "పోలీస్ కానిస్టేబుల్ వయోపరిమితి ఎంత? జీవో నం. 87 ప్రకారం ఎంత సడలింపు లభిస్తుంది?",
     teluguAnswer: "నిర్దేశిత ప్రాథమిక వయస్సు 18 నుండి 22 సంవత్సరాలు. తెలంగాణ ప్రభుత్వం జీవో 87 ద్వారా 5 ఏళ్ల సాధారణ సడలింపు ఇచ్చింది. దీనితో జనరల్/ఓసీ అభ్యర్థులు 27 ఏళ్ల వరకు దరఖాస్తు చేసుకోవచ్చు. బీసీ, ఎస్సీ, ఎస్టీ, ఈడబ్ల్యూఎస్ అభ్యర్థులకు మరో 5 ఏళ్ల సడలింపుతో 32 ఏళ్ల వరకు అర్హత ఉంటుంది.",
-  },
-  {
-    question: "What is the educational qualification required?",
-    answer: "Candidates must have passed Intermediate (10+2) or its equivalent recognized by the Telangana State Board of Intermediate Education. For SC and ST candidates, passing SSC (10th) and appearing for 1st & 2nd year Intermediate examinations is sufficient. Fire Fighter posts mandate a valid Light Motor Vehicle (LMV) driving license.",
-    teluguQuestion: "ఈ ఉద్యోగాలకు అవసరమైన విద్యా అర్హతలు ఏమిటి?",
-    teluguAnswer: "అభ్యర్థులు ఇంటర్మీడియట్ (10+2) లేదా తత్సమాన బోర్డు పరీక్ష ఉత్తీర్ణులై ఉండాలి. ఎస్సీ, ఎస్టీ అభ్యర్థులు పదో తరగతి ఉత్తీర్ణులై ఇంటర్మీడియట్ రెండు సంవత్సరాల పరీక్షలకు హాజరైతే సరిపోతుంది. ఫైర్ ఫైటర్ పోస్టులకు ఎల్‌ఎమ్‌వి డ్రైవింగ్ లైసెన్స్ ఉండాలి.",
   },
   {
     question: "What is the examination pattern and negative marking for the Preliminary Written Test (PWT)?",
@@ -313,18 +440,6 @@ const BILINGUAL_FAQS = [
     answer: "Men: Minimum height 167.6 cm (160 cm for Agency ST) and chest 86.3 cm (with 5 cm expansion). PET: 1600m Run in 7 mins 15 secs, Long Jump 4.00m, Shot Put (7.26 kg) 6.00m. Women: Minimum height 152.5 cm (150 cm for Agency ST). PET: 800m Run in 5 mins 20 secs, Long Jump 2.50m, Shot Put (4 kg) 4.00m.",
     teluguQuestion: "పురుష మరియు మహిళా అభ్యర్థులకు నిర్దేశించిన శారీరక కొలతలు & ఈవెంట్స్ ఏమిటి?",
     teluguAnswer: "పురుషుల కనీస ఎత్తు 167.6 సెం.మీ (ఏజెన్సీ ఎస్టీలకు 160 సెం.మీ), ఛాతీ 86.3 సెం.మీ. ఈవెంట్స్: 1600 మీటర్ల పరుగు 7 నిమిషాల 15 సెకన్లు, లాంగ్ జంప్ 4.00 మీటర్లు, షాట్‌పుట్ 6.00 మీటర్లు. మహిళల ఎత్తు 152.5 సెం.మీ (ఏజెన్సీ ఎస్టీలకు 150 సెం.మీ). ఈవెంట్స్: 800 మీటర్ల పరుగు 5 నిమిషాల 20 సెకన్లు, లాంగ్ జంప్ 2.50 మీటర్లు, షాట్‌పుట్ 4.00 మీటర్లు.",
-  },
-  {
-    question: "What is the pay scale and monthly in-hand salary for a Telangana Police Constable?",
-    answer: "The sanctioned pay scale is ₹24,280 – ₹72,850 under the Revised Pay Scales (RPS). Factoring in Basic Pay (₹24,280), DA, HRA (11% to 24% depending on posting location), and police allowances, the initial gross monthly salary is approximately ₹34,000 to ₹39,000 per month.",
-    teluguQuestion: "తెలంగాణ కానిస్టేబుల్ పే స్కేల్ మరియు నెలవారీ గ్రాస్ వేతనం ఎంత?",
-    teluguAnswer: "అధికారిక పే స్కేలు ₹24,280 – ₹72,850. బేసిక్ పే, డీఏ, హెచ్‌ఆర్‌ఏ మరియు ఇతర పోలీస్ అలవెన్సులతో కలిపి ప్రారంభ స్థూల వేతనం నెలకు సుమారు ₹34,000 నుండి ₹39,000 వరకు ఉంటుంది.",
-  },
-  {
-    question: "What are the minimum qualifying marks in the PWT and Final Written Examination?",
-    answer: "For PWT: Open Competition (OC) & EWS candidates must score 30% (60/200); BC candidates must score 25% (50/200); and SC/ST/Ex-Servicemen/Home Guards must score 20% (40/200). For FWE: OC & EWS must score 40%; BC 35%; and SC/ST 30%.",
-    teluguQuestion: "ప్రిలిమ్స్ మరియు మెయిన్స్ పరీక్షల్లో కనీస అర్హత మార్కులు (క్వాలిఫైయింగ్ మార్క్స్) ఎంత?",
-    teluguAnswer: "ప్రిలిమ్స్ (PWT) లో: ఓసీ & ఈడబ్ల్యూఎస్ 30% (60 మార్కులు); బీసీ 25% (50 మార్కులు); ఎస్సీ/ఎస్టీ/మాజీ సైనికులు 20% (40 మార్కులు). మెయిన్స్ పరీక్షలో: ఓసీలు 40%, బీసీలు 35%, ఎస్సీ/ఎస్టీలు 30% సాధించాలి.",
   },
   {
     question: "Where can I practice free bilingual mock tests with genuine negative marking?",
@@ -349,9 +464,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
     {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
-      headline: "Telangana Police Constable Notification 2026: 7,112 Posts, Official PDF Download, Syllabus & Dates",
+      headline: "Telangana Police Constable Notification 2026: 7,112 Posts, Official PDF Download, Syllabus, Salary & Dates",
       description:
-        "Official Telangana State Level Police Recruitment Board (TSLPRB) notification Rc No. 189/Rect./Rect.2/2026 for 7,112 posts with complete syllabus, post-wise vacancies, selection process, PMT/PET standards, and salary.",
+        "Official Telangana State Level Police Recruitment Board (TSLPRB) notification Rc No. 189/Rect./Rect.2/2026 for 7,112 posts with complete syllabus, post-wise vacancies (Post Codes 21-28), salary breakdown, medical eye sight 6/6 standards, PET 100-mark scoring slabs, and official PDF download.",
       url: canonical,
       mainEntityOfPage: {
         "@type": "WebPage",
@@ -363,7 +478,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       inLanguage: ["en-IN", "te-IN"],
       articleSection: "Government Recruitment Notifications",
       keywords:
-        "Telangana Police Constable Notification 2026, TS Police Constable Syllabus, TSLPRB 7112 Vacancies, Download Official PDF, GO Ms 87",
+        "Telangana Police Constable Notification 2026, TS Police Constable Syllabus, TSLPRB 7112 Vacancies, Download Official PDF, GO Ms 87, TS Police Constable Salary In Hand, TS Police Constable Medical Eye Sight 6/6, TS Police Constable 1600m Run Marks",
       author: {
         "@type": "Organization",
         name: "Varadhi Prep Editorial Desk",
@@ -390,7 +505,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       "@type": "JobPosting",
       title: "Telangana Police Constable (Civil, AR, SAR CPL, TSSP) - 7,112 Vacancies",
       description:
-        "Direct recruitment for 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables (Civil, AR, SAR CPL, TSSP/TGSPF), Fire Fighters, and Warders in Telangana State under TSLPRB Notification Rc No. 189 / Rect. / Rect.2 / 2026.",
+        "Direct recruitment for 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables (Civil Post Code 21, AR Post Code 22, SAR CPL Post Code 23, TSSP Post Code 24), Fire Fighters (Post Code 26), and Warders (Post Codes 27 & 28) in Telangana State under TSLPRB Notification Rc No. 189 / Rect. / Rect.2 / 2026.",
       identifier: {
         "@type": "PropertyValue",
         name: "TSLPRB",
@@ -461,7 +576,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       name: "Telangana Police Constable Notification 2026 (7,112 Posts)",
       url: canonical,
       description:
-        "Comprehensive guide, syllabus, selection procedure, and official notification PDF for Telangana Police Constable 2026.",
+        "Comprehensive guide, syllabus, salary breakdown, medical eye sight standards, PET 100-mark scoring slabs, selection procedure, and official notification PDF for Telangana Police Constable 2026.",
       speakable: {
         "@type": "SpeakableSpecification",
         cssSelector: ["h1", "article p:first-of-type"],
@@ -538,10 +653,10 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
           {/* Full-Width Headline with TV9 Mandali Telugu Font */}
           <div className="mt-2.5 max-w-6xl">
             <h1 className="font-brand text-2xl sm:text-3xl lg:text-[2.65rem] font-bold text-gray-950 leading-[1.2] tracking-tight">
-              Telangana Police Constable Notification 2026: 7,112 Posts, Cadre Breakdown, Syllabus &amp; Selection Procedure
+              Telangana Police Constable Notification 2026: 7,112 Posts, Cadre Breakdown, Salary, Syllabus &amp; Selection Procedure
             </h1>
             <p lang="te" className="font-telugu text-lg sm:text-xl lg:text-2xl text-gray-800 mt-2.5 leading-[1.75] font-normal">
-              తెలంగాణ పోలీస్ కానిస్టేబుల్ 7,112 పోస్టుల అధికారిక నోటిఫికేషన్, సిలబస్, ఈవెంట్స్ &amp; ఎంపిక విధానం
+              తెలంగాణ పోలీస్ కానిస్టేబుల్ 7,112 పోస్టుల అధికారిక నోటిఫికేషన్, శాలరీ, సిలబస్, ఈవెంట్స్ &amp; ఎంపిక విధానం
             </p>
           </div>
 
@@ -555,7 +670,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               <span>Notification Rc No. 189 / Rect. / Rect.2 / 2026</span>
             </div>
             <div className="text-gray-500 font-medium">
-              <span>5 min read</span>
+              <span>6 min read</span>
             </div>
           </div>
 
@@ -572,7 +687,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               <div className="rounded border border-gray-200 bg-white p-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Total Vacancies</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">7,112</strong>
-                <span className="text-xs text-gray-600 block">Civil &amp; Allied</span>
+                <span className="text-xs text-gray-600 block">Post Codes 21–28</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
@@ -588,9 +703,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Scale of Pay</span>
-                <strong className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 leading-snug">₹24,280–₹72,850</strong>
-                <span className="text-xs text-gray-600 block">~₹34k–₹39k Gross</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">In-Hand Salary</span>
+                <strong className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 leading-snug">~₹32.5k–₹35.5k</strong>
+                <span className="text-xs text-gray-600 block">Pay Scale ₹24.2k–₹72.8k</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
@@ -608,7 +723,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               <div className="rounded border border-gray-200 bg-white p-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">Selection</span>
                 <strong className="text-xl sm:text-2xl font-bold text-gray-900 block mt-0.5">4 Stages</strong>
-                <span className="text-xs text-gray-600 block">PWT &rarr; FWE</span>
+                <span className="text-xs text-gray-600 block">PWT &rarr; PMT/PET &rarr; FWE</span>
               </div>
 
               <div className="rounded border border-gray-200 bg-white p-3">
@@ -666,7 +781,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
 
             {/* Lead Story Paragraph */}
             <p className="text-base sm:text-[17px] leading-[1.8] text-gray-800 font-normal">
-              The Telangana State Level Police Recruitment Board (TSLPRB) has formally announced Notification Rc No. 189/Rect./Rect.2/2026 for the direct recruitment of 7,112 Stipendiary Cadet Trainee (SCT) Police Constables across Civil, Armed Reserve (AR), SAR CPL, TSSP/TGSPF, Disaster Response &amp; Fire Services, and Prison Warders. Here is the comprehensive briefing on cadre vacancies, chronological timelines, G.O. Ms No. 87 age relief, physical test parameters, and the complete Annexure-II written exam syllabus.
+              The Telangana State Level Police Recruitment Board (TSLPRB) has formally announced Notification Rc No. 189/Rect./Rect.2/2026 for direct recruitment to 7,112 posts of Stipendiary Cadet Trainee (SCT) Police Constables across Civil (Post Code 21), Armed Reserve (Post Code 22), SAR CPL (Post Code 23), TSSP/TGSPF (Post Code 24), Disaster Response &amp; Fire Services (Post Code 26), and Prison Warders (Post Codes 27 &amp; 28). This comprehensive handbook details the cadre breakdowns, month-wise salary structure with in-hand calculations, 6/6 medical visual acuity guidelines, 100-mark PET timing slabs, 95% Presidential Order local reservation norms, and complete certificate verification checklist.
             </p>
 
             {/* Section 1: Important Dates & Timeline */}
@@ -730,11 +845,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
             <section id="vacancies" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  2. Cadre-Wise Vacancy Breakdown (Total 7,112 Posts)
+                  2. Cadre-Wise Vacancy Breakdown &amp; Post Codes (Total 7,112 Posts)
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Official cadre distribution under TSLPRB Notification Rc No. 189/Rect./Rect.2/2026.
+                Official distribution of 7,112 vacancies across Post Codes 21 to 28 under TSLPRB Notification Rc No. 189/Rect./Rect.2/2026.
               </p>
 
               {/* Accessible Data Table following Modern Web Guidance */}
@@ -747,9 +862,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <table className="w-full min-w-[620px] text-left text-sm divide-y divide-gray-200">
                   <thead className="bg-[#f3f4f6] font-bold text-gray-900 text-xs uppercase tracking-wider">
                     <tr>
-                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Code</th>
-                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Cadre &amp; Post</th>
-                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Department</th>
+                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Post Code</th>
+                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Cadre &amp; Designation</th>
+                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Department / Cadre Unit</th>
                       <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Eligibility</th>
                       <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Share</th>
                       <th scope="col" className="px-3.5 py-3 text-right">Vacancies</th>
@@ -760,14 +875,16 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       <tr key={v.postCode} className={idx % 2 === 1 ? "bg-gray-50/60 hover:bg-gray-100/50" : "bg-white hover:bg-gray-100/50"}>
                         <td className="px-3.5 py-3 font-mono text-xs font-bold text-gray-700 border-r border-gray-200">
                           <span className="inline-block rounded bg-gray-100 px-2 py-0.5 border border-gray-200">
-                            {v.postCode}
+                            Post Code {v.postCode}
                           </span>
                         </td>
                         <th scope="row" className="px-3.5 py-3 font-bold text-gray-900 border-r border-gray-200 font-sans">
-                          {v.postName}
+                          <div>{v.postName}</div>
+                          <span className="text-[11px] font-normal text-gray-500 block mt-0.5">{v.roleSummary}</span>
                         </th>
-                        <td className="px-3.5 py-3 text-gray-600 border-r border-gray-200 text-xs sm:text-sm font-medium">
-                          {v.department}
+                        <td className="px-3.5 py-3 text-gray-600 border-r border-gray-200 text-xs font-medium">
+                          <div>{v.department}</div>
+                          <span className="text-[11px] text-gray-500">{v.cadreType}</span>
                         </td>
                         <td className="px-3.5 py-3 text-gray-600 border-r border-gray-200 text-xs">
                           <span className="inline-block rounded bg-gray-100 px-2.5 py-0.5 text-gray-800 font-medium border border-gray-200">
@@ -786,7 +903,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   <tfoot className="bg-[#f3f4f6] font-bold text-gray-900 border-t-2 border-gray-300">
                     <tr>
                       <td colSpan={5} className="px-3.5 py-3.5 text-right border-r border-gray-300 text-xs uppercase tracking-wider text-gray-800">
-                        Total Sanctioned Posts
+                        Total Sanctioned Posts Across All 7 Cadres
                       </td>
                       <td className="px-3.5 py-3.5 text-right text-gray-950 text-base font-extrabold">
                         {TOTAL_VACANCIES.toLocaleString("en-IN")} Posts
@@ -795,13 +912,111 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </tfoot>
                 </table>
               </div>
+
+              {/* Cadre Roles Explanation Cards */}
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-700">
+                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5">
+                  <strong className="text-gray-900 font-bold block">Post Code 21: SCT PC (Civil) - 4,965 Posts (69.8%)</strong>
+                  <p className="mt-1 text-gray-600 leading-relaxed">
+                    Primary station policing cadre for men and women. Posted across local police stations, traffic wings, cyber cells, and investigation bureaus. 95% District Cadre reservation applies.
+                  </p>
+                </div>
+                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5">
+                  <strong className="text-gray-900 font-bold block">Post Code 22: SCT PC (Armed Reserve - AR) - 1,250 Posts (17.6%)</strong>
+                  <p className="mt-1 text-gray-600 leading-relaxed">
+                    District armed reserves for VIP security, prisoner escorts, vital installations protection, law and order emergencies, and crowd control. Men and women eligible.
+                  </p>
+                </div>
+                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5">
+                  <strong className="text-gray-900 font-bold block">Post Code 24: SCT PC (TSSP / Battalions) - 500 Posts (7.0%)</strong>
+                  <p className="mt-1 text-gray-600 leading-relaxed">
+                    Telangana State Special Police (TSSP 1st to 13th Battalions). Tactical strike reserve deployed for anti-extremist combing operations, elections, and interstate border duties.
+                  </p>
+                </div>
+                <div className="rounded border border-gray-200 bg-[#f9fafb] p-3.5">
+                  <strong className="text-gray-900 font-bold block">Post Codes 26, 27 &amp; 28: Fire Fighters &amp; Warders - 297 Posts</strong>
+                  <p className="mt-1 text-gray-600 leading-relaxed">
+                    225 Fire Fighters (Disaster Response &amp; Fire Services) with mandatory LMV license, 62 Warder (Male), and 10 Warder (Female) in Prisons &amp; Correctional Services.
+                  </p>
+                </div>
+              </div>
             </section>
 
-            {/* Section 3: Age Limits & G.O. Ms No. 87 Relaxation */}
+            {/* Section 3: Salary Structure, In-Hand Pay Scale & Allowances */}
+            <section id="salary" className="scroll-mt-6">
+              <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
+                <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
+                  3. Salary Structure, In-Hand Pay Scale &amp; Monthly Allowances
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Official salary breakdown for Telangana Police Constables under the Revised Pay Scales (RPS).
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Gross Salary Components Table */}
+                <div className="rounded border border-gray-200 overflow-hidden bg-white">
+                  <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex justify-between items-center">
+                    <span>Monthly Earnings (Gross Breakdown)</span>
+                    <span className="text-[10px] rounded bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 font-bold">RPS Grade</span>
+                  </div>
+                  <div className="divide-y divide-gray-200 text-xs sm:text-sm">
+                    {SALARY_COMPONENTS.map((sc, i) => (
+                      <div key={i} className={`p-3 flex justify-between items-start gap-2 ${i >= 6 ? "bg-[#f8fafc] font-bold" : ""}`}>
+                        <div>
+                          <span className={i >= 6 ? "font-bold text-gray-900" : "font-semibold text-gray-800"}>{sc.item}</span>
+                          <span className="block text-[11px] text-gray-500 font-normal mt-0.5">{sc.note}</span>
+                        </div>
+                        <span className={`shrink-0 font-mono ${i >= 6 ? "text-sm font-bold text-[#0f2e59]" : "font-semibold text-gray-900"}`}>
+                          {sc.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Deductions & Net Take-Home Pay Table */}
+                <div className="rounded border border-gray-200 overflow-hidden bg-white">
+                  <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex justify-between items-center">
+                    <span>Deductions &amp; Net In-Hand Salary</span>
+                    <span className="text-[10px] rounded bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 font-bold">Take-Home</span>
+                  </div>
+                  <div className="divide-y divide-gray-200 text-xs sm:text-sm">
+                    {SALARY_DEDUCTIONS.map((sd, i) => (
+                      <div key={i} className={`p-3 flex justify-between items-start gap-2 ${i >= 4 ? "bg-green-50/50" : i === 3 ? "bg-gray-50 font-bold" : ""}`}>
+                        <div>
+                          <span className={i >= 4 ? "font-bold text-green-950" : "font-semibold text-gray-800"}>{sd.item}</span>
+                          <span className="block text-[11px] text-gray-500 font-normal mt-0.5">{sd.note}</span>
+                        </div>
+                        <span className={`shrink-0 font-mono ${i >= 4 ? "text-base font-extrabold text-green-800" : i === 3 ? "font-bold text-red-700" : "font-semibold text-gray-700"}`}>
+                          {sd.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Perks & Telugu Explanation */}
+              <div className="mt-4 rounded border border-gray-200 bg-[#f9fafb] p-4 text-xs text-gray-700 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#0f2e59]" />
+                  <strong className="text-gray-900 text-sm font-bold">Additional Service Perks &amp; Career Progression:</strong>
+                </div>
+                <p className="leading-relaxed">
+                  Apart from monthly take-home salary, appointed Police Constables receive 15 to 30 days annual Surrender Leave Encashment, annual uniform kit grant, complete cashless hospitalization under the Telangana Employee Health Scheme (EHS) for self and dependent parents/family, and government pension security under the Contributory Pension Scheme (CPS with matching 14% state contribution). Promotion channel leads from Police Constable to Head Constable (HC), Assistant Sub-Inspector (ASI), and Sub-Inspector of Police (SI).
+                </p>
+                <p lang="te" className="font-telugu text-sm text-gray-800 pt-1 leading-[1.7]">
+                  తెలంగాణ పోలీస్ కానిస్టేబుల్ పే స్కేల్ ₹24,280 – ₹72,850. ప్రాథమిక బేసిక్ పే ₹24,280 తో పాటు డీఏ, హెచ్‌ఆర్‌ఏ, సీసీఏ మరియు అలవెన్సులు కలుపుకుని హైదరాబాద్ పరిధిలో నెలవారీ గ్రాస్ వేతనం సుమారు ₹39,182 కాగా, అన్ని మినహాయింపులు పోను ప్రతి నెలా చేతికి వచ్చే నికర ఇన్-హ్యాండ్ జీతం సుమారు ₹35,437 ఉంటుంది. ఇతర జిల్లాల్లో ఇన్-హ్యాండ్ జీతం సుమారు ₹32,524 నుండి ₹33,495 వరకు అందుతుంది.
+                </p>
+              </div>
+            </section>
+
+            {/* Section 4: Age Limits & G.O. Ms No. 87 Relaxation */}
             <section id="eligibility" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  3. Age Limits &amp; G.O. Ms No. 87 (+5 Years Age Relaxation)
+                  4. Age Limits &amp; G.O. Ms No. 87 (+5 Years Age Relaxation)
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
@@ -841,8 +1056,8 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 </table>
               </div>
 
-              {/* Educational Criteria Callouts */}
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Educational Criteria & Special Category Reservations Callouts */}
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="rounded border border-gray-200 bg-[#f9fafb] p-4">
                   <span className="text-xs font-bold text-[#b91c1c] uppercase tracking-wider block">Prescribed Qualification</span>
                   <h3 className="font-bold text-gray-900 text-sm sm:text-base mt-1">Intermediate (10+2) Pass</h3>
@@ -857,18 +1072,25 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     SC &amp; ST candidates who passed SSC (10th) and appeared for both 1st &amp; 2nd year Intermediate exams are eligible. Fire Fighter posts require a valid LMV license.
                   </p>
                 </div>
+                <div className="rounded border border-gray-200 bg-[#f9fafb] p-4">
+                  <span className="text-xs font-bold text-[#0f2e59] uppercase tracking-wider block">Special Reservation Quotas</span>
+                  <h3 className="font-bold text-gray-900 text-sm sm:text-base mt-1">Horizontal Quotas</h3>
+                  <p className="mt-1 text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
+                    Special reservation quotas apply for CPP (Children of Police Personnel), CDI, MSP (Meritorious Sports Persons), NCC, and Home Guards (min. 360 days active duty).
+                  </p>
+                </div>
               </div>
             </section>
 
-            {/* Section 4: 4-Stage Selection Procedure */}
+            {/* Section 5: 4-Stage Selection Procedure */}
             <section id="selection" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  4. 4-Stage Selection Procedure
+                  5. 4-Stage Selection Procedure &amp; Marking Methodology
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Candidate progression from preliminary screening exam to final cadre allocation.
+                Comprehensive candidate progression from preliminary test to final selection list.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -892,46 +1114,60 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   </div>
                 ))}
               </div>
+
+              {/* Critical Marking Difference Callout */}
+              <div className="mt-4 rounded border-2 border-blue-900/20 bg-[#f8fafc] p-4 text-xs sm:text-sm text-gray-700">
+                <strong className="block text-gray-950 font-bold mb-1">
+                  ⚖️ Critical Selection Distinction: Civil (Post 21) vs Armed Reserve / TSSP (Posts 22, 23, 24)
+                </strong>
+                <p className="leading-relaxed">
+                  <strong>For SCT PC Civil (Post Code 21), Fire Fighters (Post 26), and Warders (Posts 27 &amp; 28):</strong> Physical Efficiency Test (PET) is strictly <em>qualifying</em> in nature. Final selection is decided 100% on marks scored in the 200-mark Final Written Examination (FWE).
+                </p>
+                <p className="mt-1.5 leading-relaxed">
+                  <strong>For SCT PC AR (Post Code 22), SAR CPL (Post 23), and TSSP (Post Code 24):</strong> The PET 1600m run (men) or 800m run (women) carries <strong>100 marks</strong> towards final merit! Final selection is out of 200 marks total: FWE (100 Marks) + PET Run (100 Marks). Running faster directly boosts candidate rank.
+                </p>
+              </div>
             </section>
 
-            {/* Section 5: PMT & PET Physical Standards */}
+            {/* Section 6: PMT Standards & PET 100-Marks Slabs */}
             <section id="physical" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  5. Physical Measurements (PMT) &amp; Physical Efficiency (PET)
+                  6. Physical Measurements (PMT) &amp; PET 100-Mark Scoring Slabs
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Mandatory biometric physical standards and RFID-monitored athletic events.
+                Mandatory biometric physical standards and official timing-to-mark conversion slabs for the 1600m / 800m run events.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Basic PMT Standards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                 {/* Men Standards */}
                 <div className="rounded border border-gray-200 overflow-hidden bg-white">
                   <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex items-center justify-between">
-                    <span>Men Candidates Standards</span>
+                    <span>Men Candidates Standards (PMT &amp; Events)</span>
                     <span className="rounded bg-white border border-gray-300 text-gray-800 text-[10px] px-2 py-0.5 font-bold">1600m Run</span>
                   </div>
-                  <div className="p-4 space-y-3.5 text-xs sm:text-sm text-gray-700 divide-y divide-gray-100">
+                  <div className="p-4 space-y-3 text-xs sm:text-sm text-gray-700 divide-y divide-gray-100">
                     <div>
                       <strong className="block font-bold text-gray-900">Height:</strong>
                       <p className="text-gray-700 mt-0.5">General, BC, SC: <span className="font-bold text-gray-900">Minimum 167.6 cms</span></p>
-                      <p className="text-gray-600">Agency ST Tribes: Minimum 160.0 cms</p>
+                      <p className="text-gray-600">Agency Scheduled Area ST: Minimum 160.0 cms</p>
                     </div>
-                    <div className="pt-2.5">
+                    <div className="pt-2">
                       <strong className="block font-bold text-gray-900">Chest:</strong>
                       <p className="text-gray-700 mt-0.5"><span className="font-bold text-gray-900">Minimum 86.3 cms</span> (with 5 cms expansion)</p>
-                      <p className="text-gray-600">Agency ST Tribes: Minimum 80.0 cms (3 cms expansion)</p>
+                      <p className="text-gray-600">Agency Scheduled Area ST: Minimum 80.0 cms (3 cms expansion)</p>
                     </div>
-                    <div className="pt-2.5">
-                      <strong className="block font-bold text-gray-900">1600m Run (Mandatory Qualifying):</strong>
-                      <p className="text-gray-700 mt-0.5">Maximum Time: <span className="font-bold text-gray-900">7 Minutes 15 Seconds</span></p>
+                    <div className="pt-2">
+                      <strong className="block font-bold text-gray-900">1600m Run Threshold:</strong>
+                      <p className="text-gray-700 mt-0.5">Maximum Qualifying Cutoff: <span className="font-bold text-gray-900">7 Minutes 15 Seconds</span></p>
                       <p className="text-gray-500 text-[11px]">(Ex-Servicemen: 9 Minutes 30 Seconds)</p>
                     </div>
-                    <div className="pt-2.5">
+                    <div className="pt-2">
                       <strong className="block font-bold text-gray-900">Long Jump &amp; Shot Put:</strong>
-                      <p className="text-gray-700 mt-0.5">Long Jump: <span className="font-bold text-gray-900">Min 4.00 Meters</span> (Qualifying)</p>
-                      <p className="text-gray-700">Shot Put (7.26 Kg): <span className="font-bold text-gray-900">Min 6.00 Meters</span></p>
+                      <p className="text-gray-700 mt-0.5">Long Jump: <span className="font-bold text-gray-900">Min 4.00 Meters</span> (Qualifying only)</p>
+                      <p className="text-gray-700">Shot Put (7.26 Kg): <span className="font-bold text-gray-900">Min 6.00 Meters</span> (Qualifying only)</p>
                     </div>
                   </div>
                 </div>
@@ -939,42 +1175,269 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 {/* Women Standards */}
                 <div className="rounded border border-gray-200 overflow-hidden bg-white">
                   <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex items-center justify-between">
-                    <span>Women Candidates Standards</span>
+                    <span>Women Candidates Standards (PMT &amp; Events)</span>
                     <span className="rounded bg-white border border-gray-300 text-gray-800 text-[10px] px-2 py-0.5 font-bold">800m Run</span>
                   </div>
-                  <div className="p-4 space-y-3.5 text-xs sm:text-sm text-gray-700 divide-y divide-gray-100">
+                  <div className="p-4 space-y-3 text-xs sm:text-sm text-gray-700 divide-y divide-gray-100">
                     <div>
                       <strong className="block font-bold text-gray-900">Height:</strong>
                       <p className="text-gray-700 mt-0.5">General, BC, SC: <span className="font-bold text-gray-900">Minimum 152.5 cms</span></p>
-                      <p className="text-gray-600">Agency ST Tribes: Minimum 150.0 cms</p>
+                      <p className="text-gray-600">Agency Scheduled Area ST: Minimum 150.0 cms</p>
                     </div>
-                    <div className="pt-2.5">
-                      <strong className="block font-bold text-gray-900">800m Run (Mandatory Qualifying):</strong>
-                      <p className="text-gray-700 mt-0.5">Maximum Time: <span className="font-bold text-gray-900">5 Minutes 20 Seconds</span></p>
-                      <p className="text-gray-500 text-[11px]">RFID sensor-tracked digital timing</p>
+                    <div className="pt-2">
+                      <strong className="block font-bold text-gray-900">800m Run Threshold:</strong>
+                      <p className="text-gray-700 mt-0.5">Maximum Qualifying Cutoff: <span className="font-bold text-gray-900">5 Minutes 20 Seconds</span></p>
+                      <p className="text-gray-500 text-[11px]">Monitored digitally with RFID transponder chips</p>
                     </div>
-                    <div className="pt-2.5">
-                      <strong className="block font-bold text-gray-900">Long Jump:</strong>
-                      <p className="text-gray-700 mt-0.5"><span className="font-bold text-gray-900">Minimum 2.50 Meters</span> (Qualifying)</p>
+                    <div className="pt-2">
+                      <strong className="block font-bold text-gray-900">Long Jump &amp; Shot Put:</strong>
+                      <p className="text-gray-700 mt-0.5">Long Jump: <span className="font-bold text-gray-900">Min 2.50 Meters</span> (Qualifying only)</p>
+                      <p className="text-gray-700">Shot Put (4 Kg): <span className="font-bold text-gray-900">Min 4.00 Meters</span> (Qualifying only)</p>
                     </div>
-                    <div className="pt-2.5">
-                      <strong className="block font-bold text-gray-900">Shot Put:</strong>
-                      <p className="text-gray-700 mt-0.5">Shot Put (4 Kg): <span className="font-bold text-gray-900">Minimum 4.00 Meters</span></p>
-                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Official PET 100-Mark Scoring Slabs Tables */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Men 1600m Table */}
+                <div className="rounded border border-gray-200 overflow-hidden bg-white">
+                  <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex justify-between items-center">
+                    <span>Men 1600m Run Scoring Slabs (Post Codes 22, 23, 24)</span>
+                    <span className="text-[10px] bg-red-100 text-red-800 font-bold px-1.5 py-0.5 rounded">100 Marks</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs divide-y divide-gray-200">
+                      <thead className="bg-gray-100 text-gray-800 font-bold uppercase tracking-wide">
+                        <tr>
+                          <th className="px-3 py-2 border-r border-gray-200">Time Duration</th>
+                          <th className="px-3 py-2 border-r border-gray-200 text-center">Marks</th>
+                          <th className="px-3 py-2">Performance Rating</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 text-gray-700 bg-white">
+                        {MEN_RUN_SLABS.map((sl, idx) => (
+                          <tr key={idx} className={idx === 0 ? "bg-green-50/70 font-semibold" : idx === 9 ? "bg-amber-50/70 font-semibold" : idx === 10 ? "bg-red-50 text-red-700 font-semibold" : ""}>
+                            <td className="px-3 py-2 border-r border-gray-200 font-mono">{sl.timing}</td>
+                            <td className="px-3 py-2 border-r border-gray-200 text-center font-bold text-gray-900">{sl.marks}</td>
+                            <td className="px-3 py-2">{sl.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Women 800m Table */}
+                <div className="rounded border border-gray-200 overflow-hidden bg-white">
+                  <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex justify-between items-center">
+                    <span>Women 800m Run Scoring Slabs (Post Codes 22, 23, 24)</span>
+                    <span className="text-[10px] bg-red-100 text-red-800 font-bold px-1.5 py-0.5 rounded">100 Marks</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs divide-y divide-gray-200">
+                      <thead className="bg-gray-100 text-gray-800 font-bold uppercase tracking-wide">
+                        <tr>
+                          <th className="px-3 py-2 border-r border-gray-200">Time Duration</th>
+                          <th className="px-3 py-2 border-r border-gray-200 text-center">Marks</th>
+                          <th className="px-3 py-2">Performance Rating</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 text-gray-700 bg-white">
+                        {WOMEN_RUN_SLABS.map((sl, idx) => (
+                          <tr key={idx} className={idx === 0 ? "bg-green-50/70 font-semibold" : idx === 9 ? "bg-amber-50/70 font-semibold" : idx === 10 ? "bg-red-50 text-red-700 font-semibold" : ""}>
+                            <td className="px-3 py-2 border-r border-gray-200 font-mono">{sl.timing}</td>
+                            <td className="px-3 py-2 border-r border-gray-200 text-center font-bold text-gray-900">{sl.marks}</td>
+                            <td className="px-3 py-2">{sl.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Section 6: Exam Pattern & Qualifying Marks */}
-            <section id="pattern" className="scroll-mt-6">
+            {/* Section 7: Medical Standards & Eye Sight (Visual Acuity) Guidelines */}
+            <section id="medical" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  6. Written Examination Scheme &amp; Qualifying Marks
+                  7. Medical Standards &amp; Eye Sight (Visual Acuity 6/6) Criteria
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Preliminary Written Test (PWT) and Para 16(A) minimum qualifying score requirements.
+                Mandatory physical fitness and visual standards verified by the Government Medical Board. Candidates failing visual acuity or possessing physical defects are disqualified.
+              </p>
+
+              {/* Visual Acuity Table */}
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Medical standards and eye sight table"
+                className="overflow-x-auto rounded border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 w-full mb-5"
+              >
+                <table className="w-full min-w-[620px] text-left text-sm divide-y divide-gray-200">
+                  <thead className="bg-[#f3f4f6] font-bold text-gray-900 text-xs uppercase tracking-wider">
+                    <tr>
+                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Visual Test Parameter</th>
+                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Right Eye</th>
+                      <th scope="col" className="px-3.5 py-3 border-r border-gray-200">Left Eye</th>
+                      <th scope="col" className="px-3.5 py-3">Medical Board Criterion</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 text-gray-800 bg-white text-xs sm:text-sm">
+                    {MEDICAL_STANDARDS.map((ms, idx) => (
+                      <tr key={idx} className={idx % 2 === 1 ? "bg-gray-50/60" : "bg-white"}>
+                        <th scope="row" className="px-3.5 py-3 font-bold text-gray-900 border-r border-gray-200 font-sans">
+                          {ms.parameter}
+                        </th>
+                        <td className="px-3.5 py-3 font-mono font-bold text-gray-900 border-r border-gray-200">
+                          {ms.rightEye}
+                        </td>
+                        <td className="px-3.5 py-3 font-mono font-bold text-gray-900 border-r border-gray-200">
+                          {ms.leftEye}
+                        </td>
+                        <td className="px-3.5 py-3 text-gray-600 text-xs">
+                          {ms.rule}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Disqualifying Physical Infirmities */}
+              <div className="rounded border border-red-200 bg-red-50/30 p-4">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="h-2 w-2 rounded-full bg-red-600" />
+                  <h3 className="font-bold text-red-900 text-sm sm:text-base">
+                    Strict Disqualifying Physical Infirmities (Medical Examination)
+                  </h3>
+                </div>
+                <p className="text-xs text-red-800 mb-3 leading-relaxed">
+                  During the comprehensive medical board evaluation at Gandhi Hospital / Osmania General Hospital, candidates exhibiting any of the following bodily defects or medical infirmities are declared permanently unfit:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  {PHYSICAL_DEFECTS_DISQUALIFIED.map((pd, i) => (
+                    <div key={i} className="rounded border border-red-100 bg-white p-2.5">
+                      <strong className="text-gray-900 font-semibold block">{i + 1}. {pd.defect}</strong>
+                      <span className="text-gray-600 block mt-0.5 text-[11px] leading-snug">{pd.impact}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* Section 8: Driving License Bonus Marks & Weightage */}
+            <section id="driving" className="scroll-mt-6">
+              <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
+                <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
+                  8. Driving License Bonus Marks &amp; Weightage (Para 17)
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Special bonus mark allocation for candidates holding valid motor vehicle driving licenses.
+              </p>
+
+              <div className="rounded border border-gray-200 bg-[#f9fafb] p-4.5 space-y-3 text-xs sm:text-sm text-gray-700">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block rounded bg-[#0f2e59] text-white text-xs font-bold px-2 py-0.5">
+                    +3 Marks Weightage
+                  </span>
+                  <h3 className="font-bold text-gray-900 text-sm sm:text-base">
+                    3 Bonus Marks for Valid LMV / HMV Driving License Holders
+                  </h3>
+                </div>
+                <p className="leading-relaxed">
+                  As per Para 17 of TSLPRB Notification Rc No. 189/Rect./Rect.2/2026, candidates who possess an Light Motor Vehicle (LMV) Driving License (or Heavy Motor Vehicle - HMV) continuously for a minimum period of <strong>two years</strong> prior to the notification date (i.e., on or before 29th July 2024) are awarded <strong>3 Bonus Marks</strong> in the selection process for Post Codes 21 (Civil), 22 (AR), 23 (SAR CPL), and 24 (TSSP).
+                </p>
+                <ul className="list-disc pl-5 space-y-1 text-xs text-gray-600">
+                  <li>The driving license must be issued by a competent Regional Transport Authority (RTA) in India.</li>
+                  <li>Learner&apos;s Driving License (LLR) is strictly <strong>not accepted</strong> for bonus marks.</li>
+                  <li>For Post Code 26 (Fire Fighter / Driver Operator), possessing a valid LMV license is a <em>mandatory basic qualification</em>, hence no extra bonus marks apply for Post 26.</li>
+                </ul>
+              </div>
+            </section>
+
+            {/* Section 9: 95% Local Reservation (Presidential Order 2018) */}
+            <section id="reservation" className="scroll-mt-6">
+              <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
+                <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
+                  9. 95% Local Reservation &amp; Presidential Order 2018 Norms
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Telangana State Public Employment (Organization of Local Cadres and Regulation of Direct Recruitment) Order, 2018.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded border border-gray-200 bg-white p-4">
+                  <span className="text-xs font-bold text-[#b91c1c] uppercase tracking-wider block">Local Cadre Quota</span>
+                  <strong className="text-2xl font-bold text-gray-900 block mt-1">95% Reserved</strong>
+                  <p className="mt-1 text-xs text-gray-600 leading-relaxed">
+                    95% of vacancies in District Cadres (Post Code 21 Civil and Post Code 22 AR) are strictly reserved exclusively for candidates who belong to that local district.
+                  </p>
+                </div>
+                <div className="rounded border border-gray-200 bg-white p-4">
+                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Open Competition Quota</span>
+                  <strong className="text-2xl font-bold text-gray-900 block mt-1">5% Unreserved</strong>
+                  <p className="mt-1 text-xs text-gray-600 leading-relaxed">
+                    5% of vacancies are open competition (unreserved), where candidates from all 33 districts of Telangana and eligible non-local candidates compete purely on merit.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded border border-gray-200 bg-[#f9fafb] p-4 text-xs text-gray-700 space-y-2">
+                <h3 className="font-bold text-gray-900 text-sm">How is Local Candidature Determined?</h3>
+                <p className="leading-relaxed">
+                  <strong>School Study Rule:</strong> A candidate is regarded as a local candidate to a district if they studied in an educational institution in that district for a minimum period of <strong>not less than 4 consecutive academic years</strong> ending with the academic year in which they first appeared for the 7th class examination (Classes 1st to 7th).
+                </p>
+                <p className="leading-relaxed">
+                  <strong>Private Study Rule:</strong> If a candidate did not study in any school during that 7-year period, they must produce a Residence Certificate issued by the Tahsildar / MRO confirming continuous residence in that district for a period of not less than 4 years immediately preceding the completion of SSC/equivalent.
+                </p>
+              </div>
+            </section>
+
+            {/* Section 10: Documents & Certificate Verification Checklist */}
+            <section id="documents" className="scroll-mt-6">
+              <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
+                <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
+                  10. Mandatory Document Verification Checklist (Part-II Application &amp; DV)
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Comprehensive checklist of official certificates required during Part-II online upload and in-person Certificate Verification.
+              </p>
+
+              <div className="divide-y divide-gray-200 border border-gray-200 rounded overflow-hidden text-xs sm:text-sm bg-white">
+                {DOCUMENTS_CHECKLIST.map((doc, idx) => (
+                  <div key={idx} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-5 w-5 place-items-center rounded-full bg-gray-100 text-gray-800 font-bold text-xs shrink-0 mt-0.5 border border-gray-300">
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <strong className="text-gray-900 font-bold block">{doc.item}</strong>
+                        <span className="text-gray-600 text-xs block mt-0.5">{doc.purpose}</span>
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-gray-500 font-medium text-[11px] bg-gray-50 px-2 py-1 rounded border border-gray-200 sm:self-center pl-8 sm:pl-2">
+                      {doc.issuingAuthority}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Section 11: Exam Pattern & Minimum Qualifying Marks */}
+            <section id="pattern" className="scroll-mt-6">
+              <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
+                <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
+                  11. Written Examination Scheme &amp; Minimum Qualifying Marks
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Preliminary Written Test (PWT) and statutory Rule 16(A) minimum qualifying score requirements.
               </p>
 
               {/* 4 Stat Cards */}
@@ -1004,7 +1467,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               {/* Qualifying Marks Table */}
               <div className="mt-4 rounded border border-gray-200 overflow-hidden">
                 <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex justify-between items-center">
-                  <span>Minimum Qualifying Marks (Rule 16(A))</span>
+                  <span>Minimum Qualifying Marks (Statutory Rule 16(A))</span>
                   <span className="text-xs font-normal text-gray-600">Applies to PWT &amp; FWE</span>
                 </div>
                 <div className="divide-y divide-gray-200 bg-white">
@@ -1015,6 +1478,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                         <span className="rounded bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-800 border border-gray-200">
                           PWT: {qm.pwtPercent} ({qm.pwtCutoff})
                         </span>
+                        <span className="rounded bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 border border-gray-200">
+                          FWE: {qm.fwePercent}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -1022,11 +1488,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 7: Annexure-II Syllabus Topics */}
+            {/* Section 12: Annexure-II Syllabus Topics */}
             <section id="syllabus" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  7. Complete Subject-wise Syllabus (8 Subjects)
+                  12. Complete Subject-wise Syllabus (8 Subjects)
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
@@ -1055,11 +1521,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 8: Application Fee Structure & Apply Steps */}
+            {/* Section 13: Application Fee Structure & Apply Steps */}
             <section id="fees" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  8. Application Fee &amp; How to Apply Online
+                  13. Application Fee &amp; How to Apply Online
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
@@ -1119,11 +1585,11 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 9: Official Links & Original PDF Hub */}
+            {/* Section 14: Official Links & Original PDF Hub */}
             <section id="links" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  9. Official Notification PDF &amp; Direct Links
+                  14. Official Notification PDF &amp; Direct Links
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
@@ -1254,15 +1720,15 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 10: Frequently Asked Questions */}
+            {/* Section 15: Frequently Asked Questions */}
             <section id="faqs" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  10. Frequently Asked Questions (English &amp; Telugu)
+                  15. Frequently Asked Questions (English &amp; Telugu)
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Official clarifications on eligibility, age relaxations, and examination requirements.
+                Official clarifications on vacancies, salary, medical eye sight criteria, PET scoring, and certificate verification.
               </p>
 
               <div className="space-y-3.5">
@@ -1375,8 +1841,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                   <dd className="font-semibold text-gray-900">18 – 27 Years</dd>
                 </div>
                 <div className="flex justify-between items-center">
-                  <dt className="text-gray-500">Negative Marks</dt>
-                  <dd className="font-semibold text-gray-900">-0.20 per wrong Q</dd>
+                  <dt className="text-gray-500">In-Hand Salary</dt>
+                  <dd className="font-semibold text-gray-900">~₹32.5k–₹35.5k</dd>
+                </div>
+                <div className="flex justify-between items-center">
+                  <dt className="text-gray-500">Eye Sight</dt>
+                  <dd className="font-semibold text-gray-900">6/6 Uncorrected</dd>
                 </div>
                 <div className="flex justify-between items-center">
                   <dt className="text-gray-500">Scale of Pay</dt>
@@ -1438,15 +1908,20 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </h3>
               <ul className="mt-3 space-y-2 text-xs text-gray-600">
                 <li><a href="#schedule" className="hover:text-gray-900 transition font-medium">1. Important Dates</a></li>
-                <li><a href="#vacancies" className="hover:text-gray-900 transition font-medium">2. Cadre-Wise Vacancies</a></li>
-                <li><a href="#eligibility" className="hover:text-gray-900 transition font-medium">3. Age &amp; G.O. Ms 87</a></li>
-                <li><a href="#selection" className="hover:text-gray-900 transition font-medium">4. Selection Procedure</a></li>
-                <li><a href="#physical" className="hover:text-gray-900 transition font-medium">5. PMT &amp; PET Events</a></li>
-                <li><a href="#pattern" className="hover:text-gray-900 transition font-medium">6. Exam Pattern &amp; Cutoffs</a></li>
-                <li><a href="#syllabus" className="hover:text-gray-900 transition font-medium">7. Annexure-II Syllabus</a></li>
-                <li><a href="#fees" className="hover:text-gray-900 transition font-medium">8. Application Fee &amp; Steps</a></li>
-                <li><a href="#links" className="hover:text-gray-900 transition font-medium">9. Official Notification PDF &amp; Links</a></li>
-                <li><a href="#faqs" className="hover:text-gray-900 transition font-medium">10. Frequently Asked Questions</a></li>
+                <li><a href="#vacancies" className="hover:text-gray-900 transition font-medium">2. Cadre-Wise Vacancies &amp; Post Codes</a></li>
+                <li><a href="#salary" className="hover:text-gray-900 transition font-medium">3. Salary Structure &amp; In-Hand Pay</a></li>
+                <li><a href="#eligibility" className="hover:text-gray-900 transition font-medium">4. Age &amp; G.O. Ms 87</a></li>
+                <li><a href="#selection" className="hover:text-gray-900 transition font-medium">5. Selection Procedure &amp; Marking</a></li>
+                <li><a href="#physical" className="hover:text-gray-900 transition font-medium">6. PMT &amp; PET 100-Mark Slabs</a></li>
+                <li><a href="#medical" className="hover:text-gray-900 transition font-medium">7. Medical Standards &amp; Eye Sight 6/6</a></li>
+                <li><a href="#driving" className="hover:text-gray-900 transition font-medium">8. Driving License Bonus (+3 Marks)</a></li>
+                <li><a href="#reservation" className="hover:text-gray-900 transition font-medium">9. 95% Local Reservation Rules</a></li>
+                <li><a href="#documents" className="hover:text-gray-900 transition font-medium">10. Certificate Verification Checklist</a></li>
+                <li><a href="#pattern" className="hover:text-gray-900 transition font-medium">11. Exam Pattern &amp; Qualifying Marks</a></li>
+                <li><a href="#syllabus" className="hover:text-gray-900 transition font-medium">12. Annexure-II Syllabus</a></li>
+                <li><a href="#fees" className="hover:text-gray-900 transition font-medium">13. Application Fee &amp; Steps</a></li>
+                <li><a href="#links" className="hover:text-gray-900 transition font-medium">14. Official Notification PDF &amp; Links</a></li>
+                <li><a href="#faqs" className="hover:text-gray-900 transition font-medium">15. Frequently Asked Questions</a></li>
               </ul>
             </div>
 
