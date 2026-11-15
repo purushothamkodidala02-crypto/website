@@ -471,7 +471,8 @@ export default function ApEndowmentOfficerNotificationPage() {
         "@type": "DigitalDocument",
         name: "APPSC Executive Officer Grade-III Notification 23/2026 Official Gazette PDF",
         encodingFormat: "application/pdf",
-        url: "https://psc.ap.gov.in",
+        url: absoluteUrl("/docs/appsc-endowment-officer-notification-2026-official.pdf"),
+        contentSize: "427 KB",
       },
     },
     {
@@ -584,10 +585,21 @@ export default function ApEndowmentOfficerNotificationPage() {
           <div className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-medium text-slate-700">
             <span className="hidden sm:inline text-slate-600 font-sans font-semibold text-xs">APPSC Subordinate Service 2026</span>
             <a
+              href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
+              download="APPSC-Endowment-Officer-Notification-23-2026-Official.pdf"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 px-3 py-2 font-bold transition text-xs sm:text-sm shadow-2xs"
+              title="Download Official Notification PDF (427 KB)"
+            >
+              <svg className="w-4 h-4 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
+              </svg>
+              <span>Download PDF</span>
+            </a>
+            <a
               href="https://psc.ap.gov.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#0055a2] bg-white hover:bg-[#0055a2] text-[#0055a2] hover:text-white px-3.5 py-2 font-bold transition text-xs sm:text-sm shadow-2xs"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#0055a2] bg-white hover:bg-[#0055a2] text-[#0055a2] hover:text-white px-3.5 py-2 font-bold transition text-xs sm:text-sm shadow-2xs"
               title="Official APPSC Portal"
             >
               <svg className="w-4 h-4 text-slate-700 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -688,6 +700,54 @@ export default function ApEndowmentOfficerNotificationPage() {
                 <span className="text-xs sm:text-sm text-slate-700 font-medium block mt-1">Paper-I 150 + Paper-II 150</span>
               </div>
             </div>
+
+            {/* Official Gazette PDF Banner */}
+            <div className="mt-5 pt-5 border-t border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div className="h-11 w-11 rounded-lg bg-red-100 border border-red-200 text-red-700 flex items-center justify-center shrink-0 shadow-2xs font-bold text-xs">
+                  PDF
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-extrabold text-sm sm:text-base text-slate-950">
+                      Official APPSC Notification PDF (Brief No. 23/2026)
+                    </span>
+                    <span className="rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 border border-emerald-200">
+                      Official 11 Pages • 427 KB
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    104 posts vacancy roster, Degree eligibility, Paper-I &amp; Paper-II syllabus, and CPT scheme.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a
+                  href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#0055a2] bg-white hover:bg-blue-50 text-[#0055a2] px-3.5 py-2 font-bold transition text-xs sm:text-sm shadow-2xs"
+                >
+                  <span>View PDF ↗</span>
+                </a>
+                <a
+                  href="/docs/appsc-endowment-officer-notification-2026-official.pdf"
+                  download="APPSC-Endowment-Officer-Notification-23-2026-Official.pdf"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0055a2] hover:bg-[#004280] text-white px-3.5 py-2 font-bold transition text-xs sm:text-sm shadow-xs"
+                >
+                  <svg className="w-4 h-4 text-white shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  <span>Download PDF</span>
+                </a>
+                <a
+                  href="#pdf-viewer"
+                  className="inline-flex items-center gap-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 font-semibold transition text-xs shadow-2xs"
+                >
+                  <span>Read In-Page ↓</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </article>
@@ -716,7 +776,7 @@ export default function ApEndowmentOfficerNotificationPage() {
                 <li><a href="#paper2-weightage" className="hover:text-[#0055a2] hover:underline">9. Paper-II Hindu Philosophy Weightage</a></li>
                 <li><a href="#act-matrix" className="hover:text-[#0055a2] hover:underline">10. Endowments Act 1987 Sections Master</a></li>
                 <li><a href="#cpt" className="hover:text-[#0055a2] hover:underline">11. Computer Proficiency Test (CPT)</a></li>
-                <li><a href="#downloads" className="hover:text-[#0055a2] hover:underline">12. Official PDF Download Center</a></li>
+                <li><a href="#downloads" className="hover:text-[#0055a2] hover:underline">12. Official PDF Download &amp; In-Page Viewer</a></li>
                 <li><a href="#faqs" className="hover:text-[#0055a2] hover:underline">13. Bilingual Frequently Asked Questions</a></li>
               </ol>
             </nav>
