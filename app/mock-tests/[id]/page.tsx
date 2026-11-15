@@ -18,6 +18,26 @@ export async function generateStaticParams() {
   ];
 }
 
+function getStateKeywords(isTelangana: boolean) {
+  return isTelangana
+    ? [
+        "police constable mock test",
+        "police test online",
+        "Telangana mock test",
+        "Telangana police mock test",
+        "Telangana police constable mock test",
+        "Telangana police exam",
+        "TG police constable mock test free",
+        "TGPSC mock test online",
+        "TG TET 2026 practice test",
+        "Telangana competitive exams online test series",
+        "తెలంగాణ మాక్ టెస్ట్",
+        "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్",
+        "టీజీ పోటీ పరీక్షల ప్రాక్టీస్ పేపర్స్",
+      ]
+    : undefined;
+}
+
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<Filters> };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -40,23 +60,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     ? "Take free Telangana competitive exam mock tests online. Practise TG Police Constable, TGPSC Group exams, TG TET 2026 with bilingual test papers in Telugu & English, CBT timer, and detailed solutions."
     : `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.`;
 
-  const stateKeywords = isTelangana
-    ? [
-        "police constable mock test",
-        "police test online",
-        "Telangana mock test",
-        "Telangana police mock test",
-        "Telangana police constable mock test",
-        "Telangana police exam",
-        "TG police constable mock test free",
-        "TGPSC mock test online",
-        "TG TET 2026 practice test",
-        "Telangana competitive exams online test series",
-        "తెలంగాణ మాక్ టెస్ట్",
-        "తెలంగాణ పోలీస్ కానిస్టేబుల్ ఆన్‌లైన్ టెస్ట్",
-        "టీజీ పోటీ పరీక్షల ప్రాక్టీస్ పేపర్స్",
-      ]
-    : undefined;
+  const stateKeywords = getStateKeywords(isTelangana);
 
   const seo = resolveSeoFields(context.state, {
     title: defaultFallbackTitle,
@@ -90,6 +94,7 @@ export default async function StateOrLegacyTestPage({ params, searchParams }: Pr
     ? "Take free Telangana competitive exam mock tests online. Practise TG Police Constable, TGPSC Group exams, TG TET 2026 with bilingual test papers in Telugu & English, CBT timer, and detailed solutions."
     : `Browse free ${context.state.name} competitive exam mock tests. Practise timed papers online with instant scoring, bilingual answers, and topic reviews on Varadhi Prep.`;
 
+  const stateKeywords = getStateKeywords(isTelangana);
   const seo = resolveSeoFields(context.state, { title: defaultFallbackTitle, description: defaultFallbackDesc });
   return <><JsonLd data={collectionStructuredData(seo.title, seo.description, canonical, [{ name: "Home", path: "/" }, { name: "Mock tests", path: "/mock-tests" }, { name: context.state.name, path: canonical }], stateKeywords)} />{await MockTestsPage({ searchParams: Promise.resolve({ ...(await searchParams), state: context.state.slug }), canonicalPath: canonical })}</>;
 }
