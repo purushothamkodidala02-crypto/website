@@ -324,9 +324,9 @@ const DOCUMENTS_CHECKLIST = [
 ];
 
 const QUALIFYING_MARKS = [
-  { category: "Open Competition (OC) & EWS", pwtPercent: "30%", pwtCutoff: "60 Marks / 200", fwePercent: "40%", fweCutoff: "80 / 200 (Civil) | 40 / 100 (AR)" },
-  { category: "Backward Classes (BC)", pwtPercent: "25%", pwtCutoff: "50 Marks / 200", fwePercent: "35%", fweCutoff: "70 / 200 (Civil) | 35 / 100 (AR)" },
-  { category: "SC, ST, Ex-Servicemen & Home Guards", pwtPercent: "20%", pwtCutoff: "40 Marks / 200", fwePercent: "30%", fweCutoff: "60 / 200 (Civil) | 30 / 100 (AR)" },
+  { category: "Open Competition (OC) & EWS", pwtPercent: "30%", pwtMinMarks: "60 Marks / 200", fwePercent: "40%", fweMinMarks: "80 / 200 (Civil) | 40 / 100 (AR)" },
+  { category: "Backward Classes (BC)", pwtPercent: "25%", pwtMinMarks: "50 Marks / 200", fwePercent: "35%", fweMinMarks: "70 / 200 (Civil) | 35 / 100 (AR)" },
+  { category: "SC, ST, Ex-Servicemen & Home Guards", pwtPercent: "20%", pwtMinMarks: "40 Marks / 200", fwePercent: "30%", fweMinMarks: "60 / 200 (Civil) | 30 / 100 (AR)" },
 ];
 
 const SUBJECTS = [
@@ -1161,7 +1161,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     </div>
                     <div className="pt-2">
                       <strong className="block font-bold text-gray-900">1600m Run Threshold:</strong>
-                      <p className="text-gray-700 mt-0.5">Maximum Qualifying Cutoff: <span className="font-bold text-gray-900">7 Minutes 15 Seconds</span></p>
+                      <p className="text-gray-700 mt-0.5">Maximum Qualifying Time Limit: <span className="font-bold text-gray-900">7 Minutes 15 Seconds</span></p>
                       <p className="text-gray-500 text-[11px]">(Ex-Servicemen: 9 Minutes 30 Seconds)</p>
                     </div>
                     <div className="pt-2">
@@ -1186,7 +1186,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                     </div>
                     <div className="pt-2">
                       <strong className="block font-bold text-gray-900">800m Run Threshold:</strong>
-                      <p className="text-gray-700 mt-0.5">Maximum Qualifying Cutoff: <span className="font-bold text-gray-900">5 Minutes 20 Seconds</span></p>
+                      <p className="text-gray-700 mt-0.5">Maximum Qualifying Time Limit: <span className="font-bold text-gray-900">5 Minutes 20 Seconds</span></p>
                       <p className="text-gray-500 text-[11px]">Monitored digitally with RFID transponder chips</p>
                     </div>
                     <div className="pt-2">
@@ -1476,7 +1476,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                       <span className="font-bold text-gray-900">{qm.category}</span>
                       <div className="flex items-center gap-3">
                         <span className="rounded bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-800 border border-gray-200">
-                          PWT: {qm.pwtPercent} ({qm.pwtCutoff})
+                          PWT: {qm.pwtPercent} ({qm.pwtMinMarks})
                         </span>
                         <span className="rounded bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 border border-gray-200">
                           FWE: {qm.fwePercent}
