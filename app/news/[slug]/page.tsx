@@ -20,6 +20,14 @@ const AP_ENDOWMENT_ALIASES = new Set([
   "ap-endowments-officer-notification-2026",
   "ap-endowment-officer-notification-2026",
 ]);
+const HMWSSB_MANAGER_ALIASES = new Set([
+  "hmwssb-manager-engineering-notification-2026",
+  "tgpsc-manager-engineering-hmwssb-notification-2026",
+  "tgpsc-manager-engineering-notification-2026",
+  "hmwssb-manager-engineering-notification",
+  "hmwssb-engineering-manager-notification-2026",
+  "tgpsc-hmwssb-manager-engineering-2026",
+]);
 
 export async function generateStaticParams() {
   return [
@@ -38,6 +46,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (AP_ENDOWMENT_ALIASES.has(slug)) {
     return {
       title: "Redirecting to AP Endowment Officer Notification 2026...",
+      robots: { index: false, follow: true },
+    };
+  }
+  if (HMWSSB_MANAGER_ALIASES.has(slug)) {
+    return {
+      title: "Redirecting to TGPSC HMWSSB Manager (Engineering) Notification 2026...",
       robots: { index: false, follow: true },
     };
   }
@@ -512,6 +526,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   const { slug } = await params;
   if (AP_ENDOWMENT_ALIASES.has(slug)) {
     permanentRedirect("/news/ap-endowment-officer-notification-2026");
+  }
+  if (HMWSSB_MANAGER_ALIASES.has(slug)) {
+    permanentRedirect("/news/hmwssb-manager-engineering-notification-2026");
   }
   if (slug !== PRIMARY_SLUG && !ALIAS_SLUGS.has(slug)) {
     notFound();
