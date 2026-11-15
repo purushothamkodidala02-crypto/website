@@ -192,15 +192,13 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
                     <NavigationIcon name={item.icon} />
                   </span>
                   <span>{item.label}</span>
-                  {isNavigating ? (
+                  {isNavigating && (
                     <span className="ml-auto flex items-center gap-1.5 text-xs font-bold text-teal-700">
                       <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
                     </span>
-                  ) : (
-                    <span className="ml-auto text-lg opacity-50 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
                   )}
                 </Link>
               );
