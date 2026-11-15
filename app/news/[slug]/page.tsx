@@ -32,9 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "News Not Found", robots: { index: false, follow: false } };
   }
 
-  const title = "Telangana Police Constable Notification 2026 (7,112 Posts): Download Official PDF, Syllabus, Salary & Dates";
+  const title = "Telangana Police Constable Notification 2026 (7,112 Posts): Syllabus Marks Wise & Weightage, Reasoning Syllabus, Telugu PDF Download";
   const description =
-    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/2026) issued for 7,112 vacancies. Download official PDF (748 KB), check cadre-wise vacancies (Post Codes 21-28), monthly salary in-hand, medical eye sight 6/6 standards, PET 100-mark slabs, certificates required, and G.O. Ms 87 & 122 age limits.";
+    "TSLPRB Telangana Police Constable Notification 2026 (Rc No. 189/2026) for 7,112 posts. Check TS constable syllabus marks wise, TS constable syllabus weightage marks, comprehensive TS constable reasoning syllabus, and get TS constable syllabus PDF download in Telugu (748 KB). Includes salary in-hand, medical 6/6 standards, and PET 100-mark slabs.";
   const canonical = absoluteUrl(`/news/${PRIMARY_SLUG}`);
 
   return {
@@ -44,6 +44,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "Telangana Police Constable Notification 2026",
       "TS Police Constable Notification 2026 PDF",
       "TS Police Constable Notification 2026 PDF download",
+      "ts constable syllabus weightage marks",
+      "ts constabel syllabus weightage marks",
+      "ts constable syllabus pdf download in telugu",
+      "ts constable syllabus marks wise",
+      "ts constable reasoning syllabus",
+      "TS Constable Reasoning Syllabus Topics",
+      "TS Constable Syllabus Marks Wise Distribution",
+      "TS Constable Syllabus Weightage Marks",
+      "TS Constable Syllabus PDF Download in Telugu",
       "TSLPRB Police Constable 7112 Vacancies",
       "TS Police Constable Post Code 21 Civil 22 AR 24 TSSP",
       "Telangana Police Constable Salary in hand pay scale",
@@ -62,6 +71,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "TS Police Constable Apply Online 2026",
       "TSLPRB Constable official website tgprb in",
       "తెలంగాణ పోలీస్ కానిస్టేబుల్ నోటిఫికేషన్ 2026",
+      "తెలంగాణ కానిస్టేబుల్ సిలబస్ మార్కుల వెయిటేజీ",
+      "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ పీడీఎఫ్ డౌన్‌లోడ్ తెలుగు",
+      "తెలంగాణ కానిస్టేబుల్ రీజనింగ్ సిలబస్",
       "తెలంగాణ కానిస్టేబుల్ 7112 పోస్టుల వివరాలు",
       "తెలంగాణ పోలీస్ కానిస్టేబుల్ శాలరీ పే స్కేల్ వివరాలు",
       "పోలీస్ కానిస్టేబుల్ మెడికల్ టెస్ట్ & కంటి చూపు 6/6 నిబంధనలు",
@@ -332,50 +344,66 @@ const QUALIFYING_MARKS = [
 const SUBJECTS = [
   {
     number: "01",
-    name: "English",
+    name: "English Language",
     teluguName: "ఇంగ్లీష్ లాంగ్వేజ్",
+    weightage: "15 - 20 Marks",
+    level: "SSC Standard",
     topics: "Comprehension passage, vocabulary, synonyms & antonyms, spotting errors, grammar rules, prepositions, active & passive voice, sentence correction & idioms.",
   },
   {
     number: "02",
-    name: "Arithmetic",
+    name: "Arithmetic & Numerical Ability",
     teluguName: "అర్థమెటిక్ & సంఖ్యా సామర్థ్యం",
+    weightage: "25 Marks",
+    level: "SSC Standard",
     topics: "Number systems, LCM & HCF, fractions, percentages, averages, ratio & proportion, profit & loss, simple & compound interest, time & work, time & distance, mensuration.",
   },
   {
     number: "03",
     name: "General Science",
-    teluguName: "జనరల్ సైన్స్",
+    teluguName: "జనరల్ సైన్స్ (ఫిజిక్స్, కెమిస్ట్రీ, బయాలజీ)",
+    weightage: "25 Marks",
+    level: "Intermediate Standard",
     topics: "Everyday science observations, basic physics, chemistry in daily life, human biology, nutrition, diseases & prevention, environmental ecology & public hygiene.",
   },
   {
     number: "04",
     name: "History of India & Indian Culture",
     teluguName: "భారత దేశ చరిత్ర & సంస్కృతి",
+    weightage: "25 Marks",
+    level: "Intermediate Standard",
     topics: "Ancient India, Delhi Sultanate, Mughal era, British rule, 1857 Revolt, socio-religious reform movements, Indian National Congress, Indian freedom struggle & national leaders.",
   },
   {
     number: "05",
     name: "Geography, Polity & Indian Economy",
     teluguName: "భౌగోళిక అంశాలు, పాలిటీ & భారత ఆర్థిక వ్యవస్థ",
+    weightage: "25 Marks",
+    level: "Intermediate Standard",
     topics: "Physical & Indian geography, rivers, climate, Constitution of India, fundamental rights & duties, Parliament, Judiciary, state planning, Indian economy & fiscal policy.",
   },
   {
     number: "06",
     name: "Current Events (National & International)",
     teluguName: "సమకాలీన అంశాలు (కరెంట్ అఫైర్స్)",
+    weightage: "25 Marks",
+    level: "Past 12 Months",
     topics: "Major events of the past 12 months, national & international summits, bilateral pacts, sports tournaments, prestigious awards, science & tech milestones, and central welfare schemes.",
   },
   {
     number: "07",
     name: "Reasoning & Mental Ability",
     teluguName: "రీజనింగ్ & మెంటల్ ఎబిలిటీ",
+    weightage: "25 Marks",
+    level: "Intermediate Standard",
     topics: "Analogy, series completion, coding-decoding, blood relations, direction sense, syllogisms, Venn diagrams, non-verbal spatial patterns, ranking & arithmetic reasoning.",
   },
   {
     number: "08",
     name: "Telangana Movement, History & Culture",
     teluguName: "తెలంగాణ ఉద్యమం, చరిత్ర & సంస్కృతి",
+    weightage: "35 - 40 Marks (Highest)",
+    level: "Intermediate Standard",
     topics: "History of Telangana (Satavahanas, Kakatiyas, Qutb Shahis, Asaf Jahis), Telangana armed struggle, 1969 agitation, statehood movement (1948–2014), art, literature, fairs, festivals, geography, rivers, irrigation projects, and state welfare schemes.",
   },
 ];
@@ -447,6 +475,24 @@ const BILINGUAL_FAQS = [
     teluguQuestion: "నెగెటివ్ మార్కింగ్‌తో ఉచిత మాక్ టెస్ట్‌లను ఎక్కడ ప్రాక్టీస్ చేయవచ్చు?",
     teluguAnswer: "వరధి ప్రెప్‌లో 58 పూర్తి స్థాయి మాక్ టెస్టులను 180 నిమిషాల టైమర్, 0.20 నెగెటివ్ మార్కింగ్ మరియు తెలుగు & ఇంగ్లీష్ వివరణలతో ఉచితంగా రాయవచ్చు.",
   },
+  {
+    question: "What is the TS Constable syllabus weightage marks and marks wise distribution?",
+    answer: "The TS Constable Written Examination (PWT and FWE) has 200 objective questions for 200 marks. The TS constable syllabus marks wise weightage distribution is: 1) Telangana Movement, Statehood History & Culture: 35–40 Marks (Highest Weightage); 2) Reasoning & Mental Ability: 25 Marks; 3) Arithmetic & Numerical Ability: 25 Marks; 4) General Science: 25 Marks; 5) History of India & Indian Culture: 25 Marks; 6) Geography, Polity & Indian Economy: 25 Marks; 7) Current Events of National & International Importance: 25 Marks; 8) English Language: 15–20 Marks.",
+    teluguQuestion: "తెలంగాణ పోలీస్ కానిస్టేబుల్ సిలబస్ మార్కుల వెయిటేజీ (TS Constable Syllabus Marks Wise & Weightage Marks) ఎంత?",
+    teluguAnswer: "ప్రిలిమ్స్ (PWT) మరియు మెయిన్స్ (FWE) పరీక్ష 200 మార్కులకు (200 ప్రశ్నలు) జరుగుతుంది. సబ్జెక్టుల వారీగా మార్కుల వెయిటేజీ: 1) తెలంగాణ ఉద్యమం, చరిత్ర & సంస్కృతి: 35-40 మార్కులు; 2) రీజనింగ్ & మెంటల్ ఎబిలిటీ: 25 మార్కులు; 3) అర్థమెటిక్: 25 మార్కులు; 4) జనరల్ సైన్స్: 25 మార్కులు; 5) భారత దేశ చరిత్ర: 25 మార్కులు; 6) జాగ్రఫీ, పాలిటీ, ఎకానమీ: 25 మార్కులు; 7) కరెంట్ అఫైర్స్: 25 మార్కులు; 8) ఇంగ్లీష్ లాంగ్వేజ్: 15-20 మార్కులు.",
+  },
+  {
+    question: "Where can I find the official TS Constable syllabus PDF download in Telugu?",
+    answer: "You can download the official TS Constable syllabus PDF in Telugu and English directly on Varadhi Prep from the Official Notification & Annexure-II Syllabus PDF link (748 KB) or via the TSLPRB official website at www.tgprb.in. The Annexure-II syllabus is officially bilingual and provides the complete topic list in both Telugu and English.",
+    teluguQuestion: "తెలంగాణ కానిస్టేబుల్ సిలబస్ పీడీఎఫ్ డౌన్‌లోడ్ తెలుగులో (TS Constable Syllabus PDF Download in Telugu) ఎలా పొందాలి?",
+    teluguAnswer: "వరధి ప్రెప్ వెబ్‌సైట్‌లో అధికారిక అనెక్సర్-II సిలబస్ పీడీఎఫ్ (748 KB) మరియు నోటిఫికేషన్ పత్రాన్ని తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా డౌన్‌లోడ్ చేసుకోవచ్చు. లేదా అధికారిక వెబ్‌సైట్ www.tgprb.in నుండి కూడా డౌన్‌లోడ్ చేసుకోవచ్చు.",
+  },
+  {
+    question: "What topics are included in the TS Constable reasoning syllabus?",
+    answer: "The TS Constable reasoning syllabus (Mental Ability - 25 Marks) comprises: Analogies, Similarities & Differences, Spatial Visualization, Spatial Orientation, Problem Solving, Analysis, Judgment, Decision Making, Visual Memory, Discriminating Observation, Blood Relations, Arithmetical Reasoning, Figural Classification, Arithmetic Number Series, Non-Verbal Series, Coding & Decoding, Statement Conclusion, Syllogistic Reasoning, Clock & Calendar problems, and Venn Diagrams.",
+    teluguQuestion: "తెలంగాణ కానిస్టేబుల్ రీజనింగ్ సిలబస్ (TS Constable Reasoning Syllabus) లో ఏ అంశాలు ఉంటాయి?",
+    teluguAnswer: "రీజనింగ్ & మెంటల్ ఎబిలిటీ (25 మార్కులు) విభాగంలో: పోలికలు (Analogies), కోడింగ్ & డీకోడింగ్, నెంబర్ & లెటర్ సిరీస్, రక్త సంబంధాలు, దిశలు, వెన్ డయాగ్రమ్స్, సిలాజిజమ్స్, నాన్-వెర్బల్ ప్యాటర్న్స్, మిర్రర్ ఇమేజెస్, డైస్ & క్యూబ్స్, మరియు స్టేట్‌మెంట్స్-తీర్మానాలు వంటి ముఖ్యమైన అంశాలు ఉంటాయి.",
+  },
 ];
 
 export default async function TelanganaPoliceNotificationPage({ params }: Props) {
@@ -478,7 +524,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
       inLanguage: ["en-IN", "te-IN"],
       articleSection: "Government Recruitment Notifications",
       keywords:
-        "Telangana Police Constable Notification 2026, TS Police Constable Syllabus, TSLPRB 7112 Vacancies, Download Official PDF, GO Ms 87, TS Police Constable Salary In Hand, TS Police Constable Medical Eye Sight 6/6, TS Police Constable 1600m Run Marks",
+        "Telangana Police Constable Notification 2026, TS Police Constable Syllabus, ts constable syllabus weightage marks, ts constabel syllabus weightage marks, ts constable syllabus pdf download in telugu, ts constable syllabus marks wise, ts constable reasoning syllabus, TSLPRB 7112 Vacancies, Download Official PDF, GO Ms 87, TS Police Constable Salary In Hand, TS Police Constable Medical Eye Sight 6/6, TS Police Constable 1600m Run Marks",
       author: {
         "@type": "Organization",
         name: "Varadhi Prep Editorial Desk",
@@ -573,10 +619,12 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      name: "Telangana Police Constable Notification 2026 (7,112 Posts)",
+      name: "Telangana Police Constable Notification 2026: TS Constable Syllabus Marks Wise, Weightage & Telugu PDF",
       url: canonical,
       description:
-        "Comprehensive guide, syllabus, salary breakdown, medical eye sight standards, PET 100-mark scoring slabs, selection procedure, and official notification PDF for Telangana Police Constable 2026.",
+        "Comprehensive guide featuring TS constable syllabus marks wise breakdown, TS constable syllabus weightage marks, comprehensive TS constable reasoning syllabus, TS constable syllabus PDF download in Telugu (748 KB), salary breakdown, medical eye sight 6/6 standards, and PET 100-mark scoring slabs.",
+      keywords:
+        "ts constable syllabus weightage marks, ts constabel syllabus weightage marks, ts constable syllabus pdf download in telugu, ts constable syllabus marks wise, ts constable reasoning syllabus, telangana police constable notification 2026",
       speakable: {
         "@type": "SpeakableSpecification",
         cssSelector: ["h1", "article p:first-of-type"],
@@ -1488,30 +1536,236 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
               </div>
             </section>
 
-            {/* Section 12: Annexure-II Syllabus Topics */}
+            {/* Section 12: Annexure-II Syllabus & Marks-Wise Weightage */}
             <section id="syllabus" className="scroll-mt-6">
               <div className="border-b-2 border-gray-900 pb-1.5 mb-4">
                 <h2 className="font-brand text-xl sm:text-2xl font-bold text-gray-950">
-                  12. Complete Subject-wise Syllabus (8 Subjects)
+                  12. TS Constable Syllabus: Marks Wise Weightage, Reasoning Syllabus &amp; Telugu PDF Download
                 </h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Standard Intermediate level curriculum prescribed for PWT &amp; FWE examinations.
+                Official curriculum prescribed by TSLPRB under Annexure-II for the 200-question Preliminary Written Test (PWT) and Final Written Examination (FWE). Below is the comprehensive TS constable syllabus marks wise breakdown, subject weightage marks, in-depth TS constable reasoning syllabus, and the official TS constable syllabus PDF download in Telugu.
               </p>
+
+              {/* Component 1: Official TS Constable Syllabus PDF Download in Telugu */}
+              <div className="rounded border border-slate-300 bg-[#fafbfe] p-4.5 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded bg-slate-800 text-white text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider">Annexure-II Official</span>
+                      <span className="text-xs text-slate-500 font-medium">Bilingual &bull; Telugu &amp; English</span>
+                    </div>
+                    <h3 className="font-brand text-base sm:text-lg font-bold text-gray-900 mt-1">
+                      TS Constable Syllabus PDF Download in Telugu &amp; English
+                    </h3>
+                    <p lang="te" className="font-telugu text-xs sm:text-sm text-gray-700 mt-0.5 leading-[1.7]">
+                      తెలంగాణ పోలీస్ కానిస్టేబుల్ పూర్తి సిలబస్ పీడీఎఫ్ (అనెక్సర్-2) ను తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా డౌన్‌లోడ్ చేసుకోండి.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <a
+                      href="https://doc.tgprb.in/PC+(Civil+et+al)+2026+Notification+dated+29-07-2026.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 px-3 py-1.5 text-xs font-semibold transition"
+                      title="View Official TSLPRB Gazette Mirror"
+                    >
+                      View ↗
+                    </a>
+                    <a
+                      href="/docs/telangana-police-constable-notification-2026-official.pdf"
+                      download="TSLPRB_Police_Constable_Syllabus_Telugu_Official.pdf"
+                      className="inline-flex items-center gap-1.5 rounded bg-[#1e3a5f] hover:bg-[#162a45] text-white px-3.5 py-1.5 text-xs font-semibold transition shadow-sm"
+                      title="Download TS Constable Syllabus PDF in Telugu (748 KB)"
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                      <span>Download Telugu PDF (748 KB)</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Component 2: TS Constable Syllabus Marks Wise & Weightage Marks Table */}
+              <div className="mb-6 rounded border border-gray-200 overflow-hidden bg-white">
+                <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <span>TS Constable Syllabus Marks Wise &amp; Weightage Marks (200 Questions / 200 Marks)</span>
+                  <span className="text-[11px] font-normal text-gray-600">Duration: 3 Hours (180 Mins) &bull; Negative: 0.20 Marks</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 bg-gray-50/70 text-gray-700 text-xs font-semibold">
+                        <th className="px-3.5 py-2.5">#</th>
+                        <th className="px-3.5 py-2.5">Subject / Paper</th>
+                        <th className="px-3.5 py-2.5">Telugu Title</th>
+                        <th className="px-3.5 py-2.5">Standard</th>
+                        <th className="px-3.5 py-2.5 text-right">TS Constable Syllabus Weightage Marks</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 text-gray-800">
+                      {SUBJECTS.map((sub) => (
+                        <tr key={sub.number} className="hover:bg-gray-50/50 transition">
+                          <td className="px-3.5 py-2.5 font-mono text-gray-500 font-medium">{sub.number}</td>
+                          <td className="px-3.5 py-2.5 font-bold text-gray-900">{sub.name}</td>
+                          <td className="px-3.5 py-2.5 font-telugu text-gray-700 text-xs sm:text-sm">{sub.teluguName}</td>
+                          <td className="px-3.5 py-2.5 text-gray-600 text-xs">{sub.level}</td>
+                          <td className="px-3.5 py-2.5 text-right font-bold text-gray-900">{sub.weightage}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-slate-50/80 font-bold text-gray-900 border-t-2 border-gray-300">
+                        <td colSpan={4} className="px-3.5 py-3 text-right uppercase tracking-wider text-xs">
+                          Total Examination Marks (PWT &amp; FWE Civil)
+                        </td>
+                        <td className="px-3.5 py-3 text-right text-sm font-bold text-slate-900">
+                          200 Questions / 200 Marks
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="p-3 bg-gray-50 text-[11px] text-gray-600 border-t border-gray-200 leading-relaxed">
+                  <strong>Scoring Note:</strong> For Post Code 21 (Civil), 26 (Fire), 27 &amp; 28 (Warder), final merit is based entirely on the 200-mark FWE. For Post Codes 22 (AR), 23 (SAR CPL), and 24 (TSSP), the FWE is scaled to 100 marks and combined with 100 marks from the PET physical events run for a 200-mark final merit list.
+                </div>
+              </div>
+
+              {/* Component 3: TS Constable Reasoning Syllabus (Deep-Dive Blueprint) */}
+              <div className="mb-6 rounded border border-gray-200 overflow-hidden bg-white">
+                <div className="bg-[#f3f4f6] px-4 py-3 font-bold text-xs text-gray-900 uppercase tracking-wider border-b border-gray-200 flex items-center justify-between">
+                  <span>TS Constable Reasoning Syllabus (Mental Ability &bull; 25 Marks Weightage)</span>
+                  <span className="rounded bg-white border border-gray-300 text-gray-800 text-[10px] px-2 py-0.5 font-bold">25 Marks</span>
+                </div>
+                <div className="p-4 sm:p-5">
+                  <p className="text-xs sm:text-sm text-gray-700 mb-4 leading-relaxed">
+                    The <strong>TS constable reasoning syllabus</strong> evaluates both verbal analytical deduction and non-verbal spatial reasoning. Candidates targeting high ranks must secure at least 22+ marks out of 25 in this section. The complete topic-wise syllabus breakdown is structured below:
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Verbal Reasoning Column */}
+                    <div className="rounded border border-gray-200 bg-gray-50/50 p-4">
+                      <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
+                        <h4 className="font-bold text-xs sm:text-sm text-gray-900 uppercase tracking-wider">
+                          Part A: Verbal Reasoning (15 &ndash; 17 Marks)
+                        </h4>
+                        <span className="text-[11px] font-bold text-slate-700">High Weightage</span>
+                      </div>
+                      <ul className="space-y-1.5 text-xs text-gray-700">
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Analogies:</strong> Word analogy, letter/alphabet analogy, number analogy &amp; paired relations.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Coding &amp; Decoding:</strong> Letter shifting, numeric coding, substitution &amp; deciphering coded messages.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Series Completion:</strong> Number series, alphabetical series, alternating series &amp; missing term identification.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Blood Relations:</strong> Deciphering family relationships, tree diagrams &amp; coded relation statements.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Direction &amp; Distance:</strong> 8-point compass navigation, turning angles &amp; Pythagoras distance problems.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Syllogisms &amp; Venn Diagrams:</strong> Two-statement deductions, Euler circle overlaps &amp; set relations.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Ranking &amp; Seating Arrangement:</strong> Left/right rank calculations, circular &amp; linear row orders.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Arithmetical Reasoning:</strong> Age word problems, mathematical symbol interchanging &amp; balance equations.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Clocks &amp; Calendars:</strong> Minute-hour hand angle calculation, leap year &amp; odd-day counting.</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Non-Verbal Reasoning Column */}
+                    <div className="rounded border border-gray-200 bg-gray-50/50 p-4">
+                      <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
+                        <h4 className="font-bold text-xs sm:text-sm text-gray-900 uppercase tracking-wider">
+                          Part B: Non-Verbal Reasoning (8 &ndash; 10 Marks)
+                        </h4>
+                        <span className="text-[11px] font-bold text-slate-700">Spatial Focus</span>
+                      </div>
+                      <ul className="space-y-1.5 text-xs text-gray-700">
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Spatial Visualization:</strong> Mental rotation, figure matching &amp; perspective transformation.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Mirror &amp; Water Images:</strong> Lateral inversion of alphanumeric characters, symbols &amp; compound shapes.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Paper Folding &amp; Cutting:</strong> Symmetric unfolding &amp; punched hole location mapping.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Embedded Figures:</strong> Finding hidden geometric patterns embedded within complex figures.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Pattern &amp; Figure Completion:</strong> Quadrant filling &amp; grid continuation logic.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Cubes &amp; Dice:</strong> Opposite face determination, standard vs general dice, and net box folding.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Non-Verbal Series:</strong> Clockwise/anticlockwise icon rotation &amp; stroke progression sequences.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-slate-500 font-bold">&bull;</span>
+                          <span><strong>Counting of Figures:</strong> Triangles, squares, straight lines &amp; rectangle counting formulas.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Component 4: Detailed Subject Topic Cards with Marks Weightage */}
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                  Detailed Syllabus Topics for All 8 Subjects
+                </h3>
+                <span className="text-[11px] text-gray-500">Annexure-II Prescribed Standard</span>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {SUBJECTS.map((sub) => (
                   <div key={sub.number} className="rounded border border-gray-200 bg-[#f9fafb] p-4.5 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-block rounded bg-gray-200 px-2 py-0.5 text-xs font-bold font-mono text-gray-900">
-                          {sub.number}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block rounded bg-gray-200 px-2 py-0.5 text-xs font-bold font-mono text-gray-900">
+                            {sub.number}
+                          </span>
+                          <h3 className="text-sm sm:text-base font-bold text-gray-900">{sub.name}</h3>
+                        </div>
+                        <span className="rounded bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-800 shrink-0">
+                          {sub.weightage}
                         </span>
-                        <h3 className="text-sm sm:text-base font-bold text-gray-900">{sub.name}</h3>
                       </div>
-                      <span lang="te" className="font-telugu text-sm sm:text-base text-gray-700 font-medium block mt-1 leading-[1.7]">
-                        {sub.teluguName}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span lang="te" className="font-telugu text-xs sm:text-sm text-gray-700 font-medium leading-[1.7]">
+                          {sub.teluguName}
+                        </span>
+                        <span className="text-[11px] text-gray-500 font-sans">&bull; {sub.level}</span>
+                      </div>
                       <p className="mt-2 text-xs sm:text-sm text-gray-700 leading-relaxed font-normal">
                         {sub.topics}
                       </p>
@@ -1918,7 +2172,7 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
                 <li><a href="#reservation" className="hover:text-gray-900 transition font-medium">9. 95% Local Reservation Rules</a></li>
                 <li><a href="#documents" className="hover:text-gray-900 transition font-medium">10. Certificate Verification Checklist</a></li>
                 <li><a href="#pattern" className="hover:text-gray-900 transition font-medium">11. Exam Pattern &amp; Qualifying Marks</a></li>
-                <li><a href="#syllabus" className="hover:text-gray-900 transition font-medium">12. Annexure-II Syllabus</a></li>
+                <li><a href="#syllabus" className="hover:text-gray-900 transition font-medium">12. Syllabus, Marks Wise &amp; Telugu PDF</a></li>
                 <li><a href="#fees" className="hover:text-gray-900 transition font-medium">13. Application Fee &amp; Steps</a></li>
                 <li><a href="#links" className="hover:text-gray-900 transition font-medium">14. Official Notification PDF &amp; Links</a></li>
                 <li><a href="#faqs" className="hover:text-gray-900 transition font-medium">15. Frequently Asked Questions</a></li>
