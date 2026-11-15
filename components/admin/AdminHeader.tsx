@@ -15,7 +15,7 @@ const PATH_TITLES: Record<string, { parent?: string; title: string }> = {
   "/admin/exams": { parent: "Curriculum", title: "Exam Catalogue" },
   "/admin/groups": { parent: "Curriculum", title: "Exams & Papers" },
   "/admin/subjects": { parent: "Curriculum", title: "Subjects & Syllabus" },
-  "/admin/exam-pages": { parent: "Curriculum", title: "Public Exam Pages" },
+  "/admin/exam-pages": { parent: "Curriculum", title: "Public Pages" },
   "/admin/access": { parent: "Commerce", title: "Exam Series & Access" },
   "/admin/students": { parent: "Users", title: "Registrations & Sales" },
   "/admin/results": { parent: "Assessments", title: "Results & Analytics" },

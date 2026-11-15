@@ -23,7 +23,7 @@ export const ADMIN_SECTIONS = [
     links: [
       { href: "/admin/exams", label: "Exam catalogue", icon: "categories" as const },
       { href: "/admin/subjects", label: "Subjects & Syllabus", icon: "subjects" as const },
-      { href: "/admin/exam-pages", label: "Public exam pages", icon: "exams" as const },
+      { href: "/admin/exam-pages", label: "Public pages", icon: "portal" as const },
     ],
   },
   {

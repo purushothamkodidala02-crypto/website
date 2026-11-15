@@ -82,11 +82,11 @@ const COMMANDS: CommandItem[] = [
   },
   {
     id: "nav-exam-pages",
-    title: "Public Exam Pages",
+    title: "Public Pages",
     category: "Navigation",
-    description: "Manage SEO content and FAQs for public landing pages",
+    description: "Manage public landing pages, recruitment notifications, and governance policies",
     href: "/admin/exam-pages",
-    icon: "exams",
+    icon: "portal",
   },
   {
     id: "nav-access",
