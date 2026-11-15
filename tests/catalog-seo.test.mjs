@@ -96,3 +96,34 @@ test("publicCollectionMetadata preserves bilingual titles and descriptions witho
   assert.equal(resolved.title, "Fallback Title");
   assert.equal(resolved.description, "Fallback Description");
 });
+
+test("APPSC Endowment Officer SEO generates rich bilingual metadata, keywords, and JSON-LD", async () => {
+  const eo = getExamTeluguMetadata("appsc-endowment-officer-mock-test", "Endowment Officer", "andhra-pradesh");
+  assert.ok(eo);
+  assert.equal(eo.teluguName, "ఎండోమెంట్ ఆఫీసర్ (APPSC Endowment Officer)");
+  assert.match(eo.bilingualPageTitle, /APPSC Endowment Officer Free Mock Test/);
+  assert.match(eo.bilingualPageTitle, /ఎండోమెంట్ ఆఫీసర్/);
+  assert.match(eo.bilingualDescription, /APPSC Endowment Officer/);
+  assert.match(eo.bilingualDescription, /ఎండోమెంట్ ఆఫీసర్/);
+  assert.match(eo.bilingualDescription, /Paper 1 GS & Paper 2 Hindu Philosophy/);
+  assert.ok(eo.keywords.length >= 15);
+  assert.ok(eo.keywords.some((k) => k.includes("Hindu philosophy")));
+
+  const examRoute = await read("app/mock-tests/[id]/[exam]/page.tsx");
+  assert.match(examRoute, /"@type": \["LearningResource", "Quiz"\]/);
+  assert.match(examRoute, /courseCode: context\.exam\.slug\.toUpperCase\(\)/);
+  assert.match(examRoute, /papersItemListJsonLd/);
+
+  const resolved = resolveSeoFields(
+    {
+      seo_title: "APPSC Endowment Officer Mock Test – Online Exam Practice",
+      seo_description: "Prepare for the APPSC Endowment Officer exam with online mock tests, practice questions, answers, and detailed explanations. Improve your accuracy, speed, and exam readiness with effective practice."
+    },
+    {
+      title: eo.bilingualPageTitle,
+      description: eo.bilingualDescription,
+    }
+  );
+  assert.equal(resolved.title, eo.bilingualPageTitle);
+  assert.equal(resolved.description, eo.bilingualDescription);
+});
