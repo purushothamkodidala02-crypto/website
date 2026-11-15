@@ -28,6 +28,15 @@ const HMWSSB_MANAGER_ALIASES = new Set([
   "hmwssb-engineering-manager-notification-2026",
   "tgpsc-hmwssb-manager-engineering-2026",
 ]);
+const TGPCB_SCIENTIST_ALIASES = new Set([
+  "tgpcb-assistant-scientist-notification-2026",
+  "tgpcb-assistant-scientist-analyst-grade-2-notification-2026",
+  "tgpcb-assistant-scientist-analyst-grade-ii-notification-2026",
+  "tgpcb-analyst-grade-2-notification-2026",
+  "tspcb-assistant-scientist-notification-2026",
+  "tgpsc-tgpcb-assistant-scientist-notification-2026",
+  "tgpcb-assistant-scientist-notification",
+]);
 
 export async function generateStaticParams() {
   return [
@@ -52,6 +61,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (HMWSSB_MANAGER_ALIASES.has(slug)) {
     return {
       title: "Redirecting to TGPSC HMWSSB Manager (Engineering) Notification 2026...",
+      robots: { index: false, follow: true },
+    };
+  }
+  if (TGPCB_SCIENTIST_ALIASES.has(slug)) {
+    return {
+      title: "Redirecting to TGPCB Assistant Scientist (Analyst Grade-II) Notification 2026...",
       robots: { index: false, follow: true },
     };
   }
@@ -529,6 +544,9 @@ export default async function TelanganaPoliceNotificationPage({ params }: Props)
   }
   if (HMWSSB_MANAGER_ALIASES.has(slug)) {
     permanentRedirect("/news/hmwssb-manager-engineering-notification-2026");
+  }
+  if (TGPCB_SCIENTIST_ALIASES.has(slug)) {
+    permanentRedirect("/news/tgpcb-assistant-scientist-notification-2026");
   }
   if (slug !== PRIMARY_SLUG && !ALIAS_SLUGS.has(slug)) {
     notFound();
