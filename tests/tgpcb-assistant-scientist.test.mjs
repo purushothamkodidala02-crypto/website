@@ -20,6 +20,9 @@ test("TGPCB Assistant Scientist (Analyst Grade-II) Notification 2026 broadsheet 
 
   // Snapshot metrics (20 posts, pay scale ₹45,960–₹1,24,150, 300 marks)
   assert.match(page, /TOTAL_VACANCIES\s*=\s*20/);
+  assert.match(page, /TOTAL_APPLICANTS\s*=\s*19568/);
+  assert.match(page, /19,568/);
+  assert.match(page, /978/);
   assert.match(page, /₹45,960/);
   assert.match(page, /₹1,24,150/);
   assert.match(page, /300 Marks/);

@@ -12,9 +12,10 @@ const CANONICAL_PATH = `/news/${PRIMARY_SLUG}`;
 export const metadata: Metadata = {
   title: "TGPSC TGPCB Assistant Scientist Cutoff Marks 2026 & Notification: 20 Posts, Chemistry Syllabus & Selected Candidates",
   description:
-    "Official TGPSC TGPCB Assistant Scientist (Analyst Grade-II) 2026 Cut-Off Marks and Selected Candidates List (Notification No. 01/OG/PC/2026). Check OC (228.80), OCW (225.78), BC-B (225.79), BC-D (223.77), BC-A (222.85), SC (202.79), ST (207.68), EWS (210.68) cutoffs, 19 selected candidate marks table, and Paper-II Chemistry syllabus.",
+    "Official TGPSC TGPCB Assistant Scientist (Analyst Grade-II) 2026 Cut-Off Marks and Selected Candidates List (Notification No. 01/OG/PC/2026). 19,568 candidates applied online for 20 posts (~978/post). Check OC (228.80), OCW (225.78), BC-B (225.79), BC-D (223.77), BC-A (222.85), SC (202.79), ST (207.68), EWS (210.68) cutoffs and Paper-II Chemistry syllabus.",
   keywords: [
     "TGPCB Assistant Scientist Cutoff Marks 2026",
+    "TGPCB Assistant Scientist candidates applied online 19568",
     "TGPSC TGPCB Assistant Scientist Notification 2026",
     "Telangana Pollution Control Board Analyst Grade 2 Recruitment",
     "TGPCB Assistant Scientist Selected Candidates Marks List",
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
     url: absoluteUrl(CANONICAL_PATH),
     title: "TGPCB Assistant Scientist Cutoff Marks 2026 & Notification: 20 Posts, Syllabus & Selection List",
     description:
-      "Official TGPSC Cutoff Marks and 19 selected candidates marks list for Assistant Scientist (Analyst Grade-II) in Telangana Pollution Control Board (Notification No. 01/OG/PC/2026). Complete Chemistry degree syllabus & pay scale.",
+      "Official TGPSC Cutoff Marks and 19 selected candidates marks list for Assistant Scientist (Analyst Grade-II) in Telangana Pollution Control Board (Notification No. 01/OG/PC/2026). 19,568 candidates applied online (~978/post).",
     siteName: "Varadhi Prep",
     images: [
       {
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TGPCB Assistant Scientist Cutoff Marks 2026 (Notification No. 01/OG/PC/2026)",
     description:
-      "Official TGPSC 2026 Cutoff Marks: OC 228.80, OCW 225.78, BC-B 225.79, SC 202.79, ST 207.68. Full 19 selected candidates marks breakdown & Chemistry syllabus.",
+      "Official TGPSC 2026 Cutoff Marks: OC 228.80, OCW 225.78, BC-B 225.79, SC 202.79, ST 207.68. 19,568 candidates applied online. Full 19 selected candidates marks breakdown & Chemistry syllabus.",
     images: [absoluteUrl("/opengraph-image")],
   },
 };
@@ -57,6 +58,8 @@ export const metadata: Metadata = {
 // ── Official Recruitment Constants ────────────────────────
 
 const TOTAL_VACANCIES = 20;
+const TOTAL_APPLICANTS = 19568;
+const APPLICANTS_PER_POST = "978.4";
 
 const SCHEDULE_EVENTS = [
   {
@@ -67,11 +70,11 @@ const SCHEDULE_EVENTS = [
     detail: "TGPSC released direct recruitment for 20 posts of Assistant Scientist (Analyst Grade-II) in TGPCB.",
   },
   {
-    title: "Online Application Window",
-    teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల స్వీకరణ",
+    title: "Online Application Window (19,568 Candidates Applied)",
+    teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల స్వీకరణ (19,568 మంది దరఖాస్తుదారులు)",
     date: "Concluded",
     status: "Completed",
-    detail: "Online registration and submission through One Time Registration (OTR) on websitenew.tgpsc.gov.in.",
+    detail: "A total of 19,568 candidates applied online through One Time Registration (OTR) on websitenew.tgpsc.gov.in (Competition ratio: ~978.4 applicants per post).",
   },
   {
     title: "Written Examination (CBRT Mode)",
@@ -272,6 +275,12 @@ const AGE_CRITERIA = [
 ];
 
 const BILINGUAL_FAQS = [
+  {
+    question: "How many candidates applied online for TGPCB Assistant Scientist (Analyst Grade-II) 2026?",
+    answer: "A total of 19,568 candidates applied online for the 20 vacancies of Assistant Scientist (Analyst Grade-II) in the Telangana Pollution Control Board (TGPCB / TSPCB). This translates to an intense competition ratio of approximately 978 applicants per vacancy (~978.4:1). From these 19,568 applicants, only 19 candidates were selected in the final merit list, yielding an overall selection rate of 0.097% (1 in every 1,030 applicants).",
+    teluguQuestion: "TGPCB అసిస్టెంట్ సైంటిస్ట్ పోస్టులకు ఎంత మంది అభ్యర్థులు ఆన్‌లైన్‌లో దరఖాస్తు చేసుకున్నారు? పోటీ తీవ్రత ఎంత?",
+    teluguAnswer: "తెలంగాణ పొల్యూషన్ కంట్రోల్ బోర్డులోని 20 అసిస్టెంట్ సైంటిస్ట్ (అనలిస్ట్ గ్రేడ్-2) పోస్టులకు మొత్తం 19,568 మంది అభ్యర్థులు ఆన్‌లైన్‌లో దరఖాస్తు చేసుకున్నారు. ప్రతి పోస్టుకు సగటున సుమారు 978 మంది (978:1) పోటీ పడ్డారు. తుది ఎంపిక జాబితాలో 19 మంది అభ్యర్థులు మాత్రమే నియామకం పొందగా, ఎంపిక శాతం సుమారు 0.097% (ప్రతి 1,030 మందిలో ఒకరు) గా నమోదైంది.",
+  },
   {
     question: "What are the official cut-off marks for TGPCB Assistant Scientist (Analyst Grade-II) 2026?",
     answer: "As per the official TGPSC Press Note (Notification No. 01/OG/PC/2026, dated 20/04/2026): The Open Competition (OC-UR General) cut-off is 228.79866 out of 300 marks (76.27%). Open Competition Women (OCW-UR) cut-off is 225.77852 (75.26%). Communal cut-offs: BC-B (225.79195), BC-D (223.76510), BC-A (222.84564), SC Group-2 (222.84564), SC Group-3 regular (202.78523), SC Group-3 Carry Forward (239.73826), ST (207.68456), and EWS (210.68456). The highest mark overall is 248.91275 (82.97%) by Rank 1 in OC-UR-CF.",
@@ -535,29 +544,35 @@ export default function TgpcbAssistantScientistPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
-              <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Vacancies</span>
-                <strong className="text-2xl sm:text-3xl font-black text-emerald-900 block mt-1">{TOTAL_VACANCIES} Posts</strong>
-                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">19 Candidates Selected</span>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 text-left">
+              <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-3.5 sm:p-4 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Vacancies</span>
+                <strong className="text-xl sm:text-2xl font-black text-emerald-900 block mt-1">{TOTAL_VACANCIES} Posts</strong>
+                <span className="text-xs text-slate-600 font-medium block mt-0.5">19 Selected in Merit</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Scale of Pay</span>
-                <strong className="text-lg sm:text-2xl font-black text-emerald-900 block mt-1">₹45,960 – ₹1,24,150</strong>
-                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">Gross ~₹73,465/mo</span>
+              <div className="rounded-xl border-2 border-amber-300 bg-amber-50/70 p-3.5 sm:p-4 hover:border-amber-400 hover:bg-white hover:shadow-xs transition">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 block">Candidates Applied Online</span>
+                <strong className="text-xl sm:text-2xl font-black text-amber-950 block mt-1">19,568</strong>
+                <span className="text-xs text-amber-800 font-bold block mt-0.5">~978 Applicants / Post</span>
               </div>
 
-              <div className="rounded-xl border-2 border-emerald-400 bg-emerald-50/70 p-4 sm:p-5 hover:border-emerald-500 hover:bg-white hover:shadow-xs transition">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 block">2026 OC Cut-Off Mark</span>
-                <strong className="text-xl sm:text-2xl font-black text-emerald-950 block mt-1">228.80 <span className="text-xs font-bold text-emerald-700">/ 300</span></strong>
-                <span className="text-xs sm:text-sm text-emerald-800 font-medium block mt-1">76.27% • Rank 8 (OC-UR)</span>
+              <div className="rounded-xl border-2 border-emerald-400 bg-emerald-50/70 p-3.5 sm:p-4 hover:border-emerald-500 hover:bg-white hover:shadow-xs transition">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 block">2026 OC Cut-Off</span>
+                <strong className="text-lg sm:text-xl font-black text-emerald-950 block mt-1">228.80 <span className="text-xs font-bold text-emerald-700">/ 300</span></strong>
+                <span className="text-xs text-emerald-800 font-medium block mt-0.5">76.27% • Rank 8</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-4 sm:p-5 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">2026 Highest Mark</span>
-                <strong className="text-xl sm:text-2xl font-black text-emerald-900 block mt-1">248.91 <span className="text-xs font-bold text-slate-500">/ 300</span></strong>
-                <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1">82.97% • State Rank 1</span>
+              <div className="rounded-xl border border-slate-200 bg-[#f7fbf9] p-3.5 sm:p-4 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">2026 Topper Score</span>
+                <strong className="text-lg sm:text-xl font-black text-emerald-900 block mt-1">248.91 <span className="text-xs font-bold text-slate-500">/ 300</span></strong>
+                <span className="text-xs text-slate-600 font-medium block mt-0.5">82.97% • Rank 1</span>
+              </div>
+
+              <div className="col-span-2 sm:col-span-1 rounded-xl border border-slate-200 bg-[#f7fbf9] p-3.5 sm:p-4 hover:border-emerald-300 hover:bg-white hover:shadow-xs transition">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Scale of Pay</span>
+                <strong className="text-base sm:text-lg font-black text-emerald-900 block mt-1">₹45,960–₹1,24,150</strong>
+                <span className="text-xs text-slate-600 font-medium block mt-0.5">Gross ~₹73,465/mo</span>
               </div>
             </div>
 
@@ -634,6 +649,13 @@ export default function TgpcbAssistantScientistPage() {
                     <tr>
                       <th className="px-4 py-3 font-bold bg-slate-50 text-slate-900">Total Vacancies</th>
                       <td className="px-4 py-3 font-bold text-emerald-800">20 Posts (State-wide / Multi-Zone distribution)</td>
+                    </tr>
+                    <tr>
+                      <th className="px-4 py-3 font-bold bg-slate-50 text-slate-900">Candidates Applied Online</th>
+                      <td className="px-4 py-3 text-slate-900 font-bold">
+                        <span className="text-emerald-950 font-black text-base">19,568 Candidates</span>
+                        <span className="text-xs font-semibold text-slate-600 block sm:inline sm:ml-2">(Competition: ~978.4 applicants per post)</span>
+                      </td>
                     </tr>
                     <tr>
                       <th className="px-4 py-3 font-bold bg-slate-50 text-slate-900">Scale of Pay</th>
@@ -717,7 +739,7 @@ export default function TgpcbAssistantScientistPage() {
               </p>
 
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed mb-5">
-                The Telangana Public Service Commission (TGPSC) officially published the marks of candidates picked for appointment to the post of <strong>Assistant Scientist (Analyst Grade-II) in Telangana Pollution Control Board</strong> (Notification No. 01/OG/PC/2026, dated 20/04/2026). A total of <strong>19 candidates</strong> have been selected under State-wide Unreserved merit and communal roster points based on normalized scores out of <strong>300 marks</strong> in the CBRT examination.
+                The Telangana Public Service Commission (TGPSC) officially published the marks of candidates picked for appointment to the post of <strong>Assistant Scientist (Analyst Grade-II) in Telangana Pollution Control Board</strong> (Notification No. 01/OG/PC/2026, dated 20/04/2026). A total of <strong>19,568 candidates applied online</strong> for the 20 sanctioned vacancies, creating a competition ratio of <strong>~978.4 applicants per post</strong>. Following the CBRT examination, <strong>19 candidates</strong> have been selected under State-wide Unreserved merit and communal roster points based on normalized scores out of <strong>300 marks</strong> (selection rate: ~0.097%).
               </p>
 
               {/* Category-Wise Cut-Off Summary Table */}
@@ -801,7 +823,13 @@ export default function TgpcbAssistantScientistPage() {
               </div>
 
               {/* Analytical Highlights Grid */}
-              <div className="grid sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs sm:text-sm">
+                <div className="rounded-xl border-2 border-amber-300 bg-amber-50/70 p-3.5">
+                  <span className="text-xs font-bold text-amber-900 uppercase block mb-1">Total Online Applicants</span>
+                  <strong className="text-lg font-black text-amber-950 block">19,568 Candidates</strong>
+                  <p className="text-xs text-amber-800 mt-1">~978.4 applicants per post. 19 selected out of 19,568 (0.097% success rate).</p>
+                </div>
+
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5">
                   <span className="text-xs font-bold text-emerald-900 uppercase block mb-1">State Topper (Rank 1)</span>
                   <strong className="text-lg font-black text-emerald-950 block">248.91275 / 300</strong>
@@ -1189,6 +1217,14 @@ export default function TgpcbAssistantScientistPage() {
                 <div className="flex justify-between">
                   <span className="font-medium text-slate-500">Vacancies:</span>
                   <span className="font-bold text-emerald-900">20 Posts</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-500">Applied Online:</span>
+                  <span className="font-bold text-slate-900">19,568</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-500">Competition:</span>
+                  <span className="font-bold text-amber-800">~978 / Post</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium text-slate-500">Pay Scale:</span>
