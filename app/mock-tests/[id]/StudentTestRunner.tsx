@@ -70,79 +70,6 @@ function displayTime(total: number) {
   return hours ? `${String(hours).padStart(2, "0")}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 }
 
-function hashSeed(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
-  }
-  return hash;
-}
-
-function mulberry32(seed: number) {
-  return function () {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function hasRelativeOptions(q: TestQuestion): boolean {
-  const pattern = /(above|below|both [a-d]|all of the|none of the|పైవన్నీ|పైవేవీ|ఏదీ కాదు)/i;
-  return (
-    pattern.test(q.option_a) ||
-    pattern.test(q.option_b) ||
-    pattern.test(q.option_c) ||
-    pattern.test(q.option_d) ||
-    (Boolean(q.option_a_te) && pattern.test(q.option_a_te!)) ||
-    (Boolean(q.option_b_te) && pattern.test(q.option_b_te!)) ||
-    (Boolean(q.option_c_te) && pattern.test(q.option_c_te!)) ||
-    (Boolean(q.option_d_te) && pattern.test(q.option_d_te!))
-  );
-}
-
-function getShuffledQuestions(questions: TestQuestion[], seedKey: string): TestQuestion[] {
-  const prng = mulberry32(hashSeed(seedKey || "varadhi-test-shuffle"));
-  const copy = [...questions];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(prng() * (i + 1));
-    const tmp = copy[i];
-    copy[i] = copy[j];
-    copy[j] = tmp;
-  }
-  return copy;
-}
-
-function getShuffledOptions(
-  q: TestQuestion,
-  telugu: boolean,
-  isShuffled: boolean,
-  seedKey: string,
-): Array<[string, string, Answer]> {
-  const defaultOptions: Array<[string, string, Answer]> = [
-    ["A", telugu ? q.option_a_te ?? q.option_a : q.option_a, "A"],
-    ["B", telugu ? q.option_b_te ?? q.option_b : q.option_b, "B"],
-    ["C", telugu ? q.option_c_te ?? q.option_c : q.option_c, "C"],
-    ["D", telugu ? q.option_d_te ?? q.option_d : q.option_d, "D"],
-  ];
-
-  if (!isShuffled || hasRelativeOptions(q)) {
-    return defaultOptions;
-  }
-
-  const prng = mulberry32(hashSeed(`${seedKey}:${q.question_id}`));
-  const copy = [...defaultOptions];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(prng() * (i + 1));
-    const tmp = copy[i];
-    copy[i] = copy[j];
-    copy[j] = tmp;
-  }
-
-  const labels = ["A", "B", "C", "D"];
-  return copy.map((item, idx) => [labels[idx], item[1], item[2]]);
-}
-
 export function StudentTestRunner({
   mockTestId,
   publicTestPath,
@@ -163,15 +90,10 @@ export function StudentTestRunner({
   initialRemainingSeconds,
   isShuffled = false,
 }: Props) {
-  const activeQuestions = useMemo(() => {
-    if (!isShuffled || questions.length <= 1) return questions;
-    return getShuffledQuestions(questions, sessionId);
-  }, [isShuffled, questions, sessionId]);
-
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
-    const lastAnsweredIndex = activeQuestions.reduce((last, question, questionIndex) => question.selected_answer ? questionIndex : last, -1);
-    return lastAnsweredIndex >= 0 ? Math.min(lastAnsweredIndex + 1, activeQuestions.length - 1) : 0;
+    const lastAnsweredIndex = questions.reduce((last, question, questionIndex) => question.selected_answer ? questionIndex : last, -1);
+    return lastAnsweredIndex >= 0 ? Math.min(lastAnsweredIndex + 1, questions.length - 1) : 0;
   });
   const [answers, setAnswers] = useState<Record<string, Answer>>(() => Object.fromEntries(questions.flatMap((item) => item.selected_answer ? [[item.question_id, item.selected_answer]] : [])));
   const [reviewIds, setReviewIds] = useState<Set<string>>(
@@ -263,9 +185,9 @@ export function StudentTestRunner({
     }
   }, []);
 
-  const current = activeQuestions[index] || activeQuestions[0];
+  const current = questions[index];
   const answered = useMemo(() => Object.keys(answers).length, [answers]);
-  const unanswered = activeQuestions.length - answered;
+  const unanswered = questions.length - answered;
   const locked = remaining === null || remaining === 0 || submitting || pausing || paused || isDisplaced;
   const pauseControlDisabled = remaining === null || remaining === 0 || submitting || pausing || isDisplaced;
 
@@ -559,12 +481,12 @@ export function StudentTestRunner({
         event.preventDefault();
         target?.blur();
         setNavigatorOpen(false);
-        setIndex((value) => Math.min(activeQuestions.length - 1, value + 1));
+        setIndex((value) => Math.min(questions.length - 1, value + 1));
       }
     }
     window.addEventListener("keydown", navigateWithKeyboard);
     return () => window.removeEventListener("keydown", navigateWithKeyboard);
-  }, [confirming, locked, activeQuestions.length]);
+  }, [confirming, locked, questions.length]);
 
   const handleToggleFullscreen = useCallback(async (event?: React.MouseEvent) => {
     event?.preventDefault();
@@ -655,9 +577,12 @@ export function StudentTestRunner({
   const bilingual = current.content_language_mode === "bilingual" && Boolean(current.question_text_te);
   const telugu = bilingual && language === "te";
   const questionText = telugu ? current.question_text_te ?? current.question_text : current.question_text;
-  const options = useMemo(() => {
-    return getShuffledOptions(current, telugu, Boolean(isShuffled), sessionId);
-  }, [current, telugu, isShuffled, sessionId]);
+  const options = [
+    ["A", telugu ? current.option_a_te ?? current.option_a : current.option_a],
+    ["B", telugu ? current.option_b_te ?? current.option_b : current.option_b],
+    ["C", telugu ? current.option_c_te ?? current.option_c : current.option_c],
+    ["D", telugu ? current.option_d_te ?? current.option_d : current.option_d],
+  ] as const;
 
   function toggleReview() {
     const marked = !reviewIds.has(current.question_id);
@@ -873,7 +798,7 @@ export function StudentTestRunner({
     setPausing(false);
   }
 
-  const navigator = <QuestionNavigator questions={activeQuestions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
+  const navigator = <QuestionNavigator questions={questions} currentIndex={index} answers={answers} reviewIds={reviewIds} locked={locked} onSelect={(next) => { setIndex(next); setNavigatorOpen(false); }} onFinish={() => setConfirming(true)} />;
 
   const watermarkText = studentEmail ? `Varadhi • ${studentEmail}` : "Varadhi";
 
@@ -905,7 +830,7 @@ export function StudentTestRunner({
               <h1 className="whitespace-nowrap text-xs sm:text-sm lg:text-base font-black text-slate-950">
                 <span className="min-[420px]:hidden">Q{index + 1}</span>
                 <span className="hidden min-[420px]:inline">Question {index + 1}</span>{" "}
-                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{activeQuestions.length}</span>
+                <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
               </h1>
             </button>
 
@@ -921,8 +846,8 @@ export function StudentTestRunner({
 
             <button
               type="button"
-              onClick={() => setIndex((value) => Math.min(activeQuestions.length - 1, value + 1))}
-              disabled={index === activeQuestions.length - 1 || locked}
+              onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))}
+              disabled={index === questions.length - 1 || locked}
               aria-label="Next question"
               title="Next question"
               className="grid h-7 w-7 sm:hidden place-items-center rounded-lg text-slate-700 hover:bg-white active:bg-slate-200 disabled:opacity-20 transition"
@@ -940,9 +865,9 @@ export function StudentTestRunner({
               <strong className="text-xs sm:text-sm font-black text-emerald-700">
                 {answered}
               </strong>
-              <span className="text-[10px] sm:text-xs text-slate-400 font-medium">/{activeQuestions.length}</span>
+              <span className="text-[10px] sm:text-xs text-slate-400 font-medium">/{questions.length}</span>
               <span className="hidden xl:inline rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
-                {Math.round((answered / activeQuestions.length) * 100)}%
+                {Math.round((answered / questions.length) * 100)}%
               </span>
             </div>
 
@@ -1018,7 +943,7 @@ export function StudentTestRunner({
       <div className="h-1 w-full bg-slate-100 overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 transition-all duration-300"
-          style={{ width: `${Math.round((answered / activeQuestions.length) * 100)}%` }}
+          style={{ width: `${Math.round((answered / questions.length) * 100)}%` }}
         />
       </div>
     </header>
@@ -1108,12 +1033,12 @@ export function StudentTestRunner({
               <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-normal leading-relaxed sm:leading-8 text-slate-950" />
               {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-[32dvh] sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
               <div className="mt-4 sm:mt-5 grid gap-2.5 sm:gap-3">
-                {options.map(([displayKey, text, originalKey]) => {
-                  const selected = answers[current.question_id] === originalKey;
+                {options.map(([key, text]) => {
+                  const selected = answers[current.question_id] === key;
                   const teluguOption = containsTeluguText(text);
                   return (
                     <label
-                      key={displayKey}
+                      key={key}
                       className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 sm:p-3.5 transition hover:border-teal-400 ${
                         selected
                           ? "border-teal-600 bg-teal-50/90 shadow-sm ring-1 ring-teal-500"
@@ -1124,18 +1049,18 @@ export function StudentTestRunner({
                         className="sr-only"
                         type="radio"
                         name={current.question_id}
-                        value={originalKey}
+                        value={key}
                         checked={selected}
                         disabled={locked}
                         onChange={() => {
-                          setAnswers((value) => ({ ...value, [current.question_id]: originalKey }));
+                          setAnswers((value) => ({ ...value, [current.question_id]: key }));
                           queueSave(`answer:${current.question_id}`, async () => {
                             try {
                               const supabase = createClient();
                               const rpcRes = await supabase.rpc("save_mock_test_answer_update", {
                                 requested_session_id: sessionId,
                                 requested_question_id: current.question_id,
-                                requested_answer: originalKey,
+                                requested_answer: key,
                                 requested_device_token: deviceIdRef.current || null,
                               });
                               if (rpcRes.error && rpcRes.error.message?.includes("DISPLACED")) {
@@ -1145,12 +1070,12 @@ export function StudentTestRunner({
                             } catch {
                               // Fall back to server action
                             }
-                            return saveAttemptProgress(sessionId, current.question_id, originalKey, deviceIdRef.current);
+                            return saveAttemptProgress(sessionId, current.question_id, key, deviceIdRef.current);
                           });
                         }}
                       />
                       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-bold transition mt-0.5 ${selected ? "bg-teal-700 text-white shadow-sm" : "bg-slate-100 text-slate-700"}`}>
-                        {displayKey}
+                        {key}
                       </span>
                       <span
                         lang={teluguOption ? "te" : "en"}
@@ -1195,10 +1120,10 @@ export function StudentTestRunner({
                 className="flex items-center gap-1 rounded-xl bg-teal-50 border border-teal-200/80 px-2.5 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-100 active:scale-95 transition"
                 title="View all questions"
               >
-                <span>Q {index + 1}/{activeQuestions.length}</span>
+                <span>Q {index + 1}/{questions.length}</span>
               </button>
 
-              {index === activeQuestions.length - 1 ? (
+              {index === questions.length - 1 ? (
                 <button
                   type="button"
                   onClick={() => setConfirming(true)}
@@ -1211,7 +1136,7 @@ export function StudentTestRunner({
               ) : (
                 <button
                   type="button"
-                  onClick={() => setIndex((value) => Math.min(activeQuestions.length - 1, value + 1))}
+                  onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))}
                   disabled={locked}
                   className="flex items-center gap-1.5 rounded-xl bg-[#0a2922] hover:bg-[#11382f] px-4 py-2 text-xs font-bold text-white shadow-sm disabled:opacity-50 active:scale-95 transition"
                   title="Save and move to next question"
@@ -1299,18 +1224,18 @@ export function StudentTestRunner({
             </svg>
             <span>{navigatorOpenDesktop ? "Hide Navigator" : "View Navigator"}</span>
             <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-mono font-bold text-teal-700 border border-slate-200">
-              {index + 1}/{activeQuestions.length}
+              {index + 1}/{questions.length}
             </span>
           </button>
         </div>
 
-        {index === activeQuestions.length - 1 ? (
+        {index === questions.length - 1 ? (
           <button type="button" onClick={() => setConfirming(true)} disabled={locked} className="whitespace-nowrap rounded-xl bg-teal-700 px-3 py-2 text-xs sm:text-sm font-black text-white shadow-sm transition hover:bg-teal-800 disabled:opacity-50 sm:px-5 sm:py-2.5">
             <span className="min-[360px]:hidden">Submit</span>
             <span className="hidden min-[360px]:inline">Submit test</span>
           </button>
         ) : (
-          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(activeQuestions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
+          <button type="button" title="Save & next question (→ Arrow)" onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))} disabled={locked} className="group flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl bg-[#0a2922] px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#11382f] disabled:opacity-50 sm:px-5 sm:py-2.5">
             <span className="min-[360px]:hidden">Next</span>
             <span className="hidden min-[360px]:inline">Save &amp; next</span>
             <span className="text-xs font-bold md:hidden">→</span>
@@ -1392,7 +1317,7 @@ export function StudentTestRunner({
       </div>
     )}
 
-    {confirming && !submitting && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish(false)} questions={activeQuestions} answers={answers} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
+    {confirming && !submitting && <SubmissionDialog answered={answered} review={reviewIds.size} unanswered={unanswered} submitting={submitting} onCancel={() => setConfirming(false)} onSubmit={() => void finish(false)} questions={questions} answers={answers} reviewIds={reviewIds} onGoToQuestion={(idx) => { setIndex(idx); setConfirming(false); }} />}
   </main>;
 }
 

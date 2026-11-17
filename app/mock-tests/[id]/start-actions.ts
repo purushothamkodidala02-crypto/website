@@ -111,9 +111,8 @@ export async function beginMockTest(
       }
     }
 
-    const shuffleQuery = shuffle ? "&shuffle=1" : "";
     redirect(
-      `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}${shuffleQuery}`,
+      `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}`,
     );
   } catch (err) {
     if (isRedirectError(err)) {

@@ -56,12 +56,11 @@ export default async function TakeMockTestPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ session?: string; shuffle?: string }>;
+  searchParams: Promise<{ session?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const requestedSessionId = typeof query.session === "string" ? query.session : "";
   const isValidSession = /^[0-9a-f-]{36}$/i.test(requestedSessionId);
-  const isShuffled = query.shuffle === "1" || query.shuffle === "true";
 
   const supabase = await createClient();
 
@@ -75,7 +74,7 @@ export default async function TakeMockTestPage({
     return getMockTestPublicContextById(id);
   });
   const sessionPromise = isValidSession
-    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at, remaining_seconds").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
+    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at, remaining_seconds, is_shuffled").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
     : Promise.resolve({ data: null });
   const attemptPromise = isValidSession
     ? supabase.from("test_attempts").select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions").eq("session_id", requestedSessionId).maybeSingle()
@@ -269,7 +268,7 @@ export default async function TakeMockTestPage({
       paperName={publicContext.paper.name}
       subjectName={publicContext.subject?.name}
       stateCode={publicContext.state.code}
-      isShuffled={isShuffled}
+      isShuffled={Boolean(session.is_shuffled)}
     />
   );
 }
