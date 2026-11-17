@@ -385,20 +385,36 @@ export async function submitAttempt(
       submitted_answers: cleanedAnswers,
     });
 
-    const result = data?.[0];
-    if (error || !result) {
+    const result = (Array.isArray(data) ? data[0] : data) as {
+      attempt_id?: string;
+      score?: number | string;
+      total_marks?: number | string;
+      correct_answers?: number | string;
+      incorrect_answers?: number | string;
+      unanswered_questions?: number | string;
+    } | undefined;
+
+    if (error || !result || result.attempt_id === undefined) {
       console.error("submit_mock_test_attempt RPC error:", error, "data:", data);
       const verified = await verifySubmittedAttempt(sessionId);
       if (verified.success && verified.attempt) {
-        revalidatePath("/dashboard");
-        revalidatePath("/dashboard/study-book");
+        try {
+          revalidatePath("/dashboard");
+          revalidatePath("/dashboard/study-book");
+        } catch {
+          // Ignore cache purge failures
+        }
         return verified.attempt;
       }
       return { success: false, message: error?.message || "Failed to submit attempt." };
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/study-book");
+    try {
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/study-book");
+    } catch {
+      // Ignore cache purge failures
+    }
 
     return {
       success: true,
@@ -414,8 +430,12 @@ export async function submitAttempt(
     console.error("submitAttempt error:", err);
     const verified = await verifySubmittedAttempt(sessionId);
     if (verified.success && verified.attempt) {
-      revalidatePath("/dashboard");
-      revalidatePath("/dashboard/study-book");
+      try {
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/study-book");
+      } catch {
+        // Ignore cache purge failures
+      }
       return verified.attempt;
     }
     return {
@@ -425,7 +445,10 @@ export async function submitAttempt(
   }
 }
 
-export async function verifySubmittedAttempt(sessionId: string): Promise<{
+export async function verifySubmittedAttempt(
+  sessionId: string,
+  mockTestId?: string,
+): Promise<{
   success: boolean;
   attempt?: SubmitAttemptResult;
 }> {
@@ -440,12 +463,26 @@ export async function verifySubmittedAttempt(sessionId: string): Promise<{
     }
 
     for (let i = 0; i < 4; i++) {
-      const { data: attempt } = await supabase
+      let { data: attempt } = await supabase
         .from("test_attempts")
         .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
         .eq("session_id", sessionId)
         .eq("user_id", user.id)
         .maybeSingle();
+
+      if (!attempt && mockTestId && UUID_PATTERN.test(mockTestId)) {
+        const fallback = await supabase
+          .from("test_attempts")
+          .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+          .eq("mock_test_id", mockTestId)
+          .eq("user_id", user.id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (fallback.data) {
+          attempt = fallback.data;
+        }
+      }
 
       if (attempt) {
         return {

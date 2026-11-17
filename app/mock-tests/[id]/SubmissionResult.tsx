@@ -35,33 +35,43 @@ export function SubmissionResult({
     setResult(initialResult);
   }, [initialResult]);
 
+  const hasScore =
+    typeof result.score === "number" && !isNaN(result.score)
+      ? true
+      : typeof result.score === "string" && (result.score as string).trim() !== "" && !isNaN(Number(result.score));
+
   useEffect(() => {
     void exitFullscreenSafely();
-    if (mockTestId && (result.success || typeof result.score === "number")) {
+    if (mockTestId && (result.success || hasScore)) {
       addLocalAttemptedTestId(mockTestId);
       const current = getLocalRecentPractice();
       if (current && current.testId === mockTestId) {
         setLocalRecentPractice({
           ...current,
-          score: typeof result.score === "number" ? result.score : current.score,
+          score: hasScore ? Number(result.score) : current.score,
           totalMarks: typeof result.totalMarks === "number" ? result.totalMarks : current.totalMarks,
           submittedAt: new Date().toISOString(),
         });
       }
-    } else if (mockTestId && typeof result.score !== "number") {
+    } else if (mockTestId && !hasScore) {
+      let isMounted = true;
       const supabase = createClient();
-      void supabase.auth.getSession().then(({ data }) => {
-        if (!data?.session?.user) return;
-        void supabase
-          .from("test_attempts")
-          .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-          .eq("mock_test_id", mockTestId)
-          .eq("user_id", data.session.user.id)
-          .order("submitted_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-          .then(({ data: attempt }) => {
-            if (attempt && typeof attempt.score === "number") {
+      void supabase.auth.getSession().then(async ({ data }) => {
+        if (!data?.session?.user || !isMounted) return;
+        const userId = data.session.user.id;
+        for (let i = 0; i < 4; i++) {
+          if (!isMounted) break;
+          const { data: attempt } = await supabase
+            .from("test_attempts")
+            .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+            .eq("mock_test_id", mockTestId)
+            .eq("user_id", userId)
+            .order("submitted_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (attempt && typeof attempt.score !== "undefined" && !isNaN(Number(attempt.score))) {
+            if (isMounted) {
               setResult({
                 success: true,
                 message: "Attempt submitted successfully.",
@@ -74,16 +84,23 @@ export function SubmissionResult({
               });
               addLocalAttemptedTestId(mockTestId);
             }
-          });
+            break;
+          }
+          await new Promise((r) => setTimeout(r, (i + 1) * 300));
+        }
       });
+      return () => {
+        isMounted = false;
+      };
     }
-  }, [mockTestId, result]);
+  }, [hasScore, mockTestId, result]);
 
   const parsedTitle = parseMockTestTitle(title);
 
+  const numericScore = hasScore ? Number(result.score) : null;
   const percentage =
-    result.totalMarks && result.totalMarks > 0 && typeof result.score === "number"
-      ? Math.round((result.score / result.totalMarks) * 100)
+    result.totalMarks && result.totalMarks > 0 && numericScore !== null
+      ? Math.round((numericScore / result.totalMarks) * 100)
       : null;
 
   return (
@@ -98,7 +115,7 @@ export function SubmissionResult({
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
           {isTimeUp
             ? "Time expired • Automatic submission"
-            : (result.success || typeof result.score === "number" ? "Test submitted successfully" : "Answers safely recorded")}
+            : (result.success || hasScore ? "Test submitted successfully" : "Answers safely recorded")}
         </p>
 
         {parsedTitle.breadcrumb.length > 0 && (
@@ -127,11 +144,11 @@ export function SubmissionResult({
           </div>
         )}
 
-        {result.success || typeof result.score === "number" ? (
+        {result.success || hasScore ? (
           <>
             <div className="mt-6">
               <p className="text-4xl sm:text-5xl font-black text-slate-950">
-                {result.score}{" "}
+                {numericScore ?? result.score}{" "}
                 <span className="text-xl sm:text-2xl font-bold text-slate-400">/ {result.totalMarks}</span>
               </p>
               {percentage !== null && (

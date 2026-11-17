@@ -129,7 +129,7 @@ export default async function TakeMockTestPage({
   // 1. Check if an attempt record already exists in DB for this session
   let existingAttempt = attemptResult.data;
   if (!existingAttempt && (session.submitted_at || session.session_state === "submitted")) {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       await new Promise((r) => setTimeout(r, (i + 1) * 300));
       const retry = await supabase
         .from("test_attempts")
@@ -140,6 +140,20 @@ export default async function TakeMockTestPage({
       if (retry.data) {
         existingAttempt = retry.data;
         break;
+      }
+    }
+
+    if (!existingAttempt) {
+      const fallback = await supabase
+        .from("test_attempts")
+        .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+        .eq("mock_test_id", id)
+        .eq("user_id", user.id)
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (fallback.data) {
+        existingAttempt = fallback.data;
       }
     }
   }

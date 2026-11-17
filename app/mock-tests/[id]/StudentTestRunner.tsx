@@ -63,6 +63,11 @@ type Props = {
 };
 
 function secondsLeft(expiresAt: string) { return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)); }
+function hasValidScore(val: unknown): boolean {
+  if (typeof val === "number") return !isNaN(val);
+  if (typeof val === "string" && val.trim() !== "") return !isNaN(Number(val));
+  return false;
+}
 function displayTime(total: number) {
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60).toString().padStart(2, "0");
@@ -338,8 +343,15 @@ export function StudentTestRunner({
         });
         if (apiRes.ok) {
           const json = await apiRes.json().catch(() => null);
-          if (json?.success && typeof json.score === "number") {
-            res = json;
+          if (json?.success && hasValidScore(json.score)) {
+            res = {
+              ...json,
+              score: Number(json.score),
+              totalMarks: Number(json.totalMarks ?? 0),
+              correctAnswers: Number(json.correctAnswers ?? 0),
+              incorrectAnswers: Number(json.incorrectAnswers ?? 0),
+              unansweredQuestions: Number(json.unansweredQuestions ?? 0),
+            };
           }
         }
       } catch {
@@ -354,17 +366,25 @@ export function StudentTestRunner({
             requested_session_id: sessionId,
             submitted_answers: answers,
           });
-          const result = rpcRes.data?.[0];
-          if (!rpcRes.error && result && typeof result.score === "number") {
+          const rawResult = (Array.isArray(rpcRes.data) ? rpcRes.data[0] : rpcRes.data) as {
+            attempt_id?: string;
+            score?: number | string;
+            total_marks?: number | string;
+            correct_answers?: number | string;
+            incorrect_answers?: number | string;
+            unanswered_questions?: number | string;
+          } | undefined;
+
+          if (!rpcRes.error && rawResult && hasValidScore(rawResult.score)) {
             res = {
               success: true,
               message: "Attempt submitted successfully.",
-              attemptId: String(result.attempt_id),
-              score: Number(result.score ?? 0),
-              totalMarks: Number(result.total_marks ?? 0),
-              correctAnswers: Number(result.correct_answers ?? 0),
-              incorrectAnswers: Number(result.incorrect_answers ?? 0),
-              unansweredQuestions: Number(result.unanswered_questions ?? 0),
+              attemptId: String(rawResult.attempt_id),
+              score: Number(rawResult.score ?? 0),
+              totalMarks: Number(rawResult.total_marks ?? 0),
+              correctAnswers: Number(rawResult.correct_answers ?? 0),
+              incorrectAnswers: Number(rawResult.incorrect_answers ?? 0),
+              unansweredQuestions: Number(rawResult.unanswered_questions ?? 0),
             };
           }
         } catch {
@@ -376,49 +396,76 @@ export function StudentTestRunner({
       if (!res || !res.success) {
         try {
           const serverActionRes = await submitAttempt(sessionId, answers);
-          if (serverActionRes.success && typeof serverActionRes.score === "number") {
-            res = serverActionRes;
+          if (serverActionRes.success && hasValidScore(serverActionRes.score)) {
+            res = {
+              ...serverActionRes,
+              score: Number(serverActionRes.score),
+              totalMarks: Number(serverActionRes.totalMarks ?? 0),
+              correctAnswers: Number(serverActionRes.correctAnswers ?? 0),
+              incorrectAnswers: Number(serverActionRes.incorrectAnswers ?? 0),
+              unansweredQuestions: Number(serverActionRes.unansweredQuestions ?? 0),
+            };
           }
         } catch {
           // Server action failed (e.g. Next-Action error)
         }
       }
 
-      // 4. Verify existing attempt in Supabase if not yet resolved
+      // 4. Client-side polling of test_attempts directly (avoids premature "Your answers are saved" message)
       if (!res || !res.success) {
         try {
           const supabase = createClient();
-          const { data: attempt } = await supabase
-            .from("test_attempts")
-            .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
-            .eq("session_id", sessionId)
-            .maybeSingle();
+          for (let attemptIdx = 0; attemptIdx < 5; attemptIdx++) {
+            let { data: attempt } = await supabase
+              .from("test_attempts")
+              .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+              .eq("session_id", sessionId)
+              .maybeSingle();
 
-          if (attempt && typeof attempt.score === "number") {
-            res = {
-              success: true,
-              message: "Attempt submitted successfully.",
-              attemptId: String(attempt.id),
-              score: Number(attempt.score ?? 0),
-              totalMarks: Number(attempt.total_marks ?? 0),
-              correctAnswers: Number(attempt.correct_answers ?? 0),
-              incorrectAnswers: Number(attempt.incorrect_answers ?? 0),
-              unansweredQuestions: Number(attempt.unanswered_questions ?? 0),
-            };
+            if (!attempt && mockTestId) {
+              const { data: userAuth } = await supabase.auth.getSession();
+              if (userAuth?.session?.user?.id) {
+                const { data: latestAttempt } = await supabase
+                  .from("test_attempts")
+                  .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+                  .eq("mock_test_id", mockTestId)
+                  .eq("user_id", userAuth.session.user.id)
+                  .order("submitted_at", { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+                if (latestAttempt) attempt = latestAttempt;
+              }
+            }
+
+            if (attempt && hasValidScore(attempt.score)) {
+              res = {
+                success: true,
+                message: "Attempt submitted successfully.",
+                attemptId: String(attempt.id),
+                score: Number(attempt.score ?? 0),
+                totalMarks: Number(attempt.total_marks ?? 0),
+                correctAnswers: Number(attempt.correct_answers ?? 0),
+                incorrectAnswers: Number(attempt.incorrect_answers ?? 0),
+                unansweredQuestions: Number(attempt.unanswered_questions ?? 0),
+              };
+              break;
+            }
+            await new Promise((r) => setTimeout(r, (attemptIdx + 1) * 250));
           }
         } catch {
           // Proceed to final fallback check
         }
       }
 
+      // 5. Final fallback verification
       if (!res || !res.success) {
-        const verified = await verifySubmittedAttempt(sessionId);
-        if (verified.success && verified.attempt) {
+        const verified = await verifySubmittedAttempt(sessionId, mockTestId);
+        if (verified.success && verified.attempt && hasValidScore(verified.attempt.score)) {
           res = verified.attempt;
         }
       }
 
-      if (res && (res.success || typeof res.score === "number")) {
+      if (res && (res.success || hasValidScore(res.score))) {
         setSubmission(res);
       } else {
         setSubmission(
@@ -431,21 +478,43 @@ export function StudentTestRunner({
     } catch (err) {
       console.error("Error submitting test attempt:", err);
       try {
-        const verified = await verifySubmittedAttempt(sessionId);
-        if (verified.success && verified.attempt) {
+        const verified = await verifySubmittedAttempt(sessionId, mockTestId);
+        if (verified.success && verified.attempt && hasValidScore(verified.attempt.score)) {
           setSubmission(verified.attempt);
-        } else {
-          setSubmission({
-            success: false,
-            message: "Your answers are saved in your account. Check your result in the dashboard.",
-          });
+          return;
+        }
+        const supabase = createClient();
+        const { data: userAuth } = await supabase.auth.getSession();
+        if (userAuth?.session?.user?.id && mockTestId) {
+          const { data: latestAttempt } = await supabase
+            .from("test_attempts")
+            .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+            .eq("mock_test_id", mockTestId)
+            .eq("user_id", userAuth.session.user.id)
+            .order("submitted_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (latestAttempt && hasValidScore(latestAttempt.score)) {
+            setSubmission({
+              success: true,
+              message: "Attempt submitted successfully.",
+              attemptId: String(latestAttempt.id),
+              score: Number(latestAttempt.score ?? 0),
+              totalMarks: Number(latestAttempt.total_marks ?? 0),
+              correctAnswers: Number(latestAttempt.correct_answers ?? 0),
+              incorrectAnswers: Number(latestAttempt.incorrect_answers ?? 0),
+              unansweredQuestions: Number(latestAttempt.unanswered_questions ?? 0),
+            });
+            return;
+          }
         }
       } catch {
-        setSubmission({
-          success: false,
-          message: "Your answers are saved in your account. Check your result in the dashboard.",
-        });
+        // Fall through to safe notification
       }
+      setSubmission({
+        success: false,
+        message: "Your answers are saved in your account. Check your result in the dashboard.",
+      });
     } finally {
       setSubmitting(false);
       void exitFullscreenSafely();

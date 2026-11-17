@@ -67,19 +67,46 @@ export async function POST(
       submitted_answers: cleanedAnswers,
     });
 
-    const result = data?.[0];
-    if (error || !result) {
+    const result = (Array.isArray(data) ? data[0] : data) as {
+      attempt_id?: string;
+      score?: number | string;
+      total_marks?: number | string;
+      correct_answers?: number | string;
+      incorrect_answers?: number | string;
+      unanswered_questions?: number | string;
+    } | undefined;
+
+    if (error || !result || result.attempt_id === undefined) {
       // Check if attempt already exists (e.g. idempotent retry or race condition)
-      const { data: existing } = await supabase
+      let { data: existing } = await supabase
         .from("test_attempts")
         .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
         .eq("session_id", sessionId)
         .eq("user_id", user.id)
         .maybeSingle();
 
+      if (!existing) {
+        // Fallback: check by mock_test_id for the user's latest attempt
+        const fallback = await supabase
+          .from("test_attempts")
+          .select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions")
+          .eq("mock_test_id", testId)
+          .eq("user_id", user.id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (fallback.data) {
+          existing = fallback.data;
+        }
+      }
+
       if (existing) {
-        revalidatePath("/dashboard");
-        revalidatePath("/dashboard/study-book");
+        try {
+          revalidatePath("/dashboard");
+          revalidatePath("/dashboard/study-book");
+        } catch {
+          // Ignore cache purge failures
+        }
         return NextResponse.json({
           success: true,
           message: "Attempt submitted successfully.",
@@ -98,8 +125,12 @@ export async function POST(
       );
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/study-book");
+    try {
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/study-book");
+    } catch {
+      // Ignore cache purge failures
+    }
 
     return NextResponse.json({
       success: true,
