@@ -59,7 +59,6 @@ type Props = {
   stateCode?: string;
   initialPaused?: boolean;
   initialRemainingSeconds?: number;
-  isShuffled?: boolean;
 };
 
 function secondsLeft(expiresAt: string) { return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)); }
@@ -88,7 +87,6 @@ export function StudentTestRunner({
   stateCode,
   initialPaused = false,
   initialRemainingSeconds,
-  isShuffled = false,
 }: Props) {
   const [deadline, setDeadline] = useState(expiresAt);
   const [index, setIndex] = useState(() => {
@@ -833,16 +831,6 @@ export function StudentTestRunner({
                 <span className="text-slate-500 font-medium text-[10px] sm:text-xs">/{questions.length}</span>
               </h1>
             </button>
-
-            {isShuffled && (
-              <span
-                title="Shuffled Mode: Questions and options are randomized for this practice session."
-                className="hidden sm:inline-flex items-center gap-1 rounded-md bg-teal-50 border border-teal-200/90 text-teal-800 px-1.5 py-0.5 text-[10px] font-bold shrink-0"
-              >
-                <span>🔀</span>
-                <span>Shuffled</span>
-              </span>
-            )}
 
             <button
               type="button"

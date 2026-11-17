@@ -34,7 +34,6 @@ export function TestStartActions({
   const [clientSignedIn, setClientSignedIn] = useState(false);
   const [clientResumable, setClientResumable] = useState(false);
   const [clientHasAttempt, setClientHasAttempt] = useState(false);
-  const [userShuffleChoice, setUserShuffleChoice] = useState<boolean | null>(null);
   const [deviceId, setDeviceId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
@@ -42,7 +41,6 @@ export function TestStartActions({
   const signedIn = isLoggedIn || clientSignedIn;
   const resumable = hasResumableSession || clientResumable;
   const hasAttempt = hasPreviousAttempt || clientHasAttempt;
-  const isShuffled = userShuffleChoice !== null ? userShuffleChoice : hasAttempt;
 
   useEffect(() => {
     setDeviceId(getClientDeviceId());
@@ -129,15 +127,12 @@ export function TestStartActions({
   const handleStartAttempt = async (
     e: React.FormEvent<HTMLFormElement>,
     mode: "resume" | "restart",
-    shuffleOverride?: boolean,
   ) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     setIsSubmitting(true);
     setStartError(null);
-
-    const shouldShuffle = typeof shuffleOverride === "boolean" ? shuffleOverride : isShuffled;
 
     try {
       handleFullscreenOnStart();
@@ -146,7 +141,7 @@ export function TestStartActions({
       const res = await fetch(`/api/mock-tests/${testId}/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, deviceId: effectiveDeviceId, shuffle: shouldShuffle }),
+        body: JSON.stringify({ mode, deviceId: effectiveDeviceId }),
       });
 
       const data = await res.json().catch(() => null);
@@ -169,19 +164,12 @@ export function TestStartActions({
       let clientRpc = await supabase.rpc(functionName, {
         requested_mock_test_id: testId,
         requested_device_token: effectiveDeviceId || null,
-        requested_shuffle: shouldShuffle,
       });
 
       if (clientRpc.error) {
         clientRpc = await supabase.rpc(functionName, {
           requested_mock_test_id: testId,
-          requested_device_token: effectiveDeviceId || null,
         });
-        if (clientRpc.error) {
-          clientRpc = await supabase.rpc(functionName, {
-            requested_mock_test_id: testId,
-          });
-        }
       }
 
       const sessionId = clientRpc.data?.[0]?.session_id;
@@ -248,30 +236,11 @@ export function TestStartActions({
   }
 
   if (!resumable) {
-    const startAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId, isShuffled);
+    const startAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
 
     if (hasAttempt) {
       return (
         <form action={startAction} onSubmit={(e) => void handleStartAttempt(e, "resume")} className="mt-1">
-          <label className="flex items-start gap-3 p-3 rounded-2xl border border-teal-200/90 bg-teal-50/70 cursor-pointer select-none mb-3 transition hover:bg-teal-50 hover:border-teal-300">
-            <input
-              type="checkbox"
-              checked={isShuffled}
-              onChange={(e) => setUserShuffleChoice(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-teal-400 text-teal-700 focus:ring-teal-500 cursor-pointer"
-            />
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-bold text-teal-950 flex items-center gap-1.5 flex-wrap">
-                <span>🔀</span>
-                <span>Shuffle Questions & Options</span>
-                <span className="rounded-full bg-teal-200/90 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-teal-950">Recommended</span>
-              </span>
-              <span className="text-[11px] text-teal-900/90 leading-tight mt-1">
-                Jumbles question order and options so you test your knowledge without memory bias.
-              </span>
-            </div>
-          </label>
-
           <PendingSubmitButton
             onClick={handleFullscreenOnStart}
             pendingLabel="Preparing retake…"
@@ -283,8 +252,6 @@ export function TestStartActions({
                 <LoadingSpinner className="h-4 w-4 shrink-0 text-white" />
                 <span>Preparing retake…</span>
               </span>
-            ) : isShuffled ? (
-              <span>Retake test (Shuffled 🔀)</span>
             ) : (
               <span>Retake test</span>
             )}
@@ -300,24 +267,6 @@ export function TestStartActions({
 
     return (
       <form action={startAction} onSubmit={(e) => void handleStartAttempt(e, "resume")} className="mt-1">
-        <label className="flex items-start gap-3 p-2.5 rounded-2xl border border-slate-200 bg-slate-50/70 cursor-pointer select-none mb-3 transition hover:bg-slate-100/70">
-          <input
-            type="checkbox"
-            checked={isShuffled}
-            onChange={(e) => setUserShuffleChoice(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-500 cursor-pointer"
-          />
-          <div className="flex flex-col text-left">
-            <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <span>🔀</span>
-              <span>Shuffle Questions & Options</span>
-            </span>
-            <span className="text-[11px] text-slate-600 leading-tight mt-0.5">
-              Practice with randomized question and option order.
-            </span>
-          </div>
-        </label>
-
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}
           pendingLabel="Starting test…"
@@ -329,8 +278,6 @@ export function TestStartActions({
               <LoadingSpinner className="h-4 w-4 shrink-0 text-white" />
               <span>Starting test…</span>
             </span>
-          ) : isShuffled ? (
-            <span>Start test (Shuffled 🔀)</span>
           ) : (
             <span>Start test</span>
           )}
@@ -344,8 +291,8 @@ export function TestStartActions({
     );
   }
 
-  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId, false);
-  const restartAction = beginMockTest.bind(null, testId, testPath, "restart", effectiveDeviceId, isShuffled);
+  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
+  const restartAction = beginMockTest.bind(null, testId, testPath, "restart", effectiveDeviceId);
 
   return (
     <div className="mt-1 grid gap-2.5">

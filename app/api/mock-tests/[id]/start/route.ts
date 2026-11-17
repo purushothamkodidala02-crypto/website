@@ -33,7 +33,6 @@ export async function POST(
 
     const body = await request.json().catch(() => ({}));
     const mode = body?.mode === "restart" ? "restart" : "resume";
-    const shuffle = Boolean(body?.shuffle);
     const clientDeviceId =
       typeof body?.deviceId === "string" ? body.deviceId.trim() : undefined;
 
@@ -65,19 +64,12 @@ export async function POST(
     let rpcResult = await supabase.rpc(functionName, {
       requested_mock_test_id: mockTestId,
       requested_device_token: deviceToken,
-      requested_shuffle: shuffle,
     });
 
     if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error)) {
       rpcResult = await supabase.rpc(functionName, {
         requested_mock_test_id: mockTestId,
-        requested_device_token: deviceToken,
       });
-      if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error)) {
-        rpcResult = await supabase.rpc(functionName, {
-          requested_mock_test_id: mockTestId,
-        });
-      }
     }
 
     const { data, error } = rpcResult;
