@@ -186,8 +186,9 @@ export function TestStartActions({
 
       const sessionId = clientRpc.data?.[0]?.session_id;
       if (sessionId) {
+        const shuffleQuery = shouldShuffle ? "&shuffle=1" : "";
         window.location.assign(
-          `/mock-tests/${testId}/attempt?session=${encodeURIComponent(sessionId)}`,
+          `/mock-tests/${testId}/attempt?session=${encodeURIComponent(sessionId)}${shuffleQuery}`,
         );
         return;
       }

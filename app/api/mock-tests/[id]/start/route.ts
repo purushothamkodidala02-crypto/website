@@ -113,7 +113,8 @@ export async function POST(
       );
     }
 
-    const attemptUrl = `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}`;
+    const shuffleQuery = shuffle ? "&shuffle=1" : "";
+    const attemptUrl = `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}${shuffleQuery}`;
 
     return NextResponse.json({
       ok: true,

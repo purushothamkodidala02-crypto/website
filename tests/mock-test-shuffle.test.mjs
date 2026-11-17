@@ -111,21 +111,26 @@ test("Route handler /api/mock-tests/[id]/start parses shuffle parameter", () => 
   );
 });
 
-test("TakeMockTestPage fetches is_shuffled and passes it to StudentTestRunner", () => {
+test("TakeMockTestPage safely resolves isShuffled without breaking unmigrated databases and passes it to StudentTestRunner", () => {
   const attemptPagePath = path.resolve(
     process.cwd(),
     "app/mock-tests/[id]/attempt/page.tsx"
   );
   const code = fs.readFileSync(attemptPagePath, "utf-8");
 
-  assert.match(
-    code,
-    /select\([^)]*is_shuffled[^)]*\)/i,
-    "Attempt page must select is_shuffled from test_attempt_sessions"
+  // Verify we do NOT select is_shuffled in the direct SQL query to avoid breaking on databases where migration hasn't run yet
+  assert.ok(
+    !code.includes('.select("id, user_id, expires_at, session_state, submitted_at, remaining_seconds, is_shuffled")'),
+    "Must not blindly query unmigrated is_shuffled column to prevent redirect to dashboard error"
   );
   assert.match(
     code,
-    /isShuffled=\{Boolean\(session\.is_shuffled\)\}/i,
+    /query\.shuffle === "1" \|\| query\.shuffle === "true"/,
+    "Attempt page must safely parse shuffle parameter from searchParams"
+  );
+  assert.match(
+    code,
+    /isShuffled=\{isShuffled\}/i,
     "Attempt page must pass isShuffled prop to StudentTestRunner"
   );
 });
