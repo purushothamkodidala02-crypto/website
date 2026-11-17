@@ -34,6 +34,7 @@ export function TestStartActions({
   const [clientSignedIn, setClientSignedIn] = useState(false);
   const [clientResumable, setClientResumable] = useState(false);
   const [clientHasAttempt, setClientHasAttempt] = useState(false);
+  const [userShuffleChoice, setUserShuffleChoice] = useState<boolean | null>(null);
   const [deviceId, setDeviceId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export function TestStartActions({
   const signedIn = isLoggedIn || clientSignedIn;
   const resumable = hasResumableSession || clientResumable;
   const hasAttempt = hasPreviousAttempt || clientHasAttempt;
+  const isShuffled = hasAttempt ? (userShuffleChoice !== null ? userShuffleChoice : true) : false;
 
   useEffect(() => {
     setDeviceId(getClientDeviceId());
@@ -127,12 +129,15 @@ export function TestStartActions({
   const handleStartAttempt = async (
     e: React.FormEvent<HTMLFormElement>,
     mode: "resume" | "restart",
+    shuffleOverride?: boolean,
   ) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     setIsSubmitting(true);
     setStartError(null);
+
+    const shouldShuffle = typeof shuffleOverride === "boolean" ? shuffleOverride : isShuffled;
 
     try {
       handleFullscreenOnStart();
@@ -141,7 +146,7 @@ export function TestStartActions({
       const res = await fetch(`/api/mock-tests/${testId}/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, deviceId: effectiveDeviceId }),
+        body: JSON.stringify({ mode, deviceId: effectiveDeviceId, shuffle: shouldShuffle }),
       });
 
       const data = await res.json().catch(() => null);
@@ -174,8 +179,9 @@ export function TestStartActions({
 
       const sessionId = clientRpc.data?.[0]?.session_id;
       if (sessionId) {
+        const shuffleQuery = shouldShuffle ? "&shuffle=1" : "";
         window.location.assign(
-          `/mock-tests/${testId}/attempt?session=${encodeURIComponent(sessionId)}`,
+          `/mock-tests/${testId}/attempt?session=${encodeURIComponent(sessionId)}${shuffleQuery}`,
         );
         return;
       }
@@ -235,12 +241,33 @@ export function TestStartActions({
     );
   }
 
+  const shuffleToggle = hasAttempt ? (
+    <div className="mb-2">
+      <label className="flex items-center justify-between gap-3 cursor-pointer select-none rounded-xl border border-slate-200/90 bg-slate-50/80 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100/90 transition shadow-2xs">
+        <span className="flex items-center gap-2 min-w-0">
+          <span className="text-sm">🔀</span>
+          <span className="truncate">Shuffle Questions & Options</span>
+          <span className="shrink-0 rounded-md bg-teal-100 px-1.5 py-0.5 text-[10px] font-bold text-teal-800">
+            Recommended
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          checked={isShuffled}
+          onChange={(e) => setUserShuffleChoice(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600 cursor-pointer"
+        />
+      </label>
+    </div>
+  ) : null;
+
   if (!resumable) {
-    const startAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
+    const startAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId, isShuffled);
 
     if (hasAttempt) {
       return (
         <form action={startAction} onSubmit={(e) => void handleStartAttempt(e, "resume")} className="mt-1">
+          {shuffleToggle}
           <PendingSubmitButton
             onClick={handleFullscreenOnStart}
             pendingLabel="Preparing retake…"
@@ -252,6 +279,8 @@ export function TestStartActions({
                 <LoadingSpinner className="h-4 w-4 shrink-0 text-white" />
                 <span>Preparing retake…</span>
               </span>
+            ) : isShuffled ? (
+              <span>Retake test (Shuffled 🔀)</span>
             ) : (
               <span>Retake test</span>
             )}
@@ -291,11 +320,12 @@ export function TestStartActions({
     );
   }
 
-  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId);
-  const restartAction = beginMockTest.bind(null, testId, testPath, "restart", effectiveDeviceId);
+  const resumeAction = beginMockTest.bind(null, testId, testPath, "resume", effectiveDeviceId, isShuffled);
+  const restartAction = beginMockTest.bind(null, testId, testPath, "restart", effectiveDeviceId, isShuffled);
 
   return (
     <div className="mt-1 grid gap-2.5">
+      {shuffleToggle}
       <form action={resumeAction} onSubmit={(e) => void handleStartAttempt(e, "resume")}>
         <PendingSubmitButton
           onClick={handleFullscreenOnStart}

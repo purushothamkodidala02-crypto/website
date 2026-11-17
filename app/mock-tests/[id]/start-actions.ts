@@ -34,6 +34,7 @@ export async function beginMockTest(
   publicPath: string,
   mode: "resume" | "restart",
   clientDeviceId?: string,
+  shuffle: boolean = false,
 ) {
   try {
     if (!UUID_PATTERN.test(mockTestId)) redirect("/mock-tests");
@@ -103,8 +104,9 @@ export async function beginMockTest(
       }
     }
 
+    const shuffleQuery = shuffle ? "&shuffle=1" : "";
     redirect(
-      `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}`,
+      `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}${shuffleQuery}`,
     );
   } catch (err) {
     if (isRedirectError(err)) {

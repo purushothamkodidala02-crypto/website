@@ -33,6 +33,7 @@ export async function POST(
 
     const body = await request.json().catch(() => ({}));
     const mode = body?.mode === "restart" ? "restart" : "resume";
+    const shuffle = Boolean(body?.shuffle);
     const clientDeviceId =
       typeof body?.deviceId === "string" ? body.deviceId.trim() : undefined;
 
@@ -105,7 +106,8 @@ export async function POST(
       );
     }
 
-    const attemptUrl = `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}`;
+    const shuffleQuery = shuffle ? "&shuffle=1" : "";
+    const attemptUrl = `/mock-tests/${mockTestId}/attempt?session=${encodeURIComponent(session.session_id)}${shuffleQuery}`;
 
     return NextResponse.json({
       ok: true,

@@ -56,11 +56,12 @@ export default async function TakeMockTestPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ session?: string }>;
+  searchParams: Promise<{ session?: string; shuffle?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const requestedSessionId = typeof query.session === "string" ? query.session : "";
   const isValidSession = /^[0-9a-f-]{36}$/i.test(requestedSessionId);
+  const isShuffled = query.shuffle === "1" || query.shuffle === "true";
 
   const supabase = await createClient();
 
@@ -268,6 +269,7 @@ export default async function TakeMockTestPage({
       paperName={publicContext.paper.name}
       subjectName={publicContext.subject?.name}
       stateCode={publicContext.state.code}
+      isShuffled={isShuffled}
     />
   );
 }
