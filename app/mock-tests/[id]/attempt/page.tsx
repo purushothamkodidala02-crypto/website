@@ -74,7 +74,7 @@ export default async function TakeMockTestPage({
     return getMockTestPublicContextById(id);
   });
   const sessionPromise = isValidSession
-    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at, remaining_seconds").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
+    ? supabase.from("test_attempt_sessions").select("id, user_id, expires_at, session_state, submitted_at, remaining_seconds, is_shuffled").eq("id", requestedSessionId).eq("mock_test_id", id).maybeSingle()
     : Promise.resolve({ data: null });
   const attemptPromise = isValidSession
     ? supabase.from("test_attempts").select("id, score, total_marks, correct_answers, incorrect_answers, unanswered_questions").eq("session_id", requestedSessionId).maybeSingle()
@@ -268,6 +268,7 @@ export default async function TakeMockTestPage({
       paperName={publicContext.paper.name}
       subjectName={publicContext.subject?.name}
       stateCode={publicContext.state.code}
+      isShuffled={Boolean(session.is_shuffled)}
     />
   );
 }

@@ -34,6 +34,7 @@ export async function beginMockTest(
   publicPath: string,
   mode: "resume" | "restart",
   clientDeviceId?: string,
+  shuffle: boolean = false,
 ) {
   try {
     if (!UUID_PATTERN.test(mockTestId)) redirect("/mock-tests");
@@ -56,16 +57,23 @@ export async function beginMockTest(
         ? "restart_mock_test_session"
         : "start_mock_test_session";
 
-    // Try with requested_device_token first, fallback gracefully to legacy signature
+    // Try with requested_shuffle + requested_device_token first, fallback gracefully
     let rpcResult = await supabase.rpc(functionName, {
       requested_mock_test_id: mockTestId,
       requested_device_token: deviceToken ?? null,
+      requested_shuffle: shuffle,
     });
 
     if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error)) {
       rpcResult = await supabase.rpc(functionName, {
         requested_mock_test_id: mockTestId,
+        requested_device_token: deviceToken ?? null,
       });
+      if (rpcResult.error && isRpcSignatureMismatch(rpcResult.error)) {
+        rpcResult = await supabase.rpc(functionName, {
+          requested_mock_test_id: mockTestId,
+        });
+      }
     }
 
     const { data, error } = rpcResult;
