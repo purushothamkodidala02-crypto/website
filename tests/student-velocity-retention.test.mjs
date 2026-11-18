@@ -30,7 +30,7 @@ test("Dashboard provides daily prep streak, practice quiz CTA, and exam cut-off 
 
   // Practice quiz CTAs
   assert.match(dashboard, /\/dashboard\/study-book\?view=mistakes&mode=practice/);
-  assert.match(dashboard, /Practice Quiz \(రివిజన్ క్విజ్\)/);
+  assert.match(dashboard, /Practice Quiz/);
   assert.match(dashboard, /\/dashboard\/study-book\?view=bookmarks&mode=practice/);
 
   // Exam Readiness & Cut-off Predictor

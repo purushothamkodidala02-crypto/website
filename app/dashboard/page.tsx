@@ -416,7 +416,7 @@ export default async function Dashboard({
                       className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-1.5 text-xs font-black text-white shadow-2xs hover:bg-red-700 active:scale-95 transition"
                     >
                       <span>🎯</span>
-                      <span>Practice Quiz (రివిజన్ క్విజ్)</span>
+                      <span>Practice Quiz</span>
                     </Link>
                   )}
                 </div>
