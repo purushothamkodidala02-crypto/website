@@ -261,6 +261,7 @@ function standardQuestions(examName: string): NewFaq[] {
     { question: `Where can I take ${examName} mock tests?`, answer: `Choose a paper on the ${examName} page, open an available test, and start practising on Varadhi Prep.`, display_order: 0 },
     { question: `How many ${examName} mock tests are available?`, answer: "Published mock tests appear on the exam page automatically. More tests will be added as preparation content is released.", display_order: 1 },
     { question: `Can I review my ${examName} answers?`, answer: "Yes. After submitting a test, students can review their score, selected answers, correct answers, and available explanations from the student dashboard.", display_order: 2 },
+    { question: `Can I shuffle questions and options when retaking ${examName} mock tests?`, answer: "Yes. Varadhi Prep features a built-in Shuffled Mode for retakes that randomizes both questions and multiple-choice options, helping you practice true recall without relying on pattern memorization.", display_order: 3 },
   ];
 }
 
