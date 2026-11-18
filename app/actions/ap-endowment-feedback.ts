@@ -83,8 +83,10 @@ export async function checkApEndowmentFeedbackEligibilityAction(): Promise<ApEnd
       return { eligible: false, reason: "already_submitted" };
     }
 
-    // 3. Check if user has attempted the AP Endowment Officer exam
-    // A student qualifies if they have at least 1 attempt on any AP Endowment Officer mock test
+    // 3. Check if user has attempted or attended the AP Endowment Officer exam
+    // A student qualifies if they have at least 1 attempt or active session on any AP Endowment Officer mock test
+    let hasAttempt = false;
+
     const { data: attempts, error: attemptsError } = await supabase
       .from("test_attempts")
       .select("id, mock_tests!inner(id, title)")
@@ -92,7 +94,47 @@ export async function checkApEndowmentFeedbackEligibilityAction(): Promise<ApEnd
       .ilike("mock_tests.title", "%Endowment%")
       .limit(1);
 
-    if (attemptsError || !attempts || attempts.length === 0) {
+    if (!attemptsError && attempts && attempts.length > 0) {
+      hasAttempt = true;
+    } else {
+      const { data: sessions, error: sessionsError } = await supabase
+        .from("test_attempt_sessions")
+        .select("id, mock_tests!inner(id, title)")
+        .eq("user_id", user.id)
+        .ilike("mock_tests.title", "%Endowment%")
+        .limit(1);
+
+      if (!sessionsError && sessions && sessions.length > 0) {
+        hasAttempt = true;
+      }
+    }
+
+    if (!hasAttempt) {
+      // Also check Enrollment in title as fallback
+      const { data: enrollmentAttempts } = await supabase
+        .from("test_attempts")
+        .select("id, mock_tests!inner(id, title)")
+        .eq("user_id", user.id)
+        .ilike("mock_tests.title", "%Enrollment%")
+        .limit(1);
+
+      if (enrollmentAttempts && enrollmentAttempts.length > 0) {
+        hasAttempt = true;
+      } else {
+        const { data: enrollmentSessions } = await supabase
+          .from("test_attempt_sessions")
+          .select("id, mock_tests!inner(id, title)")
+          .eq("user_id", user.id)
+          .ilike("mock_tests.title", "%Enrollment%")
+          .limit(1);
+
+        if (enrollmentSessions && enrollmentSessions.length > 0) {
+          hasAttempt = true;
+        }
+      }
+    }
+
+    if (!hasAttempt) {
       return { eligible: false, reason: "no_endowment_attempts" };
     }
 
@@ -205,6 +247,21 @@ export async function submitApEndowmentFeedbackAction(
           title: "AP Endowment Officer Mock Test Priority",
           description: "Student feedback on Paper 1 and Paper 2 subjects to prioritize for upcoming mock tests.",
           is_active: false,
+          settings: {
+            displayMode: "both",
+            targetAudience: "ap_endowment",
+            triggerDelaySeconds: 2,
+            reappearIfSubmitted: false,
+            submittedIntervalDays: 7,
+            reappearIfSkipped: true,
+            maxSkipAppearances: 2,
+            skipIntervalHours: 24,
+            allowAnonymous: false,
+            requirePhone: "optional",
+            responseQuota: null,
+            expiryDate: null,
+            showProgressBar: true,
+          },
         })
         .select("id")
         .maybeSingle();
@@ -614,6 +671,21 @@ export async function getOrCreateApEndowmentSurveyIdAction(): Promise<string | n
         title: "AP Endowment Officer — Subject Priority Responses",
         description: "Student feedback on Paper 1 and Paper 2 subjects to prioritize for upcoming mock tests.",
         is_active: true,
+        settings: {
+          displayMode: "both",
+          targetAudience: "ap_endowment",
+          triggerDelaySeconds: 2,
+          reappearIfSubmitted: false,
+          submittedIntervalDays: 7,
+          reappearIfSkipped: true,
+          maxSkipAppearances: 2,
+          skipIntervalHours: 24,
+          allowAnonymous: false,
+          requirePhone: "optional",
+          responseQuota: null,
+          expiryDate: null,
+          showProgressBar: true,
+        },
       })
       .select("id")
       .maybeSingle();

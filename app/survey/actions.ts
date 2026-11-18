@@ -1,3 +1,3 @@
 "use server";
 
-export { submitDynamicSurvey, getActiveSurvey, getSurveyById } from "@/app/actions/surveys";
+export { submitDynamicSurvey, getActiveSurvey, getSurveyById, checkSurveyEligibilityAction } from "@/app/actions/surveys";

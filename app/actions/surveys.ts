@@ -127,6 +127,203 @@ export async function submitDynamicSurvey(
   }
 }
 
+export type SurveyEligibilityResult = {
+  eligible: boolean;
+  reason?: "not_logged_in" | "no_exam_attempts" | "already_submitted" | "inactive" | "expired" | "not_targeted";
+  isApEndowment?: boolean;
+};
+
+export async function checkSurveyEligibilityAction(
+  surveyId: string
+): Promise<SurveyEligibilityResult> {
+  try {
+    const dbClient = await getSupabaseServerClient();
+    const { data: survey, error } = await dbClient
+      .from("dynamic_surveys")
+      .select("id, title, description, is_active, settings")
+      .eq("id", surveyId)
+      .maybeSingle();
+
+    if (error || !survey || !survey.is_active) {
+      return { eligible: false, reason: "inactive" };
+    }
+
+    const settings = survey.settings as SurveySettings | null | undefined;
+
+    // Check expiry
+    if (settings?.expiryDate) {
+      const exp = new Date(settings.expiryDate).getTime();
+      if (!isNaN(exp) && Date.now() > exp) {
+        return { eligible: false, reason: "expired" };
+      }
+    }
+
+    // Determine target audience
+    const isApEndowment =
+      settings?.targetAudience === "ap_endowment" ||
+      /endowment|enrollment/i.test(survey.title || "") ||
+      /endowment|enrollment/i.test(survey.description || "");
+
+    const targetAudience = settings?.targetAudience || (isApEndowment ? "ap_endowment" : "all");
+
+    // Fetch authenticated user
+    const userClient = await createClient();
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
+
+    // Check AP Endowment / Enrollment audience:
+    // Form will ONLY appear to those who attended the enrollment/endowment exam
+    if (isApEndowment || targetAudience === "ap_endowment") {
+      if (!user) {
+        return { eligible: false, reason: "not_logged_in", isApEndowment: true };
+      }
+
+      // Check if user already submitted in dynamic_survey_responses or ap_endowment_feedback
+      const { data: existingResp } = await dbClient
+        .from("dynamic_survey_responses")
+        .select("id")
+        .eq("survey_id", surveyId)
+        .eq("user_id", user.id)
+        .limit(1);
+
+      if (existingResp && existingResp.length > 0) {
+        return { eligible: false, reason: "already_submitted", isApEndowment: true };
+      }
+
+      const { data: existingFeedback } = await dbClient
+        .from("ap_endowment_feedback")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1);
+
+      if (existingFeedback && existingFeedback.length > 0) {
+        return { eligible: false, reason: "already_submitted", isApEndowment: true };
+      }
+
+      // Check if user attended the AP Endowment / Enrollment exam
+      let hasAttended = false;
+
+      // 1. Completed test attempts
+      const { data: attempts, error: attemptsError } = await dbClient
+        .from("test_attempts")
+        .select("id, mock_tests!inner(id, title)")
+        .eq("user_id", user.id)
+        .ilike("mock_tests.title", "%Endowment%")
+        .limit(1);
+
+      if (!attemptsError && attempts && attempts.length > 0) {
+        hasAttended = true;
+      } else {
+        // 2. Active or historical test attempt sessions (attended exam)
+        const { data: sessions, error: sessionsError } = await dbClient
+          .from("test_attempt_sessions")
+          .select("id, mock_tests!inner(id, title)")
+          .eq("user_id", user.id)
+          .ilike("mock_tests.title", "%Endowment%")
+          .limit(1);
+
+        if (!sessionsError && sessions && sessions.length > 0) {
+          hasAttended = true;
+        }
+      }
+
+      // Fallback check for Enrollment in test title
+      if (!hasAttended) {
+        const { data: enrollmentAttempts } = await dbClient
+          .from("test_attempts")
+          .select("id, mock_tests!inner(id, title)")
+          .eq("user_id", user.id)
+          .ilike("mock_tests.title", "%Enrollment%")
+          .limit(1);
+
+        if (enrollmentAttempts && enrollmentAttempts.length > 0) {
+          hasAttended = true;
+        } else {
+          const { data: enrollmentSessions } = await dbClient
+            .from("test_attempt_sessions")
+            .select("id, mock_tests!inner(id, title)")
+            .eq("user_id", user.id)
+            .ilike("mock_tests.title", "%Enrollment%")
+            .limit(1);
+
+          if (enrollmentSessions && enrollmentSessions.length > 0) {
+            hasAttended = true;
+          }
+        }
+      }
+
+      if (!hasAttended) {
+        return { eligible: false, reason: "no_exam_attempts", isApEndowment: true };
+      }
+
+      return { eligible: true, isApEndowment: true };
+    }
+
+    // Other targeted exam audiences
+    if (targetAudience === "tg_police") {
+      if (!user) return { eligible: false, reason: "not_logged_in" };
+      const { data: policeAttempts } = await dbClient
+        .from("test_attempts")
+        .select("id, mock_tests!inner(id, title)")
+        .eq("user_id", user.id)
+        .or("mock_tests.title.ilike.%Police%,mock_tests.title.ilike.%Constable%")
+        .limit(1);
+
+      if (!policeAttempts || policeAttempts.length === 0) {
+        return { eligible: false, reason: "no_exam_attempts" };
+      }
+    } else if (targetAudience === "appsc") {
+      if (!user) return { eligible: false, reason: "not_logged_in" };
+      const { data: appscAttempts } = await dbClient
+        .from("test_attempts")
+        .select("id, mock_tests!inner(id, title)")
+        .eq("user_id", user.id)
+        .or("mock_tests.title.ilike.%APPSC%,mock_tests.title.ilike.%Andhra%")
+        .limit(1);
+
+      if (!appscAttempts || appscAttempts.length === 0) {
+        return { eligible: false, reason: "no_exam_attempts" };
+      }
+    } else if (targetAudience === "tgpsc") {
+      if (!user) return { eligible: false, reason: "not_logged_in" };
+      const { data: tgpscAttempts } = await dbClient
+        .from("test_attempts")
+        .select("id, mock_tests!inner(id, title)")
+        .eq("user_id", user.id)
+        .or("mock_tests.title.ilike.%TGPSC%,mock_tests.title.ilike.%TSPSC%,mock_tests.title.ilike.%Telangana%")
+        .limit(1);
+
+      if (!tgpscAttempts || tgpscAttempts.length === 0) {
+        return { eligible: false, reason: "no_exam_attempts" };
+      }
+    }
+
+    // Generic "all" audience
+    if (!settings?.allowAnonymous && !user) {
+      return { eligible: false, reason: "not_logged_in" };
+    }
+
+    if (user) {
+      const { data: existingResp } = await dbClient
+        .from("dynamic_survey_responses")
+        .select("id")
+        .eq("survey_id", surveyId)
+        .eq("user_id", user.id)
+        .limit(1);
+
+      if (existingResp && existingResp.length > 0 && !settings?.reappearIfSubmitted) {
+        return { eligible: false, reason: "already_submitted" };
+      }
+    }
+
+    return { eligible: true };
+  } catch (err) {
+    console.error("Error checking survey eligibility:", err);
+    return { eligible: false, reason: "inactive" };
+  }
+}
+
 export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
   try {
     const dbClient = createPublicClient();

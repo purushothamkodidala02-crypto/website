@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { submitDynamicSurvey, type DynamicSurveyData } from "@/app/actions/surveys";
+import {
+  submitDynamicSurvey,
+  checkSurveyEligibilityAction,
+  type DynamicSurveyData,
+} from "@/app/actions/surveys";
 import type { SurveySettings } from "@/lib/surveys/survey-settings";
 
 export type SurveyQuestion = {
@@ -67,27 +71,53 @@ export function SurveyPopup({ survey }: { survey: DynamicSurveyData | ActiveSurv
       if (hoursPassed < intervalHours) return;
     }
 
-    // 4. Session & Audience check
+    // 4. Session & Audience Eligibility Check
+    // AP Enrollment / Endowment surveys only appear to users who attended the enrollment exam
     const delayMs = Math.max(500, ((settings?.triggerDelaySeconds ?? 2) * 1000));
     let timer: NodeJS.Timeout;
+    let cancelled = false;
 
-    import("@/lib/supabase/client").then(({ createClient }) => {
-      const supabase = createClient();
-      supabase.auth.getSession().then(({ data }) => {
-        const user = data.session?.user;
-        // If anonymous not allowed and not logged in, do not show
-        if (settings && !settings.allowAnonymous && !user) {
+    const isApEndowment =
+      settings?.targetAudience === "ap_endowment" ||
+      /endowment|enrollment/i.test(survey.title || "") ||
+      /endowment|enrollment/i.test(survey.description || "");
+
+    checkSurveyEligibilityAction(survey.id)
+      .then((eligibility) => {
+        if (cancelled) return;
+
+        if (!eligibility.eligible) {
+          if (eligibility.reason === "already_submitted") {
+            localStorage.setItem(`survey_completed_${survey.id}`, "true");
+            localStorage.setItem(`survey_completed_at_${survey.id}`, String(Date.now()));
+          }
           return;
         }
 
-        // If logged in or anonymous allowed, trigger modal
+        // For AP Endowment surveys: if ApEndowmentPriorityModal is mounted/open in DOM, avoid duplicate popups
+        if (isApEndowment && typeof document !== "undefined") {
+          if (document.getElementById("ap-eo-feedback-title")) {
+            return;
+          }
+        }
+
         timer = setTimeout(() => {
-          setIsOpen(true);
+          if (!cancelled) {
+            if (isApEndowment && typeof document !== "undefined") {
+              if (document.getElementById("ap-eo-feedback-title")) {
+                return;
+              }
+            }
+            setIsOpen(true);
+          }
         }, delayMs);
+      })
+      .catch((err) => {
+        console.warn("Survey eligibility check error:", err);
       });
-    });
 
     return () => {
+      cancelled = true;
       if (timer) clearTimeout(timer);
     };
   }, [survey]);
