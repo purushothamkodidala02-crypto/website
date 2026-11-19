@@ -47,7 +47,7 @@ export async function initiateCashfreeGrowthContribution(
       (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
     const origin = host ? `${proto}://${host}` : "";
     const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
-    const returnPath = `/help-us-to-grow?status=thank_you&order_id=${merchantOrderId}${isLocal ? "&preview=true" : ""}`;
+    const returnPath = `/help-us-to-grow?order_id=${merchantOrderId}${isLocal ? "&preview=true" : ""}`;
     const returnUrl = origin ? `${origin}${returnPath}` : absoluteUrl(returnPath);
 
     const result = await createCashfreeOrder({

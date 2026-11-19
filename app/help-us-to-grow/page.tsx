@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { CashfreeContributionBox } from "@/components/growth/CashfreeContributionBox";
+import { getCashfreeOrderStatus } from "@/lib/payments/cashfree";
 import { getGrowthSettings } from "@/lib/growth-settings";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl } from "@/lib/site";
@@ -22,10 +23,28 @@ export const metadata: Metadata = {
 export default async function HelpUsToGrowPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; preview?: string }>;
+  searchParams: Promise<{ status?: string; preview?: string; order_id?: string }>;
 }) {
   const query = await searchParams;
-  const isThankYou = query.status === "thank_you";
+
+  let isVerifiedPaid = false;
+  let isPaymentCancelled = false;
+
+  // Real-time server verification: Only show Thank You if Cashfree actually marks order as PAID
+  if (query.order_id) {
+    try {
+      const orderStatus = await getCashfreeOrderStatus(query.order_id);
+      if (orderStatus.paid) {
+        isVerifiedPaid = true;
+      } else {
+        // Order exists but is ACTIVE (abandoned/dropped), CANCELLED, or FAILED
+        isPaymentCancelled = true;
+      }
+    } catch {
+      // If unable to verify status or order does not exist
+      isPaymentCancelled = true;
+    }
+  }
 
   const [settings, supabase] = await Promise.all([
     getGrowthSettings(),
@@ -52,8 +71,8 @@ export default async function HelpUsToGrowPage({
     if (profile?.role === "admin") isAdmin = true;
   }
 
-  // Hide mode: If disabled and not previewing or returning from payment, regular candidates and casual visitors receive 404
-  const isPreview = query.preview === "true" || isAdmin || isThankYou;
+  // Hide mode: If disabled and not previewing or returning from payment, regular candidates receive 404
+  const isPreview = query.preview === "true" || isAdmin || isVerifiedPaid || isPaymentCancelled;
   if (!settings.enabled && !isPreview) {
     notFound();
   }
@@ -85,12 +104,22 @@ export default async function HelpUsToGrowPage({
           </div>
         )}
 
-        {/* Thank You Banner (if redirected after payment) */}
-        {isThankYou && (
+        {/* Thank You Banner (ONLY if payment is verified with Cashfree as PAID) */}
+        {isVerifiedPaid && (
           <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
             <h2 className="text-base font-black">Thank You for Your Support!</h2>
             <p className="mt-1 text-xs sm:text-sm text-emerald-800">
               Your contribution directly powers our cloud servers and bilingual question verification. We are grateful for your help in keeping Varadhi Prep open to all aspirants.
+            </p>
+          </div>
+        )}
+
+        {/* Cancelled / Incomplete Notice (if user cancelled or payment was not completed) */}
+        {isPaymentCancelled && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 text-xs sm:text-sm">
+            <p className="font-bold">Contribution Not Completed</p>
+            <p className="mt-0.5 text-amber-800">
+              Your payment was cancelled or was not completed. You have not been charged. If this was accidental, you can try again below.
             </p>
           </div>
         )}

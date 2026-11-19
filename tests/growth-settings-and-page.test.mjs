@@ -104,3 +104,17 @@ test("dashboard: integrates SupportPromptModal conditionally with server-verifie
   assert.ok(dashContent.includes("getGrowthSettings"), "dashboard must fetch getGrowthSettings");
   assert.ok(dashContent.includes("completedAttempts={totalAttempts}"), "dashboard must pass server-verified totalAttempts");
 });
+
+test("growth payment: thank you banner requires verified paid status, never shown on cancellation", () => {
+  const actionPath = path.resolve("app/actions/growth-payment.ts");
+  const actionContent = fs.readFileSync(actionPath, "utf8");
+  assert.ok(!actionContent.includes("status=thank_you"), "returnPath must not assume thank_you status in action");
+  assert.ok(actionContent.includes("order_id="), "returnPath must pass order_id for server verification");
+
+  const pagePath = path.resolve("app/help-us-to-grow/page.tsx");
+  const pageContent = fs.readFileSync(pagePath, "utf8");
+  assert.ok(pageContent.includes("getCashfreeOrderStatus"), "page must verify order status via Cashfree API");
+  assert.ok(pageContent.includes("isVerifiedPaid"), "thank you banner must be gated on isVerifiedPaid");
+  assert.ok(pageContent.includes("isPaymentCancelled"), "page must track isPaymentCancelled");
+  assert.ok(!pageContent.includes("isThankYou &&"), "must not blindly use unverified isThankYou flag");
+});
