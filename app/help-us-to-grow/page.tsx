@@ -114,13 +114,42 @@ export default async function HelpUsToGrowPage({
           </div>
         )}
 
-        {/* Cancelled / Incomplete Notice (if user cancelled or payment was not completed) */}
+        {/* Cancelled / Incomplete Notice (Option 3 with Money Debited Reassurance) */}
         {isPaymentCancelled && (
-          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 text-xs sm:text-sm">
-            <p className="font-bold">Contribution Not Completed</p>
-            <p className="mt-0.5 text-amber-800">
-              Your payment was cancelled or was not completed. You have not been charged. If this was accidental, you can try again below.
-            </p>
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950 text-xs sm:text-sm">
+            <div>
+              <p className="font-bold text-sm sm:text-base text-amber-900">
+                No Worries! Contribution Incomplete
+              </p>
+              <p className="mt-1 text-amber-800 leading-relaxed">
+                It looks like the checkout was closed or cancelled before completion. If no money was deducted, feel free to try again below or continue preparing on Varadhi Prep!
+              </p>
+            </div>
+
+            {/* In case money was debited from bank / UPI */}
+            <div className="mt-3.5 pt-3 border-t border-amber-200/80 text-[11px] sm:text-xs text-amber-900 leading-relaxed">
+              <p className="font-semibold text-amber-950">
+                Did money get deducted from your bank or UPI?
+              </p>
+              <p className="mt-0.5 text-amber-800">
+                Don&apos;t worry! When an interrupted payment occurs, your bank or UPI network automatically reverses the amount back to your account within 2–3 business days.
+              </p>
+              {query.order_id && (
+                <p className="mt-1.5 text-amber-900">
+                  If the amount is not reversed, or if you need assistance, please email{" "}
+                  <a
+                    href={`mailto:support@varadhiprep.in?subject=${encodeURIComponent(`Payment Support - Order ${query.order_id}`)}`}
+                    className="font-bold underline text-amber-950 hover:text-amber-800"
+                  >
+                    support@varadhiprep.in
+                  </a>{" "}
+                  with your Reference Order ID:{" "}
+                  <code className="font-mono font-bold bg-amber-100/90 px-1.5 py-0.5 rounded text-amber-950">
+                    {query.order_id}
+                  </code>
+                </p>
+              )}
+            </div>
           </div>
         )}
 
