@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getGrowthSettings } from "@/lib/growth-settings";
-import { GrowthSettingsForm } from "./GrowthSettingsForm";
+import { getGrowthInteractions } from "./actions";
+import { AdminGrowthWorkspace } from "./AdminGrowthWorkspace";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminGrowthSettingsPage() {
-  const settings = await getGrowthSettings();
+  const [settings, interactions] = await Promise.all([
+    getGrowthSettings(),
+    getGrowthInteractions(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -26,10 +30,10 @@ export default async function AdminGrowthSettingsPage() {
             </p>
           </div>
           <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
-            Help Us Grow Pop-up Controls
+            Help Us Grow Pop-up Controls &amp; Analytics
           </h1>
           <p className="mt-1 text-sm text-slate-600 max-w-3xl">
-            Configure targeting rules, completion milestones (e.g. 5+ mock tests), re-appearance cooldowns, and messaging for the candidate support prompt.
+            Configure targeting rules, completion milestones, and view student interaction analytics (who saw it, what buttons they clicked, and click counts).
           </p>
         </div>
 
@@ -44,7 +48,10 @@ export default async function AdminGrowthSettingsPage() {
         </div>
       </div>
 
-      <GrowthSettingsForm initialSettings={settings} />
+      <AdminGrowthWorkspace
+        initialSettings={settings}
+        interactions={interactions}
+      />
     </div>
   );
 }

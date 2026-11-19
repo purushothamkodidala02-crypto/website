@@ -49,6 +49,9 @@ export type Filters = {
 
 export type MockTestsPageProps = {
   searchParams: Promise<Filters>;
+};
+
+export type InternalMockTestsPageProps = MockTestsPageProps & {
   canonicalPath?: string;
 };
 
@@ -139,7 +142,16 @@ function testTypeUrl(
   return withQuery(path, { type });
 }
 
-export default async function MockTestsPage({ searchParams, canonicalPath }: MockTestsPageProps) {
+export default async function MockTestsPage(
+  props: InternalMockTestsPageProps,
+): Promise<React.ReactElement>;
+export default async function MockTestsPage(
+  props: MockTestsPageProps,
+): Promise<React.ReactElement>;
+export default async function MockTestsPage(
+  props: InternalMockTestsPageProps,
+) {
+  const { searchParams, canonicalPath } = props;
   const filters = await searchParams;
   const [catalog, growthSettings] = await Promise.all([
     getMockTestCatalogData(),

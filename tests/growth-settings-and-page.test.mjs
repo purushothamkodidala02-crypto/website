@@ -123,3 +123,32 @@ test("growth payment: thank you banner requires verified paid status, never show
   assert.ok(pageContent.includes("isPaymentCancelled"), "page must track isPaymentCancelled");
   assert.ok(!pageContent.includes("isThankYou &&"), "must not blindly use unverified isThankYou flag");
 });
+
+test("growth analytics tab: tracks student views, button clicks, and provides admin analytics tab", () => {
+  const workspacePath = path.resolve("app/admin/growth-settings/AdminGrowthWorkspace.tsx");
+  assert.ok(fs.existsSync(workspacePath), "AdminGrowthWorkspace must exist");
+  const workspaceContent = fs.readFileSync(workspacePath, "utf8");
+  assert.ok(workspaceContent.includes("Student Interactions & Clicks"), "must provide Student Interactions & Clicks tab");
+  assert.ok(workspaceContent.includes("GrowthAnalyticsTab"), "must render GrowthAnalyticsTab");
+
+  const analyticsTabPath = path.resolve("components/admin/growth/GrowthAnalyticsTab.tsx");
+  assert.ok(fs.existsSync(analyticsTabPath), "GrowthAnalyticsTab must exist");
+  const tabContent = fs.readFileSync(analyticsTabPath, "utf8");
+  assert.ok(tabContent.includes("Button Click Count Breakdown"), "must summarize button click count breakdown");
+  assert.ok(tabContent.includes("Candidate Interaction & Click History"), "must list candidate interaction history");
+  assert.ok(tabContent.includes("Student Total Clicks"), "must calculate total clicks per student");
+  assert.ok(tabContent.includes("Export CSV"), "must allow CSV export");
+
+  const actionPath = path.resolve("app/actions/growth-tracking.ts");
+  assert.ok(fs.existsSync(actionPath), "growth-tracking server action must exist");
+  const actionContent = fs.readFileSync(actionPath, "utf8");
+  assert.ok(actionContent.includes("recordGrowthInteractionAction"), "must export recordGrowthInteractionAction");
+  assert.ok(actionContent.includes("growth_popup_interactions"), "must write to growth_popup_interactions table");
+
+  const modalPath = path.resolve("components/growth/SupportPromptModal.tsx");
+  const modalContent = fs.readFileSync(modalPath, "utf8");
+  assert.ok(modalContent.includes("recordGrowthInteractionAction"), "modal must record interactions via action");
+
+  const migrationPath = path.resolve("supabase/migrations/20261120000000_add_growth_popup_interactions.sql");
+  assert.ok(fs.existsSync(migrationPath), "migration for growth_popup_interactions must exist");
+});

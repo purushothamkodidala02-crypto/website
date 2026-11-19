@@ -133,3 +133,37 @@ export async function saveGrowthSettings(
     };
   }
 }
+
+export type GrowthInteractionRecord = {
+  id: string;
+  user_id: string | null;
+  student_name: string | null;
+  student_email: string | null;
+  event_type: string;
+  button_label: string;
+  amount: number | null;
+  page_path: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export async function getGrowthInteractions(): Promise<GrowthInteractionRecord[]> {
+  try {
+    const auth = await adminClient();
+    if ("error" in auth) return [];
+
+    const { data, error } = await auth.supabase
+      .from("growth_popup_interactions")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data as GrowthInteractionRecord[];
+  } catch {
+    return [];
+  }
+}

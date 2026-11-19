@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { GrowthPopupSettings } from "@/lib/growth-settings";
 import { getLocalAttemptedTestIds } from "@/lib/storage/student-practice-storage";
+import { recordGrowthInteractionAction } from "@/app/actions/growth-tracking";
 
 type SupportPromptModalProps = {
   completedAttempts?: number;
@@ -24,7 +25,14 @@ export function SupportPromptModal({
 
   // Allow opening via custom event from any button on the site
   useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
+    const handleOpen = () => {
+      setIsOpen(true);
+      recordGrowthInteractionAction({
+        eventType: "trigger",
+        buttonLabel: "Custom Event Trigger",
+        pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+      }).catch(() => null);
+    };
     window.addEventListener("open-growth-popup", handleOpen);
     return () => window.removeEventListener("open-growth-popup", handleOpen);
   }, []);
@@ -36,6 +44,11 @@ export function SupportPromptModal({
     if (isPreview) {
       setEffectiveCount(serverCompletedAttempts && serverCompletedAttempts > 0 ? serverCompletedAttempts : 5);
       setIsOpen(true);
+      recordGrowthInteractionAction({
+        eventType: "view",
+        buttonLabel: "Viewed Pop-up",
+        pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+      }).catch(() => null);
       return;
     }
 
@@ -77,6 +90,11 @@ export function SupportPromptModal({
     const timer = setTimeout(() => {
       setEffectiveCount(count);
       setIsOpen(true);
+      recordGrowthInteractionAction({
+        eventType: "view",
+        buttonLabel: "Viewed Pop-up",
+        pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+      }).catch(() => null);
     }, delayMs);
 
     return () => clearTimeout(timer);
@@ -92,12 +110,60 @@ export function SupportPromptModal({
       String(currentCount + 1),
     );
     localStorage.setItem("varadhi_growth_dismissed_at", String(Date.now()));
+    recordGrowthInteractionAction({
+      eventType: "dismiss",
+      buttonLabel: settings.secondaryButtonText || "Maybe Later",
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    }).catch(() => null);
     setIsOpen(false);
+  };
+
+  const handleCloseX = () => {
+    const currentCount = parseInt(
+      localStorage.getItem("varadhi_growth_appearance_count") || "0",
+      10,
+    );
+    localStorage.setItem(
+      "varadhi_growth_appearance_count",
+      String(currentCount + 1),
+    );
+    localStorage.setItem("varadhi_growth_dismissed_at", String(Date.now()));
+    recordGrowthInteractionAction({
+      eventType: "close",
+      buttonLabel: "✕ Close Button",
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    }).catch(() => null);
+    setIsOpen(false);
+  };
+
+  const handleTierSelect = (amt: number) => {
+    setSelectedAmount(amt);
+    recordGrowthInteractionAction({
+      eventType: "select_tier",
+      buttonLabel: `₹${amt} Tier`,
+      amount: amt,
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    }).catch(() => null);
   };
 
   const handleSupportClick = () => {
     localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
+    recordGrowthInteractionAction({
+      eventType: "click_support",
+      buttonLabel: `Support Varadhi (₹${selectedAmount})`,
+      amount: selectedAmount,
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    }).catch(() => null);
     setIsOpen(false);
+  };
+
+  const handleFloatingTriggerClick = () => {
+    setIsOpen(true);
+    recordGrowthInteractionAction({
+      eventType: "trigger",
+      buttonLabel: "🌱 Support Us Trigger",
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    }).catch(() => null);
   };
 
   return (
@@ -106,7 +172,7 @@ export function SupportPromptModal({
       {!isOpen && settings.enabled && (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={handleFloatingTriggerClick}
           aria-label="Support Varadhi Prep"
           className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/95 px-3.5 py-2 text-xs font-black text-emerald-900 shadow-md shadow-emerald-950/10 backdrop-blur-md transition hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 active:scale-95 sm:bottom-6 sm:right-6 cursor-pointer"
         >
@@ -149,7 +215,7 @@ export function SupportPromptModal({
                 </div>
                 <button
                   type="button"
-                  onClick={handleDismiss}
+                  onClick={handleCloseX}
                   aria-label="Close dialog"
                   className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                 >
@@ -195,7 +261,7 @@ export function SupportPromptModal({
                       <button
                         key={amt}
                         type="button"
-                        onClick={() => setSelectedAmount(amt)}
+                        onClick={() => handleTierSelect(amt)}
                         className={`rounded-xl py-2 px-1 text-center text-xs sm:text-sm font-extrabold transition cursor-pointer ${
                           isSelected
                             ? "border-2 border-[#059669] bg-emerald-50 text-emerald-950 shadow-xs ring-1 ring-[#059669]"
