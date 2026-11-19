@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default async function HelpUsToGrowPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; preview?: string }>;
 }) {
   const query = await searchParams;
   const isThankYou = query.status === "thank_you";
@@ -52,30 +52,28 @@ export default async function HelpUsToGrowPage({
     if (profile?.role === "admin") isAdmin = true;
   }
 
-  // Hide mode: If disabled, regular candidates and casual visitors receive 404
-  if (!settings.enabled && !isAdmin) {
+  // Hide mode: If disabled and not previewing or returning from payment, regular candidates and casual visitors receive 404
+  const isPreview = query.preview === "true" || isAdmin || isThankYou;
+  if (!settings.enabled && !isPreview) {
     notFound();
   }
 
   const suggestedTiers = settings.suggestedAmounts?.length
     ? settings.suggestedAmounts
-    : [50, 100, 250, 500];
+    : [49, 99, 199, 499];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] antialiased">
-      {/* Top Accent Rule */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-[#0055a2] via-[#0055a2] to-[#fb8916]" />
-
+    <div className="min-h-screen bg-slate-50/70 text-slate-900 antialiased">
       <PublicHeader />
 
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-10 space-y-6">
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
         {/* Hide Mode Administrator Notice Banner */}
         {!settings.enabled && isAdmin && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 flex items-center justify-between gap-3">
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 flex items-center justify-between gap-3">
             <div>
               <p className="font-bold">Hide Mode Active (Admin Preview)</p>
               <p className="text-amber-800">
-                This page is invisible to candidates and casual visitors. Only administrators can view this preview.
+                This page is invisible to regular candidates and casual visitors. Only administrators can view this preview.
               </p>
             </div>
             <Link
@@ -89,77 +87,122 @@ export default async function HelpUsToGrowPage({
 
         {/* Thank You Banner (if redirected after payment) */}
         {isThankYou && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
             <h2 className="text-base font-black">Thank You for Your Support!</h2>
             <p className="mt-1 text-xs sm:text-sm text-emerald-800">
-              Your contribution directly powers our cloud servers and question verification. We are grateful for your help in keeping Varadhi Prep open to all aspirants.
+              Your contribution directly powers our cloud servers and bilingual question verification. We are grateful for your help in keeping Varadhi Prep open to all aspirants.
             </p>
           </div>
         )}
 
-        {/* Simplified, Clean Header — No excessive top clutter */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#0f172a]">
-            Help Us to Grow
+        {/* Header Section: Title, Subtitle & Value Statement */}
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#131921] leading-[1.15]">
+            🚀 Contribute to Varadhi Prep
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
-            Varadhi Prep provides free, high-standard mock exams for competitive aspirants across Andhra Pradesh and Telangana. We bear monthly server, database, and bilingual question curation costs to keep the platform fast, accurate, and 100% ad-free.
+          <p className="mt-2.5 text-xl sm:text-2xl font-bold text-[#c45500]">
+            Help Us to Grow
           </p>
-          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
-            We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. We only approach committed candidates who are using our platform for a long time and have experienced first-hand the academic and technical standard of our platform.
+          <p className="mt-3.5 text-base sm:text-lg font-medium text-[#0f1111] leading-snug">
+            If you feel happy using Varadhi Prep and it has helped your exam preparation, help us grow and sustain this platform.
           </p>
         </div>
 
-        {/* Direct Cashfree Contribution Box */}
-        <section>
+        {/* The Payment Area — Moved to Top */}
+        <div className="max-w-xl mx-auto mb-12 sm:mb-14">
           <CashfreeContributionBox
             suggestedAmounts={suggestedTiers}
-            upiId={settings.upiId || "support@varadhiprep.in"}
-            upiName={settings.upiName || "Varadhi Prep"}
             defaultPhone={userPhone}
             defaultName={userName}
           />
-        </section>
+        </div>
 
-        {/* Maintenance Costs Summary */}
-        <section className="rounded-2xl border border-[#cde7f7] bg-white p-5 sm:p-6 shadow-2xs space-y-3">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[#0055a2]">
-            Where Your Contribution Goes
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1 text-xs text-slate-700">
-            <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-3.5">
-              <p className="font-bold text-slate-900">Cloud & Edge Servers</p>
-              <p className="mt-1 text-slate-600 leading-relaxed">
-                Ensures instant response saving, sub-50ms latency, and zero crashes during heavy exam traffic.
+        {/* Where Your Contribution Goes — Clean Organic Cards */}
+        <div className="max-w-4xl mx-auto mb-10 sm:mb-12">
+          <div className="text-center mb-6">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#565959]">
+              Where Your Contribution Goes
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-[#0f1111]">
+              Every rupee contributed directly powers core server infrastructure and verified content quality.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Cloud & Edge Servers */}
+            <div className="rounded-2xl border border-slate-200 border-l-4 border-l-[#059669] bg-white p-5 shadow-xs hover:border-[#059669]/50 transition">
+              <span className="inline-block rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+                Servers & Speed
+              </span>
+              <p className="mt-2 text-sm sm:text-base font-bold text-[#0f1111]">
+                Cloud & Edge Servers
+              </p>
+              <p className="mt-1 text-xs sm:text-sm text-[#565959] leading-relaxed">
+                Ensures instant question loading, sub-50ms answer submission, and zero crashes during heavy exam traffic.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-3.5">
-              <p className="font-bold text-slate-900">Managed Database Hosting</p>
-              <p className="mt-1 text-slate-600 leading-relaxed">
-                Securely retains test history, comprehensive analytics, and student bookmarks.
+
+            {/* Managed Database */}
+            <div className="rounded-2xl border border-slate-200 border-l-4 border-l-[#059669] bg-white p-5 shadow-xs hover:border-[#059669]/50 transition">
+              <span className="inline-block rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+                Secure Storage
+              </span>
+              <p className="mt-2 text-sm sm:text-base font-bold text-[#0f1111]">
+                Managed Database Hosting
+              </p>
+              <p className="mt-1 text-xs sm:text-sm text-[#565959] leading-relaxed">
+                Securely saves all your past attempts, detailed scorecard analytics, subject breakdowns, and bookmarks.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-3.5">
-              <p className="font-bold text-slate-900">Bilingual Question Verification</p>
-              <p className="mt-1 text-slate-600 leading-relaxed">
-                Continuous updating of syllabus-aligned Telugu & English questions against official commission keys.
+
+            {/* Bilingual Question Verification */}
+            <div className="rounded-2xl border border-slate-200 border-l-4 border-l-[#059669] bg-white p-5 shadow-xs hover:border-[#059669]/50 transition">
+              <span className="inline-block rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+                Academic Quality
+              </span>
+              <p className="mt-2 text-sm sm:text-base font-bold text-[#0f1111]">
+                Bilingual Question Verification
+              </p>
+              <p className="mt-1 text-xs sm:text-sm text-[#565959] leading-relaxed">
+                Continuous drafting, translation, and auditing of syllabus-aligned Telugu & English questions against official keys.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-3.5">
-              <p className="font-bold text-slate-900">100% Ad-Free Guarantee</p>
-              <p className="mt-1 text-slate-600 leading-relaxed">
-                Zero third-party commercial banners or video pop-ups to ensure focused preparation.
+
+            {/* Completely Ad-Free */}
+            <div className="rounded-2xl border border-slate-200 border-l-4 border-l-[#059669] bg-white p-5 shadow-xs hover:border-[#059669]/50 transition">
+              <span className="inline-block rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+                No Commercial Ads
+              </span>
+              <p className="mt-2 text-sm sm:text-base font-bold text-[#0f1111]">
+                Completely Ad-Free Experience
+              </p>
+              <p className="mt-1 text-xs sm:text-sm text-[#565959] leading-relaxed">
+                Zero commercial banner ads, third-party promotional pop-ups, or video ads so you stay 100% focused on studying.
               </p>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Navigation Footer */}
-        <div className="flex items-center justify-between pt-2 text-xs font-semibold text-slate-600">
-          <Link href="/mock-tests" className="text-[#0055a2] hover:underline font-bold">
+        {/* Human Story: Promise to Aspirants */}
+        <div className="max-w-3xl mx-auto rounded-2xl border border-[#d5d9d9] bg-white p-6 sm:p-8 shadow-xs mb-8 text-center sm:text-left">
+          <h3 className="text-base font-bold text-[#0f1111] mb-2">
+            Our Promise to Aspirants
+          </h3>
+          <p className="text-sm text-[#565959] leading-relaxed">
+            We built Varadhi Prep so that competitive exam aspirants across Andhra Pradesh and Telangana can practice with high-quality, syllabus-aligned mock tests completely free — without expensive coaching fees or commercial paywalls.
+          </p>
+          <p className="mt-3 text-xs sm:text-sm text-[#565959] leading-relaxed">
+            Running high-speed servers, saving thousands of test answers in real-time, and verifying bilingual questions against official keys every month requires real operational resources. We don&apos;t ask money from new or casual visitors. If you have been preparing with us and appreciate what we do, your voluntary contribution helps keep tests free and open for everyone.
+          </p>
+        </div>
+
+        {/* Navigation Links */}
+        <div className="flex items-center justify-center gap-4 pt-2 text-xs sm:text-sm font-bold">
+          <Link href="/mock-tests" className="text-[#007185] hover:text-[#c45500] hover:underline">
             ← Back to Mock Tests
           </Link>
-          <Link href="/dashboard" className="text-slate-800 hover:underline">
+          <span className="text-slate-300">•</span>
+          <Link href="/dashboard" className="text-[#007185] hover:text-[#c45500] hover:underline">
             View My Progress →
           </Link>
         </div>

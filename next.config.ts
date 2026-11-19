@@ -14,6 +14,7 @@ const productionOrigins = [
 ].filter((origin): origin is string => Boolean(origin));
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,
   },

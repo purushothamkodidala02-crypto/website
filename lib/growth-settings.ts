@@ -11,6 +11,7 @@ export type GrowthPopupSettings = {
     dashboard: boolean;
     home: boolean;
     mockTests: boolean;
+    exams: boolean;
   };
   headline: string;
   message: string;
@@ -31,15 +32,16 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
     dashboard: true,
     home: false,
     mockTests: true,
+    exams: true,
   },
-  headline: "Support the Mission to Keep Quality Mock Tests Open & Free",
+  headline: "Contribute to Varadhi Prep",
   message:
-    "We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. As a committed candidate who has been using our platform for a long time, you have experienced first-hand the academic and technical standard of Varadhi Prep. We bear monthly server, database, and content verification costs to keep all tests open, fast, and 100% ad-free.",
+    "If you are happy with our service and Varadhi Prep has helped your preparation, consider contributing to help us grow. We keep every mock test free and ad-free for everyone. Your support directly covers cloud servers, database hosting, and bilingual questions.",
   primaryButtonText: "Support Varadhi",
   secondaryButtonText: "Maybe Later",
-  suggestedAmounts: [50, 100, 250, 500],
-  upiId: "support@varadhiprep.in",
-  upiName: "Varadhi Prep",
+  suggestedAmounts: [49, 99, 199, 499],
+  upiId: "",
+  upiName: "",
 };
 
 export const getGrowthSettings = unstable_cache(

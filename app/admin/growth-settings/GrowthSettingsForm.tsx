@@ -36,6 +36,9 @@ export function GrowthSettingsForm({
   const [targetMockTests, setTargetMockTests] = useState(
     initialSettings.targetRoutes.mockTests ?? true,
   );
+  const [targetExams, setTargetExams] = useState(
+    initialSettings.targetRoutes.exams ?? true,
+  );
   const [headline, setHeadline] = useState(initialSettings.headline);
   const [message, setMessage] = useState(initialSettings.message);
   const [primaryButtonText, setPrimaryButtonText] = useState(
@@ -45,10 +48,10 @@ export function GrowthSettingsForm({
     initialSettings.secondaryButtonText,
   );
   const [amountsStr, setAmountsStr] = useState(
-    (initialSettings.suggestedAmounts || [50, 100, 250, 500]).join(", "),
+    (initialSettings.suggestedAmounts || [99, 199, 499, 999]).join(", "),
   );
-  const [upiId, setUpiId] = useState(initialSettings.upiId);
-  const [upiName, setUpiName] = useState(initialSettings.upiName);
+  const [upiId, setUpiId] = useState(initialSettings.upiId || "");
+  const [upiName, setUpiName] = useState(initialSettings.upiName || "");
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -201,59 +204,102 @@ export function GrowthSettingsForm({
             Choose which sections eligible candidates can encounter this pop-up on.
           </p>
 
-          <div className="space-y-2.5 pt-1">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="targetRouteDashboard"
-                value="true"
-                checked={targetDashboard}
-                onChange={(e) => setTargetDashboard(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-[#0055a2] focus:ring-[#0055a2]"
-              />
-              <div>
-                <span className="text-xs sm:text-sm font-bold text-slate-900">
-                  Dashboard (My Progress)
-                </span>
-                <p className="text-[11px] text-slate-500">
-                  Recommended: Candidate visits their test progress and review history.
-                </p>
-              </div>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer">
+          <div className="space-y-3 pt-1">
+            {/* Mock Tests Directory */}
+            <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 hover:border-slate-300 transition cursor-pointer">
               <input
                 type="checkbox"
                 name="targetRouteMockTests"
                 value="true"
                 checked={targetMockTests}
                 onChange={(e) => setTargetMockTests(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-[#0055a2] focus:ring-[#0055a2]"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0f2942] focus:ring-[#0f2942]"
               />
-              <div>
-                <span className="text-xs sm:text-sm font-bold text-slate-900">
-                  Mock Tests Directory
-                </span>
-                <p className="text-[11px] text-slate-500">
-                  When browsing syllabus and looking for their next mock test.
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">
+                    Mock Tests
+                  </span>
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700">
+                    /mock-tests
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  When candidates browse full-length mock tests and syllabus papers.
                 </p>
               </div>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            {/* Exams Directory */}
+            <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 hover:border-slate-300 transition cursor-pointer">
+              <input
+                type="checkbox"
+                name="targetRouteExams"
+                value="true"
+                checked={targetExams}
+                onChange={(e) => setTargetExams(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0f2942] focus:ring-[#0f2942]"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">
+                    Exams
+                  </span>
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700">
+                    /exams
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  When candidates explore competitive exam patterns and recruitment pages.
+                </p>
+              </div>
+            </label>
+
+            {/* Dashboard */}
+            <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 hover:border-slate-300 transition cursor-pointer">
+              <input
+                type="checkbox"
+                name="targetRouteDashboard"
+                value="true"
+                checked={targetDashboard}
+                onChange={(e) => setTargetDashboard(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0f2942] focus:ring-[#0f2942]"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">
+                    Dashboard (My Progress)
+                  </span>
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700">
+                    /dashboard
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  When candidates view their attempt history, analysis, and scorecard bookmarks.
+                </p>
+              </div>
+            </label>
+
+            {/* Home Page */}
+            <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 hover:border-slate-300 transition cursor-pointer">
               <input
                 type="checkbox"
                 name="targetRouteHome"
                 value="true"
                 checked={targetHome}
                 onChange={(e) => setTargetHome(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-[#0055a2] focus:ring-[#0055a2]"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0f2942] focus:ring-[#0f2942]"
               />
-              <div>
-                <span className="text-xs sm:text-sm font-bold text-slate-900">
-                  Public Home Page
-                </span>
-                <p className="text-[11px] text-slate-500">
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">
+                    Public Home Page
+                  </span>
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700">
+                    /
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
                   Only shown to returning candidates who meet the completed tests threshold.
                 </p>
               </div>
@@ -356,9 +402,10 @@ export function GrowthSettingsForm({
                 type="text"
                 id="upiId"
                 name="upiId"
+                placeholder="Optional (leave empty if using Cashfree only)"
                 value={upiId}
                 onChange={(e) => setUpiId(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
+                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0f2942] focus:outline-none"
               />
             </div>
 
@@ -373,9 +420,10 @@ export function GrowthSettingsForm({
                 type="text"
                 id="upiName"
                 name="upiName"
+                placeholder="Optional"
                 value={upiName}
                 onChange={(e) => setUpiName(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
+                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0f2942] focus:outline-none"
               />
             </div>
           </div>
@@ -393,10 +441,10 @@ export function GrowthSettingsForm({
               name="suggestedAmounts"
               value={amountsStr}
               onChange={(e) => setAmountsStr(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
+              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0f2942] focus:outline-none"
             />
             <span className="mt-1 block text-[11px] text-slate-500">
-              Example: 50, 100, 250, 500
+              Example: 49, 99, 199, 499
             </span>
           </div>
         </section>
@@ -406,7 +454,7 @@ export function GrowthSettingsForm({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-xl bg-[#0055a2] px-6 py-3 text-sm font-bold text-white shadow-xs hover:bg-[#004382] transition disabled:opacity-60 disabled:cursor-wait"
+            className="rounded-xl bg-[#0f2942] px-6 py-3 text-sm font-bold text-white shadow-xs hover:bg-[#0a1e30] transition disabled:opacity-60 disabled:cursor-wait cursor-pointer"
           >
             {isPending ? "Saving Settings…" : "Save Pop-up Settings"}
           </button>
@@ -431,24 +479,24 @@ export function GrowthSettingsForm({
         </div>
 
         {/* Mock Modal Preview */}
-        <div className="overflow-hidden rounded-2xl border border-[#cde7f7] bg-white shadow-lg">
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#0055a2] via-[#0055a2] to-[#fb8916]" />
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#0f2942] via-blue-700 to-teal-600" />
 
           <div className="p-5 sm:p-6 space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <span className="inline-flex items-center rounded-full bg-[#0055a2]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#0055a2]">
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-900">
                 Dedicated Learner
               </span>
               <span className="text-slate-400 text-xs cursor-default">✕</span>
             </div>
 
-            <h3 className="text-base font-black text-[#0f172a] leading-snug">
-              {headline || "Support the Mission to Keep Quality Mock Tests Open & Free"}
+            <h3 className="text-base font-black text-slate-900 leading-snug">
+              {headline || "If Varadhi Has Helped Your Prep, Help Us Grow"}
             </h3>
 
             <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
               {message ||
-                "We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. As a committed candidate who has been using our platform for a long time, you have experienced first-hand the academic and technical standard of Varadhi Prep. We bear monthly server, database, and bilingual curation costs to keep all tests open, fast, and 100% ad-free."}
+                "If you are happy with our service and Varadhi Prep has added value to your exam preparation, consider supporting us to keep tests free and open for everyone. We do not ask new users or casual visitors for contributions. Your voluntary support directly powers cloud servers, databases, and bilingual questions."}
             </p>
 
             <p className="text-[11px] text-slate-500">
@@ -459,7 +507,7 @@ export function GrowthSettingsForm({
               <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">
                 {secondaryButtonText || "Maybe Later"}
               </span>
-              <span className="rounded-lg bg-[#0055a2] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
+              <span className="rounded-lg bg-[#0f2942] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
                 {primaryButtonText || "Support Varadhi"}
               </span>
             </div>

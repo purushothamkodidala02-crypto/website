@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createCashfreeOrder, getCashfreeCheckoutMode } from "@/lib/payments/cashfree";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl } from "@/lib/site";
@@ -39,7 +40,15 @@ export async function initiateCashfreeGrowthContribution(
     const customerEmail = user?.email || "contribute@varadhiprep.in";
     const customerName = name?.trim() || user?.user_metadata?.full_name || "Varadhi Supporter";
 
-    const returnUrl = absoluteUrl(`/help-us-to-grow?status=thank_you&order_id=${merchantOrderId}`);
+    const headerList = await headers();
+    const host = headerList.get("x-forwarded-host") || headerList.get("host") || "";
+    const proto =
+      headerList.get("x-forwarded-proto") ||
+      (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
+    const origin = host ? `${proto}://${host}` : "";
+    const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+    const returnPath = `/help-us-to-grow?status=thank_you&order_id=${merchantOrderId}${isLocal ? "&preview=true" : ""}`;
+    const returnUrl = origin ? `${origin}${returnPath}` : absoluteUrl(returnPath);
 
     const result = await createCashfreeOrder({
       merchantOrderId,

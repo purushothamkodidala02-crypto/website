@@ -56,6 +56,7 @@ export async function saveGrowthSettings(
     dashboard: formData.get("targetRouteDashboard") === "true",
     home: formData.get("targetRouteHome") === "true",
     mockTests: formData.get("targetRouteMockTests") === "true",
+    exams: formData.get("targetRouteExams") === "true",
   };
 
   const headline = String(formData.get("headline") ?? "").trim();
@@ -70,7 +71,7 @@ export async function saveGrowthSettings(
     .map((s) => parseInt(s.trim(), 10))
     .filter((n) => Number.isFinite(n) && n > 0);
 
-  const suggestedAmounts = amountsRaw.length ? amountsRaw : [50, 100, 250, 500];
+  const suggestedAmounts = amountsRaw.length ? amountsRaw : [49, 99, 199, 499];
 
   const payload: GrowthPopupSettings = {
     enabled,
@@ -79,14 +80,14 @@ export async function saveGrowthSettings(
     maxAppearances,
     displayDelaySeconds,
     targetRoutes,
-    headline: headline || "Support the Mission to Keep Quality Mock Tests Open & Free",
+    headline: headline || "Contribute to Varadhi Prep",
     message:
       message ||
-      "You have completed 5+ full-length mock tests on Varadhi Prep. We bear high server, database, and bilingual question curation costs every month to keep exams open to every serious aspirant without commercial advertisements or paywalls.",
-    primaryButtonText: primaryButtonText || "Support Varadhi",
+      "If you are happy with our service and Varadhi Prep has helped your preparation, consider contributing to help us grow. We keep every mock test free and ad-free for everyone. Your support directly covers cloud servers, database hosting, and bilingual questions.",
+    primaryButtonText: primaryButtonText || "Contribute to Varadhi",
     secondaryButtonText: secondaryButtonText || "Maybe Later",
     suggestedAmounts,
-    upiId: upiId || "support@varadhiprep.in",
+    upiId: upiId || "",
     upiName: upiName || "Varadhi Prep",
   };
 

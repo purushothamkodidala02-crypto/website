@@ -25,23 +25,34 @@ test("help-us-to-grow page: hide mode active for user side, admin preview preser
 
   // User side hide mode: non-admins receive 404 notFound()
   assert.ok(content.includes("notFound"), "must import and invoke notFound for user side");
-  assert.ok(content.includes("!settings.enabled && !isAdmin"), "must guard user-side access with notFound");
+  assert.ok(content.includes("!settings.enabled && !isPreview"), "must guard user-side access with notFound");
   assert.ok(content.includes("robots: { index: false, follow: false }"), "must disable search engine indexing");
 
-  // Editorial news color palette
-  assert.ok(content.includes("#0055a2"), "must use news primary navy blue #0055a2");
-  assert.ok(content.includes("#0f172a"), "must use news slate heading color #0f172a");
-  assert.ok(content.includes("#fb8916"), "must use news accent line #fb8916");
-  assert.ok(content.includes("#cde7f7"), "must use news border blue #cde7f7");
+  // Amazon Pay inspired human-made color palette
+  assert.ok(content.includes("#131921"), "must use Amazon dark slate heading color #131921");
+  assert.ok(content.includes("🚀 Contribute to Varadhi Prep"), "must include rocket before Contribute to Varadhi Prep");
+  assert.ok(content.includes("Help Us to Grow"), "must keep Help Us to Grow below");
+  assert.ok(content.includes("#c45500"), "must use warm Amazon orange accent #c45500 for subtitle");
+  assert.ok(!content.includes("Zero Interruptions"), "must not use Zero Interruptions");
+  assert.ok(content.includes("border-l-[#059669]"), "must use shared emerald border for cost cards");
+  assert.ok(content.includes("text-emerald-800"), "must use shared emerald color for category words");
 
   // Operational cost breakdown areas
   assert.ok(content.includes("Cloud & Edge Servers"), "must detail cloud edge compute costs");
   assert.ok(content.includes("Managed Database Hosting"), "must detail database storage costs");
   assert.ok(content.includes("Bilingual Question Verification"), "must detail question curation costs");
-  assert.ok(content.includes("100% Ad-Free Guarantee"), "must detail ad-free policy");
+  assert.ok(content.includes("Ad-Free"), "must detail ad-free policy");
 
   // Cashfree integration
   assert.ok(content.includes("CashfreeContributionBox"), "must integrate Cashfree contribution box");
+
+  const cashfreeBox = fs.readFileSync(path.resolve("components/growth/CashfreeContributionBox.tsx"), "utf8");
+  assert.ok(!cashfreeBox.includes("Required for Cashfree"), "must not mention required for Cashfree");
+  assert.ok(!cashfreeBox.includes("support@varadhiprep.in"), "must not hardcode incorrect support@varadhiprep.in");
+  assert.ok(!cashfreeBox.includes("with Cashfree"), "must not show 'with Cashfree' to users");
+  assert.ok(cashfreeBox.indexOf("Custom") < cashfreeBox.indexOf("suggestedAmounts.map"), "Custom button must appear before suggested amounts");
+  assert.ok(cashfreeBox.includes("Preparing Your Contribution"), "must provide floating loading card");
+  assert.ok(!content.includes("Top Editorial Accent Bar"), "must remove top rendering bar");
 });
 
 test("sidebar navigation: Help Us to Grow is hidden from public navigation drawer", () => {
