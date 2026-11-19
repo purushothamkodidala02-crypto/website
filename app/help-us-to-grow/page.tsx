@@ -146,7 +146,7 @@ export default async function HelpUsToGrowPage({
           </div>
         )}
 
-        {/* Notice 2: Incomplete / Cancelled Notice (Light Green soothing theme with Bank Debit Reassurance) */}
+        {/* Notice 2: Incomplete / Cancelled Notice (Light Green soothing theme) */}
         {isPaymentCancelled && (
           <div className="mb-6 rounded-2xl border border-emerald-200/90 bg-emerald-50/50 p-5 sm:p-6 text-emerald-950 shadow-xs">
             <div className="flex items-start gap-3.5">
@@ -156,41 +156,32 @@ export default async function HelpUsToGrowPage({
 
               <div className="flex-1 min-w-0">
                 <div className="inline-flex items-center rounded-full bg-emerald-100/80 px-2.5 py-0.5 text-[11px] font-bold text-emerald-900 uppercase tracking-wider">
-                  Payment Incomplete • No Obligation
+                  Payment Incomplete
                 </div>
 
-                <h2 className="mt-2 text-base sm:text-lg font-black text-emerald-950">
-                  No Worries! Contribution Incomplete
+                <h2 className="mt-2 text-base sm:text-lg font-black text-emerald-950 leading-snug">
+                  No worries, contribution incomplete. Did the money get deducted from your bank or UPI?
                 </h2>
 
-                <p className="mt-1 text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
-                  It looks like the checkout was closed or cancelled before completion. If no money was deducted, you can choose an amount below whenever you wish to try again, or feel free to continue practicing on Varadhi Prep!
+                <p className="mt-1.5 text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
+                  If no money was deducted, feel free to try again below or continue practicing on Varadhi Prep! If an amount was deducted, your bank or UPI app will automatically reverse it back to your account within 2–3 business days.
                 </p>
 
-                {/* Bank / UPI Deduction Reassurance in Matching Light Green */}
-                <div className="mt-4 pt-3.5 border-t border-emerald-200/70 text-[11px] sm:text-xs text-emerald-950 leading-relaxed">
-                  <p className="font-bold text-emerald-950">
-                    Did money get deducted from your bank or UPI?
+                {query.order_id && (
+                  <p className="mt-3 pt-2.5 border-t border-emerald-200/70 text-[11px] sm:text-xs text-emerald-900">
+                    Need assistance? Email{" "}
+                    <a
+                      href={`mailto:support@varadhiprep.in?subject=${encodeURIComponent(`Payment Support - Order ${query.order_id}`)}`}
+                      className="font-bold underline text-emerald-950 hover:text-emerald-700"
+                    >
+                      support@varadhiprep.in
+                    </a>{" "}
+                    with Reference Order ID:{" "}
+                    <code className="font-mono font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded text-emerald-950">
+                      {query.order_id}
+                    </code>
                   </p>
-                  <p className="mt-0.5 text-emerald-900/90">
-                    Don&apos;t worry! When an interrupted payment occurs, your bank or UPI network automatically reverses the amount back to your account within 2–3 business days.
-                  </p>
-                  {query.order_id && (
-                    <p className="mt-2 text-emerald-900">
-                      If the amount is not reversed, or if you need assistance, please email{" "}
-                      <a
-                        href={`mailto:support@varadhiprep.in?subject=${encodeURIComponent(`Payment Support - Order ${query.order_id}`)}`}
-                        className="font-bold underline text-emerald-950 hover:text-emerald-700"
-                      >
-                        support@varadhiprep.in
-                      </a>{" "}
-                      with your Reference Order ID:{" "}
-                      <code className="font-mono font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded text-emerald-950">
-                        {query.order_id}
-                      </code>
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
