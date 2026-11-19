@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default async function HelpUsToGrowPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; preview?: string; order_id?: string }>;
+  searchParams: Promise<{ status?: string; preview?: string; order_id?: string; amount?: string }>;
 }) {
   const query = await searchParams;
 
@@ -172,6 +172,7 @@ export default async function HelpUsToGrowPage({
             suggestedAmounts={suggestedTiers}
             defaultPhone={userPhone}
             defaultName={userName}
+            initialAmount={query.amount ? parseInt(query.amount, 10) : undefined}
           />
         </div>
 

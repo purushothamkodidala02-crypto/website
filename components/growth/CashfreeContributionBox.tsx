@@ -21,6 +21,7 @@ type Props = {
   upiName?: string;
   defaultPhone?: string;
   defaultName?: string;
+  initialAmount?: number;
 };
 
 export function CashfreeContributionBox({
@@ -29,9 +30,10 @@ export function CashfreeContributionBox({
   upiName = "",
   defaultPhone = "",
   defaultName = "",
+  initialAmount,
 }: Props) {
   const [selectedAmount, setSelectedAmount] = useState<number>(
-    suggestedAmounts[1] ?? 99,
+    initialAmount ?? suggestedAmounts[0] ?? 49,
   );
   const [customAmount, setCustomAmount] = useState<string>("");
   const [isCustom, setIsCustom] = useState(false);

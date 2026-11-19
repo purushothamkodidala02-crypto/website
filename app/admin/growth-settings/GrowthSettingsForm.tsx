@@ -484,47 +484,51 @@ export function GrowthSettingsForm({
 
           <div className="p-5 sm:p-6 space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                Dedicated Learner
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-100 text-sm">
+                  🌱
+                </div>
+                <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                  100% Ad-Free • Community Supported
+                </span>
+              </div>
               <span className="text-slate-400 text-xs cursor-default">✕</span>
             </div>
 
             <h3 className="text-base font-black text-slate-900 leading-snug">
-              {headline || "If Varadhi Has Helped Your Prep, Help Us Grow"}
+              {headline || "Support Varadhi Prep"}
             </h3>
 
-            <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
-              {message ||
-                "If you are happy with our service and Varadhi Prep has added value to your exam preparation, consider supporting us to keep tests free and open for everyone. We do not ask new users or casual visitors for contributions. Your voluntary support directly powers cloud servers, databases, and bilingual questions."}
+            <p className="text-xs text-slate-600 leading-relaxed">
+              All mock tests are free and ad-free. If this platform helps your preparation, consider a small voluntary contribution to keep it running for everyone.
             </p>
 
-            <div className="grid grid-cols-3 gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 p-2 text-center">
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-bold text-emerald-800">100% Ad-Free</span>
-                <span className="text-[9px] text-slate-500">Zero distractions</span>
-              </div>
-              <div className="flex flex-col items-center border-x border-slate-200/80 px-1">
-                <span className="text-[10px] font-bold text-emerald-800">Fast Servers</span>
-                <span className="text-[9px] text-slate-500">Sub-50ms speed</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-bold text-emerald-800">Bilingual Tests</span>
-                <span className="text-[9px] text-slate-500">Verified syllabus</span>
+            <div className="pt-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                Quick Contribution Tiers
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[49, 99, 199, 499].map((amt, idx) => (
+                  <div
+                    key={amt}
+                    className={`rounded-lg py-1.5 text-center text-xs font-extrabold ${
+                      idx === 0
+                        ? "border-2 border-[#059669] bg-emerald-50 text-emerald-950 shadow-xs ring-1 ring-[#059669]"
+                        : "border border-slate-200 bg-slate-50 text-slate-700"
+                    }`}
+                  >
+                    ₹{amt}
+                  </div>
+                ))}
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-500">
-              If our platform has benefited your preparation, your voluntary contribution helps keep tests accessible for fellow candidates.
-            </p>
-
             <div className="mt-4 flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">
+              <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600">
                 {secondaryButtonText || "Maybe Later"}
               </span>
               <span className="rounded-lg bg-[#059669] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
-                {primaryButtonText || "Support Varadhi"}
+                {primaryButtonText || "Support Varadhi"} (₹49)
               </span>
             </div>
           </div>

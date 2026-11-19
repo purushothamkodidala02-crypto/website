@@ -34,9 +34,9 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
     mockTests: true,
     exams: true,
   },
-  headline: "Contribute to Varadhi Prep",
+  headline: "Support Varadhi Prep",
   message:
-    "If you are happy with our service and Varadhi Prep has helped your preparation, consider contributing to help us grow. We keep every mock test free and ad-free for everyone. Your support directly covers cloud servers, database hosting, and bilingual questions.",
+    "All mock tests are free and ad-free. If this platform helps your preparation, consider a small voluntary contribution to keep it running for everyone.",
   primaryButtonText: "Support Varadhi",
   secondaryButtonText: "Maybe Later",
   suggestedAmounts: [49, 99, 199, 499],
