@@ -974,7 +974,7 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
         )}
       </div>
 
-      {growthSettings.targetRoutes.mockTests && (
+      {growthSettings.enabled && growthSettings.targetRoutes.mockTests && (
         <SupportPromptModal settings={growthSettings} />
       )}
     </main>

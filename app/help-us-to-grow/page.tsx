@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { CashfreeContributionBox } from "@/components/growth/CashfreeContributionBox";
 import { getGrowthSettings } from "@/lib/growth-settings";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "Help Us to Grow | Support Varadhi Prep",
   description:
     "Support Varadhi Prep to keep competitive mock tests free, reliable, and 100% ad-free. Review platform maintenance costs and contribute via Cashfree or UPI.",
+  robots: { index: false, follow: false },
   alternates: {
     canonical: absoluteUrl("/help-us-to-grow"),
   },
@@ -36,16 +38,23 @@ export default async function HelpUsToGrowPage({
 
   let userPhone = "";
   let userName = "";
+  let isAdmin = false;
 
   if (user) {
     userName = user.user_metadata?.full_name || user.user_metadata?.name || "";
     const { data: profile } = await supabase
       .from("profiles")
-      .select("mobile, full_name")
+      .select("mobile, full_name, role")
       .eq("id", user.id)
       .maybeSingle();
     userPhone = profile?.mobile || "";
     if (profile?.full_name) userName = profile.full_name;
+    if (profile?.role === "admin") isAdmin = true;
+  }
+
+  // Hide mode: If disabled, regular candidates and casual visitors receive 404
+  if (!settings.enabled && !isAdmin) {
+    notFound();
   }
 
   const suggestedTiers = settings.suggestedAmounts?.length
@@ -60,6 +69,24 @@ export default async function HelpUsToGrowPage({
       <PublicHeader />
 
       <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-10 space-y-6">
+        {/* Hide Mode Administrator Notice Banner */}
+        {!settings.enabled && isAdmin && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 flex items-center justify-between gap-3">
+            <div>
+              <p className="font-bold">Hide Mode Active (Admin Preview)</p>
+              <p className="text-amber-800">
+                This page is invisible to candidates and casual visitors. Only administrators can view this preview.
+              </p>
+            </div>
+            <Link
+              href="/admin/growth-settings"
+              className="shrink-0 rounded-lg bg-amber-900 px-3 py-1.5 font-bold text-white hover:bg-amber-950 transition text-[11px]"
+            >
+              Configure in Admin →
+            </Link>
+          </div>
+        )}
+
         {/* Thank You Banner (if redirected after payment) */}
         {isThankYou && (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">

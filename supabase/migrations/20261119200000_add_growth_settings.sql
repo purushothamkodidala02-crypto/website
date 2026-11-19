@@ -8,7 +8,7 @@ alter table if exists public.site_settings
 insert into public.site_settings (key, enabled, value)
 values (
   'growth_popup',
-  true,
+  false, -- Default to false (Hide Mode)
   '{
     "minCompletedTests": 5,
     "cooldownDays": 7,

@@ -22,7 +22,7 @@ export type GrowthPopupSettings = {
 };
 
 export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
-  enabled: true,
+  enabled: false, // Default to false (Hide Mode) so users never see pop-up or page until admin enables it
   minCompletedTests: 5,
   cooldownDays: 7,
   maxAppearances: 3,

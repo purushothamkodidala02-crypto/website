@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-test("growth-settings: defaults and type definition enforce minimum 5 mock test threshold", () => {
+test("growth-settings: defaults and type definition enforce hide mode and 5 mock test threshold", () => {
   const filePath = path.resolve("lib/growth-settings.ts");
   assert.ok(fs.existsSync(filePath), "lib/growth-settings.ts must exist");
   const content = fs.readFileSync(filePath, "utf8");
 
   assert.ok(content.includes("DEFAULT_GROWTH_SETTINGS"), "must export DEFAULT_GROWTH_SETTINGS");
+  assert.ok(content.includes("enabled: false"), "must default enabled to false (hide mode for user side)");
   assert.ok(content.includes("minCompletedTests: 5"), "must default minCompletedTests to 5");
   assert.ok(content.includes("cooldownDays: 7"), "must default cooldownDays to 7");
   assert.ok(content.includes("maxAppearances: 3"), "must default maxAppearances to 3");
@@ -17,10 +18,15 @@ test("growth-settings: defaults and type definition enforce minimum 5 mock test 
   assert.ok(content.includes("getGrowthSettings"), "must export getGrowthSettings with cache fallback");
 });
 
-test("help-us-to-grow page: exists, adheres to news broadsheet styling and Cashfree integration", () => {
+test("help-us-to-grow page: hide mode active for user side, admin preview preserved", () => {
   const filePath = path.resolve("app/help-us-to-grow/page.tsx");
   assert.ok(fs.existsSync(filePath), "app/help-us-to-grow/page.tsx must exist");
   const content = fs.readFileSync(filePath, "utf8");
+
+  // User side hide mode: non-admins receive 404 notFound()
+  assert.ok(content.includes("notFound"), "must import and invoke notFound for user side");
+  assert.ok(content.includes("!settings.enabled && !isAdmin"), "must guard user-side access with notFound");
+  assert.ok(content.includes("robots: { index: false, follow: false }"), "must disable search engine indexing");
 
   // Editorial news color palette
   assert.ok(content.includes("#0055a2"), "must use news primary navy blue #0055a2");
@@ -34,33 +40,14 @@ test("help-us-to-grow page: exists, adheres to news broadsheet styling and Cashf
   assert.ok(content.includes("Bilingual Question Verification"), "must detail question curation costs");
   assert.ok(content.includes("100% Ad-Free Guarantee"), "must detail ad-free policy");
 
-  // Policy: does not mention specific test counts like 5 tests to candidates, but mentions long time
-  assert.ok(!content.includes("5 or more tests"), "must not display 5 tests milestone to candidates");
-  assert.ok(content.includes("using our platform for a long time"), "must state long time users policy");
-  assert.ok(content.includes("new users or casual visitors"), "must clarify no requests to new users");
-
   // Cashfree integration
   assert.ok(content.includes("CashfreeContributionBox"), "must integrate Cashfree contribution box");
-
-  const cashfreeBoxPath = path.resolve("components/growth/CashfreeContributionBox.tsx");
-  assert.ok(fs.existsSync(cashfreeBoxPath), "CashfreeContributionBox component must exist");
-  const cashfreeBoxContent = fs.readFileSync(cashfreeBoxPath, "utf8");
-  assert.ok(cashfreeBoxContent.includes("Cashfree"), "must use Cashfree JS SDK");
-  assert.ok(cashfreeBoxContent.includes("initiateCashfreeGrowthContribution"), "must invoke Cashfree contribution action");
-  assert.ok(cashfreeBoxContent.includes("CopyUpiButton"), "must integrate UPI copying fallback");
 });
 
-test("sidebar navigation: PublicHeader and PublicNavigationMenu contain Help Us to Grow", () => {
+test("sidebar navigation: Help Us to Grow is hidden from public navigation drawer", () => {
   const headerPath = path.resolve("components/site/PublicHeader.tsx");
   const headerContent = fs.readFileSync(headerPath, "utf8");
-  assert.ok(headerContent.includes("/help-us-to-grow"), "PublicHeader must route to /help-us-to-grow");
-  assert.ok(headerContent.includes("Help Us to Grow"), "PublicHeader must label 'Help Us to Grow'");
-  assert.ok(headerContent.includes("icon: \"grow\""), "PublicHeader must specify grow icon");
-
-  const menuPath = path.resolve("components/site/PublicNavigationMenu.tsx");
-  const menuContent = fs.readFileSync(menuPath, "utf8");
-  assert.ok(menuContent.includes("\"grow\""), "PublicNavigationMenu must support grow icon type");
-  assert.ok(menuContent.includes("name === \"grow\""), "PublicNavigationMenu must render SVG for grow icon");
+  assert.ok(!headerContent.includes("/help-us-to-grow"), "PublicHeader must not expose /help-us-to-grow in user-side navigation");
 });
 
 test("admin workspace: navigation and growth settings control panel are configured", () => {

@@ -795,7 +795,7 @@ export default async function Dashboard({
         )}
       </div>
 
-      {growthSettings.targetRoutes.dashboard && (
+      {growthSettings.enabled && growthSettings.targetRoutes.dashboard && (
         <SupportPromptModal
           completedAttempts={totalAttempts}
           settings={growthSettings}

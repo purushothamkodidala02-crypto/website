@@ -71,10 +71,10 @@ export function GrowthSettingsForm({
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-bold text-slate-950">
-                Pop-up Active Status
+                Pop-up & Page Active Status
               </h2>
               <p className="mt-0.5 text-xs text-slate-600">
-                Enable or disable the &ldquo;Help Us to Grow&rdquo; support prompt across the site.
+                Enable or disable the &ldquo;Help Us to Grow&rdquo; page and candidate support pop-up (Disabled = Hide Mode, completely invisible to regular visitors).
               </p>
             </div>
             <label className="relative inline-flex cursor-pointer items-center">
