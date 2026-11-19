@@ -19,8 +19,8 @@ export async function initiateCashfreeGrowthContribution(
   name?: string,
 ): Promise<GrowthPaymentResult> {
   try {
-    if (!Number.isFinite(amountInr) || amountInr < 10) {
-      return { success: false, error: "Please enter a valid contribution of at least ₹10." };
+    if (!Number.isFinite(amountInr) || amountInr < 1) {
+      return { success: false, error: "Please enter a valid contribution of at least ₹1." };
     }
 
     const cleanPhone = phone.replace(/[^0-9]/g, "");

@@ -49,8 +49,8 @@ export function CashfreeContributionBox({
     e.preventDefault();
     setError(null);
 
-    if (effectiveAmount < 10) {
-      setError("Please select or enter an amount of at least ₹10.");
+    if (effectiveAmount < 1) {
+      setError("Please select or enter an amount of at least ₹1.");
       return;
     }
 
@@ -169,14 +169,17 @@ export function CashfreeContributionBox({
                 <input
                   id="custom-amt-input"
                   type="number"
-                  min={10}
-                  step={10}
-                  placeholder="250"
+                  min={1}
+                  step={1}
+                  placeholder="e.g. 1, 20, 50"
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
                   className="w-full rounded-xl border border-[#d5d9d9] py-2 pl-7 pr-3 text-sm font-bold text-[#0f1111] focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] focus:outline-none"
                 />
               </div>
+              <p className="mt-1 text-[11px] text-[#565959]">
+                Minimum contribution is ₹1. Every rupee directly supports our platform.
+              </p>
             </div>
           )}
         </div>
@@ -227,7 +230,7 @@ export function CashfreeContributionBox({
           <div className="pt-2">
             <button
               type="submit"
-              disabled={loading || effectiveAmount < 10}
+              disabled={loading || effectiveAmount < 1}
               className="w-full rounded-xl bg-[#059669] hover:bg-[#047857] active:bg-[#065f46] text-white font-extrabold py-3.5 px-6 text-sm sm:text-base shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
