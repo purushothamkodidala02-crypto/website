@@ -23,7 +23,7 @@ export type GrowthPopupSettings = {
 };
 
 export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
-  enabled: false, // Default to false (Hide Mode) so users never see pop-up or page until admin enables it
+  enabled: true, // Enabled so candidates can access Help Us to Grow from sidebar and prompts
   minCompletedTests: 5,
   cooldownDays: 7,
   maxAppearances: 3,

@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-test("growth-settings: defaults and type definition enforce hide mode and 5 mock test threshold", () => {
+test("growth-settings: defaults and type definition enforce live mode and 5 mock test threshold", () => {
   const filePath = path.resolve("lib/growth-settings.ts");
   assert.ok(fs.existsSync(filePath), "lib/growth-settings.ts must exist");
   const content = fs.readFileSync(filePath, "utf8");
 
   assert.ok(content.includes("DEFAULT_GROWTH_SETTINGS"), "must export DEFAULT_GROWTH_SETTINGS");
-  assert.ok(content.includes("enabled: false"), "must default enabled to false (hide mode for user side)");
+  assert.ok(content.includes("enabled: true"), "must default enabled to true for live accessibility");
   assert.ok(content.includes("minCompletedTests: 5"), "must default minCompletedTests to 5");
   assert.ok(content.includes("cooldownDays: 7"), "must default cooldownDays to 7");
   assert.ok(content.includes("maxAppearances: 3"), "must default maxAppearances to 3");
@@ -55,10 +55,11 @@ test("help-us-to-grow page: hide mode active for user side, admin preview preser
   assert.ok(!content.includes("Top Editorial Accent Bar"), "must remove top rendering bar");
 });
 
-test("sidebar navigation: Help Us to Grow is hidden from public navigation drawer", () => {
+test("sidebar navigation: Help Us to Grow is displayed in public navigation drawer", () => {
   const headerPath = path.resolve("components/site/PublicHeader.tsx");
   const headerContent = fs.readFileSync(headerPath, "utf8");
-  assert.ok(!headerContent.includes("/help-us-to-grow"), "PublicHeader must not expose /help-us-to-grow in user-side navigation");
+  assert.ok(headerContent.includes("/help-us-to-grow"), "PublicHeader must include /help-us-to-grow in navigation");
+  assert.ok(headerContent.includes("Help Us to Grow"), "PublicHeader must label Help Us to Grow in navigation");
 });
 
 test("admin workspace: navigation and growth settings control panel are configured", () => {
