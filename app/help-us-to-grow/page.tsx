@@ -166,22 +166,6 @@ export default async function HelpUsToGrowPage({
                 <p className="mt-1.5 text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
                   If no money was deducted, feel free to try again below or continue practicing on Varadhi Prep! If an amount was deducted, your bank or UPI app will automatically reverse it back to your account within 2–3 business days.
                 </p>
-
-                {query.order_id && (
-                  <p className="mt-3 pt-2.5 border-t border-emerald-200/70 text-[11px] sm:text-xs text-emerald-900">
-                    Need assistance? Email{" "}
-                    <a
-                      href={`mailto:support@varadhiprep.in?subject=${encodeURIComponent(`Payment Support - Order ${query.order_id}`)}`}
-                      className="font-bold underline text-emerald-950 hover:text-emerald-700"
-                    >
-                      support@varadhiprep.in
-                    </a>{" "}
-                    with Reference Order ID:{" "}
-                    <code className="font-mono font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded text-emerald-950">
-                      {query.order_id}
-                    </code>
-                  </p>
-                )}
               </div>
             </div>
           </div>
