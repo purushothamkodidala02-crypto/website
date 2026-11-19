@@ -17,7 +17,7 @@ test("growth-settings: defaults and type definition enforce minimum 5 mock test 
   assert.ok(content.includes("getGrowthSettings"), "must export getGrowthSettings with cache fallback");
 });
 
-test("help-us-to-grow page: exists, adheres to news broadsheet styling and transparent cost breakdown", () => {
+test("help-us-to-grow page: exists, adheres to news broadsheet styling and Cashfree integration", () => {
   const filePath = path.resolve("app/help-us-to-grow/page.tsx");
   assert.ok(fs.existsSync(filePath), "app/help-us-to-grow/page.tsx must exist");
   const content = fs.readFileSync(filePath, "utf8");
@@ -29,18 +29,23 @@ test("help-us-to-grow page: exists, adheres to news broadsheet styling and trans
   assert.ok(content.includes("#cde7f7"), "must use news border blue #cde7f7");
 
   // Operational cost breakdown areas
-  assert.ok(content.includes("High-Concurrency Cloud & Edge Delivery"), "must detail cloud edge compute costs");
-  assert.ok(content.includes("Dedicated Database & Submission Storage"), "must detail database storage costs");
-  assert.ok(content.includes("Bilingual Question Curation & Academic Auditing"), "must detail question curation costs");
-  assert.ok(content.includes("Strict Zero-Commercial-Ad Policy"), "must detail ad-free policy");
+  assert.ok(content.includes("Cloud & Edge Servers"), "must detail cloud edge compute costs");
+  assert.ok(content.includes("Managed Database Hosting"), "must detail database storage costs");
+  assert.ok(content.includes("Bilingual Question Verification"), "must detail question curation costs");
+  assert.ok(content.includes("100% Ad-Free Guarantee"), "must detail ad-free policy");
 
   // Policy on asking only after 5+ mock tests
-  assert.ok(content.includes("We do not ask for money from new users"), "must explicitly clarify new users are not interrupted");
-  assert.ok(content.includes("five or more full-length mock tests"), "must state 5+ mock tests completion policy");
+  assert.ok(content.includes("5 or more tests"), "must state 5+ mock tests completion policy");
 
-  // UPI and voluntary contribution
-  assert.ok(content.includes("CopyUpiButton"), "must integrate UPI copying");
-  assert.ok(content.includes("Official UPI ID"), "must show official UPI section");
+  // Cashfree integration
+  assert.ok(content.includes("CashfreeContributionBox"), "must integrate Cashfree contribution box");
+
+  const cashfreeBoxPath = path.resolve("components/growth/CashfreeContributionBox.tsx");
+  assert.ok(fs.existsSync(cashfreeBoxPath), "CashfreeContributionBox component must exist");
+  const cashfreeBoxContent = fs.readFileSync(cashfreeBoxPath, "utf8");
+  assert.ok(cashfreeBoxContent.includes("Cashfree"), "must use Cashfree JS SDK");
+  assert.ok(cashfreeBoxContent.includes("initiateCashfreeGrowthContribution"), "must invoke Cashfree contribution action");
+  assert.ok(cashfreeBoxContent.includes("CopyUpiButton"), "must integrate UPI copying fallback");
 });
 
 test("sidebar navigation: PublicHeader and PublicNavigationMenu contain Help Us to Grow", () => {
