@@ -104,18 +104,8 @@ export function CashfreeContributionBox({
       />
 
       <div className="rounded-2xl border border-[#d5d9d9] bg-white p-6 sm:p-7 shadow-xs">
-        {/* Header */}
-        <div className="border-b border-slate-100 pb-4">
-          <h2 className="text-base sm:text-lg font-bold text-[#131921] flex items-center gap-2">
-            <span>🚀</span> Contribute to Varadhi Prep
-          </h2>
-          <p className="mt-1 text-xs sm:text-sm text-[#565959]">
-            If you feel happy using Varadhi Prep, contribute to help us grow.
-          </p>
-        </div>
-
         {/* Amount Selector */}
-        <div className="pt-4">
+        <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-[#565959]">
             Select Amount
           </label>

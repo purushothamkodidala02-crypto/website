@@ -83,7 +83,7 @@ test("admin workspace: navigation and growth settings control panel are configur
   assert.ok(fs.existsSync(actionsPath), "admin growth settings actions must exist");
 });
 
-test("support modal: SupportPromptModal enforces eligibility and graceful dismissal", () => {
+test("support modal: SupportPromptModal enforces eligibility, graceful dismissal, and emerald styling", () => {
   const modalPath = path.resolve("components/growth/SupportPromptModal.tsx");
   assert.ok(fs.existsSync(modalPath), "SupportPromptModal must exist");
   const modalContent = fs.readFileSync(modalPath, "utf8");
@@ -94,6 +94,11 @@ test("support modal: SupportPromptModal enforces eligibility and graceful dismis
   assert.ok(modalContent.includes("varadhi_growth_supported_at"), "must track support completion");
   assert.ok(modalContent.includes("settings.primaryButtonText"), "must render primary button");
   assert.ok(modalContent.includes("settings.secondaryButtonText"), "must render secondary button");
+
+  // Emerald styling alignment with Help Us to Grow
+  assert.ok(modalContent.includes("from-emerald-600"), "must include emerald accent gradient");
+  assert.ok(modalContent.includes("bg-[#059669]"), "primary CTA must use emerald button color");
+  assert.ok(modalContent.includes("100% Ad-Free"), "must highlight ad-free pillar");
 });
 
 test("dashboard: integrates SupportPromptModal conditionally with server-verified total attempts", () => {

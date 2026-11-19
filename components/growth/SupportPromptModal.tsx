@@ -18,6 +18,15 @@ export function SupportPromptModal({
   const [effectiveCount, setEffectiveCount] = useState<number>(serverCompletedAttempts ?? 0);
 
   useEffect(() => {
+    // 0. Immediate preview mode for verification (?preview_growth=true or ?preview=growth)
+    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const isPreview = urlParams?.get("preview_growth") === "true" || urlParams?.get("preview") === "growth";
+    if (isPreview) {
+      setEffectiveCount(serverCompletedAttempts && serverCompletedAttempts > 0 ? serverCompletedAttempts : 5);
+      setIsOpen(true);
+      return;
+    }
+
     // 1. Master enable check
     if (!settings.enabled) return;
 
@@ -95,14 +104,15 @@ export function SupportPromptModal({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[#cde7f7] bg-white shadow-2xl transition-all">
-        {/* Top Header Accent Rule */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-[#0055a2] via-[#0055a2] to-[#fb8916]" />
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl transition-all">
+        {/* Top Header Accent Rule - Emerald & Amber gradient aligned with Help Us to Grow */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500" />
 
         <div className="p-5 sm:p-7">
           {/* Top Bar with Badge & Dismiss */}
           <div className="flex items-start justify-between gap-3">
-            <span className="inline-flex items-center rounded-full bg-[#0055a2]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#0055a2]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
               Dedicated Learner
             </span>
             <button
@@ -129,7 +139,7 @@ export function SupportPromptModal({
           {/* Heading */}
           <h2
             id="growth-modal-title"
-            className="mt-3 text-lg sm:text-xl font-black text-[#0f172a] leading-snug"
+            className="mt-3 text-lg sm:text-xl font-black text-[#0f172a] leading-snug tracking-tight"
           >
             {settings.headline || "Support the Mission to Keep Quality Mock Tests Open & Free"}
           </h2>
@@ -140,7 +150,23 @@ export function SupportPromptModal({
               "We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. As a committed candidate who has been using our platform for a long time, you have experienced first-hand the academic and technical standard of Varadhi Prep. We bear monthly server, database, and bilingual question curation costs to keep all tests open, fast, and 100% ad-free."}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          {/* Value Highlights Pill Chips */}
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-slate-200/80 bg-slate-50/80 p-2.5 text-center">
+            <div className="flex flex-col items-center">
+              <span className="text-[11px] font-bold text-emerald-800">100% Ad-Free</span>
+              <span className="text-[10px] text-slate-500">Zero distractions</span>
+            </div>
+            <div className="flex flex-col items-center border-x border-slate-200/80 px-1">
+              <span className="text-[11px] font-bold text-emerald-800">Fast Servers</span>
+              <span className="text-[10px] text-slate-500">Sub-50ms latency</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-[11px] font-bold text-emerald-800">Bilingual Tests</span>
+              <span className="text-[10px] text-slate-500">Verified syllabus</span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-slate-500">
             If our platform has benefited your preparation, your voluntary contribution helps keep tests accessible for fellow candidates.
           </p>
 
@@ -149,7 +175,7 @@ export function SupportPromptModal({
             <button
               type="button"
               onClick={handleDismiss}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 transition text-center"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition text-center"
             >
               {settings.secondaryButtonText || "Maybe Later"}
             </button>
@@ -157,9 +183,21 @@ export function SupportPromptModal({
             <Link
               href="/help-us-to-grow"
               onClick={handleSupportClick}
-              className="rounded-xl bg-[#0055a2] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#004382] transition text-center"
+              className="rounded-xl bg-[#059669] hover:bg-[#047857] active:bg-[#065f46] px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-xs hover:shadow transition text-center flex items-center justify-center gap-1.5"
             >
-              {settings.primaryButtonText || "Support Varadhi"}
+              <span>{settings.primaryButtonText || "Support Varadhi"}</span>
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </Link>
           </div>
         </div>

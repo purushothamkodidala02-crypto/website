@@ -479,12 +479,13 @@ export function GrowthSettingsForm({
         </div>
 
         {/* Mock Modal Preview */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#0f2942] via-blue-700 to-teal-600" />
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-lg">
+          <div className="h-1.5 w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500" />
 
           <div className="p-5 sm:p-6 space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-900">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
                 Dedicated Learner
               </span>
               <span className="text-slate-400 text-xs cursor-default">✕</span>
@@ -499,6 +500,21 @@ export function GrowthSettingsForm({
                 "If you are happy with our service and Varadhi Prep has added value to your exam preparation, consider supporting us to keep tests free and open for everyone. We do not ask new users or casual visitors for contributions. Your voluntary support directly powers cloud servers, databases, and bilingual questions."}
             </p>
 
+            <div className="grid grid-cols-3 gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 p-2 text-center">
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-bold text-emerald-800">100% Ad-Free</span>
+                <span className="text-[9px] text-slate-500">Zero distractions</span>
+              </div>
+              <div className="flex flex-col items-center border-x border-slate-200/80 px-1">
+                <span className="text-[10px] font-bold text-emerald-800">Fast Servers</span>
+                <span className="text-[9px] text-slate-500">Sub-50ms speed</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-bold text-emerald-800">Bilingual Tests</span>
+                <span className="text-[9px] text-slate-500">Verified syllabus</span>
+              </div>
+            </div>
+
             <p className="text-[11px] text-slate-500">
               If our platform has benefited your preparation, your voluntary contribution helps keep tests accessible for fellow candidates.
             </p>
@@ -507,7 +523,7 @@ export function GrowthSettingsForm({
               <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">
                 {secondaryButtonText || "Maybe Later"}
               </span>
-              <span className="rounded-lg bg-[#0f2942] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
+              <span className="rounded-lg bg-[#059669] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
                 {primaryButtonText || "Support Varadhi"}
               </span>
             </div>
