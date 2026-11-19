@@ -47,6 +47,7 @@ export const ADMIN_SECTIONS = [
     links: [
       { href: "/admin/access", label: "Exam series", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations & Sales", icon: "students" as const },
+      { href: "/admin/growth-settings", label: "Help Us Grow Pop-up", icon: "growth" as const },
       { href: "/admin/surveys", label: "Surveys & Feedback", icon: "surveys" as const },
     ],
   },
@@ -65,6 +66,7 @@ export type NavIconName =
   | "students"
   | "reports"
   | "surveys"
+  | "growth"
   | "guide"
   | "portal";
 
@@ -162,6 +164,13 @@ export function NavIcon({ name }: { name: NavIconName }) {
           <rect x="9" y="2" width="6" height="3" rx="1" />
           <path d="m9 12 2 2 4-4" />
           <path d="M9 17h6" />
+        </>
+      )}
+      {name === "growth" && (
+        <>
+          <path d="M12 21V11" />
+          <path d="M12 11c0-4.5 3.5-7 8-7 0 4.5-2.5 8-8 7Z" />
+          <path d="M12 14c0-3.5-2.5-5.5-6-5.5 0 3.5 2 6 6 5.5Z" />
         </>
       )}
       {name === "guide" && (

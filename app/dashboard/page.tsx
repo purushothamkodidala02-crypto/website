@@ -13,6 +13,8 @@ import { mockTestUrl } from "@/lib/public-urls";
 import { isPaidSalesEnabled } from "@/lib/paid-sales";
 import { createClient } from "@/lib/supabase/server";
 import { resolveStudentDisplayInfo } from "@/lib/student-name";
+import { SupportPromptModal } from "@/components/growth/SupportPromptModal";
+import { getGrowthSettings } from "@/lib/growth-settings";
 
 type Attempt = {
   id: string;
@@ -68,6 +70,7 @@ export default async function Dashboard({
   const userPromise = supabase.auth.getUser().then(({ data }) => data.user ?? null);
   const paidSalesPromise = isPaidSalesEnabled();
   const catalogPromise = getDashboardCatalogData();
+  const growthSettingsPromise = getGrowthSettings();
 
   const attemptsPromise = userPromise.then(async (user) => {
     if (!user) return [] as Attempt[];
@@ -110,6 +113,7 @@ export default async function Dashboard({
     bookmarksCount,
     paidSalesEnabled,
     catalog,
+    growthSettings,
   ] = await Promise.all([
     userPromise,
     attemptsPromise,
@@ -129,6 +133,7 @@ export default async function Dashboard({
     bookmarksCountPromise,
     paidSalesPromise,
     catalogPromise,
+    growthSettingsPromise,
   ]);
 
   if (!user) redirect("/login?next=/dashboard");
@@ -789,6 +794,13 @@ export default async function Dashboard({
           </>
         )}
       </div>
+
+      {growthSettings.targetRoutes.dashboard && (
+        <SupportPromptModal
+          completedAttempts={totalAttempts}
+          settings={growthSettings}
+        />
+      )}
     </main>
   );
 }

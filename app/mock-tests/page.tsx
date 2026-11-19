@@ -27,6 +27,8 @@ import { MockTestCardAction } from "@/components/mock-tests/MockTestCardAction";
 import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { formatMarkValue, resolveMockTestScoring, summarizeExamNegativeMarking } from "@/lib/scoring";
+import { SupportPromptModal } from "@/components/growth/SupportPromptModal";
+import { getGrowthSettings } from "@/lib/growth-settings";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
 export const revalidate = 300;
@@ -139,7 +141,10 @@ function testTypeUrl(
 
 export default async function MockTestsPage({ searchParams, canonicalPath }: MockTestsPageProps) {
   const filters = await searchParams;
-  const catalog = await getMockTestCatalogData();
+  const [catalog, growthSettings] = await Promise.all([
+    getMockTestCatalogData(),
+    getGrowthSettings(),
+  ]);
   const { states, categories, exams, specializations, papers, subjects, sections = [] } = catalog;
   const paperDisplayById = buildPaperDisplayMap(papers as OrderedPaper[]);
   const stateById = new Map(states.map((item) => [item.id, item]));
@@ -968,6 +973,10 @@ export default async function MockTestsPage({ searchParams, canonicalPath }: Moc
           </CatalogSection>
         )}
       </div>
+
+      {growthSettings.targetRoutes.mockTests && (
+        <SupportPromptModal settings={growthSettings} />
+      )}
     </main>
   );
 }

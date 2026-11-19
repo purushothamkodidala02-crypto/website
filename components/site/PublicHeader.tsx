@@ -11,6 +11,7 @@ export function PublicHeader({ compact = false }: PublicHeaderProps) {
   const navigation = [
     { href: "/", label: "Home", icon: "home" as const },
     { href: "/mock-tests", label: "Mock Tests", icon: "tests" as const },
+    { href: "/help-us-to-grow", label: "Help Us to Grow", icon: "grow" as const },
     { href: "/support", label: "Support", icon: "support" as const },
   ];
   return (
