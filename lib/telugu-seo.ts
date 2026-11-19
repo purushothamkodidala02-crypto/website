@@ -166,10 +166,10 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
 
 const TG_TET_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ టెట్ (TG-TET 2026)",
-  teluguTitle: "తెలంగాణ టెట్ 2026 ఉచిత మాక్ టెస్ట్",
-  bilingualPageTitle: "TG-TET 2026 Free Mock Test | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు",
+  teluguTitle: "తెలంగాణ టెట్ 2026 ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్ & సిలబస్",
+  bilingualPageTitle: "TG-TET 2026 Free Mock Test & Syllabus | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు",
   bilingualDescription:
-    "TG-TET 2026 free online mock tests for Paper 1 and Paper 2 in Telugu and English. తెలంగాణ టెట్ ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్‌లు.",
+    "TG-TET 2026 ఉపాధ్యాయ అర్హత పరీక్ష పేపర్ 1 మరియు పేపర్ 2 కోసం ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్‌లు, పూర్తి సిలబస్, పరీక్ష తేదీలు, ఉపాధ్యాయ విధులు మరియు అర్హతలు.",
   keywords: [
     "టీజీ టెట్ మాక్ టెస్ట్ 2026",
     "తెలంగాణ టెట్ ప్రాక్టీస్ పేపర్స్ తెలుగు",
@@ -181,8 +181,12 @@ const TG_TET_SEO: ExamTeluguSeo = {
     "తెలంగాణ టెట్ సిలబస్ 2026",
     "TG TET exam date 2026 hall tickets",
     "తెలంగాణ టెట్ పరీక్ష తేదీ",
+    "TG TET qualifying marks cut off",
+    "SGT School Assistant duties and salary",
+    "తెలంగాణ టీచర్ జీతం విధులు DSC weightage",
     "TG TET child development and pedagogy mock test",
     "Telangana teacher eligibility test paper 1 paper 2",
+    "TG TET negative marking rules",
     "వరధి ప్రెప్ టెట్ మాక్ టెస్ట్",
     "TG TET model papers in telugu",
     "తెలంగాణ టెట్ ఆన్‌లైన్ టెస్ట్",

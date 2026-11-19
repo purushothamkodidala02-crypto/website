@@ -128,16 +128,18 @@ test("APPSC Endowment Officer SEO generates rich bilingual metadata, keywords, a
   assert.equal(resolved.description, eo.bilingualDescription);
 });
 
-test("TG-TET SEO provides clean mock test focus without extraneous pattern, schedule or job profile bloat", async () => {
+test("TG-TET SEO provides rich bilingual wording without extraneous pattern, schedule or job profile bloat", async () => {
   const tet = getExamTeluguMetadata("tg-tet-2026", "TG TET 2026", "tg");
   assert.ok(tet);
   assert.equal(tet.teluguName, "తెలంగాణ టెట్ (TG-TET 2026)");
-  assert.equal(tet.teluguTitle, "తెలంగాణ టెట్ 2026 ఉచిత మాక్ టెస్ట్");
-  assert.equal(tet.bilingualPageTitle, "TG-TET 2026 Free Mock Test | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు");
-  assert.match(tet.bilingualDescription, /TG-TET 2026 free online mock tests/);
+  assert.equal(tet.teluguTitle, "తెలంగాణ టెట్ 2026 ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్ & సిలబస్");
+  assert.equal(tet.bilingualPageTitle, "TG-TET 2026 Free Mock Test & Syllabus | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు");
+  assert.match(tet.bilingualDescription, /TG-TET 2026 ఉపాధ్యాయ అర్హత పరీక్ష పేపర్ 1 మరియు పేపర్ 2 కోసం ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్‌లు/);
   assert.equal(tet.pattern, undefined);
   assert.equal(tet.schedule, undefined);
   assert.equal(tet.jobProfile, undefined);
+  assert.ok(tet.keywords.length >= 10);
+  assert.ok(tet.keywords.some((k) => k.includes("సిలబస్")));
   assert.ok(tet.teluguFaqs.length >= 2);
   assert.ok(tet.englishFaqs.length >= 2);
 });
