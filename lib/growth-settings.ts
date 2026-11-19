@@ -34,7 +34,7 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
   },
   headline: "Support the Mission to Keep Quality Mock Tests Open & Free",
   message:
-    "You have completed 5+ full-length mock tests on Varadhi Prep. We bear high server, database, and content verification costs every month to keep exams open to every serious aspirant without commercial advertisements or paywalls.",
+    "We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. As a committed candidate who has been using our platform for a long time, you have experienced first-hand the academic and technical standard of Varadhi Prep. We bear monthly server, database, and content verification costs to keep all tests open, fast, and 100% ad-free.",
   primaryButtonText: "Support Varadhi",
   secondaryButtonText: "Maybe Later",
   suggestedAmounts: [50, 100, 250, 500],

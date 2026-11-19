@@ -34,8 +34,10 @@ test("help-us-to-grow page: exists, adheres to news broadsheet styling and Cashf
   assert.ok(content.includes("Bilingual Question Verification"), "must detail question curation costs");
   assert.ok(content.includes("100% Ad-Free Guarantee"), "must detail ad-free policy");
 
-  // Policy on asking only after 5+ mock tests
-  assert.ok(content.includes("5 or more tests"), "must state 5+ mock tests completion policy");
+  // Policy: does not mention specific test counts like 5 tests to candidates, but mentions long time
+  assert.ok(!content.includes("5 or more tests"), "must not display 5 tests milestone to candidates");
+  assert.ok(content.includes("using our platform for a long time"), "must state long time users policy");
+  assert.ok(content.includes("new users or casual visitors"), "must clarify no requests to new users");
 
   // Cashfree integration
   assert.ok(content.includes("CashfreeContributionBox"), "must integrate Cashfree contribution box");

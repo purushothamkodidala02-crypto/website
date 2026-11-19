@@ -103,7 +103,7 @@ export function SupportPromptModal({
           {/* Top Bar with Badge & Dismiss */}
           <div className="flex items-start justify-between gap-3">
             <span className="inline-flex items-center rounded-full bg-[#0055a2]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#0055a2]">
-              Milestone: {effectiveCount} Mock Tests Completed
+              Dedicated Learner
             </span>
             <button
               type="button"
@@ -137,7 +137,7 @@ export function SupportPromptModal({
           {/* Body Message */}
           <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
             {settings.message ||
-              `You have completed ${effectiveCount} full-length mock tests on Varadhi Prep. We bear high server, database, and bilingual question curation costs every month to keep exams open to every serious aspirant without commercial advertisements or paywalls.`}
+              "We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. As a committed candidate who has been using our platform for a long time, you have experienced first-hand the academic and technical standard of Varadhi Prep. We bear monthly server, database, and bilingual question curation costs to keep all tests open, fast, and 100% ad-free."}
           </p>
 
           <p className="mt-2 text-xs text-slate-500">

@@ -119,7 +119,7 @@ export function GrowthSettingsForm({
                 className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
               />
               <span className="mt-1 block text-[11px] text-slate-500">
-                Default: 5 (users with 0 to 4 tests will never see the pop-up).
+                Threshold gate: Candidates must complete at least this many tests before the pop-up is shown (the pop-up does not display test counts; it addresses them as long-time users).
               </span>
             </div>
 
@@ -254,7 +254,7 @@ export function GrowthSettingsForm({
                   Public Home Page
                 </span>
                 <p className="text-[11px] text-slate-500">
-                  Only shown if candidate already has 5+ completed attempts stored.
+                  Only shown to returning candidates who meet the completed tests threshold.
                 </p>
               </div>
             </label>
@@ -437,7 +437,7 @@ export function GrowthSettingsForm({
           <div className="p-5 sm:p-6 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <span className="inline-flex items-center rounded-full bg-[#0055a2]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#0055a2]">
-                Milestone: {minCompletedTests} Mock Tests Completed
+                Dedicated Learner
               </span>
               <span className="text-slate-400 text-xs cursor-default">✕</span>
             </div>
@@ -448,7 +448,7 @@ export function GrowthSettingsForm({
 
             <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
               {message ||
-                `You have completed ${minCompletedTests} full-length mock tests on Varadhi Prep. We bear high server, database, and bilingual question curation costs every month to keep exams open to every serious aspirant without commercial advertisements or paywalls.`}
+                "We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. As a committed candidate who has been using our platform for a long time, you have experienced first-hand the academic and technical standard of Varadhi Prep. We bear monthly server, database, and bilingual curation costs to keep all tests open, fast, and 100% ad-free."}
             </p>
 
             <p className="text-[11px] text-slate-500">
@@ -468,7 +468,7 @@ export function GrowthSettingsForm({
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600 space-y-1">
           <p className="font-bold text-slate-800">Preview Notes:</p>
-          <p>• Only candidates completing ≥ {minCompletedTests} tests see this.</p>
+          <p>• Only candidates completing ≥ {minCompletedTests} tests see this (no test count is shown to candidates).</p>
           <p>• Dismissing via &ldquo;{secondaryButtonText}&rdquo; cools down for {cooldownDays} days.</p>
           <p>• Clean news colors strictly enforced; zero distracting emojis.</p>
         </div>

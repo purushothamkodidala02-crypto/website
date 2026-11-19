@@ -78,8 +78,8 @@ export default async function HelpUsToGrowPage({
           <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
             Varadhi Prep provides free, high-standard mock exams for competitive aspirants across Andhra Pradesh and Telangana. We bear monthly server, database, and bilingual question curation costs to keep the platform fast, accurate, and 100% ad-free.
           </p>
-          <p className="mt-1.5 text-xs text-slate-500">
-            Mock tests remain open to all candidates without restrictions. We only invite voluntary support from candidates who have completed 5 or more tests and wish to sustain the platform.
+          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            We do not ask for money from new users or casual visitors. Every candidate is encouraged to explore, read syllabi, and practice freely. We only approach committed candidates who are using our platform for a long time and have experienced first-hand the academic and technical standard of our platform.
           </p>
         </div>
 
