@@ -10,14 +10,16 @@ test("mock test filter blanks and SearchableSelect retain values on selection an
     locationFiltersSrc,
     existingTableSrc,
     createMockTestFormSrc,
+    questionBankTableSrc,
   ] = await Promise.all([
     read("components/admin/SearchableSelect.tsx"),
     read("components/admin/LocationFilters.tsx"),
     read("app/admin/mock-tests/ExistingMockTestsTable.tsx"),
     read("app/admin/mock-tests/CreateMockTestForm.tsx"),
+    read("app/admin/questions/QuestionBankTable.tsx"),
   ]);
 
-  // 1. SearchableSelect display value and open state
+  // 1. SearchableSelect display value, open state, and clear cross mark
   assert.match(
     searchableSelectSrc,
     /const displayValue = open \? query : \(selected\?\.label \?\? \(value \? query : ""\)\);/,
@@ -32,6 +34,23 @@ test("mock test filter blanks and SearchableSelect retain values on selection an
     searchableSelectSrc,
     /if \(!nextVal\.trim\(\) && value\) \{\s*onChange\(""\);\s*\}/,
     "SearchableSelect should only trigger onChange('') when input text is completely cleared"
+  );
+  assert.match(
+    searchableSelectSrc,
+    /aria-label="Clear selection"/,
+    "SearchableSelect should provide cross mark button to clear selection"
+  );
+
+  // 1b. QuestionBankTable active filter chips
+  assert.match(
+    questionBankTableSrc,
+    /Filtered by tag \/ keyword/,
+    "QuestionBankTable should render active filters indicator"
+  );
+  assert.match(
+    questionBankTableSrc,
+    /Board:\s*\{selectedCategory\.name\}/,
+    "QuestionBankTable should render board filter chip"
   );
 
   // 2. LocationFilters guarded against redundant resets

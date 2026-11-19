@@ -116,10 +116,6 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       if (exists) {
         return prev.filter((t) => t.trim().toLowerCase() !== lower);
       } else {
-        if (prev.length === 0 && !search.trim()) {
-          setStateId("");
-          setLocation(emptyLocation);
-        }
         return [...prev, cleanTerm];
       }
     });
@@ -153,6 +149,33 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const handleScopeClick = (clickedScope: "paper" | "subject") => {
     setScope((prev) => (prev === clickedScope ? "all" : clickedScope));
   };
+
+  const selectedCategory = useMemo(
+    () => categories.find((c) => c.id === location.categoryId),
+    [categories, location.categoryId]
+  );
+  const selectedExam = useMemo(
+    () => exams.find((e) => e.id === location.examId),
+    [exams, location.examId]
+  );
+  const selectedPaper = useMemo(
+    () => papers.find((p) => p.id === location.paperId),
+    [papers, location.paperId]
+  );
+  const selectedState = useMemo(
+    () => states.find((s) => s.id === stateId),
+    [states, stateId]
+  );
+  const hasActiveFilters = Boolean(
+    stateId ||
+    location.categoryId ||
+    location.examId ||
+    location.paperId ||
+    (status && status !== "all") ||
+    (scope && scope !== "all") ||
+    selectedTags.length > 0 ||
+    search.trim()
+  );
 
   const readyDraftsCount = tests.filter(
     (test) =>
@@ -568,9 +591,107 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </div>
         </div>
 
-        {(selectedTags.length > 0 || search.trim()) && (
+        {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600">
             <span className="font-medium text-slate-700">Filtered by tag / keyword:</span>
+
+            {/* State filter chip */}
+            {selectedState && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 font-semibold text-sky-900 shadow-2xs">
+                <span>State: {selectedState.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setStateId("")}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedState.name}" filter`}
+                  aria-label={`Remove "${selectedState.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Board / Category filter chip */}
+            {selectedCategory && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Board: {selectedCategory.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setLocation({ categoryId: "", examId: "", specializationId: "", paperId: "", subjectId: "" })}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedCategory.name}" filter`}
+                  aria-label={`Remove "${selectedCategory.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Exam filter chip */}
+            {selectedExam && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Exam: {selectedExam.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setLocation((prev) => ({ ...prev, examId: "", specializationId: "", paperId: "", subjectId: "" }))}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedExam.name}" filter`}
+                  aria-label={`Remove "${selectedExam.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Paper filter chip */}
+            {selectedPaper && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Paper: {selectedPaper.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setLocation((prev) => ({ ...prev, paperId: "", subjectId: "" }))}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedPaper.name}" filter`}
+                  aria-label={`Remove "${selectedPaper.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Status filter chip */}
+            {status !== "all" && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900 shadow-2xs">
+                <span>Status: {statusDetails[status]?.label ?? status}</span>
+                <button
+                  type="button"
+                  onClick={() => setStatus("all")}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title="Remove status filter"
+                  aria-label="Remove status filter"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Scope filter chip */}
+            {scope !== "all" && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1 font-semibold text-purple-900 shadow-2xs">
+                <span>Scope: {scope === "paper" ? "Paper-wise" : "Subject-wise"}</span>
+                <button
+                  type="button"
+                  onClick={() => setScope("all")}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title="Remove scope filter"
+                  aria-label="Remove scope filter"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Selected Tags */}
             {selectedTags.map((tag) => (
               <span
                 key={tag}
@@ -588,6 +709,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                 </button>
               </span>
             ))}
+
+            {/* Typed Search Keyword */}
             {search.trim() && !selectedTags.some((t) => t.trim().toLowerCase() === search.trim().toLowerCase()) && (
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
                 <span>&ldquo;{search.trim()}&rdquo;</span>
@@ -602,9 +725,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                 </button>
               </span>
             )}
+
             <span className="text-slate-400">
               ({filtered.length} {filtered.length === 1 ? "test" : "tests"} found{stateId ? " in selected state" : " across all states"})
             </span>
+
             <button
               type="button"
               onClick={() => {
@@ -612,6 +737,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                 setStateId("");
                 setLocation(emptyLocation);
                 setScope("all");
+                setStatus("all");
               }}
               className="text-xs font-semibold text-teal-700 hover:text-teal-900 hover:underline cursor-pointer ml-1"
               title="Reset all active filters"

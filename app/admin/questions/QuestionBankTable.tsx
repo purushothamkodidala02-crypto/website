@@ -135,6 +135,31 @@ export function QuestionBankTable({
   const examById = useMemo(() => new Map(exams.map((exam) => [exam.id, exam])), [exams]);
   const specializationById = useMemo(() => new Map(specializations.map((item) => [item.id, item.name])), [specializations]);
 
+  const selectedCategory = useMemo(
+    () => categories.find((c) => c.id === location.categoryId),
+    [categories, location.categoryId]
+  );
+  const selectedExam = useMemo(
+    () => exams.find((e) => e.id === location.examId),
+    [exams, location.examId]
+  );
+  const selectedPaper = useMemo(
+    () => papers.find((p) => p.id === location.paperId),
+    [papers, location.paperId]
+  );
+  const selectedSubject = useMemo(
+    () => subjects.find((s) => s.id === location.subjectId),
+    [subjects, location.subjectId]
+  );
+  const hasActiveFilters = Boolean(
+    location.categoryId ||
+    location.examId ||
+    location.paperId ||
+    location.subjectId ||
+    (statusFilter && statusFilter !== "all") ||
+    search.trim()
+  );
+
   useEffect(() => {
     let active = true;
     const timer = window.setTimeout(() => {
@@ -382,6 +407,140 @@ export function QuestionBankTable({
             </select>
           </label>
         </div>
+
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 text-xs text-slate-600">
+            <span className="font-medium text-slate-700">Filtered by tag / keyword:</span>
+
+            {/* Board / Category filter chip */}
+            {selectedCategory && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Board: {selectedCategory.name}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocation({ categoryId: "", examId: "", specializationId: "", paperId: "", subjectId: "" });
+                    setPage(1);
+                  }}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedCategory.name}" filter`}
+                  aria-label={`Remove "${selectedCategory.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Exam filter chip */}
+            {selectedExam && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Exam: {selectedExam.name}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocation((prev) => ({ ...prev, examId: "", specializationId: "", paperId: "", subjectId: "" }));
+                    setPage(1);
+                  }}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedExam.name}" filter`}
+                  aria-label={`Remove "${selectedExam.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Paper filter chip */}
+            {selectedPaper && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Paper: {selectedPaper.name}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocation((prev) => ({ ...prev, paperId: "", subjectId: "" }));
+                    setPage(1);
+                  }}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedPaper.name}" filter`}
+                  aria-label={`Remove "${selectedPaper.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Subject filter chip */}
+            {selectedSubject && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>Subject: {selectedSubject.name}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocation((prev) => ({ ...prev, subjectId: "" }));
+                    setPage(1);
+                  }}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${selectedSubject.name}" filter`}
+                  aria-label={`Remove "${selectedSubject.name}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Status filter chip */}
+            {statusFilter !== "all" && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900 shadow-2xs">
+                <span>Status: {statusFilter}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter("all");
+                    setPage(1);
+                  }}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title="Remove status filter"
+                  aria-label="Remove status filter"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {/* Search query chip */}
+            {search.trim() && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>&ldquo;{search.trim()}&rdquo;</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setPage(1);
+                  }}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title="Clear search keyword"
+                  aria-label="Clear search keyword"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setLocation({ categoryId: "", examId: "", specializationId: "", paperId: "", subjectId: "" });
+                setSearch("");
+                setStatusFilter("all");
+                setPage(1);
+              }}
+              className="text-xs font-semibold text-teal-700 hover:text-teal-900 hover:underline cursor-pointer ml-1"
+              title="Reset all filters"
+            >
+              Reset all filters
+            </button>
+          </div>
+        )}
       </div>
 
       {bulkFeedback && (

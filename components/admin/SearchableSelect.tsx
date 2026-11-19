@@ -151,8 +151,25 @@ export function SearchableSelect({
           }
         }}
         placeholder={placeholder}
-        className="w-full rounded-xl border py-3 pl-4 pr-12 font-normal outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+        className={`w-full rounded-xl border py-3 pl-4 ${value && !disabled ? "pr-16" : "pr-12"} font-normal outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100`}
       />
+      {value && !disabled && (
+        <button
+          type="button"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => {
+            onChange("");
+            setQuery("");
+            setOpen(false);
+            setActiveIndex(-1);
+          }}
+          aria-label="Clear selection"
+          title="Clear selection"
+          className="absolute right-8 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition text-xs cursor-pointer"
+        >
+          ✕
+        </button>
+      )}
       <button
         type="button"
         disabled={disabled}
