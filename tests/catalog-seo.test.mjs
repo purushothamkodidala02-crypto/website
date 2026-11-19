@@ -127,3 +127,18 @@ test("APPSC Endowment Officer SEO generates rich bilingual metadata, keywords, a
   assert.equal(resolved.title, eo.bilingualPageTitle);
   assert.equal(resolved.description, eo.bilingualDescription);
 });
+
+test("TG-TET SEO provides clean mock test focus without extraneous pattern, schedule or job profile bloat", async () => {
+  const tet = getExamTeluguMetadata("tg-tet-2026", "TG TET 2026", "tg");
+  assert.ok(tet);
+  assert.equal(tet.teluguName, "తెలంగాణ టెట్ (TG-TET 2026)");
+  assert.equal(tet.teluguTitle, "తెలంగాణ టెట్ 2026 ఉచిత మాక్ టెస్ట్");
+  assert.equal(tet.bilingualPageTitle, "TG-TET 2026 Free Mock Test | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు");
+  assert.match(tet.bilingualDescription, /TG-TET 2026 free online mock tests/);
+  assert.equal(tet.pattern, undefined);
+  assert.equal(tet.schedule, undefined);
+  assert.equal(tet.jobProfile, undefined);
+  assert.ok(tet.teluguFaqs.length >= 2);
+  assert.ok(tet.englishFaqs.length >= 2);
+});
+

@@ -166,10 +166,10 @@ const POLICE_CONSTABLE_SEO: ExamTeluguSeo = {
 
 const TG_TET_SEO: ExamTeluguSeo = {
   teluguName: "తెలంగాణ టెట్ (TG-TET 2026)",
-  teluguTitle: "తెలంగాణ టెట్ 2026 ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్ సిరీస్ & సిలబస్",
-  bilingualPageTitle: "TG-TET 2026 Free Mock Test & Syllabus | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు",
+  teluguTitle: "తెలంగాణ టెట్ 2026 ఉచిత మాక్ టెస్ట్",
+  bilingualPageTitle: "TG-TET 2026 Free Mock Test | తెలంగాణ టెట్ మాక్ టెస్ట్ తెలుగు",
   bilingualDescription:
-    "TG-TET 2026 ఉపాధ్యాయ అర్హత పరీక్ష పేపర్ 1 మరియు పేపర్ 2 కోసం ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్‌లు, పూర్తి సిలబస్, పరీక్ష తేదీలు, ఉపాధ్యాయ విధులు మరియు అర్హతలు.",
+    "TG-TET 2026 free online mock tests for Paper 1 and Paper 2 in Telugu and English. తెలంగాణ టెట్ ఉచిత ఆన్‌లైన్ మాక్ టెస్ట్‌లు.",
   keywords: [
     "టీజీ టెట్ మాక్ టెస్ట్ 2026",
     "తెలంగాణ టెట్ ప్రాక్టీస్ పేపర్స్ తెలుగు",
@@ -181,208 +181,44 @@ const TG_TET_SEO: ExamTeluguSeo = {
     "తెలంగాణ టెట్ సిలబస్ 2026",
     "TG TET exam date 2026 hall tickets",
     "తెలంగాణ టెట్ పరీక్ష తేదీ",
-    "TG TET qualifying marks cut off",
-    "SGT School Assistant duties and salary",
-    "తెలంగాణ టీచర్ జీతం విధులు DSC weightage",
     "TG TET child development and pedagogy mock test",
     "Telangana teacher eligibility test paper 1 paper 2",
-    "TG TET negative marking rules",
-  ],
-  schedule: {
-    authority: "Department of School Education, Government of Telangana",
-    postName: "Telangana Teacher Eligibility Test (TG-TET Paper-I & Paper-II)",
-    officialWebsite: "https://tgtet2026.cgg.gov.in",
-    notificationRelease: "March 2026",
-    applicationStart: "March 2026",
-    applicationEnd: "April 2026",
-    hallTicketRelease: "May 2026 (7 days prior)",
-    prelimsExamDate: "May 2026 (CBT Online Multi-session)",
-    prelimsSession: "Two Shifts (Paper-1: 9:00 AM – 11:30 AM, Paper-2: 2:00 PM – 4:30 PM)",
-    prelimsDuration: "150 Minutes (2.5 Hours per Paper)",
-    resultDeclaration: "June 2026",
-    events: [
-      {
-        title: "Official Notification Release",
-        teluguTitle: "అధికారిక నోటిఫికేషన్ విడుదల",
-        date: "March 2026",
-        status: "Upcoming",
-        detail: "Release of TG-TET information bulletin and application schedule on CGG portal.",
-      },
-      {
-        title: "Online Application Window",
-        teluguTitle: "ఆన్‌లైన్ దరఖాస్తుల స్వీకరణ",
-        date: "March – April 2026",
-        status: "Upcoming",
-        detail: "Submission of online applications and payment of examination fees.",
-      },
-      {
-        title: "Hall Ticket Download Window",
-        teluguTitle: "హాల్ టికెట్ డౌన్‌లోడ్",
-        date: "May 2026 (7 days prior to exam)",
-        status: "Upcoming",
-        detail: "Admit cards made available on tgtet2026.cgg.gov.in using Candidate Journal Number.",
-      },
-      {
-        title: "Computer Based Test (CBT) Conduct",
-        teluguTitle: "కంప్యూటర్ ఆధారిత పరీక్ష (CBT) నిర్వహణ",
-        date: "May 2026 (Multi-day sessions)",
-        status: "Upcoming",
-        detail: "Objective CBT examination for Paper 1 (Primary) and Paper 2 (Elementary) across designated centers.",
-      },
-      {
-        title: "Provisional Key & Objections",
-        teluguTitle: "ప్రాథమిక కీ & అభ్యంతరాల స్వీకరణ",
-        date: "May 2026 (Post Examination)",
-        status: "Upcoming",
-        detail: "Publishing of master question paper and candidate response sheets for objection filing.",
-      },
-      {
-        title: "Final Results & Lifetime Certificate Release",
-        teluguTitle: "తుది ఫలితాలు & లైఫ్‌టైమ్ సర్టిఫికేట్ విడుదల",
-        date: "June 2026",
-        status: "Upcoming",
-        detail: "Declaration of official ranks and downloadable digital TET pass certificate with lifetime validity.",
-      },
-    ],
-  },
-  pattern: {
-    authority: "School Education Department, Government of Telangana",
-    totalQuestions: 150,
-    totalMarks: 150,
-    durationMinutes: 150,
-    negativeMarking: "No Negative Marking (0 marks deducted for wrong answers)",
-    medium: "Bilingual (Telugu & English)",
-    mode: "Computer Based Test (CBT Online Exam)",
-    stages: [
-      "Paper 1: Primary Stage (Classes I to V) – 150 Questions, 150 Marks (150 Mins)",
-      "Paper 2: Upper Primary Stage (Classes VI to VIII) – 150 Questions, 150 Marks (150 Mins)",
-      "TET Certificate Validity: Lifetime validity with 20% weightage in TRT/DSC teacher recruitments",
-    ],
-    subjects: [
-      {
-        name: "Child Development and Pedagogy",
-        teluguName: "శిశు వికాసం మరియు పెడగాజి",
-        description: "Development of child, understanding learning processes, individual differences, personality, guidance & counselling, learning theories (Piaget, Kohlberg, Vygotsky), and pedagogical methods.",
-      },
-      {
-        name: "Language I – Telugu",
-        teluguName: "భాష I – తెలుగు",
-        description: "పఠనావగాహన (గద్యం, పద్యం), తెలంగాణ సాహిత్యం, కవులు-రచయితలు, వ్యాకరణ అంశాలు (సంధులు, సమాసాలు, ఛందస్సు, అలంకారాలు, విభక్తులు) మరియు తెలుగు బోధనా పద్ధతులు (మెథడాలజీ).",
-      },
-      {
-        name: "Language II – English",
-        teluguName: "భాష II – ఇంగ్లీష్",
-        description: "Reading comprehension, parts of speech, tenses, active/passive voice, direct/indirect speech, degrees of comparison, vocabulary (synonyms, antonyms, idioms), and pedagogy of English language teaching.",
-      },
-      {
-        name: "Mathematics",
-        teluguName: "గణితం & బోధనా పద్ధతులు",
-        description: "Number system, fractions, arithmetic (percentages, profit & loss, ratio), geometry, mensuration, algebra, statistics, data handling, and mathematics teaching methods.",
-      },
-      {
-        name: "Environmental Studies (Science & Social)",
-        teluguName: "పరిసరాల విజ్ఞానం (సైన్స్ & సోషల్)",
-        description: "Living world, plants & animals, human body & health, food & nutrition, water & air, Indian & Telangana history, geography, constitution & government, environment protection, and EVS pedagogical methods.",
-      },
-    ],
-  },
-  jobProfile: {
-    roleTitle: "Government School Teacher (SGT / School Assistant via DSC with TET)",
-    department: "Department of School Education, Government of Telangana",
-    payScale: "₹31,040 – ₹92,050 (RPS Pay Scale for SGT / SA)",
-    grossSalaryMonthly: "₹42,000 – ₹55,000 / month (approx. starting pay including DA & HRA)",
-    eligibility: {
-      ageLimit: "18 to 44 Years (upper age relaxation of 5 years for BC/SC/ST/EWS and up to 10 years for Physically Handicapped candidates).",
-      education: "Paper 1: Intermediate with D.El.Ed / D.Ed with at least 50% marks (45% for reserved). Paper 2: Graduation with B.Ed / B.El.Ed. Qualifying TET is mandatory to appear for DSC teacher recruitment.",
-    },
-    duties: [
-      {
-        title: "Classroom Teaching & Concept Delivery",
-        teluguTitle: "తరగతి గది బోధన & పాఠ్య ప్రణాళిక",
-        description: "Preparing annual, unit, and period lesson plans, utilizing innovative teaching-learning materials (TLM) and digital aids to impart quality education to primary and upper primary students.",
-      },
-      {
-        title: "Continuous and Comprehensive Evaluation (CCE)",
-        teluguTitle: "నిరంతర సమగ్ర మూల్యాంకనం (CCE)",
-        description: "Conducting regular formative assessments (FA 1-4) and summative assessments (SA 1-2), analyzing learning outcomes, identifying slow learners, and conducting remedial teaching.",
-      },
-      {
-        title: "Mid-day Meal & Student Health Monitoring",
-        teluguTitle: "మధ్యాహ్న భోజనం & విద్యార్థుల ఆరోగ్యం పర్యవేక్షణ",
-        description: "Supervising mid-day meal cleanliness, nutritional quality, daily student attendance, distributing free textbooks, uniforms, and coordinating with health workers for periodic health checks.",
-      },
-      {
-        title: "School Management Committee (SMC) & Parent Engagement",
-        teluguTitle: "SMC సమావేశాలు & తల్లిదండ్రుల సమన్వయం",
-        description: "Organizing periodic parent-teacher meetings, reviewing student progress, encouraging girl-child education, curbing dropouts, and mobilizing community support for school infrastructure.",
-      },
-      {
-        title: "Academic Records, UDISE+ & Student Database Maintenance",
-        teluguTitle: "స్కూల్ రికార్డులు & డేటాబేస్ నిర్వహణ",
-        description: "Maintaining child admission registers, student cumulative records, examination marks ledgers, and updating the government UDISE+ and Child Info portals.",
-      },
-    ],
-    careerGrowth: [
-      "Secondary Grade Teacher (SGT)",
-      "School Assistant (SA)",
-      "High School Headmaster (HM Gr-II)",
-      "Mandal Educational Officer (MEO) / Gazetted Headmaster",
-      "Deputy Educational Officer (Dy. EO)",
-      "District Educational Officer (DEO)",
-    ],
-  },
-  englishFaqs: [
-    {
-      question: "What is the qualifying marks cutoff for TG-TET 2026?",
-      answer:
-        "General category candidates must secure at least 60% (90 marks out of 150). BC category candidates need 50% (75 marks out of 150), and SC, ST, and Differently-abled (PH) candidates need 40% (60 marks out of 150) to qualify TG-TET.",
-    },
-    {
-      question: "What is the validity period of the TG-TET certificate?",
-      answer:
-        "The TG-TET qualifying certificate has lifetime validity. Aspirants can also reappear in future TET exams to improve their marks, as TET score carries a 20% weightage in Telangana Teacher Recruitment Test (DSC).",
-    },
-    {
-      question: "Is there any negative marking in Telangana TET?",
-      answer:
-        "No, there is no negative marking in the Telangana Teacher Eligibility Test (TG-TET). Each correct answer is awarded 1 mark, and zero marks are deducted for incorrect or unattempted questions.",
-    },
-    {
-      question: "What is the exam structure for TG-TET Paper-1 and Paper-2?",
-      answer:
-        "Both Paper 1 (for teaching classes I to V) and Paper 2 (for classes VI to VIII) contain 150 objective multiple-choice questions for 150 marks with a duration of 150 minutes (2.5 hours) conducted in Computer Based Test (CBT) online format.",
-    },
-    {
-      question: "What is the salary and role of a teacher recruited after qualifying TG-TET?",
-      answer:
-        "Teachers recruited through DSC with TG-TET qualification join as Secondary Grade Teachers (SGT) or School Assistants (SA) with an initial gross salary of approximately ₹42,000 to ₹55,000 per month under the Revised Pay Scale (RPS) ₹31,040 – ₹92,050.",
-    },
+    "వరధి ప్రెప్ టెట్ మాక్ టెస్ట్",
+    "TG TET model papers in telugu",
+    "తెలంగాణ టెట్ ఆన్‌లైన్ టెస్ట్",
   ],
   teluguFaqs: [
     {
-      question: "తెలంగాణ టెట్ (TG-TET 2026) క్వాలిఫైయింగ్ మార్కులు ఎంత?",
+      question: "వరధి ప్రెప్‌లో తెలంగాణ టెట్ (TG-TET) ఉచిత మాక్ టెస్ట్‌లు ఎలా రాయాలి?",
       answer:
-        "జనరల్ అభ్యర్థులకు 60% (150 కి 90 మార్కులు), బీసీ అభ్యర్థులకు 50% (150 కి 75 మార్కులు), మరియు ఎస్సీ, ఎస్టీ, దివ్యాంగులకు 40% (150 కి 60 మార్కులు) వస్తే అర్హత సాధించినట్లుగా పరిగణిస్తారు.",
+        "వరధి ప్రెప్ (Varadhi Prep) వెబ్‌సైట్‌లో తెలంగాణ టెట్ పేజీకి వెళ్లి, పేపర్ 1 లేదా పేపర్ 2 ఎంచుకుని, ఆన్‌లైన్ మాక్ టెస్ట్‌లను తెలుగు మరియు ఇంగ్లీష్ మాధ్యమాల్లో ఉచితంగా సాధన చేయవచ్చు.",
     },
     {
-      question: "టెట్ సర్టిఫికేట్ కాలపరిమితి (Validity) ఎంతకాలం ఉంటుంది?",
+      question: "మాక్ టెస్ట్ రాసిన తర్వాత సమాధానాలు మరియు వివరణలు చూసుకోవచ్చా?",
       answer:
-        "నేషనల్ కౌన్సిల్ ఫర్ టీచర్ ఎడ్యుకేషన్ (NCTE) నిబంధనల ప్రకారం టెట్ సర్టిఫికేట్ జీవితకాల చెల్లుబాటు (Lifetime Validity) కలిగి ఉంటుంది. డీఎస్సీ ఉపాధ్యాయ నియామకాల్లో టెట్ మార్కులకు 20 శాతం వెయిటేజీ ఉంటుంది.",
-    },
-    {
-      question: "తెలంగాణ టెట్ పరీక్షలో నెగెటివ్ మార్కింగ్ ఉందా?",
-      answer:
-        "లేదు. తెలంగాణ టెట్ పరీక్షలో ఎలాంటి నెగెటివ్ మార్కింగ్ ఉండదు. ప్రతి సరైన జవాబుకు 1 మార్కు లభిస్తుంది. తప్పు జవాబులకు ఎలాంటి మార్కులు తీసివేయబడవు.",
+        "అవును. టెస్ట్ సబ్మిట్ చేసిన వెంటనే మీ స్కోరు, సరైన సమాధానాలు మరియు సమగ్ర వివరణలను మీ డ్యాష్‌బోర్డులో సమీక్షించుకోవచ్చు.",
     },
     {
       question: "టెట్ మాక్ టెస్ట్‌లలో సైకాలజీ మరియు పెడగాజి ప్రశ్నలు ఉన్నాయా?",
       answer:
-        "అవును. తాజా సిలబస్ ప్రకారం చైల్డ్ డెవలప్‌మెంట్, పెడగాజి, తెలుగు, ఇంగ్లీష్, గణితం మరియు ఈవీఎస్ అంశాలతో కూడిన ప్రశ్నలు సమగ్ర వివరణలతో వరధి ప్రెప్‌లో లభిస్తాయి.",
+        "అవును. నూతన సిలబస్ ప్రకారం చైల్డ్ డెవలప్‌మెంట్ & పెడగాజి, తెలుగు, ఇంగ్లీష్, గణితం మరియు పరిసరాల విజ్ఞానం (EVS) అంశాలతో కూడిన ప్రశ్నలు సమగ్ర వివరణలతో వరధి ప్రెప్‌లో లభిస్తాయి.",
+    },
+  ],
+  englishFaqs: [
+    {
+      question: "Where can I take TG-TET mock tests for free?",
+      answer:
+        "Select the TG-TET exam on Varadhi Prep, choose Paper 1 or Paper 2, and practice timed bilingual mock tests with detailed solutions at zero cost.",
     },
     {
-      question: "టెట్ అర్హతతో ఉపాధ్యాయునిగా ఎంపికైతే జీతం మరియు విధులు ఎలా ఉంటాయి?",
+      question: "Can I review my answers after submitting a TG-TET mock test?",
       answer:
-        "టెట్ అర్హత మరియు డీఎస్సీ ద్వారా ఎంపికైన ఎస్జీటీ (SGT) మరియు స్కూల్ అసిస్టెంట్ (SA) ఉపాధ్యాయులకు ప్రారంభ గ్రాస్ జీతం నెలకు సుమారు ₹42,000 నుండి ₹55,000 వరకు ఉంటుంది. వీరు ప్రభుత్వ పాఠశాలల్లో నాణ్యమైన విద్యాబోధన, మూల్యాంకనం మరియు విద్యార్థుల సమగ్ర వికాసానికి బాధ్యత వహిస్తారు.",
+        "Yes. After submitting any test, you can instantly review your detailed score breakdown, correct answers, and bilingual step-by-step explanations on your dashboard.",
+    },
+    {
+      question: "Are questions available in both Telugu and English?",
+      answer:
+        "Yes, all mock tests on Varadhi Prep are provided bilingually with questions, options, and explanations in both Telugu and English.",
     },
   ],
 };
