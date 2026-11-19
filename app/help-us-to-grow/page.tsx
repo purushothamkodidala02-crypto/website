@@ -29,6 +29,7 @@ export default async function HelpUsToGrowPage({
 
   let isVerifiedPaid = false;
   let isPaymentCancelled = false;
+  let verifiedAmount: number | null = null;
 
   // Real-time server verification: Only show Thank You if Cashfree actually marks order as PAID
   if (query.order_id) {
@@ -36,6 +37,9 @@ export default async function HelpUsToGrowPage({
       const orderStatus = await getCashfreeOrderStatus(query.order_id);
       if (orderStatus.paid) {
         isVerifiedPaid = true;
+        if (orderStatus.payload && "order_amount" in orderStatus.payload && orderStatus.payload.order_amount) {
+          verifiedAmount = Number(orderStatus.payload.order_amount);
+        }
       } else {
         // Order exists but is ACTIVE (abandoned/dropped), CANCELLED, or FAILED
         isPaymentCancelled = true;
@@ -104,51 +108,90 @@ export default async function HelpUsToGrowPage({
           </div>
         )}
 
-        {/* Thank You Banner (ONLY if payment is verified with Cashfree as PAID) */}
+        {/* Notice 1: Thank You & Contribution Verified Banner (ONLY if payment is verified with Cashfree as PAID) */}
         {isVerifiedPaid && (
-          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
-            <h2 className="text-base font-black">Thank You for Your Support!</h2>
-            <p className="mt-1 text-xs sm:text-sm text-emerald-800">
-              Your contribution directly powers our cloud servers and bilingual question verification. We are grateful for your help in keeping Varadhi Prep open to all aspirants.
-            </p>
+          <div className="mb-6 overflow-hidden rounded-2xl border border-emerald-300 bg-emerald-50/90 p-5 sm:p-6 text-emerald-950 shadow-xs animate-in fade-in duration-300">
+            <div className="flex items-start gap-3.5">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-600 text-white shadow-xs">
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-200/70 px-2.5 py-0.5 text-[11px] font-black text-emerald-900 uppercase tracking-wider">
+                    ✓ Contribution Received • Verified
+                  </span>
+                  {query.order_id && (
+                    <span className="text-[11px] text-emerald-800 font-mono">
+                      Ref: {query.order_id}
+                    </span>
+                  )}
+                </div>
+
+                <h2 className="mt-2 text-lg sm:text-xl font-black text-emerald-950">
+                  🎉 Thank You for Supporting Varadhi Prep{verifiedAmount ? ` (₹${verifiedAmount})` : ""}!
+                </h2>
+
+                <p className="mt-1 text-xs sm:text-sm text-emerald-900 leading-relaxed">
+                  Your voluntary contribution has been successfully verified. It directly funds our high-speed cloud edge servers, database hosting, and bilingual question curation to keep mock tests open, fast, and 100% ad-free for all aspirants.
+                </p>
+
+                <p className="mt-2 text-xs font-semibold text-emerald-800">
+                  We are deeply grateful for your support in building this community platform!
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Cancelled / Incomplete Notice (Option 3 with Money Debited Reassurance) */}
+        {/* Notice 2: Incomplete / Cancelled Notice (Light Green soothing theme with Bank Debit Reassurance) */}
         {isPaymentCancelled && (
-          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950 text-xs sm:text-sm">
-            <div>
-              <p className="font-bold text-sm sm:text-base text-amber-900">
-                No Worries! Contribution Incomplete
-              </p>
-              <p className="mt-1 text-amber-800 leading-relaxed">
-                It looks like the checkout was closed or cancelled before completion. If no money was deducted, feel free to try again below or continue preparing on Varadhi Prep!
-              </p>
-            </div>
+          <div className="mb-6 rounded-2xl border border-emerald-200/90 bg-emerald-50/50 p-5 sm:p-6 text-emerald-950 shadow-xs">
+            <div className="flex items-start gap-3.5">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-800 text-base">
+                🌱
+              </div>
 
-            {/* In case money was debited from bank / UPI */}
-            <div className="mt-3.5 pt-3 border-t border-amber-200/80 text-[11px] sm:text-xs text-amber-900 leading-relaxed">
-              <p className="font-semibold text-amber-950">
-                Did money get deducted from your bank or UPI?
-              </p>
-              <p className="mt-0.5 text-amber-800">
-                Don&apos;t worry! When an interrupted payment occurs, your bank or UPI network automatically reverses the amount back to your account within 2–3 business days.
-              </p>
-              {query.order_id && (
-                <p className="mt-1.5 text-amber-900">
-                  If the amount is not reversed, or if you need assistance, please email{" "}
-                  <a
-                    href={`mailto:support@varadhiprep.in?subject=${encodeURIComponent(`Payment Support - Order ${query.order_id}`)}`}
-                    className="font-bold underline text-amber-950 hover:text-amber-800"
-                  >
-                    support@varadhiprep.in
-                  </a>{" "}
-                  with your Reference Order ID:{" "}
-                  <code className="font-mono font-bold bg-amber-100/90 px-1.5 py-0.5 rounded text-amber-950">
-                    {query.order_id}
-                  </code>
+              <div className="flex-1 min-w-0">
+                <div className="inline-flex items-center rounded-full bg-emerald-100/80 px-2.5 py-0.5 text-[11px] font-bold text-emerald-900 uppercase tracking-wider">
+                  Payment Incomplete • No Obligation
+                </div>
+
+                <h2 className="mt-2 text-base sm:text-lg font-black text-emerald-950">
+                  No Worries! Contribution Incomplete
+                </h2>
+
+                <p className="mt-1 text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
+                  It looks like the checkout was closed or cancelled before completion. If no money was deducted, you can choose an amount below whenever you wish to try again, or feel free to continue practicing on Varadhi Prep!
                 </p>
-              )}
+
+                {/* Bank / UPI Deduction Reassurance in Matching Light Green */}
+                <div className="mt-4 pt-3.5 border-t border-emerald-200/70 text-[11px] sm:text-xs text-emerald-950 leading-relaxed">
+                  <p className="font-bold text-emerald-950">
+                    Did money get deducted from your bank or UPI?
+                  </p>
+                  <p className="mt-0.5 text-emerald-900/90">
+                    Don&apos;t worry! When an interrupted payment occurs, your bank or UPI network automatically reverses the amount back to your account within 2–3 business days.
+                  </p>
+                  {query.order_id && (
+                    <p className="mt-2 text-emerald-900">
+                      If the amount is not reversed, or if you need assistance, please email{" "}
+                      <a
+                        href={`mailto:support@varadhiprep.in?subject=${encodeURIComponent(`Payment Support - Order ${query.order_id}`)}`}
+                        className="font-bold underline text-emerald-950 hover:text-emerald-700"
+                      >
+                        support@varadhiprep.in
+                      </a>{" "}
+                      with your Reference Order ID:{" "}
+                      <code className="font-mono font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded text-emerald-950">
+                        {query.order_id}
+                      </code>
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
