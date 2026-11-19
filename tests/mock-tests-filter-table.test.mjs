@@ -159,4 +159,36 @@ test("ExistingMockTestsTable displays sub-topic tag and uses clean Mock Test lab
     /Filtered by tag \/ keyword/,
     "ExistingMockTestsTable should render active filter indicator with clear option"
   );
+
+  // 7. Multi-tag search and removable filter chips with cross marks
+  assert.match(
+    existingTableSrc,
+    /selectedTags/,
+    "ExistingMockTestsTable should track selectedTags array for multi-tag filtering"
+  );
+  assert.match(
+    existingTableSrc,
+    /removeTag\s*=\s*\(tagToRemove:\s*string\)/,
+    "ExistingMockTestsTable should define removeTag to remove individual filter tags"
+  );
+  assert.match(
+    existingTableSrc,
+    /onClick=\{\(\)\s*=>\s*removeTag\(tag\)\}/,
+    "Active filter chips should provide cross mark button to remove specific tag"
+  );
+  assert.match(
+    existingTableSrc,
+    /isTagActive/,
+    "ExistingMockTestsTable should use isTagActive helper for active visual styling"
+  );
+  assert.match(
+    existingTableSrc,
+    /allTagsMatch/,
+    "ExistingMockTestsTable should filter tests requiring all selected tags to match"
+  );
+  assert.match(
+    adminPageSrc,
+    /initialTags=\{initialTags\}/,
+    "Admin mock tests page should pass initialTags to ExistingMockTestsTable"
+  );
 });

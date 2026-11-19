@@ -14,6 +14,7 @@ type MockTestSearchParams = {
   paper?: string;
   status?: string;
   q?: string;
+  tags?: string;
   scope?: string;
 };
 
@@ -73,6 +74,9 @@ export default async function MockTestsPage({
   const initialStatus: MockTestStatus | "all" = query.status === "draft" || query.status === "published" || query.status === "archived" ? query.status : "all";
   const initialScope: "all" | "paper" | "subject" = query.scope === "paper" || query.scope === "subject" ? query.scope : "all";
   const initialSearch = String(query.q ?? "").trim().slice(0, 100);
+  const initialTags = query.tags
+    ? query.tags.split(",").map((t) => t.trim()).filter(Boolean)
+    : [];
   const initialLocation = { categoryId, examId, specializationId, paperId, subjectId: "" };
   const summaryByTestId = new Map(
     ((summariesResult.data ?? []) as MockTestSummary[]).map((summary) => [summary.mock_test_id, summary]),
@@ -206,6 +210,7 @@ export default async function MockTestsPage({
           initialStateId={stateId}
           initialLocation={initialLocation}
           initialSearch={initialSearch}
+          initialTags={initialTags}
           initialStatus={initialStatus}
           initialScope={initialScope}
         />

@@ -65,7 +65,7 @@ const statusDetails: Record<MockTestStatus, { label: string; className: string }
   archived: { label: "Hidden", className: "border border-slate-200/80 bg-slate-100/70 text-slate-600" },
 };
 
-export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialStatus, initialScope = "all" }: {
+export function ExistingMockTestsTable({ states, categories, exams, specializations, papers, tests, initialStateId, initialLocation, initialSearch, initialTags = [], initialStatus, initialScope = "all" }: {
   states: Array<{ id: string; name: string; code: string; slug: string }>;
   categories: Array<LocationCategory & { stateId: string }>;
   exams: LocationExam[];
@@ -75,12 +75,14 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   initialStateId: string;
   initialLocation: LocationFilterValue;
   initialSearch: string;
+  initialTags?: string[];
   initialStatus: MockTestStatus | "all";
   initialScope?: "all" | "paper" | "subject";
 }) {
   const [stateId, setStateId] = useState(initialStateId);
   const [location, setLocation] = useState(initialLocation);
   const [search, setSearch] = useState(initialSearch);
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [status, setStatus] = useState<MockTestStatus | "all">(initialStatus);
   const [scope, setScope] = useState<"all" | "paper" | "subject">(initialScope);
   const [quickPreset, setQuickPreset] = useState<"all" | "needs-questions" | "ready-to-publish">("all");
@@ -107,13 +109,40 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const handleTagSearch = (term: string) => {
     const cleanTerm = term.trim();
     if (!cleanTerm) return;
-    if (search.trim().toLowerCase() === cleanTerm.toLowerCase()) {
+    const lower = cleanTerm.toLowerCase();
+
+    setSelectedTags((prev) => {
+      const exists = prev.some((t) => t.trim().toLowerCase() === lower);
+      if (exists) {
+        return prev.filter((t) => t.trim().toLowerCase() !== lower);
+      } else {
+        if (prev.length === 0 && !search.trim()) {
+          setStateId("");
+          setLocation(emptyLocation);
+        }
+        return [...prev, cleanTerm];
+      }
+    });
+
+    if (search.trim().toLowerCase() === lower) {
       setSearch("");
-    } else {
-      setStateId("");
-      setLocation(emptyLocation);
-      setSearch(cleanTerm);
     }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    const lower = tagToRemove.trim().toLowerCase();
+    setSelectedTags((prev) => prev.filter((t) => t.trim().toLowerCase() !== lower));
+  };
+
+  const clearAllTagFilters = () => {
+    setSelectedTags([]);
+    setSearch("");
+  };
+
+  const isTagActive = (term: string) => {
+    const clean = term.trim().toLowerCase();
+    if (!clean) return false;
+    return selectedTags.some((t) => t.trim().toLowerCase() === clean) || search.trim().toLowerCase() === clean;
   };
 
   const handleStateClick = (clickedStateId: string) => {
@@ -142,6 +171,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const filtered = useMemo(() => {
     const rawQuery = search.trim().toLowerCase();
     const queryWords = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
+    const normalizedTags = selectedTags.map((t) => t.trim().toLowerCase()).filter(Boolean);
+
     return tests.filter((test) => {
       if (quickPreset === "needs-questions") {
         const isNeeds =
@@ -157,22 +188,39 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
         if (!isReady) return false;
       }
 
-      return (
+      const matchesLocationAndState =
         (!stateId || test.stateId === stateId) &&
         (!location.categoryId || test.categoryId === location.categoryId) &&
         (!location.examId || test.examId === location.examId) &&
         (!location.specializationId || test.specializationId === location.specializationId) &&
         (!location.paperId || test.paperId === location.paperId) &&
         (status === "all" || test.status === status) &&
-        (scope === "all" || test.scope === scope) &&
-        (queryWords.length === 0 ||
-          (() => {
-            const haystack = `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""}`.toLowerCase();
-            return haystack.includes(rawQuery) || queryWords.every((word) => haystack.includes(word));
-          })())
-      );
+        (scope === "all" || test.scope === scope);
+
+      if (!matchesLocationAndState) return false;
+
+      const seriesLabel = mockTestLabel(test.seriesNumber).toLowerCase();
+      const haystack = `${test.title} ${test.slug} ${test.examName} ${test.paperName} ${test.subjectName ?? ""} ${test.sectionName ?? ""} ${seriesLabel}`.toLowerCase();
+
+      // Filter by typed search query words
+      if (queryWords.length > 0) {
+        const queryMatches = haystack.includes(rawQuery) || queryWords.every((word) => haystack.includes(word));
+        if (!queryMatches) return false;
+      }
+
+      // Filter by all selected tags (cumulative AND filter)
+      if (normalizedTags.length > 0) {
+        const allTagsMatch = normalizedTags.every((tag) => {
+          if (haystack.includes(tag)) return true;
+          const tagWords = tag.split(/\s+/).filter(Boolean);
+          return tagWords.length > 0 && tagWords.every((w) => haystack.includes(w));
+        });
+        if (!allTagsMatch) return false;
+      }
+
+      return true;
     });
-  }, [location, search, stateId, status, scope, quickPreset, tests]);
+  }, [location, search, selectedTags, stateId, status, scope, quickPreset, tests]);
 
   const counts = {
     all: tests.length,
@@ -191,9 +239,10 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     if (status !== "all") params.set("status", status);
     if (scope !== "all") params.set("scope", scope);
     if (search.trim()) params.set("q", search.trim().slice(0, 100));
+    if (selectedTags.length > 0) params.set("tags", selectedTags.join(",").slice(0, 200));
     const query = params.toString();
     return query ? `/admin/mock-tests?${query}` : "/admin/mock-tests";
-  }, [location, search, stateId, status, scope]);
+  }, [location, search, selectedTags, stateId, status, scope]);
 
   const router = useRouter();
 
@@ -209,6 +258,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     stateId: initialStateId,
     location: initialLocation,
     search: initialSearch,
+    tags: initialTags,
     status: initialStatus,
     scope: initialScope,
   });
@@ -220,6 +270,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     prevInitials.location.specializationId !== initialLocation.specializationId ||
     prevInitials.location.paperId !== initialLocation.paperId ||
     prevInitials.search !== initialSearch ||
+    prevInitials.tags.join(",") !== initialTags.join(",") ||
     prevInitials.status !== initialStatus ||
     prevInitials.scope !== initialScope
   ) {
@@ -227,12 +278,14 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       stateId: initialStateId,
       location: initialLocation,
       search: initialSearch,
+      tags: initialTags,
       status: initialStatus,
       scope: initialScope,
     });
     setStateId(initialStateId);
     setLocation(initialLocation);
     setSearch(initialSearch);
+    setSelectedTags(initialTags);
     setStatus(initialStatus);
     setScope(initialScope);
   }
@@ -248,6 +301,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       const urlStatus = (searchParams.get("status") as MockTestStatus) || "all";
       const urlScope = (searchParams.get("scope") as "all" | "paper" | "subject") || "all";
       const urlQ = searchParams.get("q") || "";
+      const urlTagsStr = searchParams.get("tags") || "";
+      const urlTags = urlTagsStr.split(",").map((t) => t.trim()).filter(Boolean);
 
       setStateId(urlState);
       setLocation({
@@ -260,6 +315,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       setStatus(["draft", "published", "archived"].includes(urlStatus) ? urlStatus : "all");
       setScope(["paper", "subject"].includes(urlScope) ? urlScope : "all");
       setSearch(urlQ);
+      setSelectedTags(urlTags);
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -275,7 +331,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
 
   const [page, setPage] = useState(1);
   const pageSize = 6;
-  const filterKey = `${stateId}:${location.categoryId}:${location.examId}:${location.specializationId}:${location.paperId}:${search}:${status}:${scope}`;
+  const filterKey = `${stateId}:${location.categoryId}:${location.examId}:${location.specializationId}:${location.paperId}:${search}:${selectedTags.join(",")}:${status}:${scope}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
 
   if (filterKey !== prevFilterKey) {
@@ -477,7 +533,14 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by test title, exam name, paper, subject, or topic..."
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && search.trim()) {
+                  event.preventDefault();
+                  handleTagSearch(search.trim());
+                  setSearch("");
+                }
+              }}
+              placeholder="Search by test title, exam name, paper, subject, or topic (press Enter to add filter)..."
               className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-9 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
             />
             {search && (
@@ -505,32 +568,53 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </div>
         </div>
 
-        {search.trim() && (
+        {(selectedTags.length > 0 || search.trim()) && (
           <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600">
-            <span>Filtered by tag / keyword:</span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
-              <span>&ldquo;{search.trim()}&rdquo;</span>
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500"
-                title="Clear search filter"
+            <span className="font-medium text-slate-700">Filtered by tag / keyword:</span>
+            {selectedTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs"
               >
-                ✕
-              </button>
-            </span>
+                <span>&ldquo;{tag}&rdquo;</span>
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title={`Remove "${tag}" filter`}
+                  aria-label={`Remove "${tag}" filter`}
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+            {search.trim() && !selectedTags.some((t) => t.trim().toLowerCase() === search.trim().toLowerCase()) && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900 shadow-2xs">
+                <span>&ldquo;{search.trim()}&rdquo;</span>
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="hover:text-rose-600 font-bold ml-0.5 cursor-pointer text-slate-500 transition hover:scale-110"
+                  title="Clear typed search filter"
+                  aria-label="Clear typed search filter"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
             <span className="text-slate-400">
               ({filtered.length} {filtered.length === 1 ? "test" : "tests"} found{stateId ? " in selected state" : " across all states"})
             </span>
             <button
               type="button"
               onClick={() => {
-                setSearch("");
+                clearAllTagFilters();
                 setStateId("");
                 setLocation(emptyLocation);
                 setScope("all");
               }}
-              className="text-xs font-medium text-teal-700 hover:underline cursor-pointer ml-1"
+              className="text-xs font-semibold text-teal-700 hover:text-teal-900 hover:underline cursor-pointer ml-1"
+              title="Reset all active filters"
             >
               Reset all filters
             </button>
@@ -591,12 +675,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                         type="button"
                         onClick={() => handleTagSearch(test.examName)}
                         title={
-                          search.trim().toLowerCase() === test.examName.trim().toLowerCase()
-                            ? `Active filter: "${test.examName}". Click to clear.`
+                          isTagActive(test.examName)
+                            ? `Active filter: "${test.examName}". Click to remove.`
                             : `Search "${test.examName}" across all states`
                         }
                         className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-slate-100 hover:border-slate-300 active:scale-95 text-left ${
-                          search.trim().toLowerCase() === test.examName.trim().toLowerCase()
+                          isTagActive(test.examName)
                             ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                             : "border-slate-200 bg-white text-slate-700"
                         }`}
@@ -608,12 +692,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                         type="button"
                         onClick={() => handleTagSearch(test.paperName)}
                         title={
-                          search.trim().toLowerCase() === test.paperName.trim().toLowerCase()
-                            ? `Active filter: "${test.paperName}". Click to clear.`
+                          isTagActive(test.paperName)
+                            ? `Active filter: "${test.paperName}". Click to remove.`
                             : `Search "${test.paperName}" across all states`
                         }
                         className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-teal-100/70 hover:border-teal-300 active:scale-95 text-left ${
-                          search.trim().toLowerCase() === test.paperName.trim().toLowerCase()
+                          isTagActive(test.paperName)
                             ? "border-teal-700 bg-teal-700 text-white shadow-xs"
                             : "border-teal-200/70 bg-teal-50/50 text-teal-800"
                         }`}
@@ -626,12 +710,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                           type="button"
                           onClick={() => handleTagSearch(test.subjectName!)}
                           title={
-                            search.trim().toLowerCase() === test.subjectName.trim().toLowerCase()
-                              ? `Active filter: "${test.subjectName}". Click to clear.`
+                            isTagActive(test.subjectName!)
+                              ? `Active filter: "${test.subjectName}". Click to remove.`
                               : `Search "${test.subjectName}" across all states`
                           }
                           className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-indigo-100/70 hover:border-indigo-300 active:scale-95 text-left ${
-                            search.trim().toLowerCase() === test.subjectName.trim().toLowerCase()
+                            isTagActive(test.subjectName!)
                               ? "border-indigo-700 bg-indigo-700 text-white shadow-xs"
                               : "border-indigo-200/70 bg-indigo-50/50 text-indigo-800"
                           }`}
@@ -645,12 +729,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                           type="button"
                           onClick={() => handleTagSearch(test.sectionName!)}
                           title={
-                            search.trim().toLowerCase() === test.sectionName.trim().toLowerCase()
-                              ? `Active filter: "${test.sectionName}". Click to clear.`
+                            isTagActive(test.sectionName!)
+                              ? `Active filter: "${test.sectionName}". Click to remove.`
                               : `Search "${test.sectionName}" across all states`
                           }
                           className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-purple-100/70 hover:border-purple-300 active:scale-95 text-left ${
-                            search.trim().toLowerCase() === test.sectionName.trim().toLowerCase()
+                            isTagActive(test.sectionName!)
                               ? "border-purple-700 bg-purple-700 text-white shadow-xs"
                               : "border-purple-200/70 bg-purple-50/50 text-purple-800"
                           }`}
@@ -679,9 +763,13 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       <button
                         type="button"
                         onClick={() => handleTagSearch(mockTestLabel(test.seriesNumber))}
-                        title={`Search "${mockTestLabel(test.seriesNumber)}" across all states`}
+                        title={
+                          isTagActive(mockTestLabel(test.seriesNumber))
+                            ? `Active filter: "${mockTestLabel(test.seriesNumber)}". Click to remove.`
+                            : `Search "${mockTestLabel(test.seriesNumber)}" across all states`
+                        }
                         className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold shrink-0 transition cursor-pointer hover:bg-slate-100 active:scale-95 ${
-                          search.trim().toLowerCase() === mockTestLabel(test.seriesNumber).toLowerCase()
+                          isTagActive(mockTestLabel(test.seriesNumber))
                             ? "border-slate-800 bg-slate-800 text-white shadow-xs"
                             : "border-slate-200 bg-slate-50 text-slate-600"
                         }`}
