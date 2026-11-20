@@ -9,7 +9,7 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "workers_dev": false,
+  "workers_dev": true,
   "routes": [
     {
       "pattern": "varadhiprep.in",
