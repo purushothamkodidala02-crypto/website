@@ -32,7 +32,8 @@ test("mock test email notifications schema, service, and admin UI are properly w
   assert.match(service, /buildMockTestNotificationEmail/);
   assert.match(service, /fetchEligibleStudentsForMockTest/);
   assert.match(service, /sendMockTestNotifications/);
-  assert.match(service, /BATCH_SIZE = 15/);
+  assert.match(service, /messageVersions/);
+  assert.match(service, /BATCH_SIZE = 50/);
   assert.match(service, /mock_test_notifications/);
   assert.match(template, /🎯 New Mock Test Live:/);
 

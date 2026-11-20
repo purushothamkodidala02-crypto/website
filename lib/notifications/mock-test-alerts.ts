@@ -315,21 +315,28 @@ export async function sendMockTestNotifications({
   let sentCount = 0;
   let failedCount = 0;
 
-  // Send in controlled batches of 15 to avoid Brevo rate limits & request timeouts
-  const BATCH_SIZE = 15;
+  const templateEmail = buildMockTestNotificationEmail({
+    studentName: "{{ params.studentName }}",
+    examName: details.group.name,
+    testTitle: details.formattedTitle,
+    testUrl: details.targetUrl,
+    durationMinutes: details.test.duration_minutes,
+    questionCount: details.test.target_question_count,
+  });
+
+  // Batch send via Brevo messageVersions (50 recipients per single API call).
+  // This reduces 350 individual HTTP requests down to just 7 calls, staying safely
+  // within Cloudflare Workers' 50 subrequest limit and preventing worker execution timeouts.
+  const BATCH_SIZE = 50;
   for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
     const batch = recipients.slice(i, i + BATCH_SIZE);
 
-    const promises = batch.map(async (recipient) => {
-      const emailContent = buildMockTestNotificationEmail({
-        studentName: recipient.full_name,
-        examName: details.group.name,
-        testTitle: details.formattedTitle,
-        testUrl: details.targetUrl,
-        durationMinutes: details.test.duration_minutes,
-        questionCount: details.test.target_question_count,
-      });
+    const messageVersions = batch.map((recipient) => ({
+      to: [{ email: recipient.email, name: recipient.full_name }],
+      params: { studentName: recipient.full_name },
+    }));
 
+    try {
       const response = await fetch(BREVO_SEND_EMAIL_URL, {
         method: "POST",
         cache: "no-store",
@@ -340,34 +347,39 @@ export async function sendMockTestNotifications({
         },
         body: JSON.stringify({
           sender: { name: senderName, email: senderEmail },
-          to: [{ email: recipient.email, name: recipient.full_name }],
-          subject: emailContent.subject,
-          textContent: emailContent.textContent,
-          htmlContent: emailContent.htmlContent,
+          subject: templateEmail.subject,
+          textContent: templateEmail.textContent,
+          htmlContent: templateEmail.htmlContent,
+          messageVersions,
         }),
       });
 
       if (!response.ok) {
         const errText = await response.text().catch(() => "");
-        throw new Error(`Brevo API Error (${response.status}): ${errText}`);
-      }
+        console.error(`Brevo API Batch Error (${response.status}):`, errText);
+        failedCount += batch.length;
 
-      return true;
-    });
-
-    const results = await Promise.allSettled(promises);
-    for (const res of results) {
-      if (res.status === "fulfilled") {
-        sentCount += 1;
+        // If daily credit limit is hit or authorization fails, abort subsequent batches cleanly
+        if (response.status === 400 || response.status === 402 || response.status === 403) {
+          const remaining = recipients.length - (i + batch.length);
+          if (remaining > 0) {
+            failedCount += remaining;
+          }
+          break;
+        }
       } else {
-        failedCount += 1;
-        console.error("Failed to send mock test alert to recipient:", res.reason);
+        const data = (await response.json().catch(() => ({}))) as { messageIds?: string[] };
+        const delivered = Array.isArray(data.messageIds) ? data.messageIds.length : batch.length;
+        sentCount += delivered;
       }
+    } catch (batchErr) {
+      console.error("Failed to send Brevo notification batch:", batchErr);
+      failedCount += batch.length;
     }
 
-    // Small delay between batches if there are more
+    // Controlled delay between batch requests
     if (i + BATCH_SIZE < recipients.length) {
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
   }
 
@@ -405,8 +417,15 @@ export async function sendMockTestNotifications({
   }
 
   return {
-    success: true,
-    message: `Notified ${sentCount} student${sentCount === 1 ? "" : "s"} who previously practiced ${details.group.name} tests!`,
+    success: sentCount > 0,
+    message:
+      sentCount > 0
+        ? `Notified ${sentCount} student${sentCount === 1 ? "" : "s"} who previously practiced ${details.group.name} tests!${
+            failedCount > 0
+              ? ` (${failedCount} could not be delivered, likely due to Brevo daily credit limit).`
+              : ""
+          }`
+        : `Could not send emails (${failedCount} failed). Please verify your Brevo credits or API settings.`,
     recipientCount: recipients.length,
     sentCount,
     failedCount,
