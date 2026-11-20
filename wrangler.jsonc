@@ -27,7 +27,6 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_0v7fVwvNLf399gtKqZ-S9Q_2mmaXmga",
     "NEXT_PUBLIC_SUPABASE_URL": "https://eauomwkwaxqpvzogdltq.supabase.co",
     "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAEM7znlSiOllBU-j",
-    "SUPABASE_SERVICE_ROLE_KEY": "sb_publishable_0v7fVwvNLf399gtKqZ-S9Q_2mmaXmga",
     "CASHFREE_ENV": "production"
   }
 }
