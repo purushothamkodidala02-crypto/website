@@ -9,8 +9,13 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAEM7znlSiOllBU-j",
+    "BREVO_API_KEY": "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",
+    "CASHFREE_APP_ID": "13848378d4279c2c35c7f0bd5f47384831",
+    "CASHFREE_SECRET_KEY": "cfsk_ma_prod_519dc97fe2adada7271c8249a4e88a45_af9658fd",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_0v7fVwvNLf399gtKqZ-S9Q_2mmaXmga",
     "NEXT_PUBLIC_SUPABASE_URL": "https://eauomwkwaxqpvzogdltq.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_0v7fVwvNLf399gtKqZ-S9Q_2mmaXmga"
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAEM7znlSiOllBU-j",
+    "SUPABASE_SERVICE_ROLE_KEY": "sb_publishable_0v7fVwvNLf399gtKqZ-S9Q_2mmaXmga",
+    "CASHFREE_ENV": "production"
   }
 }
