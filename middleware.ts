@@ -62,6 +62,16 @@ export async function proxy(request: NextRequest) {
     });
   }
 
+  // Canonical redirect: prevent traffic on workers.dev fallback domain and enforce official domain
+  const requestHost = request.headers.get("host") || request.nextUrl.host;
+  if (requestHost.includes("workers.dev")) {
+    const canonicalDestination = new URL(
+      request.nextUrl.pathname + request.nextUrl.search,
+      "https://varadhiprep.in"
+    );
+    return NextResponse.redirect(canonicalDestination, 301);
+  }
+
   const permanentDestination = await resolvePublicPermanentRedirect(request);
   if (permanentDestination === "not-found") {
     return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });

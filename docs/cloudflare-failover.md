@@ -8,7 +8,7 @@ Varadhi Prep (`varadhiprep.in`) was migrated from Vercel to **Cloudflare Workers
 * **Cloudflare Account ID:** `d3702f7db169467c175de56b30355997` (Markettalkstelugumtt@gmail.com's Account)
 * **Cloudflare Zone ID:** `43742526167f2e898a1637485d0621ad`
 * **Worker Name:** `varadhi`
-* **Fallback URL:** `https://varadhi.markettalkstelugumtt.workers.dev`
+* **Fallback URL:** `https://varadhi.kodidalanani.workers.dev`
 
 ---
 
