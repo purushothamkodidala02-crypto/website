@@ -31,9 +31,11 @@ Varadhi Prep (`varadhiprep.in`) was migrated from Vercel to **Cloudflare Workers
   * `CASHFREE_ENV`: `production`
 * **Encrypted Secrets (In Cloudflare Worker runtime / not committed to Git):**
   * `SUPABASE_SERVICE_ROLE_KEY`: Required for Email OTP (`createAdminClient()`), test attempt reviews, and dynamic survey counts.
-  * `CASHFREE_APP_ID`: Production Cashfree App ID.
-  * `CASHFREE_SECRET_KEY`: Production Cashfree Secret Key.
-  * `BREVO_API_KEY`: Production Brevo API Key for transactional OTP emails.
+  * `TURNSTILE_SECRET_KEY`: Server-side secret paired with Cloudflare Turnstile widget for human verification.
+  * `CUSTOM_OTP_PEPPER`: Server-side HMAC secret for secure 6-digit OTP code challenge hashes.
+  * `CASHFREE_APP_ID`: Production Cashfree App ID (in `vars`).
+  * `CASHFREE_SECRET_KEY`: Production Cashfree Secret Key (in `vars`).
+  * `BREVO_API_KEY`: Production Brevo API Key for transactional OTP emails (in `vars`).
 
 ---
 
