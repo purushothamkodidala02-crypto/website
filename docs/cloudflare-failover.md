@@ -4,11 +4,10 @@
 Varadhi Prep (`varadhiprep.in`) was migrated from Vercel to **Cloudflare Workers (via OpenNext)** after Vercel plan limits (serverless function execution GB-hours) were exhausted, which caused React minified error #441.
 
 * **Primary Hosting:** Cloudflare Workers (OpenNext)
-* **Live Domain:** `https://varadhiprep.in` & `https://www.varadhiprep.in`
-* **Cloudflare Account ID:** `d3702f7db169467c175de56b30355997` (Markettalkstelugumtt@gmail.com's Account)
+* **Live Domain:** `https://varadhiprep.in` & `https://www.varadhiprep.in` (Exclusive production endpoints)
+* **Cloudflare Account ID:** `d3702f7db169467c175de56b30355997`
 * **Cloudflare Zone ID:** `43742526167f2e898a1637485d0621ad`
 * **Worker Name:** `varadhi`
-* **Fallback URL:** `https://varadhi.kodidalanani.workers.dev`
 
 ---
 

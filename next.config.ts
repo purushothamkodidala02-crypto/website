@@ -4,8 +4,6 @@ const productionOrigins = [
   "varadhiprep.in",
   "www.varadhiprep.in",
   "*.varadhiprep.in",
-  "varadhi.kodidalanani.workers.dev",
-  "*.workers.dev",
   "localhost:3000",
   "127.0.0.1:3000",
   "*.vercel.app",
