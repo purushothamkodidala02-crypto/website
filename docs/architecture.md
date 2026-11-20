@@ -13,7 +13,8 @@ Authentication:
 - Supabase Auth
 
 Hosting:
-- Vercel
+- Cloudflare Workers (via OpenNext, Primary Production) - See docs/cloudflare-failover.md
+- Vercel (Backup / Dev)
 
 Version Control:
 - GitHub

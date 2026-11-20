@@ -49,7 +49,7 @@ export async function recordGrowthInteractionAction(
       ? createAdminClient()
       : supabase;
 
-    await db.from("growth_popup_interactions").insert({
+    const { error: insertError } = await db.from("growth_popup_interactions").insert({
       user_id: user?.id ?? null,
       student_name: studentName,
       student_email: studentEmail || null,
@@ -59,6 +59,11 @@ export async function recordGrowthInteractionAction(
       page_path: payload.pagePath ?? null,
       metadata: payload.metadata ?? {},
     });
+
+    if (insertError) {
+      console.warn("Could not record growth popup interaction:", insertError.message);
+      return { success: false };
+    }
 
     return { success: true };
   } catch (err) {
