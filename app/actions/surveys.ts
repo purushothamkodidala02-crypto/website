@@ -324,7 +324,18 @@ export async function checkSurveyEligibilityAction(
   }
 }
 
+const SURVEY_CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes
+let memActiveSurvey: { data: DynamicSurveyData | null; expiresAt: number } | null = null;
+
+export async function clearActiveSurveyCache() {
+  memActiveSurvey = null;
+}
+
 export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
+  const now = Date.now();
+  if (memActiveSurvey && now < memActiveSurvey.expiresAt) {
+    return memActiveSurvey.data;
+  }
   try {
     const dbClient = createPublicClient();
     let { data: survey, error } = await dbClient
@@ -352,7 +363,10 @@ export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
       return null;
     }
 
-    if (!survey) return null;
+    if (!survey) {
+      memActiveSurvey = { data: null, expiresAt: now + SURVEY_CACHE_TTL_MS };
+      return null;
+    }
 
     const { data: questions } = await dbClient
       .from("dynamic_survey_questions")
@@ -360,7 +374,9 @@ export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
       .eq("survey_id", survey.id)
       .order("display_order", { ascending: true });
 
-    return { ...survey, questions: questions ?? [] };
+    const result = { ...survey, questions: questions ?? [] };
+    memActiveSurvey = { data: result, expiresAt: now + SURVEY_CACHE_TTL_MS };
+    return result;
   } catch (err) {
     console.error("Error in getActiveSurvey:", err);
     return null;

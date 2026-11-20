@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { revalidatePath } from "next/cache";
+import { clearActiveSurveyCache } from "@/app/actions/surveys";
 import {
   type SurveySettings,
   DEFAULT_SURVEY_SETTINGS,
@@ -209,6 +210,7 @@ export async function deleteAdminSurvey(surveyId: string) {
 
     if (error) return { error: error.message };
 
+    await clearActiveSurveyCache();
     revalidatePath("/admin/surveys");
     revalidatePath("/survey");
     revalidatePath("/admin");
@@ -232,6 +234,7 @@ export async function toggleSurveyStatus(surveyId: string, isActive: boolean) {
     .update({ is_active: isActive })
     .eq("id", surveyId);
 
+  await clearActiveSurveyCache();
   revalidatePath("/admin/surveys");
   revalidatePath(`/admin/surveys/${surveyId}`);
   revalidatePath("/survey");

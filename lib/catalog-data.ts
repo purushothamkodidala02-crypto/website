@@ -7,7 +7,16 @@ import { createPublicClient } from "@/lib/supabase/public";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
 
+const CATALOG_IN_MEMORY_TTL_MS = 3 * 60 * 1000; // 3 minutes
+
+let memHomeCatalog: { data: any; expiresAt: number } | null = null;
+let memMockCatalog: { data: any; expiresAt: number } | null = null;
+let memDashboardCatalog: { data: any; expiresAt: number } | null = null;
+
 export function safeRevalidateCatalogTag() {
+  memHomeCatalog = null;
+  memMockCatalog = null;
+  memDashboardCatalog = null;
   try {
     updateTag(PUBLIC_CATALOG_TAG);
   } catch {
@@ -33,7 +42,7 @@ function getCatalogSupabaseClient() {
   return createPublicClient();
 }
 
-export const getHomeCatalogData = unstable_cache(
+const fetchHomeCatalogData = unstable_cache(
   async () => {
     if (!hasCatalogSupabaseEnv()) {
       return {
@@ -79,7 +88,17 @@ export const getHomeCatalogData = unstable_cache(
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
 
-export const getMockTestCatalogData = unstable_cache(
+export async function getHomeCatalogData() {
+  const now = Date.now();
+  if (memHomeCatalog && now < memHomeCatalog.expiresAt) {
+    return memHomeCatalog.data;
+  }
+  const data = await fetchHomeCatalogData();
+  memHomeCatalog = { data, expiresAt: now + CATALOG_IN_MEMORY_TTL_MS };
+  return data;
+}
+
+const fetchMockTestCatalogData = unstable_cache(
   async () => {
     if (!hasCatalogSupabaseEnv()) {
       return {
@@ -182,7 +201,17 @@ export const getMockTestCatalogData = unstable_cache(
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
 
-export const getDashboardCatalogData = unstable_cache(
+export async function getMockTestCatalogData() {
+  const now = Date.now();
+  if (memMockCatalog && now < memMockCatalog.expiresAt) {
+    return memMockCatalog.data;
+  }
+  const data = await fetchMockTestCatalogData();
+  memMockCatalog = { data, expiresAt: now + CATALOG_IN_MEMORY_TTL_MS };
+  return data;
+}
+
+const fetchDashboardCatalogData = unstable_cache(
   async () => {
     if (!hasCatalogSupabaseEnv()) {
       return {
@@ -214,3 +243,13 @@ export const getDashboardCatalogData = unstable_cache(
   ["dashboard-catalog-v1"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
+
+export async function getDashboardCatalogData() {
+  const now = Date.now();
+  if (memDashboardCatalog && now < memDashboardCatalog.expiresAt) {
+    return memDashboardCatalog.data;
+  }
+  const data = await fetchDashboardCatalogData();
+  memDashboardCatalog = { data, expiresAt: now + CATALOG_IN_MEMORY_TTL_MS };
+  return data;
+}
