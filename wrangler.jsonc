@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "varadhi",
+  "account_id": "d3702f7db169467c175de56b30355997",
   "main": ".open-next/worker.js",
   "compatibility_date": "2024-12-30",
   "compatibility_flags": ["nodejs_compat"],
@@ -8,6 +9,17 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "varadhiprep.in",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.varadhiprep.in",
+      "custom_domain": true
+    }
+  ],
   "vars": {
     "BREVO_API_KEY": "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",
     "CASHFREE_APP_ID": "13848378d4279c2c35c7f0bd5f47384831",
