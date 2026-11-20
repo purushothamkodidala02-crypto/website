@@ -14,8 +14,8 @@ function buildContentSecurityPolicy(nonce?: string) {
   }
 
   const scriptPolicy = nonce
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net${isDevelopment ? " 'unsafe-eval'" : ""}`
-    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net${isDevelopment ? " 'unsafe-eval'" : ""}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://ep2.adtrafficquality.google${isDevelopment ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://sdk.cashfree.com https://accounts.google.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://ep2.adtrafficquality.google${isDevelopment ? " 'unsafe-eval'" : ""}`;
 
   return [
     "default-src 'self'",
@@ -23,7 +23,7 @@ function buildContentSecurityPolicy(nonce?: string) {
     "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
     `img-src 'self' data: blob: ${supabaseOrigin} https://www.googletagmanager.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.g.doubleclick.net https://*.google.com`,
     "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://static.cloudflareinsights.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net`,
+    `connect-src 'self' data: ${supabaseOrigin} https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://static.cloudflareinsights.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://us.i.posthog.com https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://ep1.adtrafficquality.google`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com",

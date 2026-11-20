@@ -37,6 +37,13 @@ export function ApEndowmentPriorityModal() {
 
     // 2. Check survey display conditions:
     if (typeof window !== "undefined") {
+      if (
+        window.location.pathname.startsWith("/admin") ||
+        window.location.pathname.startsWith("/login") ||
+        window.location.pathname.startsWith("/register")
+      ) {
+        return;
+      }
       if (localStorage.getItem("varadhi_ap_endowment_survey_active") === "false") {
         return;
       }

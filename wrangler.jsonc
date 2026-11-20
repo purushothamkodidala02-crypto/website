@@ -21,7 +21,8 @@
     }
   ],
   "vars": {
-    "BREVO_API_KEY": "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",
+    "CUSTOM_OTP_FROM_EMAIL": "noreply@varadhiprep.in",
+    "CUSTOM_OTP_FROM_NAME": "Varadhiprep",
     "CASHFREE_APP_ID": "13848378d4279c2c35c7f0bd5f47384831",
     "CASHFREE_SECRET_KEY": "cfsk_ma_prod_519dc97fe2adada7271c8249a4e88a45_af9658fd",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_0v7fVwvNLf399gtKqZ-S9Q_2mmaXmga",
