@@ -18,6 +18,7 @@ const sectionHeading =
 const dataRow = /^(.{1,40}?)\s+—\s+([\d౦-౯].*)$/;
 
 export function containsTeluguText(text: string) {
+  if (!text || typeof text !== "string") return false;
   return /[\u0c00-\u0c7f]/.test(text);
 }
 
@@ -139,6 +140,7 @@ function splitInlineLists(text: string): string {
 
 
 function questionLines(rawText: string) {
+  if (!rawText || typeof rawText !== "string") return [];
   let text = rawText
     .replace(/\u00a0/g, " ")
     .replace(/\*\*/g, "")
@@ -527,6 +529,7 @@ export function FormattedQuestionText({
   text,
   className = "",
 }: FormattedQuestionTextProps) {
+  if (!text || typeof text !== "string") return null;
   const lines = questionLines(text);
   const isTelugu = containsTeluguText(text);
   const matchingLayout =

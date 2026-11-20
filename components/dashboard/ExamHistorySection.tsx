@@ -97,7 +97,7 @@ function HistoryAttemptCard({
               </span>
             </p>
           </div>
-          {attempt.detailed_review_available ? (
+          {attempt.detailed_review_available !== false ? (
             <Link
               href={`/dashboard/attempts/${attempt.id}`}
               prefetch={true}

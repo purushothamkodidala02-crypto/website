@@ -925,7 +925,7 @@ function AttemptCard({
               {attempt.score} <span className="text-xs sm:text-sm font-normal text-slate-400">/ {attempt.total_marks}</span>
             </p>
           </div>
-          {attempt.detailed_review_available ? (
+          {attempt.detailed_review_available !== false ? (
             <Link
               href={`/dashboard/attempts/${attempt.id}`}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-teal-600 bg-teal-700 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-teal-800 min-h-[38px] sm:min-h-[42px]"

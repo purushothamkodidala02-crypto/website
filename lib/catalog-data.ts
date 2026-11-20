@@ -9,10 +9,6 @@ export const PUBLIC_CATALOG_TAG = "public-catalog";
 
 const CATALOG_IN_MEMORY_TTL_MS = 3 * 60 * 1000; // 3 minutes
 
-let memHomeCatalog: { data: any; expiresAt: number } | null = null;
-let memMockCatalog: { data: any; expiresAt: number } | null = null;
-let memDashboardCatalog: { data: any; expiresAt: number } | null = null;
-
 export function safeRevalidateCatalogTag() {
   memHomeCatalog = null;
   memMockCatalog = null;
@@ -88,7 +84,10 @@ const fetchHomeCatalogData = unstable_cache(
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
 
-export async function getHomeCatalogData() {
+type HomeCatalogData = Awaited<ReturnType<typeof fetchHomeCatalogData>>;
+let memHomeCatalog: { data: HomeCatalogData; expiresAt: number } | null = null;
+
+export async function getHomeCatalogData(): Promise<HomeCatalogData> {
   const now = Date.now();
   if (memHomeCatalog && now < memHomeCatalog.expiresAt) {
     return memHomeCatalog.data;
@@ -201,7 +200,10 @@ const fetchMockTestCatalogData = unstable_cache(
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
 
-export async function getMockTestCatalogData() {
+type MockCatalogData = Awaited<ReturnType<typeof fetchMockTestCatalogData>>;
+let memMockCatalog: { data: MockCatalogData; expiresAt: number } | null = null;
+
+export async function getMockTestCatalogData(): Promise<MockCatalogData> {
   const now = Date.now();
   if (memMockCatalog && now < memMockCatalog.expiresAt) {
     return memMockCatalog.data;
@@ -244,7 +246,10 @@ const fetchDashboardCatalogData = unstable_cache(
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
 
-export async function getDashboardCatalogData() {
+type DashboardCatalogData = Awaited<ReturnType<typeof fetchDashboardCatalogData>>;
+let memDashboardCatalog: { data: DashboardCatalogData; expiresAt: number } | null = null;
+
+export async function getDashboardCatalogData(): Promise<DashboardCatalogData> {
   const now = Date.now();
   if (memDashboardCatalog && now < memDashboardCatalog.expiresAt) {
     return memDashboardCatalog.data;

@@ -47,7 +47,8 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
   );
   const questionRef = useRef<HTMLElement>(null);
   const activeNumberRef = useRef<HTMLButtonElement>(null);
-  const row = rows[index];
+  const row = rows[index] ?? rows[0];
+  if (!row) return null;
   const hasTelugu = Boolean(row.question_text_te);
   const effectiveLanguage =
     row.content_language_mode === "telugu"

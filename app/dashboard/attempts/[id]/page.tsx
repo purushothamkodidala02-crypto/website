@@ -51,6 +51,10 @@ export default async function AttemptReviewPage({
   const attempt = attemptResult.data as AttemptSummary | null;
   if (!attempt || attempt.user_id !== user.id) notFound();
 
+  if (reviewResult.error) {
+    console.error("get_attempt_review RPC error:", reviewResult.error);
+  }
+
   const { data: reviewData } = reviewResult;
   const rawRows = (reviewData ?? []) as Omit<ReviewRow, "question_id">[];
 
@@ -64,7 +68,7 @@ export default async function AttemptReviewPage({
     resolvedTitle = testData?.title ?? "Mock test";
   }
 
-  if (!attempt.detailed_review_available) {
+  if (attempt.detailed_review_available === false) {
     return <ExpiredAttemptReview attempt={attempt} title={resolvedTitle} />;
   }
 
@@ -85,7 +89,7 @@ export default async function AttemptReviewPage({
       question_id: questionIds[index] ?? `q-${row.question_order}`,
     }));
   } else if (attempt.session_id) {
-    // Fallback if RPC returns empty: fetch directly from session questions & responses
+    // Fallback 1: fetch directly from session questions & responses
     const [sessionQuestionsResult, responsesResult] = await Promise.all([
       admin
         .from("test_attempt_session_questions")
@@ -98,44 +102,105 @@ export default async function AttemptReviewPage({
         .eq("attempt_id", id),
     ]);
 
-    const responsesByQuestion = new Map(
-      (responsesResult.data ?? []).map((r) => [r.question_id, r])
-    );
+    const sessionQuestions = sessionQuestionsResult.data ?? [];
+    if (sessionQuestions.length > 0) {
+      const responsesByQuestion = new Map(
+        (responsesResult.data ?? []).map((r) => [r.question_id, r])
+      );
 
-    rows = (sessionQuestionsResult.data ?? []).map((sq) => {
-      const resp = responsesByQuestion.get(sq.question_id);
-      return {
-        question_id: sq.question_id,
-        mock_test_title: resolvedTitle,
-        score: attempt.score,
-        total_marks: attempt.total_marks,
-        correct_answers: attempt.correct_answers,
-        incorrect_answers: attempt.incorrect_answers,
-        unanswered_questions: attempt.unanswered_questions,
-        question_order: sq.question_order,
-        question_text: sq.question_text,
-        option_a: sq.option_a,
-        option_b: sq.option_b,
-        option_c: sq.option_c,
-        option_d: sq.option_d,
-        content_language_mode: sq.content_language_mode ?? "english",
-        question_text_te: sq.question_text_te,
-        option_a_te: sq.option_a_te,
-        option_b_te: sq.option_b_te,
-        option_c_te: sq.option_c_te,
-        option_d_te: sq.option_d_te,
-        selected_answer: resp?.selected_answer ?? null,
-        correct_answer: sq.correct_answer,
-        is_correct: resp?.is_correct ?? false,
-        marks_awarded: Number(resp?.marks_awarded ?? 0),
-        explanation: sq.explanation,
-        explanation_te: sq.explanation_te,
-        image_url: sq.image_url,
-      };
-    });
+      rows = sessionQuestions.map((sq) => {
+        const resp = responsesByQuestion.get(sq.question_id);
+        return {
+          question_id: sq.question_id,
+          mock_test_title: resolvedTitle,
+          score: attempt.score,
+          total_marks: attempt.total_marks,
+          correct_answers: attempt.correct_answers,
+          incorrect_answers: attempt.incorrect_answers,
+          unanswered_questions: attempt.unanswered_questions,
+          question_order: sq.question_order,
+          question_text: sq.question_text,
+          option_a: sq.option_a,
+          option_b: sq.option_b,
+          option_c: sq.option_c,
+          option_d: sq.option_d,
+          content_language_mode: sq.content_language_mode ?? "english",
+          question_text_te: sq.question_text_te,
+          option_a_te: sq.option_a_te,
+          option_b_te: sq.option_b_te,
+          option_c_te: sq.option_c_te,
+          option_d_te: sq.option_d_te,
+          selected_answer: resp?.selected_answer ?? null,
+          correct_answer: sq.correct_answer,
+          is_correct: resp?.is_correct ?? false,
+          marks_awarded: Number(resp?.marks_awarded ?? 0),
+          explanation: sq.explanation,
+          explanation_te: sq.explanation_te,
+          image_url: sq.image_url,
+        };
+      });
+    }
   }
 
-  if (rows.length === 0) notFound();
+  // Fallback 2: If rows still empty, attempt to fetch from mock_test_questions & questions
+  if (rows.length === 0) {
+    const [mockQuestionsResult, responsesResult] = await Promise.all([
+      admin
+        .from("mock_test_questions")
+        .select("question_order, question_id, questions(question_text, option_a, option_b, option_c, option_d, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url)")
+        .eq("mock_test_id", attempt.mock_test_id)
+        .order("question_order"),
+      admin
+        .from("attempt_responses")
+        .select("question_id, selected_answer, is_correct, marks_awarded")
+        .eq("attempt_id", id),
+    ]);
+
+    const mockQuestions = mockQuestionsResult.data ?? [];
+    if (mockQuestions.length > 0) {
+      const responsesByQuestion = new Map(
+        (responsesResult.data ?? []).map((r) => [r.question_id, r])
+      );
+
+      rows = mockQuestions.map((mq: any) => {
+        const q = mq.questions ?? {};
+        const resp = responsesByQuestion.get(mq.question_id);
+        return {
+          question_id: mq.question_id,
+          mock_test_title: resolvedTitle,
+          score: attempt.score,
+          total_marks: attempt.total_marks,
+          correct_answers: attempt.correct_answers,
+          incorrect_answers: attempt.incorrect_answers,
+          unanswered_questions: attempt.unanswered_questions,
+          question_order: mq.question_order,
+          question_text: q.question_text ?? "",
+          option_a: q.option_a ?? "",
+          option_b: q.option_b ?? "",
+          option_c: q.option_c ?? "",
+          option_d: q.option_d ?? "",
+          content_language_mode: q.content_language_mode ?? "english",
+          question_text_te: q.question_text_te ?? null,
+          option_a_te: q.option_a_te ?? null,
+          option_b_te: q.option_b_te ?? null,
+          option_c_te: q.option_c_te ?? null,
+          option_d_te: q.option_d_te ?? null,
+          selected_answer: resp?.selected_answer ?? null,
+          correct_answer: q.correct_answer ?? "",
+          is_correct: resp?.is_correct ?? false,
+          marks_awarded: Number(resp?.marks_awarded ?? 0),
+          explanation: q.explanation ?? null,
+          explanation_te: q.explanation_te ?? null,
+          image_url: q.image_url ?? null,
+        };
+      });
+    }
+  }
+
+  // If questions are permanently unavailable or expired, display graceful attempt summary
+  if (rows.length === 0) {
+    return <ExpiredAttemptReview attempt={attempt} title={resolvedTitle} />;
+  }
 
   const userBookmarkSet = new Set((bookmarksResult.data ?? []).map((b) => b.question_id));
   const bookmarkedQuestionIds = rows
