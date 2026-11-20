@@ -4,7 +4,7 @@ type FormattedQuestionTextProps = {
 };
 
 const labelledSection =
-  /^(Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:Statement|Conclusion|List|Column|Group|ప్రకటన|వాక్యం|తీర్మానం|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)\s*[:—–-]\s*(.+)$/i;
+  /^(Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:(?:Statement|Conclusion|Assumption|ప్రకటన|వాక్యం|తీర్మానం|ఊహ|భావన)(?:\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\))(?:\s*\([^)]+\))?)?|(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+|\([A-Za-z\d]+\)))(?:\s*\([^)]+\))?)\s*[:—–-]\s*(.+)$/i;
 
 const instructionStart =
   /^(?:(?:Choose|Select|Which|How\s+many\s+of|Pick|Identify|In\s+the\s+light\s+of)\b|(?:సరైన|సరికాని|కింది|క్రింది|పై|ఇచ్చిన).*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/i;
@@ -13,7 +13,7 @@ const numberedSection =
   /^((?:\((?:[a-hA-H]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|V|VI|i|ii|iii|iv|v|vi|[a-hA-H]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)]))\s+(.*)$/i;
 
 const sectionHeading =
-  /^(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:?$/i;
+  /^(?:Statements?|Conclusions?|Assumptions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|ఊహలు?|భావనలు?|సూచనలు?|గద్యం)\s*:?$/i;
 
 const dataRow = /^(.{1,40}?)\s+—\s+([\d౦-౯].*)$/;
 
@@ -171,11 +171,11 @@ function questionLines(rawText: string) {
         `${heading}\n${body.trim().replace(/\.\s+/g, ".\n")}`,
     )
     .replace(
-      /(?<=[.?!;:\)])[ \t]*(?=(?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)/gi,
+      /(?<=[.?!;:\)])[ \t]*(?=(?:Statements?|Conclusions?|Assumptions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|ఊహలు?|భావనలు?|సూచనలు?|గద్యం)\s*:)/gi,
       "\n",
     )
     .replace(
-      /((?:Statements?|Conclusions?|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు?|తీర్మానాలు?|సూచనలు?|గద్యం)\s*:)[ \t]*/gi,
+      /(?<=[.?!;:\)]\s*|^)((?:Statements|Conclusions|Assumptions|Directions?|Codes?|Passage|Comprehension|ప్రకటనలు|తీర్మానాలు|ఊహలు|భావనలు|సూచనలు?|గద్యం)\s*:)[ \t]*/gi,
       "$1\n",
     )
     .replace(
@@ -228,7 +228,7 @@ function questionLines(rawText: string) {
     )
     .replace(/(?<=[.?!;:\)])[ \t]+(?=(?:I{1,3}|IV|V)\.\s)/gi, "\n")
     .replace(
-      /(?<=[.?!;:\)])[ \t]+(?=Which\s+(?:conclusion|statement)s?\b)/gi,
+      /(?<=[.?!;:\)])[ \t]+(?=Which\s+(?:conclusion|statement|assumption)s?\b)/gi,
       "\n",
     )
     .replace(
@@ -260,6 +260,8 @@ function questionLines(rawText: string) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else if (previous && /\b(?:Rs|Re|రూ)\.?$/i.test(previous) && /^(\d{1,2})[.)]\s*(.*)$/.test(line)) {
         merged[merged.length - 1] = `${previous.replace(/\.?$/, ".")} ${line}`;
+      } else if (previous && /^(?:Statement|Conclusion|Assumption|ప్రకటన|తీర్మానం|ఊహ|భావన)\s*:$/i.test(previous) && !/^(?:\([a-hA-H\d]|[1-9]|I{1,4}|[౧-౯]|Statements?|Conclusions?|Assumptions?|ప్రకటనలు?|తీర్మానాలు?|ఊహలు?)/i.test(line)) {
+        merged[merged.length - 1] = `${previous} ${line}`;
       } else {
         merged.push(line);
       }
