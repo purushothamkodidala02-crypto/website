@@ -22,6 +22,13 @@ export function SupportPromptModal({
     ? settings.suggestedAmounts
     : [49, 99, 199, 499];
   const [selectedAmount, setSelectedAmount] = useState<number>(defaultAmounts[0] ?? 49);
+  const [isCustom, setIsCustom] = useState(false);
+  const [customAmount, setCustomAmount] = useState<string>("");
+
+  const parsedCustom = parseInt(customAmount, 10);
+  const effectiveAmount = isCustom
+    ? (!isNaN(parsedCustom) && parsedCustom > 0 ? parsedCustom : 0)
+    : selectedAmount;
 
   // Allow opening via custom event from any button on the site
   useEffect(() => {
@@ -137,6 +144,7 @@ export function SupportPromptModal({
   };
 
   const handleTierSelect = (amt: number) => {
+    setIsCustom(false);
     setSelectedAmount(amt);
     recordGrowthInteractionAction({
       eventType: "select_tier",
@@ -146,12 +154,23 @@ export function SupportPromptModal({
     }).catch(() => null);
   };
 
+  const handleCustomSelect = () => {
+    setIsCustom(true);
+    recordGrowthInteractionAction({
+      eventType: "select_tier",
+      buttonLabel: "Custom Amount",
+      amount: effectiveAmount > 0 ? effectiveAmount : undefined,
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    }).catch(() => null);
+  };
+
   const handleSupportClick = () => {
+    const finalAmount = effectiveAmount > 0 ? effectiveAmount : selectedAmount;
     localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
     recordGrowthInteractionAction({
       eventType: "click_support",
-      buttonLabel: `Support Varadhi (₹${selectedAmount})`,
-      amount: selectedAmount,
+      buttonLabel: `Support Varadhi (₹${finalAmount})`,
+      amount: finalAmount,
       pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
     }).catch(() => null);
     setIsOpen(false);
@@ -254,9 +273,20 @@ export function SupportPromptModal({
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
                   Select Contribution Amount
                 </p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCustomSelect}
+                    className={`rounded-xl py-2 px-1 text-center text-[11px] sm:text-xs font-bold transition cursor-pointer ${
+                      isCustom
+                        ? "border-2 border-[#059669] bg-emerald-50 text-emerald-950 font-extrabold shadow-xs ring-1 ring-[#059669]"
+                        : "border border-dashed border-slate-300 bg-slate-50 text-slate-700 hover:border-slate-400 hover:bg-white"
+                    }`}
+                  >
+                    Custom
+                  </button>
                   {defaultAmounts.map((amt) => {
-                    const isSelected = selectedAmount === amt;
+                    const isSelected = !isCustom && selectedAmount === amt;
                     return (
                       <button
                         key={amt}
@@ -273,6 +303,39 @@ export function SupportPromptModal({
                     );
                   })}
                 </div>
+
+                {/* Custom Amount Input Field */}
+                {isCustom && (
+                  <div className="mt-3 animate-in fade-in duration-150">
+                    <label
+                      htmlFor="growth-modal-custom-amount"
+                      className="block text-[11px] font-bold text-slate-700 mb-1"
+                    >
+                      Enter your initiative amount (₹)
+                    </label>
+                    <div className="relative max-w-[180px]">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-xs sm:text-sm font-bold text-slate-500">
+                        ₹
+                      </span>
+                      <input
+                        id="growth-modal-custom-amount"
+                        type="number"
+                        min="1"
+                        step="1"
+                        autoFocus
+                        placeholder="e.g. 10, 25, 50"
+                        value={customAmount}
+                        onChange={(e) => setCustomAmount(e.target.value)}
+                        className="w-full rounded-xl border border-slate-300 bg-white py-1.5 pl-7 pr-3 text-xs sm:text-sm font-bold text-slate-900 outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669]"
+                      />
+                    </div>
+                    {isCustom && customAmount !== "" && effectiveAmount < 1 && (
+                      <p className="mt-1 text-[11px] font-medium text-amber-700">
+                        Please enter an amount of at least ₹1.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -286,11 +349,18 @@ export function SupportPromptModal({
                 </button>
 
                 <Link
-                  href={`/help-us-to-grow?amount=${selectedAmount}`}
+                  href={
+                    effectiveAmount > 0
+                      ? `/help-us-to-grow?amount=${effectiveAmount}`
+                      : "/help-us-to-grow"
+                  }
                   onClick={handleSupportClick}
                   className="rounded-xl bg-[#059669] hover:bg-[#047857] active:bg-[#065f46] px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-xs hover:shadow transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>{settings.primaryButtonText || "Support Varadhi"} (₹{selectedAmount})</span>
+                  <span>
+                    {settings.primaryButtonText || "Support Varadhi"}
+                    {effectiveAmount > 0 ? ` (₹${effectiveAmount})` : ""}
+                  </span>
                   <svg
                     className="h-3.5 w-3.5"
                     viewBox="0 0 20 20"

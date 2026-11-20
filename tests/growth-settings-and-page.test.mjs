@@ -99,6 +99,11 @@ test("support modal: SupportPromptModal enforces eligibility, graceful dismissal
   assert.ok(modalContent.includes("from-emerald-600"), "must include emerald accent gradient");
   assert.ok(modalContent.includes("bg-[#059669]"), "primary CTA must use emerald button color");
   assert.ok(modalContent.includes("100% Ad-Free"), "must highlight ad-free pillar");
+
+  // Custom amount support
+  assert.ok(modalContent.includes("Custom"), "modal must offer a Custom amount option");
+  assert.ok(modalContent.includes("growth-modal-custom-amount"), "modal must render custom initiative amount input");
+  assert.ok(modalContent.includes("/help-us-to-grow?amount="), "modal must link to growth page with selected/custom amount");
 });
 
 test("dashboard: integrates SupportPromptModal conditionally with server-verified total attempts", () => {

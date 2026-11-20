@@ -507,7 +507,10 @@ export function GrowthSettingsForm({
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                 Quick Contribution Tiers
               </p>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-5 gap-1.5">
+                <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 py-1.5 text-center text-[10px] font-bold text-slate-600">
+                  Custom
+                </div>
                 {[49, 99, 199, 499].map((amt, idx) => (
                   <div
                     key={amt}

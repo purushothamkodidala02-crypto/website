@@ -32,11 +32,18 @@ export function CashfreeContributionBox({
   defaultName = "",
   initialAmount,
 }: Props) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(
-    initialAmount ?? suggestedAmounts[0] ?? 49,
+  const isInitialCustom = Boolean(
+    initialAmount && initialAmount > 0 && !suggestedAmounts.includes(initialAmount)
   );
-  const [customAmount, setCustomAmount] = useState<string>("");
-  const [isCustom, setIsCustom] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState<number>(
+    initialAmount && suggestedAmounts.includes(initialAmount)
+      ? initialAmount
+      : (suggestedAmounts[0] ?? 49)
+  );
+  const [customAmount, setCustomAmount] = useState<string>(
+    isInitialCustom ? String(initialAmount) : ""
+  );
+  const [isCustom, setIsCustom] = useState(isInitialCustom);
   const [phone, setPhone] = useState(defaultPhone);
   const [name, setName] = useState(defaultName);
   const [loading, setLoading] = useState(false);
