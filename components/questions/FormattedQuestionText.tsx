@@ -24,7 +24,7 @@ export function containsTeluguText(text: string) {
 
 const isExplicitHeader = (line: string | undefined) =>
   Boolean(line) &&
-  /^(?:(?:List|Column|Group)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI)(?:\s*\([^)]+\))?|(?:జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)(?:\s*\([^)]+\))?|Traveler|Country):?$/i.test(
+  /^(?:(?:List|Column|Group)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI)(?:\s*\([^)]+\))?|(?:జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+)(?:\s*\([^)]+\))?|Traveler|Country|Leaders|Contribution|నాయకులు|కృషి):?$/i.test(
     line!.trim(),
   );
 const romanMap: Record<string, number> = {
@@ -122,6 +122,12 @@ function findValidListIndices(matches: RegExpMatchArray[]): Set<number> {
 function splitInlineLists(text: string): string {
   const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|(?<![\d౦-౯]\s*:[ \t]*)\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
+  // Separate markers accidentally glued to words without spaces (e.g. "CommitteeC. Conduct" or "HyderabadD. Formation")
+  text = text.replace(
+    /(?<=[a-z\d\u0c00-\u0c7f])(?=(?:[A-Ha-h]|[1-9]|[౧-౯]|I{1,4}|VI{0,2}|[ivxIVX]{1,5})\.\s+[A-Za-z0-9\u0c00-\u0c7f"'])/g,
+    " ",
+  );
+
   const matches = Array.from(text.matchAll(inlineListRegex));
   if (matches.length === 0) return text;
 
@@ -132,7 +138,7 @@ function splitInlineLists(text: string): string {
   return text.replace(inlineListRegex, (match, p1, marker, p3) => {
     const isCurrentValid = validIndices.has(matchIndex++);
     if (isCurrentValid) {
-      return `\n${marker} ${p3}`;
+      return `${p1 === "." ? "." : ""}\n${marker} ${p3}`;
     }
     return match;
   });
@@ -218,6 +224,10 @@ function questionLines(rawText: string) {
   const lines = text
     .replace(
       /(?<!,)[ \t]+(?=(?:Choose|Select|Pick)\s+(?:the|a)?\s*(?:correct|incorrect|most appropriate|suitable)?\s*(?:code|answer|option|pair|match)\b)/gi,
+      "\n",
+    )
+    .replace(
+      /(?<!,)[ \t]+(?=(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను|కోడ్|కోడ్‌ను|కోడ్ను|వాక్యాన్ని)|సరైన\s+కోడ్ను|సరైన\s+జవాబును|సరైన\s+సమాధానాన్ని)\s*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/gi,
       "\n",
     )
     .replace(
@@ -320,6 +330,99 @@ function renderListItem(line: string) {
   );
 }
 
+function parseMatchingHeaders(headingLines: string[], isTelugu: boolean) {
+  let leftTitle = isTelugu ? "జాబితా I" : "List I";
+  let rightTitle = isTelugu ? "జాబితా II" : "List II";
+  let cleanedHeading = [...headingLines];
+
+  if (cleanedHeading.length > 0) {
+    const lastIdx = cleanedHeading.length - 1;
+    const lastLine = cleanedHeading[lastIdx].trim();
+
+    // Pattern 1: Heading ends with "... : LeftHeader    RightHeader" or "... : LeftHeader RightHeader"
+    const colonMultiMatch =
+      lastLine.match(
+        /^(.*?:)\s*([A-Za-z\u0c00-\u0c7f]+(?:\s+[A-Za-z\u0c00-\u0c7f]+)?)\s{2,}([A-Za-z\u0c00-\u0c7f]+(?:\s+[A-Za-z\u0c00-\u0c7f]+)?)$/,
+      ) ||
+      lastLine.match(
+        /^(.*?:)\s*([A-Za-z\u0c00-\u0c7f]{2,20})\s+([A-Za-z\u0c00-\u0c7f]{2,20})$/,
+      );
+
+    if (colonMultiMatch) {
+      cleanedHeading[lastIdx] = colonMultiMatch[1].trim();
+      leftTitle = colonMultiMatch[2].trim();
+      rightTitle = colonMultiMatch[3].trim();
+    } else {
+      // Pattern 2: Standalone header line e.g. "Leaders    Contribution" or "నాయకులు కృషి"
+      const standaloneMatch =
+        lastLine.match(
+          /^([A-Za-z\u0c00-\u0c7f]+(?:\s+[A-Za-z\u0c00-\u0c7f]+)?)\s{2,}([A-Za-z\u0c00-\u0c7f]+(?:\s+[A-Za-z\u0c00-\u0c7f]+)?)$/,
+        ) ||
+        (cleanedHeading.length > 1 &&
+          lastLine.match(/^([A-Za-z\u0c00-\u0c7f]{2,20})\s+([A-Za-z\u0c00-\u0c7f]{2,20})$/));
+      if (standaloneMatch) {
+        cleanedHeading.pop();
+        leftTitle = standaloneMatch[1].trim();
+        rightTitle = standaloneMatch[2].trim();
+      } else if (cleanedHeading.length >= 2) {
+        // Pattern 3: Two separate lines e.g. Line N-1: "Leaders", Line N: "Contribution"
+        const prevLine = cleanedHeading[cleanedHeading.length - 2].trim().replace(/:$/, "");
+        const currLine = lastLine.replace(/:$/, "");
+        if (
+          prevLine.length >= 2 &&
+          prevLine.length <= 25 &&
+          currLine.length >= 2 &&
+          currLine.length <= 25 &&
+          !/[.?!]/.test(prevLine) &&
+          !/[.?!]/.test(currLine) &&
+          (isExplicitHeader(prevLine) || /^[A-Za-z\u0c00-\u0c7f\s-]{2,25}$/.test(prevLine)) &&
+          (isExplicitHeader(currLine) || /^[A-Za-z\u0c00-\u0c7f\s-]{2,25}$/.test(currLine)) &&
+          cleanedHeading.length >= 3
+        ) {
+          cleanedHeading.splice(cleanedHeading.length - 2, 2);
+          leftTitle = prevLine;
+          rightTitle = currLine;
+        }
+      }
+    }
+  }
+
+  // Fallback: Check if heading text has "Match X with Y"
+  if (leftTitle === (isTelugu ? "జాబితా I" : "List I")) {
+    const headingText = cleanedHeading.join(" ");
+    const titleMatch = headingText.match(
+      /Match\s+(?:the\s+)?(.*?)\s+(?:with|to)\s+(?:the\s+)?(.*?)(?::|$)/i,
+    );
+    if (titleMatch && titleMatch[1] && titleMatch[2]) {
+      const l = titleMatch[1].trim();
+      const r = titleMatch[2].trim();
+      if (l.length < 30 && r.length < 30) {
+        leftTitle = l.charAt(0).toUpperCase() + l.slice(1);
+        rightTitle = r.charAt(0).toUpperCase() + r.slice(1);
+      }
+    }
+  }
+
+  return { cleanedHeading, leftTitle, rightTitle };
+}
+
+function cleanItem(item: string, leftTitle?: string, rightTitle?: string) {
+  let cleaned = item.trim().replace(/[,;]$/, "");
+  if (leftTitle && rightTitle && leftTitle !== "List I" && leftTitle !== "జాబితా I") {
+    const lEsc = leftTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const rEsc = rightTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const headerRegex = new RegExp(`[.\\s]*(?:${lEsc}\\s*${rEsc}|${rEsc}\\s*${lEsc})\\s*$`, "i");
+    cleaned = cleaned.replace(headerRegex, "").trim();
+  }
+  cleaned = cleaned
+    .replace(
+      /[.\s]*(?:నాయకులు\s*కృషి|Leaders\s*Contribution|జాబితా\s*[-–]?\s*[I1]\s*జాబితా\s*[-–]?\s*[II2]|List\s*[-–]?\s*[I1]\s*List\s*[-–]?\s*[II2])\s*$/i,
+      "",
+    )
+    .trim();
+  return cleaned;
+}
+
 function matchingListLayout(lines: string[]) {
   const isTelugu = lines.some(containsTeluguText);
 
@@ -343,7 +446,7 @@ function matchingListLayout(lines: string[]) {
   if (pairedIndices.length >= 2) {
     const firstPairIdx = pairedIndices[0];
     const lastPairIdx = pairedIndices[pairedIndices.length - 1];
-    const heading = lines
+    const rawHeading = lines
       .slice(0, firstPairIdx)
       .reduce<string[]>((acc, curr) => {
         const prev = acc.at(-1);
@@ -362,44 +465,131 @@ function matchingListLayout(lines: string[]) {
       }, []);
     const instruction = lines.slice(lastPairIdx + 1);
 
-    let leftTitle = isTelugu ? "జాబితా I" : "List I";
-    let rightTitle = isTelugu ? "జాబితా II" : "List II";
-
-    const headingText = heading.join(" ");
-    const titleMatch = headingText.match(
-      /Match\s+(?:the\s+)?(.*?)\s+(?:with|to)\s+(?:the\s+)?(.*?)(?::|$)/i,
-    );
-    if (titleMatch && titleMatch[1] && titleMatch[2]) {
-      const l = titleMatch[1].trim();
-      const r = titleMatch[2].trim();
-      if (l.length < 25 && r.length < 25) {
-        leftTitle = l.charAt(0).toUpperCase() + l.slice(1);
-        rightTitle = r.charAt(0).toUpperCase() + r.slice(1);
-      }
-    }
+    const { cleanedHeading, leftTitle, rightTitle } = parseMatchingHeaders(rawHeading, isTelugu);
 
     return {
-      heading: heading.length ? heading : [isTelugu ? "జతపరచండి:" : "Match the following:"],
+      heading: cleanedHeading.length ? cleanedHeading : [isTelugu ? "జతపరచండి:" : "Match the following:"],
       leftTitle,
       rightTitle,
-      leftItems: leftPairs,
-      rightItems: rightPairs,
+      leftItems: leftPairs.map((item) => cleanItem(item, leftTitle, rightTitle)),
+      rightItems: rightPairs.map((item) => cleanItem(item, leftTitle, rightTitle)),
+      instruction,
+    };
+  }
+
+  // Schemes for matching pairs
+  const schemes = [
+    { left: alphabeticListItem, right: numericListItem },
+    { left: numericListItem, right: alphabeticListItem },
+    { left: teluguAlphabeticListItem, right: numericListItem },
+    { left: numericListItem, right: teluguAlphabeticListItem },
+    { left: alphabeticListItem, right: romanListItem },
+    { left: romanListItem, right: alphabeticListItem },
+    { left: teluguAlphabeticListItem, right: romanListItem },
+    { left: romanListItem, right: teluguAlphabeticListItem },
+  ];
+
+  // Approach 3: Interleaved / Alternating items (e.g. A. Item, 1. Item, B. Item, 2. Item...)
+  let bestInterleaved: {
+    firstLeft: number;
+    endIdx: number;
+    leftItems: string[];
+    rightItems: string[];
+  } | null = null;
+
+  for (const scheme of schemes) {
+    const firstLeft = lines.findIndex((line) => scheme.left.test(line));
+    if (firstLeft >= 0 && firstLeft + 1 < lines.length && scheme.right.test(lines[firstLeft + 1])) {
+      const leftItems: string[] = [];
+      const rightItems: string[] = [];
+      let idx = firstLeft;
+
+      while (idx < lines.length) {
+        if (
+          /^(?:Leaders\s+Contribution|నాయకులు\s+కృషి|List\s*[-–]?\s*[I1]\s+List\s*[-–]?\s*[II2]|జాబితా\s*[-–]?\s*[I1]\s+జాబితా\s*[-–]?\s*[II2])$/i.test(
+            lines[idx].trim(),
+          )
+        ) {
+          idx++;
+          continue;
+        }
+
+        if (scheme.left.test(lines[idx])) {
+          leftItems.push(lines[idx]);
+          idx++;
+
+          if (
+            idx < lines.length &&
+            /^(?:Leaders\s+Contribution|నాయకులు\s+కృషి|List\s*[-–]?\s*[I1]\s+List\s*[-–]?\s*[II2]|జాబితా\s*[-–]?\s*[I1]\s+జాబితా\s*[-–]?\s*[II2])$/i.test(
+              lines[idx].trim(),
+            )
+          ) {
+            idx++;
+          }
+
+          if (idx < lines.length && scheme.right.test(lines[idx])) {
+            rightItems.push(lines[idx]);
+            idx++;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+
+      while (idx < lines.length && scheme.right.test(lines[idx])) {
+        rightItems.push(lines[idx]);
+        idx++;
+      }
+
+      if (leftItems.length >= 2 && rightItems.length >= 2) {
+        if (
+          !bestInterleaved ||
+          firstLeft < bestInterleaved.firstLeft ||
+          leftItems.length > bestInterleaved.leftItems.length
+        ) {
+          bestInterleaved = { firstLeft, endIdx: idx, leftItems, rightItems };
+        }
+      }
+    }
+  }
+
+  if (bestInterleaved) {
+    const rawHeading = lines
+      .slice(0, bestInterleaved.firstLeft)
+      .reduce<string[]>((acc, curr) => {
+        const prev = acc.at(-1);
+        if (
+          prev &&
+          (/\b(?:in|with|to|from|between|and|of|for|into)\s*$/i.test(prev) ||
+            /^(?:List|Column|Group|జాబితా|కాలమ్|కాలం|గ్రూప్)\s*[- ]?\s*(?:[A-Za-z\d]+|I{1,4}|V|VI|[౦-౯]+):?$/i.test(
+              curr,
+            ))
+        ) {
+          acc[acc.length - 1] = `${prev} ${curr}`.replace(/\s+/g, " ");
+        } else {
+          acc.push(curr);
+        }
+        return acc;
+      }, []);
+
+    const { cleanedHeading, leftTitle, rightTitle } = parseMatchingHeaders(rawHeading, isTelugu);
+    const instruction = lines.slice(bestInterleaved.endIdx);
+
+    return {
+      heading: cleanedHeading.length
+        ? cleanedHeading
+        : [isTelugu ? "జతపరచండి:" : "Match the following:"],
+      leftTitle,
+      rightTitle,
+      leftItems: bestInterleaved.leftItems.map((item) => cleanItem(item, leftTitle, rightTitle)),
+      rightItems: bestInterleaved.rightItems.map((item) => cleanItem(item, leftTitle, rightTitle)),
       instruction,
     };
   }
 
   // Approach 2: Separate lists (with or without column headers like "List-A:" and "List-B:")
-  const schemes = [
-    { left: numericListItem, right: alphabeticListItem },
-    { left: numericListItem, right: teluguAlphabeticListItem },
-    { left: alphabeticListItem, right: romanListItem },
-    { left: alphabeticListItem, right: numericListItem },
-    { left: romanListItem, right: alphabeticListItem },
-    { left: romanListItem, right: numericListItem },
-    { left: teluguAlphabeticListItem, right: numericListItem },
-    { left: teluguAlphabeticListItem, right: romanListItem },
-  ];
-
   for (const scheme of schemes) {
     const leftStart = lines.findIndex((line) => scheme.left.test(line));
     const rightStart = lines.findIndex(
@@ -420,7 +610,7 @@ function matchingListLayout(lines: string[]) {
         rightTitle = lines[rightStart - 1].replace(/:$/, "").trim();
       }
 
-      const heading = lines
+      const rawHeading = lines
         .slice(0, headingEnd)
         .reduce<string[]>((acc, curr) => {
           const prev = acc.at(-1);
@@ -451,29 +641,25 @@ function matchingListLayout(lines: string[]) {
         .map((line) => line.trim().replace(/[,;]$/, ""));
 
       if (leftItems.length >= 2 && rightItems.length >= 2) {
+        let finalLeftTitle = leftTitle;
+        let finalRightTitle = rightTitle;
+        let cleanedHeading = rawHeading;
+
         if (leftTitle === (isTelugu ? "జాబితా I" : "List I")) {
-          const headingText = heading.join(" ");
-          const titleMatch = headingText.match(
-            /Match\s+(?:the\s+)?(.*?)\s+(?:with|to)\s+(?:the\s+)?(.*?)(?::|$)/i,
-          );
-          if (titleMatch && titleMatch[1] && titleMatch[2]) {
-            const l = titleMatch[1].trim();
-            const r = titleMatch[2].trim();
-            if (l.length < 30 && r.length < 30) {
-              leftTitle = l.charAt(0).toUpperCase() + l.slice(1);
-              rightTitle = r.charAt(0).toUpperCase() + r.slice(1);
-            }
-          }
+          const parsed = parseMatchingHeaders(rawHeading, isTelugu);
+          finalLeftTitle = parsed.leftTitle;
+          finalRightTitle = parsed.rightTitle;
+          cleanedHeading = parsed.cleanedHeading;
         }
 
         const instruction = rightEnd === -1 ? [] : lines.slice(rightEnd);
 
         return {
-          heading: heading.length ? heading : [isTelugu ? "జతపరచండి:" : "Match the following:"],
-          leftTitle,
-          rightTitle,
-          leftItems,
-          rightItems,
+          heading: cleanedHeading.length ? cleanedHeading : [isTelugu ? "జతపరచండి:" : "Match the following:"],
+          leftTitle: finalLeftTitle,
+          rightTitle: finalRightTitle,
+          leftItems: leftItems.map((item) => cleanItem(item, finalLeftTitle, finalRightTitle)),
+          rightItems: rightItems.map((item) => cleanItem(item, finalLeftTitle, finalRightTitle)),
           instruction,
         };
       }
@@ -532,12 +718,7 @@ export function FormattedQuestionText({
   if (!text || typeof text !== "string") return null;
   const lines = questionLines(text);
   const isTelugu = containsTeluguText(text);
-  const matchingLayout =
-    matchQuestion.test(lines[0] ?? "") ||
-    lines.some((l) => isExplicitHeader(l)) ||
-    lines.some((l) => /^[A-Za-z\u0c00-\u0c7f\s-]{2,25}:$/i.test(l))
-      ? matchingListLayout(lines)
-      : null;
+  const matchingLayout = matchingListLayout(lines);
   const passageLayout = !matchingLayout ? passageListLayout(lines) : null;
 
   if (matchingLayout) {
