@@ -3,7 +3,15 @@ import { createHmac, randomInt } from "node:crypto";
 const BREVO_SEND_EMAIL_URL = "https://api.brevo.com/v3/smtp/email";
 
 function setting(name: "BREVO_API_KEY" | "CUSTOM_OTP_PEPPER" | "TURNSTILE_SECRET_KEY") {
-  const value = process.env[name];
+  let value = process.env[name];
+  if (!value) {
+    try {
+      const cfContext = (globalThis as Record<symbol, any>)[Symbol.for("__cloudflare-context__")];
+      value = cfContext?.env?.[name];
+    } catch {
+      // Ignore context lookup errors outside Cloudflare
+    }
+  }
   if (!value) throw new Error("Email OTP is being configured. Please use password login for now.");
   return value;
 }

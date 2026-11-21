@@ -1,7 +1,18 @@
 const BREVO_SEND_EMAIL_URL = "https://api.brevo.com/v3/smtp/email";
 
 function getBrevoApiKey(): string | null {
-  return process.env.BREVO_API_KEY || null;
+  if (process.env.BREVO_API_KEY) {
+    return process.env.BREVO_API_KEY;
+  }
+  try {
+    const cfContext = (globalThis as Record<symbol, any>)[Symbol.for("__cloudflare-context__")];
+    if (cfContext?.env?.BREVO_API_KEY) {
+      return cfContext.env.BREVO_API_KEY;
+    }
+  } catch {
+    // Ignore context lookup errors outside Cloudflare
+  }
+  return null;
 }
 
 export function buildDirectAdminEmail({
