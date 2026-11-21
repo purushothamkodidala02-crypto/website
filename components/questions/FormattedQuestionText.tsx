@@ -127,9 +127,9 @@ function splitInlineLists(text: string): string {
 
   const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|(?<![\d౦-౯]\s*:[ \t]*)\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
-  // Separate markers accidentally glued to words or punctuation without spaces (e.g. "CommitteeC. Conduct", "HyderabadD. Formation", "year.3. The")
+  // Separate markers accidentally glued to words or punctuation without spaces (e.g. "CommitteeC. Conduct", "HyderabadD. Formation", "year.3. The", "R.ii. T is")
   text = text.replace(
-    /(?<=[a-z\d\u0c00-\u0c7f]\.?)(?=(?:[A-Ha-h]|[1-9]|[౧-౯]|I{1,4}|VI{0,2}|[ivxIVX]{1,5})\.\s+[A-Za-z0-9\u0c00-\u0c7f"'])/g,
+    /(?<=[a-zA-Z\d\u0c00-\u0c7f][.?!]?)(?<![ivxIVX])(?=(?:[A-Ha-h]|[1-9]|[౧-౯]|I{1,4}|VI{0,2}|[ivxIVX]{1,5})\.\s+[A-Za-z0-9\u0c00-\u0c7f"'])/g,
     " ",
   );
 
@@ -157,6 +157,18 @@ function questionLines(rawText: string) {
     .replace(/\*\*/g, "")
     .replace(/\b(18\d|19\d|20\d)\s+(\d)(?=\.|\b)/g, "$1$2")
     .replace(/\b(Prades)\s+(h)\b/gi, "$1$2")
+    // Repair split roman numerals (e.g. "i i." -> "ii.", "i i i." -> "iii.")
+    .replace(/\b([ivxIVX])\s+([ivxIVX])\s+([ivxIVX])\.\s+/g, "$1$2$3. ")
+    .replace(/\b([ivxIVX])\s+([ivxIVX])\.\s+/g, "$1$2. ")
+    // Break after introductory clause before quoted code expression (e.g. "In a certain code language,‘A @ B’")
+    .replace(
+      /(?<=(?:code language|కోడ్\s*భాషలో|నిర్దిష్ట\s*కోడ్\s*భాషలో|నిరి\s*ష\s*కోడ్\s*భాషలో|భాషలో))[ \t]*[,:]?[ \t]*(?=[‘'"“])/gi,
+      ":\n",
+    )
+    // Break between consecutive quoted definitions (e.g. ...husband of B’‘A # B’ or ...భర ’ ‘A # B’)
+    .replace(/(?<=[’'"”])[ \t]*(?=[‘'"“])/g, "\n")
+    // Break before conditional prompt (e.g. ...mother of B’If ‘P % Q... or ...తలి ’ ఒకవేళ...)
+    .replace(/(?<=[’'"”])[ \t]*(?=(?:If|Where|Then)\b|ఒకవేళ(?:[\s,.]|$))/gi, "\n")
     // Protect currency and reference abbreviations (e.g. "Rs. 2", "Re. 1", "No. 1", "Fig. 1")
     // so that abbreviation dots are not mistaken for sentence ends before numbered list items.
     .replace(
@@ -323,6 +335,8 @@ const numericListItem = /^(?:\([1-9]\d?\)\s*|(?:[1-9]\d?|[౧-౯])[.)]\s+)/;
 const alphabeticListItem = /^(?:\([a-hA-H]\)\s*|[a-hA-H][.)]\s+)/;
 const teluguAlphabeticListItem = /^(?:\((?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)\)\s*|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)[.)]\s+)/;
 const romanListItem = /^(?:\([ivxIVX]{1,5}\)\s*|(?:I|II|III|IV|V|VI|VII|VIII|i|ii|iii|iv|v|vi|vii|viii)[.)]\s+)/;
+const codeDefinitionItem =
+  /^(?:[‘'"“][^'"]+?[’'"”]|[A-Za-z0-9]\s*[@#$%^&*+=<>_~/-]\s*[A-Za-z0-9])\s*(?:\b(?:means|denotes|stands for)|(?:అంటే|సూచిస్తుంది)(?:[\s,.]|$))/i;
 
 function renderListItem(line: string) {
   const match = line.match(
@@ -847,6 +861,33 @@ export function FormattedQuestionText({
                   {item.content}
                 </span>
               </div>
+            ))}
+          </div>,
+        );
+        continue;
+      }
+
+      const isCodeDef = codeDefinitionItem.test(line);
+      if (isCodeDef) {
+        const group: { line: string; index: number }[] = [];
+        while (i < lines.length) {
+          if (codeDefinitionItem.test(lines[i])) {
+            group.push({ line: lines[i], index: i });
+            i++;
+          } else {
+            break;
+          }
+        }
+
+        elements.push(
+          <div
+            key={`code-group-${group[0].index}`}
+            className="my-2 sm:my-2.5 space-y-1 sm:space-y-1.5 pl-1 sm:pl-2"
+          >
+            {group.map((item) => (
+              <p key={item.index} className="leading-relaxed sm:leading-7 text-slate-900">
+                {item.line}
+              </p>
             ))}
           </div>,
         );

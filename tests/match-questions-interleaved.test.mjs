@@ -16,7 +16,17 @@ test("FormattedQuestionText.tsx implements interleaved matching list layout and 
 test("FormattedQuestionText.tsx separates glued letter markers like CommitteeC. and HyderabadD.", async () => {
   const formatter = await read("components/questions/FormattedQuestionText.tsx");
 
-  assert.match(formatter, /\(\?<=\[a-z\\d\\u0c00-\\u0c7f\]\\.\?\)\(\?=\(\?:\[A-Ha-h\]/);
+  assert.match(formatter, /\(\?<=\[a-zA-Z\\d\\u0c00-\\u0c7f\]\[\.\?!\]\?\)\(\?<!\[ivxIVX\]\)\(\?=\(\?:\[A-Ha-h\]/);
+});
+
+test("FormattedQuestionText.tsx formats inline coded language definitions and repairs glued or split roman numerals", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /code language\|కోడ్\\s\*భాషలో/);
+  assert.match(formatter, /\(\?<=\[’'"”\]\)\[ \\t\]\*\(\?=\[‘'"“\]\)/);
+  assert.match(formatter, /\(\?<=\[’'"”\]\)\[ \\t\]\*\(\?=\(\?:If\|Where\|Then\)\\b\|ఒకవేళ/);
+  assert.match(formatter, /codeDefinitionItem/);
+  assert.match(formatter, /code-group/);
 });
 
 test("FormattedQuestionText.tsx groups list items and prevents awkward breaks after 'and'", async () => {
@@ -35,5 +45,5 @@ test("FormattedQuestionText.tsx handles glued markers like year.3. The and repai
 
   assert.match(formatter, /18\\d\|19\\d\|20\\d/);
   assert.match(formatter, /Prades/);
-  assert.match(formatter, /\[a-z\\d\\u0c00-\\u0c7f\]\\.\?/);
+  assert.match(formatter, /\[a-zA-Z\\d\\u0c00-\\u0c7f\]/);
 });
