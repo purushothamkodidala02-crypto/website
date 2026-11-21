@@ -341,7 +341,7 @@ export default async function Home() {
                       {paperCount} paper{paperCount === 1 ? "" : "s"} available
                     </span>
                     <span className="inline-flex shrink-0 items-center gap-1 font-bold text-teal-800 group-hover:text-teal-950 group-hover:translate-x-0.5 transition">
-                      Official Guide &amp; Tests <span aria-hidden="true">→</span>
+                      Explore <span aria-hidden="true">→</span>
                     </span>
                   </div>
                 </Link>
