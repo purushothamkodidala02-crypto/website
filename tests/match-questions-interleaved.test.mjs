@@ -18,3 +18,14 @@ test("FormattedQuestionText.tsx separates glued letter markers like CommitteeC. 
 
   assert.match(formatter, /\(\?<=\[a-z\\d\\u0c00-\\u0c7f\]\)\(\?=\(\?:\[A-Ha-h\]/);
 });
+
+test("FormattedQuestionText.tsx groups list items and prevents awkward breaks after 'and'", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify 'and' / 'or' guard before select/choose
+  assert.match(formatter, /\(\?<!\\b\(\?:and\|or\|to\|in order to\)\\s\*\)/);
+
+  // Verify group mapping for numbered/lettered lists
+  assert.match(formatter, /group\.map/);
+  assert.match(formatter, /key=\{`group-\$\{group\[0\]\.index\}`\}/);
+});

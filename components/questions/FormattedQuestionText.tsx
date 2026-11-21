@@ -223,11 +223,11 @@ function questionLines(rawText: string) {
 
   const lines = text
     .replace(
-      /(?<!,)[ \t]+(?=(?:Choose|Select|Pick)\s+(?:the|a)?\s*(?:correct|incorrect|most appropriate|suitable)?\s*(?:code|answer|option|pair|match)\b)/gi,
+      /(?<!\b(?:and|or|to|in order to)\s*)(?<!,)[ \t]+(?=(?:Choose|Select|Pick)\s+(?:the|a)?\s*(?:correct|incorrect|most appropriate|suitable)?\s*(?:code|answer|option|pair|match)\b)/gi,
       "\n",
     )
     .replace(
-      /(?<!,)[ \t]+(?=(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను|కోడ్|కోడ్‌ను|కోడ్ను|వాక్యాన్ని)|సరైన\s+కోడ్ను|సరైన\s+జవాబును|సరైన\s+సమాధానాన్ని)\s*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/gi,
+      /(?<!\b(?:మరియు)\s*)(?<!,)[ \t]+(?=(?:(?:సరైన|సరికాని)\s+(?:ఐచ్ఛికాన్ని|సమాధానాన్ని|జవాబును|జతను|కోడ్|కోడ్‌ను|కోడ్ను|వాక్యాన్ని)|సరైన\s+కోడ్ను|సరైన\s+జవాబును|సరైన\s+సమాధానాన్ని)\s*(?:ఎంచుకోండి|గుర్తించండి|తెల్పండి|ఎన్నుకోండి|పరిశీలించండి))/gi,
       "\n",
     )
     .replace(
@@ -268,11 +268,17 @@ function questionLines(rawText: string) {
         return merged;
       }
       const previous = merged.at(-1);
-      if (previous && /^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])$/i.test(previous)) {
+      if (/^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])$/i.test(previous || "")) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else if (previous && /\b(?:Rs|Re|రూ)\.?$/i.test(previous) && /^(\d{1,2})[.)]\s*(.*)$/.test(line)) {
         merged[merged.length - 1] = `${previous.replace(/\.?$/, ".")} ${line}`;
       } else if (previous && /^(?:Statement|Conclusion|Assumption|ప్రకటన|తీర్మానం|ఊహ|భావన)\s*:$/i.test(previous) && !/^(?:\([a-hA-H\d]|[1-9]|I{1,4}|[౧-౯]|Statements?|Conclusions?|Assumptions?|ప్రకటనలు?|తీర్మానాలు?|ఊహలు?)/i.test(line)) {
+        merged[merged.length - 1] = `${previous} ${line}`;
+      } else if (
+        previous &&
+        /\b(?:and|or|in|with|of|for|to|the|a|an|from|by|at|is|was|are|were|మరియు|యొక్క|లో|తో|నుండి|ద్వారా)\s*$/i.test(previous) &&
+        !/^(?:\((?:[a-hA-H\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-hA-H]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])/i.test(line)
+      ) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else {
         merged.push(line);
@@ -782,101 +788,142 @@ export function FormattedQuestionText({
     );
   }
 
+  const renderBlocks = () => {
+    const elements: React.ReactNode[] = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+      const numbered = line.match(numberedSection);
+      const isCaseCitation =
+        numbered &&
+        /^(?:v|vs)[.)]$/i.test(numbered[1]) &&
+        /^(?:Financial|State|Union|Commissioner|Collector|Govt|Government|Board|Council|Secretary|Inspector|Municipal|High\s+Court|Supreme\s+Court)\b/i.test(
+          numbered[2],
+        );
+
+      if (numbered && !isCaseCitation) {
+        const group: Array<{ index: number; line: string; marker: string; content: string }> = [];
+        while (i < lines.length) {
+          const currLine = lines[i];
+          const currMatch = currLine.match(numberedSection);
+          const currIsCase =
+            currMatch &&
+            /^(?:v|vs)[.)]$/i.test(currMatch[1]) &&
+            /^(?:Financial|State|Union|Commissioner|Collector|Govt|Government|Board|Council|Secretary|Inspector|Municipal|High\s+Court|Supreme\s+Court)\b/i.test(
+              currMatch[2],
+            );
+          if (currMatch && !currIsCase) {
+            group.push({
+              index: i,
+              line: currLine,
+              marker: currMatch[1],
+              content: currMatch[2],
+            });
+            i++;
+          } else {
+            break;
+          }
+        }
+
+        elements.push(
+          <div key={`group-${group[0].index}`} className="my-2 sm:my-2.5 space-y-1.5 sm:space-y-2">
+            {group.map((item) => (
+              <div
+                key={`${item.index}-${item.line}`}
+                className="flex items-start gap-2.5 sm:gap-3 leading-relaxed sm:leading-7 text-slate-950"
+              >
+                <strong className="font-bold text-slate-950 shrink-0 select-none min-w-[1.25rem] text-left">
+                  {item.marker}
+                </strong>
+                <span className="text-slate-900 font-normal">
+                  {item.content}
+                </span>
+              </div>
+            ))}
+          </div>,
+        );
+        continue;
+      }
+
+      const labelled = line.match(labelledSection);
+      const data = line.match(dataRow);
+      const isHeading = sectionHeading.test(line);
+      const isInstruction = instructionStart.test(line);
+
+      const isAssertionOrReason =
+        labelled &&
+        /^(?:Assertion(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?)$/i.test(
+          labelled[1].trim(),
+        );
+
+      if (isAssertionOrReason) {
+        const label = normalizedSectionLabel(labelled[1].trim());
+        elements.push(
+          <div
+            key={`${i}-${line}`}
+            className="my-2 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 sm:p-4"
+          >
+            <p className="leading-relaxed sm:leading-8 text-slate-950">
+              <strong className="font-bold text-slate-950 mr-2">
+                {label}:
+              </strong>
+              <span className="text-slate-900 font-normal">
+                {labelled[2]}
+              </span>
+            </p>
+          </div>,
+        );
+      } else if (isHeading) {
+        elements.push(
+          <p key={`${i}-${line}`} className="font-bold text-slate-950 leading-relaxed sm:leading-8">
+            {line}
+          </p>,
+        );
+      } else if (labelled) {
+        elements.push(
+          <p key={`${i}-${line}`} className="leading-relaxed text-slate-950">
+            <strong className="font-bold text-slate-950 mr-1.5">
+              {normalizedSectionLabel(labelled[1].trim())}:
+            </strong>
+            <span>{labelled[2]}</span>
+          </p>,
+        );
+      } else if (data && !line.endsWith("?") && line.split(/\s+/).length <= 15) {
+        elements.push(
+          <p key={`${i}-${line}`} className="leading-relaxed text-slate-950">
+            <strong className="font-bold text-slate-950">{data[1]}</strong>
+            {" — "}
+            <span>{data[2]}</span>
+          </p>,
+        );
+      } else {
+        elements.push(
+          <p
+            key={`${i}-${line}`}
+            className={
+              isInstruction && i > 0
+                ? "pt-2 leading-relaxed sm:leading-8 text-slate-950 font-medium"
+                : "leading-relaxed sm:leading-8 text-slate-950"
+            }
+          >
+            {line}
+          </p>,
+        );
+      }
+
+      i++;
+    }
+
+    return elements;
+  };
+
   return (
     <div
       lang={isTelugu ? "te" : "en"}
       className={`space-y-3 break-words ${isTelugu ? "font-telugu leading-[1.85]" : "leading-relaxed sm:leading-8"} ${className ?? ""}`}
     >
-      {lines.map((line, index) => {
-        const labelled = line.match(labelledSection);
-        const numbered = line.match(numberedSection);
-        const data = line.match(dataRow);
-        const isHeading = sectionHeading.test(line);
-        const isInstruction = instructionStart.test(line);
-
-        const isAssertionOrReason =
-          labelled &&
-          /^(?:Assertion(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?)$/i.test(
-            labelled[1].trim(),
-          );
-
-        if (isAssertionOrReason) {
-          const label = normalizedSectionLabel(labelled[1].trim());
-          return (
-            <div
-              key={`${index}-${line}`}
-              className="my-2 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 sm:p-4"
-            >
-              <p className="leading-relaxed sm:leading-8 text-slate-950">
-                <strong className="font-bold text-slate-950 mr-2">
-                  {label}:
-                </strong>
-                <span className="text-slate-900 font-normal">
-                  {labelled[2]}
-                </span>
-              </p>
-            </div>
-          );
-        }
-
-        if (isHeading) {
-          return (
-            <p key={`${index}-${line}`} className="font-bold text-slate-950 leading-relaxed sm:leading-8">
-              {line}
-            </p>
-          );
-        }
-
-        if (labelled) {
-          return (
-            <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
-              <strong className="font-bold text-slate-950 mr-1.5">
-                {normalizedSectionLabel(labelled[1].trim())}:
-              </strong>
-              <span>{labelled[2]}</span>
-            </p>
-          );
-        }
-
-        const isCaseCitation =
-          numbered &&
-          /^(?:v|vs)[.)]$/i.test(numbered[1]) &&
-          /^(?:Financial|State|Union|Commissioner|Collector|Govt|Government|Board|Council|Secretary|Inspector|Municipal|High\s+Court|Supreme\s+Court)\b/i.test(
-            numbered[2],
-          );
-
-        if (numbered && !isCaseCitation) {
-          return (
-            <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
-              <strong className="font-bold text-slate-950 mr-1.5">{numbered[1]}</strong>
-              <span>{numbered[2]}</span>
-            </p>
-          );
-        }
-
-        if (data && !line.endsWith('?') && line.split(/\s+/).length <= 15) {
-          return (
-            <p key={`${index}-${line}`} className="leading-relaxed text-slate-950">
-              <strong className="font-bold text-slate-950">{data[1]}</strong>
-              {" — "}
-              <span>{data[2]}</span>
-            </p>
-          );
-        }
-
-        return (
-          <p
-            key={`${index}-${line}`}
-            className={
-              isInstruction && index > 0
-                ? "pt-2 leading-relaxed sm:leading-8 text-slate-950"
-                : "leading-relaxed sm:leading-8 text-slate-950"
-            }
-          >
-            {line}
-          </p>
-        );
-      })}
+      {renderBlocks()}
     </div>
   );
 }
