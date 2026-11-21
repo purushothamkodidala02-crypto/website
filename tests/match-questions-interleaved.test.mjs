@@ -16,7 +16,7 @@ test("FormattedQuestionText.tsx implements interleaved matching list layout and 
 test("FormattedQuestionText.tsx separates glued letter markers like CommitteeC. and HyderabadD.", async () => {
   const formatter = await read("components/questions/FormattedQuestionText.tsx");
 
-  assert.match(formatter, /\(\?<=\[a-z\\d\\u0c00-\\u0c7f\]\)\(\?=\(\?:\[A-Ha-h\]/);
+  assert.match(formatter, /\(\?<=\[a-z\\d\\u0c00-\\u0c7f\]\\.\?\)\(\?=\(\?:\[A-Ha-h\]/);
 });
 
 test("FormattedQuestionText.tsx groups list items and prevents awkward breaks after 'and'", async () => {
@@ -28,4 +28,12 @@ test("FormattedQuestionText.tsx groups list items and prevents awkward breaks af
   // Verify group mapping for numbered/lettered lists
   assert.match(formatter, /group\.map/);
   assert.match(formatter, /key=\{`group-\$\{group\[0\]\.index\}`\}/);
+});
+
+test("FormattedQuestionText.tsx handles glued markers like year.3. The and repairs OCR year/word spaces", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /18\\d\|19\\d\|20\\d/);
+  assert.match(formatter, /Prades/);
+  assert.match(formatter, /\[a-z\\d\\u0c00-\\u0c7f\]\\.\?/);
 });

@@ -120,11 +120,16 @@ function findValidListIndices(matches: RegExpMatchArray[]): Set<number> {
 }
 
 function splitInlineLists(text: string): string {
+  // Fix OCR split 4-digit years (e.g. 200 9 -> 2009) and split words (e.g. Prades h -> Pradesh)
+  text = text
+    .replace(/\b(18\d|19\d|20\d)\s+(\d)(?=\.|\b)/g, "$1$2")
+    .replace(/\b(Prades)\s+(h)\b/gi, "$1$2");
+
   const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|(?<![\d౦-౯]\s*:[ \t]*)\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
-  // Separate markers accidentally glued to words without spaces (e.g. "CommitteeC. Conduct" or "HyderabadD. Formation")
+  // Separate markers accidentally glued to words or punctuation without spaces (e.g. "CommitteeC. Conduct", "HyderabadD. Formation", "year.3. The")
   text = text.replace(
-    /(?<=[a-z\d\u0c00-\u0c7f])(?=(?:[A-Ha-h]|[1-9]|[౧-౯]|I{1,4}|VI{0,2}|[ivxIVX]{1,5})\.\s+[A-Za-z0-9\u0c00-\u0c7f"'])/g,
+    /(?<=[a-z\d\u0c00-\u0c7f]\.?)(?=(?:[A-Ha-h]|[1-9]|[౧-౯]|I{1,4}|VI{0,2}|[ivxIVX]{1,5})\.\s+[A-Za-z0-9\u0c00-\u0c7f"'])/g,
     " ",
   );
 
@@ -150,6 +155,8 @@ function questionLines(rawText: string) {
   let text = rawText
     .replace(/\u00a0/g, " ")
     .replace(/\*\*/g, "")
+    .replace(/\b(18\d|19\d|20\d)\s+(\d)(?=\.|\b)/g, "$1$2")
+    .replace(/\b(Prades)\s+(h)\b/gi, "$1$2")
     // Protect currency and reference abbreviations (e.g. "Rs. 2", "Re. 1", "No. 1", "Fig. 1")
     // so that abbreviation dots are not mistaken for sentence ends before numbered list items.
     .replace(
@@ -252,7 +259,7 @@ function questionLines(rawText: string) {
       "\n",
     )
     .replace(
-      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s+(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:(?:\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])))\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:(?:\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])))\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
