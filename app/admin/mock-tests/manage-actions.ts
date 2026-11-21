@@ -12,6 +12,13 @@ export type MockTestManagementResult = {
   success: boolean;
   message: string;
   replacementId?: string;
+  notificationResult?: {
+    attempted: boolean;
+    sentCount: number;
+    failedCount: number;
+    recipientCount: number;
+    message: string;
+  };
 };
 
 async function getManagedMockTest(mockTestId: string) {
@@ -143,24 +150,48 @@ export async function publishMockTest(
     }
 
     let notificationNote = "";
+    let notificationResult: MockTestManagementResult["notificationResult"] = undefined;
     if (options?.notifyStudents) {
       try {
         const { data: { user } } = await result.supabase.auth.getUser();
-        const notifyResult = await sendMockTestNotifications({
+        const notifyRes = await sendMockTestNotifications({
           mockTestId,
           adminUserId: user?.id,
         });
-        if (notifyResult.sentCount > 0) {
-          notificationNote = ` and emailed ${notifyResult.sentCount} previous test-takers!`;
+        notificationResult = {
+          attempted: true,
+          sentCount: notifyRes.sentCount,
+          failedCount: notifyRes.failedCount,
+          recipientCount: notifyRes.recipientCount,
+          message: notifyRes.message,
+        };
+        if (notifyRes.sentCount > 0) {
+          notificationNote = ` and emailed ${notifyRes.sentCount} previous test-taker${notifyRes.sentCount === 1 ? "" : "s"}!`;
+        } else if (notifyRes.recipientCount === 0) {
+          notificationNote = " (Note: published, but no previous test-takers were found for this exam).";
+        } else {
+          notificationNote = ` (Note: published, but email alerts failed: ${notifyRes.message}).`;
         }
       } catch (notifyErr) {
         console.error("Failed to send mock test notifications on publish:", notifyErr);
-        notificationNote = " (Note: published, but email notification encountered an issue).";
+        const errMsg = notifyErr instanceof Error ? notifyErr.message : "email notification encountered an issue";
+        notificationResult = {
+          attempted: true,
+          sentCount: 0,
+          failedCount: 0,
+          recipientCount: 0,
+          message: errMsg,
+        };
+        notificationNote = ` (Note: published, but ${errMsg}).`;
       }
     }
 
     revalidateMockTestPages(mockTestId);
-    return { success: true, message: `“${result.mockTest.title}” is published${notificationNote}.` };
+    return {
+      success: true,
+      message: `“${result.mockTest.title}” is published${notificationNote}.`,
+      notificationResult,
+    };
   } catch (err) {
     console.error("Unexpected error in publishMockTest:", err);
     return {
@@ -216,24 +247,48 @@ export async function republishArchivedMockTest(
     }
 
     let notificationNote = "";
+    let notificationResult: MockTestManagementResult["notificationResult"] = undefined;
     if (options?.notifyStudents) {
       try {
         const { data: { user } } = await result.supabase.auth.getUser();
-        const notifyResult = await sendMockTestNotifications({
+        const notifyRes = await sendMockTestNotifications({
           mockTestId,
           adminUserId: user?.id,
         });
-        if (notifyResult.sentCount > 0) {
-          notificationNote = ` and emailed ${notifyResult.sentCount} previous test-takers!`;
+        notificationResult = {
+          attempted: true,
+          sentCount: notifyRes.sentCount,
+          failedCount: notifyRes.failedCount,
+          recipientCount: notifyRes.recipientCount,
+          message: notifyRes.message,
+        };
+        if (notifyRes.sentCount > 0) {
+          notificationNote = ` and emailed ${notifyRes.sentCount} previous test-taker${notifyRes.sentCount === 1 ? "" : "s"}!`;
+        } else if (notifyRes.recipientCount === 0) {
+          notificationNote = " (Note: live again, but no previous test-takers were found for this exam).";
+        } else {
+          notificationNote = ` (Note: live again, but email alerts failed: ${notifyRes.message}).`;
         }
       } catch (notifyErr) {
         console.error("Failed to send mock test notifications on republish:", notifyErr);
-        notificationNote = " (Note: live again, but email notification encountered an issue).";
+        const errMsg = notifyErr instanceof Error ? notifyErr.message : "email notification encountered an issue";
+        notificationResult = {
+          attempted: true,
+          sentCount: 0,
+          failedCount: 0,
+          recipientCount: 0,
+          message: errMsg,
+        };
+        notificationNote = ` (Note: live again, but ${errMsg}).`;
       }
     }
 
     revalidateMockTestPages(mockTestId);
-    return { success: true, message: `“${result.mockTest.title}” is live again${notificationNote}.` };
+    return {
+      success: true,
+      message: `“${result.mockTest.title}” is live again${notificationNote}.`,
+      notificationResult,
+    };
   } catch (err) {
     console.error("Unexpected error in republishArchivedMockTest:", err);
     return {

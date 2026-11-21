@@ -118,8 +118,8 @@ export async function sendDirectUserEmail({
     throw new Error("Email message body cannot be empty.");
   }
 
-  const senderEmail = process.env.CUSTOM_OTP_FROM_EMAIL ?? "no-reply@varadhiprep.in";
-  const senderName = process.env.CUSTOM_OTP_FROM_NAME ?? "Varadhi Prep";
+  const senderEmail = process.env.CUSTOM_OTP_FROM_EMAIL || "noreply@varadhiprep.in";
+  const senderName = process.env.CUSTOM_OTP_FROM_NAME || "Varadhiprep";
 
   const emailContent = buildDirectAdminEmail({
     recipientName,

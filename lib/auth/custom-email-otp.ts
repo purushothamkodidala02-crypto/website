@@ -25,8 +25,8 @@ export async function verifyTurnstile(token: string, ip: string) {
 }
 
 export async function sendSixDigitOtp(email: string, otp: string) {
-  const senderEmail = process.env.CUSTOM_OTP_FROM_EMAIL ?? "no-reply@varadhiprep.in";
-  const senderName = process.env.CUSTOM_OTP_FROM_NAME ?? "Varadhi Prep";
+  const senderEmail = process.env.CUSTOM_OTP_FROM_EMAIL || "noreply@varadhiprep.in";
+  const senderName = process.env.CUSTOM_OTP_FROM_NAME || "Varadhiprep";
   const response = await fetch(BREVO_SEND_EMAIL_URL, {
     method: "POST",
     cache: "no-store",

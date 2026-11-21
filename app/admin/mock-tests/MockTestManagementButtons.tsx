@@ -44,6 +44,7 @@ export function MockTestManagementButtons({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
+  const [notice, setNotice] = useState<{ type: "success" | "info" | "warning"; text: string } | null>(null);
   const [replacementId, setReplacementId] = useState<string | null>(null);
 
   // Publish with email alert modal state
@@ -59,6 +60,7 @@ export function MockTestManagementButtons({
     setPreviewLoading(true);
     setPreviewAudience(null);
     setMessage("");
+    setNotice(null);
 
     const res = await getMockTestNotificationPreviewAction(mockTestId);
     setPreviewLoading(false);
@@ -75,6 +77,7 @@ export function MockTestManagementButtons({
     const action = publishAction;
     setPending(true);
     setMessage("");
+    setNotice(null);
 
     try {
       const result =
@@ -86,6 +89,29 @@ export function MockTestManagementButtons({
       if (!result.success) {
         setMessage(result.message);
         return;
+      }
+      if (result.notificationResult?.attempted) {
+        if (result.notificationResult.sentCount > 0) {
+          setNotice({
+            type: "success",
+            text: `“${mockTestTitle}” published! Sent email alert to ${result.notificationResult.sentCount} previous test-taker${result.notificationResult.sentCount === 1 ? "" : "s"}.`,
+          });
+        } else if (result.notificationResult.recipientCount === 0) {
+          setNotice({
+            type: "info",
+            text: `“${mockTestTitle}” published! (Note: 0 previous test-takers found for this exam yet, so no automated emails were sent).`,
+          });
+        } else {
+          setNotice({
+            type: "warning",
+            text: `“${mockTestTitle}” published, but email alerts could not be sent: ${result.notificationResult.message}`,
+          });
+        }
+      } else {
+        setNotice({
+          type: "success",
+          text: result.message,
+        });
       }
       router.refresh();
     } catch (err) {
@@ -292,6 +318,30 @@ export function MockTestManagementButtons({
         </>
       )}
 
+      {notice && (
+        <div className="col-span-2 sm:basis-full py-1">
+          <div
+            className={`flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-semibold shadow-xs ${
+              notice.type === "success"
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                : notice.type === "info"
+                ? "border border-sky-200 bg-sky-50 text-sky-800"
+                : "border border-amber-300 bg-amber-50 text-amber-900"
+            }`}
+          >
+            <p aria-live="polite">{notice.text}</p>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="ml-auto text-xs font-bold opacity-60 hover:opacity-100"
+              aria-label="Dismiss notice"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {message && (
         <div className="col-span-2 sm:basis-full py-1">
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 shadow-xs">
@@ -363,6 +413,10 @@ export function MockTestManagementButtons({
                       <>
                         Found <strong>{previewAudience.count} student{previewAudience.count === 1 ? "" : "s"}</strong> who previously practiced <strong>{previewAudience.examName}</strong> tests. They will receive an email notifying them that a new mock test is live!
                       </>
+                    ) : previewAudience && previewAudience.count === 0 ? (
+                      <span className="text-amber-900 font-semibold block bg-amber-50/90 p-2 rounded-lg border border-amber-200/80 mt-1">
+                        ⚠️ 0 previous test-takers found for <strong>{previewAudience.examName}</strong> yet. Automated emails will not be sent on publish. (You can still email specific users anytime using “Notify students” on the test row).
+                      </span>
                     ) : (
                       "Students who previously took or registered for tests in this exam will receive a notification email with a direct link to practice."
                     )}

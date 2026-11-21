@@ -48,8 +48,16 @@ function getBrevoApiKey(): string | null {
   return process.env.BREVO_API_KEY || null;
 }
 
+async function getDbClient() {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return createAdminClient();
+  }
+  const { createClient } = await import("@/lib/supabase/server");
+  return await createClient();
+}
+
 export async function fetchMockTestWithDetails(mockTestId: string) {
-  const admin = createAdminClient();
+  const admin = await getDbClient();
 
   const { data: test, error } = await admin
     .from("mock_tests")
@@ -135,7 +143,7 @@ export async function fetchMockTestWithDetails(mockTestId: string) {
 }
 
 export async function fetchEligibleStudentsForMockTest(mockTestId: string): Promise<CandidateRecipient[]> {
-  const admin = createAdminClient();
+  const admin = await getDbClient();
 
   // 1. Try RPC function first
   const { data: rpcRecipients, error: rpcError } = await admin.rpc(
@@ -211,7 +219,7 @@ export async function fetchEligibleStudentsForMockTest(mockTestId: string): Prom
 }
 
 export async function previewMockTestNotification(mockTestId: string): Promise<MockTestNotificationPreview> {
-  const admin = createAdminClient();
+  const admin = await getDbClient();
   const details = await fetchMockTestWithDetails(mockTestId);
   const recipients = await fetchEligibleStudentsForMockTest(mockTestId);
 
@@ -309,11 +317,12 @@ export async function sendMockTestNotifications({
     };
   }
 
-  const senderEmail = process.env.CUSTOM_OTP_FROM_EMAIL ?? "no-reply@varadhiprep.in";
-  const senderName = process.env.CUSTOM_OTP_FROM_NAME ?? "Varadhi Prep";
+  const senderEmail = process.env.CUSTOM_OTP_FROM_EMAIL || "noreply@varadhiprep.in";
+  const senderName = process.env.CUSTOM_OTP_FROM_NAME || "Varadhiprep";
 
   let sentCount = 0;
   let failedCount = 0;
+  let lastBrevoError = "";
 
   const templateEmail = buildMockTestNotificationEmail({
     studentName: "{{ params.studentName }}",
@@ -332,8 +341,8 @@ export async function sendMockTestNotifications({
     const batch = recipients.slice(i, i + BATCH_SIZE);
 
     const messageVersions = batch.map((recipient) => ({
-      to: [{ email: recipient.email, name: recipient.full_name }],
-      params: { studentName: recipient.full_name },
+      to: [{ email: recipient.email, name: recipient.full_name?.trim() || undefined }],
+      params: { studentName: recipient.full_name?.trim() || "Student" },
     }));
 
     try {
@@ -359,8 +368,22 @@ export async function sendMockTestNotifications({
         console.error(`Brevo API Batch Error (${response.status}):`, errText);
         failedCount += batch.length;
 
-        // If daily credit limit is hit or authorization fails, abort subsequent batches cleanly
-        if (response.status === 400 || response.status === 402 || response.status === 403) {
+        let parsedReason = "";
+        try {
+          const parsed = JSON.parse(errText);
+          parsedReason = parsed.message || parsed.code || errText;
+        } catch {
+          parsedReason = errText || `HTTP ${response.status}`;
+        }
+        lastBrevoError = parsedReason;
+
+        // If daily credit limit is hit or authorization/IP fails, abort subsequent batches cleanly
+        if (
+          response.status === 400 ||
+          response.status === 401 ||
+          response.status === 402 ||
+          response.status === 403
+        ) {
           const remaining = recipients.length - (i + batch.length);
           if (remaining > 0) {
             failedCount += remaining;
@@ -375,6 +398,7 @@ export async function sendMockTestNotifications({
     } catch (batchErr) {
       console.error("Failed to send Brevo notification batch:", batchErr);
       failedCount += batch.length;
+      lastBrevoError = batchErr instanceof Error ? batchErr.message : "Network request failed";
     }
 
     // Controlled delay between batch requests
@@ -384,7 +408,7 @@ export async function sendMockTestNotifications({
   }
 
   // Log in mock_test_notifications table
-  const admin = createAdminClient();
+  const admin = await getDbClient();
   const emailMeta = buildMockTestNotificationEmail({
     studentName: "Student",
     examName: details.group.name,
@@ -422,10 +446,10 @@ export async function sendMockTestNotifications({
       sentCount > 0
         ? `Notified ${sentCount} student${sentCount === 1 ? "" : "s"} who previously practiced ${details.group.name} tests!${
             failedCount > 0
-              ? ` (${failedCount} could not be delivered, likely due to Brevo daily credit limit).`
+              ? ` (${failedCount} could not be delivered: ${lastBrevoError || "limit reached"}).`
               : ""
           }`
-        : `Could not send emails (${failedCount} failed). Please verify your Brevo credits or API settings.`,
+        : `Could not send emails (${failedCount} failed)${lastBrevoError ? `: ${lastBrevoError}` : ""}. Please verify your Brevo credentials or settings.`,
     recipientCount: recipients.length,
     sentCount,
     failedCount,
