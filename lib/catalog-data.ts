@@ -7,7 +7,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 
 export const PUBLIC_CATALOG_TAG = "public-catalog";
 
-const CATALOG_IN_MEMORY_TTL_MS = 3 * 60 * 1000; // 3 minutes
+const CATALOG_IN_MEMORY_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function safeRevalidateCatalogTag() {
   memHomeCatalog = null;
@@ -25,17 +25,15 @@ export function safeRevalidateCatalogTag() {
 }
 
 function hasCatalogSupabaseEnv() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-  );
+  return true;
 }
 
 function getCatalogSupabaseClient() {
-  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  try {
     return createAdminClient();
+  } catch {
+    return createPublicClient();
   }
-  return createPublicClient();
 }
 
 const fetchHomeCatalogData = unstable_cache(

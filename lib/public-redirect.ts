@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createPublicClient } from "@/lib/supabase/public";
+import type { createClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { categoryUrl, examUrl, mockTestUrl, paperUrl, specializationUrl, stateUrl, subjectUrl, UUID_PATTERN } from "@/lib/public-urls";
 
@@ -64,14 +65,11 @@ export async function resolvePublicPermanentRedirect(request: NextRequest) {
   const hasUuid = segments.some((segment) => UUID_PATTERN.test(segment));
 
   // Canonical paths without legacy query parameters or UUIDs are handled directly by cached route handlers
-  if (!hasLegacyParams && !hasUuid && segments.length > 0) {
+  if (!hasLegacyParams && !hasUuid) {
     return null;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) return null;
-  const supabase = createClient(supabaseUrl, anonKey, { auth: { persistSession: false, autoRefreshToken: false } }) as unknown as ReturnType<typeof createClient>;
+  const supabase = createPublicClient();
 
   if (segments.length === 1 && UUID_PATTERN.test(segments[0])) {
     const context = await contextFromTest(supabase, segments[0]);

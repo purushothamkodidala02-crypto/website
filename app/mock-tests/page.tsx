@@ -170,40 +170,6 @@ export default async function MockTestsPage(
     (catalog.stats as MockTestStats[]).map((item) => [item.mock_test_id, item]),
   );
 
-  const tests = catalog.tests.flatMap((test) => {
-    const paper = paperById.get(test.paper_id);
-    const exam = paper ? examById.get(paper.exam_group_id) : undefined;
-    const category = exam ? categoryById.get(exam.exam_id) : undefined;
-    const state = category ? stateById.get(category.state_id) : undefined;
-    if (!paper || !exam || !category || !state) return [];
-    const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
-    const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
-    const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
-    const paperDisplay = paperDisplayById.get(paper.id);
-    const stats = statsByTestId.get(test.id);
-    const configuredQuestionCount = Number(test.target_question_count ?? paper.question_count ?? 0);
-    const questions = stats
-      ? Number(stats.question_count)
-      : configuredQuestionCount > 0
-        ? configuredQuestionCount
-        : null;
-    const defaultCorrectMarks = Number(paper.default_correct_marks ?? 0);
-    const marks = stats
-      ? Number(stats.total_marks)
-      : questions !== null && defaultCorrectMarks > 0
-        ? questions * defaultCorrectMarks
-        : null;
-    const scoring = resolveMockTestScoring({
-      stats,
-      targetQuestionCount: test.target_question_count,
-      paperQuestionCount: paper.question_count,
-      defaultCorrectMarks: paper.default_correct_marks,
-      defaultNegativeMarks: paper.default_negative_marks,
-    });
-    const negativeMarks = scoring.negativeMarks;
-    return [{ ...test, paper, exam, category, state, subject, specialization, section, paperDisplay, questions, marks, negativeMarks }];
-  });
-
   let selectedState = states.find((state) => state.slug === filters.state || state.id === filters.state);
   if (!selectedState && filters.state) selectedState = (await resolvePublicRoute({ stateSlug: filters.state }))?.state;
   let selectedCategory = selectedState
@@ -255,55 +221,105 @@ export default async function MockTestsPage(
   const selectedSection = filters.section
     ? subjectSections.find((s) => s.slug === filters.section || s.id === filters.section)
     : undefined;
-  const hasUnsectionedTests = selectedSubject
+
+  const needsTests = Boolean(selectedState || isSearching || selectedPaper);
+
+  const tests = needsTests
+    ? catalog.tests.flatMap((test) => {
+        const paper = paperById.get(test.paper_id);
+        const exam = paper ? examById.get(paper.exam_group_id) : undefined;
+        const category = exam ? categoryById.get(exam.exam_id) : undefined;
+        const state = category ? stateById.get(category.state_id) : undefined;
+        if (!paper || !exam || !category || !state) return [];
+        const subject = test.subject_id ? subjectById.get(test.subject_id) : undefined;
+        const specialization = paper.specialization_id ? specializationById.get(paper.specialization_id) : undefined;
+        const section = test.subject_section_id ? sectionById.get(test.subject_section_id) : undefined;
+        const paperDisplay = paperDisplayById.get(paper.id);
+        const stats = statsByTestId.get(test.id);
+        const configuredQuestionCount = Number(test.target_question_count ?? paper.question_count ?? 0);
+        const questions = stats
+          ? Number(stats.question_count)
+          : configuredQuestionCount > 0
+            ? configuredQuestionCount
+            : null;
+        const defaultCorrectMarks = Number(paper.default_correct_marks ?? 0);
+        const marks = stats
+          ? Number(stats.total_marks)
+          : questions !== null && defaultCorrectMarks > 0
+            ? questions * defaultCorrectMarks
+            : null;
+        const scoring = resolveMockTestScoring({
+          stats,
+          targetQuestionCount: test.target_question_count,
+          paperQuestionCount: paper.question_count,
+          defaultCorrectMarks: paper.default_correct_marks,
+          defaultNegativeMarks: paper.default_negative_marks,
+        });
+        const negativeMarks = scoring.negativeMarks;
+        const timestamp = new Date(test.published_at || test.created_at || test.updated_at || 0).getTime();
+        return [{ ...test, paper, exam, category, state, subject, specialization, section, paperDisplay, questions, marks, negativeMarks, timestamp }];
+      })
+    : [];
+
+  const hasUnsectionedTests = selectedSubject && needsTests
     ? tests.find((t) => t.subject?.id === selectedSubject.id && !t.subject_section_id) !== undefined
     : false;
 
   const paperCountsByExam = new Map<string, number>();
   const subjectTextByExam = new Map<string, string[]>();
-  for (const paper of papers) {
-    paperCountsByExam.set(paper.exam_group_id, (paperCountsByExam.get(paper.exam_group_id) ?? 0) + 1);
-    const examSubjects = subjects
-      .filter((subject) => subject.paper_id === paper.id && subject.is_active)
-      .map((subject) => `${subject.name} ${subject.description ?? ""}`);
-    if (examSubjects.length > 0) {
-      const existing = subjectTextByExam.get(paper.exam_group_id) ?? [];
-      existing.push(...examSubjects);
-      subjectTextByExam.set(paper.exam_group_id, existing);
+
+  if (isSearching) {
+    const subjectsByPaperId = new Map<string, string[]>();
+    for (const s of subjects) {
+      if (!s.is_active) continue;
+      const existing = subjectsByPaperId.get(s.paper_id) ?? [];
+      existing.push(`${s.name} ${s.description ?? ""}`);
+      subjectsByPaperId.set(s.paper_id, existing);
+    }
+    for (const paper of papers) {
+      paperCountsByExam.set(paper.exam_group_id, (paperCountsByExam.get(paper.exam_group_id) ?? 0) + 1);
+      const examSubjects = subjectsByPaperId.get(paper.id);
+      if (examSubjects && examSubjects.length > 0) {
+        const existing = subjectTextByExam.get(paper.exam_group_id) ?? [];
+        existing.push(...examSubjects);
+        subjectTextByExam.set(paper.exam_group_id, existing);
+      }
     }
   }
 
-  const examMetaById = new Map(
-    exams.map((exam) => {
-      const category = categoryById.get(exam.exam_id);
-      const state = category ? stateById.get(category.state_id) : undefined;
-      const teluguData = state ? getExamTeluguMetadata(exam.slug, exam.name, state.slug) : null;
-      const patternText = teluguData?.pattern
-        ? `${teluguData.pattern.authority} ${teluguData.pattern.stages.join(" ")} ${teluguData.pattern.subjects.map((sub) => `${sub.name} ${sub.teluguName} ${sub.description}`).join(" ")}`
-        : "";
-      const scheduleText = teluguData?.schedule
-        ? `${teluguData.schedule.authority} ${teluguData.schedule.postName} ${teluguData.schedule.prelimsExamDate} ${teluguData.schedule.events.map((e) => `${e.title} ${e.teluguTitle} ${e.detail}`).join(" ")}`
-        : "";
-      const jobProfileText = teluguData?.jobProfile
-        ? `${teluguData.jobProfile.roleTitle} ${teluguData.jobProfile.department} ${teluguData.jobProfile.payScale} ${teluguData.jobProfile.grossSalaryMonthly} ${teluguData.jobProfile.eligibility.education} ${teluguData.jobProfile.eligibility.ageLimit} ${teluguData.jobProfile.duties.map((d) => `${d.title} ${d.teluguTitle ?? ""} ${d.description}`).join(" ")}`
-        : "";
-      const searchable = expandSearchableText([
-        state?.name,
-        state?.code,
-        category?.name,
-        exam.name,
-        exam.description,
-        teluguData?.teluguName,
-        teluguData?.keywords.join(" "),
-        patternText,
-        scheduleText,
-        jobProfileText,
-        subjectTextByExam.get(exam.id)?.join(" "),
-        "exam syllabus pattern mock test timeline duties salary",
-      ]);
-      return [exam.id, { state, category, teluguData, searchable }] as const;
-    }),
-  );
+  const examMetaById = isSearching
+    ? new Map(
+        exams.map((exam) => {
+          const category = categoryById.get(exam.exam_id);
+          const state = category ? stateById.get(category.state_id) : undefined;
+          const teluguData = state ? getExamTeluguMetadata(exam.slug, exam.name, state.slug) : null;
+          const patternText = teluguData?.pattern
+            ? `${teluguData.pattern.authority} ${teluguData.pattern.stages.join(" ")} ${teluguData.pattern.subjects.map((sub) => `${sub.name} ${sub.teluguName} ${sub.description}`).join(" ")}`
+            : "";
+          const scheduleText = teluguData?.schedule
+            ? `${teluguData.schedule.authority} ${teluguData.schedule.postName} ${teluguData.schedule.prelimsExamDate} ${teluguData.schedule.events.map((e) => `${e.title} ${e.teluguTitle} ${e.detail}`).join(" ")}`
+            : "";
+          const jobProfileText = teluguData?.jobProfile
+            ? `${teluguData.jobProfile.roleTitle} ${teluguData.jobProfile.department} ${teluguData.jobProfile.payScale} ${teluguData.jobProfile.grossSalaryMonthly} ${teluguData.jobProfile.eligibility.education} ${teluguData.jobProfile.eligibility.ageLimit} ${teluguData.jobProfile.duties.map((d) => `${d.title} ${d.teluguTitle ?? ""} ${d.description}`).join(" ")}`
+            : "";
+          const searchable = expandSearchableText([
+            state?.name,
+            state?.code,
+            category?.name,
+            exam.name,
+            exam.description,
+            teluguData?.teluguName,
+            teluguData?.keywords.join(" "),
+            patternText,
+            scheduleText,
+            jobProfileText,
+            subjectTextByExam.get(exam.id)?.join(" "),
+            "exam syllabus pattern mock test timeline duties salary",
+          ]);
+          return [exam.id, { state, category, teluguData, searchable }] as const;
+        }),
+      )
+    : new Map<string, { state?: typeof states[0]; category?: typeof categories[0]; teluguData?: ReturnType<typeof getExamTeluguMetadata>; searchable?: string }>();
 
   const matchingExams = isSearching
     ? exams
@@ -330,67 +346,68 @@ export default async function MockTestsPage(
     : [];
 
   const scoreByTestId = new Map<string, number>();
-  const matchingTests = tests.filter((test) => {
-    const matchesFilters =
-      (!selectedState || test.state.id === selectedState.id) &&
-      (!selectedCategory || test.category.id === selectedCategory.id) &&
-      (!selectedExam || test.exam.id === selectedExam.id) &&
-      (!selectedSpecialization || test.specialization?.id === selectedSpecialization.id || !test.specialization) &&
-      (!selectedPaper || test.paper.id === selectedPaper.id) &&
-      (selectedType !== "subject" || !selectedSubject || test.subject?.id === selectedSubject.id) &&
-      (selectedType === "all" || test.test_scope === selectedType) &&
-      (!selectedSection
-        ? (selectedSubject && subjectSections.length > 0 && !isSearching
-            ? (hasUnsectionedTests ? !test.subject_section_id : true)
-            : true)
-        : test.subject_section_id === selectedSection.id);
+  const matchingTests = needsTests
+    ? tests.filter((test) => {
+        const matchesFilters =
+          (!selectedState || test.state.id === selectedState.id) &&
+          (!selectedCategory || test.category.id === selectedCategory.id) &&
+          (!selectedExam || test.exam.id === selectedExam.id) &&
+          (!selectedSpecialization || test.specialization?.id === selectedSpecialization.id || !test.specialization) &&
+          (!selectedPaper || test.paper.id === selectedPaper.id) &&
+          (selectedType !== "subject" || !selectedSubject || test.subject?.id === selectedSubject.id) &&
+          (selectedType === "all" || test.test_scope === selectedType) &&
+          (!selectedSection
+            ? (selectedSubject && subjectSections.length > 0 && !isSearching
+                ? (hasUnsectionedTests ? !test.subject_section_id : true)
+                : true)
+            : test.subject_section_id === selectedSection.id);
 
-    if (!matchesFilters) return false;
-    if (!query) return true;
+        if (!matchesFilters) return false;
+        if (!query) return true;
 
-    const examMeta = examMetaById.get(test.exam.id);
-    const primary = `${test.state.name} ${test.state.code} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.title}`;
-    const searchable = expandSearchableText([
-      primary,
-      test.category.name,
-      test.section?.name,
-      test.description,
-      test.exam.description,
-      test.paper.description,
-      test.subject?.description,
-      examMeta?.teluguData?.teluguName,
-      examMeta?.teluguData?.keywords.join(" "),
-      examMeta?.teluguData?.pattern?.authority,
-      examMeta?.teluguData?.pattern?.subjects.map((sub) => `${sub.name} ${sub.teluguName}`).join(" "),
-      examMeta?.teluguData?.jobProfile?.roleTitle,
-      examMeta?.teluguData?.schedule?.postName,
-      "exam syllabus pattern mock test timeline duties salary",
-    ]);
-    const score = scoreCatalogMatch(searchable, query, primary);
-    if (score > 0) {
-      scoreByTestId.set(test.id, score);
-      return true;
-    }
-    return false;
-  });
+        const examMeta = examMetaById.get(test.exam.id);
+        const primary = `${test.state.name} ${test.state.code} ${test.exam.name} ${test.paperDisplay?.label ?? test.paper.name} ${test.subject?.name ?? ""} ${test.title}`;
+        const searchable = expandSearchableText([
+          primary,
+          test.category.name,
+          test.section?.name,
+          test.description,
+          test.exam.description,
+          test.paper.description,
+          test.subject?.description,
+          examMeta?.teluguData?.teluguName,
+          examMeta?.teluguData?.keywords.join(" "),
+          examMeta?.teluguData?.pattern?.authority,
+          examMeta?.teluguData?.pattern?.subjects.map((sub) => `${sub.name} ${sub.teluguName}`).join(" "),
+          examMeta?.teluguData?.jobProfile?.roleTitle,
+          examMeta?.teluguData?.schedule?.postName,
+          "exam syllabus pattern mock test timeline duties salary",
+        ]);
+        const score = scoreCatalogMatch(searchable, query, primary);
+        if (score > 0) {
+          scoreByTestId.set(test.id, score);
+          return true;
+        }
+        return false;
+      })
+    : [];
 
-  matchingTests.sort((a, b) => {
-    if (isSearching) {
-      const scoreDiff = (scoreByTestId.get(b.id) ?? 0) - (scoreByTestId.get(a.id) ?? 0);
-      if (scoreDiff !== 0) return scoreDiff;
-    }
-    if (selectedSubject || selectedSection) {
-      const diff = Number(a.series_number ?? 0) - Number(b.series_number ?? 0);
-      if (diff !== 0) return diff;
-      const timeA = new Date(a.published_at || a.created_at || a.updated_at || 0).getTime();
-      const timeB = new Date(b.published_at || b.created_at || b.updated_at || 0).getTime();
-      return timeB - timeA;
-    }
-    const timeA = new Date(a.published_at || a.created_at || a.updated_at || 0).getTime();
-    const timeB = new Date(b.published_at || b.created_at || b.updated_at || 0).getTime();
-    if (timeB !== timeA) return timeB - timeA;
-    return Number(b.series_number ?? 0) - Number(a.series_number ?? 0);
-  });
+  if (needsTests && matchingTests.length > 1) {
+    matchingTests.sort((a, b) => {
+      if (isSearching) {
+        const scoreDiff = (scoreByTestId.get(b.id) ?? 0) - (scoreByTestId.get(a.id) ?? 0);
+        if (scoreDiff !== 0) return scoreDiff;
+      }
+      if (selectedSubject || selectedSection) {
+        const diff = Number(a.series_number ?? 0) - Number(b.series_number ?? 0);
+        if (diff !== 0) return diff;
+        return (b.timestamp ?? 0) - (a.timestamp ?? 0);
+      }
+      const timeDiff = (b.timestamp ?? 0) - (a.timestamp ?? 0);
+      if (timeDiff !== 0) return timeDiff;
+      return Number(b.series_number ?? 0) - Number(a.series_number ?? 0);
+    });
+  }
 
   const pageSize = 24;
   const requestedPage = Number.parseInt(filters.page ?? "1", 10);

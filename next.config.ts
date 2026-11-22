@@ -62,6 +62,32 @@ const nextConfig: NextConfig = {
         },
       ],
     },
+    {
+      source: "/mock-tests",
+      headers: [
+        {
+          key: "Cloudflare-CDN-Cache-Control",
+          value: "public, max-age=300, stale-while-revalidate=86400",
+        },
+        {
+          key: "CDN-Cache-Control",
+          value: "public, max-age=300, stale-while-revalidate=86400",
+        },
+      ],
+    },
+    {
+      source: "/mock-tests/:state/:exam*",
+      headers: [
+        {
+          key: "Cloudflare-CDN-Cache-Control",
+          value: "public, max-age=300, stale-while-revalidate=86400",
+        },
+        {
+          key: "CDN-Cache-Control",
+          value: "public, max-age=300, stale-while-revalidate=86400",
+        },
+      ],
+    },
   ],
 };
 
