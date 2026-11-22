@@ -16,7 +16,13 @@ test("FormattedQuestionText.tsx implements interleaved matching list layout and 
 test("FormattedQuestionText.tsx separates glued letter markers like CommitteeC. and HyderabadD.", async () => {
   const formatter = await read("components/questions/FormattedQuestionText.tsx");
 
-  assert.match(formatter, /\(\?<=\[a-zA-Z\\d\\u0c00-\\u0c7f\]\[\.\?!\]\?\)\(\?<!\[ivxIVX\]\)\(\?=\(\?:\[A-Ha-h\]/);
+  assert.match(formatter, /\(\?<=\[a-z\\u0c00-\\u0c7f\]\[\.\?!;:\]\?\)\(\?=\[A-H\]\\\./);
+});
+
+test("FormattedQuestionText.tsx prevents splitting inside years like 2009. and words like Andhra Pradesh.", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  assert.match(formatter, /\(\?<!\\d\)\(\?=\[1-9\]\\\./);
 });
 
 test("FormattedQuestionText.tsx formats inline coded language definitions and repairs glued or split roman numerals", async () => {
