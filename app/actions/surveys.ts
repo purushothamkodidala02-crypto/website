@@ -368,18 +368,68 @@ export async function getActiveSurvey(): Promise<DynamicSurveyData | null> {
       return null;
     }
 
+    const rawSurvey = survey as Record<string, any>;
     const { data: questions } = await dbClient
       .from("dynamic_survey_questions")
       .select("*")
-      .eq("survey_id", survey.id)
+      .eq("survey_id", rawSurvey.id)
       .order("display_order", { ascending: true });
 
-    const result = { ...survey, questions: questions ?? [] };
+    const result = {
+      ...rawSurvey,
+      questions: (questions as DynamicSurveyQuestion[]) ?? [],
+    } as DynamicSurveyData;
     memActiveSurvey = { data: result, expiresAt: now + SURVEY_CACHE_TTL_MS };
     return result;
   } catch (err) {
     console.error("Error in getActiveSurvey:", err);
     return null;
+  }
+}
+
+export async function getActiveCampaigns(): Promise<DynamicSurveyData[]> {
+  try {
+    const dbClient = createPublicClient();
+    const { data: surveys, error } = await dbClient
+      .from("dynamic_surveys")
+      .select("id, title, description, is_active, settings, created_at")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (error || !surveys || surveys.length === 0) {
+      return [];
+    }
+
+    const rawSurveys = surveys as Array<{
+      id: string;
+      title: string;
+      description: string;
+      is_active: boolean;
+      settings?: any;
+      created_at: string;
+    }>;
+
+    const surveyIds = rawSurveys.map((s) => s.id);
+    const { data: questions } = await dbClient
+      .from("dynamic_survey_questions")
+      .select("*")
+      .in("survey_id", surveyIds)
+      .order("display_order", { ascending: true });
+
+    const rawQuestions = (questions || []) as DynamicSurveyQuestion[];
+    const qMap: Record<string, DynamicSurveyQuestion[]> = {};
+    rawQuestions.forEach((q) => {
+      qMap[q.survey_id] = qMap[q.survey_id] || [];
+      qMap[q.survey_id].push(q);
+    });
+
+    return rawSurveys.map((s) => ({
+      ...s,
+      questions: qMap[s.id] || [],
+    }));
+  } catch (err) {
+    console.error("Error in getActiveCampaigns:", err);
+    return [];
   }
 }
 

@@ -815,6 +815,13 @@ export default async function Dashboard({
           )}
         </>
       )}
+
+      {/* Sync completed attempts to candidate context for Universal Campaign Engine */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{localStorage.setItem('varadhi_user_completed_tests','${totalAttempts}');localStorage.setItem('varadhi_user_created_at','${user?.created_at || ""}');}catch(e){}`,
+        }}
+      />
     </main>
   );
 }

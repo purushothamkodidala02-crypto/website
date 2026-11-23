@@ -765,7 +765,7 @@ export function GrowthSettingsForm({
       <div className="lg:col-span-5 sticky top-20 space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Live Modal Preview
+            Live Candidate Preview
           </p>
           <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[11px] font-bold">
             <button

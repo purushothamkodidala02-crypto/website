@@ -53,12 +53,21 @@ export type AdminSurveyQuestion = {
   is_required?: boolean;
 };
 
-export async function createAdminSurvey(title: string, description: string = "") {
+export async function createAdminSurvey(
+  title: string,
+  description: string = "",
+  initialSettings?: Partial<SurveySettings>
+) {
   const dbClient = await getSupabaseServerClient();
+  const settings: SurveySettings = {
+    ...DEFAULT_SURVEY_SETTINGS,
+    ...(initialSettings || {}),
+  };
+
   let insertPayload: Record<string, any> = {
     title: title.trim(),
     description: description.trim(),
-    settings: DEFAULT_SURVEY_SETTINGS,
+    settings,
   };
 
   let { data, error } = await dbClient
@@ -78,6 +87,154 @@ export async function createAdminSurvey(title: string, description: string = "")
   }
 
   if (error || !data) return { error: error?.message || "Failed to create survey" };
+  revalidatePath("/admin/surveys");
+  revalidatePath("/survey");
+  return { id: data.id };
+}
+
+export type CampaignPresetType = "survey" | "growth" | "announcement" | "custom";
+
+export async function createAdminCampaignPreset(
+  preset: CampaignPresetType,
+  title?: string,
+  description?: string
+) {
+  const dbClient = await getSupabaseServerClient();
+  let defaultSettings: SurveySettings;
+  let defaultTitle: string;
+  let defaultDesc: string;
+
+  if (preset === "growth") {
+    defaultTitle = title?.trim() || "Help Us to Grow Varadhi Prep";
+    defaultDesc =
+      description?.trim() ||
+      "100% free & ad-free mock tests for Telugu aspirants. If Varadhi helps you, support our growth.";
+    defaultSettings = {
+      ...DEFAULT_SURVEY_SETTINGS,
+      formType: "growth_support",
+      appIcon: "💖",
+      badgeText: "Help Us to Grow",
+      themeColor: "rose",
+      targetRoutes: {
+        all: false,
+        dashboard: true,
+        mockTests: true,
+        testReview: true,
+        exams: false,
+        home: false,
+      },
+      criteria: {
+        testCondition: "five_plus",
+        minTests: 5,
+        registrationCondition: "all",
+        targetExam: "all",
+        requireAuth: false,
+      },
+      triggerDelaySeconds: 2.5,
+      cooldownDays: 5,
+      maxSkipAppearances: 3,
+      contribution: {
+        headline: "Support Varadhi Prep Growth",
+        message:
+          "All mock tests on Varadhi Prep are completely free and ad-free. If this platform helps your preparation, consider a small voluntary contribution to keep it running for everyone.",
+        suggestedAmounts: [49, 99, 199, 499],
+        upiId: "",
+        upiName: "Varadhi Prep",
+        primaryButtonText: "Support Varadhi",
+        secondaryButtonText: "Maybe Later",
+      },
+    };
+  } else if (preset === "announcement") {
+    defaultTitle = title?.trim() || "New Mock Tests & Preparation Updates";
+    defaultDesc =
+      description?.trim() ||
+      "We have released new full mock test series and updated syllabus materials for upcoming AP and Telangana exams.";
+    defaultSettings = {
+      ...DEFAULT_SURVEY_SETTINGS,
+      formType: "announcement",
+      appIcon: "📢",
+      badgeText: "Notice & Update",
+      themeColor: "amber",
+      targetRoutes: {
+        all: true,
+        dashboard: true,
+        mockTests: true,
+        testReview: false,
+        exams: true,
+        home: true,
+      },
+      criteria: {
+        testCondition: "any",
+        registrationCondition: "all",
+        targetExam: "all",
+        requireAuth: false,
+      },
+      triggerDelaySeconds: 1.5,
+      cooldownDays: 2,
+      maxSkipAppearances: 3,
+    };
+  } else if (preset === "survey") {
+    defaultTitle = title?.trim() || "Student Feedback & Suggestions";
+    defaultDesc =
+      description?.trim() ||
+      "Tell us which mock tests, subjects, or improvements you would like to see next.";
+    defaultSettings = {
+      ...DEFAULT_SURVEY_SETTINGS,
+      formType: "survey",
+      appIcon: "📝",
+      badgeText: "Student Feedback",
+      themeColor: "teal",
+      targetRoutes: {
+        all: false,
+        dashboard: true,
+        mockTests: true,
+        testReview: true,
+        exams: false,
+        home: false,
+      },
+      criteria: {
+        testCondition: "one_to_four",
+        minTests: 1,
+        maxTests: 4,
+        registrationCondition: "all",
+        targetExam: "all",
+        requireAuth: false,
+      },
+      triggerDelaySeconds: 2.5,
+      cooldownDays: 3,
+      maxSkipAppearances: 2,
+    };
+  } else {
+    defaultTitle = title?.trim() || "Custom Campaign Pop-up";
+    defaultDesc = description?.trim() || "Custom popup campaign for students.";
+    defaultSettings = {
+      ...DEFAULT_SURVEY_SETTINGS,
+      formType: "survey",
+      appIcon: "🎯",
+      badgeText: "Quick Campaign",
+      themeColor: "indigo",
+    };
+  }
+
+  const { data, error } = await dbClient
+    .from("dynamic_surveys")
+    .insert({
+      title: defaultTitle,
+      description: defaultDesc,
+      settings: defaultSettings,
+      is_active: true,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    return { error: error?.message || "Failed to create campaign preset." };
+  }
+
+  if (preset === "survey") {
+    await seedSurveyTemplateQuestions(data.id);
+  }
+
   revalidatePath("/admin/surveys");
   revalidatePath("/survey");
   return { id: data.id };
@@ -221,11 +378,11 @@ export async function deleteAdminSurvey(surveyId: string) {
   }
 }
 
-export async function toggleSurveyStatus(surveyId: string, isActive: boolean) {
+export async function toggleSurveyStatus(surveyId: string, isActive: boolean, exclusive: boolean = false) {
   const dbClient = await getSupabaseServerClient();
 
-  if (isActive) {
-    // Deactivate all others first so only one survey is primary active
+  if (isActive && exclusive) {
+    // Optionally deactivate all others if explicit exclusive mode requested
     await dbClient.from("dynamic_surveys").update({ is_active: false }).neq("id", surveyId);
   }
 
@@ -560,7 +717,14 @@ export async function getAdminSurveysWithCounts() {
         .select("id, title, description, is_active, created_at")
         .order("created_at", { ascending: false });
       if (fallbackSurveys) {
-        return fallbackSurveys.map((s) => ({ ...s, response_count: 0 }));
+        return (fallbackSurveys as Array<Record<string, any>>).map((s) => ({
+          id: s.id,
+          title: s.title,
+          description: s.description,
+          is_active: s.is_active,
+          created_at: s.created_at,
+          response_count: 0,
+        }));
       }
     } catch {
       // Ignore
