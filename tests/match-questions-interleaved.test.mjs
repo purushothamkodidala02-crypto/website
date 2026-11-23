@@ -53,3 +53,16 @@ test("FormattedQuestionText.tsx handles glued markers like year.3. The and repai
   assert.match(formatter, /Prades/);
   assert.match(formatter, /\[a-zA-Z\\d\\u0c00-\\u0c7f\]/);
 });
+
+test("FormattedQuestionText.tsx supports matching paired rows without dash and letters beyond H (W, X, Y, Z)", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify pairRowRegex supports whitespace-separated items with lookahead
+  assert.match(formatter, /pairRowRegex[\s\S]*?\\s\+\(\?=\(\?:\\\(/);
+
+  // Verify Set I / Set II heading extraction for Matching Sets
+  assert.match(formatter, /Matching\\s\+Sets\?\|Sets\?/);
+
+  // Verify alphabetic list items support full A-Z range
+  assert.match(formatter, /alphabeticListItem = \/\^\(\?:\\\(\[a-zA-Z\]\\\)/);
+});
