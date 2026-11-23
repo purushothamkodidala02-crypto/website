@@ -47,8 +47,8 @@ export const ADMIN_SECTIONS = [
     links: [
       { href: "/admin/access", label: "Exam series", icon: "passes" as const },
       { href: "/admin/students", label: "Registrations & Sales", icon: "students" as const },
-      { href: "/admin/surveys", label: "Pop-ups & Surveys Engine", icon: "surveys" as const },
       { href: "/admin/growth-settings", label: "Help Us Grow Pop-up", icon: "growth" as const },
+      { href: "/admin/surveys", label: "Surveys & Feedback", icon: "surveys" as const },
     ],
   },
 ];

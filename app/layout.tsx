@@ -6,7 +6,6 @@ import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { CopyProtection } from "@/components/site/CopyProtection";
 import { SingleDeviceWatcher } from "@/components/auth/SingleDeviceWatcher";
 import { ApEndowmentPriorityModal } from "@/components/feedback/ApEndowmentPriorityModal";
-import { UniversalCampaignHost } from "@/components/campaigns/UniversalCampaignHost";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -148,7 +147,6 @@ export default async function RootLayout({
           <CopyProtection />
           <SingleDeviceWatcher />
           <ApEndowmentPriorityModal />
-          <UniversalCampaignHost />
           {children}
           <GoogleAnalytics />
         </PostHogProvider>

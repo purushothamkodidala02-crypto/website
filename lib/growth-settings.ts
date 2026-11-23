@@ -1,28 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 
-export type NewUserSurveySettings = {
-  enabled: boolean;
-  minCompletedTests: number; // Minimum tests completed to see survey (default: 1)
-  headline: string;
-  description: string;
-  submitButtonText: string;
-  dismissButtonText: string;
-  cooldownDays: number;
-  maxAppearances: number;
-  displayDelaySeconds: number;
-  targetRoutes: {
-    dashboard: boolean;
-    home: boolean;
-    mockTests: boolean;
-    exams: boolean;
-  };
-  askTargetExam: boolean;
-  askMediumPreference: boolean;
-  askSuggestions: boolean;
-  askPhone: boolean;
-};
-
 export type GrowthPopupSettings = {
   enabled: boolean;
   minCompletedTests: number;
@@ -42,32 +20,6 @@ export type GrowthPopupSettings = {
   suggestedAmounts: number[];
   upiId: string;
   upiName: string;
-
-  // Stage 1: Post-Test Growth Survey Settings (Candidates with 1 to minCompletedTests - 1 tests)
-  survey?: NewUserSurveySettings;
-};
-
-export const DEFAULT_SURVEY_SETTINGS: NewUserSurveySettings = {
-  enabled: true,
-  minCompletedTests: 1, // Ignore 0-test visitors; trigger for users who have taken >= 1 test
-  headline: "Help Us Grow Varadhi Prep",
-  description:
-    "All mock tests on Varadhi Prep are 100% free and ad-free. Tell us how your preparation is going and which mock tests you need next!",
-  submitButtonText: "Submit & Help Us Grow",
-  dismissButtonText: "Maybe Later",
-  cooldownDays: 3,
-  maxAppearances: 2,
-  displayDelaySeconds: 2.5,
-  targetRoutes: {
-    dashboard: true,
-    home: false,
-    mockTests: true,
-    exams: true,
-  },
-  askTargetExam: true,
-  askMediumPreference: true,
-  askSuggestions: true,
-  askPhone: false,
 };
 
 export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
@@ -90,7 +42,6 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
   suggestedAmounts: [49, 99, 199, 499],
   upiId: "",
   upiName: "",
-  survey: DEFAULT_SURVEY_SETTINGS,
 };
 
 export const getGrowthSettings = unstable_cache(
@@ -107,27 +58,16 @@ export const getGrowthSettings = unstable_cache(
         return DEFAULT_GROWTH_SETTINGS;
       }
 
-      const record = data as Record<string, unknown> | null;
-      const storedValue = record?.value as Partial<GrowthPopupSettings> | undefined;
-
-      const mergedSurvey: NewUserSurveySettings = {
-        ...DEFAULT_SURVEY_SETTINGS,
-        ...(storedValue?.survey || {}),
-        targetRoutes: {
-          ...DEFAULT_SURVEY_SETTINGS.targetRoutes,
-          ...(storedValue?.survey?.targetRoutes || {}),
-        },
-      };
+      const storedValue = (data as Record<string, unknown>).value as Partial<GrowthPopupSettings> | undefined;
 
       return {
         ...DEFAULT_GROWTH_SETTINGS,
         ...(storedValue || {}),
-        enabled: typeof record?.enabled === "boolean" ? record.enabled : DEFAULT_GROWTH_SETTINGS.enabled,
+        enabled: typeof data.enabled === "boolean" ? data.enabled : DEFAULT_GROWTH_SETTINGS.enabled,
         targetRoutes: {
           ...DEFAULT_GROWTH_SETTINGS.targetRoutes,
           ...(storedValue?.targetRoutes || {}),
         },
-        survey: mergedSurvey,
       };
     } catch {
       return DEFAULT_GROWTH_SETTINGS;
