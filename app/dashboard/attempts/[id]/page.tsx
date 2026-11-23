@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BackToDashboardButton } from "@/components/dashboard/BackToDashboardButton";
 import { AttemptReviewNavigator, type ReviewRow } from "./AttemptReviewNavigator";
+import { getGrowthSettings } from "@/lib/growth-settings";
+import { PostTestGrowthSurveyModal } from "@/components/growth/PostTestGrowthSurveyModal";
 
 type AttemptSummary = {
   user_id: string;
@@ -40,13 +42,14 @@ export default async function AttemptReviewPage({
     .select("question_id")
     .eq("user_id", user.id);
 
-  const [attemptResult, reviewResult] = await Promise.all([
+  const [attemptResult, reviewResult, growthSettings] = await Promise.all([
     admin
       .from("test_attempts")
       .select("user_id, mock_test_id, session_id, submitted_at, score, total_marks, correct_answers, incorrect_answers, unanswered_questions, detailed_review_available")
       .eq("id", id)
       .maybeSingle(),
     supabase.rpc("get_attempt_review", { requested_attempt_id: id }),
+    getGrowthSettings(),
   ]);
   const attempt = attemptResult.data as AttemptSummary | null;
   if (!attempt || attempt.user_id !== user.id) notFound();
@@ -314,6 +317,13 @@ export default async function AttemptReviewPage({
           </Link>
         </section>
       </div>
+
+      {growthSettings.enabled && growthSettings.survey?.enabled && (
+        <PostTestGrowthSurveyModal
+          settings={growthSettings.survey}
+          upperThreshold={growthSettings.minCompletedTests ?? 5}
+        />
+      )}
     </main>
   );
 }

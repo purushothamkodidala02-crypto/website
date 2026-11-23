@@ -30,10 +30,10 @@ export default async function AdminGrowthSettingsPage() {
             </p>
           </div>
           <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
-            Help Us Grow Pop-up Controls &amp; Analytics
+            Growth &amp; Feedback Settings
           </h1>
           <p className="mt-1 text-sm text-slate-600 max-w-3xl">
-            Configure targeting rules, completion milestones, and view student interaction analytics (who saw it, what buttons they clicked, and click counts).
+            Configure Stage 1 Post-Test Survey Form (1–4 mock tests), Stage 2 Voluntary Support Pop-up (5+ mock tests), and view candidate feedback &amp; click analytics.
           </p>
         </div>
 

@@ -28,6 +28,7 @@ import { StudentResumePracticeBanner } from "@/components/site/StudentResumePrac
 import { resolvePublicRoute } from "@/lib/public-route-data";
 import { formatMarkValue, resolveMockTestScoring, summarizeExamNegativeMarking } from "@/lib/scoring";
 import { SupportPromptModal } from "@/components/growth/SupportPromptModal";
+import { PostTestGrowthSurveyModal } from "@/components/growth/PostTestGrowthSurveyModal";
 import { getGrowthSettings } from "@/lib/growth-settings";
 
 // ⚡ Cache on global Edge CDN and revalidate every 5 minutes
@@ -1003,8 +1004,20 @@ export default async function MockTestsPage(
         )}
       </div>
 
-      {growthSettings.enabled && growthSettings.targetRoutes.mockTests && (
-        <SupportPromptModal settings={growthSettings} />
+      {/* Growth Engine: Stage 1 Survey (1-4 tests) & Stage 2 Support (5+ tests) */}
+      {growthSettings.enabled && (
+        <>
+          {growthSettings.survey?.enabled && growthSettings.survey.targetRoutes.mockTests && (
+            <PostTestGrowthSurveyModal
+              settings={growthSettings.survey}
+              upperThreshold={growthSettings.minCompletedTests ?? 5}
+            />
+          )}
+
+          {growthSettings.targetRoutes.mockTests && (
+            <SupportPromptModal settings={growthSettings} />
+          )}
+        </>
       )}
     </main>
   );

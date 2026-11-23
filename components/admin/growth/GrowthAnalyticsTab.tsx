@@ -15,11 +15,12 @@ const istFormatter = new Intl.DateTimeFormat("en-IN", {
 
 export function GrowthAnalyticsTab({ interactions }: Props) {
   const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "view" | "click_support" | "select_tier" | "dismiss_or_close">("all");
+  const [filterType, setFilterType] = useState<"all" | "survey_response" | "view" | "click_support" | "select_tier" | "dismiss_or_close">("all");
 
   // 1. KPI Calculations
   const metrics = useMemo(() => {
     let views = 0;
+    let surveyResponses = 0;
     let supportClicks = 0;
     let tierClicks = 0;
     let dismissals = 0;
@@ -31,17 +32,19 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
       uniqueStudents.add(studentKey);
 
       if (record.event_type === "view") views++;
+      else if (record.event_type === "survey_response") surveyResponses++;
       else if (record.event_type === "click_support") supportClicks++;
       else if (record.event_type === "select_tier") tierClicks++;
       else if (record.event_type === "dismiss" || record.event_type === "close") dismissals++;
       else if (record.event_type === "trigger") triggerClicks++;
     }
 
-    const totalClicks = supportClicks + tierClicks + dismissals + triggerClicks;
+    const totalClicks = surveyResponses + supportClicks + tierClicks + dismissals + triggerClicks;
 
     return {
       totalInteractions: interactions.length,
       views,
+      surveyResponses,
       uniqueStudentsCount: uniqueStudents.size,
       totalClicks,
       supportClicks,
@@ -133,6 +136,7 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
 
     return interactions.filter((rec) => {
       // Type filter
+      if (filterType === "survey_response" && rec.event_type !== "survey_response") return false;
       if (filterType === "view" && rec.event_type !== "view") return false;
       if (filterType === "click_support" && rec.event_type !== "click_support") return false;
       if (filterType === "select_tier" && rec.event_type !== "select_tier") return false;
@@ -212,7 +216,7 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-              Support Clicks (CTA)
+              Support Clicks (Stage 2)
             </span>
             <span className="text-base">💚</span>
           </div>
@@ -220,7 +224,23 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
             {metrics.supportClicks}
           </p>
           <p className="mt-1 text-xs text-emerald-700">
-            Proceeded to contribution page
+            5+ test users proceeded to support
+          </p>
+        </div>
+
+        {/* Survey Responses */}
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-800">
+              Survey Responses (Stage 1)
+            </span>
+            <span className="text-base">📝</span>
+          </div>
+          <p className="mt-2 text-2xl sm:text-3xl font-black text-teal-900 tabular-nums">
+            {metrics.surveyResponses}
+          </p>
+          <p className="mt-1 text-xs text-teal-700">
+            Feedback from 1–4 test candidates
           </p>
         </div>
 
@@ -361,6 +381,15 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
             </button>
             <button
               type="button"
+              onClick={() => setFilterType("survey_response")}
+              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                filterType === "survey_response" ? "bg-teal-800 text-white" : "bg-teal-50 text-teal-800 hover:bg-teal-100"
+              }`}
+            >
+              📝 Survey Responses ({metrics.surveyResponses})
+            </button>
+            <button
+              type="button"
               onClick={() => setFilterType("click_support")}
               className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
                 filterType === "click_support" ? "bg-emerald-800 text-white" : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
@@ -457,7 +486,9 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
                       <td className="px-5 py-3.5">
                         <span
                           className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                            item.event_type === "view"
+                            item.event_type === "survey_response"
+                              ? "bg-teal-100 text-teal-900 border border-teal-200"
+                              : item.event_type === "view"
                               ? "bg-slate-100 text-slate-700"
                               : item.event_type === "click_support"
                               ? "bg-emerald-100 text-emerald-800"
@@ -468,7 +499,9 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
                               : "bg-rose-50 text-rose-700"
                           }`}
                         >
-                          {item.event_type === "view"
+                          {item.event_type === "survey_response"
+                            ? "📝 Survey Feedback"
+                            : item.event_type === "view"
                             ? "Seen Pop-up"
                             : item.event_type === "click_support"
                             ? "Support Varadhi"
@@ -486,6 +519,23 @@ export function GrowthAnalyticsTab({ interactions }: Props) {
                           <span className="ml-1.5 rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[10px] text-emerald-800">
                             ₹{item.amount}
                           </span>
+                        )}
+                        {item.metadata && typeof item.metadata === "object" && Boolean((item.metadata as Record<string, unknown>).targetExam) && (
+                          <div className="mt-1 text-[11px] text-slate-600 font-normal space-y-0.5">
+                            <p>
+                              <span className="font-semibold text-slate-700">Exam:</span> {String((item.metadata as Record<string, unknown>).targetExam)}
+                              <span className="mx-1 text-slate-300">•</span>
+                              <span className="font-semibold text-slate-700">Medium:</span> {String((item.metadata as Record<string, unknown>).medium)}
+                            </p>
+                            {Boolean((item.metadata as Record<string, unknown>).suggestions) && (
+                              <p className="text-slate-800 bg-slate-50 border border-slate-150 p-1.5 rounded-lg italic text-[11px]">
+                                &ldquo;{String((item.metadata as Record<string, unknown>).suggestions)}&rdquo;
+                              </p>
+                            )}
+                            {Boolean((item.metadata as Record<string, unknown>).phone) && (
+                              <p className="text-[10px] text-slate-500 font-medium">📞 {String((item.metadata as Record<string, unknown>).phone)}</p>
+                            )}
+                          </div>
                         )}
                       </td>
 

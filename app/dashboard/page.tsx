@@ -14,6 +14,7 @@ import { isPaidSalesEnabled } from "@/lib/paid-sales";
 import { createClient } from "@/lib/supabase/server";
 import { resolveStudentDisplayInfo } from "@/lib/student-name";
 import { SupportPromptModal } from "@/components/growth/SupportPromptModal";
+import { PostTestGrowthSurveyModal } from "@/components/growth/PostTestGrowthSurveyModal";
 import { getGrowthSettings } from "@/lib/growth-settings";
 
 type Attempt = {
@@ -795,11 +796,24 @@ export default async function Dashboard({
         )}
       </div>
 
-      {growthSettings.enabled && growthSettings.targetRoutes.dashboard && (
-        <SupportPromptModal
-          completedAttempts={totalAttempts}
-          settings={growthSettings}
-        />
+      {/* Growth Engine: Stage 1 Survey (1-4 tests) & Stage 2 Support (5+ tests) */}
+      {growthSettings.enabled && (
+        <>
+          {growthSettings.survey?.enabled && growthSettings.survey.targetRoutes.dashboard && (
+            <PostTestGrowthSurveyModal
+              completedAttempts={totalAttempts}
+              settings={growthSettings.survey}
+              upperThreshold={growthSettings.minCompletedTests ?? 5}
+            />
+          )}
+
+          {growthSettings.targetRoutes.dashboard && (
+            <SupportPromptModal
+              completedAttempts={totalAttempts}
+              settings={growthSettings}
+            />
+          )}
+        </>
       )}
     </main>
   );
