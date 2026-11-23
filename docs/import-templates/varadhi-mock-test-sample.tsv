@@ -1,0 +1,72 @@
+import_key	subject	question_en	option_a_en	option_b_en	option_c_en	option_d_en	question_te	option_a_te	option_b_te	option_c_te	option_d_te	correct_answer	explanation_en	explanation_te	difficulty
+VAR-STD-001	Indian Polity	Which Article of the Indian Constitution provides for the establishment of the Finance Commission?	Article 275	Article 280	Article 300	Article 324	భారత రాజ్యాంగంలోని ఏ అధికరణం ఆర్థిక సంఘం ఏర్పాటును తెలియజేస్తుంది?	అధికరణ 275	అధికరణ 280	అధికరణ 300	అధికరణ 324	B	Article 280 of the Constitution of India provides for a Finance Commission appointed by the President.	భారత రాజ్యాంగంలోని అధికరణ 280 ప్రకారం రాష్ట్రపతి ఆర్థిక సంఘాన్ని ఏర్పాటు చేస్తారు.	easy
+VAR-STMT-002	Indian Polity	"Consider the following statements regarding the Attorney General of India:
+1. He is appointed by the President of India under Article 76.
+2. He must possess the qualifications required to be appointed as a Judge of the Supreme Court.
+3. He has the right to vote in the proceedings of both Houses of Parliament.
+Which of the statements given above are correct?"	1 and 2 only	2 and 3 only	1 and 3 only	1, 2 and 3	"భారత అటార్నీ జనరల్ కు సంబంధించి కింది ప్రకటనలను పరిశీలించండి:
+1. ఆర్టికల్ 76 ప్రకారం రాష్ట్రపతి చేత నియమించబడతారు.
+2. సుప్రీంకోర్టు న్యాయమూర్తిగా నియమించబడటానికి అవసరమైన అర్హతలు కలిగి ఉండాలి.
+3. పార్లమెంటు ఉభయ సభల సమావేశాలలో ఓటు వేసే హక్కు కలిగి ఉంటారు.
+పై ప్రకటనలలో ఏవి సరైనవి?"	1 మరియు 2 మాత్రమే	2 మరియు 3 మాత్రమే	1 మరియు 3 మాత్రమే	1, 2 మరియు 3	A	The Attorney General has the right to speak and take part in parliamentary proceedings, but does not have the right to vote (Article 88).	అటార్నీ జనరల్ పార్లమెంటు సమావేశాలలో మాట్లాడవచ్చు మరియు పాల్గొనవచ్చు, కానీ ఓటు వేసే హక్కు లేదు (ఆర్టికల్ 88).	medium
+VAR-ASR-003	General Science	"Assertion (A): Sound travels faster in solids than in gases.
+Reason (R): Solids have significantly higher elasticity and density compared to gases, and elastic restoration dominates sound propagation.
+Select the correct answer using the code given below:"	Both A and R are true, and R is the correct explanation of A	Both A and R are true, but R is not the correct explanation of A	A is true, but R is false	A is false, but R is true	"నిశ్చితార్థం (A): వాయువులతో పోలిస్తే ఘనపదార్థాలలో ధ్వని వేగం చాలా ఎక్కువ.
+కారణం (R): వాయువుల కంటే ఘనపదార్థాల స్థితిస్థాపకత అధికంగా ఉంటుంది, ఇది ధ్వని తరంగాల వ్యాప్తిని వేగవంతం చేస్తుంది.
+కింది కోడ్‌ను ఉపయోగించి సరైన సమాధానాన్ని ఎంచుకోండి:"	A మరియు R రెండూ నిజం, మరియు R అనేది A కి సరైన వివరణ	A మరియు R రెండూ నిజం, కానీ R అనేది A కి సరైన వివరణ కాదు	A నిజం, కానీ R తప్పు	A తప్పు, కానీ R నిజం	A	The speed of sound depends on the elasticity and density of the medium. Due to high elastic modulus in solids, sound velocity is greatest in solids.	ధ్వని వేగం మాధ్యమం యొక్క స్థితిస్థాపకత మరియు సాంద్రతపై ఆధారపడి ఉంటుంది. ఘనపదార్థాలలో స్థితిస్థాపకత ఎక్కువగా ఉండడం వల్ల ధ్వని వేగం అత్యధికంగా ఉంటుంది.	medium
+VAR-MATCH-004	Modern History	"Match List I with List II:
+List I
+A. Raja Ram Mohan Roy
+B. Swami Dayananda Saraswati
+C. Swami Vivekananda
+D. Jyotirao Phule
+List II
+1. Brahmo Samaj
+2. Arya Samaj
+3. Ramakrishna Mission
+4. Satyashodhak Samaj
+Choose the correct code from the options given below:"	A-1, B-2, C-3, D-4	A-2, B-1, C-4, D-3	A-1, B-3, C-2, D-4	A-4, B-2, C-3, D-1	"జాబితా I ను జాబితా II తో జతపరచండి:
+జాబితా I
+A. రాజా రామ్మోహన్ రాయ్
+B. స్వామి దయానంద సరస్వతి
+C. స్వామి వివేకానంద
+D. జ్యోతిరావ్ ఫూలే
+జాబితా II
+1. బ్రహ్మ సమాజం
+2. ఆర్య సమాజం
+3. రామకృష్ణ మిషన్
+4. సత్యశోధక్ సమాజ్
+కింది ఐచ్ఛికాల నుండి సరైన కోడ్‌ను ఎంచుకోండి:"	A-1, B-2, C-3, D-4	A-2, B-1, C-4, D-3	A-1, B-3, C-2, D-4	A-4, B-2, C-3, D-1	A	Brahmo Samaj was founded by Raja Ram Mohan Roy (1828), Arya Samaj by Dayananda Saraswati (1875), Ramakrishna Mission by Vivekananda (1897), and Satyashodhak Samaj by Jyotirao Phule (1873).	బ్రహ్మ సమాజం రాజా రామ్మోహన్ రాయ్ (1828), ఆర్య సమాజం దయానంద సరస్వతి (1875), రామకృష్ణ మిషన్ వివేకానంద (1897), మరియు సత్యశోధక్ సమాజ్ జ్యోతిరావ్ ఫూలే (1873) చే స్థాపించబడ్డాయి.	medium
+VAR-MATCH-005	Indian Geography	"Match the following rivers with their origin places:
+A. Godavari River — 1. Trimbakeshwar
+B. Krishna River — 2. Mahabaleshwar
+C. Penna River — 3. Nandi Hills
+D. Tungabhadra River — 4. Varaha Parvatha
+Select the correct option:"	A-1, B-2, C-3, D-4	A-2, B-1, C-4, D-3	A-3, B-4, C-1, D-2	A-4, B-3, C-2, D-1	"కింది నదులను వాటి జన్మస్థానాలతో జతపరచండి:
+A. గోదావరి నది — 1. త్రయంబకేశ్వరం
+B. కృష్ణా నది — 2. మహాబలేశ్వరం
+C. పెన్నా నది — 3. నంది కొండలు
+D. తుంగభద్ర నది — 4. వరాహ పర్వతం
+సరైన ఎంపికను గుర్తించండి:"	A-1, B-2, C-3, D-4	A-2, B-1, C-4, D-3	A-3, B-4, C-1, D-2	A-4, B-3, C-2, D-1	A	Godavari originates at Trimbakeshwar (Maharashtra), Krishna at Mahabaleshwar (Maharashtra), Penna at Nandi Hills (Karnataka), and Tungabhadra at Varaha Parvatha (Western Ghats).	గోదావరి త్రయంబకేశ్వరం (మహారాష్ట్ర), కృష్ణా మహాబలేశ్వరం (మహారాష్ట్ర), పెన్నా నంది కొండలు (కర్ణాటక), తుంగభద్ర వరాహ పర్వతం (పశ్చిమ కనుమలు) వద్ద జన్మిస్తాయి.	medium
+VAR-PASS-SET1-01	General Studies	"Directions: Read the following passage and answer the questions (Questions 1 to 3):
+The Indus Valley Civilization (c. 2500–1900 BCE) was distinguished by its sophisticated urban planning, grid-iron street layouts, standardized baked brick masonry, and advanced municipal underground drainage networks. Cities such as Harappa and Mohenjo-daro featured fortified citadels elevated above the lower residential districts, which housed specialized artisans, traders, and administrative quarters.
+Granaries, public dockyards (notably at Lothal), and communal baths like the Great Bath indicate an organized public works authority, while uniform weights and measures attest to extensive domestic and maritime commerce extending as far as Dilmun and Mesopotamia.
+
+1. Which of the following architectural features best demonstrates the existence of an organized municipal administrative authority in the Indus Valley Civilization?"	Uniform subterranean drainage networks across residential quarters	Informal scattered residential clusters	Absence of standardized measurement weights	Unplanned narrow serpentine streets	"కింది గద్యాన్ని చదివి ప్రశ్నలకు సమాధానాలు ఇవ్వండి (1 నుండి 3 ప్రశ్నలు):
+సింధు నాగరికత (క్రీ.పూ. 2500–1900) అద్భుతమైన పట్టణ ప్రణాళిక, గ్రిడ్-ఐరన్ తరహా రహదారులు, ప్రామాణిక కాల్చిన ఇటుకల నిర్మాణాలు మరియు భూగర్భ డ్రైనేజీ వ్యవస్థకు ప్రసిద్ధి చెందింది. హరప్పా, మొహంజోదారో వంటి నగరాలు కోటలతో కూడిన ఎగువ భాగం (సిటాడెల్) మరియు నివాస ప్రాంతాలతో కూడిన దిగువ పట్టణంగా విభజించబడ్డాయి.
+విశాలమైన ధాన్యాగారాలు, లోథాల్‌లోని ఓడరేవు, మొహంజోదారోలోని మహా స్నానవాటికలు సమర్థవంతమైన ప్రజా పరిపాలనా యంత్రాంగాన్ని ప్రతిబింబిస్తాయి. ప్రామాణిక తూనికలు మరియు కొలతలు మెసొపొటేమియా మరియు దిల్మున్ వరకు విస్తరించిన సముద్ర వాణిజ్యాన్ని ధృవీకరిస్తున్నాయి.
+
+1. సింధు నాగరికతలో సమర్థవంతమైన మున్సిపల్ పరిపాలనా వ్యవస్థ ఉందనడానికి కింది వాటిలో ఏ నిర్మాణం బలమైన నిదర్శనం?"	నివాస ప్రాంతాల్లో నిర్మించబడిన భూగర్భ మురుగునీటి డ్రైనేజీ వ్యవస్థ	అస్తవ్యస్తంగా నిర్మించిన నివాస గృహాలు	ప్రామాణిక తూనికలు మరియు కొలతలు లేకపోవడం	ప్రణాళిక లేని ఇరుకైన వంకర రహదారులు	A	The standardized underground covered drainage system throughout the streets is universally cited as direct proof of proactive municipal governance.	నగరమంతటా క్రమబద్ధంగా నిర్మించిన భూగర్భ డ్రైనేజీ వ్యవస్థ ఉన్నత స్థాయి మున్సిపల్ పరిపాలనను స్పష్టంగా సూచిస్తుంది.	medium
+VAR-PASS-SET1-02	General Studies	"Based on the passage above (Question 1):
+2. Maritime international trade of the Harappan civilization is directly evidenced by which archaeological site?"	Lothal dockyard	Burzahom pit-dwellings	Bhimbetka rock shelters	Mehrgarh Neolithic settlement	"పై గద్యం ఆధారంగా (ప్రశ్న 1):
+2. సింధు ప్రజల అంతర్జాతీయ సముద్ర వాణిజ్యానికి ఏ ప్రదేశం ప్రత్యక్ష సాక్ష్యంగా నిలుస్తుంది?"	లోథాల్ ఓడరేవు	బుర్జాహోమ్ గుంత నివాసాలు	భీమ్‌బేట్కా రాతి గుహలు	మెహర్‌గఢ్ నవీన శిలా యుగ ప్రదేశం	A	The passage mentions Lothal as possessing a public dockyard, evidencing maritime overseas commerce.	లోథాల్ వద్ద లభించిన ఓడరేవు (డాక్‌యార్డ్) అంతర్జాతీయ సముద్ర వాణిజ్యానికి ముఖ్య నిదర్శనం.	easy
+VAR-PASS-SET1-03	General Studies	"With reference to the passage above (Question 1):
+3. What does the dual division into a fortified citadel and lower residential town indicate about the Harappan society?"	Social stratification and administrative centralization	A nomadic, non-sedentary social structure	Complete absence of social or trade differentiation	Primitive hunter-gatherer village organization	"పై గద్యం ప్రకారం (ప్రశ్న 1):
+3. ఎగువ కోట (సిటాడెల్) మరియు దిగువ నివాస పట్టణంగా విభజన సింధు సమాజం గురించి దేనిని తెలియజేస్తుంది?"	సామాజిక వర్గీకరణ మరియు కేంద్రీకృత పరిపాలన	సంచార జీవన విధానం	వృత్తిపరమైన లేదా వాణిజ్య తేడాలు లేకపోవడం	ప్రాథమిక వేటగాళ్ల గ్రామీణ జీవనం	A	The citadel housed ruling/administrative and religious structures while the lower town housed craftsmen and common citizens, signifying clear social and functional stratification.	ఎగువ భాగంలో పాలకవర్గం, దిగువ భాగంలో వ్యాపారులు మరియు శ్రామికులు నివసించడం వల్ల సామాజిక శ్రేణీకరణ మరియు కేంద్రీకృత పరిపాలన స్పష్టమవుతాయి.	medium
+VAR-PASS-SINGLE	Economy & Environment	"Read the following passage and answer the question:
+Continuous mono-cropping, coupled with the excessive withdrawal of groundwater for flood irrigation, has depleted essential micronutrients and substantially accelerated secondary soil salinization in arid regions. Micro-irrigation systems such as drip and sprinkler networks reduce water consumption by nearly 40 to 60 percent while drastically curbing nutrient runoff into adjacent watersheds.
+
+According to the passage, how does micro-irrigation primarily contribute to mitigating soil and water degradation?"	By reducing water usage and drastically curbing nutrient runoff	By completely replacing the necessity for crop rotation	By accelerating secondary salinization in semi-arid zones	By increasing the reliance on continuous flood irrigation	"కింది గద్యాన్ని చదివి ప్రశ్నకు సమాధానం ఇవ్వండి:
+శుష్క ప్రాంతాలలో నిరంతర ఏక-పంట సాగు మరియు అధిక నీటిపారుదల కోసం భూగర్భ జలాల మితిమీరిన వాడకం వల్ల నేలలోని సూక్ష్మ పోషకాలు హరించిపోయి, ద్వితీయ లవణీయత వేగంగా పెరిగింది. బిందు మరియు తుంపర సేద్యం వంటి సూక్ష్మ నీటిపారుదల పద్ధతులు నీటి వినియోగాన్ని 40 నుండి 60 శాతం వరకు తగ్గించడమే కాకుండా, పోషకాలు కొట్టుకుపోవడాన్ని గణనీయంగా నివారిస్తాయి.
+
+పై గద్యం ప్రకారం, నేల మరియు నీటి వనరుల క్షీణతను అరికట్టడంలో సూక్ష్మ నీటిపారుదల ప్రధానంగా ఎలా దోహదపడుతుంది?"	నీటి వినియోగాన్ని తగ్గించడం మరియు పోషకాలు కొట్టుకుపోవడాన్ని అరికట్టడం ద్వారా	పంట మార్పిడి పద్ధతుల అవసరాన్ని పూర్తిగా తొలగించడం ద్వారా	లవణీయతను మరింత వేగవంతం చేయడం ద్వారా	వరద నీటిపారుదలపై ఆధారపడటాన్ని పెంచడం ద్వారా	A	Micro-irrigation systems reduce water consumption by 40 to 60 percent and curb nutrient runoff into watersheds.	సూక్ష్మ నీటిపారుదల నీటి వినియోగాన్ని 40 నుండి 60 శాతం వరకు తగ్గించడమే కాకుండా పోషకాలు కొట్టుకుపోకుండా కాపాడుతుంది.	medium
