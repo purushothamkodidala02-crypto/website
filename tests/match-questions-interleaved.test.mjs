@@ -66,3 +66,18 @@ test("FormattedQuestionText.tsx supports matching paired rows without dash and l
   // Verify alphabetic list items support full A-Z range
   assert.match(formatter, /alphabeticListItem = \/\^\(\?:\\\(\[a-zA-Z\]\\\)/);
 });
+
+test("FormattedQuestionText.tsx protects Telugu era markers and abbreviations from splitting", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify Telugu era tokens protection
+  assert.match(formatter, /__TEL_ERA_1_/);
+  assert.match(formatter, /__TEL_ERA_2_/);
+  assert.match(formatter, /__TEL_ABBR_/);
+
+  // Verify Telugu abbreviations lookbehind in sentence splitting regex
+  assert.match(formatter, /రూ\|క్రీ\|శా\|హి\|వి\|పూ\|శ\|డా\|ప్రొ\|శ్రీ\|చి\|కు\|సం\|నెం\|పు/);
+
+  // Verify Telugu abbreviation guard in renderBlocks
+  assert.match(formatter, /isTeluguAbbrOrEra/);
+});

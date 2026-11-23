@@ -192,6 +192,21 @@ function questionLines(rawText: string) {
       "__$1_DOT__ ",
     )
     .replace(/(రూ)\.[ \t]*(?=[\d౦-౯])/g, "__$1_DOT__ ")
+    // Protect Telugu era markers (e.g. "క్రీ.శ.", "క్రీ.పూ.", "శా.శ.", "హి.శ.", "వి.శ.")
+    // so that the dot after "క్రీ." is not mistaken for a sentence end before "శ." as a bullet marker.
+    .replace(
+      /(?<=^|[^\u0c00-\u0c7f])(క్రీ|శా|హి|వి)\.([ \t]*)(శ|పూ)\./gu,
+      "__TEL_ERA_1_$1__$2__TEL_ERA_2_$3__",
+    )
+    .replace(
+      /(?<=^|[^\u0c00-\u0c7f])(క్రీ|శా|హి|వి)\.([ \t]*)(శ|పూ)(?=[ \t\d౦-౯)\]]|$)/gu,
+      "__TEL_ERA_1_$1__$2$3",
+    )
+    // Protect Telugu titles and abbreviations (e.g. "డా. బి.ఆర్. అంబేద్కర్", "ప్రొ. జయశంకర్", "సం. 2024", "నెం. 5")
+    .replace(
+      /(?<=^|[^\u0c00-\u0c7f])(డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు|రూ)\.([ \t]*)(?=[\d౦-౯\u0c00-\u0c7f])/gu,
+      "__TEL_ABBR_$1__$2",
+    )
     // Join accidental linebreaks in legal citations (e.g. "Suraj Bhan\nv. Financial Commissioner")
     .replace(
       /(?<=(?:[A-Za-z0-9\u0c00-\u0c7f'"\)]|\b(?:Ltd|Co|Govt|Inc|Corp|Anr|Ors)\.))[ \t]*\r?\n[ \t]*(?=(?:v|vs)\.[ \t]+[A-Za-z0-9\u0c00-\u0c7f'"])/gi,
@@ -287,7 +302,7 @@ function questionLines(rawText: string) {
       "\n",
     )
     .replace(
-      /(?<!\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc|రూ)\s*)([.?]|(?<![\d౦-౯]\s*):)\s*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:(?:\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])))\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /(?<!(?:\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc)|(?:రూ|క్రీ|శా|హి|వి|పూ|శ|డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు))\s*)([.?]|(?<![\d౦-౯]\s*):)\s*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:(?:\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])))\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -324,6 +339,9 @@ function questionLines(rawText: string) {
       line
         .replace(/__(v|vs)_DOT__/gi, "$1.")
         .replace(/__(Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|రూ)_DOT__[ \t]*/gi, "$1. ")
+        .replace(/__TEL_ERA_1_(క్రీ|శా|హి|వి)__/gu, "$1.")
+        .replace(/__TEL_ERA_2_(శ|పూ)__/gu, "$1.")
+        .replace(/__TEL_ABBR_(డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు|రూ)__/gu, "$1.")
     );
 }
 
@@ -847,8 +865,13 @@ export function FormattedQuestionText({
         /^(?:Financial|State|Union|Commissioner|Collector|Govt|Government|Board|Council|Secretary|Inspector|Municipal|High\s+Court|Supreme\s+Court)\b/i.test(
           numbered[2],
         );
+      const isTeluguAbbrOrEra =
+        numbered &&
+        /^(?:రూ|క్రీ|శా|హి|వి|పూ|శ|డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు)[.)]$/.test(
+          numbered[1].replace(/[()]/g, ""),
+        );
 
-      if (numbered && !isCaseCitation) {
+      if (numbered && !isCaseCitation && !isTeluguAbbrOrEra) {
         const group: Array<{ index: number; line: string; marker: string; content: string }> = [];
         while (i < lines.length) {
           const currLine = lines[i];
@@ -859,7 +882,12 @@ export function FormattedQuestionText({
             /^(?:Financial|State|Union|Commissioner|Collector|Govt|Government|Board|Council|Secretary|Inspector|Municipal|High\s+Court|Supreme\s+Court)\b/i.test(
               currMatch[2],
             );
-          if (currMatch && !currIsCase) {
+          const currIsTeluguAbbrOrEra =
+            currMatch &&
+            /^(?:రూ|క్రీ|శా|హి|వి|పూ|శ|డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు)[.)]$/.test(
+              currMatch[1].replace(/[()]/g, ""),
+            );
+          if (currMatch && !currIsCase && !currIsTeluguAbbrOrEra) {
             group.push({
               index: i,
               line: currLine,
