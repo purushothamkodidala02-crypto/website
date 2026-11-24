@@ -253,7 +253,7 @@ export default async function AdminDashboard() {
       </section>
 
       {/* ========================================================
-          2B. ZOHO-STYLE PUBLISHING LIFECYCLE PIPELINE
+          2B. PUBLISHING LIFECYCLE PIPELINE
       ======================================================== */}
       <section className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-teal-100 bg-slate-50/60 px-6 py-4">
@@ -266,7 +266,7 @@ export default async function AdminDashboard() {
                 Mock Test Publishing Pipeline
               </h2>
               <p className="text-xs text-slate-500">
-                Zoho-style stage tracker for test readiness and releases
+                Stage tracker for test readiness, review checkpoints, and release management
               </p>
             </div>
           </div>
@@ -554,7 +554,7 @@ export default async function AdminDashboard() {
       </section>
 
       {/* ========================================================
-          3B. INSTANT STUDENT & CANDIDATE LOOKUP (ZOHO CRM STYLE)
+          3B. INSTANT STUDENT & CANDIDATE LOOKUP (ENTERPRISE DIRECTORY)
       ======================================================== */}
       <section>
         <AdminQuickCandidateLookup />

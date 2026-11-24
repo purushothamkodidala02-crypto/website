@@ -187,13 +187,13 @@ export function AdminHeader({
 
       {/* Right: Security, Student Portal, User Profile, Sign Out */}
       <div className="flex min-w-0 items-center gap-2 sm:gap-2.5 shrink-0">
-        {/* Zoho-style Quick Action Launcher */}
+        {/* Enterprise Quick Action Launcher */}
         <div className="relative shrink-0" ref={quickCreateRef}>
           <button
             type="button"
             onClick={() => setQuickCreateOpen((prev) => !prev)}
             className="inline-flex h-8 items-center gap-1.5 rounded-xl bg-teal-800 px-3 text-xs font-bold text-white shadow-2xs transition hover:bg-teal-900 active:scale-95"
-            title="Zoho-style Quick Actions"
+            title="Studio Quick Actions"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

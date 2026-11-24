@@ -404,7 +404,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </p>
         )}
 
-        {/* Clean Status Tabs & Zoho Quick Views */}
+        {/* Clean Status Tabs & Workspace Quick Views */}
         <div className="mt-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
           <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center p-1 rounded-xl bg-slate-200/60 border border-slate-200">
             {([
@@ -443,7 +443,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
             })}
           </div>
 
-          {/* Zoho-style Saved Filter Presets */}
+          {/* Saved Filter Presets */}
           <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-1 rounded-xl">
             <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 px-2 hidden sm:inline">
               ⚡ Quick Views:
