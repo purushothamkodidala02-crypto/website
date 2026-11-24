@@ -335,6 +335,21 @@ export async function createQuestion(
     : { url: normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };
 
+  const imageFileTe = formData.get("question_image_te");
+  const normalizedImageTe = normalizeQuestionImageUrl(formData.get("image_url_te"));
+  const hasUploadedFileTe = isUploadFile(imageFileTe);
+  if (normalizedImageTe.error && !hasUploadedFileTe) {
+    if (uploadedImage.path) await removeQuestionImage(supabase, uploadedImage.path);
+    return { success: false, message: `Telugu image: ${normalizedImageTe.error}` };
+  }
+  const uploadedImageTe = hasUploadedFileTe
+    ? await uploadQuestionImage(supabase, user.id, imageFileTe)
+    : { url: normalizedImageTe.url, path: null, error: null };
+  if (uploadedImageTe.error) {
+    if (uploadedImage.path) await removeQuestionImage(supabase, uploadedImage.path);
+    return { success: false, message: `Telugu image: ${uploadedImageTe.error}` };
+  }
+
   const { data: createdQuestion, error } = await supabase.from("questions").insert({
     subject_id: subjectId,
     question_text: canonical.question,
@@ -352,6 +367,7 @@ export async function createQuestion(
     explanation: canonical.explanation,
     explanation_te: languageMode === "english" ? null : telugu.explanation,
     image_url: uploadedImage.url,
+    image_url_te: languageMode === "english" ? null : uploadedImageTe.url,
     source_reference:
       String(formData.get("source_reference") ?? "").trim() || null,
     difficulty: "medium",
@@ -362,6 +378,7 @@ export async function createQuestion(
   }).select("id").single();
   if (error) {
     await removeQuestionImage(supabase, uploadedImage.path);
+    await removeQuestionImage(supabase, uploadedImageTe.path);
     return { success: false, message: error.message };
   }
 

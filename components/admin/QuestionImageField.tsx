@@ -50,7 +50,27 @@ async function optimizeImage(file: File) {
   return new File([optimized], `${baseName}.webp`, { type: "image/webp", lastModified: Date.now() });
 }
 
-export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | null }) {
+interface ImageUploadCardProps {
+  label: string;
+  badge?: string;
+  helpText?: string;
+  fileInputName: string;
+  urlInputName: string;
+  removeInputName: string;
+  currentUrl?: string | null;
+  placeholder?: string;
+}
+
+function ImageUploadCard({
+  label,
+  badge,
+  helpText,
+  fileInputName,
+  urlInputName,
+  removeInputName,
+  currentUrl,
+  placeholder = "https://example.com/question-graph.webp",
+}: ImageUploadCardProps) {
   const [url, setUrl] = useState(currentUrl ?? "");
   const [filePreview, setFilePreview] = useState("");
   const [remove, setRemove] = useState(false);
@@ -59,7 +79,6 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
   const [processing, setProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync state whenever currentUrl changes from parent or after a successful save
   useEffect(() => {
     setUrl(currentUrl ?? "");
     setFilePreview((prev) => {
@@ -91,19 +110,23 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
   const preview = remove ? "" : filePreview || url.trim();
 
   return (
-    <fieldset className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-      <legend className="px-2 text-sm font-black text-slate-950">
-        Question image or graph <span className="font-normal text-slate-500">(optional)</span>
-      </legend>
-      <p className="text-sm leading-6 text-slate-600">
-        Upload a PNG, JPG, or WebP file up to 2 MB, or paste a public HTTPS image URL.
-      </p>
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <label className="block text-sm font-bold">
-          Upload image
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-bold text-slate-900">{label}</span>
+        {badge && (
+          <span className="rounded-md bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-800">
+            {badge}
+          </span>
+        )}
+      </div>
+      {helpText && <p className="mt-1 text-xs text-slate-500">{helpText}</p>}
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <label className="block text-xs font-bold text-slate-700">
+          Upload file
           <input
             ref={inputRef}
-            name="question_image"
+            name={fileInputName}
             type="file"
             accept="image/png,image/jpeg,image/webp"
             disabled={processing}
@@ -128,34 +151,34 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
                     const transfer = new DataTransfer();
                     transfer.items.add(prepared);
                     input.files = transfer.files;
-                    setFileMessage(`Optimized from ${fileSize(file.size)} to ${fileSize(prepared.size)} for a faster upload.`);
+                    setFileMessage(`Optimized from ${fileSize(file.size)} to ${fileSize(prepared.size)}.`);
                   } catch {
-                    // If DataTransfer is unsupported in this browser environment, keep original file
-                    setFileMessage(`${file.name} is ready to upload (${fileSize(file.size)}).`);
+                    setFileMessage(`${file.name} ready (${fileSize(file.size)}).`);
                   }
                 } else {
-                  setFileMessage(`${file.name} is ready to upload (${fileSize(file.size)}).`);
+                  setFileMessage(`${file.name} ready (${fileSize(file.size)}).`);
                 }
                 setFilePreview(URL.createObjectURL(prepared));
-                setUrl(""); // Clears conflicting manual URL so uploaded file takes precedence
+                setUrl("");
                 setRemove(false);
               } catch (error) {
                 input.value = "";
-                setFileError(error instanceof Error ? error.message : "This image could not be prepared.");
+                setFileError(error instanceof Error ? error.message : "Image could not be prepared.");
               } finally {
                 setProcessing(false);
               }
             }}
-            className="mt-2 block w-full rounded-xl border bg-white p-2 text-sm font-normal file:mr-3 file:rounded-lg file:border-0 file:bg-slate-950 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white"
+            className="mt-1.5 block w-full rounded-lg border bg-slate-50 p-2 text-xs font-normal file:mr-2 file:rounded file:border-0 file:bg-slate-900 file:px-2.5 file:py-1 file:text-xs file:font-bold file:text-white"
           />
-          {processing && <span className="mt-2 block text-xs font-semibold text-teal-700">Optimizing the image…</span>}
-          {!processing && fileMessage && <span className="mt-2 block text-xs font-semibold text-emerald-700">{fileMessage}</span>}
-          {fileError && <span role="alert" className="mt-2 block text-xs font-semibold text-red-700">{fileError}</span>}
+          {processing && <span className="mt-1 block text-xs font-semibold text-teal-700">Optimizing…</span>}
+          {!processing && fileMessage && <span className="mt-1 block text-xs font-semibold text-emerald-700">{fileMessage}</span>}
+          {fileError && <span role="alert" className="mt-1 block text-xs font-semibold text-red-700">{fileError}</span>}
         </label>
-        <label className="block text-sm font-bold">
-          Image URL
+
+        <label className="block text-xs font-bold text-slate-700">
+          Or paste image URL
           <input
-            name="image_url"
+            name={urlInputName}
             type="url"
             inputMode="url"
             value={url}
@@ -168,20 +191,19 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
                 setFilePreview("");
                 setFileMessage("");
                 setFileError("");
-                if (inputRef.current) {
-                  inputRef.current.value = "";
-                }
+                if (inputRef.current) inputRef.current.value = "";
               }
             }}
-            placeholder="https://example.com/question-graph.webp"
-            className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal"
+            placeholder={placeholder}
+            className="mt-1.5 w-full rounded-lg border bg-slate-50 px-3 py-2 text-xs font-normal"
           />
         </label>
       </div>
+
       {currentUrl && (
-        <label className="mt-4 flex items-center gap-3 text-sm font-bold text-red-700">
+        <label className="mt-3 flex items-center gap-2 text-xs font-bold text-red-700">
           <input
-            name="remove_image"
+            name={removeInputName}
             type="checkbox"
             checked={remove}
             onChange={(event) => {
@@ -193,19 +215,152 @@ export function QuestionImageField({ currentUrl = "" }: { currentUrl?: string | 
                 setFileMessage("");
                 setFileError("");
                 setUrl("");
-                if (inputRef.current) {
-                  inputRef.current.value = "";
-                }
+                if (inputRef.current) inputRef.current.value = "";
               } else {
                 setUrl(currentUrl ?? "");
               }
             }}
-            className="h-4 w-4"
+            className="h-3.5 w-3.5 rounded border-red-300 text-red-600 focus:ring-red-500"
           />
-          Remove the current question image
+          Remove current image
         </label>
       )}
-      {preview && <QuestionMedia src={preview} alt="Question image preview" className="mt-5" />}
+
+      {preview && (
+        <div className="mt-3 border-t pt-3">
+          <p className="text-xs font-semibold text-slate-500">Preview:</p>
+          <QuestionMedia src={preview} alt={`${label} preview`} className="mt-2" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function QuestionImageField({
+  currentUrl = "",
+  currentUrlTe = "",
+  languageMode = "bilingual",
+}: {
+  currentUrl?: string | null;
+  currentUrlTe?: string | null;
+  languageMode?: "bilingual" | "english" | "telugu";
+}) {
+  const isBilingual = languageMode === "bilingual";
+  const [imageMode, setImageMode] = useState<"single" | "separate">(() => {
+    return currentUrlTe ? "separate" : "single";
+  });
+
+  return (
+    <fieldset className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+      <legend className="px-2 text-sm font-black text-slate-950">
+        Question image settings <span className="font-normal text-slate-500">(optional)</span>
+      </legend>
+
+      <p className="text-sm leading-6 text-slate-600">
+        Upload PNG, JPG, or WebP up to 2 MB, or paste a public HTTPS image URL.
+      </p>
+
+      {/* Mode Selector for Bilingual Subjects */}
+      {isBilingual && (
+        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3">
+          <p className="text-xs font-black uppercase tracking-wider text-slate-500">Image Mode</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setImageMode("single")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                imageMode === "single"
+                  ? "bg-teal-700 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              Single Image (Same for English & Telugu)
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageMode("separate")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                imageMode === "separate"
+                  ? "bg-teal-700 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              Different Images (English & Telugu)
+            </button>
+          </div>
+          <input type="hidden" name="image_mode" value={imageMode} />
+        </div>
+      )}
+
+      {/* English / Telugu Only Mode */}
+      {!isBilingual && languageMode === "telugu" && (
+        <div className="mt-4">
+          <ImageUploadCard
+            label="Telugu Question Image (తెలుగు)"
+            badge="Telugu Only"
+            fileInputName="question_image"
+            urlInputName="image_url"
+            removeInputName="remove_image"
+            currentUrl={currentUrl || currentUrlTe}
+          />
+        </div>
+      )}
+
+      {!isBilingual && languageMode === "english" && (
+        <div className="mt-4">
+          <ImageUploadCard
+            label="English Question Image"
+            badge="English Only"
+            fileInputName="question_image"
+            urlInputName="image_url"
+            removeInputName="remove_image"
+            currentUrl={currentUrl}
+          />
+        </div>
+      )}
+
+      {/* Bilingual - Single Shared Image */}
+      {isBilingual && imageMode === "single" && (
+        <div className="mt-4">
+          <ImageUploadCard
+            label="Shared Question Image"
+            badge="Applies to Both English & Telugu"
+            helpText="This single image will be shown to students in both English and Telugu mock test views."
+            fileInputName="question_image"
+            urlInputName="image_url"
+            removeInputName="remove_image"
+            currentUrl={currentUrl}
+          />
+          {currentUrlTe && (
+            <input type="hidden" name="clear_image_te" value="true" />
+          )}
+        </div>
+      )}
+
+      {/* Bilingual - Separate Images */}
+      {isBilingual && imageMode === "separate" && (
+        <div className="mt-4 space-y-4">
+          <ImageUploadCard
+            label="English Question Image"
+            badge="English View"
+            helpText="Displayed when the student views the question in English."
+            fileInputName="question_image"
+            urlInputName="image_url"
+            removeInputName="remove_image"
+            currentUrl={currentUrl}
+          />
+
+          <ImageUploadCard
+            label="Telugu Question Image (తెలుగు)"
+            badge="Telugu View"
+            helpText="Displayed when the student switches to Telugu. If left empty, it will automatically fall back to the English image."
+            fileInputName="question_image_te"
+            urlInputName="image_url_te"
+            removeInputName="remove_image_te"
+            currentUrl={currentUrlTe}
+          />
+        </div>
+      )}
     </fieldset>
   );
 }

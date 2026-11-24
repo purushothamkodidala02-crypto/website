@@ -49,6 +49,7 @@ type QuestionMeta = {
   correctAnswer?: string;
   explanation?: string | null;
   imageUrl?: string | null;
+  imageUrlTe?: string | null;
   contentLanguageMode?: string | null;
   questionTextTe?: string | null;
   optionATe?: string | null;
@@ -68,6 +69,7 @@ type AdminQuestionRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  image_url_te?: string | null;
   question_text_te?: string | null;
   option_a_te?: string | null;
   option_b_te?: string | null;
@@ -111,6 +113,7 @@ type SessionQuestionRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  image_url_te?: string | null;
   content_language_mode?: string | null;
   question_text_te?: string | null;
   option_a_te?: string | null;
@@ -218,7 +221,7 @@ async function fetchQuestionsMetadata(
     try {
       const { data: sessionData } = await supabase
         .from("test_attempt_session_questions")
-        .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, explanation_te")
+        .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, image_url_te, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, explanation_te")
         .in("question_id", remainingIds);
 
       for (const item of (sessionData ?? []) as unknown as SessionQuestionRow[]) {
@@ -232,6 +235,7 @@ async function fetchQuestionsMetadata(
             correctAnswer: item.correct_answer,
             explanation: item.explanation,
             imageUrl: item.image_url,
+            imageUrlTe: item.image_url_te,
             contentLanguageMode: item.content_language_mode ?? "bilingual",
             questionTextTe: item.question_text_te,
             optionATe: item.option_a_te,
@@ -424,6 +428,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
         option_c_te: row.option_c_te || meta?.optionCTe || null,
         option_d_te: row.option_d_te || meta?.optionDTe || null,
         explanation_te: row.explanation_te || meta?.explanationTe || null,
+        image_url_te: row.image_url_te || meta?.imageUrlTe || null,
       };
     });
   }

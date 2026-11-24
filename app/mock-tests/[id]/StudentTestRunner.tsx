@@ -36,7 +36,7 @@ type Answer = "A" | "B" | "C" | "D";
 type TestQuestion = {
   question_id: string; question_order: number; marks: number; negative_marks: number;
   question_text: string; option_a: string; option_b: string; option_c: string; option_d: string;
-  image_url: string | null; selected_answer: Answer | null; marked_for_review: boolean;
+  image_url: string | null; image_url_te?: string | null; selected_answer: Answer | null; marked_for_review: boolean;
   content_language_mode: "bilingual" | "english" | "telugu";
   question_text_te: string | null; option_a_te: string | null; option_b_te: string | null;
   option_c_te: string | null; option_d_te: string | null;
@@ -274,7 +274,7 @@ export function StudentTestRunner({
     }
   }, []);
 
-  const current = activeQuestions[index] || activeQuestions[0];
+  const rawCurrent = activeQuestions[index] || activeQuestions[0];
   const answered = useMemo(() => Object.keys(answers).length, [answers]);
   const unanswered = activeQuestions.length - answered;
   const locked = remaining === null || remaining === 0 || submitting || pausing || paused || isDisplaced;
@@ -727,8 +727,9 @@ export function StudentTestRunner({
     );
   }
 
-  const bilingual = current.content_language_mode === "bilingual" && Boolean(current.question_text_te);
+  const bilingual = rawCurrent.content_language_mode === "bilingual" && Boolean(rawCurrent.question_text_te);
   const telugu = bilingual && language === "te";
+  const current = (telugu && rawCurrent.image_url_te) ? { ...rawCurrent, image_url: rawCurrent.image_url_te } : rawCurrent;
   const questionText = telugu ? current.question_text_te ?? current.question_text : current.question_text;
   const options = useMemo(() => {
     return getShuffledOptions(current, telugu, Boolean(isShuffled), sessionId);

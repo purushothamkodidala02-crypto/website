@@ -22,6 +22,7 @@ type StudyRow = {
   correct_answer: string;
   explanation: string | null;
   image_url: string | null;
+  image_url_te?: string | null;
   content_language_mode: string;
   question_text_te: string | null;
   option_a_te: string | null;
@@ -505,7 +506,7 @@ function StudyQuestionCard({
 
             {row.image_url && (
               <div className="mt-4">
-                <QuestionMedia src={row.image_url} />
+                <QuestionMedia src={(showTelugu && row.image_url_te) ? row.image_url_te : row.image_url} />
               </div>
             )}
 

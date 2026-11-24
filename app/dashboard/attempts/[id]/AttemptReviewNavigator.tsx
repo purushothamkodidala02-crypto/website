@@ -34,6 +34,7 @@ export type ReviewRow = {
   explanation: string | null;
   explanation_te: string | null;
   image_url: string | null;
+  image_url_te?: string | null;
 };
 
 export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds }: { attemptId: string; rows: ReviewRow[]; bookmarkedQuestionIds: string[] }) {
@@ -47,16 +48,17 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
   );
   const questionRef = useRef<HTMLElement>(null);
   const activeNumberRef = useRef<HTMLButtonElement>(null);
-  const row = rows[index] ?? rows[0];
-  if (!row) return null;
-  const hasTelugu = Boolean(row.question_text_te);
+  const baseRow = rows[index] ?? rows[0];
+  if (!baseRow) return null;
+  const hasTelugu = Boolean(baseRow.question_text_te);
   const effectiveLanguage =
-    row.content_language_mode === "telugu"
+    baseRow.content_language_mode === "telugu"
       ? "telugu"
-      : row.content_language_mode === "english"
+      : baseRow.content_language_mode === "english"
         ? "english"
         : language;
   const showTelugu = effectiveLanguage === "telugu" && hasTelugu;
+  const row = (showTelugu && baseRow.image_url_te) ? { ...baseRow, image_url: baseRow.image_url_te } : baseRow;
   const questionText = showTelugu ? row.question_text_te ?? row.question_text : row.question_text;
 
   const showQuestion = useCallback((nextIndex: number, scrollToCard = true) => {

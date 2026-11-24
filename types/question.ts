@@ -20,6 +20,7 @@ export interface Question {
   explanation_te: string | null;
   difficulty: string;
   image_url: string | null;
+  image_url_te?: string | null;
   source_reference: string | null;
   is_active: boolean;
   content_lifecycle: QuestionLifecycle;
@@ -39,6 +40,7 @@ export interface CreateQuestionInput {
   correct_answer: CorrectAnswer;
   explanation?: string;
   image_url?: string;
+  image_url_te?: string;
   source_reference?: string;
   is_active?: boolean;
   content_lifecycle?: QuestionLifecycle;

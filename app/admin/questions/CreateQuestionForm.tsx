@@ -185,7 +185,7 @@ export function CreateQuestionForm({
                     onQuestionBlur={(text) => handleCheckDuplicate(text, true)}
                   />
                 )}
-                <QuestionImageField />
+                <QuestionImageField languageMode={languageMode} />
                 <label className="block text-sm font-bold">Correct answer<SearchableSelect name="correct_answer" value={correctAnswer} onChange={setCorrectAnswer} options={["A", "B", "C", "D"].map((letter) => ({ value: letter, label: `Option ${letter}` }))} placeholder="Choose the correct option" /></label>
                 <label className="block text-sm font-bold">Source reference <span className="font-normal text-slate-500">(optional)</span><input name="source_reference" placeholder="For example: TGPSC Group 2 Paper I, 2025" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
               </div>

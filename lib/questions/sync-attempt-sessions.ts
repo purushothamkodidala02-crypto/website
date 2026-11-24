@@ -17,6 +17,7 @@ export type QuestionSessionSyncData = {
   explanation: string | null;
   explanation_te: string | null;
   image_url: string | null;
+  image_url_te?: string | null;
   correct_answer?: string;
 };
 
@@ -51,6 +52,7 @@ export async function syncQuestionToAttemptSessions(
       explanation: updatedData.explanation,
       explanation_te: updatedData.explanation_te,
       image_url: updatedData.image_url,
+      image_url_te: updatedData.image_url_te,
     };
 
     const keyChanged =

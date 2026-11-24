@@ -49,6 +49,7 @@ export default async function MockTestStudentPreviewPage({
     explanation: string | null;
     explanation_te: string | null;
     image_url: string | null;
+    image_url_te: string | null;
   }> = [];
 
   if (questionIds.length > 0) {
@@ -57,7 +58,7 @@ export default async function MockTestStudentPreviewPage({
       const chunk = questionIds.slice(i, i + chunkSize);
       const { data: qRows, error: qErr } = await db
         .from("questions")
-        .select("id, subject_id, question_text, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url")
+        .select("id, subject_id, question_text, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url, image_url_te")
         .in("id", chunk);
       if (qErr) {
         console.warn("Could not load questions batch for preview:", qErr.message);
@@ -102,6 +103,7 @@ export default async function MockTestStudentPreviewPage({
       explanation: item.explanation,
       explanationTe: item.explanation_te,
       imageUrl: item.image_url,
+      imageUrlTe: item.image_url_te,
       languageMode: languageBySubject.get(item.subject_id) ?? "bilingual",
     }];
   });

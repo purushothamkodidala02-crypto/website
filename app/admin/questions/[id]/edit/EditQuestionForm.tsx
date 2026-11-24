@@ -98,10 +98,14 @@ export function EditQuestionForm({
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
     question.image_url ?? null,
   );
+  const [currentImageUrlTe, setCurrentImageUrlTe] = useState<string | null>(
+    question.image_url_te ?? null,
+  );
 
   useEffect(() => {
     setCurrentImageUrl(question.image_url ?? null);
-  }, [question.id, question.image_url]);
+    setCurrentImageUrlTe(question.image_url_te ?? null);
+  }, [question.id, question.image_url, question.image_url_te]);
 
   const [isDirty, setIsDirty] = useState(false);
   const [showMobilePalette, setShowMobilePalette] = useState(false);
@@ -169,6 +173,9 @@ export function EditQuestionForm({
       setIsDirty(false);
       if (state.imageUrl !== undefined) {
         setCurrentImageUrl(state.imageUrl);
+      }
+      if (state.imageUrlTe !== undefined) {
+        setCurrentImageUrlTe(state.imageUrlTe);
       }
       router.refresh();
       if (state.newQuestionId && mockTestId) {
@@ -495,7 +502,12 @@ export function EditQuestionForm({
           )}
         </div>
 
-        <QuestionImageField key={`${question.id}-${currentImageUrl ?? "no-img"}`} currentUrl={currentImageUrl} />
+        <QuestionImageField
+          key={`${question.id}-${currentImageUrl ?? "no-img"}-${currentImageUrlTe ?? "no-img-te"}`}
+          currentUrl={currentImageUrl}
+          currentUrlTe={currentImageUrlTe}
+          languageMode={languageMode}
+        />
 
         <div className="grid gap-5 md:grid-cols-2">
           <label className="block text-sm font-bold">

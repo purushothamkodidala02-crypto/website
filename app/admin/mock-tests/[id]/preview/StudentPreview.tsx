@@ -26,6 +26,7 @@ export type PreviewQuestion = {
   explanation: string | null;
   explanationTe: string | null;
   imageUrl: string | null;
+  imageUrlTe?: string | null;
   languageMode: "bilingual" | "english" | "telugu";
 };
 
@@ -59,19 +60,20 @@ export function StudentPreview({ mockTestId, questions, canEdit, backHref, listR
     window.addEventListener("keydown", navigateWithKeyboard);
     return () => window.removeEventListener("keydown", navigateWithKeyboard);
   }, [questions.length]);
-  const current = questions[index];
+  const rawCurrent = questions[index];
   const previewHref = mockTestPreviewHref(mockTestId, listReturnTo, index + 1);
-  const editHref = current ? `/admin/mock-tests/${mockTestId}/questions/${current.id}/edit?returnTo=${encodeURIComponent(previewHref)}` : backHref;
+  const editHref = rawCurrent ? `/admin/mock-tests/${mockTestId}/questions/${rawCurrent.id}/edit?returnTo=${encodeURIComponent(previewHref)}` : backHref;
   const options = useMemo(() => {
-    if (!current) return [] as Array<readonly [Answer, string]>;
-    const useTelugu = current.languageMode === "bilingual" && language === "te";
-    return [["A", useTelugu ? current.optionATe ?? current.optionA : current.optionA], ["B", useTelugu ? current.optionBTe ?? current.optionB : current.optionB], ["C", useTelugu ? current.optionCTe ?? current.optionC : current.optionC], ["D", useTelugu ? current.optionDTe ?? current.optionD : current.optionD]] as Array<readonly [Answer, string]>;
-  }, [current, language]);
+    if (!rawCurrent) return [] as Array<readonly [Answer, string]>;
+    const useTelugu = rawCurrent.languageMode === "bilingual" && language === "te";
+    return [["A", useTelugu ? rawCurrent.optionATe ?? rawCurrent.optionA : rawCurrent.optionA], ["B", useTelugu ? rawCurrent.optionBTe ?? rawCurrent.optionB : rawCurrent.optionB], ["C", useTelugu ? rawCurrent.optionCTe ?? rawCurrent.optionC : rawCurrent.optionC], ["D", useTelugu ? rawCurrent.optionDTe ?? rawCurrent.optionD : rawCurrent.optionD]] as Array<readonly [Answer, string]>;
+  }, [rawCurrent, language]);
 
-  if (!current) return <section className="mt-8 rounded-3xl border border-dashed bg-white p-8 text-center shadow-sm"><h2 className="text-xl font-black text-slate-950">No questions to preview</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">Add or import questions for this mock test, then return here to check the student presentation.</p><Link href={backHref} className="mt-5 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Manage Questions</Link></section>;
+  if (!rawCurrent) return <section className="mt-8 rounded-3xl border border-dashed bg-white p-8 text-center shadow-sm"><h2 className="text-xl font-black text-slate-950">No questions to preview</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">Add or import questions for this mock test, then return here to check the student presentation.</p><Link href={backHref} className="mt-5 inline-flex rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Manage Questions</Link></section>;
 
-  const bilingual = current.languageMode === "bilingual" && Boolean(current.questionTextTe);
+  const bilingual = rawCurrent.languageMode === "bilingual" && Boolean(rawCurrent.questionTextTe);
   const useTelugu = bilingual && language === "te";
+  const current = (useTelugu && rawCurrent?.imageUrlTe) ? { ...rawCurrent, imageUrl: rawCurrent.imageUrlTe } : rawCurrent;
   const questionText = useTelugu ? current.questionTextTe ?? current.questionText : current.questionText;
   const explanation = useTelugu ? current.explanationTe ?? current.explanation : current.explanation;
 

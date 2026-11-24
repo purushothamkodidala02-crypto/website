@@ -29,7 +29,7 @@ export default async function EditQuestionPage({
       db
         .from("questions")
         .select(
-          "id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at",
+          "id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, image_url_te, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at",
         )
         .eq("id", id)
         .maybeSingle(),

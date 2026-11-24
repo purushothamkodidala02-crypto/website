@@ -19,6 +19,7 @@ export type UpdateQuestionState = {
   message: string;
   newQuestionId?: string;
   imageUrl?: string | null;
+  imageUrlTe?: string | null;
 };
 
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
@@ -105,7 +106,7 @@ export async function updateQuestion(
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    db.from("questions").select("id, subject_id, image_url, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
+    db.from("questions").select("id, subject_id, image_url, image_url_te, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
     mockTestId ? db.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, replaces_mock_test_id, superseded_by_mock_test_id").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
@@ -273,6 +274,24 @@ export async function updateQuestion(
     : { url: removeImage ? null : normalizedImage.url, path: null, error: null };
   if (uploadedImage.error) return { success: false, message: uploadedImage.error };
 
+  const imageMode = formData.get("image_mode");
+  const clearImageTe = formData.get("clear_image_te") === "true" || imageMode === "single";
+  const imageFileTe = formData.get("question_image_te");
+  const removeImageTe = formData.get("remove_image_te") === "on" || clearImageTe;
+  const normalizedImageTe = normalizeQuestionImageUrl(formData.get("image_url_te"));
+  const hasUploadedFileTe = isUploadFile(imageFileTe);
+  if (!removeImageTe && normalizedImageTe.error && !hasUploadedFileTe) {
+    if (uploadedImage.path) await removeQuestionImage(db, uploadedImage.path);
+    return { success: false, message: `Telugu image: ${normalizedImageTe.error}` };
+  }
+  const uploadedImageTe = hasUploadedFileTe
+    ? await uploadQuestionImage(db, user.id, imageFileTe)
+    : { url: removeImageTe ? null : normalizedImageTe.url, path: null, error: null };
+  if (uploadedImageTe.error) {
+    if (uploadedImage.path) await removeQuestionImage(db, uploadedImage.path);
+    return { success: false, message: `Telugu image: ${uploadedImageTe.error}` };
+  }
+
   const nextQuestion = {
       subject_id: subjectId,
       question_text: canonical.question,
@@ -307,6 +326,10 @@ export async function updateQuestion(
           ? null
           : (telugu.explanation || null),
       image_url: uploadedImage.url,
+      image_url_te:
+        languageMode === "english"
+          ? null
+          : uploadedImageTe.url,
       source_reference:
         String(formData.get("source_reference") ?? "").trim() || null,
       is_active: formData.get("is_active") === "on",
@@ -324,12 +347,14 @@ export async function updateQuestion(
       const { data: copiedQuestion, error: copyError } = await db.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
       if (copyError || !copiedQuestion) {
         await removeQuestionImage(db, uploadedImage.path);
+        await removeQuestionImage(db, uploadedImageTe.path);
         return { success: false, message: copyError?.message ?? "The separate Question copy could not be created." };
       }
       const { error: assignmentError } = await db.from("mock_test_questions").update({ question_id: copiedQuestion.id }).eq("mock_test_id", mockTestId).eq("question_id", questionId);
       if (assignmentError) {
         await db.from("questions").delete().eq("id", copiedQuestion.id);
         await removeQuestionImage(db, uploadedImage.path);
+        await removeQuestionImage(db, uploadedImageTe.path);
         return { success: false, message: assignmentError.message };
       }
       copiedForThisMock = true;
@@ -343,10 +368,14 @@ export async function updateQuestion(
 
   if (updateError) {
     await removeQuestionImage(db, uploadedImage.path);
+    await removeQuestionImage(db, uploadedImageTe.path);
     return { success: false, message: updateError.message };
   }
   if (!copiedForThisMock && existingQuestion.image_url && existingQuestion.image_url !== uploadedImage.url) {
     await removeQuestionImage(db, questionMediaPath(existingQuestion.image_url));
+  }
+  if (!copiedForThisMock && existingQuestion.image_url_te && existingQuestion.image_url_te !== uploadedImageTe.url) {
+    await removeQuestionImage(db, questionMediaPath(existingQuestion.image_url_te));
   }
 
   // Synchronize clarifying updates (diagram image, typos, explanations, answer key) to student attempt sessions:
@@ -366,6 +395,7 @@ export async function updateQuestion(
       explanation: nextQuestion.explanation,
       explanation_te: nextQuestion.explanation_te,
       image_url: nextQuestion.image_url,
+      image_url_te: nextQuestion.image_url_te,
       correct_answer: nextQuestion.correct_answer,
     },
     existingQuestion.correct_answer,
@@ -402,6 +432,7 @@ export async function updateQuestion(
     message: successMessage,
     newQuestionId: copiedQuestionId,
     imageUrl: nextQuestion.image_url,
+    imageUrlTe: nextQuestion.image_url_te,
   };
   } catch (err) {
     console.error("Unexpected error in updateQuestion action:", err);

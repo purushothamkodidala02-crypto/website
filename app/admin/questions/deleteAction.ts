@@ -31,6 +31,8 @@ export async function deleteQuestion(questionId: string): Promise<DeleteQuestion
   }
   const imageUrl = data?.[0]?.deleted_image_url;
   if (imageUrl) await removeQuestionImage(result.supabase, questionMediaPath(imageUrl));
+  const imageUrlTe = data?.[0]?.deleted_image_url_te;
+  if (imageUrlTe) await removeQuestionImage(result.supabase, questionMediaPath(imageUrlTe));
   revalidatePath("/admin");
   revalidatePath("/admin/questions");
   return { success: true, message: `"${question.question_text}" was permanently deleted.` };
@@ -73,6 +75,14 @@ export async function bulkDeleteQuestions(questionIds: string[]): Promise<BulkQu
       if (imageUrl) {
         try {
           await removeQuestionImage(result.supabase, questionMediaPath(imageUrl));
+        } catch {
+          // Ignore image cleanup error on delete
+        }
+      }
+      const imageUrlTe = data?.[0]?.deleted_image_url_te;
+      if (imageUrlTe) {
+        try {
+          await removeQuestionImage(result.supabase, questionMediaPath(imageUrlTe));
         } catch {
           // Ignore image cleanup error on delete
         }

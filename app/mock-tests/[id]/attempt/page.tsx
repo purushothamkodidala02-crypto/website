@@ -22,6 +22,7 @@ type TestQuestion = {
   option_c: string;
   option_d: string;
   image_url: string | null;
+  image_url_te?: string | null;
   selected_answer: "A" | "B" | "C" | "D" | null;
   marked_for_review: boolean;
   content_language_mode: "bilingual" | "english" | "telugu";

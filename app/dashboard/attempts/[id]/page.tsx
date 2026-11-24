@@ -137,6 +137,7 @@ export default async function AttemptReviewPage({
           explanation: sq.explanation,
           explanation_te: sq.explanation_te,
           image_url: sq.image_url,
+          image_url_te: sq.image_url_te ?? null,
         };
       });
     }
@@ -147,7 +148,7 @@ export default async function AttemptReviewPage({
     const [mockQuestionsResult, responsesResult] = await Promise.all([
       admin
         .from("mock_test_questions")
-        .select("question_order, question_id, questions(question_text, option_a, option_b, option_c, option_d, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url)")
+        .select("question_order, question_id, questions(question_text, option_a, option_b, option_c, option_d, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url, image_url_te)")
         .eq("mock_test_id", attempt.mock_test_id)
         .order("question_order"),
       admin
@@ -192,6 +193,7 @@ export default async function AttemptReviewPage({
           explanation: q.explanation ?? null,
           explanation_te: q.explanation_te ?? null,
           image_url: q.image_url ?? null,
+          image_url_te: q.image_url_te ?? null,
         };
       });
     }
