@@ -350,7 +350,7 @@ export async function createQuestion(
     return { success: false, message: `Telugu image: ${uploadedImageTe.error}` };
   }
 
-  const { data: createdQuestion, error } = await supabase.from("questions").insert({
+  const newQuestionPayload = {
     subject_id: subjectId,
     question_text: canonical.question,
     question_type: "mcq",
@@ -375,7 +375,15 @@ export async function createQuestion(
     content_lifecycle: lifecycle,
     review_on: lifecycle === "review" ? reviewOn : null,
     expires_on: lifecycle === "expires" ? expiresOn : null,
-  }).select("id").single();
+  };
+
+  let { data: createdQuestion, error } = await supabase.from("questions").insert(newQuestionPayload).select("id").single();
+  if (error && (error.message?.includes("image_url_te") || (error as { code?: string }).code === "42703")) {
+    const { image_url_te: _unused, ...payloadWithoutTe } = newQuestionPayload;
+    const retry = await supabase.from("questions").insert(payloadWithoutTe).select("id").single();
+    createdQuestion = retry.data;
+    error = retry.error;
+  }
   if (error) {
     await removeQuestionImage(supabase, uploadedImage.path);
     await removeQuestionImage(supabase, uploadedImageTe.path);

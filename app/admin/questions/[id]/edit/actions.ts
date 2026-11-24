@@ -100,13 +100,33 @@ export async function updateQuestion(
     return { success: false, message: "Choose a valid question lifetime and date." };
   }
 
+  const fetchExistingQuestion = async () => {
+    let res = await db
+      .from("questions")
+      .select("id, subject_id, image_url, image_url_te, correct_answer, question_text, question_text_te")
+      .eq("id", questionId)
+      .maybeSingle();
+    if (res.error && (res.error.message?.includes("image_url_te") || res.error.code === "42703")) {
+      const fallback = await db
+        .from("questions")
+        .select("id, subject_id, image_url, correct_answer, question_text, question_text_te")
+        .eq("id", questionId)
+        .maybeSingle();
+      res = {
+        ...fallback,
+        data: fallback.data ? { ...fallback.data, image_url_te: null } : null,
+      };
+    }
+    return res;
+  };
+
   const [{ data: subject }, { data: existingQuestion }, { data: mockTest }] = await Promise.all([
     db
       .from("subjects")
       .select("id, paper_id, content_language_mode")
       .eq("id", subjectId)
       .maybeSingle(),
-    db.from("questions").select("id, subject_id, image_url, image_url_te, correct_answer, question_text, question_text_te").eq("id", questionId).maybeSingle(),
+    fetchExistingQuestion(),
     mockTestId ? db.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, replaces_mock_test_id, superseded_by_mock_test_id").eq("id", mockTestId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (!subject || !existingQuestion) {
@@ -344,7 +364,13 @@ export async function updateQuestion(
   if (mockTestId && !hasAttempts) {
     const { count: otherAssignmentCount } = await db.from("mock_test_questions").select("id", { count: "exact", head: true }).eq("question_id", questionId).neq("mock_test_id", mockTestId);
     if ((otherAssignmentCount ?? 0) > 0) {
-      const { data: copiedQuestion, error: copyError } = await db.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
+      let { data: copiedQuestion, error: copyError } = await db.from("questions").insert({ ...nextQuestion, question_type: "mcq", import_key: null }).select("id").single();
+      if (copyError && (copyError.message?.includes("image_url_te") || (copyError as { code?: string }).code === "42703")) {
+        const { image_url_te: _unused, ...payloadWithoutTe } = nextQuestion;
+        const retry = await db.from("questions").insert({ ...payloadWithoutTe, question_type: "mcq", import_key: null }).select("id").single();
+        copiedQuestion = retry.data;
+        copyError = retry.error;
+      }
       if (copyError || !copiedQuestion) {
         await removeQuestionImage(db, uploadedImage.path);
         await removeQuestionImage(db, uploadedImageTe.path);
@@ -362,7 +388,12 @@ export async function updateQuestion(
     }
   }
   if (!copiedForThisMock) {
-    const { error } = await db.from("questions").update(nextQuestion).eq("id", questionId);
+    let { error } = await db.from("questions").update(nextQuestion).eq("id", questionId);
+    if (error && (error.message?.includes("image_url_te") || (error as { code?: string }).code === "42703")) {
+      const { image_url_te: _unused, ...payloadWithoutTe } = nextQuestion;
+      const retry = await db.from("questions").update(payloadWithoutTe).eq("id", questionId);
+      error = retry.error;
+    }
     updateError = error;
   }
 

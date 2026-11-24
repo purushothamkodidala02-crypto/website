@@ -65,6 +65,10 @@ export async function saveGrowthSettings(
   const secondaryButtonText = String(formData.get("secondaryButtonText") ?? "").trim();
   const upiId = String(formData.get("upiId") ?? "").trim();
   const upiName = String(formData.get("upiName") ?? "").trim();
+  const validityRewardEnabled = formData.get("validityRewardEnabled") === "true";
+  const validityDaysGranted = Math.max(1, parseInt(String(formData.get("validityDaysGranted") || "30"), 10));
+  const validityMinContribution = Math.max(1, parseInt(String(formData.get("validityMinContribution") || "99"), 10));
+  const validityMessage = String(formData.get("validityMessage") ?? "").trim();
 
   const amountsRaw = String(formData.get("suggestedAmounts") ?? "")
     .split(",")
@@ -89,6 +93,10 @@ export async function saveGrowthSettings(
     suggestedAmounts,
     upiId: upiId || "",
     upiName: upiName || "Varadhi Prep",
+    validityRewardEnabled,
+    validityDaysGranted,
+    validityMinContribution,
+    validityMessage,
   };
 
   try {
@@ -132,6 +140,11 @@ export async function saveGrowthSettings(
       message: err instanceof Error ? err.message : "Failed to save settings.",
     };
   }
+}
+
+export async function getAdminGrowthSettings(): Promise<GrowthPopupSettings> {
+  const { getGrowthSettings } = await import("@/lib/growth-settings");
+  return getGrowthSettings();
 }
 
 export type GrowthInteractionRecord = {

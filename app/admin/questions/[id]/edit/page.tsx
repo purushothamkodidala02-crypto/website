@@ -24,15 +24,33 @@ export default async function EditQuestionPage({
   const supabase = await createClient();
   const db = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
 
-  const [questionResult, sessionResult, assignmentsResult, taxonomy] =
-    await Promise.all([
-      db
+  const fetchQuestion = async () => {
+    let res = await db
+      .from("questions")
+      .select(
+        "id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, image_url_te, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at",
+      )
+      .eq("id", id)
+      .maybeSingle();
+    if (res.error && (res.error.message?.includes("image_url_te") || res.error.code === "42703")) {
+      const fallback = await db
         .from("questions")
         .select(
-          "id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, image_url_te, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at",
+          "id, subject_id, question_text, question_type, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, difficulty, image_url, source_reference, is_active, content_lifecycle, review_on, expires_on, created_at, updated_at",
         )
         .eq("id", id)
-        .maybeSingle(),
+        .maybeSingle();
+      res = {
+        ...fallback,
+        data: fallback.data ? { ...fallback.data, image_url_te: null } : null,
+      };
+    }
+    return res;
+  };
+
+  const [questionResult, sessionResult, assignmentsResult, taxonomy] =
+    await Promise.all([
+      fetchQuestion(),
       db
         .from("test_attempt_session_questions")
         .select("session_id", { count: "exact", head: true })

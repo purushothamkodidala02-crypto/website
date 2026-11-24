@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { GrowthPopupSettings } from "@/lib/growth-settings";
 import type { GrowthInteractionRecord } from "./actions";
 import { GrowthSettingsForm } from "./GrowthSettingsForm";
@@ -54,6 +55,13 @@ export function AdminGrowthWorkspace({ initialSettings, interactions }: Props) {
             {interactions.length}
           </span>
         </button>
+
+        <Link
+          href="/admin/surveys"
+          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 ml-auto"
+        >
+          <span>📋 Survey Forms &amp; Targeting Rules &rarr;</span>
+        </Link>
       </div>
 
       {/* Tab 1: Pop-up Controls */}

@@ -56,10 +56,18 @@ export default async function MockTestStudentPreviewPage({
     const chunkSize = 40;
     for (let i = 0; i < questionIds.length; i += chunkSize) {
       const chunk = questionIds.slice(i, i + chunkSize);
-      const { data: qRows, error: qErr } = await db
+      let { data: qRows, error: qErr } = await db
         .from("questions")
         .select("id, subject_id, question_text, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url, image_url_te")
         .in("id", chunk);
+      if (qErr && (qErr.message?.includes("image_url_te") || qErr.code === "42703")) {
+        const fallback = await db
+          .from("questions")
+          .select("id, subject_id, question_text, option_a, option_b, option_c, option_d, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url")
+          .in("id", chunk);
+        qRows = fallback.data ? (fallback.data as any[]).map((r) => ({ ...r, image_url_te: null })) : null;
+        qErr = fallback.error;
+      }
       if (qErr) {
         console.warn("Could not load questions batch for preview:", qErr.message);
       }

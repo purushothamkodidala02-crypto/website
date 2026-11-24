@@ -20,6 +20,11 @@ export type GrowthPopupSettings = {
   suggestedAmounts: number[];
   upiId: string;
   upiName: string;
+  // Contribution to Validity linkage
+  validityRewardEnabled?: boolean;
+  validityDaysGranted?: number; // e.g. 30 days added to mock series
+  validityMinContribution?: number; // e.g. ₹99
+  validityMessage?: string;
 };
 
 export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
@@ -42,6 +47,10 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
   suggestedAmounts: [49, 99, 199, 499],
   upiId: "",
   upiName: "",
+  validityRewardEnabled: true,
+  validityDaysGranted: 30,
+  validityMinContribution: 99,
+  validityMessage: "Contribute ₹99 or more to receive +30 days bonus validity extension on all active mock tests.",
 };
 
 export const getGrowthSettings = unstable_cache(

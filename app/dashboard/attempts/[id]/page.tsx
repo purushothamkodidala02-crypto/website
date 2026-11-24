@@ -145,12 +145,24 @@ export default async function AttemptReviewPage({
 
   // Fallback 2: If rows still empty, attempt to fetch from mock_test_questions & questions
   if (rows.length === 0) {
-    const [mockQuestionsResult, responsesResult] = await Promise.all([
-      admin
+    const fetchMockQuestions = async () => {
+      let res = await admin
         .from("mock_test_questions")
         .select("question_order, question_id, questions(question_text, option_a, option_b, option_c, option_d, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url, image_url_te)")
         .eq("mock_test_id", attempt.mock_test_id)
-        .order("question_order"),
+        .order("question_order");
+      if (res.error && (res.error.message?.includes("image_url_te") || res.error.code === "42703")) {
+        res = await admin
+          .from("mock_test_questions")
+          .select("question_order, question_id, questions(question_text, option_a, option_b, option_c, option_d, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, correct_answer, explanation, explanation_te, image_url)")
+          .eq("mock_test_id", attempt.mock_test_id)
+          .order("question_order");
+      }
+      return res;
+    };
+
+    const [mockQuestionsResult, responsesResult] = await Promise.all([
+      fetchMockQuestions(),
       admin
         .from("attempt_responses")
         .select("question_id, selected_answer, is_correct, marks_awarded")

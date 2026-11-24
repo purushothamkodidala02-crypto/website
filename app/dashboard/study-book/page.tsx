@@ -219,10 +219,18 @@ async function fetchQuestionsMetadata(
   const remainingIds = questionIds.filter((id) => !result.has(id));
   if (remainingIds.length > 0) {
     try {
-      const { data: sessionData } = await supabase
+      let { data: sessionData, error: sessionErr } = await supabase
         .from("test_attempt_session_questions")
         .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, image_url_te, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, explanation_te")
         .in("question_id", remainingIds);
+
+      if (sessionErr && (sessionErr.message?.includes("image_url_te") || sessionErr.code === "42703")) {
+        const fallback = await supabase
+          .from("test_attempt_session_questions")
+          .select("question_id, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url, content_language_mode, question_text_te, option_a_te, option_b_te, option_c_te, option_d_te, explanation_te")
+          .in("question_id", remainingIds);
+        sessionData = fallback.data as any;
+      }
 
       for (const item of (sessionData ?? []) as unknown as SessionQuestionRow[]) {
         if (!result.has(item.question_id)) {

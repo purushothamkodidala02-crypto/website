@@ -52,6 +52,19 @@ export function GrowthSettingsForm({
   );
   const [upiId, setUpiId] = useState(initialSettings.upiId || "");
   const [upiName, setUpiName] = useState(initialSettings.upiName || "");
+  const [validityRewardEnabled, setValidityRewardEnabled] = useState(
+    initialSettings.validityRewardEnabled ?? true,
+  );
+  const [validityDaysGranted, setValidityDaysGranted] = useState(
+    initialSettings.validityDaysGranted ?? 30,
+  );
+  const [validityMinContribution, setValidityMinContribution] = useState(
+    initialSettings.validityMinContribution ?? 99,
+  );
+  const [validityMessage, setValidityMessage] = useState(
+    initialSettings.validityMessage ??
+      "Contribute ₹99 or more to receive +30 days bonus validity extension on all active mock tests.",
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -449,6 +462,85 @@ export function GrowthSettingsForm({
           </div>
         </section>
 
+        {/* Contribution to Validity Extension */}
+        <section className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base">⏳</span>
+                <h2 className="text-base font-bold text-slate-950">
+                  Contribution to Validity Extension
+                </h2>
+              </div>
+              <p className="mt-0.5 text-xs text-slate-600">
+                Grant mock test validity bonus to candidates when they make a voluntary contribution.
+              </p>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                name="validityRewardEnabled"
+                value="true"
+                checked={validityRewardEnabled}
+                onChange={(e) => setValidityRewardEnabled(e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="peer h-7 w-12 rounded-full bg-slate-300 transition-colors after:absolute after:top-1 after:left-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-[#0055a2] peer-checked:after:translate-x-5" />
+            </label>
+          </div>
+
+          {validityRewardEnabled && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+              <div>
+                <label className="block text-xs font-bold text-slate-700">
+                  Validity Days Granted
+                </label>
+                <input
+                  type="number"
+                  name="validityDaysGranted"
+                  min="1"
+                  value={validityDaysGranted}
+                  onChange={(e) => setValidityDaysGranted(Number(e.target.value))}
+                  className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
+                />
+                <span className="mt-1 block text-[11px] text-slate-500">
+                  e.g. 30 days added to candidate&apos;s active series
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700">
+                  Minimum Contribution Required (₹)
+                </label>
+                <input
+                  type="number"
+                  name="validityMinContribution"
+                  min="1"
+                  value={validityMinContribution}
+                  onChange={(e) => setValidityMinContribution(Number(e.target.value))}
+                  className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
+                />
+                <span className="mt-1 block text-[11px] text-slate-500">
+                  e.g. ₹99 minimum to qualify for validity extension
+                </span>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  Perk Message Displayed to Candidates
+                </label>
+                <input
+                  type="text"
+                  name="validityMessage"
+                  value={validityMessage}
+                  onChange={(e) => setValidityMessage(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 focus:border-[#0055a2] focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* Submit Action */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
@@ -502,6 +594,16 @@ export function GrowthSettingsForm({
             <p className="text-xs text-slate-600 leading-relaxed">
               All mock tests are free and ad-free. If this platform helps your preparation, consider a small voluntary contribution to keep it running for everyone.
             </p>
+
+            {validityRewardEnabled && (
+              <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-2.5 text-[11px] text-blue-900 flex items-center gap-2">
+                <span className="text-sm">⏳</span>
+                <span>
+                  <strong className="font-bold">Supporter Perk:</strong> Contribute ₹{validityMinContribution}+ to receive{" "}
+                  <strong className="font-extrabold text-[#0055a2]">+{validityDaysGranted} days bonus validity</strong> on active mock series!
+                </span>
+              </div>
+            )}
 
             <div className="pt-1">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">

@@ -65,11 +65,22 @@ export async function syncQuestionToAttemptSessions(
     }
 
     // 1. Update session snapshots so attempt reviews display the new image / text / explanation
-    const { data: updatedSessions, error: updateError } = await admin
+    let { data: updatedSessions, error: updateError } = await admin
       .from("test_attempt_session_questions")
       .update(sessionQuestionUpdates)
       .eq("question_id", questionId)
       .select("session_id");
+
+    if (updateError && (updateError.message?.includes("image_url_te") || (updateError as { code?: string }).code === "42703")) {
+      delete sessionQuestionUpdates.image_url_te;
+      const retry = await admin
+        .from("test_attempt_session_questions")
+        .update(sessionQuestionUpdates)
+        .eq("question_id", questionId)
+        .select("session_id");
+      updatedSessions = retry.data;
+      updateError = retry.error;
+    }
 
     if (updateError) {
       console.warn("Could not sync question to attempt sessions:", updateError.message);

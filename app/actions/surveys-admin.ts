@@ -765,3 +765,76 @@ export async function getAdminSurveyResponses(surveyId: string): Promise<AdminSu
     return [];
   }
 }
+
+export type AdminAggregatedResponse = AdminSurveyResponse & {
+  survey_id: string;
+  survey_title?: string;
+};
+
+export async function getAllAdminSurveyResponses(): Promise<AdminAggregatedResponse[]> {
+  try {
+    const dbClient = await getSupabaseServerClient();
+    const [{ data: responses, error: rError }, { data: surveys }] = await Promise.all([
+      dbClient
+        .from("dynamic_survey_responses")
+        .select(`
+          id,
+          survey_id,
+          submitted_at,
+          user_id,
+          answers:dynamic_survey_answers(question_id, answer_text)
+        `)
+        .order("submitted_at", { ascending: false })
+        .limit(250),
+      dbClient.from("dynamic_surveys").select("id, title"),
+    ]);
+
+    if (rError || !responses) return [];
+
+    const surveyMap: Record<string, string> = {};
+    (surveys || []).forEach((s: { id: string; title: string }) => {
+      surveyMap[s.id] = s.title;
+    });
+
+    const userIds = Array.from(new Set(responses.map((r: any) => r.user_id).filter(Boolean)));
+    const profilesMap: Record<string, { full_name?: string; mobile?: string; email?: string }> = {};
+
+    if (userIds.length > 0) {
+      try {
+        const { data: profiles } = await dbClient
+          .from("profiles")
+          .select("id, full_name, mobile, email")
+          .in("id", userIds);
+        (profiles || []).forEach((p: any) => {
+          profilesMap[p.id] = p;
+        });
+      } catch {}
+    }
+
+    return responses.map((r: any) => {
+      const profile = r.user_id ? profilesMap[r.user_id] : null;
+      let contactFromAnswer: string | null = null;
+      (r.answers || []).forEach((ans: any) => {
+        if (ans.answer_text && ans.answer_text.startsWith("Respondent Contact:")) {
+          contactFromAnswer = ans.answer_text.replace("Respondent Contact:", "").trim();
+        }
+      });
+
+      return {
+        id: r.id,
+        survey_id: r.survey_id,
+        survey_title: surveyMap[r.survey_id] || "Survey Form",
+        submitted_at: r.submitted_at,
+        user_id: r.user_id,
+        respondentName: profile?.full_name || (r.user_id ? "Registered Student" : "Guest Student"),
+        respondentPhone: profile?.mobile || contactFromAnswer,
+        respondentContact: contactFromAnswer,
+        respondentEmail: profile?.email || null,
+        answers: r.answers || [],
+      };
+    });
+  } catch (err) {
+    console.error("Error in getAllAdminSurveyResponses:", err);
+    return [];
+  }
+}
