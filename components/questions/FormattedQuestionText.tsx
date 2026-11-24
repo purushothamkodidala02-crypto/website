@@ -129,7 +129,9 @@ function splitInlineLists(text: string): string {
   // Fix OCR split 4-digit years (e.g. 200 9 -> 2009) and split words (e.g. Prades h -> Pradesh)
   text = text
     .replace(/\b(18\d|19\d|20\d)\s+(\d)(?=\.|\b)/g, "$1$2")
-    .replace(/\b(Prades)\s+(h)\b/gi, "$1$2");
+    .replace(/\b(Prades)\s+(h)\b/gi, "$1$2")
+    // Fix missing space after period before sentence starting with capital letter (e.g. "thesides.A sits" -> "thesides. A sits")
+    .replace(/(?<=[a-z0-9])\.([A-Z]\s)/g, ". $1");
 
   const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-zA-Z]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|(?<![\d౦-౯]\s*:[ \t]*)\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
@@ -173,6 +175,8 @@ function questionLines(rawText: string) {
     .replace(/\*\*/g, "")
     .replace(/\b(18\d|19\d|20\d)\s+(\d)(?=\.|\b)/g, "$1$2")
     .replace(/\b(Prades)\s+(h)\b/gi, "$1$2")
+    // Fix missing space after period before sentence starting with capital letter (e.g. "thesides.A sits" -> "thesides. A sits")
+    .replace(/(?<=[a-z0-9])\.([A-Z]\s)/g, ". $1")
     // Repair split roman numerals (e.g. "i i." -> "ii.", "i i i." -> "iii.")
     .replace(/\b([ivxIVX])\s+([ivxIVX])\s+([ivxIVX])\.\s+/g, "$1$2$3. ")
     .replace(/\b([ivxIVX])\s+([ivxIVX])\.\s+/g, "$1$2. ")
@@ -326,8 +330,9 @@ function questionLines(rawText: string) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else if (
         previous &&
-        /\b(?:and|or|in|with|of|for|to|the|a|an|from|by|at|is|was|are|were|మరియు|యొక్క|లో|తో|నుండి|ద్వారా)\s*$/i.test(previous) &&
-        !/^(?:\((?:[a-zA-Z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])/i.test(line)
+        /\b(?:right of|left of|next to|opposite to|neighbor of|facing|beside|between|and|or|in|with|of|for|to|the|a|an|from|by|at|is|was|are|were|మరియు|యొక్క|లో|తో|నుండి|ద్వారా)\s*$/i.test(previous) &&
+        (!/^(?:\((?:[a-zA-Z\d]|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|[a-zA-Z]|I{1,4}|V|VI|i|ii|iii|iv|v|vi|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])/i.test(line) ||
+          /^[A-Za-z]\.\s+/.test(line))
       ) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else {
@@ -898,6 +903,22 @@ export function FormattedQuestionText({
           } else {
             break;
           }
+        }
+
+        if (
+          group.length === 1 &&
+          !/^\(/.test(group[0].marker) &&
+          !/^[\d౦-౯]/.test(group[0].marker)
+        ) {
+          elements.push(
+            <p
+              key={`${group[0].index}-${group[0].line}`}
+              className="leading-relaxed sm:leading-8 text-slate-950"
+            >
+              {group[0].line}
+            </p>,
+          );
+          continue;
         }
 
         elements.push(

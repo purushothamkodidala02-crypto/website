@@ -81,3 +81,17 @@ test("FormattedQuestionText.tsx protects Telugu era markers and abbreviations fr
   // Verify Telugu abbreviation guard in renderBlocks
   assert.match(formatter, /isTeluguAbbrOrEra/);
 });
+
+test("FormattedQuestionText.tsx joins accidental line breaks after prepositions and guards lone unparenthesized letter markers", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify preposition merge pattern supports single-letter person initials like 'I.' after 'right of'
+  assert.match(formatter, /right of\|left of\|next to\|opposite to\|neighbor of/);
+
+  // Verify lone unparenthesized letter/Roman numerals are guarded against bullet rendering
+  assert.match(formatter, /group\.length === 1/);
+  assert.match(formatter, /!\/\^\\\(\/\.test\(group\[0\]\.marker\)/);
+
+  // Verify glued period sentence start separation (e.g. thesides.A sits -> thesides. A sits)
+  assert.match(formatter, /\(\?<=\[a-z0-9\]\)\\\.\(\[A-Z\]\\s\)/);
+});
