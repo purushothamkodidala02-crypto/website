@@ -216,12 +216,12 @@ function questionLines(rawText: string) {
       /(?<=(?:[A-Za-z0-9\u0c00-\u0c7f'"\)]|\b(?:Ltd|Co|Govt|Inc|Corp|Anr|Ors)\.))[ \t]*\r?\n[ \t]*(?=(?:v|vs)\.[ \t]+[A-Za-z0-9\u0c00-\u0c7f'"])/gi,
       " ",
     )
-    // Join accidental linebreaks inside initials (e.g. "K.\nV." -> "K. V.", "B.\nR." -> "B. R.")
-    .replace(/(?<=\b[A-Za-z]\.)[ \t]*\r?\n[ \t]*(?=[A-Za-z]\.[ \t]+)/g, " ")
-    // Join accidental linebreaks between initial and capitalized name (e.g. "K.\nViswanathan" -> "K. Viswanathan")
-    .replace(/(?<=\b[A-Za-z]\.)[ \t]*\r?\n[ \t]*(?=[A-Za-z][a-z]+)/g, " ")
-    // Join accidental linebreaks after titles (e.g. "Justice\nK." -> "Justice K.")
-    .replace(/(?<=\b(?:Justice|Chief Justice|Judge|Dr|Mr|Mrs|Prof|Shri|Smt|Sir|Lord)\b(?:\s+[A-Za-z]\.)*)[ \t]*\r?\n[ \t]*(?=[A-Za-z])/gi, " ")
+    // Join accidental linebreaks inside initials (e.g. "K.\nV." -> "K. V.", "కె.\nవి." -> "కె. వి.", "B.\nR." -> "B. R.")
+    .replace(/(?<=(?:\b[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))\.)[ \t]*\r?\n[ \t]*(?=(?:[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))\.[ \t]+)/g, " ")
+    // Join accidental linebreaks between initial and capitalized name (e.g. "K.\nViswanathan" -> "K. Viswanathan", "వి.\nవిశ్వనాథన్" -> "వి. విశ్వనాథన్")
+    .replace(/(?<=(?:\b[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))\.)[ \t]*\r?\n[ \t]*(?=[A-Za-z\u0C00-\u0C7F]{2,})/g, " ")
+    // Join accidental linebreaks after titles (e.g. "Justice\nK." -> "Justice K.", "జస్టిస్\nకె." -> "జస్టిస్ కె.")
+    .replace(/(?<=(?:\b(?:Justice|Chief Justice|Judge|Dr|Mr|Mrs|Prof|Shri|Smt|Sir|Lord)\b|(?:జస్టిస్|న్యాయమూర్తి|ప్రధాన\s*న్యాయమూర్తి|డాక్టర్|డా|ప్రొఫెసర్|ప్రొ|శ్రీ|శ్రీమతి))(?:\s+(?:[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))\.)*)[ \t]*\r?\n[ \t]*(?=[A-Za-z\u0C00-\u0C7F])/gi, " ")
     // Protect person initials (e.g. "Justice K. V. Viswanathan", "C. V. Raman", "P. V. Narasimha Rao")
     // so that single-letter initials like "K." or "V." are not mistaken for sentence ends or Roman numeral list markers.
     .replace(
@@ -235,6 +235,20 @@ function questionLines(rawText: string) {
     .replace(
       /(?<=\b(?:Justice|Chief Justice|Judge|Dr|Mr|Mrs|Prof|Shri|Smt|Sir|Lord)\s+(?:[A-Za-z]\.(?:__INIT_[A-Za-z0-9_]+__)?|[A-Za-z]\.|__INIT_[A-Za-z0-9_]+__)[ \t]+)([A-Z])\.(?=[ \t]+[A-Z][a-z]+)/gi,
       "__INIT_TITLE_$1__",
+    )
+    // Protect Telugu person initials (e.g. "జస్టిస్ కె. వి. విశ్వనాథన్", "పి. వి. నరసింహారావు", "సి. వి. రామన్")
+    // so that single-syllable Telugu initials like "కె." or "వి." are not mistaken for sentence ends or list markers.
+    .replace(
+      /(?<=^|[^\u0C00-\u0C7F])([ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)\.([ \t]+)([ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)\.(?=[ \t]+[\u0C00-\u0C7F])/g,
+      "__TEL_INIT_1_$1__$2__TEL_INIT_2_$3__",
+    )
+    .replace(
+      /(?<=(?:జస్టిస్|న్యాయమూర్తి|ప్రధాన\s*న్యాయమూర్తి|డాక్టర్|డా|ప్రొఫెసర్|ప్రొ|శ్రీ|శ్రీమతి)[ \t]+)([ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)\.(?=[ \t]+[\u0C00-\u0C7F])/g,
+      "__TEL_INIT_TITLE_$1__",
+    )
+    .replace(
+      /(?<=(?:జస్టిస్|న్యాయమూర్తి|ప్రధాన\s*న్యాయమూర్తి|డాక్టర్|డా|ప్రొఫెసర్|ప్రొ|శ్రీ|శ్రీమతి)[ \t]+(?:__TEL_INIT_[^\s]+__|([ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)\.)[ \t]+)([ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)\.(?=[ \t]+[\u0C00-\u0C7F]{2,})/g,
+      "__TEL_INIT_TITLE_$1__",
     )
     // Join accidental linebreaks inside Latin abbreviations (e.g. "E.\ng." -> "E.g.", "i.\ne." -> "i.e.")
     .replace(/(?<=\b[EeIi]\.)[ \t]*\r?\n[ \t]*(?=[GgEe]\.[ \t]+)/g, "")
@@ -353,7 +367,7 @@ function questionLines(rawText: string) {
       "\n",
     )
     .replace(
-      /(?<!(?:\b[A-Za-z]|\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc)|(?:రూ|క్రీ|శా|హి|వి|పూ|శ|డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు))\s*)([.?]|(?<![\d౦-౯]\s*):)\s*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:(?:\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])))\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
+      /(?<!(?:\b[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)|\b(?:Rs|Re|No|Nos|Fig|Vol|Sec|Art|approx|Dr|Mr|Mrs|Prof|vs|v|e\.g|i\.e|etc)|(?:రూ|క్రీ|శా|హి|వి|పూ|శ|డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు))\s*)([.?]|(?<![\d౦-౯]\s*):)\s*(?=(?:Assertion(?:\s*\([A-Za-z\d]+\))?|(?:నిశ్చితార్థం|నిశ్చితార్థము|నిశ్చితం|నిశ్చయ\s*వాక్యం|వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన)(?:\s*\([A-Za-z\d]+\))?|Reason(?:\s*\([A-Za-z\d]+\))?|(?:కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ)(?:\s*\([A-Za-z\d]+\))?|(?:\((?:[a-hA-H]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:(?:\b[1-9]|\b[౧-౯]|\b[a-hA-H]|I{1,4}|VI{0,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])))\s+[A-Za-z0-9\u0c00-\u0c7f"'])/gi,
       "$1\n",
     )
     .replace(/([^\s—–-])\s*[—–-]\s*(?=(?:[A-Ha-h]|I{1,4}|V|VI|\d{1,2}|ఎ|బి|సి|డి)\.\s)/g, "$1 — ")
@@ -377,8 +391,8 @@ function questionLines(rawText: string) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else if (
         previous &&
-        /\b(?:Justice|Chief Justice|Judge|Dr|Mr|Mrs|Prof|Shri|Smt|Sir|Lord|[A-Za-z]\.)\s*$/i.test(previous) &&
-        /^[A-Za-z]\.\s+[A-Za-z]/.test(line)
+        /\b(?:Justice|Chief Justice|Judge|Dr|Mr|Mrs|Prof|Shri|Smt|Sir|Lord|జస్టిస్|న్యాయమూర్తి|ప్రధాన\s*న్యాయమూర్తి|డాక్టర్|డా|ప్రొఫెసర్|ప్రొ|శ్రీ|శ్రీమతి|[A-Za-z]\.|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్)\.)\s*$/i.test(previous) &&
+        /^(?:[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))\.\s+[A-Za-z\u0C00-\u0C7F]/.test(line)
       ) {
         merged[merged.length - 1] = `${previous} ${line}`;
       } else if (
@@ -405,6 +419,9 @@ function questionLines(rawText: string) {
         .replace(/__INIT_1_([A-Za-z])__/g, "$1.")
         .replace(/__INIT_2_([A-Za-z])__/g, "$1.")
         .replace(/__INIT_TITLE_([A-Za-z])__/g, "$1.")
+        .replace(/__TEL_INIT_1_([^_]+)__/g, "$1.")
+        .replace(/__TEL_INIT_2_([^_]+)__/g, "$1.")
+        .replace(/__TEL_INIT_TITLE_([^_]+)__/g, "$1.")
     );
 }
 
@@ -935,8 +952,8 @@ export function FormattedQuestionText({
         );
       const isPersonInitial =
         numbered &&
-        /^[A-Za-z][.)]$/.test(numbered[1]) &&
-        /^[A-Z][a-z]+(?:\s|[?.!,]|$)/.test(numbered[2]);
+        /^(?:[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))[.)]$/.test(numbered[1]) &&
+        /^[A-Za-z\u0c00-\u0c7f]+(?:\s|[?.!,]|$)/.test(numbered[2]);
 
       if (numbered && !isCaseCitation && !isTeluguAbbrOrEra && !isPersonInitial) {
         const group: Array<{ index: number; line: string; marker: string; content: string }> = [];
@@ -956,8 +973,8 @@ export function FormattedQuestionText({
             );
           const currIsPersonInitial =
             currMatch &&
-            /^[A-Za-z][.)]$/.test(currMatch[1]) &&
-            /^[A-Z][a-z]+(?:\s|[?.!,]|$)/.test(currMatch[2]);
+            /^(?:[A-Za-z]|(?:[ఎ-హ]|[\u0C05-\u0C39][\u0C3E-\u0C4D]?|ఎఫ్|హెచ్|జెడ్|ఆర్|ఎస్|ఎల్|ఎం|ఎన్|క్యూ|డబ్ల్యూ|ఎక్స్))[.)]$/.test(currMatch[1]) &&
+            /^[A-Za-z\u0c00-\u0c7f]+(?:\s|[?.!,]|$)/.test(currMatch[2]);
           if (currMatch && !currIsCase && !currIsTeluguAbbrOrEra && !currIsPersonInitial) {
             group.push({
               index: i,
