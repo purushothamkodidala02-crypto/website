@@ -62,6 +62,7 @@ export function EditQuestionForm({
   const formRef = useRef<HTMLFormElement | null>(null);
   const activePaletteItemRef = useRef<HTMLAnchorElement | null>(null);
   const paletteContainerRef = useRef<HTMLDivElement | null>(null);
+  const isSubmittingRef = useRef(false);
 
   const updateQuestionAction = useMemo(
     () => updateQuestion.bind(null, question.id),
@@ -70,9 +71,15 @@ export function EditQuestionForm({
 
   const safeAction = useCallback(
     async (previousState: UpdateQuestionState, formData: FormData) => {
+      isSubmittingRef.current = true;
       try {
-        return await updateQuestionAction(previousState, formData);
+        const result = await updateQuestionAction(previousState, formData);
+        if (!result.success) {
+          isSubmittingRef.current = false;
+        }
+        return result;
       } catch (err) {
+        isSubmittingRef.current = false;
         console.error("Question save network/server error caught:", err);
         return {
           success: false,
@@ -143,7 +150,7 @@ export function EditQuestionForm({
   // Handle navigation with unsaved changes check
   const confirmNavigation = useCallback(
     (targetHref: string) => {
-      if (hasUnsavedChanges) {
+      if (hasUnsavedChanges && !isSubmittingRef.current && !pending) {
         const discard = window.confirm(
           `You have unsaved changes on Question ${navigation ? navigation.currentQuestionNumber : ""}. Discard changes and leave this question?`,
         );
@@ -152,20 +159,26 @@ export function EditQuestionForm({
       router.push(targetHref);
       return true;
     },
-    [hasUnsavedChanges, navigation, router],
+    [hasUnsavedChanges, navigation, pending, router],
   );
 
-  // Prevent accidental tab close or page reload when dirty
+  // Prevent accidental tab close or page reload when dirty,
+  // but NEVER intercept when saving is in progress or form is submitting.
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isSubmittingRef.current || pending) {
+        return;
+      }
       if (hasUnsavedChanges) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    if (hasUnsavedChanges && !pending) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, pending]);
 
   // Handle save success navigation
   useEffect(() => {
@@ -186,9 +199,13 @@ export function EditQuestionForm({
         router.push(navigation.nextHref);
       } else if (submitIntent === "save_and_return" && navigation?.backHref) {
         router.push(navigation.backHref);
+      } else {
+        isSubmittingRef.current = false;
       }
+    } else if (state.message) {
+      isSubmittingRef.current = false;
     }
-  }, [state.success, state.newQuestionId, state.imageUrl, mockTestId, submitIntent, navigation, router]);
+  }, [state.success, state.message, state.newQuestionId, state.imageUrl, mockTestId, submitIntent, navigation, router]);
 
   // Keyboard navigation and shortcuts:
   // - Right / Left arrow keys: Navigate to Next / Prev question (when not editing text)
@@ -199,12 +216,14 @@ export function EditQuestionForm({
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
+        isSubmittingRef.current = true;
         setSubmitIntent("save");
         formRef.current?.requestSubmit();
         return;
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
+        isSubmittingRef.current = true;
         setSubmitIntent("save");
         formRef.current?.requestSubmit();
         return;
@@ -442,8 +461,15 @@ export function EditQuestionForm({
               ref={formRef}
               action={action}
               encType="multipart/form-data"
-              onChange={() => setIsDirty(true)}
-              onInput={() => setIsDirty(true)}
+              onSubmit={() => {
+                isSubmittingRef.current = true;
+              }}
+              onChange={() => {
+                if (!pending) setIsDirty(true);
+              }}
+              onInput={() => {
+                if (!pending) setIsDirty(true);
+              }}
               className="space-y-6"
             >
               <input type="hidden" name="mock_test_id" value={mockTestId ?? ""} />
@@ -570,7 +596,10 @@ export function EditQuestionForm({
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <button
             type="submit"
-            onClick={() => setSubmitIntent("save")}
+            onClick={() => {
+              isSubmittingRef.current = true;
+              setSubmitIntent("save");
+            }}
             disabled={pending}
             aria-busy={pending && submitIntent === "save"}
             className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:opacity-50 transition"
@@ -582,7 +611,10 @@ export function EditQuestionForm({
           {navigation?.nextHref && (
             <button
               type="submit"
-              onClick={() => setSubmitIntent("save_and_next")}
+              onClick={() => {
+                isSubmittingRef.current = true;
+                setSubmitIntent("save_and_next");
+              }}
               disabled={pending}
               aria-busy={pending && submitIntent === "save_and_next"}
               className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-xs hover:bg-slate-50 disabled:opacity-50 transition"
@@ -595,7 +627,10 @@ export function EditQuestionForm({
           {navigation?.backHref && (
             <button
               type="submit"
-              onClick={() => setSubmitIntent("save_and_return")}
+              onClick={() => {
+                isSubmittingRef.current = true;
+                setSubmitIntent("save_and_return");
+              }}
               disabled={pending}
               aria-busy={pending && submitIntent === "save_and_return"}
               className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-50 transition"

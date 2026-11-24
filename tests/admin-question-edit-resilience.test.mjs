@@ -5,11 +5,12 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("admin question editing and taxonomy loading are resilient against missing service role key and unexpected errors", async () => {
-  const [taxonomy, syncAttempt, editActions, adminError] = await Promise.all([
+  const [taxonomy, syncAttempt, editActions, adminError, editForm] = await Promise.all([
     read("lib/admin/taxonomy.ts"),
     read("lib/questions/sync-attempt-sessions.ts"),
     read("app/admin/questions/[id]/edit/actions.ts"),
     read("app/admin/error.tsx"),
+    read("app/admin/questions/[id]/edit/EditQuestionForm.tsx"),
   ]);
 
   // 1. Taxonomy uses public client fallback and never crashes if service role key is absent
@@ -31,4 +32,9 @@ test("admin question editing and taxonomy loading are resilient against missing 
   assert.match(adminError, /RetryButton/);
   assert.match(adminError, /\/admin\/mock-tests/);
   assert.match(adminError, /\/admin\/questions/);
+
+  // 5. EditQuestionForm suppresses beforeunload and discard dialog when saving is initiated
+  assert.match(editForm, /isSubmittingRef/);
+  assert.match(editForm, /if\s*\(\s*isSubmittingRef\.current\s*\|\|\s*pending\s*\)\s*\{\s*return;\s*\}/);
+  assert.match(editForm, /onSubmit=\{/);
 });
