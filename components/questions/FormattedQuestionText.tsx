@@ -216,11 +216,28 @@ function questionLines(rawText: string) {
       /(?<=(?:[A-Za-z0-9\u0c00-\u0c7f'"\)]|\b(?:Ltd|Co|Govt|Inc|Corp|Anr|Ors)\.))[ \t]*\r?\n[ \t]*(?=(?:v|vs)\.[ \t]+[A-Za-z0-9\u0c00-\u0c7f'"])/gi,
       " ",
     )
+    // Join accidental linebreaks inside Latin abbreviations (e.g. "E.\ng." -> "E.g.", "i.\ne." -> "i.e.")
+    .replace(/(?<=\b[EeIi]\.)[ \t]*\r?\n[ \t]*(?=[GgEe]\.[ \t]+)/g, "")
+    // Protect Latin abbreviations like "e.g.", "E.g.", "i.e.", "I.e."
+    // so that "E." is not split before "g." as a lettered list item.
+    .replace(
+      /\b(e|i)\.([ \t]*)(g|e)\./gi,
+      "__LATIN_ABBR_1_$1__$2__LATIN_ABBR_2_$3__",
+    )
+    .replace(
+      /\b(e|i)\.([ \t]*)(g|e)(?=[ \t\d౦-౯)\]]|$)/gi,
+      "__LATIN_ABBR_1_$1__$2$3",
+    )
     // Protect legal case citations (e.g. "Suraj Bhan v. Financial Commissioner" or "A vs. B")
     // so that 'v.' or 'vs.' is not mistaken for Roman numeral 'v.' (5) or split onto a new line.
     .replace(
       /(?<=(?:[A-Za-z0-9\u0c00-\u0c7f'"\)]|\b(?:Ltd|Co|Govt|Inc|Corp|Anr|Ors)\.))[ \t]+(v|vs)\.[ \t]+(?=[A-Za-z0-9\u0c00-\u0c7f'"])/gi,
       " __$1_DOT__ ",
+    )
+    // Break before Note clauses (e.g. "...logic?(NOTE : Operations..." -> "...logic?\n(NOTE : Operations...")
+    .replace(
+      /(?<=[.?!;:])\s*(?=\(?(?:NOTE|Note|సూచన|గమనిక)\s*:)/gi,
+      "\n",
     )
     .replace(/[ \t]*:\s*;+[ \t]*/g, ":\n")
     .replace(/[ \t]*\.\s*;+[ \t]*/g, ".\n")
@@ -347,6 +364,8 @@ function questionLines(rawText: string) {
         .replace(/__TEL_ERA_1_(క్రీ|శా|హి|వి)__/gu, "$1.")
         .replace(/__TEL_ERA_2_(శ|పూ)__/gu, "$1.")
         .replace(/__TEL_ABBR_(డా|ప్రొ|శ్రీ|చి|కు|సం|నెం|పు|రూ)__/gu, "$1.")
+        .replace(/__LATIN_ABBR_1_(e|i)__/gi, "$1.")
+        .replace(/__LATIN_ABBR_2_(g|e)__/gi, "$1.")
     );
 }
 

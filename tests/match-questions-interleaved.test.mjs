@@ -95,3 +95,14 @@ test("FormattedQuestionText.tsx joins accidental line breaks after prepositions 
   // Verify glued period sentence start separation (e.g. thesides.A sits -> thesides. A sits)
   assert.match(formatter, /\(\?<=\[a-z0-9\]\)\\\.\(\[A-Z\]\\s\)/);
 });
+
+test("FormattedQuestionText.tsx protects E.g. and i.e. from splitting and separates NOTE clauses", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify Latin abbreviation tokens
+  assert.match(formatter, /__LATIN_ABBR_1_/);
+  assert.match(formatter, /__LATIN_ABBR_2_/);
+
+  // Verify break before NOTE clauses
+  assert.match(formatter, /NOTE\|Note\|సూచన\|గమనిక/);
+});
