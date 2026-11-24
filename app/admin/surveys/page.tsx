@@ -398,7 +398,7 @@ function AdminSurveysList() {
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-              Design dynamic feedback forms, set precise candidate targeting rules (new users, mock test count, exam, state, specific people), manage voluntary support &amp; validity extension perks, and analyze student submissions.
+              Design dynamic feedback forms, set precise candidate targeting rules (new users, mock test count, exam, state, specific people), manage voluntary community support, and analyze student submissions.
             </p>
           </div>
 
@@ -468,17 +468,17 @@ function AdminSurveysList() {
 
           <div className="rounded-xl bg-slate-50/80 p-3.5 border border-slate-200/60">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Validity Extension
+              Platform Status
             </span>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-[#0055a2]">
-                +{growthSettings.validityDaysGranted || 30}d
+              <span className="text-2xl font-black text-emerald-700">
+                100% Free
               </span>
-              <span className="text-[11px] font-bold text-amber-700 bg-amber-100/70 px-1.5 py-0.5 rounded">
-                ₹{growthSettings.validityMinContribution || 99}+
+              <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded">
+                Ad-Free
               </span>
             </div>
-            <p className="mt-0.5 text-[10px] text-slate-500">Supporter perk enabled</p>
+            <p className="mt-0.5 text-[10px] text-slate-500">Community Supported • No Paywalls</p>
           </div>
         </div>
       </div>
@@ -517,7 +517,7 @@ function AdminSurveysList() {
         >
           <span>🌱 Help Us Grow &amp; Contributions</span>
           <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-900">
-            Validity Perks
+            Voluntary UPI
           </span>
         </button>
 
@@ -925,10 +925,10 @@ function AdminSurveysList() {
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs text-emerald-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
             <div>
               <p className="font-bold text-sm text-emerald-950">
-                🌱 Voluntary Candidate Contributions &amp; Validity Bonus Setup
+                🌱 Voluntary Community Support &amp; Fundraising Setup (100% Free Platform)
               </p>
               <p className="mt-0.5 text-emerald-900 leading-relaxed">
-                Configure voluntary student financial support, official UPI account details, suggested amounts, and automatic mock series validity extension perks granted to contributing candidates.
+                Configure voluntary student financial support, official UPI account details, suggested amounts, and transparency reporting to keep Varadhi 100% free and ad-free for every aspirant.
               </p>
             </div>
             <Link
@@ -1221,7 +1221,7 @@ function AdminSurveysList() {
                     <span>{activePreviewSurvey?.settings?.sideButtonLabel || "💬 1-Min Feedback"}</span>
                     {activePreviewSurvey?.settings?.rewardType && activePreviewSurvey.settings.rewardType !== "none" && (
                       <span className="rounded-full bg-amber-400 px-1.5 py-0.2 text-[9px] font-black text-slate-950">
-                        🎁 PERK
+                        🎁 REWARD
                       </span>
                     )}
                   </button>
@@ -1254,7 +1254,7 @@ function AdminSurveysList() {
                         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-xs text-emerald-950 flex items-center gap-2">
                           <span className="text-base">🎁</span>
                           <span>
-                            <strong>Incentive:</strong> {activePreviewSurvey.settings.rewardTitle || "Validity Extension"}
+                            <strong>Incentive:</strong> {activePreviewSurvey.settings.rewardTitle || "Free Study Material PDF"}
                           </span>
                         </div>
                       )}
@@ -1337,7 +1337,7 @@ function AdminSurveysList() {
                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-xs text-emerald-950 flex items-center gap-2">
                       <span className="text-base">🎁</span>
                       <span>
-                        <strong>Incentive:</strong> {activePreviewSurvey.settings.rewardTitle || "Bonus Validity Extension"}
+                        <strong>Incentive:</strong> {activePreviewSurvey.settings.rewardTitle || "Free High-Yield Blueprint PDF"}
                       </span>
                     </div>
                   )}
@@ -1621,7 +1621,7 @@ function AdminSurveysList() {
                     <label className="block text-xs font-bold text-slate-700">Reward Display Title</label>
                     <input
                       type="text"
-                      placeholder="e.g. +30 Days Free Mock Pass Validity"
+                      placeholder="e.g. Free High-Yield Exam Blueprint PDF"
                       value={newRewardTitle}
                       onChange={(e) => setNewRewardTitle(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 focus:outline-none"

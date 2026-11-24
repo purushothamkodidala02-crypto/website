@@ -53,7 +53,7 @@ export function GrowthSettingsForm({
   const [upiId, setUpiId] = useState(initialSettings.upiId || "");
   const [upiName, setUpiName] = useState(initialSettings.upiName || "");
   const [validityRewardEnabled, setValidityRewardEnabled] = useState(
-    initialSettings.validityRewardEnabled ?? true,
+    initialSettings.validityRewardEnabled ?? false,
   );
   const [validityDaysGranted, setValidityDaysGranted] = useState(
     initialSettings.validityDaysGranted ?? 30,
@@ -594,16 +594,6 @@ export function GrowthSettingsForm({
             <p className="text-xs text-slate-600 leading-relaxed">
               All mock tests are free and ad-free. If this platform helps your preparation, consider a small voluntary contribution to keep it running for everyone.
             </p>
-
-            {validityRewardEnabled && (
-              <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-2.5 text-[11px] text-blue-900 flex items-center gap-2">
-                <span className="text-sm">⏳</span>
-                <span>
-                  <strong className="font-bold">Supporter Perk:</strong> Contribute ₹{validityMinContribution}+ to receive{" "}
-                  <strong className="font-extrabold text-[#0055a2]">+{validityDaysGranted} days bonus validity</strong> on active mock series!
-                </span>
-              </div>
-            )}
 
             <div className="pt-1">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">

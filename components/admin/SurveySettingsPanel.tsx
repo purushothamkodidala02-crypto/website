@@ -330,7 +330,7 @@ export function SurveySettingsPanel({
               <label className="block text-xs font-semibold text-slate-700">Reward Display Title</label>
               <input
                 type="text"
-                placeholder="e.g. Receive +30 Days Free Mock Pass Validity Extension"
+                placeholder="e.g. Free High-Yield Blueprint PDF"
                 value={settings.rewardTitle || ""}
                 onChange={(e) => setSettings((s) => ({ ...s, rewardTitle: e.target.value }))}
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs text-slate-800 focus:bg-white focus:border-slate-400 focus:outline-none"

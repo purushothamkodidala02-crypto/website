@@ -47,7 +47,7 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
   suggestedAmounts: [49, 99, 199, 499],
   upiId: "",
   upiName: "",
-  validityRewardEnabled: true,
+  validityRewardEnabled: false,
   validityDaysGranted: 30,
   validityMinContribution: 99,
   validityMessage: "Contribute ₹99 or more to receive +30 days bonus validity extension on all active mock tests.",
