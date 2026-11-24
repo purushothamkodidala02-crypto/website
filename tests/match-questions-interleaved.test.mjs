@@ -106,3 +106,18 @@ test("FormattedQuestionText.tsx protects E.g. and i.e. from splitting and separa
   // Verify break before NOTE clauses
   assert.match(formatter, /NOTE\|Note\|సూచన\|గమనిక/);
 });
+
+test("FormattedQuestionText.tsx protects person initials like K. V. Viswanathan and avoids false Roman numeral V splitting", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify initial tokens and title guards
+  assert.match(formatter, /__INIT_1_/);
+  assert.match(formatter, /__INIT_2_/);
+  assert.match(formatter, /__INIT_TITLE_/);
+
+  // Verify Roman numeral V context guard
+  assert.match(formatter, /hasRomanNumeralContext/);
+
+  // Verify isPersonInitial guard in renderBlocks
+  assert.match(formatter, /isPersonInitial/);
+});
