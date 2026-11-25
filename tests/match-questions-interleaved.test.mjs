@@ -126,3 +126,20 @@ test("FormattedQuestionText.tsx protects person initials like K. V. Viswanathan 
   // Verify isPersonInitial guard in renderBlocks
   assert.match(formatter, /isPersonInitial/);
 });
+
+test("FormattedQuestionText.tsx protects explanation statement evaluations and prevents false matching list splitting", async () => {
+  const formatter = await read("components/questions/FormattedQuestionText.tsx");
+
+  // Verify evaluation lookbehind in inlineListRegex
+  assert.match(formatter, /Thus\|Therefore\|Hence\|So\|Consequently\|Because\|Since\|Statement/);
+  assert.match(formatter, /కాబట్టి\|కావున\|అందువల్ల\|అందుచేత\|దీని\\s\*ప్రకారం\|ప్రకారం/);
+
+  // Verify evaluation lookahead in inlineListRegex
+  assert.match(formatter, /తప్పు\|సత్యం\|నిజం\|సరైనది\|సరియైనది\|సరికానిది\|సరికాదు\|కాదు\|చెల్లదు\|వర్తిస్తుంది/);
+
+  // Verify pairRowRegex restricts parenthesized markers to single letter or 1-2 digits
+  assert.match(formatter, /\[a-zA-Z\]\|\\d\{1,2\}/);
+
+  // Verify pairedIndices contiguity check in matchingListLayout
+  assert.match(formatter, /pairedIndices\.length === \(pairedIndices\[pairedIndices\.length - 1\] - pairedIndices\[0\] \+ 1\)/);
+});

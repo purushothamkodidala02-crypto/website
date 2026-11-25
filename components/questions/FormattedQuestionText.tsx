@@ -133,7 +133,7 @@ function splitInlineLists(text: string): string {
     // Fix missing space after period before sentence starting with capital letter (e.g. "thesides.A sits" -> "thesides. A sits")
     .replace(/(?<=[a-z0-9])\.([A-Z]\s)/g, ". $1");
 
-  const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-zA-Z]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|(?<![\d౦-౯]\s*:[ \t]*)\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to)\b|(?:మరియు)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
+  const inlineListRegex = /(?<!(?:\b(?:Assertion|Reason|Option|Vitamin|Grade|Group|Column|List|Table|Figure|Class|Rs|Re|No|Nos|Fig|Thus|Therefore|Hence|So|Consequently|Because|Since|Statement|Statements)|(?:వాదన|ప్రకటన|ప్రతిపాదన|దృఢ\s*ప్రకటన|కారణం|కారణము|హేతువు|సమర్థన|సమర్థనము|వివరణ|నిశ్చితార్థం|నిశ్చితార్థము|రూ|కాబట్టి|కావున|అందువల్ల|అందుచేత|దీని\s*ప్రకారం|ప్రకారం|స్టేట్‌మెంట్|స్టేట్మెంట్|స్టేట్‌మెంట్లు|వాక్యం|వాక్యాలు|తీర్మానం|తీర్మానాలు))[ \t]*)([,;.]|[ \t]+)\s*((?:\((?:[a-zA-Z]|[1-9]|[౧-౯]|[ivxIVX]{1,5}|(?:[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))\)|(?<![\d౦-౯]\s*:[ \t]*)\b(?:[1-9]|[౧-౯]|[a-hA-H]|I{1,4}|VI{0,2}|[ivxIVX]{1,5}|(?:\b[ఎ-హ]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)))[.)]))\s+(?!(?:(?:and|&|or|is|was|are|were|refers|means|denotes|to|represents|follows|holds|implies|indicates|stands)\b|(?:మరియు|లేదా|తప్పు|సత్యం|నిజం|సరైనది|సరియైనది|సరికానిది|సరికాదు|కాదు|చెల్లదు|వర్తిస్తుంది|అనగా|అంటే|అవుతుంది|అగును)[ \t]))([A-Za-z0-9\u0c00-\u0c7f"'])/g;
 
   // Separate uppercase letter markers glued to words or punctuation (e.g. "CommitteeC. Conduct", "HyderabadD. Formation")
   text = text.replace(
@@ -578,7 +578,7 @@ function matchingListLayout(lines: string[]) {
 
   // Approach 1: Paired Rows on each line (e.g. 1. Item — A. Item or (i) Item (W) Item)
   const pairRowRegex =
-    /^((?:\((?:[a-zA-Z\d]+|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|VI{0,2}|[a-zA-Z]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+.*?)(?:\s*[—–-]\s*|\s+(?=(?:\((?:[a-zA-Z\d]+|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|VI{0,2}|[a-zA-Z]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s))((?:\((?:[a-zA-Z\d]+|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|VI{0,2}|[a-zA-Z]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+.*)$/;
+    /^((?:\((?:[a-zA-Z]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|VI{0,2}|[a-zA-Z]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+.*?)(?:\s*[—–-]\s*|(?<!\b(?:Thus|Therefore|Hence|So|Consequently|Because|Since|Statement|Statements)\b|కాబట్టి|కావున|అందువల్ల|అందుచేత|ప్రకారం)\s+(?=(?:\((?:[a-zA-Z]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|VI{0,2}|[a-zA-Z]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s(?!(?:is|was|are|were|refers|means|denotes|to|represents|follows|holds|implies|indicates|stands)\b|మరియు|లేదా|తప్పు|సత్యం|నిజం|సరైనది|సరియైనది|సరికానిది|సరికాదు|కాదు|చెల్లదు|వర్తిస్తుంది)))((?:\((?:[a-zA-Z]|\d{1,2}|[ivxIVX]{1,5}|[౦-౯]{1,2}|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)\)|(?:\d{1,2}|[౦-౯]{1,2}|I{1,4}|VI{0,2}|[a-zA-Z]|(?:ఎ|బి|సి|డి|ఈ|ఎఫ్|జి|హెచ్)|[\u0C05-\u0C39][\u0C3E-\u0C4D]?)[.)])\s+.*)$/;
 
   const pairedIndices: number[] = [];
   const leftPairs: string[] = [];
@@ -593,7 +593,10 @@ function matchingListLayout(lines: string[]) {
     }
   });
 
-  if (pairedIndices.length >= 2) {
+  if (
+    pairedIndices.length >= 2 &&
+    pairedIndices.length === (pairedIndices[pairedIndices.length - 1] - pairedIndices[0] + 1)
+  ) {
     const firstPairIdx = pairedIndices[0];
     const lastPairIdx = pairedIndices[pairedIndices.length - 1];
     const rawHeading = lines
