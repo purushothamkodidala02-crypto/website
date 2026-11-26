@@ -187,9 +187,10 @@ export function SupportPromptModal({
 
   const handleSupportClick = () => {
     const finalAmount = effectiveAmount > 0 ? effectiveAmount : selectedAmount;
-    setIsSupported(true);
     try {
-      localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
+      // Set dismissal timestamp as temporary cooldown so it doesn't immediately pop up
+      // again while navigating back if they return without completing payment
+      localStorage.setItem("varadhi_growth_dismissed_at", String(Date.now()));
     } catch {}
     recordGrowthInteractionAction({
       eventType: "click_support",

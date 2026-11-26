@@ -5,6 +5,7 @@ import { PublicHeader } from "@/components/site/PublicHeader";
 import { CashfreeContributionBox } from "@/components/growth/CashfreeContributionBox";
 import { getCashfreeOrderStatus } from "@/lib/payments/cashfree";
 import { getGrowthSettings } from "@/lib/growth-settings";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl } from "@/lib/site";
 
@@ -73,6 +74,25 @@ export default async function HelpUsToGrowPage({
     userPhone = profile?.mobile || "";
     if (profile?.full_name) userName = profile.full_name;
     if (profile?.role === "admin") isAdmin = true;
+  }
+
+  // Record verified contribution in database if payment is confirmed
+  if (isVerifiedPaid && user && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const admin = createAdminClient();
+      await admin.from("growth_popup_interactions").insert({
+        user_id: user.id,
+        student_name: userName || "Supporter",
+        student_email: user.email || null,
+        event_type: "payment_completed",
+        button_label: "Verified Contribution",
+        amount: verifiedAmount ?? undefined,
+        page_path: "/help-us-to-grow",
+        metadata: { order_id: query.order_id, verified: true },
+      });
+    } catch {
+      // Non-blocking telemetry
+    }
   }
 
   // Hide mode: If disabled and not previewing or returning from payment, regular candidates receive 404
@@ -154,6 +174,11 @@ export default async function HelpUsToGrowPage({
         {/* Notice 2: Incomplete / Cancelled Notice (Light Green soothing theme) */}
         {isPaymentCancelled && (
           <div className="mb-6 rounded-2xl border border-emerald-200/90 bg-emerald-50/50 p-5 sm:p-6 text-emerald-950 shadow-xs">
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `try{localStorage.removeItem("varadhi_growth_supported_at");localStorage.setItem("varadhi_growth_dismissed_at",String(Date.now()));}catch(e){}`,
+              }}
+            />
             <div className="flex items-start gap-3.5">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-800 text-base">
                 🌱

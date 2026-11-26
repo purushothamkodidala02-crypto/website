@@ -105,12 +105,19 @@ export default async function Dashboard({
 
   const hasSupportedPromise = userPromise.then(async (user) => {
     if (!user) return false;
-    const { count } = await supabase
+    const { count: paidOrdersCount } = await supabase
+      .from("payment_orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "paid");
+    if ((paidOrdersCount ?? 0) > 0) return true;
+
+    const { count: verifiedGrowthCount } = await supabase
       .from("growth_popup_interactions")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .eq("event_type", "click_support");
-    return (count ?? 0) > 0;
+      .eq("event_type", "payment_completed");
+    return (verifiedGrowthCount ?? 0) > 0;
   });
 
   const [
