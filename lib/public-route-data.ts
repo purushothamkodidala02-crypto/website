@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
+import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { createPublicClient } from "@/lib/supabase/public";
 
 type SlugEntity = { id: string; slug: string };
@@ -144,7 +145,7 @@ export async function getMockTestFastContextById(
 ) {
   const supabase = client ?? createPublicClient();
   const selectQuery =
-    "id, title, slug, status, access_type, test_scope, subject:subjects(id, name, slug), paper:papers!inner(id, name, slug, exam_group:exam_groups!inner(id, name, slug, exam:exams!inner(id, name, slug, state:exam_states!inner(id, name, code, slug))))";
+    "id, series_number, title, slug, status, access_type, test_scope, subject:subjects(id, name, slug), subject_section:subject_sections(id, name), paper:papers!inner(id, name, slug, specialization:exam_specializations(id, name), exam_group:exam_groups!inner(id, name, slug, exam:exams!inner(id, name, slug, state:exam_states!inner(id, name, code, slug))))";
 
   const { data: test } = await (supabase as unknown as ReturnType<typeof createPublicClient>)
     .from("mock_tests")
@@ -159,6 +160,7 @@ export async function getMockTestFastContextById(
     id: string;
     name: string;
     slug: string;
+    specialization: { id: string; name: string } | null;
     exam_group: {
       id: string;
       name: string;
@@ -178,15 +180,24 @@ export async function getMockTestFastContextById(
   };
 
   const rawSubject = test.subject as unknown as { id: string; name: string; slug: string } | null;
+  const rawSection = test.subject_section as unknown as { id: string; name: string } | null;
 
   const examGroup = rawPaper.exam_group;
   const category = examGroup.exam;
   const state = category.state;
+  const canonicalTitle = buildMockTestTitle({
+    stateCode: state.code,
+    examName: examGroup.name,
+    paperName: rawPaper.specialization?.name ?? rawPaper.name,
+    subjectName: rawSubject?.name,
+    sectionName: rawSection?.name,
+    seriesNumber: Number(test.series_number ?? 1),
+  });
 
   return {
     mockTest: {
       id: test.id,
-      title: test.title,
+      title: canonicalTitle,
       slug: test.slug,
       status: test.status,
       access_type: test.access_type,

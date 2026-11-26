@@ -103,6 +103,16 @@ export default async function Dashboard({
     return count ?? 0;
   });
 
+  const hasSupportedPromise = userPromise.then(async (user) => {
+    if (!user) return false;
+    const { count } = await supabase
+      .from("growth_popup_interactions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("event_type", "click_support");
+    return (count ?? 0) > 0;
+  });
+
   const [
     user,
     attempts,
@@ -114,6 +124,7 @@ export default async function Dashboard({
     paidSalesEnabled,
     catalog,
     growthSettings,
+    hasSupported,
   ] = await Promise.all([
     userPromise,
     attemptsPromise,
@@ -134,6 +145,7 @@ export default async function Dashboard({
     paidSalesPromise,
     catalogPromise,
     growthSettingsPromise,
+    hasSupportedPromise,
   ]);
 
   if (!user) redirect("/login?next=/dashboard");
@@ -799,6 +811,7 @@ export default async function Dashboard({
         <SupportPromptModal
           completedAttempts={totalAttempts}
           settings={growthSettings}
+          hasSupported={hasSupported}
         />
       )}
     </main>

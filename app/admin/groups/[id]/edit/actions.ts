@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { revalidatePath } from "next/cache";
+import { syncMockTestTitles } from "@/lib/admin/sync-mock-test-titles";
 import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
@@ -159,6 +159,8 @@ export async function updateGroup(
     };
   }
 
+  await syncMockTestTitles(supabase);
+
   revalidatePath("/admin/groups");
   revalidatePath("/admin/exams");
   revalidatePath("/admin/papers");
@@ -166,7 +168,7 @@ export async function updateGroup(
   revalidatePath("/admin/mock-tests");
   revalidatePath("/admin/questions");
   revalidatePath("/mock-tests");
-  revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  revalidatePath("/dashboard");
   revalidatePath(`/admin/groups/${groupId}/edit`);
 
   return {

@@ -111,6 +111,11 @@ export default async function HelpUsToGrowPage({
         {/* Notice 1: Thank You & Contribution Verified Banner (ONLY if payment is verified with Cashfree as PAID) */}
         {isVerifiedPaid && (
           <div className="mb-6 overflow-hidden rounded-2xl border border-emerald-300 bg-emerald-50/90 p-5 sm:p-6 text-emerald-950 shadow-xs animate-in fade-in duration-300">
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `try{localStorage.setItem("varadhi_growth_supported_at",String(Date.now()));}catch(e){}`,
+              }}
+            />
             <div className="flex items-start gap-3.5">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-600 text-white shadow-xs">
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

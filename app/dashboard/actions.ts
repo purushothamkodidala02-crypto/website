@@ -1,5 +1,6 @@
 "use server";
 
+import { getMockTestCatalogData } from "@/lib/catalog-data";
 import { createClient } from "@/lib/supabase/server";
 
 export type AttemptHistoryItem = {
@@ -43,14 +44,29 @@ export async function fetchAllStudentAttempts(limit: number = 100) {
 
   const testTitles: Record<string, string> = {};
   if (testIds.length > 0) {
-    const { data: tests } = await supabase
-      .from("mock_tests")
-      .select("id, title")
-      .in("id", testIds);
+    const catalog = await getMockTestCatalogData();
+    const catalogTitles = new Map(catalog.tests.map((test) => [test.id, test.title]));
+    const missingIds: string[] = [];
 
-    for (const test of tests ?? []) {
-      if (test.id && test.title) {
-        testTitles[test.id] = test.title;
+    for (const id of testIds) {
+      const catalogTitle = catalogTitles.get(id);
+      if (catalogTitle) {
+        testTitles[id] = catalogTitle;
+      } else {
+        missingIds.push(id);
+      }
+    }
+
+    if (missingIds.length > 0) {
+      const { data: tests } = await supabase
+        .from("mock_tests")
+        .select("id, title")
+        .in("id", missingIds);
+
+      for (const test of tests ?? []) {
+        if (test.id && test.title) {
+          testTitles[test.id] = test.title;
+        }
       }
     }
   }

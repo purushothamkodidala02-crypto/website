@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { revalidatePath } from "next/cache";
+import { safeRevalidateCatalogTag } from "@/lib/catalog-data";
+import { syncMockTestTitles } from "@/lib/admin/sync-mock-test-titles";
 import { readSeoFields } from "@/lib/seo-fields";
 import { createClient } from "@/lib/supabase/server";
 
@@ -40,7 +41,7 @@ export async function createSpecialization(_previous: SpecializationActionState,
   const { error } = await result.supabase.from("exam_specializations").insert(parsed.value);
   if (error?.code === "23505") return { success: false, message: "This Specialisation already exists for the selected Exam." };
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests"); safeRevalidateCatalogTag();
   return { success: true, message: "Specialisation created successfully." };
 }
 
@@ -54,7 +55,8 @@ export async function updateSpecialization(_previous: SpecializationActionState,
   if ((existing ?? []).some((item) => item.name.trim().toLowerCase() === parsed.value!.name.toLowerCase())) return { success: false, message: `"${parsed.value.name}" already exists for this Exam.` };
   const { error } = await result.supabase.from("exam_specializations").update(parsed.value).eq("id", specializationId);
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/mock-tests"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  await syncMockTestTitles(result.supabase);
+  revalidatePath("/admin/groups"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/papers"); revalidatePath("/admin/mock-tests"); revalidatePath("/mock-tests"); revalidatePath("/dashboard");
   return { success: true, message: "Specialisation updated successfully." };
 }
 

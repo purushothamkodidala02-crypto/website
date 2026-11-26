@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { PUBLIC_CATALOG_TAG, safeRevalidateCatalogTag } from "@/lib/catalog-data";
+import { syncMockTestTitles } from "@/lib/admin/sync-mock-test-titles";
 import { createClient } from "@/lib/supabase/server";
 
 export type SectionActionState = { success: boolean; message: string };
@@ -288,11 +289,14 @@ export async function updateSubjectSection(
 
   if (updateError) return { success: false, message: updateError.message };
 
+  await syncMockTestTitles(supabase, { subjectSectionId: sectionId });
+
   revalidatePath("/admin/subjects");
   revalidatePath(`/admin/subjects/${subjectId}/edit`);
   revalidatePath("/admin/mock-tests");
   revalidatePath("/mock-tests");
-  revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  revalidatePath("/dashboard");
+  safeRevalidateCatalogTag();
 
   return { success: true, message: "Sub-section updated successfully." };
 }

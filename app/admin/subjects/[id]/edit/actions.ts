@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { revalidatePath } from "next/cache";
+import { syncMockTestTitles } from "@/lib/admin/sync-mock-test-titles";
 import { createClient } from "@/lib/supabase/server";
 
 export type UpdateSubjectState = { success: boolean; message: string };
@@ -24,6 +24,7 @@ export async function updateSubject(subjectId: string, _previous: UpdateSubjectS
   const { error } = await supabase.from("subjects").update({ paper_id: paperId, name, slug, description: String(formData.get("description") ?? "").trim() || null, content_language_mode: languageMode, is_active: formData.get("is_active") === "on", display_order: displayOrder }).eq("id", subjectId);
   if (error?.code === "23505") return { success: false, message: "A Subject with this slug already exists in the selected Paper." };
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/subjects"); revalidatePath("/admin/exams"); revalidatePath(`/admin/subjects/${subjectId}/edit`); revalidatePath("/admin/questions"); revalidatePath("/admin/mock-tests"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  await syncMockTestTitles(supabase, { subjectId });
+  revalidatePath("/admin/subjects"); revalidatePath("/admin/exams"); revalidatePath(`/admin/subjects/${subjectId}/edit`); revalidatePath("/admin/questions"); revalidatePath("/admin/mock-tests"); revalidatePath("/mock-tests"); revalidatePath("/dashboard");
   return { success: true, message: "Subject updated successfully." };
 }

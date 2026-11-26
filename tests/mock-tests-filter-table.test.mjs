@@ -135,16 +135,22 @@ test("ExistingMockTestsTable displays sub-topic tag and uses clean Mock Test lab
     "Admin mock tests page should map sectionName onto mappedTests"
   );
 
-  // 5. Title sync in manage-actions preserves subject sections
+  // 5. Title sync in manage-actions delegates to syncMockTestTitles and preserves subject sections
+  const syncTitlesSrc = await read("lib/admin/sync-mock-test-titles.ts");
   assert.match(
     manageActionsSrc,
-    /subject_section_id/,
-    "syncAllMockTestTitles should select subject_section_id"
+    /syncMockTestTitles/,
+    "syncAllMockTestTitles should delegate to syncMockTestTitles"
   );
   assert.match(
-    manageActionsSrc,
+    syncTitlesSrc,
+    /subject_section_id/,
+    "syncMockTestTitles should select subject_section_id"
+  );
+  assert.match(
+    syncTitlesSrc,
     /sectionName:\s*section\?\.name/,
-    "syncAllMockTestTitles should preserve sectionName in buildMockTestTitle"
+    "syncMockTestTitles should preserve sectionName in buildMockTestTitle"
   );
 
   // 6. Interactive tag search across all states

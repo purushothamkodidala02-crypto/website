@@ -9,13 +9,16 @@ import { recordGrowthInteractionAction } from "@/app/actions/growth-tracking";
 type SupportPromptModalProps = {
   completedAttempts?: number;
   settings: GrowthPopupSettings;
+  hasSupported?: boolean;
 };
 
 export function SupportPromptModal({
   completedAttempts: serverCompletedAttempts,
   settings,
+  hasSupported = false,
 }: SupportPromptModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSupported, setIsSupported] = useState(hasSupported);
   const [, setEffectiveCount] = useState<number>(serverCompletedAttempts ?? 0);
 
   const defaultAmounts = settings.suggestedAmounts?.length
@@ -45,7 +48,25 @@ export function SupportPromptModal({
   }, []);
 
   useEffect(() => {
-    // 0. Immediate preview mode for verification (?preview_growth=true or ?preview=growth)
+    // 0. If user has already supported, stop and ensure local storage is set
+    if (hasSupported) {
+      setIsSupported(true);
+      try {
+        localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
+      } catch {}
+      return;
+    }
+
+    // 0b. Check if already supported in localStorage
+    try {
+      const supportedAt = localStorage.getItem("varadhi_growth_supported_at");
+      if (supportedAt) {
+        setIsSupported(true);
+        return;
+      }
+    } catch {}
+
+    // 0c. Immediate preview mode for verification (?preview_growth=true or ?preview=growth)
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
     const isPreview = urlParams?.get("preview_growth") === "true" || urlParams?.get("preview") === "growth";
     if (isPreview) {
@@ -166,7 +187,10 @@ export function SupportPromptModal({
 
   const handleSupportClick = () => {
     const finalAmount = effectiveAmount > 0 ? effectiveAmount : selectedAmount;
-    localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
+    setIsSupported(true);
+    try {
+      localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
+    } catch {}
     recordGrowthInteractionAction({
       eventType: "click_support",
       buttonLabel: `Support Varadhi (₹${finalAmount})`,
@@ -184,6 +208,10 @@ export function SupportPromptModal({
       pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
     }).catch(() => null);
   };
+
+  if (isSupported) {
+    return null;
+  }
 
   return (
     <>

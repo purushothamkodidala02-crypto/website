@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_CATALOG_TAG } from "@/lib/catalog-data";
+import { revalidatePath } from "next/cache";
+import { safeRevalidateCatalogTag } from "@/lib/catalog-data";
+import { syncMockTestTitles } from "@/lib/admin/sync-mock-test-titles";
 import { createClient } from "@/lib/supabase/server";
 
 export type PaperActionState = { success: boolean; message: string };
@@ -54,7 +55,7 @@ export async function createPaper(_previous: PaperActionState, formData: FormDat
   const { error } = await result.supabase.from("papers").insert(parsed.value);
   if (error?.code === "23505") return { success: false, message: "A Paper with this slug already exists under the selected Exam." };
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/papers"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/subjects"); revalidatePath("/admin/mock-tests"); revalidatePath("/admin/questions"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  revalidatePath("/admin/papers"); revalidatePath("/admin/exams"); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/subjects"); revalidatePath("/admin/mock-tests"); revalidatePath("/admin/questions"); safeRevalidateCatalogTag();
   return { success: true, message: "Paper created successfully." };
 }
 
@@ -68,7 +69,8 @@ export async function updatePaper(_previous: PaperActionState, formData: FormDat
   const { error } = await result.supabase.from("papers").update(parsed.value).eq("id", paperId);
   if (error?.code === "23505") return { success: false, message: "A Paper with this slug already exists under the selected Exam." };
   if (error) return { success: false, message: error.message };
-  revalidatePath("/admin/papers"); revalidatePath("/admin/exams"); revalidatePath(`/admin/papers/${paperId}/edit`); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/subjects"); revalidatePath("/admin/mock-tests"); revalidatePath("/admin/questions"); revalidateTag(PUBLIC_CATALOG_TAG, "max");
+  await syncMockTestTitles(result.supabase, { paperId });
+  revalidatePath("/admin/papers"); revalidatePath("/admin/exams"); revalidatePath(`/admin/papers/${paperId}/edit`); revalidatePath(`/admin/groups/${parsed.value.exam_group_id}/edit`); revalidatePath("/admin/subjects"); revalidatePath("/admin/mock-tests"); revalidatePath("/admin/questions"); revalidatePath("/mock-tests"); revalidatePath("/dashboard");
   return { success: true, message: "Paper updated successfully." };
 }
 
