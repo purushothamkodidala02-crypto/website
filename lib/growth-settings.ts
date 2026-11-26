@@ -20,6 +20,7 @@ export type GrowthPopupSettings = {
   suggestedAmounts: number[];
   upiId: string;
   upiName: string;
+  supporterCooldownDays?: number; // Days before re-showing to paid supporters (e.g. 90 = 3 months, 0 = never)
   // Contribution to Validity linkage
   validityRewardEnabled?: boolean;
   validityDaysGranted?: number; // e.g. 30 days added to mock series
@@ -47,6 +48,7 @@ export const DEFAULT_GROWTH_SETTINGS: GrowthPopupSettings = {
   suggestedAmounts: [49, 99, 199, 499],
   upiId: "",
   upiName: "",
+  supporterCooldownDays: 90, // 3 months default for paid supporters
   validityRewardEnabled: false,
   validityDaysGranted: 30,
   validityMinContribution: 99,

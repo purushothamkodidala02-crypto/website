@@ -74,6 +74,7 @@ type CatalogTest = {
   duration_minutes: number;
   target_question_count: number | null;
   access_type: string;
+  pdf_url?: string | null;
   slug: string;
   paper: { id: string; name: string; slug: string };
   exam: { id: string; name: string; slug: string };
@@ -1094,6 +1095,7 @@ function TestGrid({ tests }: { tests: CatalogTest[] }) {
                 <MockTestCardAction
                   testId={test.id}
                   testHref={testHref}
+                  pdfUrl={test.pdf_url}
                   testTitle={testHeading}
                   folderUrl={folderUrl}
                   folderName={folderName}

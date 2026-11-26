@@ -48,21 +48,30 @@ export function SupportPromptModal({
   }, []);
 
   useEffect(() => {
-    // 0. If user has already supported, stop and ensure local storage is set
+    const supporterCooldownDays = settings.supporterCooldownDays ?? 90;
+    const supporterCooldownMs = supporterCooldownDays * 24 * 60 * 60 * 1000;
+
+    // 0. If server indicates the user supported within the cooldown window, suppress
     if (hasSupported) {
       setIsSupported(true);
-      try {
-        localStorage.setItem("varadhi_growth_supported_at", String(Date.now()));
-      } catch {}
       return;
     }
 
-    // 0b. Check if already supported in localStorage
+    // 0b. Check if supported in localStorage and whether supporter cooldown has elapsed
     try {
       const supportedAt = localStorage.getItem("varadhi_growth_supported_at");
       if (supportedAt) {
-        setIsSupported(true);
-        return;
+        const supportedTime = parseInt(supportedAt, 10);
+        if (
+          supporterCooldownDays === 0 ||
+          (!isNaN(supportedTime) && Date.now() - supportedTime < supporterCooldownMs)
+        ) {
+          setIsSupported(true);
+          return;
+        } else {
+          // Supporter cooldown (e.g. 3 months / 90 days) has passed!
+          setIsSupported(false);
+        }
       }
     } catch {}
 
@@ -93,9 +102,21 @@ export function SupportPromptModal({
     const threshold = settings.minCompletedTests ?? 5;
     if (count < threshold) return;
 
-    // 4. Check if already supported
-    const supportedAt = localStorage.getItem("varadhi_growth_supported_at");
-    if (supportedAt) return;
+    // 4. Check if already supported within cooldown window
+    let isSupporterRenewal = false;
+    try {
+      const supportedAt = localStorage.getItem("varadhi_growth_supported_at");
+      if (supportedAt) {
+        const supportedTime = parseInt(supportedAt, 10);
+        if (
+          supporterCooldownDays === 0 ||
+          (!isNaN(supportedTime) && Date.now() - supportedTime < supporterCooldownMs)
+        ) {
+          return;
+        }
+        isSupporterRenewal = true;
+      }
+    } catch {}
 
     // 5. Check dismissal cooldown
     const dismissedAt = localStorage.getItem("varadhi_growth_dismissed_at");
@@ -105,13 +126,13 @@ export function SupportPromptModal({
       if (timePassed < cooldownMs) return;
     }
 
-    // 6. Check appearance frequency
+    // 6. Check appearance frequency (supporter renewal bypasses stale lifetime appearance cap)
     const appearanceCount = parseInt(
       localStorage.getItem("varadhi_growth_appearance_count") || "0",
       10,
     );
     const maxAppearances = settings.maxAppearances ?? 3;
-    if (maxAppearances > 0 && appearanceCount >= maxAppearances) return;
+    if (!isSupporterRenewal && maxAppearances > 0 && appearanceCount >= maxAppearances) return;
 
     // 7. Respectful trigger delay so user isn't startled on page paint
     const delayMs = Math.max(800, (settings.displayDelaySeconds ?? 2.5) * 1000);

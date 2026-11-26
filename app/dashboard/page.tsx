@@ -105,19 +105,46 @@ export default async function Dashboard({
 
   const hasSupportedPromise = userPromise.then(async (user) => {
     if (!user) return false;
-    const { count: paidOrdersCount } = await supabase
-      .from("payment_orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("status", "paid");
-    if ((paidOrdersCount ?? 0) > 0) return true;
+    const settings = await growthSettingsPromise;
+    const supporterCooldownDays = settings.supporterCooldownDays ?? 90;
 
-    const { count: verifiedGrowthCount } = await supabase
-      .from("growth_popup_interactions")
-      .select("id", { count: "exact", head: true })
+    if (supporterCooldownDays === 0) {
+      const { count: paidOrdersCount } = await supabase
+        .from("payment_orders")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "paid");
+      if ((paidOrdersCount ?? 0) > 0) return true;
+
+      const { count: verifiedGrowthCount } = await supabase
+        .from("growth_popup_interactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("event_type", "payment_completed");
+      return (verifiedGrowthCount ?? 0) > 0;
+    }
+
+    const cutoffDate = new Date(Date.now() - supporterCooldownDays * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: recentPaidOrder } = await supabase
+      .from("payment_orders")
+      .select("id")
       .eq("user_id", user.id)
-      .eq("event_type", "payment_completed");
-    return (verifiedGrowthCount ?? 0) > 0;
+      .eq("status", "paid")
+      .gte("created_at", cutoffDate)
+      .limit(1)
+      .maybeSingle();
+    if (recentPaidOrder) return true;
+
+    const { data: recentGrowthPayment } = await supabase
+      .from("growth_popup_interactions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("event_type", "payment_completed")
+      .gte("created_at", cutoffDate)
+      .limit(1)
+      .maybeSingle();
+    return Boolean(recentGrowthPayment);
   });
 
   const [

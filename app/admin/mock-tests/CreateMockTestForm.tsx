@@ -5,6 +5,7 @@ import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { MockSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
 import { formatMockNumber, mockTestLabel, displayMockTestHeading } from "@/lib/exam-catalog";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
+import { MockTestPdfField } from "@/components/admin/MockTestPdfField";
 import { quickCreateSubjectSection } from "@/app/admin/subjects/sections/actions";
 import { createMockTest, type CreateMockTestState } from "./actions";
 import type { MockTestAccessType } from "@/types/mock-test";
@@ -458,6 +459,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       <label className="block text-sm font-bold md:col-span-2">Description <span className="font-normal text-slate-500">(optional)</span><textarea name="description" rows={3} placeholder="Tell students what this mock covers" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
       <label className="block text-sm font-bold">Duration in minutes<input name="duration_minutes" type="number" min="1" required value={durationMinutes} onChange={(e) => { setDurationMinutes(e.target.value); setIsDurationCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
       <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required value={targetQuestionCount} onChange={(e) => { setTargetQuestionCount(e.target.value); setIsTargetCountCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
+      <MockTestPdfField />
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
         <strong>Student access</strong>
         <div className="mt-3">

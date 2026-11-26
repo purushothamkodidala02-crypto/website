@@ -43,6 +43,10 @@ export async function saveGrowthSettings(
     0,
     parseInt(String(formData.get("cooldownDays") || "7"), 10),
   );
+  const supporterCooldownDays = Math.max(
+    0,
+    parseInt(String(formData.get("supporterCooldownDays") || "90"), 10),
+  );
   const maxAppearances = Math.max(
     0,
     parseInt(String(formData.get("maxAppearances") || "3"), 10),
@@ -93,6 +97,7 @@ export async function saveGrowthSettings(
     suggestedAmounts,
     upiId: upiId || "",
     upiName: upiName || "Varadhi Prep",
+    supporterCooldownDays,
     validityRewardEnabled,
     validityDaysGranted,
     validityMinContribution,

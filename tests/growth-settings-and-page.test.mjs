@@ -12,6 +12,7 @@ test("growth-settings: defaults and type definition enforce live mode and 5 mock
   assert.ok(content.includes("enabled: true"), "must default enabled to true for live accessibility");
   assert.ok(content.includes("minCompletedTests: 5"), "must default minCompletedTests to 5");
   assert.ok(content.includes("cooldownDays: 7"), "must default cooldownDays to 7");
+  assert.ok(content.includes("supporterCooldownDays: 90"), "must default supporterCooldownDays to 90 (3 months)");
   assert.ok(content.includes("maxAppearances: 3"), "must default maxAppearances to 3");
   assert.ok(content.includes("primaryButtonText: \"Support Varadhi\""), "must provide primary button label");
   assert.ok(content.includes("secondaryButtonText: \"Maybe Later\""), "must provide secondary button label");
@@ -76,11 +77,14 @@ test("admin workspace: navigation and growth settings control panel are configur
   const formContent = fs.readFileSync(adminFormPath, "utf8");
   assert.ok(formContent.includes("minCompletedTests"), "admin form must control minCompletedTests");
   assert.ok(formContent.includes("cooldownDays"), "admin form must control cooldownDays");
+  assert.ok(formContent.includes("supporterCooldownDays"), "admin form must control supporterCooldownDays");
   assert.ok(formContent.includes("maxAppearances"), "admin form must control maxAppearances");
   assert.ok(formContent.includes("Live Candidate Preview"), "admin form must render live preview");
 
   const actionsPath = path.resolve("app/admin/growth-settings/actions.ts");
   assert.ok(fs.existsSync(actionsPath), "admin growth settings actions must exist");
+  const actionsContent = fs.readFileSync(actionsPath, "utf8");
+  assert.ok(actionsContent.includes("supporterCooldownDays"), "actions must parse and persist supporterCooldownDays");
 });
 
 test("support modal: SupportPromptModal enforces eligibility, graceful dismissal, and emerald styling", () => {
@@ -92,6 +96,7 @@ test("support modal: SupportPromptModal enforces eligibility, graceful dismissal
   assert.ok(modalContent.includes("varadhi_growth_dismissed_at"), "must track dismissal timestamp");
   assert.ok(modalContent.includes("varadhi_growth_appearance_count"), "must track appearance count");
   assert.ok(modalContent.includes("varadhi_growth_supported_at"), "must track support completion");
+  assert.ok(modalContent.includes("supporterCooldownDays"), "must check supporterCooldownDays");
   assert.ok(modalContent.includes("settings.primaryButtonText"), "must render primary button");
   assert.ok(modalContent.includes("settings.secondaryButtonText"), "must render secondary button");
 

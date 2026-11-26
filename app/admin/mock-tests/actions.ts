@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { readMockTestAccess } from "@/lib/mock-test-access";
+import { removeMockTestPdf, resolveMockTestPdfInput } from "@/lib/mock-tests/pdf";
 import { mockTestSlug } from "@/lib/public-urls";
 import { createClient } from "@/lib/supabase/server";
 import type { MockTestScope } from "@/types/mock-test";
@@ -142,6 +143,11 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     };
   }
 
+  const pdfResolution = await resolveMockTestPdfInput(supabase, user.id, formData);
+  if (pdfResolution.error) {
+    return { success: false, message: pdfResolution.error };
+  }
+
   const targetQuestionCount = scope === "paper" ? Number(paper.question_count ?? requestedTarget) : requestedTarget;
   const { error } = await supabase.from("mock_tests").insert({
     paper_id: paperId,
@@ -162,7 +168,11 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     published_at: null,
     access_type: pricing.accessType,
     price_inr: pricing.priceInr,
+    pdf_url: pdfResolution.pdfUrl,
   });
+  if (error) {
+    await removeMockTestPdf(supabase, pdfResolution.uploadedPath);
+  }
   if (error?.code === "23505") {
     if (error.message?.includes("uq_mock_tests_subject_series")) {
       return {

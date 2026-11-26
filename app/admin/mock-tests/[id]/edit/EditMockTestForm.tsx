@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { PendingButtonContent } from "@/components/feedback/LoadingSpinner";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
+import { MockTestPdfField } from "@/components/admin/MockTestPdfField";
 import type { MockTest, MockTestAccessType } from "@/types/mock-test";
 import { quickCreateSubjectSection } from "@/app/admin/subjects/sections/actions";
 import { updateMockTest, type UpdateMockTestState } from "./actions";
@@ -287,6 +288,7 @@ export function EditMockTestForm({
           <span className="mt-1 block text-xs font-normal text-slate-500">Locked after publishing or after the first student attempt.</span>
         </label>
         <input type="hidden" name="status" value={mockTest.status} />
+        <MockTestPdfField currentUrl={mockTest.pdf_url} />
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
           <strong>Student access</strong>
           <div className="mt-3">

@@ -21,6 +21,9 @@ export function GrowthSettingsForm({
   const [cooldownDays, setCooldownDays] = useState(
     initialSettings.cooldownDays ?? 7,
   );
+  const [supporterCooldownDays, setSupporterCooldownDays] = useState(
+    initialSettings.supporterCooldownDays ?? 90,
+  );
   const [maxAppearances, setMaxAppearances] = useState(
     initialSettings.maxAppearances ?? 3,
   );
@@ -180,6 +183,49 @@ export function GrowthSettingsForm({
               />
               <span className="mt-1 block text-[11px] text-slate-500">
                 Days to wait after candidate clicks &ldquo;Maybe Later&rdquo;.
+              </span>
+            </div>
+
+            <div>
+              <label
+                htmlFor="supporterCooldownDays"
+                className="block text-xs font-bold text-slate-700"
+              >
+                Paid Supporter Renewal (Days)
+              </label>
+              <input
+                type="number"
+                id="supporterCooldownDays"
+                name="supporterCooldownDays"
+                min={0}
+                max={365}
+                value={supporterCooldownDays}
+                onChange={(e) => setSupporterCooldownDays(parseInt(e.target.value, 10) || 0)}
+                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-[#0055a2] focus:outline-none"
+              />
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {[
+                  { label: "3 Months (90d)", days: 90 },
+                  { label: "6 Months (180d)", days: 180 },
+                  { label: "1 Year (365d)", days: 365 },
+                  { label: "Never (0d)", days: 0 },
+                ].map((preset) => (
+                  <button
+                    key={preset.days}
+                    type="button"
+                    onClick={() => setSupporterCooldownDays(preset.days)}
+                    className={`rounded-lg px-2 py-0.5 text-[11px] font-bold transition cursor-pointer ${
+                      supporterCooldownDays === preset.days
+                        ? "bg-[#0055a2] text-white"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <span className="mt-1 block text-[11px] text-slate-500">
+                Days after a candidate contributes before the support prompt can appear again (default: 90 days / 3 months; 0 = never show to paid supporters).
               </span>
             </div>
 

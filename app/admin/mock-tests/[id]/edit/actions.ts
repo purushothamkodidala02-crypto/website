@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 import { PUBLIC_CATALOG_TAG, safeRevalidateCatalogTag } from "@/lib/catalog-data";
 import { buildMockTestTitle } from "@/lib/exam-catalog";
 import { readMockTestAccess } from "@/lib/mock-test-access";
+import { removeMockTestPdf, resolveMockTestPdfInput } from "@/lib/mock-tests/pdf";
 import { createClient } from "@/lib/supabase/server";
 import type { MockTestScope } from "@/types/mock-test";
 
@@ -16,7 +17,7 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
     if (!user) return { success: false, message: "You must be logged in." };
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== "admin") return { success: false, message: "You are not authorized to update mock tests." };
-    const { data: current } = await supabase.from("mock_tests").select("status, series_number, slug, target_question_count, paper_id, subject_id, subject_section_id, test_scope, duration_minutes").eq("id", mockTestId).maybeSingle();
+    const { data: current } = await supabase.from("mock_tests").select("status, series_number, slug, target_question_count, paper_id, subject_id, subject_section_id, test_scope, duration_minutes, pdf_url").eq("id", mockTestId).maybeSingle();
     if (!current) return { success: false, message: "Mock test not found." };
     const isPublished = current.status !== "draft";
 
@@ -108,6 +109,11 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
     const { data: specialization } = paper.specialization_id
       ? await supabase.from("exam_specializations").select("name").eq("id", paper.specialization_id).maybeSingle()
       : { data: null };
+    const pdfResolution = await resolveMockTestPdfInput(supabase, user.id, formData, current.pdf_url);
+    if (pdfResolution.error) {
+      return { success: false, message: pdfResolution.error };
+    }
+
     const title = buildMockTestTitle({ stateCode: stateResult.data.code, examName: group.name, paperName: specialization?.name ?? paper.name, subjectName: subject?.name, sectionName: section?.name, seriesNumber });
     const { error } = await supabase.from("mock_tests").update({
       paper_id: paperId,
@@ -126,9 +132,15 @@ export async function updateMockTest(mockTestId: string, _previous: UpdateMockTe
       published_at: null,
       access_type: pricing.accessType,
       price_inr: pricing.priceInr,
+      pdf_url: pdfResolution.pdfUrl,
     }).eq("id", mockTestId);
+    if (error) {
+      await removeMockTestPdf(supabase, pdfResolution.uploadedPath);
+    }
     if (error?.code === "23505") return { success: false, message: "That paper already has this mock-test number." };
     if (error) return { success: false, message: error.message };
+
+    await removeMockTestPdf(supabase, pdfResolution.oldPathToRemove);
 
     try {
       revalidatePath("/admin/mock-tests");
