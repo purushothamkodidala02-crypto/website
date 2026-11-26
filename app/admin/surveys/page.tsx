@@ -432,7 +432,7 @@ function AdminSurveysList() {
         </div>
 
         {/* Studio Performance KPI Ribbon */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 border-t border-slate-100 pt-5">
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 border-t border-slate-100 pt-5">
           <div className="rounded-xl bg-slate-50/80 p-3.5 border border-slate-200/60">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Form Inventory
@@ -464,21 +464,6 @@ function AdminSurveysList() {
               <span className="text-[11px] font-semibold text-slate-500">verified</span>
             </div>
             <p className="mt-0.5 text-[10px] text-slate-400">Recorded student submissions</p>
-          </div>
-
-          <div className="rounded-xl bg-slate-50/80 p-3.5 border border-slate-200/60">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Platform Status
-            </span>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-emerald-700">
-                100% Free
-              </span>
-              <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded">
-                Ad-Free
-              </span>
-            </div>
-            <p className="mt-0.5 text-[10px] text-slate-500">Community Supported • No Paywalls</p>
           </div>
         </div>
       </div>

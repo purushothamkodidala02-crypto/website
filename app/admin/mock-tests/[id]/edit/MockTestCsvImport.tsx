@@ -25,8 +25,6 @@ export function MockTestCsvImport({
   isDraft,
   targetQuestionCount,
   assignedQuestionCount,
-  paperName,
-  subjectName,
   defaultSkipCrossTestDuplicateCheck = false,
 }: MockTestCsvImportProps) {
   const importForMock = importQuestionsIntoMockTest.bind(null, mockTestId);
@@ -43,12 +41,6 @@ export function MockTestCsvImport({
         <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
           Upload Excel or CSV into this mock test
         </h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          This draft already belongs to <strong>{paperName}</strong>
-          {subjectName ? <> and <strong>{subjectName}</strong></> : ""}. The upload saves every
-          valid Question for this mock test and adds it here at the same time. The same
-          import key in another mock test does not update this test&apos;s Questions.
-        </p>
       </div>
 
       {isDraft ? (
