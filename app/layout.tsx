@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_Telugu, Mandali } from "next/font/google";
+import { Inter, Mandali } from "next/font/google";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
@@ -22,13 +22,6 @@ const inter = Inter({
   preload: true,
   variable: "--font-varadhi-ui",
   fallback: ["Segoe UI", "Arial", "sans-serif"],
-});
-
-const notoSansTelugu = Noto_Sans_Telugu({
-  subsets: ["telugu"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-telugu-noto",
 });
 
 const mandali = Mandali({
@@ -129,8 +122,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${notoSansTelugu.variable} ${mandali.variable} antialiased`}>
+    <html lang="en" className={`${inter.variable} ${mandali.variable} antialiased`}>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap"
+        />
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="" />
