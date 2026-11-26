@@ -196,6 +196,17 @@ export default async function AdminStudentsPage() {
       emailResult.error,
   );
 
+  if (hasError) {
+    console.error("AdminStudentsPage query errors:", {
+      studentsError: studentsResult.error?.message ?? studentsResult.error ?? null,
+      productsError: productsResult.error?.message ?? productsResult.error ?? null,
+      recentOrdersError: recentOrdersResult.error?.message ?? recentOrdersResult.error ?? null,
+      analyticsError: analyticsResult.error?.message ?? analyticsResult.error ?? null,
+      fallbackError,
+      emailError: emailResult.error?.message ?? emailResult.error ?? null,
+    });
+  }
+
   return (
     <div>
       <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Registrations</p>
