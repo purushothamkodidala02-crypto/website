@@ -169,6 +169,7 @@ export async function createMockTest(_previous: CreateMockTestState, formData: F
     access_type: pricing.accessType,
     price_inr: pricing.priceInr,
     pdf_url: pdfResolution.pdfUrl,
+    allow_duplicate_questions: formData.get("allow_duplicate_questions") === "on",
   });
   if (error) {
     await removeMockTestPdf(supabase, pdfResolution.uploadedPath);

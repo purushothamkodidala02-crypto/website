@@ -289,6 +289,15 @@ export function EditMockTestForm({
         </label>
         <input type="hidden" name="status" value={mockTest.status} />
         <MockTestPdfField currentUrl={mockTest.pdf_url} />
+        <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm md:col-span-2">
+          <input
+            name="allow_duplicate_questions"
+            type="checkbox"
+            defaultChecked={Boolean(mockTest.allow_duplicate_questions)}
+            className="h-4 w-4 shrink-0"
+          />
+          <span className="font-bold text-slate-900">Allow duplicates</span>
+        </label>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
           <strong>Student access</strong>
           <div className="mt-3">

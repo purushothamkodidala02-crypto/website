@@ -39,6 +39,7 @@ type MockImportTarget = {
   status: string;
   target_question_count: number;
   replaces_mock_test_id: string | null;
+  allow_duplicate_questions?: boolean;
 };
 
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
@@ -324,7 +325,7 @@ async function importQuestions(
   if (mockTestId) {
     const { data } = await supabase
       .from("mock_tests")
-      .select("id, paper_id, subject_id, test_scope, status, target_question_count, replaces_mock_test_id")
+      .select("id, paper_id, subject_id, test_scope, status, target_question_count, replaces_mock_test_id, allow_duplicate_questions")
       .eq("id", mockTestId)
       .maybeSingle();
     mockTest = data as MockImportTarget | null;
@@ -545,6 +546,10 @@ async function importQuestions(
   const embeddedImageTargets: Array<{ importIndex: number; image: EmbeddedQuestionImage; rowNumber: number }> = [];
   const assignmentPreferences: Array<{ key: string; rowNumber: number; questionOrder: number | null; marks: number | null; negativeMarks: number | null }> = [];
 
+  const skipCrossTestDuplicateCheck =
+    Boolean(mockTest?.allow_duplicate_questions) ||
+    String(formData.get("skip_cross_test_duplicate_check") ?? "") === "1";
+
   parsedFile.rows.forEach(({ values: row, rowNumber }, rowIndex) => {
     // Option 1: Automatic slot assignment (q1, q2...) for mock test uploads
     // Completely frees the admin from managing random import_keys in Excel
@@ -648,6 +653,10 @@ async function importQuestions(
       const existingMatch = existingByText.get(normCanonical);
       if (existingMatch) {
         if (mockTest) {
+          const alreadyInThisTest = existingMatch.assignedMockTests.some((t) => t.id === mockTest.id);
+          if (alreadyInThisTest && mode === "add") {
+            errors.push(`Row ${rowNumber}: Duplicate question! This question is already assigned to this Mock Test.`);
+          }
           const otherTests = existingMatch.assignedMockTests.filter((t) => t.id !== mockTest.id);
           // Questions are allowed to repeat between a subject-wise test and a full paper mock test
           const conflictingTests = otherTests.filter((t) => {
@@ -655,11 +664,11 @@ async function importQuestions(
             if (mockTest.test_scope === "subject" && t.testScope === "paper") return false;
             return true;
           });
-          if (conflictingTests.length > 0) {
+          if (!skipCrossTestDuplicateCheck && conflictingTests.length > 0) {
             errors.push(
               `Row ${rowNumber}: Duplicate question! This question already exists in "${conflictingTests[0].title}". Questions cannot be repeated across mock tests with the same scope in this paper.`
             );
-          } else if (subject && existingMatch.subjectId !== subject.id) {
+          } else if (!skipCrossTestDuplicateCheck && subject && existingMatch.subjectId !== subject.id) {
             errors.push(
               `Row ${rowNumber}: Duplicate question! An identical question already exists under ${existingMatch.subjectName}.`
             );

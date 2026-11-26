@@ -15,7 +15,7 @@ async function draft(mockTestId: string, allowPublishedWithoutAttempts = false) 
   if (!user) return { supabase, error: "You must be logged in." };
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return { supabase, error: "You are not authorized to manage Questions." };
-  const { data: mockTest } = await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count").eq("id", mockTestId).maybeSingle();
+  const { data: mockTest } = await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count, allow_duplicate_questions").eq("id", mockTestId).maybeSingle();
   if (!mockTest) return { supabase, error: "Mock Test not found." };
   const { count } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTestId);
   if ((count ?? 0) > 0) {
@@ -73,7 +73,9 @@ export async function assignQuestion(mockTestId: string, _previous: AssignmentSt
     // Allow questions to repeat between subject tests and full paper mocks
     return (t.test_scope as string) === currentScope;
   });
-  const siblingTestIds = filteredSiblings.map((t) => t.id);
+  const siblingTestIds = result.mockTest.allow_duplicate_questions
+    ? [mockTestId]
+    : filteredSiblings.map((t) => t.id);
   const siblingTestMap = new Map(filteredSiblings.map((t) => [t.id, t.title]));
 
   if (siblingTestIds.length > 0) {

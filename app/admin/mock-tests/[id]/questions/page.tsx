@@ -15,7 +15,7 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
   const db = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
 
   const [testResult, papersResult, subjectsResult, assignmentsResult] = await Promise.all([
-    db.from("mock_tests").select("id, paper_id, subject_id, test_scope, title, status, target_question_count").eq("id", id).maybeSingle(),
+    db.from("mock_tests").select("id, paper_id, subject_id, test_scope, title, status, target_question_count, allow_duplicate_questions").eq("id", id).maybeSingle(),
     db.from("papers").select("id, name, default_correct_marks, default_negative_marks"),
     db.from("subjects").select("id, paper_id, name, display_order"),
     db.from("mock_test_questions").select("id, question_id, question_order, marks, negative_marks").eq("mock_test_id", id).order("question_order"),
@@ -98,7 +98,7 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
     <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">{paper?.name ?? "Mock test"}{subjectName ? ` · ${subjectName}` : ""}</p>
     <h1 className="mt-2 text-3xl font-black">{test.title}: Questions</h1>
     <p className="mt-2 max-w-3xl text-slate-600">Manage only this mock test&apos;s questions. Upload a file, add one question, edit a question, remove it, or replace the full draft.</p>
-    <MockTestCsvImport mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestionCount={assignments.length} paperName={paper?.name ?? "this Paper"} subjectName={subjectName} />
+    <MockTestCsvImport mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestionCount={assignments.length} paperName={paper?.name ?? "this Paper"} subjectName={subjectName} defaultSkipCrossTestDuplicateCheck={Boolean(test.allow_duplicate_questions)} />
     <QuestionAssignments mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestions={assignments} questionsPath={questionsPath} returnTo={mockTestsPath} />
   </main>;
 }

@@ -460,6 +460,10 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
       <label className="block text-sm font-bold">Duration in minutes<input name="duration_minutes" type="number" min="1" required value={durationMinutes} onChange={(e) => { setDurationMinutes(e.target.value); setIsDurationCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
       <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required value={targetQuestionCount} onChange={(e) => { setTargetQuestionCount(e.target.value); setIsTargetCountCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
       <MockTestPdfField />
+      <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm md:col-span-2">
+        <input name="allow_duplicate_questions" type="checkbox" className="h-4 w-4 shrink-0" />
+        <span className="font-bold text-slate-900">Allow duplicates</span>
+      </label>
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
         <strong>Student access</strong>
         <div className="mt-3">

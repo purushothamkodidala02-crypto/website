@@ -68,13 +68,15 @@ export async function checkQuestionDuplicate(
   if (!paperSubjectIds.length) return { isDuplicate: false };
 
   let currentTestScope = "paper";
+  let allowDuplicateQuestions = false;
   if (mockTestId) {
     const { data: mt } = await supabase
       .from("mock_tests")
-      .select("test_scope")
+      .select("test_scope, allow_duplicate_questions")
       .eq("id", mockTestId)
       .maybeSingle();
     currentTestScope = mt?.test_scope ?? "paper";
+    allowDuplicateQuestions = Boolean(mt?.allow_duplicate_questions);
   }
 
   let query = supabase
@@ -120,6 +122,16 @@ export async function checkQuestionDuplicate(
   }
 
   if (mockTestId) {
+    const inThisTest = assignedTests.some((t) => t.id === mockTestId);
+    if (inThisTest) {
+      return {
+        isDuplicate: true,
+        message: "This question is already added to this Mock Test.",
+      };
+    }
+    if (allowDuplicateQuestions) {
+      return { isDuplicate: false };
+    }
     const otherTest = assignedTests.find((t) => {
       if (t.id === mockTestId) return false;
       const rawMtq = (match.mock_test_questions ?? []).find(
@@ -136,13 +148,6 @@ export async function checkQuestionDuplicate(
         isDuplicate: true,
         message: `This question already exists in "${otherTest.title}" in this paper series.`,
         foundInTestTitle: otherTest.title,
-      };
-    }
-    const inThisTest = assignedTests.some((t) => t.id === mockTestId);
-    if (inThisTest) {
-      return {
-        isDuplicate: true,
-        message: "This question is already added to this Mock Test.",
       };
     }
   }
@@ -198,7 +203,7 @@ export async function createQuestion(
   }
 
   const { data: mockTest } = mockTestId
-    ? await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count").eq("id", mockTestId).maybeSingle()
+    ? await supabase.from("mock_tests").select("id, paper_id, subject_id, test_scope, status, target_question_count, allow_duplicate_questions").eq("id", mockTestId).maybeSingle()
     : { data: null };
   if (mockTestId && (!mockTest || mockTest.status !== "draft")) {
     return { success: false, message: "Only a draft Mock Test can receive a new question." };
@@ -303,17 +308,19 @@ export async function createQuestion(
             message: "This question is already added to this Mock Test.",
           };
         }
-        const otherTest = assignedTests.find((t) => t.id !== mockTest.id);
-        if (otherTest) {
+        if (!mockTest.allow_duplicate_questions) {
+          const otherTest = assignedTests.find((t) => t.id !== mockTest.id);
+          if (otherTest) {
+            return {
+              success: false,
+              message: `Duplicate question detected! This question already exists in "${otherTest.title}". Questions cannot be repeated across mock tests in the same paper series.`,
+            };
+          }
           return {
             success: false,
-            message: `Duplicate question detected! This question already exists in "${otherTest.title}". Questions cannot be repeated across mock tests in the same paper series.`,
+            message: "This question already exists in the Question Bank for this Paper. Questions cannot be duplicated.",
           };
         }
-        return {
-          success: false,
-          message: "This question already exists in the Question Bank for this Paper. Questions cannot be duplicated.",
-        };
       } else {
         const subjectName = paperSubjects?.find((s) => s.id === match.subject_id)?.name ?? "the selected Subject";
         return {

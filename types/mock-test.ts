@@ -35,6 +35,7 @@ export interface MockTest {
   access_type: MockTestAccessType;
   price_inr: number | null;
   pdf_url?: string | null;
+  allow_duplicate_questions?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -60,4 +61,5 @@ export interface CreateMockTestInput {
   access_type?: MockTestAccessType;
   price_inr?: number | null;
   pdf_url?: string | null;
+  allow_duplicate_questions?: boolean;
 }

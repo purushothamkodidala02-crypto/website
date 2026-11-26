@@ -16,7 +16,7 @@ export default async function EditMockTestPage({ params, searchParams }: { param
   const backHref = mockTestsListReturnTo(returnTo);
   const supabase = await createClient();
   const [testResult, subjectsResult, papersResult, groupsResult, categoriesResult, specializationsResult, sectionsResult] = await Promise.all([
-    supabase.from("mock_tests").select("id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, slug, description, seo_title, seo_description, instructions, duration_minutes, target_question_count, difficulty, status, version, display_order, published_at, access_type, price_inr, pdf_url, created_at, updated_at").eq("id", id).maybeSingle(),
+    supabase.from("mock_tests").select("id, paper_id, subject_id, subject_section_id, test_scope, series_number, title, slug, description, seo_title, seo_description, instructions, duration_minutes, target_question_count, difficulty, status, version, display_order, published_at, access_type, price_inr, pdf_url, allow_duplicate_questions, created_at, updated_at").eq("id", id).maybeSingle(),
     supabase.from("subjects").select("id, paper_id, name").order("display_order"),
     supabase.from("papers").select("id, exam_group_id, specialization_id, name, duration_minutes, display_order"),
     supabase.from("exam_groups").select("id, exam_id, name"),
