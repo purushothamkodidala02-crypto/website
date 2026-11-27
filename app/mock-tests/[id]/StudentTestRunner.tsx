@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { containsTeluguText, FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { LoadingSpinner } from "@/components/feedback/LoadingSpinner";
@@ -203,7 +204,57 @@ export function StudentTestRunner({
   const [pausing, setPausing] = useState(false);
   const [paused, setPaused] = useState(Boolean(initialPaused));
   const [pauseError, setPauseError] = useState("");
+  const router = useRouter();
   const [submission, setSubmission] = useState<SubmitAttemptResult | null>(null);
+  const submittedStorageKey = `varadhi_submitted_session_${sessionId}`;
+
+  const persistSubmittedSession = useCallback(
+    (result: SubmitAttemptResult, timeUp: boolean) => {
+      try {
+        sessionStorage.setItem(
+          submittedStorageKey,
+          JSON.stringify({ result, isTimeUp: timeUp }),
+        );
+      } catch {
+        // Ignore private browsing storage errors
+      }
+    },
+    [submittedStorageKey],
+  );
+
+  const restoreSubmittedSessionFromStorage = useCallback(() => {
+    try {
+      const raw = sessionStorage.getItem(submittedStorageKey);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw) as { result?: SubmitAttemptResult; isTimeUp?: boolean } | null;
+      if (parsed?.result && (parsed.result.success || hasValidScore(parsed.result.score))) {
+        isFinishingRef.current = true;
+        if (parsed.isTimeUp) {
+          setIsTimeUp(true);
+        }
+        setSubmission(parsed.result);
+        router.refresh();
+        return true;
+      }
+    } catch {
+      // Ignore malformed storage payload
+    }
+    return false;
+  }, [router, submittedStorageKey]);
+
+  useLayoutEffect(() => {
+    restoreSubmittedSessionFromStorage();
+  }, [restoreSubmittedSessionFromStorage]);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        restoreSubmittedSessionFromStorage();
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [restoreSubmittedSessionFromStorage]);
   const isFullscreen = useSyncExternalStore(
     subscribeToFullscreenChange,
     isCurrentlyFullscreen,
@@ -466,7 +517,9 @@ export function StudentTestRunner({
       }
 
       if (res && (res.success || hasValidScore(res.score))) {
+        persistSubmittedSession(res, autoSubmitDueToTime);
         setSubmission(res);
+        router.refresh();
       } else {
         setSubmission(
           res ?? {
@@ -474,13 +527,16 @@ export function StudentTestRunner({
             message: "Your answers are saved in your account. Check your result in the dashboard.",
           },
         );
+        router.refresh();
       }
     } catch (err) {
       console.error("Error submitting test attempt:", err);
       try {
         const verified = await verifySubmittedAttempt(sessionId, mockTestId);
         if (verified.success && verified.attempt && hasValidScore(verified.attempt.score)) {
+          persistSubmittedSession(verified.attempt, autoSubmitDueToTime);
           setSubmission(verified.attempt);
+          router.refresh();
           return;
         }
         const supabase = createClient();
@@ -495,7 +551,7 @@ export function StudentTestRunner({
             .limit(1)
             .maybeSingle();
           if (latestAttempt && hasValidScore(latestAttempt.score)) {
-            setSubmission({
+            const recovered: SubmitAttemptResult = {
               success: true,
               message: "Attempt submitted successfully.",
               attemptId: String(latestAttempt.id),
@@ -504,7 +560,10 @@ export function StudentTestRunner({
               correctAnswers: Number(latestAttempt.correct_answers ?? 0),
               incorrectAnswers: Number(latestAttempt.incorrect_answers ?? 0),
               unansweredQuestions: Number(latestAttempt.unanswered_questions ?? 0),
-            });
+            };
+            persistSubmittedSession(recovered, autoSubmitDueToTime);
+            setSubmission(recovered);
+            router.refresh();
             return;
           }
         }
@@ -515,11 +574,12 @@ export function StudentTestRunner({
         success: false,
         message: "Your answers are saved in your account. Check your result in the dashboard.",
       });
+      router.refresh();
     } finally {
       setSubmitting(false);
       void exitFullscreenSafely();
     }
-  }, [answers, flushSaves, mockTestId, sessionId, submission, submitting]);
+  }, [answers, flushSaves, mockTestId, persistSubmittedSession, router, sessionId, submission, submitting]);
 
   useEffect(() => {
     if (submission || paused) return;
@@ -587,6 +647,23 @@ export function StudentTestRunner({
           .maybeSingle();
 
         if (session) {
+          if (session.session_state === "submitted" || session.submitted_at) {
+            isFinishingRef.current = true;
+            const verified = await verifySubmittedAttempt(sessionId, mockTestId);
+            const resolvedResult: SubmitAttemptResult =
+              verified.success && verified.attempt && hasValidScore(verified.attempt.score)
+                ? verified.attempt
+                : {
+                    success: false,
+                    message: "Your answers are saved in your account. Check your result in the dashboard.",
+                  };
+            if (resolvedResult.success || hasValidScore(resolvedResult.score)) {
+              persistSubmittedSession(resolvedResult, false);
+            }
+            setSubmission(resolvedResult);
+            router.refresh();
+            return;
+          }
           const isDisplaced = Boolean(
             session.active_device_token &&
             deviceIdRef.current &&
@@ -609,7 +686,7 @@ export function StudentTestRunner({
     };
     const timer = window.setInterval(() => void heartbeat(), 4000);
     return () => window.clearInterval(timer);
-  }, [handleDisplaced, isDisplaced, paused, pausing, sessionId, submission, submitting]);
+  }, [handleDisplaced, isDisplaced, mockTestId, paused, pausing, persistSubmittedSession, router, sessionId, submission, submitting]);
 
   useEffect(() => {
     function navigateWithKeyboard(event: KeyboardEvent) {
