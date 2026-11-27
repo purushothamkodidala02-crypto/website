@@ -16,7 +16,10 @@ import {
   republishArchivedMockTest,
   restoreMockTestAsDraft,
 } from "./manage-actions";
-import { getMockTestNotificationPreviewAction } from "./notification-actions";
+import {
+  getMockTestNotificationPreviewAction,
+  sendMockTestNotificationAction,
+} from "./notification-actions";
 
 export function MockTestManagementButtons({
   mockTestId,
@@ -29,6 +32,7 @@ export function MockTestManagementButtons({
   correctedVersionStatus,
   canRepublish,
   adminAttemptCount = 0,
+  onStatusChange,
 }: {
   mockTestId: string;
   mockTestTitle: string;
@@ -40,6 +44,7 @@ export function MockTestManagementButtons({
   correctedVersionStatus?: MockTestStatus | null;
   canRepublish: boolean;
   adminAttemptCount?: number;
+  onStatusChange?: (mockTestId: string, nextStatus: MockTestStatus) => void;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -75,6 +80,8 @@ export function MockTestManagementButtons({
   async function confirmPublish() {
     if (!publishAction || pending) return;
     const action = publishAction;
+    const shouldNotify = notifyStudents;
+    const knownZeroRecipients = previewAudience?.count === 0;
     setPending(true);
     setMessage("");
     setNotice(null);
@@ -82,38 +89,61 @@ export function MockTestManagementButtons({
     try {
       const result =
         action === "publish"
-          ? await publishMockTest(mockTestId, { notifyStudents })
-          : await republishArchivedMockTest(mockTestId, { notifyStudents });
+          ? await publishMockTest(mockTestId)
+          : await republishArchivedMockTest(mockTestId);
 
       setPublishAction(null);
       if (!result.success) {
         setMessage(result.message);
         return;
       }
-      if (result.notificationResult?.attempted) {
-        if (result.notificationResult.sentCount > 0) {
-          setNotice({
-            type: "success",
-            text: `“${mockTestTitle}” published! Sent email alert to ${result.notificationResult.sentCount} previous test-taker${result.notificationResult.sentCount === 1 ? "" : "s"}.`,
+
+      onStatusChange?.(mockTestId, "published");
+      router.refresh();
+
+      if (shouldNotify && knownZeroRecipients) {
+        setNotice({
+          type: "info",
+          text: `“${mockTestTitle}” published! (Note: 0 previous test-takers found for this exam yet, so no automated emails were sent).`,
+        });
+      } else if (shouldNotify) {
+        setNotice({
+          type: "info",
+          text: `“${mockTestTitle}” published! Sending email alerts to students in the background…`,
+        });
+        void sendMockTestNotificationAction(mockTestId)
+          .then((notifyRes) => {
+            if (notifyRes.sentCount > 0) {
+              setNotice({
+                type: "success",
+                text: `“${mockTestTitle}” published! Sent email alert to ${notifyRes.sentCount} previous test-taker${notifyRes.sentCount === 1 ? "" : "s"}.`,
+              });
+              router.refresh();
+            } else if (notifyRes.recipientCount === 0) {
+              setNotice({
+                type: "info",
+                text: `“${mockTestTitle}” published! (Note: 0 previous test-takers found for this exam yet, so no automated emails were sent).`,
+              });
+            } else {
+              setNotice({
+                type: "warning",
+                text: `“${mockTestTitle}” published, but email alerts could not be sent: ${notifyRes.message}`,
+              });
+            }
+          })
+          .catch((notifyErr) => {
+            const errMsg = notifyErr instanceof Error ? notifyErr.message : "email notification encountered an issue";
+            setNotice({
+              type: "warning",
+              text: `“${mockTestTitle}” published, but email alerts could not be sent: ${errMsg}`,
+            });
           });
-        } else if (result.notificationResult.recipientCount === 0) {
-          setNotice({
-            type: "info",
-            text: `“${mockTestTitle}” published! (Note: 0 previous test-takers found for this exam yet, so no automated emails were sent).`,
-          });
-        } else {
-          setNotice({
-            type: "warning",
-            text: `“${mockTestTitle}” published, but email alerts could not be sent: ${result.notificationResult.message}`,
-          });
-        }
       } else {
         setNotice({
           type: "success",
           text: result.message,
         });
       }
-      router.refresh();
     } catch (err) {
       setPublishAction(null);
       setMessage(err instanceof Error ? err.message : "An unexpected error occurred while publishing.");
@@ -178,6 +208,12 @@ export function MockTestManagementButtons({
     if (result.replacementId) {
       router.push(`/admin/mock-tests/${result.replacementId}/questions`);
       return;
+    }
+
+    if (action === "hide") {
+      onStatusChange?.(mockTestId, "archived");
+    } else if (action === "restore") {
+      onStatusChange?.(mockTestId, "draft");
     }
 
     setPending(false);

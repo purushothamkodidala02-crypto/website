@@ -108,3 +108,89 @@ test("email template generation produces correct HTML and plain text structure",
   );
   assert.doesNotMatch(deduplicatedEmail.subject, /APPSC Endowment Officer - APPSC Endowment Officer/);
 });
+
+test("prioritizeCandidateRecipients puts inactive exam-takers first and recent signups at the bottom", async () => {
+  const [migration, { prioritizeCandidateRecipients }] = await Promise.all([
+    read("supabase/migrations/20261126140000_prioritize_inactive_mock_test_recipients.sql"),
+    import("../lib/notifications/recipient-priority.ts"),
+  ]);
+
+  assert.match(migration, /drop function if exists public\.get_mock_test_candidate_recipients\(uuid\);/);
+  assert.match(migration, /priority_tier text/);
+  assert.match(migration, /inactive_test_taker/);
+  assert.match(migration, /recent_signup/);
+
+  const now = new Date("2026-11-26T10:00:00Z");
+  const recipients = [
+    {
+      user_id: "u-new-today",
+      email: "new.today@example.com",
+      full_name: "New Today",
+      registered_at: "2026-11-26T08:00:00Z",
+      last_seen_at: "2026-11-26T08:00:00Z",
+      has_taken_exam: true,
+    },
+    {
+      user_id: "u-active",
+      email: "active@example.com",
+      full_name: "Active User",
+      registered_at: "2026-10-01T10:00:00Z",
+      last_seen_at: "2026-11-24T10:00:00Z",
+      has_taken_exam: true,
+    },
+    {
+      user_id: "u-inactive-10d",
+      email: "inactive10@example.com",
+      full_name: "Inactive 10d",
+      registered_at: "2026-09-01T10:00:00Z",
+      last_seen_at: "2026-11-16T10:00:00Z",
+      has_taken_exam: true,
+    },
+    {
+      user_id: "u-new-3d",
+      email: "new.3d@example.com",
+      full_name: "New 3d",
+      registered_at: "2026-11-23T10:00:00Z",
+      last_seen_at: "2026-11-23T10:00:00Z",
+      has_taken_exam: true,
+    },
+    {
+      user_id: "u-inactive-25d",
+      email: "inactive25@example.com",
+      full_name: "Inactive 25d",
+      registered_at: "2026-08-15T10:00:00Z",
+      last_seen_at: "2026-11-01T10:00:00Z",
+      has_taken_exam: true,
+    },
+  ];
+
+  const ordered = prioritizeCandidateRecipients(recipients, now);
+  assert.deepEqual(
+    ordered.map((r) => r.email),
+    [
+      "inactive25@example.com",
+      "inactive10@example.com",
+      "active@example.com",
+      "new.3d@example.com",
+      "new.today@example.com",
+    ]
+  );
+  assert.equal(ordered[0].priority_tier, "inactive_test_taker");
+  assert.equal(ordered[0].inactive_days, 25);
+  assert.equal(ordered[2].priority_tier, "active_or_entitled");
+  assert.equal(ordered[4].priority_tier, "recent_signup");
+});
+
+test("inactivity by last submitted test is denormalized and indexed for fast queries", async () => {
+  const optMigration = await read(
+    "supabase/migrations/20261126150000_optimize_inactivity_by_last_submitted_test.sql"
+  );
+
+  assert.match(optMigration, /add column if not exists last_test_submitted_at timestamptz/);
+  assert.match(optMigration, /create or replace function public\.sync_profile_last_test_submitted_at/);
+  assert.match(optMigration, /create trigger trg_sync_profile_last_test_submitted_at/);
+  assert.match(optMigration, /idx_test_attempt_sessions_mock_test_user/);
+  assert.match(optMigration, /idx_student_entitlements_product_expires_user/);
+  assert.match(optMigration, /idx_profiles_student_last_submitted/);
+  assert.match(optMigration, /coalesce\(prof\.last_test_submitted_at, u\.created_at\)/);
+});

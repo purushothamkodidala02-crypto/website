@@ -238,8 +238,27 @@ export function NotifyStudentsModal({
                       </span>
                     </p>
                     <p className="mt-1 text-xs text-slate-600">
-                      Select specific previous test-takers below and/or enter any user email addresses manually.
+                      Ordered by priority: <strong>inactive past test-takers (by last submitted test) first</strong>, active students next, and <strong>recently registered users at the bottom</strong>.
                     </p>
+
+                    {preview.recipients && preview.recipients.length > 0 && (() => {
+                      const inactiveCount = preview.recipients.filter((r) => r.priorityTier === "inactive_test_taker").length;
+                      const recentCount = preview.recipients.filter((r) => r.priorityTier === "recent_signup").length;
+                      const activeCount = preview.recipients.length - inactiveCount - recentCount;
+                      return (
+                        <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900">
+                            {inactiveCount} inactive (first)
+                          </span>
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900">
+                            {activeCount} active
+                          </span>
+                          <span className="rounded-full bg-slate-200/80 px-2 py-0.5 text-slate-700">
+                            {recentCount} new signup (bottom)
+                          </span>
+                        </div>
+                      );
+                    })()}
 
                     {preview.recipients && preview.recipients.length > 0 && (
                       <div className="mt-3 border-t border-teal-100 pt-3">
@@ -310,9 +329,21 @@ export function NotifyStudentsModal({
                                     </p>
                                   </div>
                                 </div>
-                                <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                                  {isSelected ? "Selected" : "Excluded"}
-                                </span>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  {student.priorityTier === "inactive_test_taker" && (
+                                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">
+                                      Inactive{typeof student.inactiveDays === "number" ? ` · ${student.inactiveDays}d` : ""}
+                                    </span>
+                                  )}
+                                  {student.priorityTier === "recent_signup" && (
+                                    <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800">
+                                      New signup
+                                    </span>
+                                  )}
+                                  <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                    {isSelected ? "Selected" : "Excluded"}
+                                  </span>
+                                </div>
                               </label>
                             );
                           })}

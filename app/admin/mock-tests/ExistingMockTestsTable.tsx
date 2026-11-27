@@ -88,6 +88,21 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   const [quickPreset, setQuickPreset] = useState<"all" | "needs-questions" | "ready-to-publish">("all");
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [statusOverrides, setStatusOverrides] = useState<
+    Record<string, { prev: MockTestStatus; next: MockTestStatus }>
+  >({});
+
+  const effectiveTests = useMemo(
+    () =>
+      tests.map((test) => {
+        const override = statusOverrides[test.id];
+        if (override && test.status === override.prev) {
+          return { ...test, status: override.next };
+        }
+        return test;
+      }),
+    [tests, statusOverrides]
+  );
 
   const handleSyncTitles = async () => {
     if (!window.confirm("Standardize all mock test titles in the database to match the canonical format? This will update any legacy titles.")) {
@@ -177,14 +192,14 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     search.trim()
   );
 
-  const readyDraftsCount = tests.filter(
+  const readyDraftsCount = effectiveTests.filter(
     (test) =>
       test.status === "draft" &&
       test.questionCount === test.targetQuestionCount &&
       test.questionCount - test.usableQuestionCount === 0,
   ).length;
 
-  const incompleteDraftsCount = tests.filter(
+  const incompleteDraftsCount = effectiveTests.filter(
     (test) =>
       test.status === "draft" &&
       (test.questionCount < test.targetQuestionCount ||
@@ -196,7 +211,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
     const queryWords = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
     const normalizedTags = selectedTags.map((t) => t.trim().toLowerCase()).filter(Boolean);
 
-    return tests.filter((test) => {
+    return effectiveTests.filter((test) => {
       if (quickPreset === "needs-questions") {
         const isNeeds =
           test.status === "draft" &&
@@ -243,13 +258,13 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
 
       return true;
     });
-  }, [location, search, selectedTags, stateId, status, scope, quickPreset, tests]);
+  }, [location, search, selectedTags, stateId, status, scope, quickPreset, effectiveTests]);
 
   const counts = {
-    all: tests.length,
-    draft: tests.filter((test) => test.status === "draft").length,
-    published: tests.filter((test) => test.status === "published").length,
-    archived: tests.filter((test) => test.status === "archived").length,
+    all: effectiveTests.length,
+    draft: effectiveTests.filter((test) => test.status === "draft").length,
+    published: effectiveTests.filter((test) => test.status === "published").length,
+    archived: effectiveTests.filter((test) => test.status === "archived").length,
   };
 
   const mockTestAdminUrl = useMemo(() => {
@@ -1045,6 +1060,12 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                         test.correctedVersionStatus === "draft"
                       }
                       adminAttemptCount={test.adminAttemptCount}
+                      onStatusChange={(id, nextStatus) =>
+                        setStatusOverrides((prev) => ({
+                          ...prev,
+                          [id]: { prev: test.status, next: nextStatus },
+                        }))
+                      }
                     />
 
                     <NotifyStudentsModal

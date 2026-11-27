@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { syncMockTestTitles } from "@/lib/admin/sync-mock-test-titles";
 import { safeRevalidateCatalogTag } from "@/lib/catalog-data";
-import { sendMockTestNotifications } from "@/lib/notifications/mock-test-alerts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { clearAdminTestAttempts, mockTestHasStudentAttempts } from "@/lib/admin-mock-test-exemptions";
@@ -27,21 +26,25 @@ async function getManagedMockTest(mockTestId: string) {
 
   if (userError || !user) return { supabase, error: "You must be logged in." };
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const [
+    { data: profile, error: profileError },
+    { data: mockTest, error: mockTestError },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("mock_tests")
+      .select("id, title, status, superseded_by_mock_test_id, replaces_mock_test_id")
+      .eq("id", mockTestId)
+      .single(),
+  ]);
 
   if (profileError || profile?.role !== "admin") {
     return { supabase, error: "You are not authorized to manage Mock Tests." };
   }
-
-  const { data: mockTest, error: mockTestError } = await supabase
-    .from("mock_tests")
-    .select("id, title, status, superseded_by_mock_test_id, replaces_mock_test_id")
-    .eq("id", mockTestId)
-    .single();
 
   if (mockTestError || !mockTest) return { supabase, error: "Mock Test not found." };
 
@@ -86,8 +89,7 @@ export async function archiveMockTest(mockTestId: string): Promise<MockTestManag
 }
 
 export async function publishMockTest(
-  mockTestId: string,
-  options?: { notifyStudents?: boolean }
+  mockTestId: string
 ): Promise<MockTestManagementResult> {
   try {
     const result = await getManagedMockTest(mockTestId);
@@ -149,48 +151,10 @@ export async function publishMockTest(
       };
     }
 
-    let notificationNote = "";
-    let notificationResult: MockTestManagementResult["notificationResult"] = undefined;
-    if (options?.notifyStudents) {
-      try {
-        const { data: { user } } = await result.supabase.auth.getUser();
-        const notifyRes = await sendMockTestNotifications({
-          mockTestId,
-          adminUserId: user?.id,
-        });
-        notificationResult = {
-          attempted: true,
-          sentCount: notifyRes.sentCount,
-          failedCount: notifyRes.failedCount,
-          recipientCount: notifyRes.recipientCount,
-          message: notifyRes.message,
-        };
-        if (notifyRes.sentCount > 0) {
-          notificationNote = ` and emailed ${notifyRes.sentCount} previous test-taker${notifyRes.sentCount === 1 ? "" : "s"}!`;
-        } else if (notifyRes.recipientCount === 0) {
-          notificationNote = " (Note: published, but no previous test-takers were found for this exam).";
-        } else {
-          notificationNote = ` (Note: published, but email alerts failed: ${notifyRes.message}).`;
-        }
-      } catch (notifyErr) {
-        console.error("Failed to send mock test notifications on publish:", notifyErr);
-        const errMsg = notifyErr instanceof Error ? notifyErr.message : "email notification encountered an issue";
-        notificationResult = {
-          attempted: true,
-          sentCount: 0,
-          failedCount: 0,
-          recipientCount: 0,
-          message: errMsg,
-        };
-        notificationNote = ` (Note: published, but ${errMsg}).`;
-      }
-    }
-
     revalidateMockTestPages(mockTestId);
     return {
       success: true,
-      message: `“${result.mockTest.title}” is published${notificationNote}.`,
-      notificationResult,
+      message: `“${result.mockTest.title}” is published.`,
     };
   } catch (err) {
     console.error("Unexpected error in publishMockTest:", err);
@@ -202,8 +166,7 @@ export async function publishMockTest(
 }
 
 export async function republishArchivedMockTest(
-  mockTestId: string,
-  options?: { notifyStudents?: boolean }
+  mockTestId: string
 ): Promise<MockTestManagementResult> {
   try {
     const result = await getManagedMockTest(mockTestId);
@@ -246,48 +209,10 @@ export async function republishArchivedMockTest(
       return { success: false, message: knownMessage ?? `Republishing failed: ${error.message}` };
     }
 
-    let notificationNote = "";
-    let notificationResult: MockTestManagementResult["notificationResult"] = undefined;
-    if (options?.notifyStudents) {
-      try {
-        const { data: { user } } = await result.supabase.auth.getUser();
-        const notifyRes = await sendMockTestNotifications({
-          mockTestId,
-          adminUserId: user?.id,
-        });
-        notificationResult = {
-          attempted: true,
-          sentCount: notifyRes.sentCount,
-          failedCount: notifyRes.failedCount,
-          recipientCount: notifyRes.recipientCount,
-          message: notifyRes.message,
-        };
-        if (notifyRes.sentCount > 0) {
-          notificationNote = ` and emailed ${notifyRes.sentCount} previous test-taker${notifyRes.sentCount === 1 ? "" : "s"}!`;
-        } else if (notifyRes.recipientCount === 0) {
-          notificationNote = " (Note: live again, but no previous test-takers were found for this exam).";
-        } else {
-          notificationNote = ` (Note: live again, but email alerts failed: ${notifyRes.message}).`;
-        }
-      } catch (notifyErr) {
-        console.error("Failed to send mock test notifications on republish:", notifyErr);
-        const errMsg = notifyErr instanceof Error ? notifyErr.message : "email notification encountered an issue";
-        notificationResult = {
-          attempted: true,
-          sentCount: 0,
-          failedCount: 0,
-          recipientCount: 0,
-          message: errMsg,
-        };
-        notificationNote = ` (Note: live again, but ${errMsg}).`;
-      }
-    }
-
     revalidateMockTestPages(mockTestId);
     return {
       success: true,
-      message: `“${result.mockTest.title}” is live again${notificationNote}.`,
-      notificationResult,
+      message: `“${result.mockTest.title}” is live again.`,
     };
   } catch (err) {
     console.error("Unexpected error in republishArchivedMockTest:", err);

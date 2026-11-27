@@ -3,15 +3,27 @@ import { mockTestUrl } from "@/lib/public-urls";
 import { absoluteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildMockTestNotificationEmail, formatMockTestNotificationSubject } from "./email-template";
+import {
+  prioritizeCandidateRecipients,
+  type CandidateRecipient,
+  type RecipientPriorityTier,
+} from "./recipient-priority";
 
-export { buildMockTestNotificationEmail, formatMockTestNotificationSubject };
+export {
+  buildMockTestNotificationEmail,
+  formatMockTestNotificationSubject,
+  prioritizeCandidateRecipients,
+  type CandidateRecipient,
+  type RecipientPriorityTier,
+};
 
 const BREVO_SEND_EMAIL_URL = "https://api.brevo.com/v3/smtp/email";
 
-export type CandidateRecipient = {
-  user_id: string;
+export type PreviewRecipient = {
   email: string;
-  full_name: string;
+  name: string;
+  priorityTier?: RecipientPriorityTier;
+  inactiveDays?: number | null;
 };
 
 export type MockTestNotificationPreview = {
@@ -23,8 +35,8 @@ export type MockTestNotificationPreview = {
   durationMinutes: number;
   questionCount: number;
   recipientCount: number;
-  recipientsPreview: { email: string; name: string }[];
-  recipients: { email: string; name: string }[];
+  recipientsPreview: PreviewRecipient[];
+  recipients: PreviewRecipient[];
   alreadyNotifiedAt: string | null;
   previousSendCount: number;
   previousSends: {
@@ -67,6 +79,11 @@ async function getDbClient() {
   return await createClient();
 }
 
+function unwrapRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
 export async function fetchMockTestWithDetails(mockTestId: string) {
   const admin = await getDbClient();
 
@@ -81,7 +98,32 @@ export async function fetchMockTestWithDetails(mockTestId: string) {
       series_number,
       status,
       paper_id,
-      subject_id
+      subject_id,
+      subjects(name),
+      papers!inner(
+        id,
+        name,
+        slug,
+        exam_group_id,
+        exam_groups!inner(
+          id,
+          name,
+          slug,
+          exam_id,
+          exams!inner(
+            id,
+            name,
+            slug,
+            state_id,
+            exam_states!inner(
+              id,
+              name,
+              code,
+              slug
+            )
+          )
+        )
+      )
     `)
     .eq("id", mockTestId)
     .single();
@@ -90,47 +132,31 @@ export async function fetchMockTestWithDetails(mockTestId: string) {
     throw new Error(`Mock test not found: ${error?.message ?? "unknown"}`);
   }
 
-  const { data: paper } = await admin
-    .from("papers")
-    .select("id, name, slug, exam_group_id")
-    .eq("id", test.paper_id)
-    .single();
+  type JoinedState = { id: string; name: string; code: string; slug: string };
+  type JoinedExam = { id: string; name: string; slug: string; state_id: string; exam_states: JoinedState | JoinedState[] };
+  type JoinedGroup = { id: string; name: string; slug: string; exam_id: string; exams: JoinedExam | JoinedExam[] };
+  type JoinedPaper = { id: string; name: string; slug: string; exam_group_id: string; exam_groups: JoinedGroup | JoinedGroup[] };
+  type JoinedSubject = { name: string };
 
+  const joined = test as typeof test & {
+    papers?: JoinedPaper | JoinedPaper[] | null;
+    subjects?: JoinedSubject | JoinedSubject[] | null;
+  };
+
+  const paper = unwrapRelation(joined.papers);
   if (!paper) throw new Error("Paper associated with mock test not found");
 
-  const { data: group } = await admin
-    .from("exam_groups")
-    .select("id, name, slug, exam_id")
-    .eq("id", paper.exam_group_id)
-    .single();
-
+  const group = unwrapRelation(paper.exam_groups);
   if (!group) throw new Error("Exam group associated with paper not found");
 
-  const { data: exam } = await admin
-    .from("exams")
-    .select("id, name, slug, state_id")
-    .eq("id", group.exam_id)
-    .single();
-
+  const exam = unwrapRelation(group.exams);
   if (!exam) throw new Error("Exam associated with exam group not found");
 
-  const { data: state } = await admin
-    .from("exam_states")
-    .select("id, name, code, slug")
-    .eq("id", exam.state_id)
-    .single();
-
+  const state = unwrapRelation(exam.exam_states);
   if (!state) throw new Error("State associated with exam not found");
 
-  let subjectName: string | null = null;
-  if (test.subject_id) {
-    const { data: subject } = await admin
-      .from("subjects")
-      .select("name")
-      .eq("id", test.subject_id)
-      .maybeSingle();
-    subjectName = subject?.name ?? null;
-  }
+  const subject = unwrapRelation(joined.subjects);
+  const subjectName: string | null = subject?.name ?? null;
 
   const formattedTitle = studentFacingMockTestTitle({
     examName: group.name,
@@ -143,11 +169,41 @@ export async function fetchMockTestWithDetails(mockTestId: string) {
   const targetUrl = absoluteUrl(relativeUrl);
 
   return {
-    test,
-    paper,
-    group,
-    exam,
-    state,
+    test: {
+      id: test.id,
+      title: test.title,
+      slug: test.slug,
+      duration_minutes: test.duration_minutes,
+      target_question_count: test.target_question_count,
+      series_number: test.series_number,
+      status: test.status,
+      paper_id: test.paper_id,
+      subject_id: test.subject_id,
+    },
+    paper: {
+      id: paper.id,
+      name: paper.name,
+      slug: paper.slug,
+      exam_group_id: paper.exam_group_id,
+    },
+    group: {
+      id: group.id,
+      name: group.name,
+      slug: group.slug,
+      exam_id: group.exam_id,
+    },
+    exam: {
+      id: exam.id,
+      name: exam.name,
+      slug: exam.slug,
+      state_id: exam.state_id,
+    },
+    state: {
+      id: state.id,
+      name: state.name,
+      code: state.code,
+      slug: state.slug,
+    },
     formattedTitle,
     targetUrl,
   };
@@ -163,7 +219,7 @@ export async function fetchEligibleStudentsForMockTest(mockTestId: string): Prom
   );
 
   if (!rpcError && Array.isArray(rpcRecipients)) {
-    return rpcRecipients as CandidateRecipient[];
+    return prioritizeCandidateRecipients(rpcRecipients as CandidateRecipient[]);
   }
 
   // 2. Fallback query if RPC isn't loaded yet
@@ -187,17 +243,20 @@ export async function fetchEligibleStudentsForMockTest(mockTestId: string): Prom
   const testIds = (groupTests ?? []).map((t) => t.id);
   if (testIds.length === 0) return [];
 
-  // Query test attempts
-  const { data: attempts } = await admin
-    .from("test_attempts")
-    .select("user_id")
-    .in("mock_test_id", testIds);
+  // Query test attempts and sessions (only user_ids + submitted_at fallback)
+  const [{ data: attempts }, { data: sessions }] = await Promise.all([
+    admin.from("test_attempts").select("user_id, submitted_at").in("mock_test_id", testIds),
+    admin.from("test_attempt_sessions").select("user_id").in("mock_test_id", testIds),
+  ]);
 
-  // Query test attempt sessions
-  const { data: sessions } = await admin
-    .from("test_attempt_sessions")
-    .select("user_id")
-    .in("mock_test_id", testIds);
+  const lastSubmittedByUser = new Map<string, string>();
+  for (const a of attempts ?? []) {
+    if (!a.submitted_at) continue;
+    const prev = lastSubmittedByUser.get(a.user_id);
+    if (!prev || Date.parse(a.submitted_at) > Date.parse(prev)) {
+      lastSubmittedByUser.set(a.user_id, a.submitted_at);
+    }
+  }
 
   const distinctUserIds = [...new Set([
     ...(attempts ?? []).map((a) => a.user_id),
@@ -206,40 +265,60 @@ export async function fetchEligibleStudentsForMockTest(mockTestId: string): Prom
 
   if (distinctUserIds.length === 0) return [];
 
-  // Query user emails and profiles
+  // Query user emails and profiles (using denormalized last_test_submitted_at)
   const [{ data: profiles }, emailResult] = await Promise.all([
-    admin.from("profiles").select("id, full_name, role").in("id", distinctUserIds),
+    admin
+      .from("profiles")
+      .select("id, full_name, role, created_at, last_test_submitted_at")
+      .in("id", distinctUserIds),
     admin.rpc("get_admin_user_emails", { requested_user_ids: distinctUserIds.slice(0, 200) }),
   ]);
 
-  const profileMap = new Map((profiles ?? []).filter((p) => p.role === "student").map((p) => [p.id, p.full_name]));
+  const profileMap = new Map(
+    (profiles ?? [])
+      .filter((p) => p.role === "student")
+      .map((p) => [
+        p.id,
+        {
+          full_name: p.full_name,
+          created_at: p.created_at as string | null,
+          last_test_submitted_at: (p as { last_test_submitted_at?: string | null }).last_test_submitted_at ?? null,
+        },
+      ])
+  );
   const emailRows = (emailResult.data ?? []) as { user_id: string; email: string }[];
 
   const recipients: CandidateRecipient[] = [];
   for (const row of emailRows) {
-    if (row.email && profileMap.has(row.user_id)) {
+    const prof = profileMap.get(row.user_id);
+    if (row.email && prof) {
+      const lastSubmittedAt =
+        prof.last_test_submitted_at ?? lastSubmittedByUser.get(row.user_id) ?? prof.created_at ?? null;
       recipients.push({
         user_id: row.user_id,
         email: row.email,
-        full_name: profileMap.get(row.user_id)?.trim() || "Student",
+        full_name: prof.full_name?.trim() || "Student",
+        last_seen_at: lastSubmittedAt,
+        registered_at: prof.created_at ?? null,
+        has_taken_exam: true,
       });
     }
   }
 
-  return recipients;
+  return prioritizeCandidateRecipients(recipients);
 }
 
 export async function previewMockTestNotification(mockTestId: string): Promise<MockTestNotificationPreview> {
   const admin = await getDbClient();
-  const details = await fetchMockTestWithDetails(mockTestId);
-  const recipients = await fetchEligibleStudentsForMockTest(mockTestId);
-
-  // Check if already notified
-  const { data: notificationHistory } = await admin
-    .from("mock_test_notifications")
-    .select("id, sent_at, recipient_count, metadata")
-    .eq("mock_test_id", mockTestId)
-    .order("sent_at", { ascending: false });
+  const [details, recipients, { data: notificationHistory }] = await Promise.all([
+    fetchMockTestWithDetails(mockTestId),
+    fetchEligibleStudentsForMockTest(mockTestId),
+    admin
+      .from("mock_test_notifications")
+      .select("id, sent_at, recipient_count, metadata")
+      .eq("mock_test_id", mockTestId)
+      .order("sent_at", { ascending: false }),
+  ]);
 
   const history = (notificationHistory ?? []) as {
     id: string;
@@ -258,8 +337,18 @@ export async function previewMockTestNotification(mockTestId: string): Promise<M
     durationMinutes: details.test.duration_minutes,
     questionCount: details.test.target_question_count,
     recipientCount: recipients.length,
-    recipientsPreview: recipients.slice(0, 5).map((r) => ({ email: r.email, name: r.full_name })),
-    recipients: recipients.map((r) => ({ email: r.email, name: r.full_name })),
+    recipientsPreview: recipients.slice(0, 5).map((r) => ({
+      email: r.email,
+      name: r.full_name,
+      priorityTier: r.priority_tier ?? undefined,
+      inactiveDays: r.inactive_days ?? null,
+    })),
+    recipients: recipients.map((r) => ({
+      email: r.email,
+      name: r.full_name,
+      priorityTier: r.priority_tier ?? undefined,
+      inactiveDays: r.inactive_days ?? null,
+    })),
     alreadyNotifiedAt: latestNotification?.sent_at ?? null,
     previousSendCount: history.reduce((sum, item) => sum + (item.recipient_count || 0), 0),
     previousSends: history.map((item) => ({
@@ -291,8 +380,10 @@ export async function sendMockTestNotifications({
     throw new Error("BREVO_API_KEY is not configured on the server.");
   }
 
-  const details = await fetchMockTestWithDetails(mockTestId);
-  const eligible = await fetchEligibleStudentsForMockTest(mockTestId);
+  const [details, eligible] = await Promise.all([
+    fetchMockTestWithDetails(mockTestId),
+    fetchEligibleStudentsForMockTest(mockTestId),
+  ]);
 
   let recipients: CandidateRecipient[];
   if (selectedEmails !== undefined) {

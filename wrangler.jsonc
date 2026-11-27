@@ -12,12 +12,12 @@
   "workers_dev": true,
   "routes": [
     {
-      "pattern": "varadhiprep.in",
-      "custom_domain": true
+      "pattern": "varadhiprep.in/*",
+      "zone_name": "varadhiprep.in"
     },
     {
-      "pattern": "www.varadhiprep.in",
-      "custom_domain": true
+      "pattern": "www.varadhiprep.in/*",
+      "zone_name": "varadhiprep.in"
     }
   ],
   "vars": {

@@ -49,8 +49,8 @@ export function SingleDeviceWatcher() {
       }
     };
 
-    // Check periodically every 60 seconds and debounced when tab becomes active
-    const interval = window.setInterval(() => void verify(), 60000);
+    // Check periodically every 3 minutes and debounced when tab becomes active
+    const interval = window.setInterval(() => void verify(), 180000);
     let visibilityTimer: ReturnType<typeof setTimeout> | undefined;
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {

@@ -628,11 +628,11 @@ export function StudentTestRunner({
         setRemaining(result.remaining);
       }
     };
-    const timer = window.setInterval(() => void sync(), 15000);
+    const timer = window.setInterval(() => void sync(), 120000);
     return () => window.clearInterval(timer);
   }, [handleDisplaced, isDisplaced, paused, pausing, sessionId, submission, submitting]);
 
-  // Fast device displacement heartbeat (detects when student resumes on mobile within ~4 seconds)
+  // Device displacement heartbeat (detects when student resumes on mobile within ~15 seconds)
   useEffect(() => {
     if (submission || paused || pausing || submitting || isDisplaced) return;
     const heartbeat = async () => {
@@ -684,7 +684,7 @@ export function StudentTestRunner({
         void handleDisplaced();
       }
     };
-    const timer = window.setInterval(() => void heartbeat(), 4000);
+    const timer = window.setInterval(() => void heartbeat(), 15000);
     return () => window.clearInterval(timer);
   }, [handleDisplaced, isDisplaced, mockTestId, paused, pausing, persistSubmittedSession, router, sessionId, submission, submitting]);
 
