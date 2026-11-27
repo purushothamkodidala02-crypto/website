@@ -229,7 +229,12 @@ const fetchDashboardCatalogData = unstable_cache(
       supabase.from("exams").select("id, state_id, name, slug, is_active").order("display_order"),
       supabase.from("exam_groups").select("id, exam_id, name, slug, is_active").order("display_order"),
       supabase.from("papers").select("id, exam_group_id, specialization_id, name, slug, display_order, is_active").order("display_order"),
-      supabase.from("mock_tests").select("id, paper_id, title, slug").eq("status", "published"),
+      supabase
+        .from("mock_tests")
+        .select("id, paper_id, subject_id, test_scope, series_number, display_order, title, duration_minutes, slug, access_type")
+        .eq("status", "published")
+        .order("display_order", { ascending: true })
+        .order("series_number", { ascending: true }),
     ]);
 
     return {
@@ -240,7 +245,7 @@ const fetchDashboardCatalogData = unstable_cache(
       tests: testsResult.data ?? [],
     };
   },
-  ["dashboard-catalog-v1"],
+  ["dashboard-catalog-v2"],
   { tags: [PUBLIC_CATALOG_TAG], revalidate: 300 },
 );
 

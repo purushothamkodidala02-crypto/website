@@ -5,9 +5,11 @@ import Link from "next/link";
 
 export function ViewTestLink({
   href,
+  label = "View test",
   className = "inline-flex items-center gap-1.5 rounded-lg bg-[#ea580c] px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-2xs transition hover:bg-[#d94f08] min-h-[36px]",
 }: {
   href: string;
+  label?: string;
   className?: string;
 }) {
   const [isOpening, setIsOpening] = useState(false);
@@ -29,7 +31,7 @@ export function ViewTestLink({
         </>
       ) : (
         <>
-          <span>View test</span>
+          <span>{label}</span>
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
           </svg>

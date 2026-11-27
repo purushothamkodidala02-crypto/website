@@ -35,9 +35,11 @@ test("Dashboard provides daily prep streak, practice quiz CTA, and exam cut-off 
 
   // Exam Readiness & Cut-off Predictor
   assert.match(dashboard, /Exam Readiness &amp; Cut-Off Predictor/);
-  assert.match(dashboard, /TSLPRB &amp; APPSC Score Calibration/);
+  assert.match(dashboard, /activeCalibrationLabel/);
+  assert.match(dashboard, /role="meter"/);
   assert.match(dashboard, /cutOffBenchmark = 40/);
   assert.match(dashboard, /meritBenchmark = 55/);
   assert.match(dashboard, /weakestSubject/);
-  assert.match(dashboard, /Fastest Rank Booster/);
+  assert.match(dashboard, /Focus area:/);
+  assert.match(dashboard, /selectRecommendedMockTests/);
 });

@@ -15,6 +15,11 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveStudentDisplayInfo } from "@/lib/student-name";
 import { SupportPromptModal } from "@/components/growth/SupportPromptModal";
 import { getGrowthSettings } from "@/lib/growth-settings";
+import {
+  selectRecommendedMockTests,
+  type DashboardCatalogMockTest,
+  type RecommendationReason,
+} from "@/lib/dashboard-recommendations";
 
 type Attempt = {
   id: string;
@@ -36,15 +41,6 @@ type AttemptHistorySummary = {
   latest_mock_test_id: string | null;
 };
 
-type AvailableMockTest = {
-  id: string;
-  paper_id: string;
-  title: string;
-  duration_minutes: number;
-  slug: string;
-  access_type: "free" | "paid";
-};
-
 type SubjectAnalytics = {
   subject_name: string;
   answered_questions: number;
@@ -54,6 +50,30 @@ type SubjectAnalytics = {
 };
 
 const attemptsPerPage = 20;
+
+function computeCooldownCutoffIso(days: number): string {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+function computeStudyStreak(attempts: Attempt[]): number {
+  if (attempts.length === 0) return 0;
+  const attemptDates = new Set(
+    attempts
+      .filter((a) => Boolean(a.submitted_at))
+      .map((a) => new Date(a.submitted_at).toISOString().slice(0, 10)),
+  );
+  const nowMs = Date.now();
+  const today = new Date(nowMs).toISOString().slice(0, 10);
+  const yesterday = new Date(nowMs - 86400000).toISOString().slice(0, 10);
+  if (!attemptDates.has(today) && !attemptDates.has(yesterday)) return 0;
+  let streak = 0;
+  let current = attemptDates.has(today) ? new Date(nowMs) : new Date(nowMs - 86400000);
+  while (attemptDates.has(current.toISOString().slice(0, 10))) {
+    streak++;
+    current = new Date(current.getTime() - 86400000);
+  }
+  return streak;
+}
 
 export default async function Dashboard({
   searchParams,
@@ -124,7 +144,7 @@ export default async function Dashboard({
       return (verifiedGrowthCount ?? 0) > 0;
     }
 
-    const cutoffDate = new Date(Date.now() - supporterCooldownDays * 24 * 60 * 60 * 1000).toISOString();
+    const cutoffDate = computeCooldownCutoffIso(supporterCooldownDays);
 
     const { data: recentPaidOrder } = await supabase
       .from("payment_orders")
@@ -147,12 +167,41 @@ export default async function Dashboard({
     return Boolean(recentGrowthPayment);
   });
 
+  const attemptedTestsMetaPromise = isFirstPage
+    ? userPromise.then(async (user) => {
+        if (!user) return [] as { mock_test_id: string }[];
+        const { data } = await supabase
+          .from("test_attempts")
+          .select("mock_test_id")
+          .eq("user_id", user.id)
+          .order("submitted_at", { ascending: false })
+          .limit(500);
+        return (data ?? []) as { mock_test_id: string }[];
+      })
+    : Promise.resolve([] as { mock_test_id: string }[]);
+
+  const activeSessionsPromise = isFirstPage
+    ? userPromise.then(async (user) => {
+        if (!user) return [] as { mock_test_id: string }[];
+        const { data } = await supabase
+          .from("test_attempt_sessions")
+          .select("mock_test_id")
+          .eq("user_id", user.id)
+          .is("submitted_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .order("started_at", { ascending: false })
+          .limit(4);
+        return (data ?? []) as { mock_test_id: string }[];
+      })
+    : Promise.resolve([] as { mock_test_id: string }[]);
+
   const [
     user,
     attempts,
     attemptSummaryResult,
     subjectAnalyticsResult,
-    availableTestsResult,
+    attemptedTestsMeta,
+    activeSessions,
     mistakesCount,
     bookmarksCount,
     paidSalesEnabled,
@@ -166,14 +215,8 @@ export default async function Dashboard({
     isFirstPage
       ? supabase.rpc("get_student_subject_analytics")
       : Promise.resolve({ data: [] as SubjectAnalytics[] }),
-    isFirstPage
-      ? supabase
-          .from("mock_tests")
-          .select("id, paper_id, title, duration_minutes, slug, access_type")
-          .eq("status", "published")
-          .order("display_order", { ascending: true })
-          .limit(4)
-      : Promise.resolve({ data: [] as AvailableMockTest[] }),
+    attemptedTestsMetaPromise,
+    activeSessionsPromise,
     mistakesCountPromise,
     bookmarksCountPromise,
     paidSalesPromise,
@@ -196,13 +239,32 @@ export default async function Dashboard({
   if (totalAttempts > 0 && page > totalPages) redirect(`/dashboard?page=${totalPages}`);
 
   const subjectAnalytics = (subjectAnalyticsResult.data ?? []) as SubjectAnalytics[];
-  const availableTests = (availableTestsResult.data ?? []) as AvailableMockTest[];
   const paperDisplayById = buildPaperDisplayMap(catalog.papers as OrderedPaper[]);
   const testTitles = new Map(catalog.tests.map((test) => [test.id, test.title]));
   const catalogPaperById = new Map(catalog.papers.map((item) => [item.id, item]));
   const catalogExamById = new Map(catalog.exams.map((item) => [item.id, item]));
   const catalogCategoryById = new Map(catalog.categories.map((item) => [item.id, item]));
   const catalogStateById = new Map(catalog.states.map((item) => [item.id, item]));
+  const catalogTestById = new Map(
+    (catalog.tests as DashboardCatalogMockTest[]).map((test) => [test.id, test]),
+  );
+
+  const recentAttemptedTestIds = attemptedTestsMeta
+    .map((item) => item.mock_test_id)
+    .filter(Boolean);
+  const activeInProgressTestIds = activeSessions
+    .map((item) => item.mock_test_id)
+    .filter(Boolean);
+
+  const recommendedTests = isFirstPage
+    ? selectRecommendedMockTests({
+        tests: catalog.tests as DashboardCatalogMockTest[],
+        papersById: catalogPaperById,
+        recentAttemptedTestIds,
+        activeInProgressTestIds,
+        limit: 4,
+      })
+    : [];
 
   const missingTestIds = new Set<string>();
   if (attemptSummary.latest_mock_test_id && !testTitles.has(attemptSummary.latest_mock_test_id)) {
@@ -234,29 +296,12 @@ export default async function Dashboard({
   });
 
   // Calculate study streak from recent attempts
-  const studyStreak = (() => {
-    if (attempts.length === 0) return 0;
-    const attemptDates = new Set(
-      attempts
-        .filter((a) => Boolean(a.submitted_at))
-        .map((a) => new Date(a.submitted_at).toISOString().slice(0, 10))
-    );
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    if (!attemptDates.has(today) && !attemptDates.has(yesterday)) return 0;
-    let streak = 0;
-    let current = attemptDates.has(today) ? new Date() : new Date(Date.now() - 86400000);
-    while (attemptDates.has(current.toISOString().slice(0, 10))) {
-      streak++;
-      current = new Date(current.getTime() - 86400000);
-    }
-    return streak;
-  })();
+  const studyStreak = computeStudyStreak(attempts);
 
   // counts are resolved directly from promises above
   const isPaidEnabled = paidSalesEnabled === true;
 
-  const publicTestPath = (test: AvailableMockTest) => {
+  const publicTestPath = (test: DashboardCatalogMockTest) => {
     const paper = catalogPaperById.get(test.paper_id);
     const exam = paper ? catalogExamById.get(paper.exam_group_id) : undefined;
     const category = exam ? catalogCategoryById.get(exam.exam_id) : undefined;
@@ -293,18 +338,67 @@ export default async function Dashboard({
     },
   ] as const;
 
-  // Exam Readiness & Cut-Off Predictor calculations
+  // Exam Readiness & Benchmark calculations
   const avgAccuracy = totalAttempts > 0 ? Number(attemptSummary.average_score) : 0;
-  const cutOffBenchmark = 40; // 40% qualifying threshold for TSLPRB / APPSC
-  const meritBenchmark = 55; // 55% competitive selection rank benchmark
+  const cutOffBenchmark = 40; // 40% qualifying benchmark
+  const meritBenchmark = 55; // 55% merit selection benchmark
   const isCutOffCleared = avgAccuracy >= cutOffBenchmark;
   const isMeritCleared = avgAccuracy >= meritBenchmark;
 
+  const activeCalibrationLabel = (() => {
+    const recentExamLabels = new Set<string>();
+    for (const testId of recentAttemptedTestIds.slice(0, 10)) {
+      const test = catalogTestById.get(testId);
+      const paper = test ? catalogPaperById.get(test.paper_id) : undefined;
+      const exam = paper ? catalogExamById.get(paper.exam_group_id) : undefined;
+      if (exam?.name) {
+        recentExamLabels.add(exam.name);
+      }
+    }
+    if (recentExamLabels.size === 1) {
+      return Array.from(recentExamLabels)[0];
+    }
+    if (recentExamLabels.size > 1) {
+      return "Multi-Exam Score Calibration";
+    }
+    return "General Qualifying Calibration";
+  })();
+
   const weakestSubject = subjectAnalytics.length > 0
     ? [...subjectAnalytics]
+        .filter((s) => s.answered_questions >= 5)
+        .sort((a, b) => Number(a.accuracy) - Number(b.accuracy))[0] ??
+      [...subjectAnalytics]
         .filter((s) => s.answered_questions >= 2)
-        .sort((a, b) => Number(a.accuracy) - Number(b.accuracy))[0] ?? subjectAnalytics[0]
+        .sort((a, b) => Number(a.accuracy) - Number(b.accuracy))[0] ??
+      subjectAnalytics[0]
     : null;
+
+  const accuracyToCutOff = Math.max(0, cutOffBenchmark - avgAccuracy);
+  const accuracyToMerit = Math.max(0, meritBenchmark - avgAccuracy);
+  const accuracyAboveMerit = Math.max(0, avgAccuracy - meritBenchmark);
+
+  const recommendationBadge = (reason: RecommendationReason) => {
+    switch (reason) {
+      case "in_progress":
+        return {
+          label: "In progress",
+          className: "bg-amber-50 text-amber-800 border border-amber-200/80",
+        };
+      case "up_next":
+        return {
+          label: "Up next",
+          className: "bg-teal-50 text-teal-800 border border-teal-200/80",
+        };
+      case "retake":
+        return {
+          label: "Completed",
+          className: "bg-slate-100 text-slate-700 border border-slate-200/80",
+        };
+      default:
+        return null;
+    }
+  };
 
   const latestAttempts = attempts.slice(0, 5);
 
@@ -516,76 +610,102 @@ export default async function Dashboard({
             </section>
 
             {/* Exam Readiness & Cut-Off Predictor */}
-            <section className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-teal-600 text-white text-xs font-black">
-                    🎯
+            <section className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-xs">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <span
+                    aria-hidden="true"
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-teal-200/80 bg-teal-50 text-teal-700"
+                  >
+                    <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                    </svg>
                   </span>
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 block">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-700">
                       Exam Readiness &amp; Cut-Off Predictor
-                    </span>
-                    <h2 className="text-sm sm:text-base font-black text-slate-950">
-                      TSLPRB &amp; APPSC Score Calibration
+                    </p>
+                    <h2 className="mt-0.5 text-base sm:text-lg font-black text-slate-950 break-words">
+                      {activeCalibrationLabel}
                     </h2>
                   </div>
                 </div>
 
                 {totalAttempts === 0 ? (
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-bold text-slate-600">
-                    Needs Mock Attempt
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 shrink-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true" />
+                    Awaiting First Attempt
                   </span>
                 ) : isMeritCleared ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-extrabold text-emerald-900">
-                    <span>🏆</span>
-                    <span>Merit List Contender (≥55%)</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 shrink-0">
+                    <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                    <span>Merit Zone (55%+)</span>
                   </span>
                 ) : isCutOffCleared ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-900">
-                    <span>🟡</span>
-                    <span>Cut-Off Qualified (≥40%)</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900 shrink-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
+                    <span>Qualifying Zone (40%+)</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-50 px-2.5 py-0.5 text-[11px] font-extrabold text-rose-900">
-                    <span>⚠️</span>
-                    <span>Below Cut-Off Baseline (&lt;40%)</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-800 shrink-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-rose-500" aria-hidden="true" />
+                    <span>Below Qualifying (&lt;40%)</span>
                   </span>
                 )}
               </div>
 
-              {/* Progress & Milestone Gauge */}
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-600">
-                  <span>
-                    Your Accuracy: <strong className="text-slate-950 text-sm font-black">{totalAttempts > 0 ? `${avgAccuracy.toFixed(1)}%` : "—"}</strong>
-                  </span>
-                  <div className="flex items-center gap-3 text-[11px]">
-                    <span className="inline-flex items-center gap-1 text-slate-500">
-                      <span className="h-2 w-2 rounded-full bg-amber-400" />
-                      Cut-off: 40%
+              {/* Accuracy Summary & Precision Scale */}
+              <div className="mt-4 sm:mt-5 space-y-2.5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <div className="flex flex-wrap items-baseline gap-2.5">
+                    <span className="text-xs font-semibold text-slate-500">Overall Accuracy</span>
+                    <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-950 tabular-nums">
+                      {totalAttempts > 0 ? `${avgAccuracy.toFixed(1)}%` : "—"}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-slate-500">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    {totalAttempts > 0 && (
+                      <span className="text-xs font-semibold text-slate-500 tabular-nums">
+                        {isMeritCleared
+                          ? `+${accuracyAboveMerit.toFixed(1)}% above merit benchmark`
+                          : isCutOffCleared
+                          ? `${accuracyToMerit.toFixed(1)}% away from merit target`
+                          : `${accuracyToCutOff.toFixed(1)}% away from qualifying bar`}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-600">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
+                      Qualifying: 40%
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-emerald-600" aria-hidden="true" />
                       Merit: 55%
                     </span>
                   </div>
                 </div>
 
-                <div className="relative h-4 w-full overflow-hidden rounded-full bg-slate-100 border border-slate-200/80">
-                  {/* Background Zones */}
-                  <div className="absolute inset-y-0 left-0 w-[40%] bg-rose-100/60" title="Below Cut-Off" />
-                  <div className="absolute inset-y-0 left-[40%] w-[15%] bg-amber-100/70" title="Cut-Off Qualified" />
-                  <div className="absolute inset-y-0 left-[55%] right-0 bg-emerald-100/60" title="Merit Rank Zone" />
+                {/* Precision Benchmark Meter */}
+                <div
+                  role="meter"
+                  aria-label="Overall exam accuracy against 40% qualifying and 55% merit benchmarks"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={totalAttempts > 0 ? Number(avgAccuracy.toFixed(1)) : 0}
+                  aria-valuetext={totalAttempts > 0 ? `${avgAccuracy.toFixed(1)}% accuracy` : "No attempts yet"}
+                  className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-inset ring-slate-200/80"
+                >
+                  {/* Subtle Zone Bands */}
+                  <div className="absolute inset-y-0 left-0 w-[40%] bg-rose-100/45" />
+                  <div className="absolute inset-y-0 left-[40%] w-[15%] bg-amber-100/60" />
+                  <div className="absolute inset-y-0 left-[55%] right-0 bg-emerald-100/45" />
 
-                  {/* Marker lines */}
-                  <div className="absolute inset-y-0 left-[40%] w-0.5 bg-amber-500/80 z-10" />
-                  <div className="absolute inset-y-0 left-[55%] w-0.5 bg-emerald-600/80 z-10" />
-
-                  {/* Student Score Fill */}
+                  {/* Active Fill */}
                   {totalAttempts > 0 && (
                     <div
-                      className={`relative h-full transition-all duration-500 rounded-full ${
+                      className={`relative z-[1] h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
                         isMeritCleared
                           ? "bg-emerald-600"
                           : isCutOffCleared
@@ -595,31 +715,46 @@ export default async function Dashboard({
                       style={{ width: `${Math.min(100, Math.max(0, avgAccuracy))}%` }}
                     />
                   )}
+
+                  {/* Threshold Ticks */}
+                  <div className="absolute inset-y-0 left-[40%] z-10 w-0.5 bg-amber-600/85" />
+                  <div className="absolute inset-y-0 left-[55%] z-10 w-0.5 bg-emerald-700/85" />
                 </div>
 
-                <div className="flex justify-between text-[10px] font-semibold text-slate-400 px-0.5">
-                  <span>0%</span>
-                  <span className="text-amber-700 font-bold">40% Min Cut-Off</span>
-                  <span className="text-emerald-700 font-bold">55% Merit Target</span>
-                  <span>100%</span>
+                {/* Exact-Aligned Scale Labels */}
+                <div className="relative h-4 text-[10px] sm:text-[11px] font-semibold text-slate-400 tabular-nums select-none">
+                  <span className="absolute left-0 top-0">0%</span>
+                  <span className="absolute left-[40%] top-0 -translate-x-1/2 font-bold text-amber-700">
+                    40%
+                  </span>
+                  <span className="absolute left-[55%] top-0 -translate-x-1/2 font-bold text-emerald-700">
+                    55%
+                  </span>
+                  <span className="absolute right-0 top-0">100%</span>
                 </div>
               </div>
 
-              {/* Status explanation & Weak Subject recommendation */}
-              <div className="mt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs">
-                <div className="space-y-0.5">
-                  <p className="font-semibold text-slate-800">
+              {/* Actionable Diagnosis & Focus Area */}
+              <div className="mt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50/80 px-3.5 py-3 text-xs">
+                <div className="space-y-1 min-w-0">
+                  <p className="font-semibold text-slate-800 leading-relaxed">
                     {totalAttempts === 0
-                      ? "Submit 1 mock test to calculate your official readiness benchmark and score projection."
+                      ? "Complete 1 mock test to unlock your readiness calibration and subject-level focus area."
                       : isMeritCleared
-                      ? `Outstanding! At ${avgAccuracy.toFixed(1)}% accuracy, you comfortably exceed the competitive selection threshold.`
+                      ? `Strong consistency at ${avgAccuracy.toFixed(1)}% accuracy. Maintain speed and accuracy above the 55% merit benchmark.`
                       : isCutOffCleared
-                      ? `Good foundation! You have cleared the 40% qualifying bar. Target +${(meritBenchmark - avgAccuracy).toFixed(1)}% more to secure top merit.`
-                      : `Current average (${avgAccuracy.toFixed(1)}%) needs attention. Clear weak topics to cross the 40% qualification cut-off.`}
+                      ? `Qualifying baseline cleared at ${avgAccuracy.toFixed(1)}%. Focus on high-weightage revision to bridge the remaining ${accuracyToMerit.toFixed(1)}% to merit.`
+                      : `Average accuracy is ${avgAccuracy.toFixed(1)}%. Revising incorrect answers and targeted subject drills will help cross the 40% qualifying bar.`}
                   </p>
                   {weakestSubject && (
-                    <p className="text-[11px] text-slate-500">
-                      ⚡ Fastest Rank Booster: <strong>{weakestSubject.subject_name}</strong> is at {Number(weakestSubject.accuracy).toFixed(0)}% accuracy ({weakestSubject.correct_answers}/{weakestSubject.answered_questions} correct).
+                    <p className="flex items-start gap-1.5 text-[11px] text-slate-600 leading-snug">
+                      <svg className="h-3.5 w-3.5 mt-0.5 shrink-0 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                      </svg>
+                      <span>
+                        Focus area: <strong className="font-bold text-slate-900">{weakestSubject.subject_name}</strong>{" "}
+                        ({Number(weakestSubject.accuracy).toFixed(0)}% accuracy · {weakestSubject.correct_answers}/{weakestSubject.answered_questions} answered)
+                      </span>
                     </p>
                   )}
                 </div>
@@ -628,16 +763,18 @@ export default async function Dashboard({
                   <Link
                     href="/dashboard/study-book?view=mistakes&mode=practice"
                     prefetch={true}
-                    className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-teal-800 px-3.5 py-2 text-xs font-black text-white shadow-2xs hover:bg-teal-900 active:scale-95 transition"
+                    className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-teal-800 px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-teal-900 active:scale-[0.98] transition"
                   >
-                    <span>🎯 Re-Attempt Mistakes</span>
-                    <span>&rarr;</span>
+                    <span>Practice Mistakes</span>
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
                   </Link>
                 )}
               </div>
             </section>
 
-            {/* Available Practice Tests */}
+            {/* Available Practice Tests (Progress-Aware Recommendations) */}
             <section className="space-y-3 sm:space-y-4">
               <div className="flex flex-wrap items-end justify-between gap-2.5">
                 <div>
@@ -647,6 +784,11 @@ export default async function Dashboard({
                   <h2 className="mt-0.5 text-lg sm:text-xl lg:text-2xl font-black text-slate-950">
                     Choose your next practice test
                   </h2>
+                  <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
+                    {totalAttempts > 0 || activeInProgressTestIds.length > 0
+                      ? "Updated automatically from your active sessions and unattempted papers."
+                      : "Start with a practice test from our state exam library."}
+                  </p>
                 </div>
                 <Link
                   href="/mock-tests"
@@ -656,15 +798,22 @@ export default async function Dashboard({
                   Browse all tests &rarr;
                 </Link>
               </div>
-              {availableTests.length === 0 ? (
+              {recommendedTests.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 sm:p-8 text-center text-sm text-slate-600">
                   No mock tests are available right now.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {availableTests.slice(0, 4).map((test) => {
+                  {recommendedTests.map(({ test, reason }) => {
                     const parsed = parseMockTestTitle(testTitles.get(test.id) ?? test.title);
                     const paperLabel = paperDisplayById.get(test.paper_id)?.label ?? "Paper";
+                    const statusBadge = recommendationBadge(reason);
+                    const ctaLabel =
+                      reason === "in_progress"
+                        ? "Resume test"
+                        : reason === "retake"
+                        ? "Retake test"
+                        : "View test";
 
                     return (
                       <article
@@ -680,6 +829,11 @@ export default async function Dashboard({
                               <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200/80">
                                 {paperLabel}
                               </span>
+                              {statusBadge && (
+                                <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusBadge.className}`}>
+                                  {statusBadge.label}
+                                </span>
+                              )}
                             </div>
                             <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0 ${test.access_type === "free" ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60" : "bg-amber-50 text-amber-900 border border-amber-200/60"}`}>
                               {test.access_type === "free" ? "Free" : "Paid"} {/* Paid series */}
@@ -698,7 +852,7 @@ export default async function Dashboard({
                           <span className="text-xs font-semibold text-slate-500">
                             {test.duration_minutes} minutes
                           </span>
-                          <ViewTestLink href={publicTestPath(test)} />
+                          <ViewTestLink href={publicTestPath(test)} label={ctaLabel} />
                         </div>
                       </article>
                     );
