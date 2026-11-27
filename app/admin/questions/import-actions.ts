@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import { createClient } from "@/lib/supabase/server";
 import { mockTestHasStudentAttempts } from "@/lib/admin-mock-test-exemptions";
@@ -175,43 +174,131 @@ function parseCsv(source: string): ParsedQuestionFile {
   };
 }
 
+function cellToText(cell: XLSX.CellObject | undefined): string {
+  if (!cell || cell.t === "z") return "";
+  if (cell.v instanceof Date && !Number.isNaN(cell.v.getTime())) {
+    return cell.v.toISOString().slice(0, 10);
+  }
+  if (typeof cell.v === "string") return cell.v;
+  if (cell.w !== undefined) return String(cell.w);
+  if (cell.v !== undefined && cell.v !== null) return String(cell.v);
+  return "";
+}
+
+function extractDenseRows(
+  worksheet: XLSX.WorkSheet & { "!data"?: Array<Array<XLSX.CellObject | undefined>> },
+): Array<Array<XLSX.CellObject | undefined>> {
+  const denseData = worksheet["!data"];
+  if (Array.isArray(denseData)) return denseData;
+
+  // Sparse object-keyed fallback: ignore bloated !ref and index only populated cells
+  const sparseRows: Array<Array<XLSX.CellObject | undefined>> = [];
+  for (const address of Object.keys(worksheet)) {
+    if (address.startsWith("!")) continue;
+    const cell = worksheet[address] as XLSX.CellObject | undefined;
+    if (!cell || cell.t === "z") continue;
+    const { r, c } = XLSX.utils.decode_cell(address);
+    let row = sparseRows[r];
+    if (!row) {
+      row = [];
+      sparseRows[r] = row;
+    }
+    row[c] = cell;
+  }
+  return sparseRows;
+}
+
+function chunkTextsByUrlBudget(texts: string[], maxItems = 15, maxEncodedLength = 3500): string[][] {
+  const chunks: string[][] = [];
+  let current: string[] = [];
+  let currentEncodedLength = 0;
+
+  for (const text of texts) {
+    const encodedLength = encodeURIComponent(text).length + 3;
+    if (
+      current.length > 0 &&
+      (current.length >= maxItems || currentEncodedLength + encodedLength > maxEncodedLength)
+    ) {
+      chunks.push(current);
+      current = [];
+      currentEncodedLength = 0;
+    }
+    current.push(text);
+    currentEncodedLength += encodedLength;
+  }
+
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+}
+
 async function parseExcel(file: File): Promise<ParsedQuestionFile> {
   const rawBuffer = Buffer.from(await file.arrayBuffer());
   const isBiff8Xls = rawBuffer.length >= 8 && rawBuffer.subarray(0, 8).toString("hex") === "d0cf11e0a1b11ae1";
   const extension = file.name.toLowerCase().split(".").pop();
 
-  // Fast direct parsing via SheetJS (xlsx) - parses .xlsx and .xls in ~10-20ms without ExcelJS XML overhead
-  let readWb: XLSX.WorkBook;
-  if (isBiff8Xls || extension === "xls") {
-    try {
-      readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
-      const normalizedBuffer = XLSX.write(readWb, { bookType: "xlsx", type: "buffer" });
-      readWb = XLSX.read(normalizedBuffer, { type: "buffer", cellDates: true });
-    } catch {
+  // Read sheet names first, then parse only the target sheet in dense mode so
+  // bloated Excel dimensions (e.g. A1:XFD1048576) and unused sheets are skipped.
+  let sheetName: string;
+  try {
+    const metaWb = XLSX.read(rawBuffer, { type: "buffer", bookSheets: true });
+    sheetName = metaWb.SheetNames.includes("Varadhi Import") ? "Varadhi Import" : metaWb.SheetNames[0];
+  } catch (loadError) {
+    if (isBiff8Xls || extension === "xls") {
       throw new Error("The Excel 97-2003 (.xls) file could not be read. Please ensure it is a valid Excel workbook.");
     }
-  } else {
-    try {
-      readWb = XLSX.read(rawBuffer, { type: "buffer", cellDates: true });
-    } catch (loadError) {
-      throw new Error(
-        loadError instanceof Error ? loadError.message : "The Excel file could not be read."
-      );
+    throw new Error(
+      loadError instanceof Error ? loadError.message : "The Excel file could not be read."
+    );
+  }
+  if (!sheetName) throw new Error("The Excel file does not contain a worksheet.");
+
+  let readWb: XLSX.WorkBook;
+  try {
+    readWb = XLSX.read(rawBuffer, {
+      type: "buffer",
+      sheets: [sheetName],
+      cellDates: true,
+      cellFormula: false,
+      cellHTML: false,
+      cellStyles: false,
+      dense: true,
+    });
+    if (!readWb.Sheets[sheetName]) {
+      readWb = XLSX.read(rawBuffer, {
+        type: "buffer",
+        cellDates: true,
+        cellFormula: false,
+        cellHTML: false,
+        cellStyles: false,
+        dense: true,
+      });
     }
+  } catch (loadError) {
+    if (isBiff8Xls || extension === "xls") {
+      throw new Error("The Excel 97-2003 (.xls) file could not be read. Please ensure it is a valid Excel workbook.");
+    }
+    throw new Error(
+      loadError instanceof Error ? loadError.message : "The Excel file could not be read."
+    );
   }
 
-  const sheetName = readWb.SheetNames.includes("Varadhi Import") ? "Varadhi Import" : readWb.SheetNames[0];
+  const resolvedSheetName = readWb.Sheets[sheetName]
+    ? sheetName
+    : (readWb.SheetNames.includes("Varadhi Import") ? "Varadhi Import" : readWb.SheetNames[0]);
   const worksheet: XLSX.WorkSheet & {
+    "!data"?: Array<Array<XLSX.CellObject | undefined>>;
     getImages?: () => Array<{ imageId: unknown; range: { tl: { nativeRow: number } } }>;
-  } = readWb.Sheets[sheetName];
+  } = readWb.Sheets[resolvedSheetName];
   if (!worksheet) throw new Error("The Excel file does not contain a worksheet.");
 
-  // Fast raw data extraction via SheetJS sheet_to_json
-  const rawData: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" });
-  if (!rawData.length) throw new Error("The Excel sheet needs headings and at least one Question.");
+  const rawData = extractDenseRows(worksheet);
+  if (!rawData.length || !rawData[0]) throw new Error("The Excel sheet needs headings and at least one Question.");
 
-  const rawHeaders = (rawData[0] ?? []) as unknown[];
-  const headers = rawHeaders.map((val) => normalizeHeader(String(val ?? "")));
+  const rawHeaders = rawData[0];
+  const headers: string[] = [];
+  for (let colIndex = 0; colIndex < rawHeaders.length; colIndex += 1) {
+    headers.push(normalizeHeader(cellToText(rawHeaders[colIndex])));
+  }
   while (headers.length > 0 && !headers[headers.length - 1]) {
     headers.pop();
   }
@@ -230,20 +317,27 @@ async function parseExcel(file: File): Promise<ParsedQuestionFile> {
   const rows: ParsedQuestionFile["rows"] = [];
 
   for (let rowIndex = 1; rowIndex < rawData.length; rowIndex += 1) {
-    const rowValues = (rawData[rowIndex] ?? []) as unknown[];
-    const values = headers.map((header, colIndex) => {
-      const cell = rowValues[colIndex];
-      let text = cell !== undefined && cell !== null ? String(cell) : "";
-      if (cell instanceof Date && !Number.isNaN(cell.getTime())) {
-        text = cell.toISOString().slice(0, 10);
-      }
-      return [header, cleanCellValue(text)] as const;
-    });
-    if (values.some(([, value]) => value)) {
+    const rowCells = rawData[rowIndex];
+    if (!rowCells || rowCells.length === 0) continue;
+
+    let hasValue = false;
+    const values: CsvRow = {};
+    for (let colIndex = 0; colIndex < headers.length; colIndex += 1) {
+      const header = headers[colIndex];
+      if (!header) continue;
+      const text = cleanCellValue(cellToText(rowCells[colIndex]));
+      if (text) hasValue = true;
+      values[header] = text;
+    }
+
+    if (hasValue) {
       rows.push({
-        values: Object.fromEntries(values),
+        values,
         rowNumber: rowIndex + 1,
       });
+      if (rows.length > 500) {
+        throw new Error("Import up to 500 Questions at one time.");
+      }
     }
   }
 
@@ -314,28 +408,29 @@ async function importQuestions(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, message: "You must be logged in." };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin") return { success: false, message: "You are not authorized to import Questions." };
 
   const categoryId = String(formData.get("import_exam_id") ?? "").trim();
   const examId = String(formData.get("import_exam_group_id") ?? "").trim();
   let paperId = String(formData.get("import_paper_id") ?? "").trim();
   const file = formData.get("questions_file");
+
+  const [{ data: profile }, mockTestResult] = await Promise.all([
+    supabase.from("profiles").select("role").eq("id", user.id).single(),
+    mockTestId
+      ? supabase
+          .from("mock_tests")
+          .select("id, paper_id, subject_id, test_scope, status, target_question_count, replaces_mock_test_id, allow_duplicate_questions")
+          .eq("id", mockTestId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  if (profile?.role !== "admin") return { success: false, message: "You are not authorized to import Questions." };
+
   let mockTest: MockImportTarget | null = null;
   if (mockTestId) {
-    const { data } = await supabase
-      .from("mock_tests")
-      .select("id, paper_id, subject_id, test_scope, status, target_question_count, replaces_mock_test_id, allow_duplicate_questions")
-      .eq("id", mockTestId)
-      .maybeSingle();
-    mockTest = data as MockImportTarget | null;
+    mockTest = mockTestResult.data as MockImportTarget | null;
     if (!mockTest) return { success: false, message: "Mock Test not found." };
     if (mockTest.status !== "draft") return { success: false, message: "Only draft Mock Tests can receive a file import." };
-    const { count: attemptCount } = await supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("mock_test_id", mockTest.id);
-    if ((attemptCount ?? 0) > 0) {
-      const hasStudents = await mockTestHasStudentAttempts(mockTest.id);
-      if (hasStudents) return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
-    }
     paperId = mockTest.paper_id;
   } else if (!categoryId || !examId || !paperId) {
     return { success: false, message: "Choose a Recruiting Board, Exam, and Paper before importing." };
@@ -343,30 +438,50 @@ async function importQuestions(
   if (!(file instanceof File) || !file.size) return { success: false, message: "Choose an Excel or CSV file to import." };
   if (file.size > 2_500_000) return { success: false, message: "This file is too large. Import up to 2.5 MB at a time." };
 
-  const [{ data: paper }, { data: exam }] = await Promise.all([
+  const [
+    { data: paper },
+    { data: exam },
+    { data: subjects, error: subjectsError },
+    hasStudents,
+    existingMockCountResult,
+    parseOutcome,
+  ] = await Promise.all([
     supabase.from("papers").select("id, exam_group_id, default_correct_marks, default_negative_marks").eq("id", paperId).maybeSingle(),
     mockTest
       ? Promise.resolve({ data: null })
       : supabase.from("exam_groups").select("id, exam_id").eq("id", examId).maybeSingle(),
+    supabase
+      .from("subjects")
+      .select("id, name, content_language_mode, display_order")
+      .eq("paper_id", paperId)
+      .order("display_order"),
+    mockTest ? mockTestHasStudentAttempts(mockTest.id) : Promise.resolve(false),
+    mockTest && mode === "add"
+      ? supabase
+          .from("mock_test_questions")
+          .select("question_id", { count: "exact", head: true })
+          .eq("mock_test_id", mockTest.id)
+      : Promise.resolve({ count: 0 }),
+    parseQuestionFile(file)
+      .then((parsedFile) => ({ parsedFile, error: null as string | null }))
+      .catch((error: unknown) => ({
+        parsedFile: null as ParsedQuestionFile | null,
+        error: error instanceof Error ? error.message : "The Question file could not be read.",
+      })),
   ]);
+
+  if (mockTest && hasStudents) {
+    return { success: false, message: "This Mock Test has student attempts and its Questions are locked." };
+  }
   if (!paper || (!mockTest && (!exam || paper.exam_group_id !== exam.id || exam.exam_id !== categoryId))) {
     return { success: false, message: "The selected Recruiting Board, Exam, and Paper do not belong together." };
   }
-
-  let parsedFile: ParsedQuestionFile;
-  try {
-    parsedFile = await parseQuestionFile(file);
-  } catch (error) {
-    return { success: false, message: error instanceof Error ? error.message : "The Question file could not be read." };
+  if (parseOutcome.error || !parseOutcome.parsedFile) {
+    return { success: false, message: parseOutcome.error ?? "The Question file could not be read." };
   }
+  const parsedFile = parseOutcome.parsedFile;
   if (parsedFile.rows.length > 500) return { success: false, message: "Import up to 500 Questions at one time." };
   if (mockTest && mode === "replace" && parsedFile.rows.length !== mockTest.target_question_count) return { success: false, message: `Nothing was replaced. The file has ${parsedFile.rows.length} row${parsedFile.rows.length === 1 ? "" : "s"}, but this Mock Test requires exactly ${mockTest.target_question_count}.` };
-
-  const { data: subjects, error: subjectsError } = await supabase
-    .from("subjects")
-    .select("id, name, content_language_mode, display_order")
-    .eq("paper_id", paperId)
-    .order("display_order");
   if (subjectsError) return { success: false, message: subjectsError.message };
   const subjectByName = new Map((subjects ?? []).map((subject) => [normalizeLookup(subject.name), subject]));
 
@@ -383,17 +498,14 @@ async function importQuestions(
     return { success: false, message: error instanceof Error ? error.message : "The Question file could not be read." };
   }
 
-  let existingMockQuestionCount = 0;
-  if (mockTest && mode === "add") {
-    const { count } = await supabase
-      .from("mock_test_questions")
-      .select("question_id", { count: "exact", head: true })
-      .eq("mock_test_id", mockTest.id);
-    existingMockQuestionCount = count ?? 0;
-  }
+  const existingMockQuestionCount = mockTest && mode === "add" ? (existingMockCountResult.count ?? 0) : 0;
   const startSlot = mode === "add" ? existingMockQuestionCount : 0;
 
-  // Pre-fetch active questions in this paper to check for duplicates
+  const skipCrossTestDuplicateCheck =
+    Boolean(mockTest?.allow_duplicate_questions) ||
+    String(formData.get("skip_cross_test_duplicate_check") ?? "") === "1";
+
+  // Pre-fetch active questions in this paper to check for duplicates (only when needed)
   const subjectIds = (subjects ?? []).map((subject) => subject.id);
   let existingPaperQuestions: Array<{
     id: string;
@@ -407,80 +519,124 @@ async function importQuestions(
     }>;
   }> = [];
 
-  // Fast targeted duplicate check:
-  // Instead of downloading thousands of questions across the whole paper,
-  // query only the questions that match the texts present in the uploaded file.
-  const fileTextsToMatch = Array.from(
-    new Set(
-      parsedFile.rows
-        .flatMap(({ values: r }) => [
-          (r.question_en ?? r.question ?? "").trim(),
-          (r.question_te ?? "").trim(),
-        ])
-        .filter((t) => t.length >= 10)
-    )
-  );
-
-  if (subjectIds.length > 0 && fileTextsToMatch.length > 0) {
-    const chunkSize = 40;
-    const queryPromises = [];
-    for (let i = 0; i < fileTextsToMatch.length; i += chunkSize) {
-      const textChunk = fileTextsToMatch.slice(i, i + chunkSize);
-      queryPromises.push(
-        supabase
-          .from("questions")
-          .select(`
+  if (mockTest && skipCrossTestDuplicateCheck) {
+    // Only check whether any uploaded question is already assigned to this mock test in add mode
+    if (mode === "add" && existingMockQuestionCount > 0) {
+      const { data: currentAssignments } = await supabase
+        .from("mock_test_questions")
+        .select(`
+          mock_test_id,
+          questions!inner (
             id,
             question_text,
             question_text_te,
             subject_id,
-            import_key,
-            mock_test_questions (
-              mock_test_id,
-              mock_tests (
-                id,
-                title,
-                paper_id,
-                status,
-                superseded_by_mock_test_id,
-                test_scope
-              )
-            )
-          `)
+            import_key
+          )
+        `)
+        .eq("mock_test_id", mockTest.id);
+
+      for (const item of currentAssignments ?? []) {
+        const q = (item as unknown as {
+          questions: {
+            id: string;
+            question_text: string;
+            question_text_te: string | null;
+            subject_id: string;
+            import_key: string | null;
+          } | null;
+        }).questions;
+        if (!q) continue;
+        existingPaperQuestions.push({
+          ...q,
+          mock_test_questions: [
+            {
+              mock_test_id: mockTest.id,
+              mock_tests: {
+                id: mockTest.id,
+                title: "this Mock Test",
+                paper_id: mockTest.paper_id,
+                status: mockTest.status,
+                superseded_by_mock_test_id: null,
+                test_scope: mockTest.test_scope,
+              },
+            },
+          ],
+        });
+      }
+    }
+  } else if (mockTest && subjectIds.length > 0) {
+    // Fast targeted duplicate check with URL-budgeted chunking so long Telugu texts
+    // never exceed PostgREST/gateway URL length limits or query unused columns.
+    const canonicalQuestionTexts = new Set<string>();
+    const canonicalTeluguTexts = new Set<string>();
+
+    for (const { values: r } of parsedFile.rows) {
+      const rowSubject = subjectByName.get(normalizeLookup(r.subject ?? ""));
+      const modeForRow = rowSubject?.content_language_mode;
+      const enText = (r.question_en ?? r.question ?? "").trim();
+      const teText = (r.question_te ?? "").trim();
+
+      if (modeForRow === "telugu") {
+        if (teText.length >= 10) {
+          canonicalQuestionTexts.add(teText);
+          canonicalTeluguTexts.add(teText);
+        }
+      } else if (modeForRow === "english" || modeForRow === "bilingual") {
+        if (enText.length >= 10) canonicalQuestionTexts.add(enText);
+      } else {
+        if (enText.length >= 10) canonicalQuestionTexts.add(enText);
+        if (teText.length >= 10) {
+          canonicalQuestionTexts.add(teText);
+          canonicalTeluguTexts.add(teText);
+        }
+      }
+    }
+
+    const questionSelect = `
+      id,
+      question_text,
+      question_text_te,
+      subject_id,
+      import_key,
+      mock_test_questions (
+        mock_test_id,
+        mock_tests (
+          id,
+          title,
+          paper_id,
+          status,
+          superseded_by_mock_test_id,
+          test_scope
+        )
+      )
+    `;
+
+    const queryPromises = [
+      ...chunkTextsByUrlBudget(Array.from(canonicalQuestionTexts)).map((textChunk) =>
+        supabase
+          .from("questions")
+          .select(questionSelect)
           .in("subject_id", subjectIds)
           .eq("is_active", true)
           .in("question_text", textChunk)
-      );
-      queryPromises.push(
+      ),
+      ...chunkTextsByUrlBudget(Array.from(canonicalTeluguTexts)).map((textChunk) =>
         supabase
           .from("questions")
-          .select(`
-            id,
-            question_text,
-            question_text_te,
-            subject_id,
-            import_key,
-            mock_test_questions (
-              mock_test_id,
-              mock_tests (
-                id,
-                title,
-                paper_id,
-                status,
-                superseded_by_mock_test_id,
-                test_scope
-              )
-            )
-          `)
+          .select(questionSelect)
           .in("subject_id", subjectIds)
           .eq("is_active", true)
           .in("question_text_te", textChunk)
-      );
-    }
-    const results = await Promise.all(queryPromises);
-    for (const res of results) {
-      if (res.data) {
-        existingPaperQuestions = existingPaperQuestions.concat(res.data as unknown as typeof existingPaperQuestions);
+      ),
+    ];
+
+    if (queryPromises.length > 0) {
+      const results = await Promise.all(queryPromises);
+      for (const res of results) {
+        if (res.data) {
+          existingPaperQuestions = existingPaperQuestions.concat(res.data as unknown as typeof existingPaperQuestions);
+        }
       }
     }
   }
@@ -545,10 +701,6 @@ async function importQuestions(
   const importRows: Record<string, unknown>[] = [];
   const embeddedImageTargets: Array<{ importIndex: number; image: EmbeddedQuestionImage; rowNumber: number }> = [];
   const assignmentPreferences: Array<{ key: string; rowNumber: number; questionOrder: number | null; marks: number | null; negativeMarks: number | null }> = [];
-
-  const skipCrossTestDuplicateCheck =
-    Boolean(mockTest?.allow_duplicate_questions) ||
-    String(formData.get("skip_cross_test_duplicate_check") ?? "") === "1";
 
   parsedFile.rows.forEach(({ values: row, rowNumber }, rowIndex) => {
     // Option 1: Automatic slot assignment (q1, q2...) for mock test uploads

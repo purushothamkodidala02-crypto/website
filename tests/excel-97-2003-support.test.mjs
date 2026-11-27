@@ -18,7 +18,7 @@ test("Excel 97-2003 (.xls) format is accepted across admin import forms and guid
   assert.match(importer, /import \* as XLSX from "xlsx"/);
   assert.match(importer, /d0cf11e0a1b11ae1/);
   assert.match(importer, /extension === "xlsx" \|\| extension === "xls"/);
-  assert.match(importer, /bookType:\s*"xlsx"/);
+  assert.match(importer, /dense:\s*true/);
 
   // Form input accept attributes include .xls and application/vnd.ms-excel
   assert.match(questionImport, /\.xls/);

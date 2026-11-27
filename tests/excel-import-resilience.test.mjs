@@ -68,3 +68,74 @@ test("Excel workbook with namespace prefixes (<x:workbook>) is normalized via Sh
   assert.equal(ws.getCell(1, 1).text, "import_key");
   assert.equal(ws.getCell(2, 1).text, "test-001");
 });
+
+test("SheetJS dense extraction handles 25-question Excel with bloated A1:XFD1048576 dimension in under 500ms", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const importer = await readFile(new URL("../app/admin/questions/import-actions.ts", import.meta.url), "utf8");
+  assert.match(importer, /dense:\s*true/);
+  assert.doesNotMatch(importer, /sheet_to_json\([^)]*defval:\s*""/);
+
+  const wb = XLSX.utils.book_new();
+  const rows = [
+    [
+      "import_key",
+      "subject",
+      "question_en",
+      "option_a_en",
+      "option_b_en",
+      "option_c_en",
+      "option_d_en",
+      "question_te",
+      "option_a_te",
+      "option_b_te",
+      "option_c_te",
+      "option_d_te",
+      "correct_answer",
+    ],
+  ];
+  for (let i = 1; i <= 25; i += 1) {
+    rows.push([
+      `q${i}`,
+      "General Studies",
+      `Question ${i}?`,
+      "A",
+      "B",
+      "C",
+      "D",
+      `ప్రశ్న ${i}?`,
+      "ఎ",
+      "బి",
+      "సి",
+      "డి",
+      "A",
+    ]);
+  }
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, "Varadhi Import");
+  const buf = XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
+
+  const zip = await JSZip.loadAsync(buf);
+  let sheetXml = await zip.file("xl/worksheets/sheet1.xml").async("string");
+  sheetXml = sheetXml.replace(/<dimension ref="[^"]*"/, '<dimension ref="A1:XFD1048576"');
+  zip.file("xl/worksheets/sheet1.xml", sheetXml);
+  const bloatedBuf = await zip.generateAsync({ type: "nodebuffer" });
+
+  const start = Date.now();
+  const meta = XLSX.read(bloatedBuf, { type: "buffer", bookSheets: true });
+  const target = meta.SheetNames.includes("Varadhi Import") ? "Varadhi Import" : meta.SheetNames[0];
+  const parsed = XLSX.read(bloatedBuf, {
+    type: "buffer",
+    sheets: [target],
+    cellDates: true,
+    cellFormula: false,
+    cellHTML: false,
+    cellStyles: false,
+    dense: true,
+  });
+  const denseRows = parsed.Sheets[target]["!data"];
+  const elapsedMs = Date.now() - start;
+
+  assert.ok(Array.isArray(denseRows));
+  assert.equal(denseRows.length, 26);
+  assert.ok(elapsedMs < 1000, `Expected bloated 25-question parse < 1000ms, took ${elapsedMs}ms`);
+});
