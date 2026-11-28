@@ -117,9 +117,6 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Detailed review</p>
           <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">Questions and explanations</h2>
-          <p className="mt-1.5 text-xs text-slate-600 sm:text-sm">
-            Review questions side-by-side with complete explanations. On a laptop, use the <kbd className="rounded bg-slate-200 px-1.5 py-0.5 font-bold text-slate-700">←</kbd> and <kbd className="rounded bg-slate-200 px-1.5 py-0.5 font-bold text-slate-700">→</kbd> arrow keys.
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
           <Legend tone="emerald" label="Correct answer" />
@@ -160,30 +157,37 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
           aria-live="polite"
         >
           {/* Header strip */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-2.5 sm:px-6">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-100 bg-slate-50/80 px-3 py-2.5 sm:px-6">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-0.5 shadow-2xs">
-                <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="h-7 w-7" />
-                <span className="px-2 text-xs font-black uppercase tracking-wider text-slate-700">
+                <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="h-9 w-9 sm:h-7 sm:w-7" />
+                <span className="px-2 text-xs font-black uppercase tracking-wider text-slate-700 whitespace-nowrap">
                   Question {row.question_order} of {rows.length}
                 </span>
-                <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="h-7 w-7" />
+                <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="h-9 w-9 sm:h-7 sm:w-7" />
               </div>
-              <QuestionStatus row={row} />
-              <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-bold text-slate-700">
-                {row.marks_awarded > 0 ? `+${row.marks_awarded}` : row.marks_awarded} mark{row.marks_awarded === 1 ? "" : "s"}
-              </span>
+              <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
+                <QuestionStatus row={row} />
+                <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-bold text-slate-700 whitespace-nowrap">
+                  {row.marks_awarded > 0 ? `+${row.marks_awarded}` : row.marks_awarded} mark{row.marks_awarded === 1 ? "" : "s"}
+                </span>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
               {hasTelugu && row.content_language_mode === "bilingual" && (
-                <div className="inline-flex rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Review language">
-                  <LanguageButton active={effectiveLanguage === "english"} onClick={() => setLanguage("english")}>English</LanguageButton>
+                <div className="inline-flex shrink-0 rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Review language">
+                  <LanguageButton active={effectiveLanguage === "english"} onClick={() => setLanguage("english")}>
+                    <span className="sm:hidden">EN</span>
+                    <span className="hidden sm:inline">English</span>
+                  </LanguageButton>
                   <LanguageButton active={effectiveLanguage === "telugu"} onClick={() => setLanguage("telugu")} lang="te">తెలుగు</LanguageButton>
                 </div>
               )}
-              <ReportQuestionButton key={`report-${row.question_id}`} questionId={row.question_id} attemptId={attemptId} />
-              <BookmarkButton key={row.question_id} questionId={row.question_id} initialBookmarked={bookmarkedQuestionIds.includes(row.question_id)} />
+              <div className="flex min-w-0 flex-1 sm:flex-initial items-center gap-1.5 sm:gap-2">
+                <ReportQuestionButton key={`report-${row.question_id}`} questionId={row.question_id} attemptId={attemptId} className="flex-1 sm:flex-initial" />
+                <BookmarkButton key={row.question_id} questionId={row.question_id} initialBookmarked={bookmarkedQuestionIds.includes(row.question_id)} className="flex-1 sm:flex-initial" />
+              </div>
             </div>
           </div>
 

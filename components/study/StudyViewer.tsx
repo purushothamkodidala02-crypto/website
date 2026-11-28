@@ -257,9 +257,9 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto sm:justify-end">
           {canSwitchLanguage && (
-            <div className="inline-flex rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Question language">
+            <div className="hidden sm:inline-flex rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Question language">
               <button
                 type="button"
                 onClick={() => setLanguage("english")}
@@ -287,8 +287,10 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
               </button>
             </div>
           )}
-          <ReportQuestionButton questionId={currentRow.question_id} />
-          <BookmarkButton questionId={currentRow.question_id} initialBookmarked={currentRow.bookmarked} />
+          <div className="flex min-w-0 flex-1 sm:flex-initial items-center gap-2">
+            <ReportQuestionButton key={`report-${currentRow.question_id}`} questionId={currentRow.question_id} className="flex-1 sm:flex-initial" />
+            <BookmarkButton key={currentRow.question_id} questionId={currentRow.question_id} initialBookmarked={currentRow.bookmarked} className="flex-1 sm:flex-initial" />
+          </div>
         </div>
       </div>
 

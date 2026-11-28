@@ -15,16 +15,24 @@ export function ReportQuestionButton({
   questionId,
   attemptId = null,
   mockTestId = null,
+  className = "",
 }: {
   questionId: string;
   attemptId?: string | null;
   mockTestId?: string | null;
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-600 transition hover:border-amber-300 hover:text-amber-800">Report issue</button>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-slate-600 transition hover:border-amber-300 hover:text-amber-800 sm:px-3 sm:py-2.5 sm:text-sm ${className}`}
+      >
+        Report issue
+      </button>
       {open && <ReportQuestionDialog questionId={questionId} attemptId={attemptId} mockTestId={mockTestId} onClose={() => setOpen(false)} />}
     </>
   );
