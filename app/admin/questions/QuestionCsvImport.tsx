@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useMemo, useState, useTransition } from "react";
 import { LongPendingNotice, PendingButtonContent } from "@/components/feedback/LoadingSpinner";
+import { ImportIssuesPanel, type RetryImportPayload } from "@/components/admin/ImportIssuesPanel";
 import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { importQuestionsFromCsv, type ImportQuestionsState } from "./import-actions";
 
@@ -17,14 +18,42 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
   specializations: Specialization[];
   papers: Paper[];
 }) {
-  const [state, action, pending] = useActionState(importQuestionsFromCsv, initialState);
+  const [state, action, actionPending] = useActionState(importQuestionsFromCsv, initialState);
+  const [isTransitionPending, startTransition] = useTransition();
+  const pending = actionPending || isTransitionPending;
+
   const [categoryId, setCategoryId] = useState("");
   const [examId, setExamId] = useState("");
   const [specializationId, setSpecializationId] = useState("");
   const [paperId, setPaperId] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const visibleExams = useMemo(() => exams.filter((exam) => exam.categoryId === categoryId), [categoryId, exams]);
   const visibleSpecializations = useMemo(() => specializations.filter((item) => item.examId === examId), [specializations, examId]);
   const visiblePapers = useMemo(() => papers.filter((paper) => paper.examId === examId && (specializationId ? paper.specializationId === specializationId : !paper.specializationId)), [papers, examId, specializationId]);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    if (selectedFile) formData.set("questions_file", selectedFile);
+    startTransition(() => {
+      action(formData);
+    });
+  }
+
+  function handleRetryImport(payload: RetryImportPayload) {
+    if (!selectedFile) return;
+    const formData = new FormData();
+    formData.set("import_exam_id", categoryId);
+    formData.set("import_exam_group_id", examId);
+    formData.set("import_paper_id", paperId);
+    formData.set("questions_file", selectedFile);
+    formData.set("row_overrides", JSON.stringify(payload.overrides));
+    formData.set("excluded_rows", JSON.stringify(payload.excludedRows));
+    startTransition(() => {
+      action(formData);
+    });
+  }
 
   return (
     <section className="mt-8 overflow-hidden rounded-3xl border bg-white shadow-sm">
@@ -33,7 +62,7 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
         <h2 className="mt-2 text-2xl font-black">Add Questions from Excel or CSV</h2>
         <p className="mt-2 text-sm text-slate-600">Upload Excel directly for the fastest workflow. Choose the Paper first; every row is checked before Questions are saved.</p>
       </div>
-      <form action={action} className="p-6 sm:p-7">
+      <form onSubmit={handleSubmit} className="p-6 sm:p-7">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <label className="block text-sm font-bold">Recruiting Board<SearchableSelect name="import_exam_id" value={categoryId} onChange={(value) => { setCategoryId(value); setExamId(""); setSpecializationId(""); setPaperId(""); }} options={categories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose a Recruiting Board" /></label>
           <label className="block text-sm font-bold">Exam<SearchableSelect name="import_exam_group_id" value={examId} onChange={(value) => { setExamId(value); setSpecializationId(""); setPaperId(""); }} options={visibleExams.map((item) => ({ value: item.id, label: item.name }))} placeholder="Search and choose an Exam" disabled={!categoryId} /></label>
@@ -42,7 +71,15 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
         </div>
         <label className="mt-6 block rounded-2xl border border-dashed bg-slate-50 p-5 text-sm font-bold">
           Excel or CSV file
-          <input name="questions_file" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" required disabled={!paperId} className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-slate-950 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white disabled:cursor-not-allowed" />
+          <input
+            name="questions_file"
+            type="file"
+            accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+            required
+            disabled={!paperId}
+            onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+            className="mt-3 block w-full text-sm font-normal file:mr-4 file:rounded-lg file:border-0 file:bg-slate-950 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white disabled:cursor-not-allowed"
+          />
           <span className="mt-3 block text-xs font-normal leading-5 text-slate-600">Use .xlsx or .xls for the speed option, or CSV as a fallback. Up to 500 Questions or 2.5 MB.</span>
         </label>
         <details className="mt-5 rounded-xl border bg-slate-50 p-4">
@@ -57,9 +94,21 @@ export function QuestionCsvImport({ categories, exams, specializations, papers }
             <li>The Subject name must already exist under the selected Paper.</li>
           </ul>
         </details>
-        <button disabled={pending || !paperId} aria-busy={pending} className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"><PendingButtonContent pending={pending} pendingLabel="Checking and importing…">Import Excel or CSV</PendingButtonContent></button>
-        <LongPendingNotice pending={pending} />
-        {state.message && <p aria-live="polite" className={`mt-4 text-sm font-semibold ${state.success ? "text-emerald-700" : "text-red-700"}`}>{state.message}</p>}
+        <button disabled={pending || !paperId} aria-busy={pending} className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50">
+          <PendingButtonContent pending={pending} pendingLabel="Importing…">Import Excel or CSV</PendingButtonContent>
+        </button>
+        <LongPendingNotice pending={pending} label="Still importing…" />
+        <ImportIssuesPanel
+          success={state.success}
+          message={state.message}
+          issues={state.issues}
+          availableSubjects={state.availableSubjects}
+          isMockTest={false}
+          importMode="add"
+          hasSelectedFile={Boolean(selectedFile)}
+          pending={pending}
+          onRetryImport={handleRetryImport}
+        />
       </form>
     </section>
   );

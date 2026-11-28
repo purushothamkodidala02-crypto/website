@@ -8,11 +8,20 @@ import {
   QUESTION_IMPORT_REQUIRED_HEADERS,
   getRequiredHeadersForLanguageMode,
 } from "@/lib/questions/import-format";
+import {
+  isDuplicateIssue,
+  isValidIsoDate,
+  parseExcludedRowsJson,
+  parseRowOverridesJson,
+  suggestIsoDate,
+  type ImportIssueItem,
+  type ImportQuestionsState,
+} from "@/lib/questions/import-issues";
 import { normalizeQuestionImageUrl, questionMediaPath, removeQuestionImage, uploadQuestionImage } from "@/lib/questions/media";
 import type { CorrectAnswer, QuestionLifecycle } from "@/types/question";
 import type { SubjectContentLanguageMode } from "@/types/subject";
 
-export type ImportQuestionsState = { success: boolean; message: string };
+export type { ImportQuestionsState } from "@/lib/questions/import-issues";
 
 type CsvRow = Record<string, string>;
 type EmbeddedQuestionImage = {
@@ -43,7 +52,7 @@ type MockImportTarget = {
 
 const answers: CorrectAnswer[] = ["A", "B", "C", "D"];
 const lifecycles: QuestionLifecycle[] = ["permanent", "review", "expires"];
-const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+const validDate = isValidIsoDate;
 const optionalNumber = (value: string) => {
   const normalized = value.trim();
   if (!normalized) return null;
@@ -370,6 +379,66 @@ function validateLanguageValues(values: QuestionLanguageValues, language: string
   return null;
 }
 
+function collectLanguageValueIssues(
+  values: QuestionLanguageValues,
+  suffix: "en" | "te",
+  language: string,
+  rowNumber: number,
+  questionNumber: number,
+  questionPreview: string,
+): ImportIssueItem[] {
+  const result: ImportIssueItem[] = [];
+  if (!values.question) {
+    result.push({
+      id: `row-${rowNumber}-question_${suffix}`,
+      rowNumber,
+      questionNumber,
+      questionPreview,
+      kind: "missing_or_duplicate_option",
+      field: `question_${suffix}`,
+      currentValue: "",
+      requiredFormat: `${language} question text`,
+      message: `${language} question text is required.`,
+      editableType: "text",
+    });
+  }
+  const letters = ["a", "b", "c", "d"] as const;
+  values.options.forEach((opt, idx) => {
+    if (!opt) {
+      result.push({
+        id: `row-${rowNumber}-option_${letters[idx]}_${suffix}`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "missing_or_duplicate_option",
+        field: `option_${letters[idx]}_${suffix}`,
+        currentValue: "",
+        requiredFormat: `Option ${letters[idx].toUpperCase()} (${language})`,
+        message: `${language} option ${letters[idx].toUpperCase()} is required.`,
+        editableType: "text",
+      });
+    }
+  });
+  if (
+    !values.options.some((opt) => !opt) &&
+    new Set(values.options.map((option) => option.toLocaleLowerCase())).size !== 4
+  ) {
+    result.push({
+      id: `row-${rowNumber}-options_dup_${suffix}`,
+      rowNumber,
+      questionNumber,
+      questionPreview,
+      kind: "missing_or_duplicate_option",
+      field: `option_d_${suffix}`,
+      currentValue: values.options.join(" | "),
+      requiredFormat: `4 distinct ${language} options`,
+      message: `All four ${language} options must be different.`,
+      editableType: "text",
+    });
+  }
+  return result;
+}
+
 function activeValue(value: string) {
   const normalized = value.trim().toLowerCase();
   if (["", "true", "yes", "1", "active"].includes(normalized)) return true;
@@ -479,7 +548,24 @@ async function importQuestions(
   if (parseOutcome.error || !parseOutcome.parsedFile) {
     return { success: false, message: parseOutcome.error ?? "The Question file could not be read." };
   }
+  const rowOverrides = parseRowOverridesJson(formData.get("row_overrides"));
+  const excludedRows = parseExcludedRowsJson(formData.get("excluded_rows"));
   const parsedFile = parseOutcome.parsedFile;
+  if (excludedRows.size > 0) {
+    parsedFile.rows = parsedFile.rows.filter((item) => !excludedRows.has(item.rowNumber));
+  }
+  if (Object.keys(rowOverrides).length > 0) {
+    for (const item of parsedFile.rows) {
+      const overridesForRow = rowOverrides[item.rowNumber];
+      if (!overridesForRow) continue;
+      for (const [key, value] of Object.entries(overridesForRow)) {
+        item.values[normalizeHeader(key)] = cleanCellValue(value);
+      }
+    }
+  }
+  if (!parsedFile.rows.length) {
+    return { success: false, message: "All rows were excluded. Keep at least one row to import." };
+  }
   if (parsedFile.rows.length > 500) return { success: false, message: "Import up to 500 Questions at one time." };
   if (mockTest && mode === "replace" && parsedFile.rows.length !== mockTest.target_question_count) return { success: false, message: `Nothing was replaced. The file has ${parsedFile.rows.length} row${parsedFile.rows.length === 1 ? "" : "s"}, but this Mock Test requires exactly ${mockTest.target_question_count}.` };
   if (subjectsError) return { success: false, message: subjectsError.message };
@@ -515,6 +601,7 @@ async function importQuestions(
     import_key: string | null;
     mock_test_questions: Array<{
       mock_test_id: string;
+      question_order?: number | null;
       mock_tests: { id: string; title: string; paper_id: string; status?: string; superseded_by_mock_test_id?: string | null; test_scope?: "paper" | "subject" } | null;
     }>;
   }> = [];
@@ -526,6 +613,7 @@ async function importQuestions(
         .from("mock_test_questions")
         .select(`
           mock_test_id,
+          question_order,
           questions!inner (
             id,
             question_text,
@@ -537,7 +625,8 @@ async function importQuestions(
         .eq("mock_test_id", mockTest.id);
 
       for (const item of currentAssignments ?? []) {
-        const q = (item as unknown as {
+        const typedItem = item as unknown as {
+          question_order?: number | null;
           questions: {
             id: string;
             question_text: string;
@@ -545,13 +634,15 @@ async function importQuestions(
             subject_id: string;
             import_key: string | null;
           } | null;
-        }).questions;
+        };
+        const q = typedItem.questions;
         if (!q) continue;
         existingPaperQuestions.push({
           ...q,
           mock_test_questions: [
             {
               mock_test_id: mockTest.id,
+              question_order: typedItem.question_order ?? null,
               mock_tests: {
                 id: mockTest.id,
                 title: "this Mock Test",
@@ -601,6 +692,7 @@ async function importQuestions(
       import_key,
       mock_test_questions (
         mock_test_id,
+        question_order,
         mock_tests (
           id,
           title,
@@ -653,7 +745,12 @@ async function importQuestions(
     importKey: string | null;
     subjectId: string;
     subjectName: string;
-    assignedMockTests: Array<{ id: string; title: string; testScope: "paper" | "subject" }>;
+    assignedMockTests: Array<{
+      id: string;
+      title: string;
+      testScope: "paper" | "subject";
+      questionOrder: number | null;
+    }>;
   };
 
   const existingByText = new Map<string, ExistingDbQuestion>();
@@ -661,10 +758,11 @@ async function importQuestions(
     const normEn = normalizeQuestionText(q.question_text);
     const normTe = normalizeQuestionText(q.question_text_te);
     const subjName = (subjects ?? []).find((s) => s.id === q.subject_id)?.name ?? "Subject";
-    const assignedMockTests: Array<{ id: string; title: string; testScope: "paper" | "subject" }> = [];
+    const assignedMockTests: ExistingDbQuestion["assignedMockTests"] = [];
 
     for (const mtq of (q.mock_test_questions as unknown as Array<{
       mock_test_id: string;
+      question_order?: number | null;
       mock_tests: { id: string; title: string; paper_id: string; status: string; superseded_by_mock_test_id: string | null; test_scope?: "paper" | "subject" } | null;
     }>) ?? []) {
       if (
@@ -679,6 +777,7 @@ async function importQuestions(
           id: mtq.mock_tests.id,
           title: mtq.mock_tests.title,
           testScope: (mtq.mock_tests.test_scope as "paper" | "subject") ?? "paper",
+          questionOrder: typeof mtq.question_order === "number" ? mtq.question_order : null,
         });
       }
     }
@@ -696,8 +795,9 @@ async function importQuestions(
   }
 
   const importKeys = new Set<string>();
-  const seenFileQuestions = new Map<string, number>();
+  const seenFileQuestions = new Map<string, { rowNumber: number; questionNumber: number }>();
   const errors: string[] = [];
+  const issues: ImportIssueItem[] = [];
   const importRows: Record<string, unknown>[] = [];
   const embeddedImageTargets: Array<{ importIndex: number; image: EmbeddedQuestionImage; rowNumber: number }> = [];
   const assignmentPreferences: Array<{ key: string; rowNumber: number; questionOrder: number | null; marks: number | null; negativeMarks: number | null }> = [];
@@ -706,6 +806,7 @@ async function importQuestions(
     // Option 1: Automatic slot assignment (q1, q2...) for mock test uploads
     // Completely frees the admin from managing random import_keys in Excel
     const slotNumber = startSlot + rowIndex + 1;
+    const questionNumber = slotNumber;
     const slotKey = `q${slotNumber}`;
     const importKey = mockTest ? slotKey : ((row.import_key ?? "").trim().toLocaleLowerCase() || slotKey);
     const storedImportKey = mockTest ? `mock:${mockTest.id}:${slotKey}` : importKey;
@@ -738,7 +839,8 @@ async function importQuestions(
       reviewOn = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     }
 
-    let lifecycle = ((row.content_lifecycle ?? "").trim().toLowerCase()) as QuestionLifecycle;
+    const rawLifecycle = (row.content_lifecycle ?? "").trim();
+    let lifecycle = rawLifecycle.toLowerCase() as QuestionLifecycle;
     if (!lifecycle) {
       lifecycle = expiresOn ? "expires" : (reviewOn ? "review" : "permanent");
     }
@@ -746,28 +848,242 @@ async function importQuestions(
     const isActive = activeValue(row.is_active ?? "");
     const english = languageValues(row, "en");
     const telugu = languageValues(row, "te");
+    const questionPreview = (english.question || telugu.question || row.question || "").trim().slice(0, 140);
     const questionOrder = optionalNumber(row.question_order ?? "");
     const marks = optionalNumber(row.marks ?? "");
     const negativeMarks = optionalNumber(row.negative_marks ?? "");
     const embeddedImage = parsedFile.embeddedImages.get(rowNumber);
     const image = embeddedImage ? { url: null, error: null } : normalizeQuestionImageUrl(row.image_url ?? "");
 
-    if (!importKey) errors.push(`Row ${rowNumber}: import_key is required.`);
-    if (storedImportKey.length > 200) errors.push(`Row ${rowNumber}: import_key is too long.`);
-    if (!subject) errors.push(`Row ${rowNumber}: Subject "${row.subject || "(blank)"}" does not exist in the chosen Paper.`);
-    if (subject && importKeys.has(`${subject.id}:${importKey}`)) errors.push(`Row ${rowNumber}: import_key "${importKey}" is repeated for ${subject.name}.`);
-    if (subject && importKey) importKeys.add(`${subject.id}:${importKey}`);
-    if (!answers.includes(correctAnswer)) errors.push(`Row ${rowNumber}: correct_answer must be A, B, C, or D.`);
-    if (!lifecycles.includes(lifecycle) || (lifecycle === "review" && !validDate(reviewOn)) || (lifecycle === "expires" && !validDate(expiresOn))) {
-      errors.push(`Row ${rowNumber}: check content_lifecycle and its date (use YYYY-MM-DD).`);
+    if (!importKey) {
+      errors.push(`Row ${rowNumber}: import_key is required.`);
+      issues.push({
+        id: `row-${rowNumber}-import_key`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "other",
+        field: "import_key",
+        currentValue: "",
+        requiredFormat: "Unique key",
+        message: "import_key is required.",
+        editableType: "text",
+      });
     }
-    if (sourceExamDate && !validDate(sourceExamDate)) errors.push(`Row ${rowNumber}: source_exam_date must use YYYY-MM-DD.`);
-    if (isActive === null) errors.push(`Row ${rowNumber}: is_active must be true or false.`);
-    if (image.error) errors.push(`Row ${rowNumber}: ${image.error}`);
-    if (embeddedImage && (row.image_url ?? "").trim()) errors.push(`Row ${rowNumber}: use either the embedded image or image_url, not both.`);
-    if (mockTest && questionOrder !== null && (!Number.isInteger(questionOrder) || questionOrder < 1)) errors.push(`Row ${rowNumber}: question_order must be a whole number greater than zero.`);
-    if (mockTest && marks !== null && (!Number.isFinite(marks) || marks <= 0)) errors.push(`Row ${rowNumber}: marks must be a number greater than zero.`);
-    if (mockTest && negativeMarks !== null && (!Number.isFinite(negativeMarks) || negativeMarks < 0)) errors.push(`Row ${rowNumber}: negative_marks must be zero or a positive number.`);
+    if (storedImportKey.length > 200) {
+      errors.push(`Row ${rowNumber}: import_key is too long.`);
+      issues.push({
+        id: `row-${rowNumber}-import_key-len`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "other",
+        field: "import_key",
+        currentValue: importKey,
+        requiredFormat: "Max 200 chars",
+        message: "import_key is too long.",
+        editableType: "text",
+      });
+    }
+    if (!subject) {
+      errors.push(`Row ${rowNumber}: Subject "${row.subject || "(blank)"}" does not exist in the chosen Paper.`);
+      issues.push({
+        id: `row-${rowNumber}-subject`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "subject",
+        field: "subject",
+        currentValue: (row.subject ?? "").trim(),
+        requiredFormat: "Existing subject in Paper",
+        message: `Subject "${row.subject || "(blank)"}" does not exist in this Paper.`,
+        editableType: "subject",
+      });
+    }
+    if (subject && importKeys.has(`${subject.id}:${importKey}`)) {
+      errors.push(`Row ${rowNumber}: import_key "${importKey}" is repeated for ${subject.name}.`);
+      issues.push({
+        id: `row-${rowNumber}-import_key-dup`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "other",
+        field: "import_key",
+        currentValue: importKey,
+        requiredFormat: "Unique per subject",
+        message: `import_key "${importKey}" is repeated for ${subject.name}.`,
+        editableType: "text",
+      });
+    }
+    if (subject && importKey) importKeys.add(`${subject.id}:${importKey}`);
+    if (!answers.includes(correctAnswer)) {
+      errors.push(`Row ${rowNumber}: correct_answer must be A, B, C, or D.`);
+      issues.push({
+        id: `row-${rowNumber}-correct_answer`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "correct_answer",
+        field: "correct_answer",
+        currentValue: (row.correct_answer ?? "").trim(),
+        requiredFormat: "A, B, C, or D",
+        message: "correct_answer must be A, B, C, or D.",
+        editableType: "answer",
+      });
+    }
+    if (!lifecycles.includes(lifecycle)) {
+      errors.push(`Row ${rowNumber}: content_lifecycle must be permanent, review, or expires.`);
+      issues.push({
+        id: `row-${rowNumber}-content_lifecycle`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "content_lifecycle",
+        field: "content_lifecycle",
+        currentValue: rawLifecycle,
+        requiredFormat: "permanent | review | expires",
+        message: `Invalid content_lifecycle "${rawLifecycle}". Choose permanent, review, or expires.`,
+        editableType: "lifecycle",
+        relatedDateField: "review_on",
+        relatedDateValue: rawReviewOn || rawExpiresOn,
+      });
+    } else if (lifecycle === "review" && !validDate(reviewOn)) {
+      errors.push(`Row ${rowNumber}: review_on must use YYYY-MM-DD.`);
+      issues.push({
+        id: `row-${rowNumber}-review_on`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "date_format",
+        field: "review_on",
+        currentValue: rawReviewOn,
+        requiredFormat: "YYYY-MM-DD",
+        suggestedValue: suggestIsoDate(rawReviewOn) ?? undefined,
+        message: "review_on must use YYYY-MM-DD format.",
+        editableType: "date",
+      });
+    } else if (lifecycle === "expires" && !validDate(expiresOn)) {
+      errors.push(`Row ${rowNumber}: expires_on must use YYYY-MM-DD.`);
+      issues.push({
+        id: `row-${rowNumber}-expires_on`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "date_format",
+        field: "expires_on",
+        currentValue: rawExpiresOn,
+        requiredFormat: "YYYY-MM-DD",
+        suggestedValue: suggestIsoDate(rawExpiresOn) ?? undefined,
+        message: "expires_on must use YYYY-MM-DD format.",
+        editableType: "date",
+      });
+    }
+    if (sourceExamDate && !validDate(sourceExamDate)) {
+      errors.push(`Row ${rowNumber}: source_exam_date must use YYYY-MM-DD.`);
+      issues.push({
+        id: `row-${rowNumber}-source_exam_date`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "date_format",
+        field: "source_exam_date",
+        currentValue: sourceExamDate,
+        requiredFormat: "YYYY-MM-DD",
+        suggestedValue: suggestIsoDate(sourceExamDate) ?? undefined,
+        message: "source_exam_date must use YYYY-MM-DD format.",
+        editableType: "date",
+      });
+    }
+    if (isActive === null) {
+      errors.push(`Row ${rowNumber}: is_active must be true or false.`);
+      issues.push({
+        id: `row-${rowNumber}-is_active`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "is_active",
+        field: "is_active",
+        currentValue: (row.is_active ?? "").trim(),
+        requiredFormat: "true or false",
+        message: "is_active must be true or false.",
+        editableType: "boolean",
+      });
+    }
+    if (image.error) {
+      errors.push(`Row ${rowNumber}: ${image.error}`);
+      issues.push({
+        id: `row-${rowNumber}-image_url`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "image_conflict",
+        field: "image_url",
+        currentValue: (row.image_url ?? "").trim(),
+        requiredFormat: "HTTPS PNG/JPG/WebP URL",
+        message: image.error,
+        editableType: "text",
+      });
+    }
+    if (embeddedImage && (row.image_url ?? "").trim()) {
+      errors.push(`Row ${rowNumber}: use either the embedded image or image_url, not both.`);
+      issues.push({
+        id: `row-${rowNumber}-image_conflict`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "image_conflict",
+        field: "image_url",
+        currentValue: (row.image_url ?? "").trim(),
+        requiredFormat: "Clear image_url to keep embedded image",
+        message: "Use either the embedded image or image_url, not both.",
+        editableType: "text",
+      });
+    }
+    if (mockTest && questionOrder !== null && (!Number.isInteger(questionOrder) || questionOrder < 1)) {
+      errors.push(`Row ${rowNumber}: question_order must be a whole number greater than zero.`);
+      issues.push({
+        id: `row-${rowNumber}-question_order`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "numeric_field",
+        field: "question_order",
+        currentValue: (row.question_order ?? "").trim(),
+        requiredFormat: "Whole number >= 1",
+        message: "question_order must be a whole number >= 1.",
+        editableType: "number",
+      });
+    }
+    if (mockTest && marks !== null && (!Number.isFinite(marks) || marks <= 0)) {
+      errors.push(`Row ${rowNumber}: marks must be a number greater than zero.`);
+      issues.push({
+        id: `row-${rowNumber}-marks`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "numeric_field",
+        field: "marks",
+        currentValue: (row.marks ?? "").trim(),
+        requiredFormat: "Number > 0",
+        message: "marks must be greater than zero.",
+        editableType: "number",
+      });
+    }
+    if (mockTest && negativeMarks !== null && (!Number.isFinite(negativeMarks) || negativeMarks < 0)) {
+      errors.push(`Row ${rowNumber}: negative_marks must be zero or a positive number.`);
+      issues.push({
+        id: `row-${rowNumber}-negative_marks`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "numeric_field",
+        field: "negative_marks",
+        currentValue: (row.negative_marks ?? "").trim(),
+        requiredFormat: "Number >= 0",
+        message: "negative_marks must be zero or positive.",
+        editableType: "number",
+      });
+    }
 
     const languageMode = subject?.content_language_mode as SubjectContentLanguageMode | undefined;
     if (languageMode === "bilingual") {
@@ -775,39 +1091,95 @@ async function importQuestions(
       const teluguError = validateLanguageValues(telugu, "Telugu", rowNumber);
       if (englishError) errors.push(englishError);
       if (teluguError) errors.push(teluguError);
+      issues.push(
+        ...collectLanguageValueIssues(english, "en", "English", rowNumber, questionNumber, questionPreview),
+        ...collectLanguageValueIssues(telugu, "te", "Telugu", rowNumber, questionNumber, questionPreview),
+      );
     } else if (languageMode === "english") {
       const englishError = validateLanguageValues(english, "English", rowNumber);
       if (englishError) errors.push(englishError);
+      issues.push(
+        ...collectLanguageValueIssues(english, "en", "English", rowNumber, questionNumber, questionPreview),
+      );
     } else if (languageMode === "telugu") {
       const teluguError = validateLanguageValues(telugu, "Telugu", rowNumber);
       if (teluguError) errors.push(teluguError);
+      issues.push(
+        ...collectLanguageValueIssues(telugu, "te", "Telugu", rowNumber, questionNumber, questionPreview),
+      );
     }
 
     if (mockTest?.test_scope === "subject" && subject && subject.id !== mockTest.subject_id) {
+      const targetSubjectName = (subjects ?? []).find((s) => s.id === mockTest.subject_id)?.name ?? "selected subject";
       errors.push(`Row ${rowNumber}: this subject-wise Mock Test only accepts Questions for its selected Subject.`);
+      issues.push({
+        id: `row-${rowNumber}-subject-scope`,
+        rowNumber,
+        questionNumber,
+        questionPreview,
+        kind: "subject",
+        field: "subject",
+        currentValue: (row.subject ?? "").trim(),
+        requiredFormat: targetSubjectName,
+        suggestedValue: targetSubjectName,
+        message: `Subject-wise test only accepts "${targetSubjectName}".`,
+        editableType: "subject",
+      });
     }
 
     const canonical = languageMode === "telugu" ? telugu : english;
+    const canonicalField = languageMode === "telugu" ? "question_te" : "question_en";
     const normCanonical = normalizeQuestionText(canonical.question);
 
     if (normCanonical && normCanonical.length >= 10) {
       // In-file duplicate check (catches repeated questions within the same file)
-      const seenRow = seenFileQuestions.get(normCanonical);
-      if (seenRow !== undefined) {
+      const seenEntry = seenFileQuestions.get(normCanonical);
+      if (seenEntry !== undefined) {
         errors.push(
-          `Row ${rowNumber}: Duplicate question text in file. Matches Row ${seenRow}. Questions in the file must be unique.`
+          `Row ${rowNumber}: Duplicate question text in file. Matches Row ${seenEntry.rowNumber}. Questions in the file must be unique.`
         );
+        issues.push({
+          id: `row-${rowNumber}-dup-file`,
+          rowNumber,
+          questionNumber,
+          questionPreview,
+          kind: "duplicate_in_file",
+          field: canonicalField,
+          currentValue: canonical.question,
+          duplicateLocation: {
+            type: "file",
+            targetRowNumber: seenEntry.rowNumber,
+            targetQuestionNumber: seenEntry.questionNumber,
+          },
+          message: `Matches Row ${seenEntry.rowNumber} (Q${seenEntry.questionNumber}) in this file.`,
+          editableType: "text",
+        });
       } else {
-        seenFileQuestions.set(normCanonical, rowNumber);
+        seenFileQuestions.set(normCanonical, { rowNumber, questionNumber });
       }
 
       // Database duplicate check in this paper
       const existingMatch = existingByText.get(normCanonical);
       if (existingMatch) {
         if (mockTest) {
-          const alreadyInThisTest = existingMatch.assignedMockTests.some((t) => t.id === mockTest.id);
-          if (alreadyInThisTest && mode === "add") {
+          const thisTestAssignment = existingMatch.assignedMockTests.find((t) => t.id === mockTest.id);
+          if (thisTestAssignment && mode === "add") {
             errors.push(`Row ${rowNumber}: Duplicate question! This question is already assigned to this Mock Test.`);
+            issues.push({
+              id: `row-${rowNumber}-dup-this-test`,
+              rowNumber,
+              questionNumber,
+              questionPreview,
+              kind: "duplicate_in_this_test",
+              field: canonicalField,
+              currentValue: canonical.question,
+              duplicateLocation: {
+                type: "this_test",
+                targetQuestionNumber: thisTestAssignment.questionOrder ?? undefined,
+              },
+              message: `Already in this Mock Test${thisTestAssignment.questionOrder ? ` (Q#${thisTestAssignment.questionOrder})` : ""}.`,
+              editableType: "text",
+            });
           }
           const otherTests = existingMatch.assignedMockTests.filter((t) => t.id !== mockTest.id);
           // Questions are allowed to repeat between a subject-wise test and a full paper mock test
@@ -820,10 +1192,41 @@ async function importQuestions(
             errors.push(
               `Row ${rowNumber}: Duplicate question! This question already exists in "${conflictingTests[0].title}". Questions cannot be repeated across mock tests with the same scope in this paper.`
             );
+            issues.push({
+              id: `row-${rowNumber}-dup-other-test`,
+              rowNumber,
+              questionNumber,
+              questionPreview,
+              kind: "duplicate_in_other_test",
+              field: canonicalField,
+              currentValue: canonical.question,
+              duplicateLocation: {
+                type: "other_test",
+                mockTestTitle: conflictingTests[0].title,
+                targetQuestionNumber: conflictingTests[0].questionOrder ?? undefined,
+              },
+              message: `In "${conflictingTests[0].title}"${conflictingTests[0].questionOrder ? ` (Q#${conflictingTests[0].questionOrder})` : ""}.`,
+              editableType: "text",
+            });
           } else if (!skipCrossTestDuplicateCheck && subject && existingMatch.subjectId !== subject.id) {
             errors.push(
               `Row ${rowNumber}: Duplicate question! An identical question already exists under ${existingMatch.subjectName}.`
             );
+            issues.push({
+              id: `row-${rowNumber}-dup-other-subject`,
+              rowNumber,
+              questionNumber,
+              questionPreview,
+              kind: "duplicate_in_other_subject",
+              field: canonicalField,
+              currentValue: canonical.question,
+              duplicateLocation: {
+                type: "other_subject",
+                subjectName: existingMatch.subjectName,
+              },
+              message: `Exists under "${existingMatch.subjectName}".`,
+              editableType: "text",
+            });
           }
         }
       }
@@ -862,8 +1265,31 @@ async function importQuestions(
   });
 
   if (errors.length) {
-    const shownErrors = errors.slice(0, 6);
-    return { success: false, message: `Nothing was imported. ${shownErrors.join(" ")}${errors.length > shownErrors.length ? ` Plus ${errors.length - shownErrors.length} more issue(s).` : ""}` };
+    const duplicateCount = issues.filter(isDuplicateIssue).length;
+    const otherCount = Math.max(0, issues.length - duplicateCount);
+    const parts: string[] = [];
+    if (duplicateCount > 0) {
+      parts.push(`${duplicateCount} duplicate${duplicateCount === 1 ? "" : "s"}`);
+    }
+    if (otherCount > 0) {
+      parts.push(`${otherCount} ${duplicateCount > 0 ? "other " : ""}issue${otherCount === 1 ? "" : "s"}`);
+    }
+    const summaryMessage = parts.length
+      ? `${parts.join(" and ")} found.`
+      : `${errors.length} issue${errors.length === 1 ? "" : "s"} found.`;
+    const availableSubjects =
+      mockTest?.test_scope === "subject" && mockTest.subject_id
+        ? (subjects ?? []).filter((s) => s.id === mockTest.subject_id).map((s) => s.name)
+        : (subjects ?? []).map((s) => s.name);
+
+    return {
+      success: false,
+      message: summaryMessage,
+      issues,
+      availableSubjects,
+      isMockTest: Boolean(mockTest),
+      importMode: mode,
+    };
   }
 
   const uploadedImagePaths: string[] = [];

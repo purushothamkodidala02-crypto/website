@@ -6,18 +6,24 @@ type LoadingSpinnerProps = {
   className?: string;
 };
 
-export function LongPendingNotice({ pending }: { pending: boolean }) {
-  return pending ? <LongPendingNoticeTimer /> : null;
+export function LongPendingNotice({
+  pending,
+  label = "This is taking longer than expected. Please wait or try again.",
+}: {
+  pending: boolean;
+  label?: string;
+}) {
+  return pending ? <LongPendingNoticeTimer label={label} /> : null;
 }
 
-function LongPendingNoticeTimer() {
+function LongPendingNoticeTimer({ label }: { label: string }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const timeout = window.setTimeout(() => setVisible(true), 8000);
     return () => window.clearTimeout(timeout);
   }, []);
   if (!visible) return null;
-  return <p role="status" aria-live="polite" className="mt-2 text-xs font-semibold text-amber-700">This is taking longer than expected. Please wait or try again.</p>;
+  return <p role="status" aria-live="polite" className="mt-2 text-xs font-semibold text-amber-700">{label}</p>;
 }
 
 export function LoadingSpinner({ className = "h-4 w-4" }: LoadingSpinnerProps) {
