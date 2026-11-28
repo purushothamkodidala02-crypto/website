@@ -115,7 +115,6 @@ export function AdminShell({
         <AdminHeader
           collapsed={sidebarCollapsed}
           onToggleSidebar={handleToggleSidebar}
-          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           userEmail={userEmail}
           adminName={adminName}
         />
