@@ -25,48 +25,61 @@ export default async function AdminMfaPage() {
 
   if (profile?.role !== "admin") redirect("/dashboard");
 
-  const { data: assurance } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const [{ data: assurance }, { data: factorsData }] = await Promise.all([
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+    supabase.auth.mfa.listFactors(),
+  ]);
 
   if (assurance?.currentLevel === "aal2") redirect("/admin");
 
+  const verifiedTotp = factorsData?.totp?.[0];
+  const initialFactor = verifiedTotp
+    ? {
+        id: verifiedTotp.id,
+        friendlyName: verifiedTotp.friendly_name || "Varadhi Admin",
+      }
+    : null;
+
   return (
-    <main className="min-h-screen bg-slate-950 px-5 py-10 text-slate-950 sm:px-8 sm:py-14">
+    <main className="student-page min-h-screen bg-[#f6faf8] px-4 py-8 text-slate-950 sm:px-8 sm:py-12">
       <div className="mx-auto max-w-5xl">
         <div className="flex justify-center">
           <BrandLockup
             context="admin"
-            markClassName="h-12 w-12 shrink-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)]"
+            markClassName="h-11 w-11 shrink-0 drop-shadow-[0_8px_14px_rgba(10,41,34,0.16)]"
           />
         </div>
 
-        <div className="mt-9 grid overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl shadow-black/35 lg:grid-cols-[0.82fr_1.18fr]">
-          <aside className="bg-teal-700 p-7 text-white sm:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-100">
-              Administrator protection
+        <div className="mt-7 grid overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xl shadow-slate-900/5 lg:grid-cols-[0.84fr_1.16fr]">
+          <aside className="bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-7 text-white sm:p-10">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
+              Admin Workspace Security
             </p>
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-              A password is only the first step.
+            <h1 className="font-display mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+              Two-Factor Verification
             </h1>
-            <p className="mt-4 text-sm leading-6 text-teal-50/90">
-              Varadhi requires a fresh six-digit code before opening the admin
-              workspace. Student accounts are not affected by this requirement.
+            <p className="mt-3 text-sm leading-6 text-teal-50/90">
+              Verify your identity with a six-digit code from your authenticator app
+              to open the Varadhi Prep administration workspace.
             </p>
 
-            <ol className="mt-8 space-y-5 text-sm">
-              <SecurityStep number="1" title="Sign in with your password" />
-              <SecurityStep number="2" title="Verify your authenticator code" />
-              <SecurityStep number="3" title="Enter the protected workspace" />
+            <ol className="mt-7 space-y-4 text-sm">
+              <SecurityStep number="1" title="Signed in with your account" />
+              <SecurityStep number="2" title="Enter your 6-digit authenticator code" />
+              <SecurityStep number="3" title="Continue to Admin Workspace" />
             </ol>
 
-            <div className="mt-9 rounded-2xl border border-white/15 bg-slate-950/20 p-4 text-xs leading-5 text-teal-50">
-              Use Google Authenticator, Microsoft Authenticator, Authy, 1Password,
-              or any compatible TOTP application.
+            <div className="mt-8 rounded-2xl border border-white/15 bg-white/10 p-4 text-xs leading-5 text-teal-50">
+              Compatible with Google Authenticator, Microsoft Authenticator, Authy,
+              and 1Password.
             </div>
           </aside>
 
           <section className="p-6 sm:p-10">
-            <AdminMfaForm email={user.email ?? "Administrator"} />
+            <AdminMfaForm
+              email={user.email ?? "Administrator"}
+              initialFactor={initialFactor}
+            />
           </section>
         </div>
       </div>

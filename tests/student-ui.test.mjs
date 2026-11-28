@@ -291,3 +291,24 @@ test("display preferences sanitize inputs and wire self-hosted Telugu fonts and 
   assert.match(catalogGrid, /Filter tests on this page/);
   assert.match(mockTestsPage, /SubjectFilterRibbon/);
 });
+
+test("Google sign-in pending overlay, native progress spinner, and server-resolved admin MFA avoid stuck rotations", async () => {
+  const [globalsCss, googleButton, adminMfaPage, adminMfaForm, turnstile] = await Promise.all([
+    read("app/globals.css"),
+    read("components/auth/GoogleSignInButton.tsx"),
+    read("app/admin-mfa/page.tsx"),
+    read("app/admin-mfa/AdminMfaForm.tsx"),
+    read("components/auth/TurnstileChallenge.tsx"),
+  ]);
+
+  assert.match(globalsCss, /@layer base\s*\{\s*\*\s*\{\s*border-color:/);
+  assert.match(globalsCss, /progress\.loading-spinner:indeterminate/);
+  assert.match(googleButton, /Signing in with Google…/);
+  assert.doesNotMatch(googleButton, /preparing your session/);
+  assert.match(googleButton, /className="loading-spinner/);
+  assert.match(adminMfaPage, /listFactors\(\)/);
+  assert.match(adminMfaPage, /initialFactor=\{initialFactor\}/);
+  assert.doesNotMatch(adminMfaPage, /min-h-screen bg-slate-950/);
+  assert.match(adminMfaForm, /initialFactor/);
+  assert.match(turnstile, /Loading security check…/);
+});

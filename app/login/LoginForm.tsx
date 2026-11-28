@@ -208,7 +208,11 @@ export function LoginForm({
         </p>
         {nextPath !== "/" && (
           <span className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-[11px] font-bold text-teal-800">
-            Resuming your selection
+            {nextPath.startsWith("/admin")
+              ? "Admin sign-in"
+              : nextPath.startsWith("/dashboard")
+                ? "Student dashboard"
+                : "Continue to your test"}
           </span>
         )}
       </div>

@@ -18,11 +18,20 @@ const noticeStyles = {
   success: "border-emerald-200 bg-emerald-50 text-emerald-800",
 };
 
-export function AdminMfaForm({ email }: { email: string }) {
-  const initialized = useRef(false);
-  const [stage, setStage] = useState<Stage>("checking");
-  const [factorId, setFactorId] = useState<string | null>(null);
-  const [factorName, setFactorName] = useState("Varadhi Admin");
+export function AdminMfaForm({
+  email,
+  initialFactor,
+}: {
+  email: string;
+  initialFactor?: { id: string; friendlyName: string } | null;
+}) {
+  const hasInitialFactorProp = initialFactor !== undefined;
+  const initialized = useRef(hasInitialFactorProp);
+  const [stage, setStage] = useState<Stage>(() =>
+    hasInitialFactorProp ? (initialFactor ? "verify" : "setup") : "checking",
+  );
+  const [factorId, setFactorId] = useState<string | null>(initialFactor?.id ?? null);
+  const [factorName, setFactorName] = useState(initialFactor?.friendlyName || "Varadhi Admin");
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -42,27 +51,35 @@ export function AdminMfaForm({ email }: { email: string }) {
     initialized.current = true;
 
     async function inspectFactors() {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.mfa.listFactors();
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.auth.mfa.listFactors();
 
-      if (error) {
+        if (error) {
+          setNotice({
+            tone: "error",
+            message: "Unable to verify security settings. Please sign out and sign in again.",
+          });
+          setStage("setup");
+          return;
+        }
+
+        const verifiedFactor = data.totp[0];
+        if (verifiedFactor) {
+          setFactorId(verifiedFactor.id);
+          setFactorName(verifiedFactor.friendly_name || "Varadhi Admin");
+          setStage("verify");
+          return;
+        }
+
+        setStage("setup");
+      } catch {
         setNotice({
           tone: "error",
-          message: "We could not check your administrator security setup. Sign out and try again.",
+          message: "Unable to connect to security verification. Please refresh the page.",
         });
         setStage("setup");
-        return;
       }
-
-      const verifiedFactor = data.totp[0];
-      if (verifiedFactor) {
-        setFactorId(verifiedFactor.id);
-        setFactorName(verifiedFactor.friendly_name || "Varadhi Admin");
-        setStage("verify");
-        return;
-      }
-
-      setStage("setup");
     }
 
     void inspectFactors();
@@ -154,7 +171,7 @@ export function AdminMfaForm({ email }: { email: string }) {
       return;
     }
 
-    setNotice({ tone: "success", message: "Administrator identity verified. Opening Varadhi…" });
+    setNotice({ tone: "success", message: "Verified. Opening admin workspace…" });
     window.location.replace("/admin");
   }
 
@@ -167,10 +184,10 @@ export function AdminMfaForm({ email }: { email: string }) {
 
   if (stage === "checking") {
     return (
-      <div className="grid min-h-96 place-items-center text-center">
-        <div>
-          <span className="mx-auto block h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-teal-700" />
-          <p className="mt-4 text-sm font-bold text-slate-600">Checking administrator security…</p>
+      <div className="grid min-h-72 place-items-center text-center">
+        <div className="flex flex-col items-center gap-3">
+          <progress aria-label="Loading verification" className="loading-spinner" />
+          <p className="text-sm font-semibold text-slate-600">Loading verification…</p>
         </div>
       </div>
     );

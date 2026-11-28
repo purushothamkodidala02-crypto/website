@@ -79,9 +79,14 @@ export function TurnstileChallenge({
       "expired-callback": () => onTokenRef.current(null),
       "error-callback": (errorCode) => {
         onTokenRef.current(null);
+        if (errorCode === "110200") {
+          console.warn(
+            `Turnstile hostname (${typeof window !== "undefined" ? window.location.hostname : "unknown"}) is not authorized for this site key.`,
+          );
+        }
         setErrorMessage(
           errorCode === "110200"
-            ? `This address (${typeof window !== "undefined" ? window.location.hostname : "hostname"}) is not authorized in Cloudflare Turnstile. Add it to your Turnstile widget hostnames in Cloudflare.`
+            ? "Security verification is unavailable on this local address. You can continue with Google sign-in above."
             : "Security verification could not load. Refresh the page and try again.",
         );
         return true;
@@ -115,14 +120,14 @@ export function TurnstileChallenge({
       />
       <div ref={containerRef} className="min-h-16" role="region" aria-label="Security verification" />
       {!ready && (
-        <div className="flex items-center justify-center gap-2 py-2 text-xs text-slate-500" aria-live="polite">
-          <span className="h-3 w-3 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
-          <span>Verifying security…</span>
+        <div className="flex items-center justify-center gap-2 py-2 text-xs font-medium text-slate-500" aria-live="polite">
+          <progress aria-label="Loading security check" className="loading-spinner loading-spinner-sm" />
+          <span>Loading security check…</span>
         </div>
       )}
       {errorMessage && <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{errorMessage}</p>}
-      <p className="mt-2 text-center text-xs text-slate-500">
-        Protected from automated abuse by Cloudflare Turnstile.
+      <p className="mt-2 text-center text-[11px] text-slate-500">
+        Security check by Cloudflare Turnstile
       </p>
     </div>
   );

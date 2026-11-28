@@ -127,14 +127,30 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         }}
         onError={() => setError("Google sign-in could not load. Please use email sign-in or try again shortly.")}
       />
-      <div ref={buttonRef} className={`min-h-11 w-full overflow-hidden flex justify-center ${pending ? "opacity-40 pointer-events-none" : ""}`} aria-busy={pending} aria-live="polite" />
-      {pending && (
-        <div className="mt-2.5 flex items-center justify-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-3 py-2 text-xs font-bold text-teal-800">
-          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-teal-700 border-t-transparent" />
-          <span>Signing in with Google and preparing your session…</span>
-        </div>
-      )}
-      <LongPendingNotice pending={pending} />
+      <div className="relative mx-auto min-h-11 w-full max-w-[400px]">
+        <div
+          ref={buttonRef}
+          className={`flex min-h-11 w-full items-center justify-center overflow-hidden transition-opacity duration-150 ${
+            pending ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+          aria-hidden={pending}
+        />
+        {pending && (
+          <div
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            className="absolute inset-0 flex items-center justify-center gap-2.5 rounded-lg border border-teal-200 bg-teal-50/75 px-4 text-sm font-semibold text-teal-950 shadow-2xs"
+          >
+            <progress aria-label="Signing in with Google" className="loading-spinner loading-spinner-sm" />
+            <span>Signing in with Google…</span>
+          </div>
+        )}
+      </div>
+      <LongPendingNotice
+        pending={pending}
+        label="Still connecting with Google. Please wait a moment…"
+      />
       {error && (
         <p role="alert" aria-live="polite" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {error}
