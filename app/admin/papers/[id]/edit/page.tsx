@@ -24,11 +24,13 @@ export default async function EditPaperPage({ params, searchParams }: { params: 
   const backHref = cameFromExam ? `/admin/groups/${paper.exam_group_id}/edit?open=${openKey}#${openKey === "direct" ? "direct-papers" : `specialization-${openKey}`}` : "/admin/papers";
   const backLabel = cameFromExam ? `← Back to ${parentExam?.name ?? "Exam"}` : "← Back to Papers";
   return (
-    <main>
-      <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">{backLabel}</Link>
-      <h1 className="mt-5 text-3xl font-black">Edit Paper</h1>
+    <div className="space-y-5">
+      <div>
+        <Link href={backHref} className="text-sm font-semibold text-teal-800 hover:underline">{backLabel}</Link>
+        <h1 className="mt-3 border-b border-slate-200/80 pb-4 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Edit Paper</h1>
+      </div>
       <PaperForm paper={paper} exams={groups.map((group) => ({ id: group.id, label: `${categories.get(group.exam_id) ?? "Unknown Recruiting Board"} → ${group.name}` }))} specializations={(specializationsResult.data ?? []).map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))} />
       <EntitySeoForm entityType="paper" entityId={paper.id} title={paper.seo_title} description={paper.seo_description} titlePlaceholder={`${parentExam?.name ?? "Exam"} ${paper.name} Mock Tests`} descriptionPlaceholder={`Take free ${paper.name} mock tests with timed practice and answer review.`} />
-    </main>
+    </div>
   );
 }

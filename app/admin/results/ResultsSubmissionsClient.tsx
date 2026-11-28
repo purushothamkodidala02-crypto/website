@@ -388,50 +388,45 @@ export function ResultsSubmissionsClient({
 
   return (
     <div className="space-y-6">
-      {/* Executive Header */}
-      <section className="rounded-3xl border border-teal-100 bg-white p-6 shadow-xs sm:p-7">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-teal-800">
-                Candidate Analytics
-              </p>
-            </div>
-            <h1 className="mt-1.5 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
-              Results &amp; Submissions
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-slate-600">
-              Audit student test attempts, inspect question-level accuracy, isolate zero-score submissions, and export filtered reports.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              disabled={filteredAndSortedAttempts.length === 0}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm"
-            >
-              <svg aria-hidden="true" className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-              </svg>
-              <span>Export CSV ({filteredAndSortedAttempts.length})</span>
-            </button>
-
-            <Link
-              href="/admin/mock-tests"
-              prefetch={true}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:text-sm"
-            >
-              <span>Review Mock Tests</span>
-              <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-          </div>
+      {/* Compact Header */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-slate-200/80 pb-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">
+            Candidate Analytics
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            Results &amp; Submissions
+          </h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-600">
+            Audit completed test attempts, inspect question accuracy, and export filtered reports.
+          </p>
         </div>
-      </section>
+
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={filteredAndSortedAttempts.length === 0}
+            className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm"
+          >
+            <svg aria-hidden="true" className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span className="admin-stat">Export CSV ({filteredAndSortedAttempts.length})</span>
+          </button>
+
+          <Link
+            href="/admin/mock-tests"
+            prefetch={false}
+            className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50/80 px-3.5 py-2 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:text-sm"
+          >
+            <span>Review Mock Tests</span>
+            <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
+        </div>
+      </div>
 
       {/* Primary KPI Strip */}
       <section aria-label="Overall assessment metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -444,7 +439,7 @@ export function ResultsSubmissionsClient({
               </svg>
             </span>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-950 tabular-nums">
+          <p className="admin-stat mt-3 text-3xl font-bold tracking-tight text-slate-950">
             {Number(summary.completedAttempts).toLocaleString("en-IN")}
           </p>
           <p className="mt-1.5 text-xs font-medium text-slate-500">
@@ -452,7 +447,7 @@ export function ResultsSubmissionsClient({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-indigo-50/40 via-white to-white p-5 shadow-xs">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Participants</p>
             <span className="grid h-8 w-8 place-items-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-800">
@@ -463,15 +458,15 @@ export function ResultsSubmissionsClient({
               </svg>
             </span>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-950 tabular-nums">
+          <p className="admin-stat mt-3 text-3xl font-bold tracking-tight text-slate-950">
             {Number(summary.participants).toLocaleString("en-IN")}
           </p>
-          <p className="mt-1.5 text-xs font-medium text-slate-500 tabular-nums">
+          <p className="admin-stat mt-1.5 text-xs font-medium text-slate-500">
             {attemptsPerParticipant} avg attempts per candidate
           </p>
         </div>
 
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-emerald-50/40 via-white to-white p-5 shadow-xs">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Average Score</p>
             <span className="grid h-8 w-8 place-items-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-800">
@@ -480,7 +475,7 @@ export function ResultsSubmissionsClient({
               </svg>
             </span>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-950 tabular-nums">
+          <p className="admin-stat mt-3 text-3xl font-bold tracking-tight text-slate-950">
             {Number(summary.averageScore).toFixed(1)}%
           </p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100">
@@ -491,7 +486,7 @@ export function ResultsSubmissionsClient({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-amber-50/40 via-white to-white p-5 shadow-xs">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Average Accuracy</p>
             <span className="grid h-8 w-8 place-items-center rounded-xl border border-amber-100 bg-amber-50 text-amber-800">
@@ -502,7 +497,7 @@ export function ResultsSubmissionsClient({
               </svg>
             </span>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-950 tabular-nums">
+          <p className="admin-stat mt-3 text-3xl font-bold tracking-tight text-slate-950">
             {Number(summary.averageAccuracy).toFixed(1)}%
           </p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-amber-100">
@@ -573,15 +568,14 @@ export function ResultsSubmissionsClient({
                     type="button"
                     onClick={() => navigateWithFilters({ band: active ? "all" : band.key, page: 1 })}
                     aria-pressed={active}
-                    className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 ${
+                    className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 ${
                       active
                         ? "border-teal-700 bg-teal-700 text-white"
                         : "border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300 hover:bg-teal-50"
                     }`}
                   >
-                    <span className={`h-2 w-2 rounded-full ${active ? "bg-white" : band.dot}`} />
                     <span>{band.label}</span>
-                    <span className={`tabular-nums ${active ? "text-teal-100" : "text-slate-400"}`}>
+                    <span className={`admin-stat ${active ? "text-teal-100" : "text-slate-500"}`}>
                       ({band.count})
                     </span>
                   </button>

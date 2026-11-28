@@ -32,23 +32,24 @@ export default async function EditExamPage({
   const exam = data as Exam;
 
   return (
-    <main>
-      <Link
-        href="/admin/exams"
-        className="text-sm font-medium text-gray-600 hover:text-black"
-      >
-        ← Back to Recruiting Boards
-      </Link>
+    <div className="space-y-5">
+      <div>
+        <Link
+          href="/admin/exams"
+          className="text-sm font-semibold text-teal-800 hover:underline"
+        >
+          ← Back to Recruiting Boards
+        </Link>
 
-      <div className="mt-6">
-        <h1 className="text-3xl font-bold">Edit Recruiting Board</h1>
-
-        <p className="mt-2 text-gray-600">
-          Update the selected exam’s details and status.
-        </p>
+        <div className="mt-3 border-b border-slate-200/80 pb-4">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Edit Recruiting Board</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Update the selected board&apos;s details and status.
+          </p>
+        </div>
       </div>
 
       <EditExamForm exam={exam} states={statesResult.data ?? []} />
-    </main>
+    </div>
   );
 }

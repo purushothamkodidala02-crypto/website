@@ -26,15 +26,17 @@ type RegistrationAnalytics = {
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" });
 
-async function loadFallbackOrdersAndEntitlements(now: string) {
-  const admin = createAdminClient();
+async function loadFallbackOrdersAndEntitlements(
+  now: string,
+  db: ReturnType<typeof createAdminClient> | Awaited<ReturnType<typeof createClient>>,
+) {
   const [ordersRes, entitlementsRes] = await Promise.all([
-    admin
+    db
       .from("payment_orders")
       .select("id, user_id, product_id, amount_paise, created_at")
       .eq("status", "paid")
       .limit(5000),
-    admin
+    db
       .from("student_entitlements")
       .select("user_id, product_id")
       .gt("expires_at", now)
@@ -59,7 +61,7 @@ export default async function AdminStudentsPage() {
   if (profile?.role !== "admin") redirect("/dashboard");
   if (assurance?.currentLevel !== "aal2") redirect("/admin-mfa");
 
-  const admin = createAdminClient();
+  const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
   const [studentsResult, productsResult, recentOrdersResult, analyticsResult] = await Promise.all([
     admin
       .from("profiles")
@@ -103,7 +105,7 @@ export default async function AdminStudentsPage() {
     }
   } else {
     // Graceful fast fallback if RPC is not yet present on remote DB
-    const fallback = await loadFallbackOrdersAndEntitlements(new Date().toISOString());
+    const fallback = await loadFallbackOrdersAndEntitlements(new Date().toISOString(), admin);
     fallbackError = fallback.hasError;
     const paidStudentIds = new Set(fallback.paidOrders.map((item) => item.user_id));
     uniquePaidStudents = paidStudentIds.size;
@@ -208,22 +210,22 @@ export default async function AdminStudentsPage() {
   }
 
   return (
-    <div>
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Registrations</p>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-950">Registration and purchase overview</h1>
-          <p className="mt-2 max-w-3xl text-slate-600">See how many students registered, which Exam Series they purchased, active access, and payment status.</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Registrations</p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">Registration and purchase overview</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-600">Track registered students, active series passes, and payment activity.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <SendUserEmailModal triggerLabel="Compose Email" />
-          <Link href="/admin/access" className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">Manage Exam Series</Link>
+          <Link href="/admin/access" prefetch={false} className="rounded-xl bg-slate-950 px-3.5 py-2 text-xs sm:text-sm font-bold text-white hover:bg-teal-800 transition">Manage Exam Series</Link>
         </div>
       </div>
 
-      {hasError && <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">Some student or payment information could not be loaded. Refresh this page to try again.</p>}
+      {hasError && <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">Some student or payment information could not be loaded. Refresh this page to try again.</p>}
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-5">
         <SummaryCard label="Registered students" value={studentsResult.count ?? 0} detail="All student accounts" />
         <SummaryCard label="Paid students" value={uniquePaidStudents} detail="Unique successful buyers" />
         <SummaryCard label="Successful payments" value={totalSuccessfulPayments} detail="Completed transactions" />
@@ -359,10 +361,10 @@ export default async function AdminStudentsPage() {
 
 function SummaryCard({ label, value, detail }: { label: string; value: number | string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 to-white p-5 shadow-sm">
-      <p className="text-sm font-bold text-slate-600">{label}</p>
-      <p className="mt-3 text-3xl font-black text-slate-950">{value}</p>
-      <p className="mt-2 text-xs font-semibold text-slate-500">{detail}</p>
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-2xs">
+      <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="admin-stat mt-2 text-2xl sm:text-3xl font-bold text-slate-950">{value}</p>
+      <p className="mt-1.5 text-xs font-medium text-slate-500">{detail}</p>
     </div>
   );
 }

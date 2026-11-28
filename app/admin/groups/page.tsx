@@ -22,11 +22,12 @@ export default async function AdminGroupsPage() {
   );
 
   return (
-    <main>
-      <div>
-        <h1 className="text-3xl font-bold">Exams</h1>
-        <p className="mt-2 text-gray-600">
-          Create an Exam under a Recruiting Board, then open it to add optional Specialisations and their Papers in one place.
+    <div className="space-y-5">
+      <div className="border-b border-slate-200/80 pb-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Exam structure</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Exams</h1>
+        <p className="mt-1 text-sm text-slate-600">
+          Create an Exam under a Recruiting Board, then add optional Specialisations and Papers.
         </p>
       </div>
 
@@ -51,6 +52,6 @@ export default async function AdminGroupsPage() {
           }))}
         />
       )}
-    </main>
+    </div>
   );
 }

@@ -430,8 +430,9 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
     return (
       <div className="mx-auto max-w-6xl space-y-6">
         <BackButton fallbackHref="/admin/surveys" label="← Back to Surveys & Feedback" />
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500">
-          <span className="inline-block animate-spin mr-2">⏳</span> Loading survey details…
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+          <progress aria-label="Loading survey details" className="loading-spinner" />
+          <span className="text-xs font-semibold text-slate-600">Loading survey details…</span>
         </div>
       </div>
     );
@@ -529,8 +530,7 @@ export default function AdminSurveyEditor({ params }: { params: Promise<{ id: st
                   {survey.title}
                 </h1>
                 {survey.is_active ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-3 py-1 text-xs font-semibold">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-0.5 text-xs font-semibold">
                     Active (Live)
                   </span>
                 ) : (

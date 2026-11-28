@@ -43,19 +43,19 @@ export function AdminQuickCandidateLookup() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </span>
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
-              Instant Candidate Lookup
+            <h3 className="text-xs font-black uppercase tracking-[0.14em] text-slate-900">
+              Candidate Lookup
             </h3>
           </div>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Quickly check student enrollment, phone number, and test attempt progress.
+          <p className="mt-1 text-xs text-slate-500">
+            Find a student by name or phone number.
           </p>
         </div>
         <Link
           href="/admin/students"
-          className="text-xs font-bold text-teal-700 hover:text-teal-900 transition self-start sm:self-auto"
+          className="shrink-0 whitespace-nowrap text-xs font-bold text-teal-700 hover:text-teal-900 transition self-start sm:self-auto"
         >
-          All Registrations &rarr;
+          All students &rarr;
         </Link>
       </div>
 
@@ -74,7 +74,7 @@ export function AdminQuickCandidateLookup() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter candidate phone number or name..."
+            placeholder="Name or phone number…"
             className="w-full rounded-xl border border-slate-300 bg-slate-50/50 pl-10 pr-9 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:bg-white focus:ring-1 focus:ring-teal-100"
           />
           {query && (
@@ -92,14 +92,18 @@ export function AdminQuickCandidateLookup() {
         <button
           type="submit"
           disabled={isPending || !query.trim()}
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-800 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-teal-900 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-teal-800 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-teal-900 disabled:opacity-50"
         >
           {isPending ? (
             <>
-              <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
+              <progress
+                aria-label="Searching candidates"
+                className="loading-spinner loading-spinner-sm"
+                style={{
+                  ["--spinner-color" as string]: "#ffffff",
+                  ["--track-color" as string]: "rgba(255, 255, 255, 0.25)",
+                }}
+              />
               <span>Searching…</span>
             </>
           ) : (

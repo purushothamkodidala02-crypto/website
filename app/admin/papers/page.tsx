@@ -14,5 +14,35 @@ export default async function PapersPage() {
   const exams = groupsResult.data ?? []; const papers = papersResult.data ?? []; const specializations = specializationsResult.data ?? [];
   const examOptions = exams.map((exam) => ({ id: exam.id, label: `${categoriesById.get(exam.exam_id) ?? "Unknown Recruiting Board"} → ${exam.name}` }));
   const specializationById = new Map(specializations.map((item) => [item.id, item.name]));
-  return <main><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Exam structure</p><h1 className="mt-2 text-3xl font-black">Papers</h1><p className="mt-2 text-slate-600">Create the actual government Papers under each Exam. Select a Specialisation for branch-based Exams such as AEE.</p></div><PaperForm exams={examOptions} specializations={specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))} />{papersResult.error ? <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{papersResult.error.message}</p> : <ExistingPapersTable exams={examOptions} specializations={specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))} papers={papers.map((paper) => ({ id: paper.id, examId: paper.exam_group_id, specializationId: paper.specialization_id, specializationName: paper.specialization_id ? specializationById.get(paper.specialization_id) ?? "Unknown Specialisation" : null, name: paper.name, slug: paper.slug, durationMinutes: paper.duration_minutes, questionCount: paper.question_count, isActive: paper.is_active }))} />}</main>;
+  return (
+    <div className="space-y-5">
+      <div className="border-b border-slate-200/80 pb-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Exam structure</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Papers</h1>
+        <p className="mt-1 text-sm text-slate-600">
+          Create Papers under an Exam or Specialisation for branch-based Exams.
+        </p>
+      </div>
+      <PaperForm exams={examOptions} specializations={specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))} />
+      {papersResult.error ? (
+        <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{papersResult.error.message}</p>
+      ) : (
+        <ExistingPapersTable
+          exams={examOptions}
+          specializations={specializations.map((item) => ({ id: item.id, examId: item.exam_group_id, name: item.name }))}
+          papers={papers.map((paper) => ({
+            id: paper.id,
+            examId: paper.exam_group_id,
+            specializationId: paper.specialization_id,
+            specializationName: paper.specialization_id ? specializationById.get(paper.specialization_id) ?? "Unknown Specialisation" : null,
+            name: paper.name,
+            slug: paper.slug,
+            durationMinutes: paper.duration_minutes,
+            questionCount: paper.question_count,
+            isActive: paper.is_active,
+          }))}
+        />
+      )}
+    </div>
+  );
 }

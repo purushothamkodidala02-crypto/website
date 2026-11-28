@@ -30,9 +30,11 @@ export default async function EditSubjectPage({ params, searchParams }: { params
   const backHref = validReturnContext ? `/admin/subjects?category=${context.fromCategory}&exam=${context.fromExam}&specialization=${context.fromSpecialization ?? ""}&paper=${context.fromPaper}` : "/admin/subjects";
   const backLabel = validReturnContext ? "← Back to selected Subjects" : "← Back to Subjects";
   return (
-    <main>
-      <Link href={backHref} className="text-sm font-semibold text-teal-700 hover:underline">{backLabel}</Link>
-      <h1 className="mt-5 text-3xl font-black">Edit Subject</h1>
+    <div className="space-y-5">
+      <div>
+        <Link href={backHref} className="text-sm font-semibold text-teal-800 hover:underline">{backLabel}</Link>
+        <h1 className="mt-3 border-b border-slate-200/80 pb-4 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Edit Subject</h1>
+      </div>
       <EditSubjectForm subject={subject as Subject} papers={papers.map((paper) => { const group = groups.get(paper.exam_group_id); return { id: paper.id, label: `${categories.get(group?.exam_id ?? "") ?? "Unknown Recruiting Board"} → ${group?.name ?? "Unknown Exam"}${paper.specialization_id ? ` → ${specializations.get(paper.specialization_id) ?? "Unknown Specialisation"}` : ""} → ${paper.name}` }; })} />
       <SubjectSectionsManager
         subjectId={subject.id}
@@ -40,6 +42,6 @@ export default async function EditSubjectPage({ params, searchParams }: { params
         sections={(sectionsResult.data ?? []) as SubjectSection[]}
       />
       <EntitySeoForm entityType="subject" entityId={subject.id} title={subject.seo_title} description={subject.seo_description} titlePlaceholder={`${subject.name} Mock Tests for ${subjectExam?.name ?? "Exam"}`} descriptionPlaceholder={`Practise free ${subject.name} mock tests with timed questions and answer review.`} />
-    </main>
+    </div>
   );
 }

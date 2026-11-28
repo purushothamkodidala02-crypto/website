@@ -39,6 +39,14 @@ export async function lookupCandidateAction(rawQuery: string): Promise<{
       return { success: false, candidates: [], error: "Enter at least 2 characters to search." };
     }
 
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return {
+        success: false,
+        candidates: [],
+        error: "Candidate directory search requires SUPABASE_SERVICE_ROLE_KEY in this environment.",
+      };
+    }
+
     const admin = createAdminClient();
     const isDigits = /^\d+$/.test(query);
 

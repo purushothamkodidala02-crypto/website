@@ -7,7 +7,6 @@ import { AdminGrowthWorkspace } from "./AdminGrowthWorkspace";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Help Us Grow Pop-up Settings | Admin Workspace | Varadhi Prep",
   description:
     "Control candidate support pop-up settings, mock test completion threshold, frequency rules, cooldown days, and copy.",
 };
@@ -19,29 +18,27 @@ export default async function AdminGrowthSettingsPage() {
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200/80 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[#0055a2]" />
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#0055a2]">
-              Growth & Sustainability Operations
-            </p>
-          </div>
-          <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#0055a2]">
+            Growth &amp; Sustainability Operations
+          </p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
             Help Us Grow Pop-up Controls &amp; Analytics
           </h1>
-          <p className="mt-1 text-sm text-slate-600 max-w-3xl">
-            Configure targeting rules, completion milestones, and view student interaction analytics (who saw it, what buttons they clicked, and click counts).
+          <p className="mt-1 text-sm text-slate-600 max-w-2xl">
+            Configure targeting milestones, preview student pop-up prompts, and review button click analytics.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Link
             href="/help-us-to-grow"
             target="_blank"
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-800 shadow-2xs hover:bg-slate-50 transition"
+            prefetch={false}
+            className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-800 shadow-2xs hover:bg-slate-50 transition"
           >
             View Live Public Page ↗
           </Link>

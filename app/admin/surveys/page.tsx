@@ -41,9 +41,9 @@ export default function AdminSurveysPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500 shadow-2xs">
+        <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-2xs">
           <div className="flex flex-col items-center gap-3">
-            <span className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-[#0055a2]" />
+            <progress aria-label="Loading Form and Engagement Studio" className="loading-spinner" />
             <p className="text-xs font-semibold text-slate-600">Loading Form &amp; Engagement Studio…</p>
           </div>
         </div>
@@ -378,35 +378,26 @@ function AdminSurveysList() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      {/* ========================================================
-          1. ENTERPRISE STUDIO HEADER & BREADCRUMBS
-      ======================================================== */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      {/* Compact Header & KPI Ribbon */}
+      <div className="space-y-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-slate-200/80 pb-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">
-                <span className="h-2 w-2 rounded-full bg-[#0055a2]" />
-                Studio Workspace
-              </span>
-              <span className="text-slate-300">/</span>
-              <span className="text-xs font-semibold text-slate-500">Candidate Experience &amp; Intelligence</span>
-            </div>
-
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#0055a2]">
+              Studio Workspace &bull; Candidate Intelligence
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Student Surveys & Feedback
             </h1>
-
-            <p className="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-              Design dynamic feedback forms, set precise candidate targeting rules (new users, mock test count, exam, state, specific people), manage voluntary community support, and analyze student submissions.
+            <p className="text-sm text-slate-600 max-w-2xl">
+              Manage dynamic feedback forms, targeting rules, voluntary support settings, and student submissions.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#0055a2] px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-[#004280] active:scale-95 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0055a2] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#004280] active:scale-95 transition cursor-pointer"
             >
               <span className="text-sm">+</span>
               <span>Create New Form</span>
@@ -416,15 +407,16 @@ function AdminSurveysList() {
               type="button"
               onClick={refreshSurveys}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-95 transition cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-95 transition cursor-pointer shadow-2xs"
             >
-              <span>{loading ? "Refreshing…" : "↻ Refresh"}</span>
+              <span>{loading ? "Refreshing…" : "Refresh"}</span>
             </button>
 
             <Link
               href="/help-us-to-grow"
               target="_blank"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-white active:scale-95 transition shadow-2xs"
+              prefetch={false}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-95 transition shadow-2xs"
             >
               <span>Live Supporter Page ↗</span>
             </Link>
@@ -432,59 +424,56 @@ function AdminSurveysList() {
         </div>
 
         {/* Studio Performance KPI Ribbon */}
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 border-t border-slate-100 pt-5">
-          <div className="rounded-xl bg-slate-50/80 p-3.5 border border-slate-200/60">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-xl bg-white p-3.5 border border-slate-200/80 shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Form Inventory
             </span>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-900">{1 + surveys.length}</span>
-              <span className="text-[11px] font-semibold text-slate-500">campaigns</span>
+              <span className="admin-stat text-2xl font-bold text-slate-950">{1 + surveys.length}</span>
+              <span className="text-xs font-medium text-slate-500">
+                {1 + surveys.length === 1 ? "campaign" : "campaigns"}
+              </span>
             </div>
-            <p className="mt-0.5 text-[10px] text-slate-400">Targeted &amp; dynamic forms</p>
           </div>
 
-          <div className="rounded-xl bg-slate-50/80 p-3.5 border border-slate-200/60">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="rounded-xl bg-white p-3.5 border border-emerald-200/80 shadow-2xs">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
               Active Campaigns
             </span>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-emerald-700">{1 + activeSurveysCount}</span>
-              <span className="text-[11px] font-semibold text-emerald-800">live</span>
+              <span className="admin-stat text-2xl font-bold text-emerald-700">{1 + activeSurveysCount}</span>
+              <span className="text-xs font-medium text-emerald-800">live audience triggers</span>
             </div>
-            <p className="mt-0.5 text-[10px] text-emerald-600 font-medium">Eligible for audience triggers</p>
           </div>
 
-          <div className="rounded-xl bg-slate-50/80 p-3.5 border border-slate-200/60">
+          <div className="rounded-xl bg-white p-3.5 border border-slate-200/80 shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Candidate Responses
             </span>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-900">{totalResponsesCount}</span>
-              <span className="text-[11px] font-semibold text-slate-500">verified</span>
+              <span className="admin-stat text-2xl font-bold text-slate-950">{totalResponsesCount}</span>
+              <span className="text-xs font-medium text-slate-500">verified submissions</span>
             </div>
-            <p className="mt-0.5 text-[10px] text-slate-400">Recorded student submissions</p>
           </div>
         </div>
       </div>
 
-      {/* ========================================================
-          2. ENTERPRISE SEGMENTED MODULE BAR (TABS)
-      ======================================================== */}
-      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-2xs">
+      {/* Horizontal Module Bar */}
+      <div className="admin-tablist border-b border-slate-200 pb-1">
         <button
           type="button"
           onClick={() => setActiveTab("surveys")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer ${
             activeTab === "surveys"
-              ? "bg-[#0f2942] text-white shadow-xs"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              ? "border-[#0055a2] text-[#0f2942]"
+              : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
           <span>📋 Survey Forms</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-              activeTab === "surveys" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+            className={`admin-stat rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
+              activeTab === "surveys" ? "bg-[#0055a2]/10 text-[#0055a2]" : "bg-slate-100 text-slate-700"
             }`}
           >
             {1 + surveys.length}
@@ -494,14 +483,14 @@ function AdminSurveysList() {
         <button
           type="button"
           onClick={() => setActiveTab("growth")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer ${
             activeTab === "growth"
-              ? "bg-[#0f2942] text-white shadow-xs"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              ? "border-[#0055a2] text-[#0f2942]"
+              : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
           <span>🌱 Help Us Grow &amp; Contributions</span>
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-900">
+          <span className="rounded-md bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.5 text-[10px] font-bold text-emerald-900">
             Voluntary UPI
           </span>
         </button>
@@ -509,14 +498,14 @@ function AdminSurveysList() {
         <button
           type="button"
           onClick={() => setActiveTab("targeting")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer ${
             activeTab === "targeting"
-              ? "bg-[#0f2942] text-white shadow-xs"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              ? "border-[#0055a2] text-[#0f2942]"
+              : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
           <span>🎯 Who Can See &amp; Rewards</span>
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-900">
+          <span className="rounded-md bg-blue-50 border border-blue-200/70 px-1.5 py-0.5 text-[10px] font-bold text-blue-900">
             Rules
           </span>
         </button>
@@ -524,14 +513,14 @@ function AdminSurveysList() {
         <button
           type="button"
           onClick={() => setActiveTab("preview")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer ${
             activeTab === "preview"
-              ? "bg-[#0f2942] text-white shadow-xs"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              ? "border-[#0055a2] text-[#0f2942]"
+              : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
           <span>🎨 Side Button &amp; Pop-up Preview</span>
-          <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-black text-indigo-900">
+          <span className="rounded-md bg-indigo-50 border border-indigo-200/70 px-1.5 py-0.5 text-[10px] font-bold text-indigo-900">
             Sandbox
           </span>
         </button>
@@ -539,16 +528,16 @@ function AdminSurveysList() {
         <button
           type="button"
           onClick={() => setActiveTab("responses")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition cursor-pointer ml-auto ${
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer sm:ml-auto ${
             activeTab === "responses"
-              ? "bg-[#0f2942] text-white shadow-xs"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              ? "border-[#0055a2] text-[#0f2942]"
+              : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
           <span>📊 Submissions &amp; Feedback</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-              activeTab === "responses" ? "bg-white/20 text-white" : "bg-blue-100 text-blue-900"
+            className={`admin-stat rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
+              activeTab === "responses" ? "bg-[#0055a2]/10 text-[#0055a2]" : "bg-blue-50 text-blue-900"
             }`}
           >
             {totalResponsesCount}
@@ -655,8 +644,9 @@ function AdminSurveysList() {
             </div>
 
             {loading ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500 shadow-2xs">
-                <span className="inline-block animate-spin mr-2">⏳</span> Loading forms repository…
+              <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-2xs">
+                <progress aria-label="Loading forms repository" className="loading-spinner" />
+                <span className="text-xs font-semibold text-slate-600">Loading forms repository…</span>
               </div>
             ) : displayedSurveys.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500">
@@ -692,18 +682,13 @@ function AdminSurveysList() {
                         <button
                           type="button"
                           onClick={() => handleToggle(survey.id, survey.is_active)}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold transition cursor-pointer border ${
+                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-bold transition cursor-pointer border ${
                             survey.is_active
                               ? "bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100"
                               : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
                           }`}
                           title="Click to toggle Active / Draft"
                         >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              survey.is_active ? "bg-emerald-600" : "bg-slate-400"
-                            }`}
-                          />
                           <span>{survey.is_active ? "Active" : "Draft"}</span>
                         </button>
 
@@ -1395,8 +1380,9 @@ function AdminSurveysList() {
           {/* Submissions Table */}
           <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
             {loadingResponses ? (
-              <div className="p-12 text-center text-slate-500 text-xs">
-                <span className="inline-block animate-spin mr-2">⏳</span> Loading submissions data…
+              <div className="flex items-center justify-center gap-2 p-10 text-center text-slate-500 text-xs">
+                <progress aria-label="Loading submissions data" className="loading-spinner" />
+                <span className="font-semibold text-slate-600">Loading submissions data…</span>
               </div>
             ) : filteredResponses.length === 0 ? (
               <div className="p-12 text-center text-slate-500 text-xs">

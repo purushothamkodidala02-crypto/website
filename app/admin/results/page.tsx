@@ -65,7 +65,7 @@ export default async function AdminResultsPage({
   const selectedBand = parseBand(params.band);
 
   const supabase = await createClient();
-  const admin = createAdminClient();
+  const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
 
   const [summaryResult, allMockTestsResult] = await Promise.all([
     supabase.rpc("get_admin_attempt_summary"),

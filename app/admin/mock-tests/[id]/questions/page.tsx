@@ -81,24 +81,32 @@ export default async function MockTestQuestionsPage({ params, searchParams }: { 
   const settingsPath = `/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestsPath)}`;
   const previewPath = mockTestPreviewHref(test.id, mockTestsPath);
 
-  return <main>
-    {assignments.length > 0 && <div className="mb-4 flex justify-end"><Link href={previewPath} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 hover:bg-teal-100">Student Preview</Link></div>}
+  return <div className="space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3 text-sm font-semibold">
-        <Link href={mockTestsPath} className="text-teal-700 hover:underline">
+        <Link href={mockTestsPath} prefetch={false} className="text-teal-800 hover:underline">
           ← Back to Mock Tests
         </Link>
         <span className="text-slate-300" aria-hidden="true">·</span>
-        <Link href={settingsPath} className="text-slate-600 hover:text-teal-700 hover:underline">
+        <Link href={settingsPath} prefetch={false} className="text-slate-600 hover:text-teal-800 hover:underline">
           Mock Test Settings
         </Link>
       </div>
-      {assignments.length > 0 && <DownloadQuestionsButton mockTestId={test.id} />}
+      <div className="flex flex-wrap items-center gap-2">
+        {assignments.length > 0 && (
+          <Link href={previewPath} prefetch={false} className="rounded-xl border border-teal-200 bg-teal-50 px-3.5 py-2 text-xs sm:text-sm font-bold text-teal-900 hover:bg-teal-100 transition">
+            Student Preview
+          </Link>
+        )}
+        {assignments.length > 0 && <DownloadQuestionsButton mockTestId={test.id} />}
+      </div>
     </div>
-    <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">{paper?.name ?? "Mock test"}{subjectName ? ` · ${subjectName}` : ""}</p>
-    <h1 className="mt-2 text-3xl font-black">{test.title}: Questions</h1>
-    <p className="mt-2 max-w-3xl text-slate-600">Manage only this mock test&apos;s questions. Upload a file, add one question, edit a question, remove it, or replace the full draft.</p>
+    <div className="border-b border-slate-200/80 pb-4">
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">{paper?.name ?? "Mock test"}{subjectName ? ` · ${subjectName}` : ""}</p>
+      <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">{test.title}: Questions</h1>
+      <p className="mt-1 max-w-3xl text-sm text-slate-600">Upload a file, add one question, edit, remove, or replace this test&apos;s questions.</p>
+    </div>
     <MockTestCsvImport mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestionCount={assignments.length} paperName={paper?.name ?? "this Paper"} subjectName={subjectName} defaultSkipCrossTestDuplicateCheck={Boolean(test.allow_duplicate_questions)} />
     <QuestionAssignments mockTestId={test.id} isDraft={test.status === "draft"} targetQuestionCount={test.target_question_count} assignedQuestions={assignments} questionsPath={questionsPath} returnTo={mockTestsPath} />
-  </main>;
+  </div>;
 }

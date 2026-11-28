@@ -30,7 +30,7 @@ export function LocationFilters({ categories, exams, specializations = [], paper
   const columns = includeSubjects ? "xl:grid-cols-5" : "lg:grid-cols-4";
 
   return (
-    <div className={`grid gap-3 ${columns}`}>
+    <div className={`grid items-end gap-3 ${columns}`}>
       <label className="block text-sm font-bold">
         Recruiting Board
         <SearchableSelect
@@ -58,7 +58,7 @@ export function LocationFilters({ categories, exams, specializations = [], paper
         />
       </label>
       <label className="block text-sm font-bold">
-        Specialisation <span className="font-normal text-slate-500">(optional)</span>
+        Specialisation <span className="whitespace-nowrap font-normal text-slate-500">(optional)</span>
         <SearchableSelect
           value={value.specializationId}
           onChange={(specializationId) => {

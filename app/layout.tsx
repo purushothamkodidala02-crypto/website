@@ -4,10 +4,8 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { CopyProtection } from "@/components/site/CopyProtection";
-import { DisplayPreferencesProvider } from "@/components/site/DisplayPreferencesProvider";
 import { SingleDeviceWatcher } from "@/components/auth/SingleDeviceWatcher";
 import { ApEndowmentPriorityModal } from "@/components/feedback/ApEndowmentPriorityModal";
-import { DISPLAY_PREFS_INIT_SCRIPT } from "@/lib/preferences/display-preferences";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -135,12 +133,10 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning
       className={`${inter.variable} ${plusJakarta.variable} ${notoSansTelugu.variable} antialiased`}
     >
       <head>
         <meta name="text-scale" content="scale" />
-        <script dangerouslySetInnerHTML={{ __html: DISPLAY_PREFS_INIT_SCRIPT }} />
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="" />
@@ -152,16 +148,14 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#f6faf8] text-[#132621]">
-        <DisplayPreferencesProvider>
-          <PostHogProvider>
-            <NavigationProgress />
-            <CopyProtection />
-            <SingleDeviceWatcher />
-            <ApEndowmentPriorityModal />
-            {children}
-            <GoogleAnalytics />
-          </PostHogProvider>
-        </DisplayPreferencesProvider>
+        <PostHogProvider>
+          <NavigationProgress />
+          <CopyProtection />
+          <SingleDeviceWatcher />
+          <ApEndowmentPriorityModal />
+          {children}
+          <GoogleAnalytics />
+        </PostHogProvider>
       </body>
     </html>
   );

@@ -4,7 +4,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Administration | Varadhi Prep",
+  title: "Administration",
   robots: { index: false, follow: false },
 };
 

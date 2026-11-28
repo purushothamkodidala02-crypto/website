@@ -1,16 +1,29 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DeletePaperButton } from "@/app/admin/papers/DeletePaperButton";
 import { DeleteSpecializationButton } from "@/app/admin/specializations/DeleteSpecializationButton";
 import { DeleteSubjectButton } from "@/app/admin/subjects/DeleteSubjectButton";
-import { CreateGroupForm } from "@/app/admin/groups/CreateGroupForm";
 import { DeleteGroupButton } from "@/app/admin/groups/DeleteGroupButton";
 import { ExamSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
-import { CreateExamForm } from "./CreateExamForm";
 import { DeleteExamButton } from "./DeleteExamButton";
-import { StateManager } from "./StateManager";
+
+const StateManager = dynamic(
+  () => import("./StateManager").then((mod) => mod.StateManager),
+  { loading: () => <PanelLoading label="Loading state settings…" /> },
+);
+
+const CreateExamForm = dynamic(
+  () => import("./CreateExamForm").then((mod) => mod.CreateExamForm),
+  { loading: () => <PanelLoading label="Loading recruiting board form…" /> },
+);
+
+const CreateGroupForm = dynamic(
+  () => import("@/app/admin/groups/CreateGroupForm").then((mod) => mod.CreateGroupForm),
+  { loading: () => <PanelLoading label="Loading exam creation form…" /> },
+);
 
 type ExamState = {
   id: string;
@@ -65,14 +78,24 @@ type Subject = {
   displayOrder?: number;
 };
 
-function stateCategoriesFor(categories: Category[], stateId: string) {
-  return categories.filter((category) => category.stateId === stateId);
+type StatusFilter = "all" | "active" | "inactive";
+
+function plural(count: number, singular: string, pluralWord = `${singular}s`) {
+  return `${count.toLocaleString("en-IN")} ${count === 1 ? singular : pluralWord}`;
 }
 
-// Clean inline SVG icons for a professional, human-crafted design
-function IconSettings({ className = "h-4 w-4" }: { className?: string }) {
+function PanelLoading({ label }: { label: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <div role="status" className="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white p-5 text-xs font-semibold text-slate-600 shadow-xs">
+      <progress aria-label={label} className="loading-spinner loading-spinner-sm" />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function IconSettings({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.15.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
@@ -81,66 +104,50 @@ function IconSettings({ className = "h-4 w-4" }: { className?: string }) {
 
 function IconSearch({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
     </svg>
   );
 }
 
-function IconPlus({ className = "h-4 w-4" }: { className?: string }) {
+function IconPlus({ className = "h-3.5 w-3.5" }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
   );
 }
 
-function IconClose({ className = "h-4 w-4" }: { className?: string }) {
+function IconChevronRight({ className = "h-3.5 w-3.5" }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
     </svg>
   );
 }
 
-function IconChevronDown({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-    </svg>
-  );
-}
+function handleTabKeyDown<T extends { id: string }>(
+  event: React.KeyboardEvent<HTMLDivElement>,
+  items: T[],
+  currentId: string,
+  onSelect: (item: T) => void,
+) {
+  if (items.length <= 1) return;
+  const currentIndex = Math.max(0, items.findIndex((item) => item.id === currentId));
+  let nextIndex = -1;
 
-function IconChevronUp({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-    </svg>
-  );
-}
+  if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % items.length;
+  else if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + items.length) % items.length;
+  else if (event.key === "Home") nextIndex = 0;
+  else if (event.key === "End") nextIndex = items.length - 1;
+  else return;
 
-function IconLayers({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.142 4.5L2.25 16.5l9.75 5.25 9.75-5.25-4.179-2.25M12 2.25L2.25 7.5l9.75 5.25 9.75-5.25L12 2.25z" />
-    </svg>
-  );
-}
-
-function IconFileText({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-    </svg>
-  );
-}
-
-function IconStar({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-    </svg>
-  );
+  event.preventDefault();
+  const nextItem = items[nextIndex];
+  if (!nextItem) return;
+  onSelect(nextItem);
+  const tabs = event.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]');
+  tabs[nextIndex]?.focus();
 }
 
 export function ExamStructureWorkspace({
@@ -150,6 +157,9 @@ export function ExamStructureWorkspace({
   specializations,
   papers,
   subjects,
+  initialStateSlug,
+  initialBoardSlug,
+  initialSearch,
 }: {
   states: ExamState[];
   categories: Category[];
@@ -157,378 +167,709 @@ export function ExamStructureWorkspace({
   specializations: Specialization[];
   papers: Paper[];
   subjects: Subject[];
+  initialStateSlug?: string;
+  initialBoardSlug?: string;
+  initialSearch?: string;
 }) {
-  const [selectedStateId, setSelectedStateId] = useState(states[0]?.id ?? "");
+  // O(1) indexed taxonomy lookups to avoid O(N^2) scans during renders and search
+  const indexes = useMemo(() => {
+    const stateById = new Map<string, ExamState>();
+    for (const state of states) stateById.set(state.id, state);
+
+    const categoriesByStateId = new Map<string, Category[]>();
+    const categoryById = new Map<string, Category>();
+    for (const category of categories) {
+      categoryById.set(category.id, category);
+      const list = categoriesByStateId.get(category.stateId) ?? [];
+      list.push(category);
+      categoriesByStateId.set(category.stateId, list);
+    }
+
+    const examsByCategoryId = new Map<string, Exam[]>();
+    const examById = new Map<string, Exam>();
+    for (const exam of exams) {
+      examById.set(exam.id, exam);
+      const list = examsByCategoryId.get(exam.categoryId) ?? [];
+      list.push(exam);
+      examsByCategoryId.set(exam.categoryId, list);
+    }
+
+    const specsByExamId = new Map<string, Specialization[]>();
+    for (const spec of specializations) {
+      const list = specsByExamId.get(spec.examId) ?? [];
+      list.push(spec);
+      specsByExamId.set(spec.examId, list);
+    }
+
+    const subjectsByPaperId = new Map<string, Subject[]>();
+    for (const subject of subjects) {
+      const list = subjectsByPaperId.get(subject.paperId) ?? [];
+      list.push(subject);
+      subjectsByPaperId.set(subject.paperId, list);
+    }
+
+    const papersByExamId = new Map<string, Paper[]>();
+    const directPapersByExamId = new Map<string, Paper[]>();
+    const papersBySpecId = new Map<string, Paper[]>();
+    const examSubjectCountMap = new Map<string, number>();
+    const specSubjectCountMap = new Map<string, number>();
+
+    for (const paper of papers) {
+      const examPapers = papersByExamId.get(paper.examId) ?? [];
+      examPapers.push(paper);
+      papersByExamId.set(paper.examId, examPapers);
+
+      const subjectCount = (subjectsByPaperId.get(paper.id) ?? []).length;
+      examSubjectCountMap.set(paper.examId, (examSubjectCountMap.get(paper.examId) ?? 0) + subjectCount);
+
+      if (paper.specializationId) {
+        const specPapers = papersBySpecId.get(paper.specializationId) ?? [];
+        specPapers.push(paper);
+        papersBySpecId.set(paper.specializationId, specPapers);
+        specSubjectCountMap.set(
+          paper.specializationId,
+          (specSubjectCountMap.get(paper.specializationId) ?? 0) + subjectCount,
+        );
+      } else {
+        const directPapers = directPapersByExamId.get(paper.examId) ?? [];
+        directPapers.push(paper);
+        directPapersByExamId.set(paper.examId, directPapers);
+      }
+    }
+
+    return {
+      stateById,
+      categoriesByStateId,
+      categoryById,
+      examsByCategoryId,
+      examById,
+      specsByExamId,
+      papersByExamId,
+      directPapersByExamId,
+      papersBySpecId,
+      subjectsByPaperId,
+      examSubjectCountMap,
+      specSubjectCountMap,
+    };
+  }, [states, categories, exams, specializations, papers, subjects]);
+
+  const initialMatchedState = useMemo(() => {
+    if (initialStateSlug) {
+      const bySlug = states.find((s) => s.slug === initialStateSlug);
+      if (bySlug) return bySlug;
+    }
+    return states[0];
+  }, [initialStateSlug, states]);
+
+  const [selectedStateId, setSelectedStateId] = useState(initialMatchedState?.id ?? "");
+  const [boardByState, setBoardByState] = useState<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    if (initialMatchedState && initialBoardSlug) {
+      const matchedBoard = categories.find(
+        (c) => c.stateId === initialMatchedState.id && c.slug === initialBoardSlug,
+      );
+      if (matchedBoard) {
+        map[initialMatchedState.id] = matchedBoard.id;
+      }
+    }
+    return map;
+  });
+
+  const [search, setSearch] = useState(initialSearch ?? "");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [showAddBoard, setShowAddBoard] = useState(false);
   const [showAddExam, setShowAddExam] = useState(false);
   const [showStateManager, setShowStateManager] = useState(false);
+  const [expandedExamIds, setExpandedExamIds] = useState<Record<string, boolean>>({});
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const boardTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const resolvedStateId = states.some((state) => state.id === selectedStateId)
+  const resolvedStateId = indexes.stateById.has(selectedStateId)
     ? selectedStateId
     : (states[0]?.id ?? "");
-  const selectedState = states.find((state) => state.id === resolvedStateId);
-  const stateCategories = categories.filter((category) => category.stateId === resolvedStateId);
+  const selectedState = indexes.stateById.get(resolvedStateId);
+  const stateCategories = indexes.categoriesByStateId.get(resolvedStateId) ?? [];
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState(stateCategories[0]?.id ?? "");
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
-
-  const resolvedCategoryId = stateCategories.some((category) => category.id === selectedCategoryId)
-    ? selectedCategoryId
+  const desiredBoardId = boardByState[resolvedStateId];
+  const resolvedCategoryId = stateCategories.some((category) => category.id === desiredBoardId)
+    ? desiredBoardId
     : (stateCategories[0]?.id ?? "");
-  const selectedCategory = stateCategories.find((category) => category.id === resolvedCategoryId);
+  const selectedCategory = indexes.categoryById.get(resolvedCategoryId);
+
+  const syncUrlParams = useCallback(
+    (stateSlug?: string, boardSlug?: string) => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      if (stateSlug) params.set("state", stateSlug);
+      else params.delete("state");
+      if (boardSlug) params.set("board", boardSlug);
+      else params.delete("board");
+      const qs = params.toString();
+      const target = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+      window.history.replaceState(null, "", target);
+    },
+    [],
+  );
+
+  const handleSelectState = useCallback(
+    (state: ExamState) => {
+      setSelectedStateId(state.id);
+      const boards = indexes.categoriesByStateId.get(state.id) ?? [];
+      const rememberedId = boardByState[state.id];
+      const nextBoard = boards.find((b) => b.id === rememberedId) ?? boards[0];
+      syncUrlParams(state.slug, nextBoard?.slug);
+    },
+    [boardByState, indexes.categoriesByStateId, syncUrlParams],
+  );
+
+  const handleSelectBoard = useCallback(
+    (category: Category) => {
+      setBoardByState((prev) => ({ ...prev, [category.stateId]: category.id }));
+      const st = indexes.stateById.get(category.stateId);
+      syncUrlParams(st?.slug, category.slug);
+    },
+    [indexes.stateById, syncUrlParams],
+  );
+
+  // Keep selected board tab visible inside horizontal scroller
+  useEffect(() => {
+    const activeTab = resolvedCategoryId ? boardTabRefs.current[resolvedCategoryId] : null;
+    activeTab?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [resolvedCategoryId]);
 
   const query = search.trim().toLowerCase();
+  const isSearchingGlobally = query.length > 0;
 
-  const visibleExams = useMemo(() => {
-    return exams.filter((exam) => {
-      if (exam.categoryId !== resolvedCategoryId) return false;
-      if (statusFilter === "active" && !exam.isActive) return false;
-      if (statusFilter === "inactive" && exam.isActive) return false;
-      if (query && !`${exam.name} ${exam.slug}`.toLowerCase().includes(query)) return false;
-      return true;
-    });
-  }, [exams, resolvedCategoryId, statusFilter, query]);
+  // Board-scoped exams when browsing normally
+  const boardExams = useMemo(() => {
+    if (!selectedCategory) return [];
+    const list = indexes.examsByCategoryId.get(selectedCategory.id) ?? [];
+    if (statusFilter === "all") return list;
+    return list.filter((exam) => (statusFilter === "active" ? exam.isActive : !exam.isActive));
+  }, [indexes.examsByCategoryId, selectedCategory, statusFilter]);
+
+  // Global cross-catalogue filter when user types in search bar
+  const globalSearchMatches = useMemo(() => {
+    if (!query) return { matchingBoards: [] as Category[], examMatches: [] as Array<{ exam: Exam; category: Category; state?: ExamState; matchedHints: string[] }> };
+
+    const matchingBoards = categories.filter((cat) =>
+      `${cat.name} ${cat.slug}`.toLowerCase().includes(query),
+    );
+
+    const examMatches: Array<{ exam: Exam; category: Category; state?: ExamState; matchedHints: string[] }> = [];
+    for (const exam of exams) {
+      if (statusFilter === "active" && !exam.isActive) continue;
+      if (statusFilter === "inactive" && exam.isActive) continue;
+
+      const category = indexes.categoryById.get(exam.categoryId);
+      if (!category) continue;
+      const state = indexes.stateById.get(category.stateId);
+
+      const examSpecs = indexes.specsByExamId.get(exam.id) ?? [];
+      const examPapers = indexes.papersByExamId.get(exam.id) ?? [];
+
+      const matchedHints: string[] = [];
+      for (const spec of examSpecs) {
+        if (spec.name.toLowerCase().includes(query)) matchedHints.push(spec.name);
+      }
+      for (const paper of examPapers) {
+        if (paper.name.toLowerCase().includes(query)) matchedHints.push(paper.name);
+        for (const subject of indexes.subjectsByPaperId.get(paper.id) ?? []) {
+          if (subject.name.toLowerCase().includes(query)) matchedHints.push(subject.name);
+        }
+      }
+
+      const directMatch =
+        `${exam.name} ${exam.slug} ${category.name} ${state?.name ?? ""}`.toLowerCase().includes(query);
+
+      if (directMatch || matchedHints.length > 0) {
+        examMatches.push({
+          exam,
+          category,
+          state,
+          matchedHints: [...new Set(matchedHints)].slice(0, 4),
+        });
+      }
+    }
+
+    return { matchingBoards, examMatches };
+  }, [categories, exams, indexes, query, statusFilter]);
+
+  const activeExamList = isSearchingGlobally
+    ? globalSearchMatches.examMatches.map((m) => m.exam)
+    : boardExams;
+  const allActiveExamsExpanded =
+    activeExamList.length > 0 && activeExamList.every((exam) => Boolean(expandedExamIds[exam.id]));
+
+  const toggleAllExams = () => {
+    if (allActiveExamsExpanded) {
+      setExpandedExamIds((prev) => {
+        const next = { ...prev };
+        for (const exam of activeExamList) delete next[exam.id];
+        return next;
+      });
+    } else {
+      setExpandedExamIds((prev) => {
+        const next = { ...prev };
+        for (const exam of activeExamList) next[exam.id] = true;
+        return next;
+      });
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* State / Region Pill Selector & Top Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="px-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-            Region:
-          </span>
-          {states.map((state) => {
-            const active = state.id === resolvedStateId;
-            const stateExams = exams.filter((exam) =>
-              categories.some((c) => c.id === exam.categoryId && c.stateId === state.id),
-            );
-            const stateBoardCount = stateCategoriesFor(categories, state.id).length;
-
-            return (
-              <button
-                key={state.id}
-                type="button"
-                onClick={() => {
-                  setSelectedStateId(state.id);
-                  const firstCategory = categories.find((c) => c.stateId === state.id);
-                  setSelectedCategoryId(firstCategory?.id ?? "");
-                  setSearch("");
-                }}
-                className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
-                  active
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                <span className={`grid h-4 w-4 place-items-center ${active ? "text-teal-300" : "text-slate-500"}`}>
-                  <StateSymbol slug={state.slug} className="h-4 w-4" />
-                </span>
-                <span>{state.name}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                    active ? "bg-white/20 text-teal-200" : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {stateBoardCount} {stateBoardCount === 1 ? "board" : "boards"} · {stateExams.length} {stateExams.length === 1 ? "exam" : "exams"}
-                </span>
-              </button>
-            );
-          })}
+    <div className="space-y-4">
+      {/* Compact Header & Primary Actions */}
+      <header className="flex flex-col gap-3 border-b border-teal-100/90 pb-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            Exam Catalogue
+          </h1>
+          <p className="mt-1 text-xs font-semibold text-slate-500">
+            {plural(states.length, "State")} &middot; {plural(categories.length, "Board")} &middot;{" "}
+            {plural(exams.length, "Exam")} &middot; {plural(papers.length, "Paper")} &middot;{" "}
+            {plural(subjects.length, "Subject")}
+          </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowStateManager(!showStateManager)}
-          className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold transition shadow-xs ${
-            showStateManager
-              ? "border-slate-300 bg-slate-100 text-slate-900"
-              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-          }`}
-        >
-          <IconSettings className="h-3.5 w-3.5" />
-          <span>{showStateManager ? "Close State Settings" : "State Settings"}</span>
-        </button>
-      </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setShowAddBoard((prev) => !prev);
+              setShowAddExam(false);
+              setShowStateManager(false);
+            }}
+            aria-expanded={showAddBoard}
+            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2 text-xs font-bold shadow-2xs transition ${
+              showAddBoard
+                ? "border-slate-900 bg-slate-900 text-white"
+                : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+            }`}
+          >
+            <IconPlus className="h-3.5 w-3.5" />
+            <span>{showAddBoard ? "Close Board Form" : "Add Board"}</span>
+          </button>
 
-      {/* State Manager Collapsible Panel */}
-      {showStateManager && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
-          <StateManager
-            states={states.map((state) => ({
-              ...state,
-              categoryCount: categories.filter((category) => category.stateId === state.id).length,
-            }))}
-          />
-        </div>
-      )}
-
-      {/* Recruiting Boards in Active State */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Recruiting Boards in {selectedState?.name ?? "this state"}
-            </h2>
-            <span className="rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-800">
-              {stateCategories.length} {stateCategories.length === 1 ? "Board" : "Boards"}
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
+          {selectedCategory && (
             <button
               type="button"
               onClick={() => {
-                setShowAddBoard(!showAddBoard);
-                if (showAddExam) setShowAddExam(false);
+                setShowAddExam((prev) => !prev);
+                setShowAddBoard(false);
+                setShowStateManager(false);
               }}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-semibold transition shadow-xs ${
-                showAddBoard
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+              aria-expanded={showAddExam}
+              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-bold shadow-xs transition ${
+                showAddExam
+                  ? "bg-teal-950 text-white"
+                  : "bg-teal-700 text-white hover:bg-teal-800"
               }`}
             >
-              {showAddBoard ? (
-                <>
-                  <IconClose className="h-3.5 w-3.5" />
-                  <span>Close Board Form</span>
-                </>
-              ) : (
-                <>
-                  <IconPlus className="h-3.5 w-3.5" />
-                  <span>Add Recruiting Board</span>
-                </>
-              )}
+              <IconPlus className="h-3.5 w-3.5" />
+              <span>{showAddExam ? "Close Exam Form" : `Add Exam (${selectedCategory.name})`}</span>
             </button>
+          )}
 
-            {selectedCategory && (
+          <button
+            type="button"
+            onClick={() => {
+              setShowStateManager((prev) => !prev);
+              setShowAddBoard(false);
+              setShowAddExam(false);
+            }}
+            aria-expanded={showStateManager}
+            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2 text-xs font-bold shadow-2xs transition ${
+              showStateManager
+                ? "border-teal-300 bg-teal-50 text-teal-950"
+                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <IconSettings />
+            <span>{showStateManager ? "Hide Regions" : "Regions"}</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Lazy Drawers: State Settings / Add Board / Add Exam */}
+      {showStateManager && (
+        <StateManager
+          states={states.map((state) => ({
+            ...state,
+            categoryCount: (indexes.categoriesByStateId.get(state.id) ?? []).length,
+          }))}
+        />
+      )}
+
+      {showAddBoard && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
+          <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="text-sm font-bold text-slate-900 sm:text-base">Add Recruiting Board</h2>
+            <button
+              type="button"
+              onClick={() => setShowAddBoard(false)}
+              className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Close
+            </button>
+          </div>
+          <CreateExamForm
+            states={states.map((state) => ({ id: state.id, name: state.name, code: state.code }))}
+            initialStateId={resolvedStateId}
+            existingCategories={categories.map((category) => ({
+              id: category.id,
+              stateId: category.stateId,
+              name: category.name,
+            }))}
+          />
+        </section>
+      )}
+
+      {showAddExam && selectedCategory && (
+        <section className="rounded-2xl border border-teal-200 bg-teal-50/40 p-5 shadow-xs sm:p-6">
+          <div className="mb-4 flex items-center justify-between border-b border-teal-200/80 pb-3">
+            <h2 className="text-sm font-bold text-teal-950 sm:text-base">
+              Add Exam in {selectedCategory.name}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowAddExam(false)}
+              className="rounded-lg border border-teal-300 px-2.5 py-1 text-xs font-semibold text-teal-800 hover:bg-teal-100"
+            >
+              Close
+            </button>
+          </div>
+          <CreateGroupForm
+            key={selectedCategory.id}
+            categories={stateCategories.map((category) => ({
+              id: category.id,
+              name: category.name,
+            }))}
+            existingExams={exams.map((exam) => ({
+              id: exam.id,
+              categoryId: exam.categoryId,
+              name: exam.name,
+              slug: exam.slug,
+            }))}
+            initialCategoryId={selectedCategory.id}
+          />
+        </section>
+      )}
+
+      {/* Fast Search & Status Bar */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1">
+          <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            ref={searchInputRef}
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && search) {
+                event.preventDefault();
+                setSearch("");
+              }
+            }}
+            aria-label="Search boards, exams, papers, or subjects"
+            placeholder="Quick find any board, exam, paper, or subject…"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-16 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-2xs focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                searchInputRef.current?.focus();
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600 hover:bg-slate-100"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <div
+          role="group"
+          aria-label="Filter by active status"
+          className="inline-flex shrink-0 items-center self-start rounded-xl border border-slate-200 bg-white p-1 shadow-2xs sm:self-auto"
+        >
+          {(
+            [
+              { id: "all", label: "All" },
+              { id: "active", label: "Active" },
+              { id: "inactive", label: "Hidden" },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setStatusFilter(opt.id)}
+              aria-pressed={statusFilter === opt.id}
+              className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                statusFilter === opt.id
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isSearchingGlobally ? (
+        /* Instant Global Search Results Across All States & Boards */
+        <section className="overflow-hidden rounded-2xl border border-teal-200/80 bg-white shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-100 bg-teal-50/40 px-4 py-3 sm:px-5">
+            <p className="text-xs font-bold text-slate-800">
+              {plural(globalSearchMatches.examMatches.length, "exam")} matching &ldquo;{search.trim()}&rdquo; across all boards
+            </p>
+            {globalSearchMatches.examMatches.length > 0 && (
               <button
                 type="button"
-                onClick={() => {
-                  setShowAddExam(!showAddExam);
-                  if (showAddBoard) setShowAddBoard(false);
-                }}
-                className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-semibold transition shadow-xs ${
-                  showAddExam
-                    ? "border-teal-900 bg-teal-900 text-white"
-                    : "border-teal-700 bg-teal-700 text-white hover:bg-teal-800"
-                }`}
+                onClick={toggleAllExams}
+                aria-expanded={allActiveExamsExpanded}
+                className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
-                {showAddExam ? (
-                  <>
-                    <IconClose className="h-3.5 w-3.5" />
-                    <span>Close Exam Form</span>
-                  </>
-                ) : (
-                  <>
-                    <IconPlus className="h-3.5 w-3.5" />
-                    <span>Add Exam in {selectedCategory.name}</span>
-                  </>
-                )}
+                {allActiveExamsExpanded ? "Collapse all" : "Expand all"}
               </button>
             )}
           </div>
-        </div>
 
-        {/* Inline Add Board Form */}
-        {showAddBoard && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 sm:text-base">Add Recruiting Board</h3>
-                <p className="text-xs text-slate-500">e.g. TGPSC, APPSC, DSC, Police Recruitment Board</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAddBoard(false)}
-                className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                Close
-              </button>
-            </div>
-            <CreateExamForm
-              states={states.map((state) => ({ id: state.id, name: state.name, code: state.code }))}
-              initialStateId={resolvedStateId}
-              existingCategories={categories.map((category) => ({
-                id: category.id,
-                stateId: category.stateId,
-                name: category.name,
-              }))}
-            />
-          </div>
-        )}
-
-        {/* Inline Add Exam Form */}
-        {showAddExam && selectedCategory && (
-          <div className="rounded-2xl border border-teal-200 bg-teal-50/40 p-5 shadow-sm sm:p-6">
-            <div className="mb-4 flex items-center justify-between border-b border-teal-200/80 pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-teal-950 sm:text-base">
-                  Add Exam under {selectedCategory.name}
-                </h3>
-                <p className="text-xs text-teal-700">
-                  Configure the exam name, optional specialisations, and papers together.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAddExam(false)}
-                className="rounded-lg border border-teal-300 px-2.5 py-1 text-xs font-semibold text-teal-800 hover:bg-teal-100"
-              >
-                Close
-              </button>
-            </div>
-            <CreateGroupForm
-              key={selectedCategory.id}
-              categories={stateCategories.map((category) => ({
-                id: category.id,
-                name: category.name,
-              }))}
-              existingExams={exams.map((exam) => ({
-                id: exam.id,
-                categoryId: exam.categoryId,
-                name: exam.name,
-                slug: exam.slug,
-              }))}
-              initialCategoryId={selectedCategory.id}
-            />
-          </div>
-        )}
-
-        {/* Boards Grid Cards */}
-        {stateCategories.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-xs text-slate-500">
-            No Recruiting Boards in this state yet. Click &quot;Add Recruiting Board&quot; above to create one.
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {stateCategories.map((category) => {
-              const categoryExams = exams.filter((exam) => exam.categoryId === category.id);
-              const active = resolvedCategoryId === category.id;
-
-              return (
+          {globalSearchMatches.matchingBoards.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 bg-slate-50/60 px-4 py-2.5 sm:px-5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Boards:
+              </span>
+              {globalSearchMatches.matchingBoards.map((board) => (
                 <button
-                  key={category.id}
+                  key={board.id}
                   type="button"
                   onClick={() => {
-                    setSelectedCategoryId(category.id);
+                    setSelectedStateId(board.stateId);
+                    handleSelectBoard(board);
                     setSearch("");
                   }}
-                  className={`flex items-start gap-3.5 rounded-2xl border p-4 text-left transition-all ${
-                    active
-                      ? "border-teal-600 bg-teal-50/70 shadow-xs ring-1 ring-teal-600"
-                      : "border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs"
-                  }`}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-white px-2.5 py-1 text-xs font-bold text-teal-900 hover:bg-teal-50"
                 >
-                  <span
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition ${
-                      active ? "bg-slate-900 text-teal-300" : "bg-slate-100 text-slate-700"
-                    }`}
-                  >
-                    <ExamSymbol name={category.name} className="h-5 w-5" />
+                  <span>{board.name}</span>
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    ({indexes.stateById.get(board.stateId)?.code})
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <strong className="text-sm font-bold text-slate-900 leading-snug break-words">
-                        {category.name}
-                      </strong>
-                      <Status active={category.isActive} compact />
-                    </div>
-                    <p className="mt-1 text-xs font-semibold text-slate-500">
-                      {categoryExams.length} {categoryExams.length === 1 ? "Exam" : "Exams"}
-                    </p>
-                  </div>
                 </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Selected Board & Exam Architecture Explorer */}
-      {selectedCategory && (
-        <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-          {/* Header Banner & Filter Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">
-                  {selectedState?.name} › Recruiting Board
-                </span>
-                <h3 className="text-xl font-bold text-slate-900">{selectedCategory.name}</h3>
-              </div>
-              <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs font-medium text-slate-600 shadow-xs">
-                /{selectedCategory.slug} · Display #{selectedCategory.displayOrder}
-              </span>
+              ))}
             </div>
+          )}
 
-            <div className="flex flex-wrap items-center gap-2.5">
-              {/* Search Field */}
-              <div className="relative w-60 sm:w-64">
-                <IconSearch className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={`Filter exams in ${selectedCategory.name}...`}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs text-slate-800 placeholder-slate-400 shadow-xs focus:border-teal-500 focus:outline-none"
-                />
-              </div>
-
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-xs focus:border-teal-500 focus:outline-none"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active Only</option>
-                <option value="inactive">Inactive Only</option>
-              </select>
-
-              <Link
-                href={`/admin/exams/${selectedCategory.id}/edit`}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50"
-              >
-                Edit Board
-              </Link>
-              <DeleteExamButton examId={selectedCategory.id} examName={selectedCategory.name} />
-            </div>
-          </div>
-
-          {/* Exams List Container */}
-          <div className="space-y-3 p-5 sm:p-6 bg-[#fbfcfc]">
-            <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs font-semibold text-slate-500">
-              <span>
-                Showing {visibleExams.length} of {exams.filter((e) => e.categoryId === selectedCategory.id).length} exams in {selectedCategory.name}
-              </span>
-              <span className="text-slate-400">Click any exam below to inspect papers and subjects</span>
-            </div>
-
-            {visibleExams.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-                <h4 className="text-sm font-bold text-slate-900">No matching exams</h4>
+          <div className="space-y-2.5 bg-[#fbfcfc] p-4 sm:p-5">
+            {globalSearchMatches.examMatches.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
+                <p className="text-sm font-bold text-slate-900">No matching exams</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {search
-                    ? "Try adjusting your search keywords."
-                    : "Click '+ Add Exam' above to configure your first exam."}
+                  No board, exam, paper, or subject matched &ldquo;{search.trim()}&rdquo;.
                 </p>
               </div>
             ) : (
-              visibleExams.map((exam) => (
+              globalSearchMatches.examMatches.map(({ exam, category, state, matchedHints }) => (
                 <ExamBranch
                   key={exam.id}
                   exam={exam}
-                  categoryId={selectedCategory.id}
-                  specializations={specializations.filter((item) => item.examId === exam.id)}
-                  papers={papers.filter((paper) => paper.examId === exam.id)}
-                  subjects={subjects}
-                  defaultOpen={false}
+                  categoryId={category.id}
+                  contextBadge={`${state?.code ?? ""} · ${category.name}`}
+                  matchedHints={matchedHints}
+                  specializations={indexes.specsByExamId.get(exam.id) ?? []}
+                  papers={indexes.papersByExamId.get(exam.id) ?? []}
+                  directPapers={indexes.directPapersByExamId.get(exam.id) ?? []}
+                  papersBySpecId={indexes.papersBySpecId}
+                  subjectsByPaperId={indexes.subjectsByPaperId}
+                  totalSubjects={indexes.examSubjectCountMap.get(exam.id) ?? 0}
+                  specSubjectCountMap={indexes.specSubjectCountMap}
+                  isOpen={Boolean(expandedExamIds[exam.id])}
+                  onToggle={() =>
+                    setExpandedExamIds((prev) => ({ ...prev, [exam.id]: !prev[exam.id] }))
+                  }
+                  onJumpToBoard={() => {
+                    setSelectedStateId(category.stateId);
+                    handleSelectBoard(category);
+                    setSearch("");
+                    setExpandedExamIds((prev) => ({ ...prev, [exam.id]: true }));
+                  }}
                 />
               ))
             )}
           </div>
         </section>
+      ) : (
+        /* Structured Region Tabs -> Single-Row Board Tabs -> Instant Exam Explorer */
+        <>
+          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+            {/* Row 1: Single-line State / Region Tabs */}
+            <div className="border-b border-slate-100 bg-slate-50/70 px-3 py-2 sm:px-4">
+              <div
+                role="tablist"
+                aria-label="States and regions"
+                onKeyDown={(e) => handleTabKeyDown(e, states, resolvedStateId, handleSelectState)}
+                className="admin-tablist admin-tablist-no-underline items-center gap-1.5"
+              >
+                {states.map((state) => {
+                  const active = state.id === resolvedStateId;
+
+                  return (
+                    <button
+                      key={state.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      tabIndex={active ? 0 : -1}
+                      onClick={() => handleSelectState(state)}
+                      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl border px-3 py-2 text-xs font-bold transition ${
+                        active
+                          ? "border-teal-700 bg-white text-teal-950 shadow-2xs"
+                          : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-white/70 hover:text-slate-900"
+                      }`}
+                    >
+                      <StateSymbol
+                        slug={state.slug}
+                        className={`h-3.5 w-3.5 shrink-0 ${active ? "text-teal-700" : "text-slate-400"}`}
+                      />
+                      <span>{state.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Row 2: Compact Single-Row Recruiting Board Tabs */}
+            <div className="px-3 py-2.5 sm:px-4">
+              {stateCategories.length === 0 ? (
+                <p className="py-2 text-xs font-medium text-slate-500">
+                  No Recruiting Boards in {selectedState?.name ?? "this region"} yet.
+                </p>
+              ) : (
+                <div
+                  role="tablist"
+                  aria-label={`Recruiting boards in ${selectedState?.name ?? "selected state"}`}
+                  onKeyDown={(e) => handleTabKeyDown(e, stateCategories, resolvedCategoryId, handleSelectBoard)}
+                  className="admin-tablist admin-tablist-no-underline items-center gap-2"
+                >
+                  {stateCategories.map((category) => {
+                    const active = resolvedCategoryId === category.id;
+
+                    return (
+                      <button
+                        key={category.id}
+                        ref={(el) => {
+                          boardTabRefs.current[category.id] = el;
+                        }}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        tabIndex={active ? 0 : -1}
+                        onClick={() => handleSelectBoard(category)}
+                        className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl border px-3 py-2 text-xs font-bold transition ${
+                          active
+                            ? "border-teal-700 bg-teal-50/90 text-teal-950 shadow-2xs"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <ExamSymbol
+                          name={category.name}
+                          className={`h-3.5 w-3.5 shrink-0 ${active ? "text-teal-800" : "text-slate-500"}`}
+                        />
+                        <span>{category.name}</span>
+                        {!category.isActive && (
+                          <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                            Hidden
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Active Board Exam Explorer */}
+          {selectedCategory && (
+            <section
+              role="tabpanel"
+              aria-label={`${selectedCategory.name} exams`}
+              className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/70 px-4 py-3 sm:px-6">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <h2 className="text-base font-black text-slate-900 sm:text-lg">
+                    {selectedCategory.name}
+                  </h2>
+                  <span className="whitespace-nowrap rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-medium text-slate-600">
+                    /{selectedCategory.slug}
+                  </span>
+                  <span className="whitespace-nowrap rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                    Order #{selectedCategory.displayOrder}
+                  </span>
+                  <Status active={selectedCategory.isActive} compact />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {boardExams.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={toggleAllExams}
+                      aria-expanded={allActiveExamsExpanded}
+                      className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+                    >
+                      {allActiveExamsExpanded ? "Collapse all" : "Expand all"}
+                    </button>
+                  )}
+
+                  <Link
+                    href={`/admin/exams/${selectedCategory.id}/edit`}
+                    prefetch={false}
+                    className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+                  >
+                    Edit Board
+                  </Link>
+
+                  <DeleteExamButton examId={selectedCategory.id} examName={selectedCategory.name} />
+                </div>
+              </div>
+
+              <div className="space-y-2.5 bg-[#fbfcfc] p-4 sm:p-5">
+                {boardExams.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
+                    <p className="text-sm font-bold text-slate-900">No exams in this view</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {statusFilter !== "all"
+                        ? "Switch status filter to All or add a new exam."
+                        : "Use Add Exam above to add an exam under this board."}
+                    </p>
+                  </div>
+                ) : (
+                  boardExams.map((exam) => (
+                    <ExamBranch
+                      key={exam.id}
+                      exam={exam}
+                      categoryId={selectedCategory.id}
+                      specializations={indexes.specsByExamId.get(exam.id) ?? []}
+                      papers={indexes.papersByExamId.get(exam.id) ?? []}
+                      directPapers={indexes.directPapersByExamId.get(exam.id) ?? []}
+                      papersBySpecId={indexes.papersBySpecId}
+                      subjectsByPaperId={indexes.subjectsByPaperId}
+                      totalSubjects={indexes.examSubjectCountMap.get(exam.id) ?? 0}
+                      specSubjectCountMap={indexes.specSubjectCountMap}
+                      isOpen={Boolean(expandedExamIds[exam.id])}
+                      onToggle={() =>
+                        setExpandedExamIds((prev) => ({ ...prev, [exam.id]: !prev[exam.id] }))
+                      }
+                    />
+                  ))
+                )}
+              </div>
+            </section>
+          )}
+        </>
       )}
     </div>
   );
@@ -539,166 +880,187 @@ function ExamBranch({
   categoryId,
   specializations,
   papers,
-  subjects,
-  defaultOpen = false,
+  directPapers,
+  papersBySpecId,
+  subjectsByPaperId,
+  totalSubjects,
+  specSubjectCountMap,
+  isOpen,
+  onToggle,
+  contextBadge,
+  matchedHints,
+  onJumpToBoard,
 }: {
   exam: Exam;
   categoryId: string;
   specializations: Specialization[];
   papers: Paper[];
-  subjects: Subject[];
-  defaultOpen?: boolean;
+  directPapers: Paper[];
+  papersBySpecId: Map<string, Paper[]>;
+  subjectsByPaperId: Map<string, Subject[]>;
+  totalSubjects: number;
+  specSubjectCountMap: Map<string, number>;
+  isOpen: boolean;
+  onToggle: () => void;
+  contextBadge?: string;
+  matchedHints?: string[];
+  onJumpToBoard?: () => void;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [expandedSpecializations, setExpandedSpecializations] = useState<Record<string, boolean>>({});
-  const [directPapersOpen, setDirectPapersOpen] = useState(false);
+  const [expandedPaperSubjects, setExpandedPaperSubjects] = useState<Record<string, boolean>>({});
 
-  const examSubjects = subjects.filter((subject) =>
-    papers.some((paper) => paper.id === subject.paperId),
-  );
-  const directPapers = papers.filter((paper) => !paper.specializationId);
+  const allPapers = papers;
+  const allExpandedInside =
+    (specializations.length === 0 || specializations.every((s) => expandedSpecializations[s.id])) &&
+    (allPapers.length === 0 || allPapers.every((p) => expandedPaperSubjects[p.id]));
 
-  const toggleSpecialization = (id: string) => {
-    setExpandedSpecializations((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const expandAll = () => {
-    const allExpanded: Record<string, boolean> = {};
-    specializations.forEach((s) => {
-      allExpanded[s.id] = true;
-    });
-    setExpandedSpecializations(allExpanded);
-    setDirectPapersOpen(true);
-  };
-
-  const collapseAll = () => {
-    setExpandedSpecializations({});
-    setDirectPapersOpen(false);
+  const toggleAllInside = () => {
+    if (allExpandedInside) {
+      setExpandedSpecializations({});
+      setExpandedPaperSubjects({});
+    } else {
+      const nextSpecs: Record<string, boolean> = {};
+      for (const spec of specializations) nextSpecs[spec.id] = true;
+      const nextPapers: Record<string, boolean> = {};
+      for (const paper of allPapers) nextPapers[paper.id] = true;
+      setExpandedSpecializations(nextSpecs);
+      setExpandedPaperSubjects(nextPapers);
+    }
   };
 
   return (
-    <details
-      open={isOpen}
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition open:border-teal-200/80 open:shadow-xs"
+    <article
+      className={`exam-branch-deferred overflow-hidden rounded-2xl border bg-white transition ${
+        isOpen ? "border-teal-300 shadow-xs" : "border-slate-200/90 hover:border-slate-300"
+      }`}
     >
-      <summary className="cursor-pointer list-none bg-white px-5 py-4 transition hover:bg-slate-50/60 sm:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <Status active={exam.isActive} compact />
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                Display #{exam.displayOrder}
-              </span>
-            </div>
-            <h3 className="mt-2 text-base font-bold text-slate-900">{exam.name}</h3>
-            <p className="mt-0.5 font-mono text-xs text-slate-400">/{exam.slug}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-            {specializations.length > 0 && (
-              <StructureCount value={specializations.length} label="Specialisations" tone="amber" />
-            )}
-            <StructureCount value={papers.length} label="Papers" tone="blue" />
-            <StructureCount value={examSubjects.length} label="Subjects" tone="teal" />
-            <span className="ml-1 inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-700 transition group-open:bg-teal-50 group-open:text-teal-900 group-open:border-teal-200">
-              <span>{isOpen ? "Hide Structure" : "View Structure"}</span>
-              {isOpen ? (
-                <IconChevronUp className="h-3.5 w-3.5" />
-              ) : (
-                <IconChevronDown className="h-3.5 w-3.5" />
-              )}
-            </span>
-          </div>
-        </div>
-      </summary>
-
-      {/* Expanded Hierarchy Breakdown */}
-      <div className="space-y-4 border-t border-slate-100 bg-[#f8fbfb] p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
-              Exam Hierarchy & Workspace
-            </p>
-            <p className="text-xs text-slate-500">
-              Manage specialisations, papers, and assigned subjects for {exam.name}.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {(specializations.length > 0 || directPapers.length > 0) && (
-              <div className="mr-2 flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={expandAll}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50"
-                >
-                  Expand all
-                </button>
-                <button
-                  type="button"
-                  onClick={collapseAll}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50"
-                >
-                  Collapse all
-                </button>
-              </div>
-            )}
-
-            <Link
-              href={`/admin/groups/${exam.id}/edit`}
-              className="inline-flex items-center gap-1 rounded-xl bg-teal-800 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-teal-900"
+      {/* Accordion Header (heading wraps toggle button cleanly per WCAG accordion semantics) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5">
+          <h3 className="min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-expanded={isOpen}
+              className="group flex w-full items-start gap-2.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg"
             >
-              <span>Open Exam Workspace</span>
-            </Link>
+              <span
+                className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg border text-slate-600 transition ${
+                  isOpen
+                    ? "rotate-90 border-teal-200 bg-teal-50 text-teal-800"
+                    : "border-slate-200 bg-slate-50 group-hover:bg-slate-100"
+                }`}
+              >
+                <IconChevronRight className="h-3.5 w-3.5" />
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-bold text-slate-950 sm:text-base break-words">
+                    {exam.name}
+                  </span>
+                  <Status active={exam.isActive} compact />
+                  {contextBadge && (
+                    <span className="whitespace-nowrap rounded bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-800 border border-teal-200/70">
+                      {contextBadge}
+                    </span>
+                  )}
+                </span>
+
+                <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+                  <span className="font-mono text-[11px] text-slate-400">/{exam.slug}</span>
+                  <span aria-hidden="true" className="text-slate-300">&middot;</span>
+                  {specializations.length > 0 && (
+                    <>
+                      <span className="whitespace-nowrap font-semibold text-amber-800">
+                        {plural(specializations.length, "Specialisation")}
+                      </span>
+                      <span aria-hidden="true" className="text-slate-300">&middot;</span>
+                    </>
+                  )}
+                  <span className="whitespace-nowrap font-semibold text-sky-800">
+                    {plural(papers.length, "Paper")}
+                  </span>
+                  <span aria-hidden="true" className="text-slate-300">&middot;</span>
+                  <span className="whitespace-nowrap font-semibold text-teal-800">
+                    {plural(totalSubjects, "Subject")}
+                  </span>
+                </span>
+
+                {matchedHints && matchedHints.length > 0 && (
+                  <span className="mt-1.5 flex flex-wrap gap-1">
+                    {matchedHints.map((hint) => (
+                      <span
+                        key={hint}
+                        className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900"
+                      >
+                        {hint}
+                      </span>
+                    ))}
+                  </span>
+                )}
+              </span>
+            </button>
+          </h3>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0 pl-8 sm:pl-0">
+          {onJumpToBoard && (
+            <button
+              type="button"
+              onClick={onJumpToBoard}
+              className="whitespace-nowrap rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-900 hover:bg-teal-100"
+            >
+              Open board
+            </button>
+          )}
+
+          <Link
+            href={`/admin/groups/${exam.id}/edit`}
+            prefetch={false}
+            className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Edit Exam
+          </Link>
+        </div>
+      </div>
+
+      {/* Lazy-Mounted Hierarchy Details */}
+      {isOpen && (
+        <div className="space-y-3 border-t border-slate-100 bg-[#f8fbfb] p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              {(specializations.length > 0 || allPapers.length > 0) && (
+                <button
+                  type="button"
+                  onClick={toggleAllInside}
+                  aria-expanded={allExpandedInside}
+                  className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+                >
+                  {allExpandedInside ? "Collapse papers & subjects" : "Expand all papers & subjects"}
+                </button>
+              )}
+              <Link
+                href={`/admin/groups/${exam.id}/edit`}
+                prefetch={false}
+                className="whitespace-nowrap rounded-lg bg-teal-800 px-3 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-teal-900"
+              >
+                Manage Papers &amp; SEO
+              </Link>
+            </div>
 
             <DeleteGroupButton groupId={exam.id} groupName={exam.name} />
           </div>
-        </div>
 
-        {/* Direct / Common Papers Section */}
-        {directPapers.length > 0 && (
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => setDirectPapersOpen(!directPapersOpen)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setDirectPapersOpen(!directPapersOpen);
-                }
-              }}
-              className="flex cursor-pointer select-none items-center justify-between gap-3 bg-slate-50/70 p-3.5 transition hover:bg-slate-100/60"
-            >
-              <div className="flex items-center gap-3">
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-200/70 text-slate-700">
-                  <IconFileText className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">Common Examination Papers</h4>
-                  <p className="text-xs text-slate-500">
-                    Papers taken by all candidates of this exam ({directPapers.length}{" "}
-                    {directPapers.length === 1 ? "Paper" : "Papers"})
-                  </p>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-xs">
-                <span>{directPapersOpen ? "Hide Papers" : `Show Papers (${directPapers.length})`}</span>
-                {directPapersOpen ? (
-                  <IconChevronUp className="h-3 w-3" />
-                ) : (
-                  <IconChevronDown className="h-3 w-3" />
-                )}
-              </span>
-            </div>
-
-            {directPapersOpen && (
-              <div className="grid gap-2.5 border-t border-slate-100 bg-[#fafafa] p-4">
+          {/* Direct / Common Papers rendered immediately (no redundant extra click!) */}
+          {directPapers.length > 0 && (
+            <div className="space-y-2">
+              {specializations.length > 0 && (
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Common Papers ({directPapers.length})
+                </p>
+              )}
+              <div className="grid gap-2">
                 {directPapers.map((paper) => (
                   <PaperBranch
                     key={paper.id}
@@ -706,126 +1068,135 @@ function ExamBranch({
                     categoryId={categoryId}
                     examId={exam.id}
                     specializationId={null}
-                    subjects={subjects.filter((subject) => subject.paperId === paper.id)}
+                    subjects={subjectsByPaperId.get(paper.id) ?? []}
+                    showSubjects={Boolean(expandedPaperSubjects[paper.id])}
+                    onToggleSubjects={() =>
+                      setExpandedPaperSubjects((prev) => ({
+                        ...prev,
+                        [paper.id]: !prev[paper.id],
+                      }))
+                    }
                   />
                 ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Specialisations & Streams Section */}
-        {specializations.length > 0 && (
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Exam Streams & Specialisations ({specializations.length})
-            </h4>
+          {/* Specialisations / Streams */}
+          {specializations.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                {plural(specializations.length, "Specialisation")}
+              </p>
 
-            {specializations.map((specialization) => {
-              const specializationPapers = papers.filter(
-                (paper) => paper.specializationId === specialization.id,
-              );
-              const specSubjects = subjects.filter((subject) =>
-                specializationPapers.some((paper) => paper.id === subject.paperId),
-              );
-              const isExpanded = !!expandedSpecializations[specialization.id];
+              {specializations.map((specialization) => {
+                const specPapers = papersBySpecId.get(specialization.id) ?? [];
+                const specSubjectsCount = specSubjectCountMap.get(specialization.id) ?? 0;
+                const specOpen = Boolean(expandedSpecializations[specialization.id]);
 
-              return (
-                <div
-                  key={specialization.id}
-                  className="overflow-hidden rounded-2xl border border-teal-100 bg-white shadow-xs"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/60 bg-teal-50/30 p-3.5">
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => toggleSpecialization(specialization.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          toggleSpecialization(specialization.id);
-                        }
-                      }}
-                      className="flex min-w-[200px] flex-1 cursor-pointer select-none items-center gap-3"
-                    >
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-teal-100 text-teal-800">
-                        <IconStar className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-slate-900">{specialization.name}</h4>
-                          <Status active={specialization.isActive} compact />
-                        </div>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {specializationPapers.length} {specializationPapers.length === 1 ? "Paper" : "Papers"} ·{" "}
-                          {specSubjects.length} {specSubjects.length === 1 ? "Subject" : "Subjects"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
+                return (
+                  <div
+                    key={specialization.id}
+                    className="overflow-hidden rounded-xl border border-teal-100 bg-white shadow-2xs"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2.5 bg-teal-50/35 px-3.5 py-2.5">
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSpecialization(specialization.id);
-                        }}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
-                          isExpanded
-                            ? "bg-teal-800 text-white hover:bg-teal-900"
-                            : "border border-teal-200 bg-teal-50 text-teal-900 hover:bg-teal-100"
-                        }`}
+                        onClick={() =>
+                          setExpandedSpecializations((prev) => ({
+                            ...prev,
+                            [specialization.id]: !prev[specialization.id],
+                          }))
+                        }
+                        aria-expanded={specOpen}
+                        className="flex min-w-0 flex-1 items-center gap-2 text-left"
                       >
-                        <span>{isExpanded ? "Hide Papers" : `Show Papers (${specializationPapers.length})`}</span>
-                        {isExpanded ? (
-                          <IconChevronUp className="h-3 w-3" />
-                        ) : (
-                          <IconChevronDown className="h-3 w-3" />
-                        )}
+                        <IconChevronRight
+                          className={`h-3.5 w-3.5 shrink-0 text-teal-800 transition ${
+                            specOpen ? "rotate-90" : ""
+                          }`}
+                        />
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-bold text-slate-900 break-words">
+                              {specialization.name}
+                            </span>
+                            <Status active={specialization.isActive} compact />
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            {plural(specPapers.length, "Paper")} &middot;{" "}
+                            {plural(specSubjectsCount, "Subject")}
+                          </p>
+                        </div>
                       </button>
 
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedSpecializations((prev) => ({
+                              ...prev,
+                              [specialization.id]: !prev[specialization.id],
+                            }))
+                          }
+                          aria-expanded={specOpen}
+                          className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                            specOpen
+                              ? "bg-teal-800 text-white"
+                              : "border border-teal-200 bg-white text-teal-900 hover:bg-teal-50"
+                          }`}
+                        >
+                          {specOpen ? "Hide Papers" : `Papers (${specPapers.length})`}
+                        </button>
+
                         <DeleteSpecializationButton
                           specializationId={specialization.id}
                           name={specialization.name}
                         />
                       </div>
                     </div>
+
+                    {specOpen && (
+                      <div className="space-y-2 border-t border-teal-100 bg-[#fbfdfd] p-3">
+                        {specPapers.length === 0 ? (
+                          <p className="rounded-lg border border-dashed border-slate-200 bg-white p-3 text-xs text-slate-500">
+                            No papers in this specialisation yet.
+                          </p>
+                        ) : (
+                          specPapers.map((paper) => (
+                            <PaperBranch
+                              key={paper.id}
+                              paper={paper}
+                              categoryId={categoryId}
+                              examId={exam.id}
+                              specializationId={specialization.id}
+                              subjects={subjectsByPaperId.get(paper.id) ?? []}
+                              showSubjects={Boolean(expandedPaperSubjects[paper.id])}
+                              onToggleSubjects={() =>
+                                setExpandedPaperSubjects((prev) => ({
+                                  ...prev,
+                                  [paper.id]: !prev[paper.id],
+                                }))
+                              }
+                            />
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
+                );
+              })}
+            </div>
+          )}
 
-                  {isExpanded && (
-                    <div className="space-y-2.5 border-t border-teal-50 bg-[#fbfdfd] p-4">
-                      {specializationPapers.length === 0 ? (
-                        <p className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-xs text-slate-500">
-                          No papers in this specialisation yet. Open the Exam workspace to add one.
-                        </p>
-                      ) : (
-                        specializationPapers.map((paper) => (
-                          <PaperBranch
-                            key={paper.id}
-                            paper={paper}
-                            categoryId={categoryId}
-                            examId={exam.id}
-                            specializationId={specialization.id}
-                            subjects={subjects.filter((subject) => subject.paperId === paper.id)}
-                          />
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {papers.length === 0 && specializations.length === 0 && (
-          <div className="rounded-xl border border-dashed border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
-            This Exam has no Papers or Specialisations yet. Open its workspace to configure test papers.
-          </div>
-        )}
-      </div>
-    </details>
+          {papers.length === 0 && specializations.length === 0 && (
+            <div className="rounded-xl border border-dashed border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900">
+              No Papers or Specialisations yet. Click <strong>Manage Papers &amp; SEO</strong> above to add them.
+            </div>
+          )}
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -835,58 +1206,61 @@ function PaperBranch({
   examId,
   specializationId,
   subjects,
+  showSubjects,
+  onToggleSubjects,
 }: {
   paper: Paper;
   categoryId: string;
   examId: string;
   specializationId: string | null;
   subjects: Subject[];
+  showSubjects: boolean;
+  onToggleSubjects: () => void;
 }) {
-  const [showSubjects, setShowSubjects] = useState(false);
   const subjectsHref = `/admin/subjects?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`;
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h5 className="text-sm font-bold text-slate-900">{paper.name}</h5>
-              <Status active={paper.isActive} compact />
-            </div>
-            <p className="mt-0.5 text-xs text-slate-500">
-              {subjects.length} {subjects.length === 1 ? "Subject" : "Subjects"}
-            </p>
+    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="text-sm font-bold text-slate-900 break-words">{paper.name}</h4>
+            <Status active={paper.isActive} compact />
+            <span className="whitespace-nowrap text-xs font-medium text-slate-500">
+              {plural(subjects.length, "Subject")}
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {subjects.length > 0 && (
+            <button
+              type="button"
+              onClick={onToggleSubjects}
+              aria-expanded={showSubjects}
+              className={`inline-flex items-center gap-1 whitespace-nowrap rounded-lg border px-2.5 py-1 text-xs font-semibold transition ${
+                showSubjects
+                  ? "border-teal-700 bg-teal-50 text-teal-900"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span>{showSubjects ? "Hide Subjects" : `Subjects (${subjects.length})`}</span>
+            </button>
+          )}
+
           <Link
             href={subjectsHref}
-            className="inline-flex items-center gap-1 rounded-lg bg-teal-800 px-2.5 py-1 text-xs font-semibold text-white shadow-xs transition hover:bg-teal-900"
+            prefetch={false}
+            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-teal-800 px-2.5 py-1 text-xs font-semibold text-white hover:bg-teal-900"
           >
             <IconPlus className="h-3 w-3" />
             <span>Add Subjects</span>
           </Link>
 
-          {subjects.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowSubjects(!showSubjects)}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              <span>{showSubjects ? "Hide Subjects" : `Show Subjects (${subjects.length})`}</span>
-              {showSubjects ? (
-                <IconChevronUp className="h-3 w-3" />
-              ) : (
-                <IconChevronDown className="h-3 w-3" />
-              )}
-            </button>
-          )}
-
           <Link
             href={`/admin/papers/${paper.id}/edit?fromExam=${examId}`}
-            className="rounded-lg px-2 py-1 text-xs font-semibold text-teal-800 hover:bg-teal-50"
+            prefetch={false}
+            className="whitespace-nowrap rounded-lg px-2 py-1 text-xs font-semibold text-teal-800 hover:bg-teal-50"
           >
             Edit Paper
           </Link>
@@ -895,92 +1269,54 @@ function PaperBranch({
         </div>
       </div>
 
-      {showSubjects && (
-        <div className="mt-3 border-t border-slate-100 pt-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Assigned Subjects
-            </span>
-            <Link
-              href={subjectsHref}
-              className="text-xs font-semibold text-teal-800 hover:underline"
-            >
-              Manage Subjects in workspace →
-            </Link>
-          </div>
-
-          {subjects.length === 0 ? (
-            <p className="mt-2 text-xs text-slate-400 italic">No Subjects added to this paper yet.</p>
-          ) : (
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {subjects.map((subject) => (
-                <div
-                  key={subject.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-1.5 transition hover:bg-slate-100/70"
-                >
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span className="shrink-0 rounded bg-slate-200 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700">
-                      #{subject.displayOrder ?? "-"}
-                    </span>
-                    <span className="text-xs font-semibold text-slate-800 leading-snug break-words">
-                      {subject.name}
-                    </span>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    <Link
-                      href={`/admin/subjects/${subject.id}/edit?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`}
-                      className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-teal-800 hover:bg-teal-50"
-                    >
-                      Edit
-                    </Link>
-                    <DeleteSubjectButton subjectId={subject.id} subjectName={subject.name} />
-                  </div>
+      {showSubjects && subjects.length > 0 && (
+        <div className="mt-3 border-t border-slate-100 pt-2.5">
+          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+            {subjects.map((subject) => (
+              <div
+                key={subject.id}
+                className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-1.5"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700">
+                    #{subject.displayOrder ?? "-"}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-800 leading-snug break-words">
+                    {subject.name}
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
+
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <Link
+                    href={`/admin/subjects/${subject.id}/edit?category=${categoryId}&exam=${examId}&specialization=${specializationId ?? ""}&paper=${paper.id}`}
+                    prefetch={false}
+                    className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-teal-800 hover:bg-teal-50"
+                  >
+                    Edit
+                  </Link>
+                  <DeleteSubjectButton subjectId={subject.id} subjectName={subject.name} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-    </article>
-  );
-}
-
-function StructureCount({
-  value,
-  label,
-  tone = "slate",
-}: {
-  value: number;
-  label: string;
-  tone?: "amber" | "blue" | "teal" | "slate";
-}) {
-  const tones = {
-    amber: "bg-amber-50 text-amber-900 border-amber-200/80",
-    blue: "bg-sky-50 text-sky-900 border-sky-200/80",
-    teal: "bg-teal-50 text-teal-900 border-teal-200/80",
-    slate: "bg-slate-100 text-slate-700 border-slate-200/80",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-0.5 text-xs font-semibold ${tones[tone]}`}>
-      <strong className="font-bold text-slate-900">{value}</strong>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
-    </span>
+    </div>
   );
 }
 
 function Status({ active, compact = false }: { active: boolean; compact?: boolean }) {
   return (
     <span
-      className={`rounded-full font-semibold ${
-        compact ? "px-2 py-0.2 text-[10px]" : "px-2.5 py-0.5 text-xs"
+      className={`whitespace-nowrap rounded-full font-semibold ${
+        compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-0.5 text-xs"
       } ${
         active
           ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
           : "border border-slate-200 bg-slate-100 text-slate-600"
       }`}
     >
-      {active ? "Active" : "Inactive"}
+      {active ? "Active" : "Hidden"}
     </span>
   );
 }

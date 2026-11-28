@@ -362,68 +362,61 @@ export function ExamPageFaqManager({
   };
 
   return (
-    <main className="space-y-8">
-      {/* Varadhi Prep Executive Header Box */}
-      <section className="relative overflow-hidden rounded-3xl border border-teal-200/80 bg-gradient-to-br from-white via-white to-teal-50/50 p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-teal-800">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-600 inline-block" />
-                Varadhi Prep &bull; Public Pages
-              </span>
-              <span className="text-xs font-semibold text-slate-400">•</span>
-              <span className="text-xs font-semibold text-slate-500">Recruitment Notification Hub</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+    <div className="space-y-6">
+      <div className="border-b border-slate-200/80 pb-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">
+              Varadhi Prep &bull; Public Pages
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Public pages
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
-              Centralized registry of primary recruitment notification pages and student landing URLs. Upload and manage links directly.
+            <p className="mt-1 text-sm text-slate-600">
+              Manage primary notification URLs and student exam landing page FAQs.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800">
-              <span className="h-2 w-2 rounded-full bg-emerald-600" />
+            <span className="admin-stat inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800">
               {liveCount} Live {liveCount === 1 ? "Page" : "Pages"} (200 OK)
             </span>
             <button
               type="button"
               onClick={() => setIsUploading((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs transition"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-800 hover:bg-teal-900 text-white px-3.5 py-2 text-xs font-bold shadow-xs transition"
             >
-              {isUploading ? "✕ Close Upload" : "+ Upload Link"}
+              {isUploading ? "Close Upload" : "+ Upload Link"}
             </button>
           </div>
         </div>
 
-        {/* Tab Controls */}
-        <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-200/80 pt-5">
+        <div role="tablist" aria-label="Public page sections" className="admin-tablist mt-4">
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === "primary"}
             onClick={() => setActiveTab("primary")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition ${
-              activeTab === "primary"
-                ? "bg-teal-700 text-white shadow-xs"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/80"
-            }`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap border-b-2 transition data-[active=true]:border-teal-700 data-[active=true]:text-teal-900 text-slate-600 hover:text-slate-900"
+            data-active={activeTab === "primary"}
           >
-            <span>📰 Primary Recruitment Pages ({pagesList.length})</span>
+            Primary Recruitment Pages
+            <span className="admin-stat rounded-md bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-700">
+              {pagesList.length}
+            </span>
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === "catalog"}
             onClick={() => setActiveTab("catalog")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition ${
-              activeTab === "catalog"
-                ? "bg-teal-700 text-white shadow-xs"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/80"
-            }`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold whitespace-nowrap border-b-2 transition data-[active=true]:border-teal-700 data-[active=true]:text-teal-900 text-slate-600 hover:text-slate-900"
+            data-active={activeTab === "catalog"}
           >
-            <span>📚 Exam Catalogue &amp; FAQs</span>
+            Exam Catalogue &amp; FAQs
           </button>
         </div>
-      </section>
+      </div>
 
       {/* Tab 1: Primary Recruitment Links Only */}
       {activeTab === "primary" && (
@@ -448,7 +441,7 @@ export function ExamPageFaqManager({
             {pagesList.map((page) => (
               <article
                 key={page.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs hover:border-slate-300 transition"
+                className="admin-card-deferred rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs hover:border-slate-300 transition"
               >
                 {/* Status bar */}
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5 mb-4">
@@ -457,13 +450,11 @@ export function ExamPageFaqManager({
                       {page.state}
                     </span>
                     {page.status === "live" ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-200">
-                        <span className="h-2 w-2 rounded-full bg-emerald-600 inline-block animate-pulse" />
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-200">
                         {page.statusCode} (Live)
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800 border border-amber-200">
-                        <span className="h-2 w-2 rounded-full bg-amber-600 inline-block" />
+                      <span className="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800 border border-amber-200">
                         {page.statusCode}
                       </span>
                     )}
@@ -664,6 +655,6 @@ export function ExamPageFaqManager({
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }

@@ -98,7 +98,7 @@ export async function getAdminAttemptDetailAction(attemptId: string): Promise<{
       return { success: false, error: "Administrator MFA verification is required." };
     }
 
-    const admin = createAdminClient();
+    const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
     const { data: rawAttempt, error: attemptError } = await admin
       .from("test_attempts")
       .select("id, user_id, mock_test_id, session_id, detailed_review_available")

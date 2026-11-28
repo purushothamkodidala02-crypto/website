@@ -53,33 +53,42 @@ export default async function QuestionsPage({
   const tableStateKey = [categoryId, examId, specializationId, paperId, subjectId, initialSearch, initialStatus, initialPage].join(":");
 
   return (
-    <main>
-      <div>
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Content library</p>
-        <h1 className="mt-2 text-3xl font-black">Question Bank</h1>
-        <p className="mt-2 text-slate-600">Browse reusable questions first. Open a creation tool only when you need to add new content.</p>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Content library</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Question Bank</h1>
+          <p className="mt-1 text-sm text-slate-600">Browse reusable questions or open a creation tool below.</p>
+        </div>
+        <nav aria-label="Question Bank tools" className="flex flex-wrap items-center gap-2">
+          <a href="#existing-questions" className="rounded-xl border border-teal-300 bg-teal-50 px-3.5 py-2 text-xs font-bold text-teal-950 hover:bg-teal-100 transition">Browse existing</a>
+          <a href="#add-one-question" className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 hover:border-teal-300 transition">+ Add question</a>
+          <a href="#import-questions" className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 hover:border-teal-300 transition">Import Excel / CSV</a>
+          <Link href="/admin/similarity" prefetch={false} className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-800 hover:border-teal-300 hover:bg-teal-50/70 transition">Similarity scanner</Link>
+        </nav>
       </div>
-
-      <nav aria-label="Question Bank tools" className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <a href="#existing-questions" className="rounded-2xl border border-teal-300 bg-teal-50 p-4 text-sm font-black text-teal-950">Browse existing questions</a>
-        <a href="#add-one-question" className="rounded-2xl border bg-white p-4 text-sm font-black text-slate-800 hover:border-teal-300">Add one question</a>
-        <a href="#import-questions" className="rounded-2xl border bg-white p-4 text-sm font-black text-slate-800 hover:border-teal-300">Import Excel or CSV</a>
-        <Link href="/admin/similarity" className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4 text-sm font-black text-teal-950 hover:bg-teal-100 transition">Similarity scanner</Link>
-      </nav>
 
       <div id="existing-questions" className="scroll-mt-24">
         <QuestionBankTable key={tableStateKey} categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjectOptions} initialLocation={initialLocation} initialSearch={initialSearch} initialPage={initialPage} initialStatus={initialStatus} />
       </div>
 
-      <details id="add-one-question" className="mt-8 scroll-mt-24 overflow-hidden rounded-3xl border border-teal-200 bg-white shadow-sm">
-        <summary className="cursor-pointer list-none px-6 py-5"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Create</p><h2 className="font-display mt-2 text-xl">+ Add one question</h2><p className="mt-1 text-sm text-slate-600">Classify and enter one reusable question manually.</p></summary>
-        <div className="border-t px-4 pb-7 sm:px-7"><CreateQuestionForm categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjectOptions} /></div>
+      <details id="add-one-question" className="mt-6 scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs">
+        <summary className="cursor-pointer list-none px-5 py-4 hover:bg-slate-50/70 transition">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Create</span>
+          <h2 className="mt-0.5 text-lg font-bold text-slate-950">+ Add one question</h2>
+          <p className="mt-0.5 text-xs text-slate-600">Classify and enter one reusable question manually.</p>
+        </summary>
+        <div className="border-t px-4 pb-6 sm:px-6"><CreateQuestionForm categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} subjects={subjectOptions} /></div>
       </details>
 
-      <details id="import-questions" className="mt-6 scroll-mt-24 overflow-hidden rounded-3xl border border-teal-200 bg-white shadow-sm">
-        <summary className="cursor-pointer list-none px-6 py-5"><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">Bulk import</p><h2 className="font-display mt-2 text-xl">+ Import Excel or CSV</h2><p className="mt-1 text-sm text-slate-600">Upload up to 500 checked questions for one Paper.</p></summary>
-        <div className="border-t px-4 pb-7 sm:px-7"><QuestionCsvImport categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} /></div>
+      <details id="import-questions" className="mt-4 scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs">
+        <summary className="cursor-pointer list-none px-5 py-4 hover:bg-slate-50/70 transition">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Bulk import</span>
+          <h2 className="mt-0.5 text-lg font-bold text-slate-950">+ Import Excel or CSV</h2>
+          <p className="mt-0.5 text-xs text-slate-600">Upload up to 500 checked questions for one Paper.</p>
+        </summary>
+        <div className="border-t px-4 pb-6 sm:px-6"><QuestionCsvImport categories={categoryOptions} exams={examOptions} specializations={specializationOptions} papers={paperOptions} /></div>
       </details>
-    </main>
+    </div>
   );
 }

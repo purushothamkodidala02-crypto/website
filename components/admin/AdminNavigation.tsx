@@ -225,29 +225,12 @@ export function NavigationLinks({
   return (
     <div className="space-y-5">
       {ADMIN_SECTIONS.map((section) => {
-        const isSurveysActive = pathname.startsWith("/admin/surveys");
-        const isReportsActive = pathname.startsWith("/admin/question-reports");
-
-        const sectionHasUpdates = section.links.some((l) =>
-          l.href === "/admin/question-reports"
-            ? !isReportsActive && badges.openReports > 0
-            : l.href === "/admin/surveys"
-              ? !isSurveysActive && badges.newSurveys > 0
-              : false
-        );
-
         return (
           <section key={section.label} className="space-y-1">
             <div className="flex items-center justify-between px-3 py-1">
               <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-800">
                 {section.label}
               </p>
-              {sectionHasUpdates && (
-                <span
-                  title="Updates available in this section"
-                  className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
-                />
-              )}
             </div>
 
             <div className="space-y-0.5">
@@ -272,7 +255,7 @@ export function NavigationLinks({
                   <Link
                     key={link.href}
                     href={link.href}
-                    prefetch={true}
+                    prefetch={false}
                     onClick={onLinkClick}
                     className={`group relative flex items-center justify-between rounded-xl px-3 py-2 text-xs sm:text-sm font-bold transition duration-150 ${
                       active
@@ -535,10 +518,12 @@ export function AdminNavigation(props: {
             type="button"
             onClick={onToggle}
             title="Collapse sidebar ( [ )"
-            aria-label="Close sidebar"
-            className="grid h-8 w-8 place-items-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-900 focus:outline-none"
+            aria-label="Collapse sidebar"
+            className="grid h-8 w-8 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-teal-50 hover:text-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
-            ✕
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
           </button>
         </div>
 
@@ -570,38 +555,23 @@ export function AdminNavigation(props: {
           </Link>
 
           {/* Admin identity & status */}
-          <div className="flex items-start justify-between gap-2 pt-1 px-1">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-teal-700 text-[11px] font-black text-white shadow-2xs">
-                {initials}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 leading-snug break-words">
-                  {identity.displayName}
-                </p>
-                {userEmail && (
-                  <p className="text-[10px] font-medium text-slate-500 break-all leading-snug">
-                    {userEmail}
-                  </p>
-                )}
-                <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-teal-800">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                  <span>MFA Active</span>
-                </p>
-              </div>
+          <div className="flex items-start gap-2.5 pt-1 px-1">
+            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-teal-700 text-[11px] font-black text-white shadow-2xs">
+              {initials}
             </div>
-
-            <button
-              type="button"
-              onClick={onToggle}
-              title="Collapse sidebar ( [ )"
-              aria-label="Collapse sidebar"
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-900 leading-snug break-words">
+                {identity.displayName}
+              </p>
+              {userEmail && (
+                <p className="text-[10px] font-medium text-slate-500 break-all leading-snug">
+                  {userEmail}
+                </p>
+              )}
+              <p className="mt-0.5 text-[10px] font-semibold text-teal-800">
+                MFA Active
+              </p>
+            </div>
           </div>
         </div>
       </aside>
@@ -721,9 +691,8 @@ export function AdminNavigation(props: {
                         {userEmail}
                       </p>
                     )}
-                    <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-teal-800">
-                      <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                      <span>MFA Verified Session</span>
+                    <p className="mt-0.5 text-[10px] font-semibold text-teal-800">
+                      MFA Verified Session
                     </p>
                   </div>
                 </div>

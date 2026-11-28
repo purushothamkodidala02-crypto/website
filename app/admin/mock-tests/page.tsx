@@ -147,26 +147,26 @@ export default async function MockTestsPage({
   const publishedCount = mappedTests.filter((test) => test.status === "published").length;
   const draftCount = mappedTests.filter((test) => test.status === "draft").length;
 
-  return <main className="space-y-6">
-      {/* Professional Executive Header */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  return <div className="space-y-6">
+      {/* Compact Header & KPI Ribbon */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-slate-200/80 pb-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-600">
-              <MockSymbol className="h-4 w-4" />
+            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">
+              <MockSymbol className="h-3.5 w-3.5" />
               <span>Assessment Operations</span>
             </div>
-            <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
               Mock Tests
             </h1>
             <p className="mt-1 text-sm text-slate-600 max-w-2xl">
-              Create, configure questions, and publish state competitive examination practice papers for students across Telangana and Andhra Pradesh.
+              Configure papers, assign questions, and publish mock test series.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <a
               href="#create-mock-test"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-2xs transition hover:bg-slate-800 active:bg-slate-950"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-2xs transition hover:bg-slate-800 active:bg-slate-950"
             >
               <span className="text-sm leading-none">+</span> Create Mock Test
             </a>
@@ -174,25 +174,25 @@ export default async function MockTestsPage({
         </div>
 
         {/* Executive KPI Stats Bar */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-slate-100">
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
-            <span className="text-xs font-medium text-slate-500">Total Mock Tests</span>
-            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-slate-900">{tests.length}</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+            <span className="text-xs font-semibold text-slate-500">Total Mock Tests</span>
+            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-slate-950">{tests.length}</p>
           </div>
-          <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/30 p-3.5">
-            <span className="text-xs font-medium text-emerald-800/90">Published (Live)</span>
-            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-emerald-950">{publishedCount}</p>
+          <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/35 p-3.5 shadow-2xs">
+            <span className="text-xs font-semibold text-emerald-800">Published (Live)</span>
+            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-emerald-950">{publishedCount}</p>
           </div>
-          <div className="rounded-xl border border-amber-200/70 bg-amber-50/30 p-3.5">
-            <span className="text-xs font-medium text-amber-800/90">Drafts</span>
-            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-amber-950">{draftCount}</p>
+          <div className="rounded-xl border border-amber-200/80 bg-amber-50/35 p-3.5 shadow-2xs">
+            <span className="text-xs font-semibold text-amber-800">Drafts</span>
+            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-amber-950">{draftCount}</p>
           </div>
-          <div className="rounded-xl border border-sky-200/70 bg-sky-50/30 p-3.5">
-            <span className="text-xs font-medium text-sky-800/90">States Covered</span>
-            <p className="mt-1 text-2xl font-bold font-mono tracking-tight text-sky-950">{states.length}</p>
+          <div className="rounded-xl border border-sky-200/80 bg-sky-50/35 p-3.5 shadow-2xs">
+            <span className="text-xs font-semibold text-sky-800">States Covered</span>
+            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-sky-950">{states.length}</p>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Main Existing Mock Tests Workspace */}
       {testsResult.error || statesResult.error || summariesResult.error ? (
@@ -250,5 +250,5 @@ export default async function MockTestsPage({
           />
         </div>
       </section>
-  </main>;
+  </div>;
 }

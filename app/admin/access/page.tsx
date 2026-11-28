@@ -34,62 +34,52 @@ export default async function AdminAccessPage() {
   const paidSalesEnabled = salesSettingResult.data?.enabled === true;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200/80 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-teal-600" />
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
-              Commercial Operations & Access
-            </p>
-          </div>
-          <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
-            Exam Series & Passes
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">
+            Commercial Operations &amp; Access
+          </p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
+            Exam Series &amp; Passes
           </h1>
-          <p className="mt-1 text-sm text-slate-600 max-w-3xl">
-            Configure free and paid mock test series, sales visibility, pricing in INR, access durations, and discount promotional codes.
+          <p className="mt-1 text-sm text-slate-600 max-w-2xl">
+            Manage free or paid access visibility, pricing, durations, and discount codes.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Link
             href="/admin/students"
-            prefetch={true}
-            className="rounded-xl border border-teal-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs hover:bg-teal-50 hover:border-teal-300 transition"
+            prefetch={false}
+            className="rounded-xl border border-teal-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs hover:bg-teal-50 hover:border-teal-300 transition"
           >
-            View Registrations & Revenue
+            View registrations
           </Link>
         </div>
       </div>
 
       {/* Global Sales Banner */}
       <section
-        className={`rounded-3xl border p-6 shadow-xs transition ${
+        className={`rounded-2xl border p-5 shadow-xs transition ${
           paidSalesEnabled
-            ? "border-emerald-200/90 bg-emerald-50/60"
-            : "border-amber-200/90 bg-amber-50/60"
+            ? "border-emerald-200/90 bg-emerald-50/50"
+            : "border-amber-200/90 bg-amber-50/50"
         }`}
       >
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  paidSalesEnabled ? "bg-emerald-600" : "bg-amber-600"
-                }`}
-              />
-              <p className="text-xs font-black uppercase tracking-wider text-slate-600">
-                Student Purchase Visibility
-              </p>
-            </div>
-            <h2 className="text-xl font-black text-slate-950">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+              Student Purchase Visibility
+            </p>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-950">
               Paid sales are {paidSalesEnabled ? "ON" : "OFF"}
             </h2>
             <p className="max-w-2xl text-xs sm:text-sm text-slate-700 leading-relaxed">
               {paidSalesEnabled
-                ? "Students can see purchase banners, pricing, and buy active Exam Series through Razorpay. All transactions are logged in Registrations."
-                : "Purchases, prices, and Buy buttons are hidden across the entire student portal. Existing access records and historical payments are preserved."}
+                ? "Students can view pricing and buy active Exam Series through Razorpay. Transactions log in Registrations."
+                : "Purchases and prices are hidden across the student portal while preserving historical access and payments."}
             </p>
           </div>
           <div className="shrink-0">
@@ -98,47 +88,28 @@ export default async function AdminAccessPage() {
         </div>
       </section>
 
-      {/* How it works 2-card step overview */}
-      <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-3xl border border-teal-100 bg-white p-6 shadow-xs">
-          <p className="text-xs font-black uppercase tracking-wider text-teal-800">
-            Step 1 · Free or Paid Access
-          </p>
-          <h2 className="mt-1.5 text-lg font-black text-slate-950">
-            Configure access on each Mock Test
-          </h2>
-          <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">
-            <strong className="text-slate-900">Free:</strong> Any registered student can attempt immediately.{" "}
-            <strong className="text-slate-900">Paid:</strong> Candidates must purchase an active exam series covering that recruiting exam.
-          </p>
-          <div className="mt-5">
-            <Link
-              href="/admin/mock-tests"
-              className="inline-flex rounded-xl bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-2xs hover:bg-teal-800 transition"
-            >
-              Manage Mock Tests
+      {/* Collapsible setup guide */}
+      <details className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs sm:text-sm shadow-2xs">
+        <summary className="cursor-pointer font-semibold text-slate-800 select-none flex flex-wrap items-center justify-between gap-2">
+          <span>
+            How Free/Paid series access works ({activeCount} active series · {products.length - activeCount} paused)
+          </span>
+          <span className="text-xs font-bold text-teal-800">Configure mock test access &rarr;</span>
+        </summary>
+        <div className="mt-3 grid gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2 text-xs text-slate-600 leading-relaxed">
+          <div>
+            <p className="font-bold text-slate-900">1. Configure access per Mock Test</p>
+            <p className="mt-1">Free tests open immediately; Paid tests require an active Exam Series covering that exam.</p>
+            <Link href="/admin/mock-tests" prefetch={false} className="mt-2 inline-block font-bold text-teal-800 hover:underline">
+              Manage Mock Tests &rarr;
             </Link>
           </div>
+          <div>
+            <p className="font-bold text-slate-900">2. Bundle exams into Exam Series</p>
+            <p className="mt-1">Create single-exam passes or multi-exam bundles with INR pricing and validity windows.</p>
+          </div>
         </div>
-
-        <div className="rounded-3xl border border-teal-100 bg-white p-6 shadow-xs">
-          <p className="text-xs font-black uppercase tracking-wider text-teal-800">
-            Step 2 · Price & Exam Coverage
-          </p>
-          <h2 className="mt-1.5 text-lg font-black text-slate-950">
-            Create bundles & series
-          </h2>
-          <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">
-            One series can cover a single exam, such as TSPSC Group 2, or multiple related exams, such as all Telangana Police exams.
-          </p>
-          <p className="mt-4 text-xs font-bold text-teal-900">
-            {activeCount} active series for sale · {products.length - activeCount} paused
-          </p>
-          <Link href="/admin/students" className="mt-4 inline-flex text-xs sm:text-sm font-bold text-teal-700 hover:underline">
-            View registrations &rarr;
-          </Link>
-        </div>
-      </section>
+      </details>
 
       {/* Series Creation & List */}
       <section className="grid gap-8 xl:grid-cols-[1fr_1.1fr]">

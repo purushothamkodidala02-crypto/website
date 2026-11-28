@@ -481,7 +481,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
           </label>
         </div>
         <p className="mt-2 leading-5 text-emerald-900">
-          Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam Passes.
+          Free tests open to everyone. Paid tests require an active Exam Series that includes this exam. Set the selling price only in Admin → Exam series.
         </p>
       </div>
       <div className="md:col-span-2">

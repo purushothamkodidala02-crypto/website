@@ -25,10 +25,14 @@ export default async function NewMockTestQuestionPage({ params, searchParams }: 
   const testPaper = papers.find((paper) => paper.id === mockTest.paper_id);
   const examGroup = testPaper ? (examsResult.data ?? []).find((group) => group.id === testPaper.exam_group_id) : null;
 
-  return <main>
-    <Link href={questionsPath} className="text-sm font-semibold text-teal-700 hover:underline">← Back to {mockTest.title} Questions</Link>
-    <h1 className="mt-5 text-3xl font-black">Add question to this mock test</h1>
-    <p className="mt-2 text-slate-600">This question is created and assigned only to {mockTest.title}.</p>
+  return <div className="space-y-5">
+    <div>
+      <Link href={questionsPath} prefetch={false} className="text-sm font-semibold text-teal-800 hover:underline">← Back to {mockTest.title} Questions</Link>
+      <div className="mt-3 border-b border-slate-200/80 pb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">Add question to this mock test</h1>
+        <p className="mt-1 text-sm text-slate-600">This question is created and assigned only to {mockTest.title}.</p>
+      </div>
+    </div>
     {isDraft ? (
       <CreateQuestionForm
         categories={(categoriesResult.data ?? []).map((item) => ({ id: item.id, name: item.name }))}
@@ -43,5 +47,5 @@ export default async function NewMockTestQuestionPage({ params, searchParams }: 
         This mock test is published or archived, so its questions are locked to protect student test attempts.
       </div>
     )}
-  </main>;
+  </div>;
 }

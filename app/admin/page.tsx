@@ -8,7 +8,7 @@ import { AdminQuickCandidateLookup } from "@/components/admin/AdminQuickCandidat
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
-  const admin = createAdminClient();
+  const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
   const today = indiaDateKey();
   const future30Date = new Date();
   future30Date.setDate(future30Date.getDate() + 30);
@@ -121,6 +121,7 @@ export default async function AdminDashboard() {
   }
 
   const usableQuestionsCount = usableQuestionsCountResult.count ?? 0;
+  const totalQuestionsCount = totalQuestionsCountResult.count ?? 0;
   const expiringSoonCount = expiringSoonCountResult.count ?? 0;
   const openReportsCount = reportsResult.count ?? 0;
   const readyDraftsCount = drafts.length - draftsNeedingWork.length;
@@ -129,119 +130,106 @@ export default async function AdminDashboard() {
     {
       label: "Published Tests",
       value: published.length,
-      detail: `${tests.length > 0 ? Math.round((published.length / tests.length) * 100) : 0}% of ${tests.length} total tests live`,
-      href: "/admin/mock-tests",
+      detail: `${tests.length > 0 ? Math.round((published.length / tests.length) * 100) : 0}% of ${tests.length.toLocaleString("en-IN")} total tests`,
+      href: "/admin/mock-tests?status=published",
       icon: "published" as const,
       color: "emerald" as const,
     },
     {
       label: "Draft Tests",
       value: drafts.length,
-      detail: draftsNeedingWork.length > 0 ? `${draftsNeedingWork.length} require questions or marks` : "All drafts ready to review",
-      href: "/admin/mock-tests",
+      detail:
+        draftsNeedingWork.length > 0
+          ? `${draftsNeedingWork.length} need questions or marks`
+          : "All drafts ready",
+      href: "/admin/mock-tests?status=draft",
       icon: "draft" as const,
       color: "amber" as const,
     },
     {
-      label: "Active Question Bank",
+      label: "Question Bank",
       value: usableQuestionsCount,
-      detail: `${totalQuestionsCountResult.count ?? 0} total questions registered`,
+      detail: `${totalQuestionsCount.toLocaleString("en-IN")} total questions`,
       href: "/admin/questions",
       icon: "questions" as const,
       color: "teal" as const,
     },
     {
-      label: "Completed Submissions",
+      label: "Submissions",
       value: attemptsResult.count ?? 0,
-      detail: "Student attempts submitted & graded",
+      detail: "Submitted & graded",
       href: "/admin/results",
       icon: "attempts" as const,
       color: "indigo" as const,
     },
   ] as const;
 
-  const hasAnyAttentionItem =
-    expiringSoonCount > 0 ||
-    openReportsCount > 0 ||
-    draftsNeedingWork.length > 0 ||
-    readyDraftsCount > 0 ||
-    hidden.length > 0;
+  const attentionCount = [
+    openReportsCount > 0,
+    expiringSoonCount > 0,
+    draftsNeedingWork.length > 0,
+    readyDraftsCount > 0,
+    hidden.length > 0,
+  ].filter(Boolean).length;
+  const hasAnyAttentionItem = attentionCount > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* ========================================================
-          1. EXECUTIVE HERO COMMAND BAR
+          1. CLEAN OVERVIEW HEADER & QUICK ACTIONS
       ======================================================== */}
-      <div className="relative overflow-hidden rounded-3xl border border-teal-200/80 bg-gradient-to-br from-white via-white to-teal-50/40 p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
-                </span>
-                <span>Production Operational</span>
-              </span>
-              <span className="text-xs font-semibold text-slate-400">•</span>
-              <span className="text-xs font-semibold text-slate-500">{formattedDate}</span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
-              VaradhiPrep Command Center
-            </h1>
-
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Real-time administrative control of test publishing, verified question banks, candidate attempts, and exam series access.
-            </p>
-          </div>
-
-          {/* Quick Operations Toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <Link
-              href="/admin/mock-tests"
-              prefetch={true}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              <span>Manage Tests</span>
-            </Link>
-
-            <Link
-              href="/admin/questions#add-one-question"
-              prefetch={true}
-              className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
-            >
-              <svg className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              <span>Add Question</span>
-            </Link>
-
-            <Link
-              href="/admin/similarity"
-              prefetch={true}
-              className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
-            >
-              <svg className="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-              <span className="hidden sm:inline">Similarity</span>
-            </Link>
-
-            <Link
-              href="/admin/excel-import-guide"
-              prefetch={true}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              <span>Excel Guide</span>
-              <span className="text-[10px] font-bold text-slate-400">↗</span>
-            </Link>
-          </div>
+      <header className="flex flex-col gap-4 border-b border-teal-100/90 pb-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-500">{formattedDate}</p>
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            Overview
+          </h1>
         </div>
-      </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Link
+            href="/admin/mock-tests"
+            prefetch={false}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-teal-700 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-teal-800"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Manage Tests</span>
+          </Link>
+
+          <Link
+            href="/admin/questions#add-one-question"
+            prefetch={false}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
+          >
+            <svg className="h-3.5 w-3.5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Add Question</span>
+          </Link>
+
+          <Link
+            href="/admin/similarity"
+            prefetch={false}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs font-bold text-teal-900 shadow-2xs transition hover:border-teal-300 hover:bg-teal-50"
+          >
+            <svg className="h-3.5 w-3.5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <span>Similarity</span>
+          </Link>
+
+          <Link
+            href="/admin/excel-import-guide"
+            prefetch={false}
+            className="inline-flex items-center gap-1 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            <span>Excel Guide</span>
+            <span aria-hidden="true" className="text-[10px] text-slate-400">↗</span>
+          </Link>
+        </div>
+      </header>
 
       {/* ========================================================
           2. CORE KPI METRICS ROW
@@ -253,115 +241,103 @@ export default async function AdminDashboard() {
       </section>
 
       {/* ========================================================
-          2B. PUBLISHING LIFECYCLE PIPELINE
+          2B. PUBLISHING PIPELINE
       ======================================================== */}
       <section className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-teal-100 bg-slate-50/60 px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-6 w-6 place-items-center rounded-lg bg-teal-800 text-white font-black text-xs">
-              ⚡
-            </span>
-            <div>
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
-                Mock Test Publishing Pipeline
-              </h2>
-              <p className="text-xs text-slate-500">
-                Stage tracker for test readiness, review checkpoints, and release management
-              </p>
-            </div>
-          </div>
+        <div className="flex items-center justify-between gap-3 border-b border-teal-100 bg-slate-50/60 px-5 py-3.5 sm:px-6">
+          <h2 className="text-xs font-black uppercase tracking-[0.14em] text-slate-900">
+            Publishing Pipeline
+          </h2>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/admin/mock-tests"
-              className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
-            >
-              All {tests.length} Tests &rarr;
-            </Link>
-          </div>
+          <Link
+            href="/admin/mock-tests"
+            className="shrink-0 whitespace-nowrap text-xs font-bold text-teal-700 hover:text-teal-900 transition"
+          >
+            All {tests.length.toLocaleString("en-IN")} tests &rarr;
+          </Link>
         </div>
 
-        <div className="grid gap-4 p-5 sm:p-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Stage 1: Drafting / Incomplete */}
+        <div className="grid gap-3.5 p-5 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Stage 1: Drafting */}
           <div className="rounded-2xl border border-amber-200/80 bg-amber-50/40 p-4 transition hover:bg-amber-50/70">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-black uppercase tracking-wider text-amber-800">
-                1. Drafting &amp; Assembly
+                1. Drafting
               </span>
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-900 border border-amber-200">
+              <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-900">
                 {draftsNeedingWork.length}
               </span>
             </div>
             <p className="mt-2 text-2xl font-black text-slate-900">{draftsNeedingWork.length}</p>
-            <p className="mt-1 text-xs text-slate-500">Tests missing questions or valid marks.</p>
+            <p className="mt-1 text-xs text-slate-500">Missing questions or marks</p>
             <Link
               href="/admin/mock-tests?status=draft"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-amber-900 hover:underline"
+              className="mt-3 inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold text-amber-900 hover:underline"
             >
-              <span>Inspect Drafts</span>
+              <span>Review drafts</span>
               <span>&rarr;</span>
             </Link>
           </div>
 
-          {/* Stage 2: Ready for Sign-off */}
+          {/* Stage 2: Ready */}
           <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-4 transition hover:bg-emerald-50/70">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                2. Ready to Release
+                2. Ready
               </span>
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-900 border border-emerald-200">
+              <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-900">
                 {readyDraftsCount}
               </span>
             </div>
             <p className="mt-2 text-2xl font-black text-slate-900">{readyDraftsCount}</p>
-            <p className="mt-1 text-xs text-slate-500">100% questions ready for 1-click publish.</p>
+            <p className="mt-1 text-xs text-slate-500">Verified for release</p>
             <Link
               href="/admin/mock-tests?status=draft"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-900 hover:underline"
+              className="mt-3 inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold text-emerald-900 hover:underline"
             >
-              <span>Review &amp; Publish</span>
+              <span>Review &amp; publish</span>
               <span>&rarr;</span>
             </Link>
           </div>
 
-          {/* Stage 3: Live in Production */}
+          {/* Stage 3: Live */}
           <div className="rounded-2xl border border-teal-200/80 bg-teal-50/40 p-4 transition hover:bg-teal-50/70">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-black uppercase tracking-wider text-teal-800">
-                3. Live Production
+                3. Live
               </span>
-              <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-black text-teal-900 border border-teal-200">
+              <span className="rounded-full border border-teal-200 bg-teal-100 px-2 py-0.5 text-xs font-black text-teal-900">
                 {published.length}
               </span>
             </div>
             <p className="mt-2 text-2xl font-black text-slate-900">{published.length}</p>
-            <p className="mt-1 text-xs text-slate-500">Actively visible and testable by students.</p>
+            <p className="mt-1 text-xs text-slate-500">Visible to students</p>
             <Link
               href="/admin/mock-tests?status=published"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-900 hover:underline"
+              className="mt-3 inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold text-teal-900 hover:underline"
             >
-              <span>Manage Live Tests</span>
+              <span>Manage live</span>
               <span>&rarr;</span>
             </Link>
           </div>
 
-          {/* Stage 4: Archived / Hidden */}
+          {/* Stage 4: Archived */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 transition hover:bg-slate-100/60">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-600">
-                4. Archived / Hidden
+                4. Archived
               </span>
-              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-black text-slate-700 border border-slate-300">
+              <span className="rounded-full border border-slate-300 bg-slate-200 px-2 py-0.5 text-xs font-black text-slate-700">
                 {hidden.length}
               </span>
             </div>
             <p className="mt-2 text-2xl font-black text-slate-900">{hidden.length}</p>
-            <p className="mt-1 text-xs text-slate-500">Archived tests with preserved attempts.</p>
+            <p className="mt-1 text-xs text-slate-500">Hidden from catalogue</p>
             <Link
               href="/admin/mock-tests?status=archived"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:underline"
+              className="mt-3 inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold text-slate-700 hover:underline"
             >
-              <span>View Archived</span>
+              <span>View archived</span>
               <span>&rarr;</span>
             </Link>
           </div>
@@ -369,44 +345,43 @@ export default async function AdminDashboard() {
       </section>
 
       {/* ========================================================
-          3. OPERATIONS & RECENT TESTS DUAL GRID
+          3. ACTION QUEUE & RECENT TESTS DUAL GRID
       ======================================================== */}
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        {/* Left Column: Action Items & Attention Center */}
+        {/* Left Column: Action Queue */}
         <div className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xs">
-          <div className="flex items-center justify-between gap-4 border-b border-teal-100 bg-slate-50/60 px-6 py-4">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2 w-2 rounded-full bg-teal-600" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
-                Action Required & Quality Queue
+          <div className="flex items-center justify-between gap-3 border-b border-teal-100 bg-slate-50/60 px-5 py-3.5 sm:px-6">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-xs font-black uppercase tracking-[0.14em] text-slate-900">
+                Action Queue
               </h2>
               {hasAnyAttentionItem && (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-900 border border-amber-200">
-                  Active Tasks
+                <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-900">
+                  {attentionCount} {attentionCount === 1 ? "item" : "items"}
                 </span>
               )}
             </div>
 
             <Link
               href="/admin/question-reports"
-              prefetch={true}
-              className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
+              prefetch={false}
+              className="shrink-0 whitespace-nowrap text-xs font-bold text-teal-700 hover:text-teal-900 transition"
             >
-              Reports Queue &rarr;
+              Reports &rarr;
             </Link>
           </div>
 
-          <div className="p-6">
+          <div className="p-5 sm:p-6">
             {!hasAnyAttentionItem ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-50 text-teal-700 border border-teal-100">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-teal-100 bg-teal-50 text-teal-700">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                   </svg>
                 </div>
-                <h3 className="mt-3 text-sm font-bold text-slate-900">Content Integrity 100% Clear</h3>
-                <p className="mt-1 max-w-sm text-xs text-slate-500">
-                  No open candidate reports, expiring questions, or incomplete drafts currently require intervention.
+                <h3 className="mt-3 text-sm font-bold text-slate-900">All clear</h3>
+                <p className="mt-1 max-w-xs text-xs text-slate-500">
+                  No open reports, expiring questions, or incomplete drafts need attention.
                 </p>
               </div>
             ) : (
@@ -415,7 +390,7 @@ export default async function AdminDashboard() {
                   <AttentionItem
                     count={openReportsCount}
                     title="Student question reports are open"
-                    detail="Review reported questions, wording, translations, and answers."
+                    detail="Review flagged questions, translations, and answer keys."
                     tone="rose"
                     href="/admin/question-reports"
                   />
@@ -424,7 +399,7 @@ export default async function AdminDashboard() {
                   <AttentionItem
                     count={expiringSoonCount}
                     title="Questions expiring soon (≤ 30 days)"
-                    detail="Review current affairs and expiring questions before they leave mock tests."
+                    detail="Update time-sensitive questions before expiry."
                     tone="amber"
                     href="/admin/questions?status=expiring_soon"
                   />
@@ -432,28 +407,28 @@ export default async function AdminDashboard() {
                 {draftsNeedingWork.length > 0 && (
                   <AttentionItem
                     count={draftsNeedingWork.length}
-                    title="Draft tests not ready for release"
-                    detail="Add usable questions and valid marks before publishing to students."
+                    title="Draft tests need setup"
+                    detail="Add questions and check mark settings."
                     tone="amber"
-                    href="/admin/mock-tests"
+                    href="/admin/mock-tests?status=draft"
                   />
                 )}
                 {readyDraftsCount > 0 && (
                   <AttentionItem
                     count={readyDraftsCount}
-                    title="Draft tests ready for review & publication"
-                    detail="Preview test flow and publish when final sign-off is complete."
+                    title="Draft tests ready to publish"
+                    detail="Preview questions and publish when ready."
                     tone="emerald"
-                    href="/admin/mock-tests"
+                    href="/admin/mock-tests?status=draft"
                   />
                 )}
                 {hidden.length > 0 && (
                   <AttentionItem
                     count={hidden.length}
-                    title="Hidden or archived tests"
-                    detail="Results remain preserved; unarchive if candidate access is needed."
+                    title="Archived tests"
+                    detail="Hidden from students with attempts preserved."
                     tone="slate"
-                    href="/admin/mock-tests"
+                    href="/admin/mock-tests?status=archived"
                   />
                 )}
               </div>
@@ -461,21 +436,18 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* Right Column: Recent Mock Tests Management */}
+        {/* Right Column: Recent Mock Tests */}
         <div className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xs">
-          <div className="flex items-center justify-between gap-4 border-b border-teal-100 bg-slate-50/60 px-6 py-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-teal-600" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
-                Recent Mock Tests
-              </h2>
-            </div>
+          <div className="flex items-center justify-between gap-3 border-b border-teal-100 bg-slate-50/60 px-5 py-3.5 sm:px-6">
+            <h2 className="text-xs font-black uppercase tracking-[0.14em] text-slate-900">
+              Recent Mock Tests
+            </h2>
             <Link
               href="/admin/mock-tests"
-              prefetch={true}
-              className="text-xs font-bold text-teal-700 hover:text-teal-900 transition"
+              prefetch={false}
+              className="shrink-0 whitespace-nowrap text-xs font-bold text-teal-700 hover:text-teal-900 transition"
             >
-              View All ({tests.length}) &rarr;
+              View all ({tests.length.toLocaleString("en-IN")}) &rarr;
             </Link>
           </div>
 
@@ -484,7 +456,7 @@ export default async function AdminDashboard() {
               <p className="text-sm text-slate-500">No mock tests have been created yet.</p>
               <Link
                 href="/admin/mock-tests"
-                prefetch={true}
+                prefetch={false}
                 className="mt-3 inline-block rounded-xl border border-teal-600 bg-teal-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-900/15 hover:bg-teal-800"
               >
                 Create your first test
@@ -531,14 +503,14 @@ export default async function AdminDashboard() {
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/admin/mock-tests/${test.id}/edit`}
-                          prefetch={true}
+                          prefetch={false}
                           className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-950 shadow-2xs"
                         >
                           Edit
                         </Link>
                         <Link
                           href={`/admin/mock-tests/${test.id}/preview`}
-                          prefetch={true}
+                          prefetch={false}
                           className="rounded-lg border border-teal-200 bg-teal-50/50 px-2.5 py-1 text-xs font-bold text-teal-800 hover:bg-teal-100 shadow-2xs"
                         >
                           Preview
@@ -561,38 +533,37 @@ export default async function AdminDashboard() {
       </section>
 
       {/* ========================================================
-          4. ESSENTIAL WORKFLOW SHORTCUTS
+          4. WORKSPACE SHORTCUTS
       ======================================================== */}
-      <section className="pt-2">
-        <div className="flex items-center justify-between mb-3 px-1">
+      <section className="pt-1">
+        <div className="mb-3 px-1">
           <h3 className="text-[11px] font-black uppercase tracking-[0.16em] text-teal-800">
-            Administrative Workspaces
+            Quick Links
           </h3>
-          <span className="text-xs text-slate-400">Instant shortcuts</span>
         </div>
 
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           <ShortcutCard
             title="Exam Catalogue"
-            detail="State, Recruiting Boards & Papers"
+            detail="Boards, exams & papers"
             href="/admin/exams"
             icon="catalogue"
           />
           <ShortcutCard
             title="Subjects & Syllabus"
-            detail="Section hierarchy & practice tags"
+            detail="Sections & practice tags"
             href="/admin/subjects"
             icon="subjects"
           />
           <ShortcutCard
             title="Registrations & Sales"
-            detail="Candidate profiles, revenue & access"
+            detail="Students, orders & passes"
             href="/admin/students"
             icon="students"
           />
           <ShortcutCard
             title="Question Reports"
-            detail="Resolution queue for student flags"
+            detail="Flagged questions queue"
             href="/admin/question-reports"
             icon="reports"
             badge={openReportsCount}
@@ -628,14 +599,14 @@ function MetricCard({
   return (
     <Link
       href={href}
-      prefetch={true}
-      className="group relative overflow-hidden rounded-2xl border border-teal-100 bg-white p-5 shadow-xs transition hover:border-teal-200 hover:shadow-md"
+      prefetch={false}
+      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-teal-100 bg-white p-5 shadow-xs transition hover:border-teal-200 hover:shadow-md"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 group-hover:text-teal-950 transition">
           {label}
         </span>
-        <span className={`grid h-8 w-8 place-items-center rounded-xl border ${colorStyles}`}>
+        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl border ${colorStyles}`}>
           {icon === "published" && (
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -707,7 +678,7 @@ function AttentionItem({
   return (
     <Link
       href={href}
-      prefetch={true}
+      prefetch={false}
       className={`group flex items-center justify-between gap-4 rounded-2xl border p-4 transition ${styles.card}`}
     >
       <div className="flex items-center gap-3.5 min-w-0">
@@ -767,7 +738,7 @@ function ShortcutCard({
   return (
     <Link
       href={href}
-      prefetch={true}
+      prefetch={false}
       className="group flex items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-xs transition hover:border-teal-200 hover:shadow-md"
     >
       <div className="flex items-center gap-3 min-w-0">

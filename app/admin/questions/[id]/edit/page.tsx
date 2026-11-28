@@ -82,17 +82,20 @@ export default async function EditQuestionPage({
   });
 
   return (
-    <main>
-      <Link
-        href={backHref}
-        className="text-sm font-semibold text-teal-700 hover:underline"
-      >
-        ← Back to Question Bank
-      </Link>
-      <h1 className="mt-5 text-3xl font-black">Edit Question</h1>
+    <div className="space-y-5">
+      <div>
+        <Link
+          href={backHref}
+          prefetch={false}
+          className="text-sm font-semibold text-teal-800 hover:underline"
+        >
+          ← Back to Question Bank
+        </Link>
+        <h1 className="mt-3 border-b border-slate-200/80 pb-4 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Edit Question</h1>
+      </div>
       {assignmentsResult.data && assignmentsResult.data.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-teal-200 bg-teal-50/70 p-4">
-          <p className="text-xs font-black uppercase tracking-wider text-teal-900">
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-teal-900">
             Assigned in {assignmentsResult.data.length} Mock Test{assignmentsResult.data.length > 1 ? "s" : ""}:
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
@@ -104,10 +107,11 @@ export default async function EditQuestionPage({
                 <Link
                   key={assignment.mock_test_id}
                   href={`/admin/mock-tests/${assignment.mock_test_id}/questions/${id}/edit`}
+                  prefetch={false}
                   className="inline-flex items-center gap-2 rounded-xl border border-teal-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-xs transition hover:border-teal-500 hover:bg-teal-50"
                 >
                   <span>{mockTest?.title ?? "Mock Test"}</span>
-                  <span className="rounded-md bg-teal-700 px-1.5 py-0.5 text-[11px] font-black text-white">
+                  <span className="admin-stat rounded-md bg-teal-700 px-1.5 py-0.5 text-[11px] font-bold text-white">
                     Question #{assignment.question_order}
                   </span>
                 </Link>
@@ -122,6 +126,6 @@ export default async function EditQuestionPage({
         subjects={options}
         hasAttempts={hasAttempts}
       />
-    </main>
+    </div>
   );
 }

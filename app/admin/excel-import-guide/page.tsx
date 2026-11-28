@@ -106,25 +106,23 @@ const optionalColumns = [
 
 export default function ExcelImportGuidePage() {
   return (
-    <div className="space-y-8">
-      {/* Header section */}
-      <section className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-white p-7 text-slate-900 shadow-sm sm:p-9">
-        <div className="relative flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-500">Question bank</p>
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Excel & TSV Import Guide</h1>
-            <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-              Generate bilingual questions using AI prompts in TSV format, or import directly through Excel (.xlsx, .xls) and CSV (.csv). Every row is strictly validated before saving.
-            </p>
-          </div>
-          <Link
-            href="/admin/questions#import-questions"
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
-          >
-            Open Excel import →
-          </Link>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Question bank</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Excel &amp; TSV Import Guide</h1>
+          <p className="mt-1 max-w-3xl text-sm text-slate-600">
+            Generate bilingual questions in TSV format or import directly via Excel (.xlsx, .xls) and CSV.
+          </p>
         </div>
-      </section>
+        <Link
+          href="/admin/questions#import-questions"
+          prefetch={false}
+          className="rounded-xl bg-slate-900 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-slate-800"
+        >
+          Open Excel import →
+        </Link>
+      </div>
 
       {/* Info Cards */}
       <section className="grid gap-4 md:grid-cols-3">

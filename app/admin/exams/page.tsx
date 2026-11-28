@@ -1,16 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { ExamStructureWorkspace } from "./ExamStructureWorkspace";
 
-function MetricPill({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="min-w-16 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-center shadow-xs">
-      <strong className="block text-base font-bold tracking-tight text-slate-900">{value}</strong>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
-    </div>
-  );
-}
-
-export default async function AdminExamStructurePage() {
+export default async function AdminExamStructurePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ state?: string; board?: string; q?: string }>;
+}) {
+  const query = searchParams ? await searchParams : {};
   const supabase = await createClient();
   const [
     statesResult,
@@ -67,40 +63,17 @@ export default async function AdminExamStructurePage() {
   const subjects = subjectsResult.data ?? [];
 
   return (
-    <main className="space-y-6">
-      {/* Executive Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-teal-600" />
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-800">
-              Exam Catalogue & Content Architecture
-            </p>
-          </div>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Exam Structure & Catalogue
-          </h1>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate-600">
-            Configure the educational taxonomy across States, Recruiting Boards, Exams, Specialisations, Papers, and Subject display hierarchies.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <MetricPill value={states.length} label="States" />
-          <MetricPill value={categories.length} label="Boards" />
-          <MetricPill value={exams.length} label="Exams" />
-          <MetricPill value={papers.length} label="Papers" />
-          <MetricPill value={subjects.length} label="Subjects" />
-        </div>
-      </div>
-
+    <div className="space-y-4">
       {errors.length > 0 && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800">
-          Some Exam Structure data could not be loaded: {errors[0]?.message}
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-semibold text-rose-800">
+          Some Exam Catalogue data could not be loaded: {errors[0]?.message}
         </div>
       )}
 
       <ExamStructureWorkspace
+        initialStateSlug={query.state}
+        initialBoardSlug={query.board}
+        initialSearch={query.q}
         states={states.map((state) => ({
           id: state.id,
           name: state.name,
@@ -149,6 +122,6 @@ export default async function AdminExamStructurePage() {
           displayOrder: subject.display_order,
         }))}
       />
-    </main>
+    </div>
   );
 }

@@ -19,21 +19,23 @@ export default async function SubjectsPage({ searchParams }: { searchParams: Pro
   const initialLocation = { categoryId: selected.category ?? "", examId: selected.exam ?? "", specializationId: selected.specialization ?? "", paperId: selected.paper ?? "" };
 
   return (
-    <main>
-      <div>
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Exam catalogue &amp; curriculum</p>
-        <h1 className="mt-2 text-3xl font-black">Subjects &amp; Syllabus Curriculum</h1>
-        <p className="mt-2 text-slate-600">
-          Choose the Recruiting Board, Exam, optional Specialisation, and Paper before adding its Subjects.
-        </p>
-      </div>
-      <div className="mt-4 rounded-2xl border border-teal-200/80 bg-teal-50/70 p-4 text-xs text-teal-950 sm:text-sm shadow-xs">
-        <p className="font-bold flex items-center gap-1.5">
-          <span aria-hidden="true">💡</span> How Syllabus is generated automatically:
-        </p>
-        <p className="mt-1 leading-relaxed text-slate-700">
-          You don&apos;t have to manually write syllabus text. Adding Papers and Subjects here automatically builds the official Exam Pattern, Paper Distribution, and Curriculum Units on the student syllabus page. You can add topics/months inside any subject by clicking <strong>Edit subject</strong>.
-        </p>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Exam catalogue &amp; curriculum</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Subjects &amp; Syllabus Curriculum</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Select a Board, Exam, optional Specialisation, and Paper to manage its subjects.
+          </p>
+        </div>
+        <details className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-700 shadow-2xs max-w-md">
+          <summary className="cursor-pointer font-semibold text-teal-900 select-none">
+            How Syllabus is generated automatically
+          </summary>
+          <p className="mt-2 leading-relaxed text-slate-600">
+            Adding Papers and Subjects here builds the Exam Pattern, Paper Distribution, and Curriculum Units on student syllabus pages. Use <strong>Edit subject</strong> to add topics or modules inside any subject.
+          </p>
+        </details>
       </div>
       <SubjectsWorkspace
         categories={categories}
@@ -54,6 +56,6 @@ export default async function SubjectsPage({ searchParams }: { searchParams: Pro
       {subjectsResult.error && (
         <p className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{subjectsResult.error.message}</p>
       )}
-    </main>
+    </div>
   );
 }

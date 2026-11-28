@@ -122,18 +122,20 @@ export default async function MockTestStudentPreviewPage({
   const studentAttemptCount = attemptCountResult.count ?? 0;
   const canEdit = true;
   return (
-    <main>
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <BackButton fallbackHref={questionsHref} label="← Back" className="text-sm font-semibold text-teal-700 hover:underline" />
-        <Link href={settingsHref} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">
+        <BackButton fallbackHref={questionsHref} label="← Back" className="text-sm font-semibold text-teal-800 hover:underline" />
+        <Link href={settingsHref} prefetch={false} className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-800 hover:bg-slate-50 transition">
           Mock Test Settings
         </Link>
       </div>
-      <p className="mt-5 text-xs font-black uppercase tracking-[0.14em] text-teal-700">Quality check</p>
-      <h1 className="mt-2 text-3xl font-black text-slate-950">Student Preview</h1>
-      <p className="mt-2 max-w-3xl text-slate-600">
-        Review exactly how students will read each question, including images and mobile-friendly navigation. The answer key and explanations below are visible only to administrators.
-      </p>
+      <div className="border-b border-slate-200/80 pb-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Quality check</p>
+        <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">Student Preview</h1>
+        <p className="mt-1 max-w-3xl text-sm text-slate-600">
+          Review how students read each question and explanation. Answer keys below are visible only to administrators.
+        </p>
+      </div>
       {!isDraft && (
         <p className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm font-medium leading-6 text-sky-950">
           <span className="font-bold">Live Mock Test: </span>
@@ -141,6 +143,6 @@ export default async function MockTestStudentPreviewPage({
         </p>
       )}
       <StudentPreview mockTestId={id} questions={questions} canEdit={canEdit} backHref={questionsHref} listReturnTo={listReturnTo} initialQuestion={initialQuestion} />
-    </main>
+    </div>
   );
 }

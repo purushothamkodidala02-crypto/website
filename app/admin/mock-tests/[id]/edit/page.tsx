@@ -40,12 +40,19 @@ export default async function EditMockTestPage({ params, searchParams }: { param
     ? studentFacingMockTestTitle({ examName: selectedExam.name, paperLabel: paperDisplayById.get(selectedPaper.id)?.shortLabel ?? selectedPaper.name, seriesNumber: Number(test.series_number ?? 1), subjectName: selectedSubject?.name ?? null, sectionName: selectedSection?.name ?? null })
     : test.title;
 
-  return <main>
-    <div className="mb-4 flex justify-end"><Link href={mockTestPreviewHref(test.id, backHref)} className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 hover:bg-teal-100">Student Preview</Link></div>
-    <div className="flex flex-wrap items-center justify-between gap-3"><BackButton fallbackHref={backHref} label="← Back to Mock Tests" className="text-sm font-semibold text-teal-700 hover:underline" /><Link href={mockTestQuestionsHref(test.id, backHref)} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800">Manage Questions</Link></div>
-    <h1 className="mt-5 text-3xl font-black">Mock Test Settings</h1>
-    <p className="mt-2 text-slate-600">Edit the mock test details here. Use Manage Questions for this test&apos;s Excel upload, individual questions, editing, and removal.</p>
+  return <div className="space-y-5">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <BackButton fallbackHref={backHref} label="← Back to Mock Tests" className="text-sm font-semibold text-teal-800 hover:underline" />
+      <div className="flex flex-wrap items-center gap-2">
+        <Link href={mockTestPreviewHref(test.id, backHref)} prefetch={false} className="rounded-xl border border-teal-200 bg-teal-50 px-3.5 py-2 text-xs sm:text-sm font-bold text-teal-900 hover:bg-teal-100 transition">Student Preview</Link>
+        <Link href={mockTestQuestionsHref(test.id, backHref)} prefetch={false} className="rounded-xl bg-slate-950 px-3.5 py-2 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 transition">Manage Questions</Link>
+      </div>
+    </div>
+    <div className="border-b border-slate-200/80 pb-4">
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">Mock Test Settings</h1>
+      <p className="mt-1 text-sm text-slate-600">Edit the mock test details here. Use Manage Questions for file import, editing, and removal.</p>
+    </div>
     <EditMockTestForm mockTest={test} studentTitle={studentTitle} papers={papers.map((paper) => { const group = groups.get(paper.exam_group_id); return { id: paper.id, label: `${categories.get(group?.exam_id ?? "") ?? "Unknown Recruiting Board"} → ${group?.name ?? "Unknown Exam"}${paper.specialization_id ? ` → ${specializations.get(paper.specialization_id) ?? "Unknown Specialisation"}` : ""} → ${paper.name}`, duration: paper.duration_minutes }; })} subjects={(subjectsResult.data ?? []).map((subject) => ({ id: subject.id, paperId: subject.paper_id, name: subject.name }))} sections={sections.map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))} />
     <EntitySeoForm entityType="mock_test" entityId={test.id} title={test.seo_title} description={test.seo_description} titlePlaceholder={test.title} descriptionPlaceholder={test.description ?? "Take this free timed mock test with detailed result review."} />
-  </main>;
+  </div>;
 }

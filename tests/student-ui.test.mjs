@@ -2,11 +2,6 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { resolveStudentDisplayInfo } from "../lib/student-name.ts";
-import {
-  DEFAULT_DISPLAY_PREFERENCES,
-  sanitizeDisplayPreferences,
-  TEXT_SCALE_FACTORS,
-} from "../lib/preferences/display-preferences.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -225,37 +220,8 @@ test("login page follows modern autofill, mobile-first order, and shared email s
   assert.match(googleButton, /Math\.max\(220,/);
 });
 
-test("display preferences sanitize inputs and wire self-hosted Telugu fonts and settings controls", async () => {
-  assert.deepEqual(sanitizeDisplayPreferences(null), DEFAULT_DISPLAY_PREFERENCES);
-  assert.deepEqual(
-    sanitizeDisplayPreferences({
-      textScale: "large",
-      questionFont: "sans",
-      readingTone: "cream",
-      defaultLanguage: "te",
-      motion: "reduced",
-    }),
-    {
-      textScale: "large",
-      questionFont: "sans",
-      readingTone: "cream",
-      defaultLanguage: "te",
-      motion: "reduced",
-    },
-  );
-  assert.deepEqual(
-    sanitizeDisplayPreferences({
-      textScale: "invalid",
-      questionFont: "comic",
-      readingTone: "neon",
-      defaultLanguage: "fr",
-      motion: "fast",
-    }),
-    DEFAULT_DISPLAY_PREFERENCES,
-  );
-  assert.ok(TEXT_SCALE_FACTORS.xlarge > TEXT_SCALE_FACTORS.large);
-
-  const [layout, globalsCss, publicHeader, publicNav, runner, reviewNavigator, studyViewer, settingsButton, examGrid, homeBrowser, catalogGrid, mockTestsPage] =
+test("self-hosted Telugu fonts, catalog filters, and removed user display preference controls stay enforced", async () => {
+  const [layout, globalsCss, publicHeader, publicNav, runner, reviewNavigator, studyViewer, examGrid, homeBrowser, catalogGrid, mockTestsPage] =
     await Promise.all([
       read("app/layout.tsx"),
       read("app/globals.css"),
@@ -264,7 +230,6 @@ test("display preferences sanitize inputs and wire self-hosted Telugu fonts and 
       read("app/mock-tests/[id]/StudentTestRunner.tsx"),
       read("app/dashboard/attempts/[id]/AttemptReviewNavigator.tsx"),
       read("components/study/StudyViewer.tsx"),
-      read("components/site/DisplaySettingsButton.tsx"),
       read("components/exams/ExamSelectionGrid.tsx"),
       read("components/exams/HomeCatalogBrowser.tsx"),
       read("components/exams/CatalogTestGrid.tsx"),
@@ -275,17 +240,15 @@ test("display preferences sanitize inputs and wire self-hosted Telugu fonts and 
   assert.match(layout, /Plus_Jakarta_Sans/);
   assert.match(layout, /meta name="text-scale" content="scale"/);
   assert.doesNotMatch(layout, /fonts\.googleapis\.com\/css2/);
+  assert.doesNotMatch(layout, /DisplayPreferencesProvider|DISPLAY_PREFS_INIT_SCRIPT/);
   assert.match(globalsCss, /font-size-adjust:\s*from-font/);
   assert.match(globalsCss, /@supports not \(font-size-adjust:\s*from-font\)/);
-  assert.match(globalsCss, /\[data-reading-tone="cream"\]/);
-  assert.match(globalsCss, /\[data-reading-tone="contrast"\]/);
+  assert.doesNotMatch(globalsCss, /\[data-reading-tone=/);
   assert.doesNotMatch(publicHeader, /<DisplaySettingsButton/);
   assert.doesNotMatch(publicNav, /<nav className="font-brand/);
-  assert.match(runner, /<DisplaySettingsButton/);
-  assert.match(reviewNavigator, /<DisplaySettingsButton/);
-  assert.match(studyViewer, /<DisplaySettingsButton/);
-  assert.match(settingsButton, /<dialog/);
-  assert.match(settingsButton, /closedby:\s*"any"/);
+  assert.doesNotMatch(runner, /DisplaySettingsButton|useDisplayPreferences/);
+  assert.doesNotMatch(reviewNavigator, /DisplaySettingsButton|useDisplayPreferences/);
+  assert.doesNotMatch(studyViewer, /DisplaySettingsButton|useDisplayPreferences/);
   assert.match(examGrid, /Filter exams in this state/);
   assert.match(homeBrowser, /Filter exams by state/);
   assert.match(catalogGrid, /Filter tests on this page/);

@@ -12,11 +12,15 @@ export default async function EditSpecializationPage({ params }: { params: Promi
   ]);
   if (!specializationResult.data) notFound();
   return (
-    <main>
-      <Link href={`/admin/groups/${specializationResult.data.exam_group_id}/edit`} className="text-sm font-bold text-teal-700 hover:underline">← Back to Exam</Link>
-      <h1 className="mt-6 text-3xl font-black">Edit Specialisation</h1>
-      <p className="mt-2 text-slate-600">Update its student details, permanent URL and Google search appearance.</p>
+    <div className="space-y-5">
+      <div>
+        <Link href={`/admin/groups/${specializationResult.data.exam_group_id}/edit`} className="text-sm font-semibold text-teal-800 hover:underline">← Back to Exam</Link>
+        <div className="mt-3 border-b border-slate-200/80 pb-4">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Edit Specialisation</h1>
+          <p className="mt-1 text-sm text-slate-600">Update student details, URL slug, and search metadata.</p>
+        </div>
+      </div>
       <SpecializationForm exams={(examsResult.data ?? []).map((exam) => ({ id: exam.id, label: exam.name }))} specialization={specializationResult.data} />
-    </main>
+    </div>
   );
 }

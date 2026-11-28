@@ -266,17 +266,19 @@ export default async function EditMockTestQuestionPage({
   };
 
   return (
-    <main>
-      <h1 className="text-3xl font-black">
-        Edit Question #{currentIndex + 1}
-      </h1>
-      <p className="mt-1 text-slate-600">
-        Editing question in{" "}
-        <span className="font-bold text-slate-900">
-          {mockTest.title}
-        </span>
-        . Changes apply to this mock test and synchronize to student attempt reviews.
-      </p>
+    <div className="space-y-5">
+      <div className="border-b border-slate-200/80 pb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
+          Edit Question #{currentIndex + 1}
+        </h1>
+        <p className="mt-1 text-sm text-slate-600">
+          Editing question in{" "}
+          <span className="font-semibold text-slate-900">
+            {mockTest.title}
+          </span>
+          . Updates sync to student attempt reviews.
+        </p>
+      </div>
 
       {!isDraft && (
         <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm font-medium leading-6 text-sky-950">
@@ -295,6 +297,6 @@ export default async function EditMockTestQuestionPage({
         marks={currentMarks}
         negativeMarks={currentNegativeMarks}
       />
-    </main>
+    </div>
   );
 }

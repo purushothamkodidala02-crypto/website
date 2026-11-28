@@ -52,22 +52,23 @@ export default async function EditGroupPage({
   const exams = examsResult.data ?? [];
 
   return (
-    <main>
-      <Link
-        href="/admin/groups"
-        className="text-sm font-medium text-gray-600 hover:text-black"
-      >
-        ← Back to Exams
-      </Link>
+    <div className="space-y-5">
+      <div>
+        <Link
+          href="/admin/groups"
+          className="text-sm font-semibold text-teal-800 hover:underline"
+        >
+          ← Back to Exams
+        </Link>
 
-      <div className="mt-6">
-        <h1 className="text-3xl font-bold">
-          Edit Exam
-        </h1>
-
-        <p className="mt-2 text-gray-600">
-          Set up Specialisations and their Papers from this one Exam workspace.
-        </p>
+        <div className="mt-3 border-b border-slate-200/80 pb-4">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            Edit Exam
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Set up Specialisations and their Papers from this Exam workspace.
+          </p>
+        </div>
       </div>
 
       <EditGroupForm group={group} exams={exams} />
@@ -86,6 +87,6 @@ export default async function EditGroupPage({
           isActive: paper.is_active,
         }))}
       />
-    </main>
+    </div>
   );
 }

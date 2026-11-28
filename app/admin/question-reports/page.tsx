@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ReportAdminForm } from "./ReportAdminForm";
 import { QuestionPreviewDrawer } from "./QuestionPreviewDrawer";
@@ -105,7 +106,8 @@ export default async function AdminQuestionReportsPage({
   searchParams: Promise<{ status?: string; category?: string; q?: string; sort?: string }>;
 }) {
   const query = await searchParams;
-  const admin = createAdminClient();
+  const supabase = await createClient();
+  const admin = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
   const sortAsc = query.sort === "oldest";
 
   const { cutoffDate, cutoffMs } = getRetentionCutoff(15);
@@ -426,16 +428,12 @@ export default async function AdminQuestionReportsPage({
 
   return (
     <div className="space-y-6">
-      {/* Header section with brand context and top actions */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-teal-500" />
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-800">Quality assurance & feedback</p>
-          </div>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-black text-slate-950">Question reports</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
-            Review and triage issues reported by students, inspect assigned mock tests and question numbers, verify question content and answer keys, and record resolutions.
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">Quality assurance &amp; feedback</p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">Question reports</h1>
+          <p className="mt-1 max-w-3xl text-sm text-slate-600">
+            Review student-reported issues, inspect mock test assignments, and record resolutions.
           </p>
         </div>
 
@@ -443,13 +441,15 @@ export default async function AdminQuestionReportsPage({
           <ExportReportsButton reports={exportRows} />
           <Link
             href="/admin/questions"
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 text-center whitespace-nowrap"
+            prefetch={false}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 text-center whitespace-nowrap"
           >
             Question Bank
           </Link>
           <Link
             href="/admin/similarity"
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 text-center whitespace-nowrap"
+            prefetch={false}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 text-center whitespace-nowrap"
           >
             Similarity scanner
           </Link>
@@ -464,10 +464,10 @@ export default async function AdminQuestionReportsPage({
           className="group rounded-xl border border-rose-200/70 bg-rose-50/30 p-3.5 shadow-2xs transition hover:bg-rose-50/50 min-w-0"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-medium text-rose-800/90 leading-snug break-words">Action Required</p>
+            <p className="text-xs font-semibold text-rose-800/90 leading-snug break-words">Action Required</p>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
-            <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-rose-950">{counts.open}</p>
+            <p className="admin-stat text-2xl sm:text-3xl font-bold tracking-tight text-rose-950">{counts.open}</p>
             <span className="text-xs font-medium text-rose-700/80">open reports</span>
           </div>
           <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
@@ -481,10 +481,10 @@ export default async function AdminQuestionReportsPage({
           className="group rounded-xl border border-amber-200/70 bg-amber-50/30 p-3.5 shadow-2xs transition hover:bg-amber-50/50 min-w-0"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-medium text-amber-800/90 leading-snug break-words">Under Review</p>
+            <p className="text-xs font-semibold text-amber-800/90 leading-snug break-words">Under Review</p>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
-            <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-amber-950">{counts.reviewing}</p>
+            <p className="admin-stat text-2xl sm:text-3xl font-bold tracking-tight text-amber-950">{counts.reviewing}</p>
             <span className="text-xs font-medium text-amber-700/80">in triage</span>
           </div>
           <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
@@ -498,10 +498,10 @@ export default async function AdminQuestionReportsPage({
           className="group rounded-xl border border-emerald-200/70 bg-emerald-50/30 p-3.5 shadow-2xs transition hover:bg-emerald-50/50 min-w-0"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-medium text-emerald-800/90 leading-snug break-words">Resolved (≤15d)</p>
+            <p className="text-xs font-semibold text-emerald-800/90 leading-snug break-words">Resolved (≤15d)</p>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
-            <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-emerald-950">{counts.resolved}</p>
+            <p className="admin-stat text-2xl sm:text-3xl font-bold tracking-tight text-emerald-950">{counts.resolved}</p>
             <span className="text-xs font-medium text-emerald-700/80">last 15 days</span>
           </div>
           <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
@@ -512,13 +512,13 @@ export default async function AdminQuestionReportsPage({
         {/* Total & Resolution Rate */}
         <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 shadow-2xs min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-1 min-w-0">
-            <p className="text-xs font-medium text-slate-500 leading-snug break-words">Active Queue</p>
-            <span className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700 shrink-0">
+            <p className="text-xs font-semibold text-slate-600 leading-snug break-words">Active Queue</p>
+            <span className="admin-stat rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-700 shrink-0">
               {resolutionRate}% Closed
             </span>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
-            <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-900">{counts.total}</p>
+            <p className="admin-stat text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">{counts.total}</p>
             <span className="text-xs font-medium text-slate-500">active reports</span>
           </div>
           <p className="mt-1 text-[11px] font-medium text-slate-500 leading-snug break-words">
@@ -578,11 +578,8 @@ export default async function AdminQuestionReportsPage({
           <p className="mt-1 text-xs opacity-90">Please refresh this page or try again in a few moments.</p>
         </div>
       ) : reports.length === 0 ? (
-        <section className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-600">
-            📋
-          </div>
-          <h2 className="mt-4 text-xl font-black text-slate-950">
+        <section className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <h2 className="text-lg font-bold text-slate-950">
             {isArchiveView ? "No archived reports" : "No matching reports"}
           </h2>
           <p className="mt-2 text-sm text-slate-600">
@@ -643,7 +640,7 @@ export default async function AdminQuestionReportsPage({
             return (
               <article
                 key={report.id}
-                className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-2xs transition hover:border-slate-300"
+                className="admin-card-deferred rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-2xs transition hover:border-slate-300"
               >
                 {/* Top card bar: Badges, subject, and Open question action */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3.5">
@@ -668,6 +665,7 @@ export default async function AdminQuestionReportsPage({
                   {/* Primary question edit action button */}
                   <Link
                     href={`/admin/questions/${report.question_id}/edit`}
+                    prefetch={false}
                     className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs transition w-full sm:w-auto shrink-0 text-center"
                   >
                     Open question →
