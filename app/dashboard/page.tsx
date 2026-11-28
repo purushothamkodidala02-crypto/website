@@ -426,15 +426,10 @@ export default async function Dashboard({
                     </p>
                   )}
                 </div>
-                {studyStreak > 0 ? (
+                {studyStreak > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold text-amber-900 shrink-0 shadow-2xs">
                     <span>🔥</span>
                     <span>{studyStreak}-Day Streak</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/80 bg-teal-50 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-teal-800 shrink-0">
-                    <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
-                    Active Prep
                   </span>
                 )}
                 {page > 1 && (

@@ -464,7 +464,7 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
   const currentIndex = Number.isInteger(requestedItem) ? Math.min(Math.max(requestedItem - 1, 0), Math.max(filteredRows.length - 1, 0)) : 0;
 
   return (
-    <main className="student-page min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
+    <main className="student-page min-h-screen bg-[#f6faf8] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
       <div className="mx-auto max-w-7xl 2xl:max-w-[90rem] px-4 py-4 sm:px-6 lg:py-6">
         {/* Top bar: Back link and View Switcher Tabs */}
@@ -480,20 +480,20 @@ export default async function StudyBookPage({ searchParams }: { searchParams: Pr
         </div>
 
         {/* Compact revision banner */}
-        <section className="mt-3 rounded-2xl bg-gradient-to-br from-[#0a2922] via-[#0e3a30] to-[#144d40] p-4 sm:p-5 text-white sm:rounded-3xl shadow-sm border border-emerald-900/40">
+        <section className="mt-3 rounded-2xl border border-[#cfe2db] bg-gradient-to-br from-[#ebf4f1] via-[#f5faf8] to-[#edf6f3] p-4 sm:p-5 text-[#132621] sm:rounded-3xl shadow-2xs">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] text-teal-300">Personal revision</p>
-              <h1 className="mt-0.5 text-xl sm:text-2xl lg:text-3xl font-black">Mistake Book and Bookmarks</h1>
-              <p className="mt-1 text-xs sm:text-sm text-slate-300">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] text-[#0f766e]">Personal revision</p>
+              <h1 className="mt-0.5 text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-[#132621]">Mistake Book and Bookmarks</h1>
+              <p className="mt-1 text-xs sm:text-sm text-[#4b635c]">
                 {view === "bookmarks"
                   ? "Questions you bookmarked for review. Analyze solutions and master concepts side-by-side."
                   : "Questions you answered incorrectly are collected here automatically with complete explanations."}
               </p>
             </div>
-            <div className="rounded-xl border border-emerald-800/40 bg-[#071f1a]/90 px-3.5 py-1.5 sm:py-2 text-center">
-              <span className="block text-lg sm:text-2xl font-black text-teal-300">{filteredRows.length}</span>
-              <span className="block text-[10px] sm:text-[11px] font-bold text-slate-400">
+            <div className="shrink-0 rounded-xl border border-[#d4e4de] bg-white px-3.5 py-1.5 sm:px-4 sm:py-2 text-center shadow-2xs min-w-[78px]">
+              <span className="block text-lg sm:text-2xl font-black tabular-nums text-[#0f766e]">{filteredRows.length}</span>
+              <span className="block text-[10px] sm:text-[11px] font-bold text-[#526862]">
                 {view === "bookmarks" ? "Bookmarks" : "Mistakes"}
               </span>
             </div>

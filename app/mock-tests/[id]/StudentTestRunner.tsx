@@ -1328,52 +1328,6 @@ export function StudentTestRunner({
                 </button>
               </div>
             </div>
-
-            {/* Quick Next / Prev Action Bar inside Question Card for Mobile & Touch */}
-            <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 md:hidden">
-              <button
-                type="button"
-                onClick={() => setIndex((value) => Math.max(0, value - 1))}
-                disabled={index === 0 || locked}
-                className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-30 active:scale-95 transition"
-                title="Previous question"
-              >
-                <span className="text-sm font-bold">←</span>
-                <span>Prev</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setNavigatorOpen(true)}
-                className="flex items-center gap-1 rounded-xl bg-teal-50 border border-teal-200/80 px-2.5 py-2 text-xs font-bold text-teal-900 shadow-2xs hover:bg-teal-100 active:scale-95 transition"
-                title="View all questions"
-              >
-                <span>Q {index + 1}/{questions.length}</span>
-              </button>
-
-              {index === questions.length - 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setConfirming(true)}
-                  disabled={locked}
-                  className="flex items-center gap-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 px-4 py-2 text-xs font-black text-white shadow-sm disabled:opacity-50 active:scale-95 transition"
-                >
-                  <span>Submit test</span>
-                  <span className="text-sm font-bold">✓</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIndex((value) => Math.min(questions.length - 1, value + 1))}
-                  disabled={locked}
-                  className="flex items-center gap-1.5 rounded-xl bg-[#0a2922] hover:bg-[#11382f] px-4 py-2 text-xs font-bold text-white shadow-sm disabled:opacity-50 active:scale-95 transition"
-                  title="Save and move to next question"
-                >
-                  <span>Save &amp; next</span>
-                  <span className="text-sm font-bold">→</span>
-                </button>
-              )}
-            </div>
           </section>
 
           {remaining === 0 && <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Time is up. Your saved answers are being submitted.</p>}
