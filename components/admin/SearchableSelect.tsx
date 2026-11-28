@@ -85,7 +85,7 @@ export function SearchableSelect({
   const displayValue = open ? query : (selected?.label ?? (value ? query : ""));
 
   return (
-    <div ref={containerRef} className="relative mt-2">
+    <div ref={containerRef} className="relative mt-1.5 w-full min-w-0">
       <input type="hidden" name={name} value={value} />
       <input
         ref={inputRef}
@@ -151,7 +151,7 @@ export function SearchableSelect({
           }
         }}
         placeholder={placeholder}
-        className={`w-full rounded-xl border py-3 pl-4 ${value && !disabled ? "pr-16" : "pr-12"} font-normal outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100`}
+        className={`w-full min-h-[42px] rounded-xl border border-slate-300 bg-white py-2.5 pl-3.5 text-sm ${value && !disabled ? "pr-16" : "pr-11"} font-normal text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100`}
       />
       {value && !disabled && (
         <button

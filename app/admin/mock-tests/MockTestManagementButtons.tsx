@@ -247,6 +247,7 @@ export function MockTestManagementButtons({
         pending={pending}
         onClick={() => run("clear-all-attempts")}
         label="Clear attempts & restore draft"
+        fullWidthMobile={true}
         className="border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 hover:text-amber-950"
       />
     ) : null;
@@ -275,6 +276,7 @@ export function MockTestManagementButtons({
             pending={pending}
             onClick={() => run("restore")}
             label="Restore as draft"
+            fullWidthMobile={true}
             className="border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
           />
           {clearAdminBtn}
@@ -334,6 +336,7 @@ export function MockTestManagementButtons({
             disabled={!ready}
             onClick={() => openPublishDialog("publish")}
             label={ready ? "Publish" : "Not ready"}
+            fullWidthMobile={hasAttempts}
             className="border border-emerald-700/90 bg-emerald-700 text-white hover:bg-emerald-800 active:bg-emerald-900"
           />
           {clearAdminBtn}
@@ -399,9 +402,9 @@ export function MockTestManagementButtons({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-3 sm:p-4 backdrop-blur-xs"
         >
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-teal-700">
@@ -528,7 +531,7 @@ function ActionButton({
       onClick={handleClick}
       disabled={isBusy || disabled}
       aria-busy={isBusy}
-      className={`w-full sm:w-auto inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-2xs transition disabled:cursor-not-allowed disabled:opacity-45 ${
+      className={`w-full sm:w-auto min-h-[38px] inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-center shadow-2xs transition disabled:cursor-not-allowed disabled:opacity-45 ${
         fullWidthMobile ? "col-span-2 sm:col-span-1" : ""
       } ${className}`}
     >

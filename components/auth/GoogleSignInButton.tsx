@@ -23,7 +23,7 @@ type GoogleIdentityApi = {
       }) => void;
       renderButton: (
         parent: HTMLElement,
-        options: { theme: "outline"; size: "large"; width: number; text: "continue_with" },
+        options: { theme: "outline" | "filled_blue" | "filled_black"; size: "large"; width: number; text: "continue_with"; shape?: "rectangular" | "pill" },
       ) => void;
     };
   };
@@ -71,7 +71,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
       });
 
       if (signInError) {
-        setError("Google sign-in is temporarily unavailable. Use email sign-in or try again shortly.");
+        setError("Google sign-in is temporarily unavailable. Please try again shortly.");
         setPending(false);
         return;
       }
@@ -103,11 +103,12 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",
         size: "large",
+        shape: "pill",
         width: Math.max(220, Math.min(400, Math.floor(buttonRef.current.getBoundingClientRect().width))),
         text: "continue_with",
       });
     }).catch(() => {
-      setError("Google sign-in could not be prepared. Please use email sign-in or try again shortly.");
+      setError("Google sign-in could not be prepared. Please refresh and try again shortly.");
     });
 
     return () => {
@@ -125,12 +126,12 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
         onReady={() => {
           setScriptReady(true);
         }}
-        onError={() => setError("Google sign-in could not load. Please use email sign-in or try again shortly.")}
+        onError={() => setError("Google sign-in could not load. Check your connection and refresh to try again.")}
       />
-      <div className="relative mx-auto min-h-11 w-full max-w-[400px]">
+      <div className="relative min-h-11 w-full max-w-[400px]">
         <div
           ref={buttonRef}
-          className={`flex min-h-11 w-full items-center justify-center overflow-hidden transition-opacity duration-150 ${
+          className={`flex min-h-11 w-full items-center justify-start overflow-hidden transition-opacity duration-150 ${
             pending ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           aria-hidden={pending}
@@ -140,7 +141,7 @@ export function GoogleSignInButton({ nextPath }: { nextPath: string }) {
             role="status"
             aria-live="polite"
             aria-busy="true"
-            className="absolute inset-0 flex items-center justify-center gap-2.5 rounded-lg border border-teal-200 bg-teal-50/75 px-4 text-sm font-semibold text-teal-950 shadow-2xs"
+            className="absolute inset-0 flex items-center justify-center gap-2.5 rounded-full border border-teal-200 bg-teal-50/75 px-4 text-sm font-semibold text-teal-950 shadow-2xs"
           >
             <progress aria-label="Signing in with Google" className="loading-spinner loading-spinner-sm" />
             <span>Signing in with Google…</span>

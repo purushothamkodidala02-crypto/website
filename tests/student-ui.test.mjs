@@ -198,25 +198,22 @@ test("student screens adapt cleanly across narrow, split-screen, and notched vie
   assert.match(studyViewer, /flex min-w-0 flex-wrap items-center/);
 });
 
-test("login page follows modern autofill, mobile-first order, and shared email switching", async () => {
-  const [loginPage, loginForm, emailOtpForm, passwordInput, googleButton] = await Promise.all([
+test("login page keeps Google-only sign-in, mobile-first order, and Soft Sage Mist banner", async () => {
+  const [loginPage, loginForm, emailOtpForm, googleButton] = await Promise.all([
     read("app/login/page.tsx"),
     read("app/login/LoginForm.tsx"),
     read("app/login/EmailOtpLoginForm.tsx"),
-    read("components/auth/PasswordInput.tsx"),
     read("components/auth/GoogleSignInButton.tsx"),
   ]);
 
   assert.match(loginPage, /order-1 md:order-2/);
   assert.match(loginPage, /order-2 md:order-1/);
-  assert.match(loginForm, /autoComplete="username"/);
-  assert.match(loginForm, /spellCheck=\{false\}/);
-  assert.match(loginForm, /autoComplete="current-password"/);
-  assert.match(loginForm, /enterKeyHint="done"/);
-  assert.match(loginForm, /onEmailChange=\{setEmail\}/);
+  assert.match(loginPage, /from-\[#ebf4f1\]/);
+  assert.doesNotMatch(loginPage, /6-digit email code/);
+  assert.match(loginForm, /GoogleSignInButton/);
+  assert.doesNotMatch(loginForm, /loginWithPassword|EmailOtpLoginForm/);
   assert.match(emailOtpForm, /autoComplete="username"/);
   assert.match(emailOtpForm, /spellCheck=\{false\}/);
-  assert.match(passwordInput, /min-h-12/);
   assert.match(googleButton, /Math\.max\(220,/);
 });
 

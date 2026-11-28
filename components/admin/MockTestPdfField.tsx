@@ -34,9 +34,9 @@ export function MockTestPdfField({
   const activePreviewUrl = remove ? "" : url.trim();
 
   return (
-    <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+    <div className="min-w-0 md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-bold text-slate-900">
             Question Paper / Previous Paper PDF{" "}
             <span className="font-normal text-slate-500">(optional)</span>
@@ -60,8 +60,8 @@ export function MockTestPdfField({
 
       <input type="hidden" name="remove_pdf" value={remove ? "1" : "0"} />
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <div>
+      <div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2">
+        <div className="min-w-0">
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-600">
             Upload PDF file
             <input
@@ -94,11 +94,11 @@ export function MockTestPdfField({
                 setSelectedFileName(`${file.name} (${formatPdfSize(file.size)})`);
                 setRemove(false);
               }}
-              className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white hover:file:bg-slate-800"
+              className="mt-2 block w-full max-w-full overflow-hidden text-ellipsis rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-normal text-slate-700 file:mr-2.5 file:rounded-lg file:border-0 file:bg-slate-900 file:px-2.5 file:py-1.5 file:text-xs file:font-bold file:text-white hover:file:bg-slate-800"
             />
           </label>
           {selectedFileName && (
-            <p className="mt-1.5 text-xs font-semibold text-teal-800">
+            <p className="mt-1.5 text-xs font-semibold text-teal-800 break-all">
               Selected: {selectedFileName}
             </p>
           )}
@@ -109,7 +109,7 @@ export function MockTestPdfField({
           )}
         </div>
 
-        <div>
+        <div className="min-w-0">
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-600">
             Or paste PDF URL / site path
             <input

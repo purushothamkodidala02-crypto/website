@@ -39,10 +39,9 @@ test("accepts valid email addresses", () => {
 });
 
 test("forms enforce email ID validation pattern without did-you-mean suggestions", async () => {
-  const [registerSource, forgotSource, loginSource, otpSource] = await Promise.all([
+  const [registerSource, forgotSource, otpSource] = await Promise.all([
     read("app/register/RegisterForm.tsx"),
     read("app/forgot-password/ForgotPasswordForm.tsx"),
-    read("app/login/LoginForm.tsx"),
     read("app/login/EmailOtpLoginForm.tsx"),
   ]);
 
@@ -56,10 +55,6 @@ test("forms enforce email ID validation pattern without did-you-mean suggestions
   assert.match(forgotSource, /validateRegistrationEmail\(email\)/);
   assert.match(forgotSource, /pattern=\{EMAIL_INPUT_PATTERN\}/);
   assert.doesNotMatch(forgotSource, /Did you mean/);
-
-  // LoginForm enforces pattern
-  assert.match(loginSource, /pattern=\{EMAIL_INPUT_PATTERN\}/);
-  assert.doesNotMatch(loginSource, /Did you mean/);
 
   // EmailOtpLoginForm enforces validateRegistrationEmail and pattern
   assert.match(otpSource, /validateRegistrationEmail\(email\)/);

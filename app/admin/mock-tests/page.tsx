@@ -163,10 +163,10 @@ export default async function MockTestsPage({
               Configure papers, assign questions, and publish mock test series.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 sm:shrink-0">
             <a
               href="#create-mock-test"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-2xs transition hover:bg-slate-800 active:bg-slate-950"
+              className="w-full sm:w-auto inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-2xs transition hover:bg-slate-800 active:bg-slate-950"
             >
               <span className="text-sm leading-none">+</span> Create Mock Test
             </a>
@@ -174,22 +174,22 @@ export default async function MockTestsPage({
         </div>
 
         {/* Executive KPI Stats Bar */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
-            <span className="text-xs font-semibold text-slate-500">Total Mock Tests</span>
-            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-slate-950">{tests.length}</p>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+          <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:p-3.5 shadow-2xs">
+            <span className="block text-[11px] sm:text-xs font-semibold text-slate-500">Total Mock Tests</span>
+            <p className="admin-stat mt-1 text-xl sm:text-2xl font-bold tracking-tight text-slate-950">{tests.length}</p>
           </div>
-          <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/35 p-3.5 shadow-2xs">
-            <span className="text-xs font-semibold text-emerald-800">Published (Live)</span>
-            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-emerald-950">{publishedCount}</p>
+          <div className="min-w-0 rounded-xl border border-emerald-200/80 bg-emerald-50/35 p-3 sm:p-3.5 shadow-2xs">
+            <span className="block text-[11px] sm:text-xs font-semibold text-emerald-800">Published (Live)</span>
+            <p className="admin-stat mt-1 text-xl sm:text-2xl font-bold tracking-tight text-emerald-950">{publishedCount}</p>
           </div>
-          <div className="rounded-xl border border-amber-200/80 bg-amber-50/35 p-3.5 shadow-2xs">
-            <span className="text-xs font-semibold text-amber-800">Drafts</span>
-            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-amber-950">{draftCount}</p>
+          <div className="min-w-0 rounded-xl border border-amber-200/80 bg-amber-50/35 p-3 sm:p-3.5 shadow-2xs">
+            <span className="block text-[11px] sm:text-xs font-semibold text-amber-800">Drafts</span>
+            <p className="admin-stat mt-1 text-xl sm:text-2xl font-bold tracking-tight text-amber-950">{draftCount}</p>
           </div>
-          <div className="rounded-xl border border-sky-200/80 bg-sky-50/35 p-3.5 shadow-2xs">
-            <span className="text-xs font-semibold text-sky-800">States Covered</span>
-            <p className="admin-stat mt-1 text-2xl font-bold tracking-tight text-sky-950">{states.length}</p>
+          <div className="min-w-0 rounded-xl border border-sky-200/80 bg-sky-50/35 p-3 sm:p-3.5 shadow-2xs">
+            <span className="block text-[11px] sm:text-xs font-semibold text-sky-800">States Covered</span>
+            <p className="admin-stat mt-1 text-xl sm:text-2xl font-bold tracking-tight text-sky-950">{states.length}</p>
           </div>
         </div>
       </div>
@@ -217,38 +217,25 @@ export default async function MockTestsPage({
       )}
 
       {/* Create New Mock Test Section */}
-      <section id="create-mock-test" className="scroll-mt-20 rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-        <div className="border-b border-slate-100 px-6 py-5 bg-slate-50/60">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            <span>New Test Series</span>
-          </div>
-          <h2 className="mt-1 text-lg sm:text-xl font-bold text-slate-900">
-            Create Mock Test
-          </h2>
-          <p className="mt-0.5 text-xs sm:text-sm text-slate-600">
-            Select the state, exam, and paper to automatically calculate the next series number and configure duration and question targets.
-          </p>
-        </div>
-        <div className="px-6 py-6 sm:px-8 sm:py-7">
-          <CreateMockTestForm
-            states={states}
-            categories={categoryOptions}
-            exams={examOptions}
-            specializations={specializationOptions}
-            papers={paperOptions}
-            subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))}
-            sections={sections.filter((s) => s.is_active !== false).map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))}
-            existingSeries={tests
-              .filter((test) => !test.superseded_by_mock_test_id)
-              .map((test) => ({
-                paperId: test.paper_id,
-                subjectId: test.subject_id,
-                subjectSectionId: test.subject_section_id,
-                scope: test.test_scope as "paper" | "subject",
-                seriesNumber: Number(test.series_number ?? 1),
-              }))}
-          />
-        </div>
-      </section>
+      <div id="create-mock-test" className="scroll-mt-20">
+        <CreateMockTestForm
+          states={states}
+          categories={categoryOptions}
+          exams={examOptions}
+          specializations={specializationOptions}
+          papers={paperOptions}
+          subjects={subjects.map((item) => ({ id: item.id, paperId: item.paper_id, name: item.name }))}
+          sections={sections.filter((s) => s.is_active !== false).map((s) => ({ id: s.id, subjectId: s.subject_id, name: s.name, slug: s.slug }))}
+          existingSeries={tests
+            .filter((test) => !test.superseded_by_mock_test_id)
+            .map((test) => ({
+              paperId: test.paper_id,
+              subjectId: test.subject_id,
+              subjectSectionId: test.subject_section_id,
+              scope: test.test_scope as "paper" | "subject",
+              seriesNumber: Number(test.series_number ?? 1),
+            }))}
+        />
+      </div>
   </div>;
 }

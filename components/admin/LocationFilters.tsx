@@ -30,8 +30,8 @@ export function LocationFilters({ categories, exams, specializations = [], paper
   const columns = includeSubjects ? "xl:grid-cols-5" : "lg:grid-cols-4";
 
   return (
-    <div className={`grid items-end gap-3 ${columns}`}>
-      <label className="block text-sm font-bold">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 min-w-0 items-end gap-3 ${columns}`}>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">
         Recruiting Board
         <SearchableSelect
           value={value.categoryId}
@@ -43,7 +43,7 @@ export function LocationFilters({ categories, exams, specializations = [], paper
           placeholder="Search a recruiting board"
         />
       </label>
-      <label className="block text-sm font-bold">
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">
         Exam
         <SearchableSelect
           value={value.examId}
@@ -57,7 +57,7 @@ export function LocationFilters({ categories, exams, specializations = [], paper
           emptyMessage="No Exams under this recruiting board."
         />
       </label>
-      <label className="block text-sm font-bold">
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">
         Specialisation <span className="whitespace-nowrap font-normal text-slate-500">(optional)</span>
         <SearchableSelect
           value={value.specializationId}
@@ -74,7 +74,7 @@ export function LocationFilters({ categories, exams, specializations = [], paper
           emptyMessage="No Specialisations in this Exam."
         />
       </label>
-      <label className="block text-sm font-bold">
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">
         Paper
         <SearchableSelect
           value={value.paperId}
@@ -89,7 +89,7 @@ export function LocationFilters({ categories, exams, specializations = [], paper
         />
       </label>
       {includeSubjects && (
-        <label className="block text-sm font-bold">
+        <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">
           Subject
           <SearchableSelect
             value={value.subjectId}

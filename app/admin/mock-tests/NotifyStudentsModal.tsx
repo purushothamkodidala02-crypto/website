@@ -130,7 +130,7 @@ export function NotifyStudentsModal({
       <button
         type="button"
         onClick={handleOpen}
-        className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-2xs transition ${
+        className={`col-span-2 sm:col-span-1 w-full sm:w-auto min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-2xs transition ${
           hasNotificationHistory
             ? "border border-sky-200/80 bg-sky-50/50 text-sky-800 hover:bg-sky-100/60 hover:border-sky-300"
             : isDraft
@@ -171,9 +171,9 @@ export function NotifyStudentsModal({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-3 sm:p-4 backdrop-blur-xs"
         >
-          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="max-h-[90dvh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-100 pb-4">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.14em] text-teal-700">

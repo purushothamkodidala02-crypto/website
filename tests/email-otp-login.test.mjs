@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("email OTP login keeps password login and protects OTP requests", async () => {
+test("login screen keeps only Google sign-in while OTP backend routes remain protected", async () => {
   const [login, otp, guide, migration, requestRoute, verifyRoute, callbackRoute, sender] = await Promise.all([
     read("app/login/LoginForm.tsx"),
     read("app/login/EmailOtpLoginForm.tsx"),
@@ -15,8 +15,9 @@ test("email OTP login keeps password login and protects OTP requests", async () 
     read("app/auth/email-otp/callback/route.ts"),
     read("lib/auth/custom-email-otp.ts"),
   ]);
-  assert.match(login, /Sign in using a six-digit email code/);
-  assert.match(login, /EmailOtpLoginForm/);
+  assert.match(login, /GoogleSignInButton/);
+  assert.doesNotMatch(login, /EmailOtpLoginForm/);
+  assert.doesNotMatch(login, /PasswordInput/);
   assert.match(otp, /\/api\/auth\/email-otp\/request/);
   assert.match(otp, /captchaToken/);
   assert.match(otp, /\/api\/auth\/email-otp\/verify/);

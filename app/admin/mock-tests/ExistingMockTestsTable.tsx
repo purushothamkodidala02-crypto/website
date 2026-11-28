@@ -386,25 +386,25 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
   return (
     <section className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
       {/* Header & Status Segmented Tabs */}
-      <div className="border-b border-slate-200/80 bg-slate-50/50 px-5 py-5 sm:px-7">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+      <div className="border-b border-slate-200/80 bg-slate-50/50 p-4 sm:px-6 sm:py-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-700">
               <span>Test Directory</span>
             </div>
-            <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900">
+            <h2 className="mt-1 text-lg sm:text-xl font-bold tracking-tight text-slate-900">
               All Mock Tests
             </h2>
             <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
               Filter by examination hierarchy, manage question assignments, and control student access.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:shrink-0">
             <button
               type="button"
               disabled={isSyncing}
               onClick={handleSyncTitles}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
+              className="w-full sm:w-auto min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
               title="Update all mock test titles in the database to the canonical standard format"
             >
               <span>⚙</span>
@@ -420,7 +420,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
         )}
 
         {/* Clean Status Tabs & Workspace Quick Views */}
-        <div className="mt-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div className="mt-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 sm:gap-3">
           <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center p-1 rounded-xl bg-slate-200/60 border border-slate-200">
             {([
               ["all", "All Tests", counts.all],
@@ -437,7 +437,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     setStatus(value);
                     setQuickPreset("all");
                   }}
-                  className={`flex items-center justify-center sm:justify-start gap-2 rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-semibold transition ${
+                  className={`flex items-center justify-center sm:justify-start gap-1.5 rounded-lg px-2.5 py-2 sm:px-3.5 sm:py-1.5 text-xs font-semibold whitespace-nowrap transition ${
                     isActive
                       ? "bg-white text-slate-900 shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
@@ -459,7 +459,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </div>
 
           {/* Saved Filter Presets */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-1 rounded-xl">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-1.5 sm:p-1 rounded-xl">
             <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 px-2 hidden sm:inline">
               ⚡ Quick Views:
             </span>
@@ -469,7 +469,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                 setQuickPreset((prev) => (prev === "needs-questions" ? "all" : "needs-questions"));
                 setStatus("draft");
               }}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+              className={`inline-flex flex-1 basis-[155px] sm:flex-initial min-h-[36px] items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition ${
                 quickPreset === "needs-questions"
                   ? "bg-amber-600 text-white shadow-2xs"
                   : "border border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100"
@@ -486,7 +486,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                 setQuickPreset((prev) => (prev === "ready-to-publish" ? "all" : "ready-to-publish"));
                 setStatus("draft");
               }}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+              className={`inline-flex flex-1 basis-[155px] sm:flex-initial min-h-[36px] items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition ${
                 quickPreset === "ready-to-publish"
                   ? "bg-emerald-700 text-white shadow-2xs"
                   : "border border-emerald-200 bg-emerald-50/80 text-emerald-900 hover:bg-emerald-100"
@@ -502,17 +502,17 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="border-b border-slate-200/80 bg-white px-5 py-5 sm:px-7 space-y-4">
+      <div className="border-b border-slate-200/80 bg-white p-4 sm:px-6 sm:py-5 space-y-3.5 sm:space-y-4">
         {/* State Selection */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-slate-500 mr-1">State:</span>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span className="w-full sm:w-auto text-xs font-semibold text-slate-500 mr-1">State:</span>
           <button
             type="button"
             onClick={() => {
               setStateId("");
               setLocation(emptyLocation);
             }}
-            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+            className={`min-h-[34px] rounded-lg border px-2.5 py-1.5 sm:px-3 text-xs font-semibold transition ${
               !stateId
                 ? "border-slate-900 bg-slate-900 text-white font-semibold shadow-2xs"
                 : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
@@ -530,7 +530,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   setStateId(state.id);
                   setLocation(emptyLocation);
                 }}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                className={`min-h-[34px] inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 sm:px-3 text-xs font-semibold transition ${
                   isSelected
                     ? "border-slate-900 bg-slate-900 text-white font-semibold shadow-2xs"
                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
@@ -556,8 +556,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
         />
 
         {/* Search & Scope Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 pt-0.5">
+          <div className="relative min-w-0 flex-1">
             <svg
               className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none"
               fill="none"
@@ -578,8 +578,8 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   setSearch("");
                 }
               }}
-              placeholder="Search by test title, exam name, paper, subject, or topic (press Enter to add filter)..."
-              className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-9 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
+              placeholder="Search title, exam, paper, subject, or topic..."
+              className="w-full min-h-[42px] rounded-xl border border-slate-300 bg-white pl-10 pr-9 py-2 text-sm sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
             />
             {search && (
               <button
@@ -597,7 +597,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
             <select
               value={scope}
               onChange={(event) => setScope(event.target.value as "all" | "paper" | "subject")}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
+              className="w-full min-h-[42px] rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-teal-600 focus:ring-1 focus:ring-teal-100"
             >
               <option value="all">All scopes (Paper &amp; Subject)</option>
               <option value="paper">Paper-wise only</option>
@@ -786,11 +786,11 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
               return (
                 <article
                   key={test.id}
-                  className="p-5 sm:p-6 transition hover:bg-slate-50/60"
+                  className="p-4 sm:p-6 transition hover:bg-slate-50/60"
                 >
-                  {/* Top Metadata Row */}
-                  <div className="flex items-start justify-between gap-2.5">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
+                  {/* Top Title + Status Header Row */}
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => handleStateClick(test.stateId)}
@@ -812,77 +812,9 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                         {test.stateCode}
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleTagSearch(test.examName)}
-                        title={
-                          isTagActive(test.examName)
-                            ? `Active filter: "${test.examName}". Click to remove.`
-                            : `Search "${test.examName}" across all states`
-                        }
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-slate-100 hover:border-slate-300 active:scale-95 text-left ${
-                          isTagActive(test.examName)
-                            ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                            : "border-slate-200 bg-white text-slate-700"
-                        }`}
-                      >
-                        {test.examName}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleTagSearch(test.paperName)}
-                        title={
-                          isTagActive(test.paperName)
-                            ? `Active filter: "${test.paperName}". Click to remove.`
-                            : `Search "${test.paperName}" across all states`
-                        }
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-teal-100/70 hover:border-teal-300 active:scale-95 text-left ${
-                          isTagActive(test.paperName)
-                            ? "border-teal-700 bg-teal-700 text-white shadow-xs"
-                            : "border-teal-200/70 bg-teal-50/50 text-teal-800"
-                        }`}
-                      >
-                        {test.paperName}
-                      </button>
-
-                      {test.subjectName && (
-                        <button
-                          type="button"
-                          onClick={() => handleTagSearch(test.subjectName!)}
-                          title={
-                            isTagActive(test.subjectName!)
-                              ? `Active filter: "${test.subjectName}". Click to remove.`
-                              : `Search "${test.subjectName}" across all states`
-                          }
-                          className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-indigo-100/70 hover:border-indigo-300 active:scale-95 text-left ${
-                            isTagActive(test.subjectName!)
-                              ? "border-indigo-700 bg-indigo-700 text-white shadow-xs"
-                              : "border-indigo-200/70 bg-indigo-50/50 text-indigo-800"
-                          }`}
-                        >
-                          {test.subjectName}
-                        </button>
-                      )}
-
-                      {test.sectionName && (
-                        <button
-                          type="button"
-                          onClick={() => handleTagSearch(test.sectionName!)}
-                          title={
-                            isTagActive(test.sectionName!)
-                              ? `Active filter: "${test.sectionName}". Click to remove.`
-                              : `Search "${test.sectionName}" across all states`
-                          }
-                          className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-purple-100/70 hover:border-purple-300 active:scale-95 text-left ${
-                            isTagActive(test.sectionName!)
-                              ? "border-purple-700 bg-purple-700 text-white shadow-xs"
-                              : "border-purple-200/70 bg-purple-50/50 text-purple-800"
-                          }`}
-                        >
-                          {test.sectionName}
-                        </button>
-                      )}
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                        {mockTestLabel(test.seriesNumber)}
+                      </h3>
 
                       <button
                         type="button"
@@ -900,26 +832,9 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                       >
                         {test.scope === "paper" ? "Paper-wise" : "Subject-wise"}
                       </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleTagSearch(mockTestLabel(test.seriesNumber))}
-                        title={
-                          isTagActive(mockTestLabel(test.seriesNumber))
-                            ? `Active filter: "${mockTestLabel(test.seriesNumber)}". Click to remove.`
-                            : `Search "${mockTestLabel(test.seriesNumber)}" across all states`
-                        }
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold shrink-0 transition cursor-pointer hover:bg-slate-100 active:scale-95 ${
-                          isTagActive(mockTestLabel(test.seriesNumber))
-                            ? "border-slate-800 bg-slate-800 text-white shadow-xs"
-                            : "border-slate-200 bg-slate-50 text-slate-600"
-                        }`}
-                      >
-                        Series #{test.seriesNumber}
-                      </button>
                     </div>
 
-                    <div className="shrink-0 flex flex-wrap items-center justify-end gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                       {test.supersededByMockTestId && (
                         test.correctedVersionStatus === "published" ? (
                           <span className="rounded-md border border-slate-200/80 bg-slate-100/80 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-slate-700">
@@ -944,18 +859,103 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                     </div>
                   </div>
 
-                  {/* Test Title & Description */}
-                  <div className="mt-2.5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                      {mockTestLabel(test.seriesNumber)}
-                    </h3>
+                  {/* Clickable Taxonomy Chips Row */}
+                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => handleTagSearch(test.examName)}
+                      title={
+                        isTagActive(test.examName)
+                          ? `Active filter: "${test.examName}". Click to remove.`
+                          : `Search "${test.examName}" across all states`
+                      }
+                      className={`max-w-full rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-slate-100 hover:border-slate-300 active:scale-95 text-left ${
+                        isTagActive(test.examName)
+                          ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                          : "border-slate-200 bg-white text-slate-700"
+                      }`}
+                    >
+                      {test.examName}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleTagSearch(test.paperName)}
+                      title={
+                        isTagActive(test.paperName)
+                          ? `Active filter: "${test.paperName}". Click to remove.`
+                          : `Search "${test.paperName}" across all states`
+                      }
+                      className={`max-w-full rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-teal-100/70 hover:border-teal-300 active:scale-95 text-left ${
+                        isTagActive(test.paperName)
+                          ? "border-teal-700 bg-teal-700 text-white shadow-xs"
+                          : "border-teal-200/70 bg-teal-50/50 text-teal-800"
+                      }`}
+                    >
+                      {test.paperName}
+                    </button>
+
+                    {test.subjectName && (
+                      <button
+                        type="button"
+                        onClick={() => handleTagSearch(test.subjectName!)}
+                        title={
+                          isTagActive(test.subjectName!)
+                            ? `Active filter: "${test.subjectName}". Click to remove.`
+                            : `Search "${test.subjectName}" across all states`
+                        }
+                        className={`max-w-full rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-indigo-100/70 hover:border-indigo-300 active:scale-95 text-left ${
+                          isTagActive(test.subjectName!)
+                            ? "border-indigo-700 bg-indigo-700 text-white shadow-xs"
+                            : "border-indigo-200/70 bg-indigo-50/50 text-indigo-800"
+                        }`}
+                      >
+                        {test.subjectName}
+                      </button>
+                    )}
+
+                    {test.sectionName && (
+                      <button
+                        type="button"
+                        onClick={() => handleTagSearch(test.sectionName!)}
+                        title={
+                          isTagActive(test.sectionName!)
+                            ? `Active filter: "${test.sectionName}". Click to remove.`
+                            : `Search "${test.sectionName}" across all states`
+                        }
+                        className={`max-w-full rounded-md border px-2 py-0.5 text-[11px] font-semibold break-words transition cursor-pointer hover:bg-purple-100/70 hover:border-purple-300 active:scale-95 text-left ${
+                          isTagActive(test.sectionName!)
+                            ? "border-purple-700 bg-purple-700 text-white shadow-xs"
+                            : "border-purple-200/70 bg-purple-50/50 text-purple-800"
+                        }`}
+                      >
+                        {test.sectionName}
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleTagSearch(mockTestLabel(test.seriesNumber))}
+                      title={
+                        isTagActive(mockTestLabel(test.seriesNumber))
+                          ? `Active filter: "${mockTestLabel(test.seriesNumber)}". Click to remove.`
+                          : `Search "${mockTestLabel(test.seriesNumber)}" across all states`
+                      }
+                      className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold shrink-0 transition cursor-pointer hover:bg-slate-100 active:scale-95 ${
+                        isTagActive(mockTestLabel(test.seriesNumber))
+                          ? "border-slate-800 bg-slate-800 text-white shadow-xs"
+                          : "border-slate-200 bg-slate-50 text-slate-600"
+                      }`}
+                    >
+                      Series #{test.seriesNumber}
+                    </button>
                   </div>
 
                   {/* Clean Metric Indicators Strip */}
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
-                    <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0">
-                      <span className="text-slate-400">Questions:</span>
-                      <div className="flex items-center gap-1.5">
+                    <div className="min-w-0 col-span-2 sm:col-span-1 flex flex-wrap items-center justify-between sm:justify-start gap-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 px-3 py-2 sm:bg-transparent sm:border-0 sm:p-0">
+                      <span className="text-[11px] sm:text-xs text-slate-500">Questions:</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <span
                           className={`font-semibold ${
                             ready ? "text-emerald-700/90" : "text-amber-700/90"
@@ -970,31 +970,31 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
-                      <span className="text-slate-400">Marks:</span>
-                      <span className="font-semibold font-mono text-slate-800">
+                    <div className="min-w-0 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 px-3 py-2 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
+                      <span className="text-[10px] sm:text-xs text-slate-500">Marks</span>
+                      <span className="font-semibold font-mono text-slate-900">
                         {test.totalMarks.toFixed(2).replace(/\.00$/, "")}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
-                      <span className="text-slate-400">Duration:</span>
-                      <span className="font-semibold font-mono text-slate-800">
+                    <div className="min-w-0 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 px-3 py-2 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
+                      <span className="text-[10px] sm:text-xs text-slate-500">Duration</span>
+                      <span className="font-semibold font-mono text-slate-900">
                         {test.durationMinutes} mins
                       </span>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
-                      <span className="text-slate-400">Attempts:</span>
-                      <span className="font-semibold font-mono text-slate-800">
+                    <div className="min-w-0 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 px-3 py-2 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
+                      <span className="text-[10px] sm:text-xs text-slate-500">Attempts</span>
+                      <span className="font-semibold font-mono text-slate-900 break-words">
                         {test.adminAttemptCount && test.attemptCount === 0
                           ? `0 (${test.adminAttemptCount} admin test)`
                           : test.attemptCount}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-start gap-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-2.5 py-1.5 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
-                      <span className="text-slate-400">Notification:</span>
+                    <div className="min-w-0 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 px-3 py-2 sm:bg-transparent sm:border-0 sm:p-0 text-slate-600">
+                      <span className="text-[10px] sm:text-xs text-slate-500">Notification</span>
                       <span
                         className={`font-semibold ${
-                          test.lastNotifiedAt ? "text-sky-700" : "text-slate-600"
+                          test.lastNotifiedAt ? "text-sky-700" : "text-slate-700"
                         }`}
                       >
                         {test.lastNotifiedAt
@@ -1016,17 +1016,17 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                   )}
 
                   {/* Clean Synchronized Action Toolbar */}
-                  <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 border-t border-slate-100 pt-3.5">
+                  <div className="mt-3.5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 border-t border-slate-100 pt-3.5">
                     <Link
                       href={`/admin/mock-tests/${test.id}/edit?returnTo=${encodeURIComponent(mockTestAdminUrl)}`}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3 py-2 text-xs font-semibold text-slate-800 shadow-2xs transition"
+                      className="w-full sm:w-auto min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 px-3 py-2 text-xs font-semibold text-slate-800 shadow-2xs transition"
                     >
                       Manage test
                     </Link>
 
                     <Link
                       href={`/admin/mock-tests/${test.id}/questions?returnTo=${encodeURIComponent(mockTestAdminUrl)}`}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition"
+                      className="w-full sm:w-auto min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition"
                     >
                       Questions ({test.questionCount})
                     </Link>
@@ -1040,7 +1040,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
                           test.slug
                         )}
                         target="_blank"
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-sky-300 hover:text-sky-700 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition"
+                        className="w-full sm:w-auto min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-sky-300 hover:text-sky-700 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition"
                       >
                         View live ↗
                       </Link>
@@ -1089,7 +1089,7 @@ export function ExistingMockTestsTable({ states, categories, exams, specializati
           </div>
 
           {/* Clean Pagination Footer */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200 bg-slate-50/70 px-5 py-3.5 sm:px-7">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200 bg-slate-50/70 p-4 sm:px-6 sm:py-3.5">
             <p className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
               Showing{" "}
               <span className="font-semibold text-slate-900">

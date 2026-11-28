@@ -205,8 +205,25 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
   function resetAfterExam(value: string) { if (value === examId) return; setExamId(value); setSpecializationId(""); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
   function resetAfterSpecialization(value: string) { if (value === specializationId) return; setSpecializationId(value); setPaperId(""); setSubjectId(""); setSubjectSectionId(""); }
 
-  return <section className="mt-6 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
-    <div className="border-b bg-gradient-to-r from-slate-950 to-teal-950 px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-300 text-slate-950"><MockSymbol /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-teal-200">Guided test creator</p><h2 className="font-display mt-1 text-2xl">Create the next mock in its correct series</h2></div></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Select the location from left to right. Varadhi generates the test number, full name and URL automatically.</p></div>
+  return <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+    <div className="border-b border-slate-200/80 bg-slate-50/70 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="flex items-center gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-teal-200 bg-teal-50 text-teal-800">
+          <MockSymbol />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-800">
+            New Test Series · Guided Creator
+          </p>
+          <h2 className="font-display mt-0.5 text-lg sm:text-xl font-bold text-slate-950">
+            Create Mock Test
+          </h2>
+        </div>
+      </div>
+      <p className="mt-2.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600">
+        Select the state, exam, and paper to calculate the next series number and configure duration and question targets automatically.
+      </p>
+    </div>
     <form
       action={action}
       onSubmit={(e) => {
@@ -216,21 +233,21 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
         }
         setIsSubmitting(true);
       }}
-      className="grid gap-5 p-6 md:grid-cols-2 sm:p-7"
+      className="grid min-w-0 gap-4 p-4 md:grid-cols-2 sm:gap-5 sm:p-6"
     >
-      <label className="block text-sm font-bold">1. State / catalogue
-        <select name="state_id" value={stateId} onChange={(event) => resetAfterState(event.target.value)} className="mt-2 w-full rounded-xl border bg-white px-4 py-3 font-normal">
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">1. State / catalogue
+        <select name="state_id" value={stateId} onChange={(event) => resetAfterState(event.target.value)} className="mt-1.5 w-full min-h-[42px] rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-normal text-slate-900">
           {states.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}
         </select>
       </label>
-      <label className="block text-sm font-bold">2. Recruiting board<SearchableSelect name="exam_id" value={categoryId} onChange={resetAfterCategory} options={availableCategories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose TGPSC, APPSC, DSC…" /></label>
-      <label className="block text-sm font-bold">3. Exam<SearchableSelect name="exam_group_id" value={examId} onChange={resetAfterExam} options={availableExams.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose Executive Officer, Group 2…" disabled={!categoryId} /></label>
-      <label className="block text-sm font-bold">Specialisation <span className="font-normal text-slate-500">(only when applicable)</span><SearchableSelect value={specializationId} onChange={resetAfterSpecialization} options={[{ value: "", label: availableSpecializations.length ? "Common / direct papers" : "No specialisation" }, ...availableSpecializations.map((item) => ({ value: item.id, label: item.name }))]} placeholder="Choose specialisation" disabled={!examId} /></label>
-      <label className="block text-sm font-bold md:col-span-2">4. Paper<SearchableSelect name="paper_id" value={paperId} onChange={(value) => { setPaperId(value); setSubjectId(""); setSubjectSectionId(""); }} options={availablePapers.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose the exact paper" disabled={!examId} emptyMessage="No papers exist in this selection." /></label>
-      <fieldset className="rounded-2xl border bg-slate-50 p-4"><legend className="px-1 text-sm font-bold">Practice coverage</legend><label className="mt-1 flex gap-3 text-sm"><input name="test_scope" type="radio" value="paper" checked={scope === "paper"} onChange={() => { setScope("paper"); setSubjectId(""); setSubjectSectionId(""); }} />Full paper mock</label><label className="mt-3 flex gap-3 text-sm"><input name="test_scope" type="radio" value="subject" checked={scope === "subject"} onChange={() => setScope("subject")} />One subject only</label></fieldset>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">2. Recruiting board<SearchableSelect name="exam_id" value={categoryId} onChange={resetAfterCategory} options={availableCategories.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose TGPSC, APPSC, DSC…" /></label>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">3. Exam<SearchableSelect name="exam_group_id" value={examId} onChange={resetAfterExam} options={availableExams.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose Executive Officer, Group 2…" disabled={!categoryId} /></label>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">Specialisation <span className="font-normal text-slate-500">(only when applicable)</span><SearchableSelect value={specializationId} onChange={resetAfterSpecialization} options={[{ value: "", label: availableSpecializations.length ? "Common / direct papers" : "No specialisation" }, ...availableSpecializations.map((item) => ({ value: item.id, label: item.name }))]} placeholder="Choose specialisation" disabled={!examId} /></label>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800 md:col-span-2">4. Paper<SearchableSelect name="paper_id" value={paperId} onChange={(value) => { setPaperId(value); setSubjectId(""); setSubjectSectionId(""); }} options={availablePapers.map((item) => ({ value: item.id, label: item.name }))} placeholder="Choose the exact paper" disabled={!examId} emptyMessage="No papers exist in this selection." /></label>
+      <fieldset className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4"><legend className="px-1 text-xs sm:text-sm font-bold text-slate-800">Practice coverage</legend><label className="mt-1 flex items-center gap-3 text-sm"><input name="test_scope" type="radio" value="paper" checked={scope === "paper"} onChange={() => { setScope("paper"); setSubjectId(""); setSubjectSectionId(""); }} />Full paper mock</label><label className="mt-2.5 flex items-center gap-3 text-sm"><input name="test_scope" type="radio" value="subject" checked={scope === "subject"} onChange={() => setScope("subject")} />One subject only</label></fieldset>
       {scope === "subject" ? (
-        <div className="space-y-4">
-          <label className="block text-sm font-bold">
+        <div className="min-w-0 space-y-4">
+          <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">
             Subject
             <SearchableSelect
               name="subject_id"
@@ -244,9 +261,9 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
               disabled={!paperId}
             />
           </label>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-sm font-bold">
+          <div className="min-w-0 space-y-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className="block text-xs sm:text-sm font-bold text-slate-800">
                 {SectionKind} / Sub-section <span className="font-normal text-slate-500">(optional)</span>
               </label>
               {subjectId && (
@@ -276,7 +293,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
             {isAddingSection && (
               <div className="mt-2 rounded-xl border border-teal-200 bg-teal-50/70 p-3">
                 <p className="text-xs font-bold text-teal-950">Add new {sectionKind} / sub-section (e.g. {exampleSectionNames})</p>
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   <input
                     type="text"
                     value={newSectionName}
@@ -288,7 +305,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
                       }
                     }}
                     placeholder={exampleSectionPlaceholder}
-                    className="flex-1 rounded-lg border bg-white px-3 py-1.5 text-xs outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-200"
+                    className="min-w-[160px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-200"
                     disabled={isAddingSectionPending}
                     autoFocus
                   />
@@ -339,17 +356,17 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
         </div>
       )}
 
-      <div className="md:col-span-2 rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-50 to-white p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex gap-4">
+      <div className="min-w-0 md:col-span-2 rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-50 to-white p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
             {state && (
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-teal-200">
+              <span className="grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl bg-slate-950 text-teal-200">
                 <StateSymbol slug={state.slug} className="h-5 w-5" />
               </span>
             )}
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[0.13em] text-teal-700">Student-facing name preview</p>
-              <h3 className="font-display mt-1 text-xl">
+              <h3 className="font-display mt-1 text-lg sm:text-xl break-words">
                 {paper
                   ? displayMockTestHeading({
                       subjectName: subject?.name,
@@ -360,7 +377,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
                   : "Choose a paper to generate the name"}
               </h3>
               {paper && (
-                <p className="mt-1 text-sm font-semibold text-slate-600">
+                <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 break-words">
                   {state?.code} · {exam?.name} · {paperSpecialization?.name ?? paper.name}
                   {subject ? ` · ${subject.name}${section ? ` (${section.name})` : ""}` : " · Full Syllabus"}
                 </p>
@@ -368,8 +385,8 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
             </div>
           </div>
           {paper && (
-            <div className="flex flex-col items-end gap-1">
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-teal-800 shadow-sm">
+            <div className="flex flex-col items-start sm:items-end gap-1">
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-teal-800 shadow-sm border border-teal-100">
                 {hasGap
                   ? `Gap filled: Mock Test ${formatMockNumber(firstAvailableSeries)}`
                   : `Next in series: ${firstAvailableSeries}`}
@@ -389,7 +406,7 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
               <p>
                 <strong>Series Gap Detected:</strong> Mock Test {formatMockNumber(firstAvailableSeries)} is missing in this series (e.g. was deleted). We defaulted to Mock Test {formatMockNumber(firstAvailableSeries)} to fill the slot.
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -456,15 +473,15 @@ export function CreateMockTestForm({ states, categories, exams, specializations,
         )}
       </div>
 
-      <label className="block text-sm font-bold md:col-span-2">Description <span className="font-normal text-slate-500">(optional)</span><textarea name="description" rows={3} placeholder="Tell students what this mock covers" className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
-      <label className="block text-sm font-bold">Duration in minutes<input name="duration_minutes" type="number" min="1" required value={durationMinutes} onChange={(e) => { setDurationMinutes(e.target.value); setIsDurationCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /></label>
-      <label className="block text-sm font-bold">Target questions<input name="target_question_count" type="number" min="1" max="500" required value={targetQuestionCount} onChange={(e) => { setTargetQuestionCount(e.target.value); setIsTargetCountCustom(true); }} className="mt-2 w-full rounded-xl border px-4 py-3 font-normal" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800 md:col-span-2">Description <span className="font-normal text-slate-500">(optional)</span><textarea name="description" rows={3} placeholder="Tell students what this mock covers" className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-normal text-slate-900" /></label>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">Duration in minutes<input name="duration_minutes" type="number" min="1" required value={durationMinutes} onChange={(e) => { setDurationMinutes(e.target.value); setIsDurationCustom(true); }} className="mt-1.5 w-full min-h-[42px] rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-normal text-slate-900" /></label>
+      <label className="min-w-0 block text-xs sm:text-sm font-bold text-slate-800">Target questions<input name="target_question_count" type="number" min="1" max="500" required value={targetQuestionCount} onChange={(e) => { setTargetQuestionCount(e.target.value); setIsTargetCountCustom(true); }} className="mt-1.5 w-full min-h-[42px] rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-normal text-slate-900" /><span className="mt-1 block text-xs font-normal text-slate-500">Full-paper mocks inherit the Paper count. Subject mocks can use a custom target.</span></label>
       <MockTestPdfField />
-      <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm md:col-span-2">
+      <label className="min-w-0 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 text-sm md:col-span-2">
         <input name="allow_duplicate_questions" type="checkbox" className="h-4 w-4 shrink-0" />
         <span className="font-bold text-slate-900">Allow duplicates</span>
       </label>
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
+      <div className="min-w-0 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 sm:p-4 text-sm text-emerald-950 md:col-span-2">
         <strong>Student access</strong>
         <div className="mt-3">
           <label className="block text-sm font-semibold">
