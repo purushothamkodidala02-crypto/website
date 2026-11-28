@@ -158,20 +158,11 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
         >
           {/* Header strip */}
           <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-100 bg-slate-50/80 px-3 py-2.5 sm:px-6">
-            <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-0.5 shadow-2xs">
-                <ReviewArrow direction="previous" disabled={index === 0} onClick={() => showQuestion(index - 1)} className="h-9 w-9 sm:h-7 sm:w-7" />
-                <span className="px-2 text-xs font-black uppercase tracking-wider text-slate-700 whitespace-nowrap">
-                  Question {row.question_order} of {rows.length}
-                </span>
-                <ReviewArrow direction="next" disabled={index === rows.length - 1} onClick={() => showQuestion(index + 1)} className="h-9 w-9 sm:h-7 sm:w-7" />
-              </div>
-              <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
-                <QuestionStatus row={row} />
-                <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-bold text-slate-700 whitespace-nowrap">
-                  {row.marks_awarded > 0 ? `+${row.marks_awarded}` : row.marks_awarded} mark{row.marks_awarded === 1 ? "" : "s"}
-                </span>
-              </div>
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5 w-full sm:w-auto">
+              <QuestionStatus row={row} />
+              <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-bold text-slate-700 whitespace-nowrap">
+                {row.marks_awarded > 0 ? `+${row.marks_awarded}` : row.marks_awarded} mark{row.marks_awarded === 1 ? "" : "s"}
+              </span>
             </div>
 
             <div className="flex min-w-0 flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
@@ -406,11 +397,6 @@ function OptionRow({
       )}
     </div>
   );
-}
-
-function ReviewArrow({ direction, disabled, onClick, className = "" }: { direction: "previous" | "next"; disabled: boolean; onClick: () => void; className?: string }) {
-  const previous = direction === "previous";
-  return <button type="button" onClick={onClick} disabled={disabled} aria-label={previous ? "Previous question" : "Next question"} title={previous ? "Previous question (← Arrow)" : "Next question (→ Arrow)"} className={`grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-950 shadow-lg transition-colors hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-30 ${className}`}><svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 fill-none stroke-current stroke-2 ${previous ? "" : "rotate-180"}`}><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>;
 }
 
 function Legend({ tone, label }: { tone: "emerald" | "red"; label: string }) {

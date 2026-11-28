@@ -26,5 +26,7 @@ test("exam review page displays questions and explanations wide and side-by-side
   // 4. Navigation supports previous/next buttons and arrow keys
   assert.match(reviewNavigator, /Previous/);
   assert.match(reviewNavigator, /Next/);
-  assert.match(reviewNavigator, /ReviewArrow/);
+  assert.match(reviewNavigator, /ArrowLeft/);
+  assert.match(reviewNavigator, /ArrowRight/);
+  assert.doesNotMatch(reviewNavigator, /ReviewArrow/);
 });
