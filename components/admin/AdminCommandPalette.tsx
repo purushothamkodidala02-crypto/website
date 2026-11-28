@@ -106,7 +106,7 @@ const COMMANDS: CommandItem[] = [
   },
   {
     id: "nav-results",
-    title: "Results & Analytics",
+    title: "Results & Submissions",
     category: "Navigation",
     description: "Review student test submissions and score performance",
     href: "/admin/results",

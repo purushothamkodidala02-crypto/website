@@ -18,7 +18,7 @@ const PATH_TITLES: Record<string, { parent?: string; title: string }> = {
   "/admin/exam-pages": { parent: "Curriculum", title: "Public Pages" },
   "/admin/access": { parent: "Commerce", title: "Exam Series & Access" },
   "/admin/students": { parent: "Users", title: "Registrations & Sales" },
-  "/admin/results": { parent: "Assessments", title: "Results & Analytics" },
+  "/admin/results": { parent: "Assessments", title: "Results & Submissions" },
   "/admin/surveys": { parent: "Feedback", title: "Student Surveys & Feedback" },
 };
 
