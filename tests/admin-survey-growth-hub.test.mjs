@@ -45,15 +45,18 @@ test("growth-settings actions.ts persists validity extension settings and export
   assert.match(content, /validityMinContribution/);
 });
 
-test("app/admin/surveys/page.tsx provides unified Hub with survey forms, growth contributions, targeting matrix, and simulator", async () => {
+test("app/admin/surveys/page.tsx provides clean 2-tab Survey & Feedback workspace with cohesive teal/slate palette", async () => {
   const content = await read("app/admin/surveys/page.tsx");
 
-  // Multi-tab architecture
-  assert.match(content, /📋 Survey Forms/);
-  assert.match(content, /🌱 Help Us Grow &amp; Contributions/);
-  assert.match(content, /🎯 Who Can See &amp; Rewards/);
-  assert.match(content, /🎨 Side Button &amp; Pop-up Preview/);
-  assert.match(content, /📊 Submissions &amp; Feedback/);
+  // Clean focused 2-tab navigation
+  assert.match(content, /<span>Survey Forms<\/span>/);
+  assert.match(content, /<span>Submissions &amp; Feedback<\/span>/);
+
+  // Unwanted clutter and harsh colors removed
+  assert.doesNotMatch(content, /Admin Presentation Simulator/);
+  assert.doesNotMatch(content, /Voluntary UPI/);
+  assert.doesNotMatch(content, /#0055a2/);
+  assert.doesNotMatch(content, /border-purple-/);
 
   // Essential test assertions
   assert.match(content, /Student Surveys & Feedback/);
@@ -68,10 +71,6 @@ test("app/admin/surveys/page.tsx provides unified Hub with survey forms, growth 
   // CSV Export & responses
   assert.match(content, /handleExportResponsesCSV/);
   assert.match(content, /Export All Responses \(CSV\)/);
-
-  // Admin Sandbox / Simulator
-  assert.match(content, /Admin Presentation Simulator/);
-  assert.match(content, /Floating Side Button/);
 });
 
 test("components/admin/SurveySettingsPanel.tsx provides granular audience targeting and reward controls", async () => {

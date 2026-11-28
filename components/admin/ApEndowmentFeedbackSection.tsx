@@ -26,21 +26,13 @@ export function ApEndowmentFeedbackSection({
   surveyIndex?: number;
   initialSurvey?: { id?: string; response_count?: number } | null;
 } = {}) {
-  const [data, setData] = useState<ApEndowmentFeedbackSummary>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("varadhi_cached_ap_endowment_feedback");
-        if (cached) return JSON.parse(cached);
-      } catch {}
-    }
-    return {
-      totalResponses: initialSurvey?.response_count || 4,
-      paper1Count: 1,
-      paper2Count: 2,
-      bothCount: 1,
-      recentResponses: [],
-    };
-  });
+  const [data, setData] = useState<ApEndowmentFeedbackSummary>(() => ({
+    totalResponses: initialSurvey?.response_count || 0,
+    paper1Count: 0,
+    paper2Count: 0,
+    bothCount: 0,
+    recentResponses: [],
+  }));
   const [loading, setLoading] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -184,6 +176,17 @@ export function ApEndowmentFeedbackSection({
   useEffect(() => {
     setIsExpired(Date.now() > AP_EO_CAMPAIGN_EXPIRY_MS);
     if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("varadhi_cached_ap_endowment_feedback");
+        if (cached) {
+          const parsedCache = JSON.parse(cached);
+          if (parsedCache && typeof parsedCache.totalResponses === "number") {
+            setData(parsedCache);
+          }
+        }
+      } catch {
+        // ignore cache parse errors
+      }
       const savedActive = localStorage.getItem("varadhi_ap_endowment_survey_active");
       if (savedActive !== null) {
         setIsActive(savedActive === "true");
@@ -425,14 +428,14 @@ export function ApEndowmentFeedbackSection({
               Active
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+            <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
               Draft
             </span>
           )}
           <button
             type="button"
             onClick={() => setShowResponses((prev) => !prev)}
-            className="inline-flex items-center gap-1 rounded-full bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium hover:bg-slate-100 transition cursor-pointer"
+            className="admin-stat inline-flex items-center gap-1 rounded-md bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium hover:bg-slate-100 transition cursor-pointer"
             title="Click to toggle quick table preview"
           >
             <span>
@@ -441,17 +444,17 @@ export function ApEndowmentFeedbackSection({
             </span>
             <span className="text-[10px] text-slate-400">{showResponses ? "▲" : "▼"}</span>
           </button>
-          <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+          <span className="inline-flex items-center rounded-md bg-slate-50 text-slate-700 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium">
             AP Endowment
           </span>
-          <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+          <span className="inline-flex items-center rounded-md bg-slate-50 text-slate-600 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium">
             {isExpired ? "Campaign Expired" : "1-Week Campaign"}
           </span>
         </div>
 
         <Link
           href={dynamicSurveyId ? `/admin/surveys/${dynamicSurveyId}` : "/admin/surveys"}
-          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 touch-manipulation text-center whitespace-nowrap shrink-0 self-start sm:self-auto"
+          className="inline-flex items-center justify-center rounded-xl bg-teal-800 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-900 shadow-2xs transition touch-manipulation text-center whitespace-nowrap shrink-0 self-start sm:self-auto"
         >
           Edit Questions & Responses ({data?.totalResponses ?? 0}) &rarr;
         </Link>
@@ -518,20 +521,20 @@ export function ApEndowmentFeedbackSection({
         </div>
 
         {/* 5 Utility buttons side by side */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={handleCopyLink}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition touch-manipulation whitespace-nowrap"
             title="Copy link to share with students"
           >
-            {copiedLink ? "✓ Copied!" : "🔗 Copy Link"}
+            {copiedLink ? "Copied" : "Copy Link"}
           </button>
 
           <button
             type="button"
             onClick={handleToggle}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition touch-manipulation whitespace-nowrap"
           >
             {isActive ? "Deactivate" : "Activate"}
           </button>
@@ -539,33 +542,33 @@ export function ApEndowmentFeedbackSection({
           <button
             type="button"
             onClick={() => (isEditing ? setIsEditing(false) : startEdit())}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition touch-manipulation whitespace-nowrap"
             title="Edit title"
           >
-            ✏️ Edit
+            Edit
           </button>
 
           <button
             type="button"
             onClick={() => setShowSettings((prev) => !prev)}
-            className={`inline-flex items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-medium shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap ${
+            className={`inline-flex items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-medium shadow-2xs transition touch-manipulation whitespace-nowrap ${
               showSettings
-                ? "bg-slate-100 border-slate-300 text-slate-900"
+                ? "bg-teal-50 border-teal-300 text-teal-950 font-semibold"
                 : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
             }`}
             title="Survey display rules and conditions"
           >
-            {showSettings ? "✕ Settings" : "⚙️ Settings"}
+            {showSettings ? "Close Settings" : "Settings"}
           </button>
 
           <button
             type="button"
             onClick={handleDeleteSurvey}
             disabled={isDeleting}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50/60 hover:border-red-200 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200 disabled:opacity-40 shadow-2xs transition touch-manipulation whitespace-nowrap"
             title="Delete entire survey and its responses"
           >
-            {isDeleting ? "Deleting…" : "🗑️ Delete"}
+            {isDeleting ? "Deleting…" : "Delete"}
           </button>
         </div>
       </div>
@@ -575,8 +578,8 @@ export function ApEndowmentFeedbackSection({
         <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-6 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
             <div>
-              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                <span>⚙️</span> Survey Conditions & Re-appearance Rules
+              <h4 className="text-sm font-bold text-slate-900">
+                Survey Conditions &amp; Re-appearance Rules
               </h4>
               <p className="text-xs text-slate-500 mt-0.5">
                 Control target audience and student re-trigger conditions.
@@ -587,7 +590,7 @@ export function ApEndowmentFeedbackSection({
               onClick={() => setShowSettings(false)}
               className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition"
             >
-              ✕ Close
+              Close
             </button>
           </div>
 
@@ -814,22 +817,12 @@ export function ApEndowmentFeedbackSection({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-sm">
               <input
-                type="text"
+                type="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by student, email, phone, topic…"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 pl-9 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-teal-700 focus:outline-none transition"
               />
-              <span className="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-2.5 top-2 text-xs font-bold text-slate-400 hover:text-slate-600"
-                >
-                  ✕
-                </button>
-              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -837,19 +830,19 @@ export function ApEndowmentFeedbackSection({
                 type="button"
                 onClick={loadData}
                 disabled={loading}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition touch-manipulation whitespace-nowrap"
                 title="Refresh survey responses"
               >
-                {loading ? "…" : "↻ Refresh"}
+                {loading ? "Loading…" : "Refresh"}
               </button>
               <button
                 type="button"
                 onClick={handleExportCSV}
                 disabled={loading || !data || data.totalResponses === 0}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 shadow-2xs transition active:scale-95 touch-manipulation whitespace-nowrap"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 shadow-2xs transition touch-manipulation whitespace-nowrap"
                 title="Export all responses as CSV"
               >
-                📥 Export CSV
+                Export CSV
               </button>
             </div>
           </div>
@@ -897,7 +890,7 @@ export function ApEndowmentFeedbackSection({
                         <span className="block text-xs text-slate-500">{r.studentEmail}</span>
                         {r.studentPhone && (
                           <span className="inline-block mt-0.5 rounded-md bg-slate-100 border border-slate-200/60 px-1.5 py-0.5 text-[10px] font-medium text-slate-700">
-                            📱 {r.studentPhone.startsWith("+") ? r.studentPhone : `+91 ${r.studentPhone}`}
+                            {r.studentPhone.startsWith("+") ? r.studentPhone : `+91 ${r.studentPhone}`}
                           </span>
                         )}
                       </td>

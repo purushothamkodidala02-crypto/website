@@ -74,11 +74,11 @@ export function SurveySettingsPanel({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
         <div>
-          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-            <span>⚙️</span> Survey Conditions, Targeting &amp; Controls
+          <h4 className="text-sm font-bold text-slate-900">
+            Survey Conditions, Targeting &amp; Controls
           </h4>
           <p className="text-xs text-slate-500 mt-0.5">
-            Configure who can see &ldquo;{surveyTitle}&rdquo;, mock test conditions, rewards offered, and display styles.
+            Configure who can see &ldquo;{surveyTitle}&rdquo;, mock test conditions, rewards, and display styles.
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -88,7 +88,7 @@ export function SurveySettingsPanel({
               onClick={onClose}
               className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
             >
-              ✕ Close
+              Close
             </button>
           )}
         </div>
@@ -101,11 +101,11 @@ export function SurveySettingsPanel({
           onClick={() => setActiveTab("targeting")}
           className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
             activeTab === "targeting"
-              ? "bg-slate-900 text-white"
+              ? "bg-teal-800 text-white"
               : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
           }`}
         >
-          🎯 1. Who Can See (Audience Rules)
+          1. Who Can See (Audience Rules)
         </button>
 
         <button
@@ -113,11 +113,11 @@ export function SurveySettingsPanel({
           onClick={() => setActiveTab("rewards")}
           className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
             activeTab === "rewards"
-              ? "bg-slate-900 text-white"
+              ? "bg-teal-800 text-white"
               : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
           }`}
         >
-          🎁 2. What They Receive (Validity / Reward)
+          2. What They Receive (Reward)
         </button>
 
         <button
@@ -125,11 +125,11 @@ export function SurveySettingsPanel({
           onClick={() => setActiveTab("display")}
           className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
             activeTab === "display"
-              ? "bg-slate-900 text-white"
+              ? "bg-teal-800 text-white"
               : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
           }`}
         >
-          🎨 3. Side Button &amp; Display Style
+          3. Side Button &amp; Display Style
         </button>
 
         <button
@@ -137,11 +137,11 @@ export function SurveySettingsPanel({
           onClick={() => setActiveTab("frequency")}
           className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
             activeTab === "frequency"
-              ? "bg-slate-900 text-white"
+              ? "bg-teal-800 text-white"
               : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
           }`}
         >
-          ⏱️ 4. Frequency &amp; Limits
+          4. Frequency &amp; Limits
         </button>
       </div>
 
@@ -318,11 +318,11 @@ export function SurveySettingsPanel({
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs text-slate-800 focus:bg-white focus:border-slate-400 focus:outline-none"
               >
                 <option value="none">None (Standard Voluntary Feedback)</option>
-                <option value="validity_extension">⏳ Mock Test Validity Extension (+30 or +60 Days)</option>
-                <option value="free_pass">🎟️ Free Mock Test Series Pass</option>
-                <option value="study_notes">📚 Free High-Yield Study Notes / Blueprint PDF</option>
-                <option value="discount_code">🏷️ Special Discount Coupon Code</option>
-                <option value="custom">✨ Custom Reward / Direct Mentor Call</option>
+                <option value="validity_extension">Mock Test Validity Extension (+30 or +60 Days)</option>
+                <option value="free_pass">Free Mock Test Series Pass</option>
+                <option value="study_notes">Free High-Yield Study Notes / Blueprint PDF</option>
+                <option value="discount_code">Special Discount Coupon Code</option>
+                <option value="custom">Custom Reward / Direct Mentor Call</option>
               </select>
             </div>
 
@@ -366,7 +366,6 @@ export function SurveySettingsPanel({
 
           {settings.rewardType && settings.rewardType !== "none" && (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-xs text-emerald-900 flex items-center gap-2">
-              <span className="text-base">🎁</span>
               <span>
                 <strong className="font-bold">Active Incentive:</strong> When students complete &ldquo;{surveyTitle}&rdquo;, they will be rewarded with &ldquo;{settings.rewardTitle || "Specified Reward"}&rdquo;.
               </span>
@@ -391,7 +390,7 @@ export function SurveySettingsPanel({
               <label
                 className={`flex cursor-pointer items-center justify-center rounded-lg border p-2 text-xs transition ${
                   settings.displayMode === "side_button"
-                    ? "border-slate-800 bg-slate-900 text-white font-semibold"
+                    ? "border-teal-800 bg-teal-800 text-white font-semibold"
                     : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-100"
                 }`}
               >
@@ -402,13 +401,13 @@ export function SurveySettingsPanel({
                   checked={settings.displayMode === "side_button"}
                   onChange={() => setSettings((s) => ({ ...s, displayMode: "side_button" }))}
                 />
-                <span>🔘 Side Floating Button</span>
+                <span>Side Floating Button</span>
               </label>
 
               <label
                 className={`flex cursor-pointer items-center justify-center rounded-lg border p-2 text-xs transition ${
                   settings.displayMode === "popup_modal"
-                    ? "border-slate-800 bg-slate-900 text-white font-semibold"
+                    ? "border-teal-800 bg-teal-800 text-white font-semibold"
                     : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-100"
                 }`}
               >
@@ -419,13 +418,13 @@ export function SurveySettingsPanel({
                   checked={settings.displayMode === "popup_modal"}
                   onChange={() => setSettings((s) => ({ ...s, displayMode: "popup_modal" }))}
                 />
-                <span>💬 Pop-up Modal</span>
+                <span>Pop-up Modal</span>
               </label>
 
               <label
                 className={`flex cursor-pointer items-center justify-center rounded-lg border p-2 text-xs transition ${
                   settings.displayMode === "both"
-                    ? "border-slate-800 bg-slate-900 text-white font-semibold"
+                    ? "border-teal-800 bg-teal-800 text-white font-semibold"
                     : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-100"
                 }`}
               >
@@ -442,7 +441,7 @@ export function SurveySettingsPanel({
               <label
                 className={`flex cursor-pointer items-center justify-center rounded-lg border p-2 text-xs transition ${
                   settings.displayMode === "page_only"
-                    ? "border-slate-800 bg-slate-900 text-white font-semibold"
+                    ? "border-teal-800 bg-teal-800 text-white font-semibold"
                     : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-100"
                 }`}
               >
@@ -453,7 +452,7 @@ export function SurveySettingsPanel({
                   checked={settings.displayMode === "page_only"}
                   onChange={() => setSettings((s) => ({ ...s, displayMode: "page_only" }))}
                 />
-                <span>🔗 Standalone Page Only</span>
+                <span>Standalone Page Only</span>
               </label>
             </div>
 
@@ -793,20 +792,20 @@ export function SurveySettingsPanel({
           onClick={handleReset}
           className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline transition cursor-pointer"
         >
-          ↺ Reset to Default Rules
+          Reset to Default Rules
         </button>
 
         <div className="flex items-center gap-2">
           {saveSuccess && (
             <span className="text-xs font-semibold text-emerald-700 animate-in fade-in">
-              ✓ Settings saved successfully!
+              Settings saved successfully
             </span>
           )}
           <button
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-2xs transition active:scale-95 disabled:opacity-60 cursor-pointer"
+            className="rounded-xl bg-teal-800 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-900 shadow-2xs transition disabled:opacity-60 cursor-pointer"
           >
             {isSaving ? "Saving…" : "Save Survey Settings"}
           </button>
