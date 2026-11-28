@@ -7,6 +7,8 @@ import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { FormattedQuestionText } from "@/components/questions/FormattedQuestionText";
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
+import { DisplaySettingsButton } from "@/components/site/DisplaySettingsButton";
+import { useDisplayPreferences } from "@/components/site/DisplayPreferencesProvider";
 
 type StudyRow = {
   question_id: string;
@@ -56,9 +58,10 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
 
   const answeredQuestionsCount = Object.keys(practiceAnswers).length;
   const practiceScore = rows.filter((r) => practiceAnswers[r.question_id] === r.correct_answer).length;
-  const [language, setLanguage] = useState<"english" | "telugu">(() => {
-    return rows[initialIndex]?.content_language_mode === "telugu" ? "telugu" : "english";
-  });
+  const { preferences } = useDisplayPreferences();
+  const [languageOverride, setLanguageOverride] = useState<"english" | "telugu" | null>(null);
+  const language: "english" | "telugu" =
+    languageOverride ?? (preferences.defaultLanguage === "te" ? "telugu" : "english");
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -258,11 +261,12 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
         </div>
 
         <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto sm:justify-end">
+          <DisplaySettingsButton variant="compact" />
           {canSwitchLanguage && (
             <div className="hidden sm:inline-flex rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Question language">
               <button
                 type="button"
-                onClick={() => setLanguage("english")}
+                onClick={() => setLanguageOverride("english")}
                 aria-pressed={effectiveLanguage === "english"}
                 className={`rounded-lg px-2.5 py-1 text-xs font-black transition ${
                   effectiveLanguage === "english"
@@ -274,7 +278,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
               </button>
               <button
                 type="button"
-                onClick={() => setLanguage("telugu")}
+                onClick={() => setLanguageOverride("telugu")}
                 aria-pressed={effectiveLanguage === "telugu"}
                 lang="te"
                 className={`rounded-lg px-2.5 py-1 text-xs font-black transition ${
@@ -369,7 +373,7 @@ export function StudyViewer({ rows, initialIndex, view }: { rows: StudyRow[]; in
           showTelugu={showTelugu}
           canSwitchLanguage={canSwitchLanguage}
           effectiveLanguage={effectiveLanguage}
-          onLanguageChange={setLanguage}
+          onLanguageChange={setLanguageOverride}
           isPracticeMode={practiceMode}
           userSelectedOption={practiceAnswers[currentRow.question_id]}
           isRevealed={revealedAnswers[currentRow.question_id] === true}
@@ -434,7 +438,7 @@ function StudyQuestionCard({
     : row.explanation;
 
   return (
-    <article className="student-card overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-sm">
+    <article className="student-card reading-card overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-sm">
       {/* Context strip */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/90 px-4 py-2.5 sm:px-6">
         <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs">
@@ -501,7 +505,7 @@ function StudyQuestionCard({
               <div className="min-w-0 flex-1" lang={showTelugu ? "te" : "en"}>
                 <FormattedQuestionText
                   text={questionText}
-                  className={`font-exam text-base sm:text-lg font-normal leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
+                  className={`reading-surface font-exam text-base sm:text-lg font-normal leading-relaxed text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
                 />
               </div>
             </div>
@@ -528,7 +532,7 @@ function StudyQuestionCard({
                       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-xs font-black text-slate-700 group-hover:bg-teal-700 group-hover:text-white transition">
                         {key}
                       </span>
-                      <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 font-normal font-exam text-slate-900 ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+                      <span className={`reading-surface min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 font-normal font-exam text-slate-900 ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
                         {label}
                       </span>
                       <span className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-500 group-hover:border-teal-300 group-hover:bg-teal-100 group-hover:text-teal-900 transition">
@@ -543,7 +547,7 @@ function StudyQuestionCard({
                   ? key === userSelectedOption
                   : key === row.last_selected_answer;
 
-                let cardStyle = "border-slate-200 bg-white text-slate-800";
+                let cardStyle = "reading-option border-slate-200 bg-white text-slate-800";
                 let badgeStyle = "bg-slate-100 text-slate-700";
                 let statusBadge = null;
 
@@ -581,7 +585,7 @@ function StudyQuestionCard({
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${badgeStyle}`}>
                       {key}
                     </span>
-                    <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 font-normal font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+                    <span className={`reading-surface min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base leading-relaxed sm:leading-7 font-normal font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
                       {label}
                     </span>
                     {statusBadge}
@@ -670,7 +674,7 @@ function StudyQuestionCard({
                 <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5 text-sm leading-relaxed text-slate-900 shadow-2xs" lang={showTelugu ? "te" : "en"}>
                   <FormattedQuestionText
                     text={explanation}
-                    className={`font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                    className={`reading-surface font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
                   />
                 </div>
               ) : (

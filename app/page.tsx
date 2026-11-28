@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/VaradhiBrand";
 import { ExamSymbol, StateSymbol } from "@/components/exams/CatalogSymbols";
+import { HomeCatalogBrowser, type HomeExamFilterItem } from "@/components/exams/HomeCatalogBrowser";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { StudentResumePracticeBanner } from "@/components/site/StudentResumePracticeBanner";
@@ -75,6 +76,79 @@ export default async function Home() {
   const categoryById = new Map(categories.map((item) => [item.id, item]));
 
   const activeExams = exams;
+  const homeExamItems: HomeExamFilterItem[] = activeExams.flatMap((exam) => {
+    const category = categoryById.get(exam.exam_id);
+    const state = states.find((item) => item.id === category?.state_id);
+    if (!state) return [];
+    const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
+    const fullExamName = exam.name.toLowerCase().includes(state.name.toLowerCase())
+      ? exam.name
+      : `${state.name} ${exam.name}`;
+    const teluguMeta = getExamTeluguMetadata(exam.slug, exam.name, state.slug);
+    const isPolice =
+      exam.slug.includes("police") ||
+      exam.name.toLowerCase().includes("police") ||
+      exam.name.toLowerCase().includes("constable");
+    const teluguSubtitle =
+      teluguMeta?.teluguName || (isPolice ? "తెలంగాణ పోలీస్ కానిస్టేబుల్ (TGPRB / TSLPRB)" : "");
+
+    const searchText = `${fullExamName} ${teluguSubtitle} ${category?.name ?? ""} ${state.name} ${state.code}`.toLowerCase();
+
+    return [
+      {
+        id: exam.id,
+        stateId: state.id,
+        searchText,
+        node: (
+          <Link
+            key={exam.id}
+            href={examUrl(state.slug, exam.slug)}
+            prefetch={true}
+            className="student-card group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md"
+          >
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-600/0 via-teal-500/35 to-teal-600/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-teal-100/90 bg-teal-50/70 text-teal-900 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-teal-200 group-hover:bg-teal-100/80">
+                  <ExamSymbol name={exam.name} className="h-5 w-5" />
+                </span>
+                <div className="flex flex-wrap items-center justify-end gap-1.5 min-w-0">
+                  {category?.name && (
+                    <span className="rounded-full border border-slate-200/90 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 leading-snug">
+                      {category.name}
+                    </span>
+                  )}
+                  <span className="rounded-full border border-teal-200/80 bg-teal-50/80 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-teal-950 transition">
+                    {state.code}
+                  </span>
+                </div>
+              </div>
+              <h3 className="font-display mt-3.5 text-base font-bold leading-snug text-slate-900 group-hover:text-teal-950 transition break-words">
+                {fullExamName}
+              </h3>
+              {teluguSubtitle && (
+                <p lang="te" className="font-telugu mt-1 text-xs font-semibold leading-relaxed text-teal-800 break-words">
+                  {teluguSubtitle}
+                </p>
+              )}
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs">
+              <span className="font-medium text-slate-500">
+                {paperCount} paper{paperCount === 1 ? "" : "s"} available
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1 font-bold text-teal-800 group-hover:text-teal-950 group-hover:translate-x-0.5 transition">
+                Explore <span aria-hidden="true">→</span>
+              </span>
+            </div>
+          </Link>
+        ),
+      },
+    ];
+  });
+  const homeStateTabs = states.map((s) => ({ id: s.id, name: s.name, code: s.code }));
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -123,11 +197,7 @@ export default async function Home() {
         {/* Hero Heading & Quick Search */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <div className="max-w-xl min-w-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200/80 bg-teal-50/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-teal-900">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-600" aria-hidden="true" />
-              Telangana &amp; Andhra Pradesh
-            </span>
-            <h1 className="font-display mt-2.5 text-2xl font-bold tracking-tight text-slate-950 sm:text-[1.75rem] lg:text-[2rem] leading-tight">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-slate-950 sm:text-[1.75rem] lg:text-[2rem] leading-tight">
               TG &amp; AP Competitive Exams Mock Tests &amp; Official Syllabus
             </h1>
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">
@@ -283,71 +353,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="student-stagger mt-3.5 grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
-            {activeExams.map((exam) => {
-              const category = categoryById.get(exam.exam_id);
-              const state = states.find((item) => item.id === category?.state_id);
-              const paperCount = papers.filter((paper) => paper.exam_group_id === exam.id).length;
-              if (!state) return null;
-
-              const fullExamName = exam.name.toLowerCase().includes(state.name.toLowerCase())
-                ? exam.name
-                : `${state.name} ${exam.name}`;
-              const teluguMeta = getExamTeluguMetadata(exam.slug, exam.name, state.slug);
-              const isPolice =
-                exam.slug.includes("police") ||
-                exam.name.toLowerCase().includes("police") ||
-                exam.name.toLowerCase().includes("constable");
-              const teluguSubtitle = teluguMeta?.teluguName || (isPolice ? "తెలంగాణ పోలీస్ కానిస్టేబుల్ (TGPRB / TSLPRB)" : "");
-
-              return (
-                <Link
-                  key={exam.id}
-                  href={examUrl(state.slug, exam.slug)}
-                  prefetch={true}
-                  className="student-card group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md"
-                >
-                  <div
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-600/0 via-teal-500/35 to-teal-600/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                    aria-hidden="true"
-                  />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-teal-100/90 bg-teal-50/70 text-teal-900 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-teal-200 group-hover:bg-teal-100/80">
-                        <ExamSymbol name={exam.name} className="h-5 w-5" />
-                      </span>
-                      <div className="flex flex-wrap items-center justify-end gap-1.5 min-w-0">
-                        {category?.name && (
-                          <span className="rounded-full border border-slate-200/90 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 leading-snug">
-                            {category.name}
-                          </span>
-                        )}
-                        <span className="rounded-full border border-teal-200/80 bg-teal-50/80 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-teal-950 transition">
-                          {state.code}
-                        </span>
-                      </div>
-                    </div>
-                    <h3 className="font-display mt-3.5 text-base font-bold leading-snug text-slate-900 group-hover:text-teal-950 transition break-words">
-                      {fullExamName}
-                    </h3>
-                    {teluguSubtitle && (
-                      <p className="mt-1 text-xs font-semibold leading-relaxed text-teal-800 break-words">
-                        {teluguSubtitle}
-                      </p>
-                    )}
-                  </div>
-                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs">
-                    <span className="font-medium text-slate-500">
-                      {paperCount} paper{paperCount === 1 ? "" : "s"} available
-                    </span>
-                    <span className="inline-flex shrink-0 items-center gap-1 font-bold text-teal-800 group-hover:text-teal-950 group-hover:translate-x-0.5 transition">
-                      Explore <span aria-hidden="true">→</span>
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <HomeCatalogBrowser states={homeStateTabs} items={homeExamItems} />
         </div>
       </section>
 

@@ -5,6 +5,8 @@ import { FormattedQuestionText } from "@/components/questions/FormattedQuestionT
 import { QuestionMedia } from "@/components/questions/QuestionMedia";
 import { BookmarkButton } from "@/components/study/BookmarkButton";
 import { ReportQuestionButton } from "@/components/questions/ReportQuestionButton";
+import { DisplaySettingsButton } from "@/components/site/DisplaySettingsButton";
+import { useDisplayPreferences } from "@/components/site/DisplayPreferencesProvider";
 import { exitFullscreenSafely } from "@/lib/fullscreen";
 
 export type ReviewRow = {
@@ -42,10 +44,11 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
     void exitFullscreenSafely();
   }, []);
 
+  const { preferences } = useDisplayPreferences();
   const [index, setIndex] = useState(0);
-  const [language, setLanguage] = useState<"english" | "telugu">(
-    rows[0]?.content_language_mode === "telugu" ? "telugu" : "english",
-  );
+  const [languageOverride, setLanguageOverride] = useState<"english" | "telugu" | null>(null);
+  const language: "english" | "telugu" =
+    languageOverride ?? (preferences.defaultLanguage === "te" ? "telugu" : "english");
   const questionRef = useRef<HTMLElement>(null);
   const activeNumberRef = useRef<HTMLButtonElement>(null);
   const baseRow = rows[index] ?? rows[0];
@@ -153,7 +156,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
       <div className="relative mt-4 w-full">
         <article
           ref={questionRef}
-          className="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:rounded-3xl w-full"
+          className="reading-card scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:rounded-3xl w-full"
           aria-live="polite"
         >
           {/* Header strip */}
@@ -166,13 +169,14 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
             </div>
 
             <div className="flex min-w-0 flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+              <DisplaySettingsButton variant="compact" />
               {hasTelugu && row.content_language_mode === "bilingual" && (
                 <div className="inline-flex shrink-0 rounded-xl bg-slate-200/80 p-0.5" role="group" aria-label="Review language">
-                  <LanguageButton active={effectiveLanguage === "english"} onClick={() => setLanguage("english")}>
+                  <LanguageButton active={effectiveLanguage === "english"} onClick={() => setLanguageOverride("english")}>
                     <span className="sm:hidden">EN</span>
                     <span className="hidden sm:inline">English</span>
                   </LanguageButton>
-                  <LanguageButton active={effectiveLanguage === "telugu"} onClick={() => setLanguage("telugu")} lang="te">తెలుగు</LanguageButton>
+                  <LanguageButton active={effectiveLanguage === "telugu"} onClick={() => setLanguageOverride("telugu")} lang="te">తెలుగు</LanguageButton>
                 </div>
               )}
               <div className="flex min-w-0 flex-1 sm:flex-initial items-center gap-1.5 sm:gap-2">
@@ -194,7 +198,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                   <div className="min-w-0 flex-1 pt-0.5" lang={showTelugu ? "te" : "en"}>
                     <FormattedQuestionText
                       text={questionText}
-                      className={`font-exam text-base sm:text-lg font-normal leading-relaxed sm:leading-8 text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
+                      className={`reading-surface font-exam text-base sm:text-lg font-normal leading-relaxed sm:leading-8 text-slate-950 ${showTelugu ? "font-telugu" : ""}`}
                     />
                   </div>
                 </div>
@@ -264,7 +268,7 @@ export function AttemptReviewNavigator({ attemptId, rows, bookmarkedQuestionIds 
                   >
                     <FormattedQuestionText
                       text={explanation}
-                      className={`font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
+                      className={`reading-surface font-exam text-sm sm:text-base leading-relaxed text-teal-950 ${showTelugu ? "font-telugu" : ""}`}
                     />
                   </div>
                 ) : (
@@ -364,7 +368,7 @@ function OptionRow({
   selected: boolean;
   showTelugu?: boolean;
 }) {
-  let style = "border-slate-200 bg-white text-slate-800";
+  let style = "reading-option border-slate-200 bg-white text-slate-800";
   let badgeStyle = "bg-slate-100 text-slate-600";
   let statusText = "";
 
@@ -387,7 +391,7 @@ function OptionRow({
       <span className={`grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg text-xs sm:text-sm font-black ${badgeStyle}`}>
         {optionKey}
       </span>
-      <span className={`min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base font-normal leading-relaxed sm:leading-7 font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
+      <span className={`reading-surface min-w-0 flex-1 pt-0.5 text-[15px] sm:text-base font-normal leading-relaxed sm:leading-7 font-exam ${showTelugu ? "font-telugu" : ""}`} lang={showTelugu ? "te" : "en"}>
         {label}
       </span>
       {statusText && (

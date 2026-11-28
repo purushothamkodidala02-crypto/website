@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Mandali } from "next/font/google";
+import { Inter, Noto_Sans_Telugu, Plus_Jakarta_Sans } from "next/font/google";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { NavigationProgress } from "@/components/feedback/NavigationProgress";
 import { CopyProtection } from "@/components/site/CopyProtection";
+import { DisplayPreferencesProvider } from "@/components/site/DisplayPreferencesProvider";
 import { SingleDeviceWatcher } from "@/components/auth/SingleDeviceWatcher";
 import { ApEndowmentPriorityModal } from "@/components/feedback/ApEndowmentPriorityModal";
+import { DISPLAY_PREFS_INIT_SCRIPT } from "@/lib/preferences/display-preferences";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -24,11 +26,20 @@ const inter = Inter({
   fallback: ["Segoe UI", "Arial", "sans-serif"],
 });
 
-const mandali = Mandali({
-  subsets: ["telugu", "latin"],
-  weight: ["400"],
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
   display: "swap",
-  variable: "--font-mandali",
+  preload: true,
+  variable: "--font-varadhi-display",
+  fallback: ["Segoe UI", "Arial", "sans-serif"],
+});
+
+const notoSansTelugu = Noto_Sans_Telugu({
+  subsets: ["telugu", "latin"],
+  display: "swap",
+  preload: true,
+  variable: "--font-telugu-webfont",
+  fallback: ["Nirmala UI", "Gautami", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -122,14 +133,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${mandali.variable} antialiased`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${plusJakarta.variable} ${notoSansTelugu.variable} antialiased`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap"
-        />
+        <meta name="text-scale" content="scale" />
+        <script dangerouslySetInnerHTML={{ __html: DISPLAY_PREFS_INIT_SCRIPT }} />
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="" />
@@ -140,15 +151,17 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-screen bg-white text-gray-900">
-        <PostHogProvider>
-          <NavigationProgress />
-          <CopyProtection />
-          <SingleDeviceWatcher />
-          <ApEndowmentPriorityModal />
-          {children}
-          <GoogleAnalytics />
-        </PostHogProvider>
+      <body className="min-h-screen bg-[#f6faf8] text-[#132621]">
+        <DisplayPreferencesProvider>
+          <PostHogProvider>
+            <NavigationProgress />
+            <CopyProtection />
+            <SingleDeviceWatcher />
+            <ApEndowmentPriorityModal />
+            {children}
+            <GoogleAnalytics />
+          </PostHogProvider>
+        </DisplayPreferencesProvider>
       </body>
     </html>
   );

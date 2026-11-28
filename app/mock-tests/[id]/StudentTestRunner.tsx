@@ -15,6 +15,8 @@ import { ReportQuestionButton } from "@/components/questions/ReportQuestionButto
 import { SubmissionResult } from "./SubmissionResult";
 import { setLocalRecentPractice, clearLocalPracticeStorage } from "@/lib/storage/student-practice-storage";
 import { ScreenWatermark } from "@/components/mock-tests/ScreenWatermark";
+import { DisplaySettingsButton } from "@/components/site/DisplaySettingsButton";
+import { useDisplayPreferences } from "@/components/site/DisplayPreferencesProvider";
 import {
   exitFullscreenSafely,
   getLastFullscreenStatus,
@@ -195,7 +197,9 @@ export function StudentTestRunner({
     }
     return Math.max(0, secondsLeft(expiresAt));
   });
-  const [language, setLanguage] = useState<"en" | "te">("en");
+  const { preferences } = useDisplayPreferences();
+  const [languageOverride, setLanguageOverride] = useState<"en" | "te" | null>(null);
+  const language = languageOverride ?? preferences.defaultLanguage;
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [navigatorOpenDesktop, setNavigatorOpenDesktop] = useState(true);
   const [confirming, setConfirming] = useState(false);
@@ -1110,8 +1114,9 @@ export function StudentTestRunner({
             </div>
           </div>
 
-          {/* Box 3: Controls (Fullscreen Toggle, Timer & Mobile Submit) */}
+          {/* Box 3: Controls (Display Settings, Fullscreen Toggle, Timer & Mobile Submit) */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+            <DisplaySettingsButton variant="compact" />
             {fullscreenAvailable && (
               <button
                 type="button"
@@ -1241,7 +1246,7 @@ export function StudentTestRunner({
             </div>
           )}
 
-          <section className="flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-3.5 sm:p-5 lg:p-6 [@media(max-height:540px)]:p-3 shadow-sm">
+          <section className="reading-card flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-3.5 sm:p-5 lg:p-6 [@media(max-height:540px)]:p-3 shadow-sm">
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -1253,12 +1258,12 @@ export function StudentTestRunner({
                 </div>
                 {bilingual && (
                   <div className="rounded-lg bg-slate-100 p-0.5 text-xs font-bold shadow-inner">
-                    <button type="button" onClick={() => setLanguage("en")} className={`rounded-md px-2.5 py-1 transition ${language === "en" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>English</button>
-                    <button type="button" onClick={() => setLanguage("te")} className={`rounded-md px-2.5 py-1 transition ${language === "te" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>తెలుగు</button>
+                    <button type="button" onClick={() => setLanguageOverride("en")} className={`rounded-md px-2.5 py-1 transition ${language === "en" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>English</button>
+                    <button type="button" onClick={() => setLanguageOverride("te")} className={`rounded-md px-2.5 py-1 transition ${language === "te" ? "bg-white shadow-sm font-black text-slate-950" : "text-slate-600 hover:text-slate-900"}`}>తెలుగు</button>
                   </div>
                 )}
               </div>
-              <FormattedQuestionText text={questionText} className="font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-normal leading-relaxed sm:leading-8 text-slate-950" />
+              <FormattedQuestionText text={questionText} className="reading-surface font-exam mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl font-normal leading-relaxed sm:leading-8 text-slate-950" />
               {current.image_url && <QuestionMedia src={current.image_url} className="mt-3 max-h-[32dvh] sm:max-h-56 lg:max-h-64 w-auto object-contain" />}
               <div className="mt-4 sm:mt-5 grid gap-2.5 sm:gap-3">
                 {options.map(({ displayKey, text, originalKey }) => {
@@ -1270,7 +1275,7 @@ export function StudentTestRunner({
                       className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 sm:p-3.5 transition hover:border-teal-400 ${
                         selected
                           ? "border-teal-600 bg-teal-50/90 shadow-sm ring-1 ring-teal-500"
-                          : "border-slate-200/90 bg-white hover:bg-slate-50/70"
+                          : "reading-option border-slate-200/90 bg-white hover:bg-slate-50/70"
                       } ${locked ? "pointer-events-none opacity-60" : ""}`}
                     >
                       <input
@@ -1307,7 +1312,7 @@ export function StudentTestRunner({
                       </span>
                       <span
                         lang={teluguOption ? "te" : "en"}
-                        className={`min-w-0 flex-1 whitespace-pre-line text-[15px] sm:text-base leading-relaxed sm:leading-7 ${
+                        className={`reading-surface min-w-0 flex-1 whitespace-pre-line text-[15px] sm:text-base leading-relaxed sm:leading-7 ${
                           teluguOption ? "font-telugu" : ""
                         } font-normal text-slate-800 font-exam break-words [overflow-wrap:anywhere]`}
                       >

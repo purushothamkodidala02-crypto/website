@@ -164,7 +164,7 @@ export function PublicNavigationMenu({ items }: { items: NavigationItem[] }) {
             </button>
           </div>
 
-          <nav className="font-brand flex-1 space-y-2 overflow-y-auto p-4" aria-label="Sidebar navigation">
+          <nav className="font-sans flex-1 space-y-2 overflow-y-auto p-4" aria-label="Sidebar navigation">
             {visibleItems.map((item) => {
               const tone = navigationIconStyles[item.icon];
               const isCurrentPage = item.href === "/"

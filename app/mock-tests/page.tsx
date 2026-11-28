@@ -7,10 +7,12 @@ import {
   StateSymbol,
 } from "@/components/exams/CatalogSymbols";
 import { ExamSelectionGrid, type ExamSelectionItem } from "@/components/exams/ExamSelectionGrid";
+import { CatalogTestGrid, type CatalogTestFilterItem } from "@/components/exams/CatalogTestGrid";
+import { SubjectFilterRibbon } from "@/components/exams/SubjectFilterRibbon";
 import { PublicHeader } from "@/components/site/PublicHeader";
 import { CatalogSteps } from "@/components/exams/CatalogSteps";
 import { getMockTestCatalogData } from "@/lib/catalog-data";
-import { hasMockTestSuffixOrMention, mockTestLabel, displayMockTestHeading } from "@/lib/exam-catalog";
+import { hasMockTestSuffixOrMention, displayMockTestHeading } from "@/lib/exam-catalog";
 import {
   categoryUrl,
   examUrl,
@@ -446,6 +448,7 @@ export default async function MockTestsPage(
   const examSelectionItems: ExamSelectionItem[] = selectedState
     ? stateExams.map((exam) => {
       const category = categoryById.get(exam.exam_id);
+      const teluguMeta = getExamTeluguMetadata(exam.slug, exam.name, selectedState.slug);
       return {
         id: exam.id,
         name: exam.name,
@@ -454,19 +457,41 @@ export default async function MockTestsPage(
         contextLabel: `${selectedState.code} · ${category?.name ?? "Exam board"}`,
         paperCount: papers.filter((paper) => paper.exam_group_id === exam.id).length,
         href: examUrl(selectedState.slug, exam.slug),
+        teluguName: teluguMeta?.teluguName,
+        description: exam.description ?? undefined,
       };
     })
+    : [];
+
+  const rootExamSelectionItems: ExamSelectionItem[] = !selectedState && !isSearching
+    ? exams.flatMap((exam) => {
+        const category = categoryById.get(exam.exam_id);
+        const state = category ? stateById.get(category.state_id) : undefined;
+        if (!state) return [];
+        const teluguMeta = getExamTeluguMetadata(exam.slug, exam.name, state.slug);
+        return [{
+          id: exam.id,
+          name: exam.name.toLowerCase().includes(state.name.toLowerCase()) ? exam.name : `${state.name} ${exam.name}`,
+          slug: exam.slug,
+          boardName: `${state.code} · ${category?.name ?? "Exam"}`,
+          contextLabel: `${state.name} · ${category?.name ?? "Exam board"}`,
+          paperCount: papers.filter((paper) => paper.exam_group_id === exam.id).length,
+          href: examUrl(state.slug, exam.slug),
+          teluguName: teluguMeta?.teluguName,
+          description: exam.description ?? undefined,
+        }];
+      })
     : [];
 
   return (
     <main className="student-page min-h-screen bg-[#f6faf8] text-[#132621] w-full max-w-full overflow-x-hidden">
       <PublicHeader />
-      <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#f1f5f9] via-[#f5f8fc] to-[#f8fafc]">
+      <section className="border-b border-slate-200/80 bg-gradient-to-b from-[#eaf2ef]/70 via-[#f2f7f5]/50 to-[#f6faf8]">
         <div className="relative mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-10 md:grid-cols-[1.18fr_0.82fr] md:items-center">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-xs font-semibold text-blue-900">
-                <MockSymbol className="h-3.5 w-3.5 text-blue-700" /> Official Pattern Test Series
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200/90 bg-teal-50/90 px-3 py-1 text-xs font-semibold text-teal-900">
+                <MockSymbol className="h-3.5 w-3.5 text-teal-700" /> Official Pattern Test Series
               </span>
               {selectedState && (
                 <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700">
@@ -501,9 +526,9 @@ export default async function MockTestsPage(
                 : "Full-length papers and targeted subject practice for Telangana and Andhra Pradesh competitive exams with real exam timing and scoring."}
             </p>
           </div>
-          <form action="/mock-tests" method="get" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <form action="/mock-tests" method="get" className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
             {selectedState && <input type="hidden" name="state" value={selectedState.slug} />}
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Search Test Series</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Search Test Series</p>
             <div className="mt-2.5 flex gap-2">
               <input
                 id="catalog-search"
@@ -511,11 +536,11 @@ export default async function MockTestsPage(
                 type="search"
                 defaultValue={filters.q ?? ""}
                 placeholder="Search by exam, syllabus, paper, or subject..."
-                className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition"
+                className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 transition"
               />
               <button
                 type="submit"
-                className="inline-flex h-11 px-4 items-center justify-center rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm transition shadow-xs"
+                className="inline-flex h-11 px-4 items-center justify-center rounded-xl bg-teal-800 hover:bg-teal-900 text-white font-semibold text-sm transition shadow-xs"
                 aria-label="Search mock tests"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
@@ -604,50 +629,65 @@ export default async function MockTestsPage(
             </CatalogSection>
           </div>
         ) : !selectedState ? (
-          <CatalogSection
-            eyebrow="Step 1"
-            title="Choose your target state"
-            description="Select your state to explore dedicated competitive exams, official syllabus papers, and practice series."
-          >
-            <div className="student-stagger grid gap-4 md:grid-cols-3">
-              {states.map((state) => {
-                const stats = stateStats.get(state.id) ?? { exams: 0 };
-                return (
-                  <Link
-                    key={state.id}
-                    href={stateUrl(state.slug)}
-                    prefetch={false}
-                    className="student-card group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-400 hover:shadow-md"
-                  >
-                    <div>
-                      <span className="flex items-start justify-between gap-4">
-                        <span className="grid h-12 w-12 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
-                          <StateSymbol slug={state.slug} className="h-6 w-6" />
+          <div className="space-y-8">
+            <CatalogSection
+              eyebrow="Step 1"
+              title="Choose your target state"
+              description="Select your state to explore dedicated competitive exams, official syllabus papers, and practice series."
+            >
+              <div className="student-stagger grid gap-4 md:grid-cols-3">
+                {states.map((state) => {
+                  const stats = stateStats.get(state.id) ?? { exams: 0 };
+                  return (
+                    <Link
+                      key={state.id}
+                      href={stateUrl(state.slug)}
+                      prefetch={false}
+                      className="student-card group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-400 hover:shadow-md"
+                    >
+                      <div>
+                        <span className="flex items-start justify-between gap-4">
+                          <span className="grid h-12 w-12 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-700 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900">
+                            <StateSymbol slug={state.slug} className="h-6 w-6" />
+                          </span>
+                          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black tracking-wide text-slate-700">
+                            {state.code}
+                          </span>
                         </span>
-                        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black tracking-wide text-slate-700">
-                          {state.code}
+                        <h2 className="font-display mt-5 text-2xl font-bold text-slate-950 group-hover:text-teal-800 transition">
+                          {state.name}
+                        </h2>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {state.description}
+                        </p>
+                      </div>
+                      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
+                        <span className="font-bold text-slate-600">
+                          {stats.exams} exam{stats.exams === 1 ? "" : "s"}
                         </span>
-                      </span>
-                      <h2 className="font-display mt-5 text-2xl font-bold text-slate-950 group-hover:text-teal-800 transition">
-                        {state.name}
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        {state.description}
-                      </p>
-                    </div>
-                    <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
-                      <span className="font-bold text-slate-600">
-                        {stats.exams} exam{stats.exams === 1 ? "" : "s"}
-                      </span>
-                      <span className="font-black text-teal-700 transition group-hover:translate-x-1">
-                        View exams →
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </CatalogSection>
+                        <span className="font-black text-teal-700 transition group-hover:translate-x-1">
+                          View exams →
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </CatalogSection>
+
+            {rootExamSelectionItems.length > 0 && (
+              <CatalogSection
+                eyebrow="Quick Jump"
+                title="Or jump straight to an exam"
+                description="Browse and filter available Telangana and Andhra Pradesh exam series directly."
+              >
+                <ExamSelectionGrid
+                  exams={rootExamSelectionItems}
+                  searchPlaceholder="Filter exams across all states..."
+                />
+              </CatalogSection>
+            )}
+          </div>
         ) : !selectedExam ? (
           <CatalogSection
             eyebrow={`${selectedState.code} · Step 2`}
@@ -751,60 +791,58 @@ export default async function MockTestsPage(
             </div>
 
             {selectedType !== "paper" && paperSubjects.length > 0 && (
-              <div className="mb-6 rounded-2xl border border-teal-100/90 bg-white p-3 sm:p-4 shadow-2xs">
-                <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5 px-0.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">
-                    {selectedSubject ? `Subject: ${selectedSubject.name}` : "Filter by Subject"}
-                  </span>
-                  <span className="text-[11px] font-semibold text-slate-500">
-                    {paperSubjects.length} subject{paperSubjects.length === 1 ? "" : "s"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 sm:pb-0 sm:flex-wrap no-scrollbar -mx-1 px-1 touch-pan-x scroll-smooth">
-                  <Link
-                    href={testTypeUrl(selectedType === "all" ? "all" : "subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
-                    className={`inline-flex min-h-[42px] sm:min-h-[38px] shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap active:scale-[0.98] ${
-                      !selectedSubject
-                        ? "bg-teal-800 text-white shadow-xs border border-teal-800 font-bold"
-                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300 hover:bg-white"
+              <SubjectFilterRibbon
+                headerLabel={selectedSubject ? `Subject: ${selectedSubject.name}` : "Filter by Subject"}
+                subjectCount={paperSubjects.length}
+                hasSelectedSubject={Boolean(selectedSubject)}
+                allSubjectsHref={testTypeUrl(selectedType === "all" ? "all" : "subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                scrollContainerClassName="flex items-center gap-2 overflow-x-auto touch-pan-x no-scrollbar scroll-smooth py-0.5"
+              >
+                <Link
+                  href={testTypeUrl(selectedType === "all" ? "all" : "subject", selectedState.slug, selectedExam.slug, selectedPaper.slug)}
+                  data-selected={!selectedSubject}
+                  className={`inline-flex min-h-[42px] sm:min-h-[38px] shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap active:scale-[0.98] ${
+                    !selectedSubject
+                      ? "bg-teal-800 text-white shadow-xs border border-teal-800"
+                      : "border border-slate-200 bg-slate-50/90 text-slate-700 hover:border-teal-300 hover:bg-white"
+                  }`}
+                >
+                  <span>{!selectedSubject ? "✓ " : ""}All subjects</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
+                      !selectedSubject ? "bg-teal-900/70 text-teal-100" : "bg-slate-200/90 text-slate-700"
                     }`}
                   >
-                    <span>All subjects</span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
-                        !selectedSubject ? "bg-teal-900/70 text-teal-100" : "bg-slate-200/90 text-slate-700"
+                    {selectedType === "subject" ? currentSubjectOnlyCount : currentPaperAllCount}
+                  </span>
+                </Link>
+                {paperSubjects.map((sub) => {
+                  const isSelected = selectedSubject?.id === sub.id;
+                  const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
+                  return (
+                    <Link
+                      key={sub.id}
+                      href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
+                      prefetch={true}
+                      data-selected={isSelected}
+                      className={`inline-flex min-h-[42px] sm:min-h-[38px] shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap active:scale-[0.98] ${
+                        isSelected
+                          ? "bg-teal-800 text-white shadow-xs border border-teal-800"
+                          : "border border-slate-200 bg-slate-50/90 text-slate-700 hover:border-teal-300 hover:bg-white"
                       }`}
                     >
-                      {paperSubjects.length}
-                    </span>
-                  </Link>
-                  {paperSubjects.map((sub) => {
-                    const isSelected = selectedSubject?.id === sub.id;
-                    const subTestsCount = tests.filter((t) => t.subject?.id === sub.id).length;
-                    return (
-                      <Link
-                        key={sub.id}
-                        href={subjectUrl(selectedState.slug, selectedExam.slug, selectedPaper.slug, sub.slug)}
-                        prefetch={true}
-                        className={`inline-flex min-h-[42px] sm:min-h-[38px] shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap active:scale-[0.98] ${
-                          isSelected
-                            ? "bg-teal-800 text-white shadow-xs border border-teal-800 font-bold"
-                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300 hover:bg-white"
+                      <span className="leading-snug">{isSelected ? "✓ " : ""}{sub.name}</span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
+                          isSelected ? "bg-teal-900/70 text-teal-100" : "bg-slate-200/90 text-slate-700"
                         }`}
                       >
-                        <span className="leading-snug">{isSelected ? "✓ " : ""}{sub.name}</span>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
-                            isSelected ? "bg-teal-900/70 text-teal-100" : "bg-slate-200/90 text-slate-700"
-                          }`}
-                        >
-                          {subTestsCount}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
+                        {subTestsCount}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </SubjectFilterRibbon>
             )}
 
             {selectedType === "subject" && !selectedSubject && paperSubjects.length > 0 && (
@@ -1017,101 +1055,104 @@ function CatalogSection({ eyebrow, title, description, action, children }: { eye
 
 function TestGrid({ tests }: { tests: CatalogTest[] }) {
   if (tests.length === 0) return <EmptyCatalog title="No matching mock tests" detail="Try another paper or clear the current search." />;
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 min-w-0 max-w-full">
-      {tests.map((test) => {
-        const testNum = String(test.series_number ?? 1).padStart(2, "0");
-        const isFree = test.access_type === "free";
-        const testHref = mockTestUrl(test.state.slug, test.exam.slug, test.paper.slug, test.slug);
-        const marksDisplay = test.marks === null ? "—" : Number(test.marks).toFixed(2).replace(/\.00$/, "");
-        const folderUrl = test.subject
-          ? subjectUrl(test.state.slug, test.exam.slug, test.paper.slug, test.subject.slug)
-          : paperUrl(test.state.slug, test.exam.slug, test.paper.slug);
-        const folderName = test.subject?.name ?? test.paper.name;
-        const testHeading = displayMockTestHeading({
-          subjectName: test.subject?.name,
-          sectionName: test.section?.name,
-          testScope: test.test_scope,
-          seriesNumber: Number(test.series_number ?? 1),
-        });
+  const items: CatalogTestFilterItem[] = tests.map((test) => {
+    const testNum = String(test.series_number ?? 1).padStart(2, "0");
+    const isFree = test.access_type === "free";
+    const testHref = mockTestUrl(test.state.slug, test.exam.slug, test.paper.slug, test.slug);
+    const marksDisplay = test.marks === null ? "—" : Number(test.marks).toFixed(2).replace(/\.00$/, "");
+    const folderUrl = test.subject
+      ? subjectUrl(test.state.slug, test.exam.slug, test.paper.slug, test.subject.slug)
+      : paperUrl(test.state.slug, test.exam.slug, test.paper.slug);
+    const folderName = test.subject?.name ?? test.paper.name;
+    const testHeading = displayMockTestHeading({
+      subjectName: test.subject?.name,
+      sectionName: test.section?.name,
+      testScope: test.test_scope,
+      seriesNumber: Number(test.series_number ?? 1),
+    });
+    const searchText = `${testHeading} ${test.exam.name} ${test.paper.name} ${test.subject?.name ?? ""} ${test.section?.name ?? ""}`.toLowerCase();
 
-        return (
-          <article
-            key={test.id}
-            className="group relative min-w-0 max-w-full overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
-          >
-            <div className="min-w-0 max-w-full">
-              <div className="flex items-start justify-between gap-2.5 sm:gap-3 min-w-0 max-w-full">
-                <div className="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border border-teal-100 bg-teal-50/70 text-xs font-black text-teal-900 shadow-2xs transition-all duration-200 group-hover:border-teal-200 group-hover:bg-teal-100">
-                    {testNum}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700 leading-snug break-words">
-                      {test.state.code} · {test.exam.name} · {test.paperDisplay?.shortLabel ?? "Paper"}
-                    </p>
-                    <h3 className="font-display mt-0.5 text-sm sm:text-base font-bold leading-snug text-slate-900 transition group-hover:text-teal-800 sm:text-lg break-words">
-                      <Link href={testHref} prefetch={false} className="hover:underline">
-                        {testHeading}
-                      </Link>
-                    </h3>
-                  </div>
-                </div>
-
-                <span
-                  className={`shrink-0 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${
-                    isFree
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                      : "bg-amber-50 text-amber-900 border border-amber-200"
-                  }`}
-                >
-                  {isFree ? "Free" : "Paid"} {/* Paid series */}
+    return {
+      id: test.id,
+      isFree,
+      searchText,
+      node: (
+        <article
+          key={test.id}
+          className="student-card group relative min-w-0 max-w-full overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xs transition hover:border-teal-400 hover:shadow-md"
+        >
+          <div className="min-w-0 max-w-full">
+            <div className="flex items-start justify-between gap-2.5 sm:gap-3 min-w-0 max-w-full">
+              <div className="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
+                <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border border-teal-100 bg-teal-50/70 text-xs font-black text-teal-900 shadow-2xs transition-all duration-200 group-hover:border-teal-200 group-hover:bg-teal-100">
+                  {testNum}
                 </span>
-              </div>
-
-              <div className="mt-3.5 flex items-center justify-between gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-xs border border-slate-100 min-w-0 max-w-full">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="font-black text-slate-900">{test.questions ?? "—"}</span>
-                  <span className="text-[11px] font-medium text-slate-500">Questions</span>
-                </div>
-                <span className="text-slate-300 font-bold" aria-hidden="true">•</span>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="font-black text-slate-900">{test.duration_minutes}</span>
-                  <span className="text-[11px] font-medium text-slate-500">Mins</span>
-                </div>
-                <span className="text-slate-300 font-bold" aria-hidden="true">•</span>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="font-black text-slate-900">{marksDisplay}</span>
-                  <span className="text-[11px] font-medium text-slate-500">Marks</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700 leading-snug break-words">
+                    {test.state.code} · {test.exam.name} · {test.paperDisplay?.shortLabel ?? "Paper"}
+                  </p>
+                  <h3 className="font-display mt-0.5 text-sm sm:text-base font-bold leading-snug text-slate-900 transition group-hover:text-teal-800 sm:text-lg break-words">
+                    <Link href={testHref} prefetch={false} className="hover:underline">
+                      {testHeading}
+                    </Link>
+                  </h3>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
-              <span className="text-xs font-semibold text-slate-500 leading-snug">
-                {test.negativeMarks > 0 ? `-${formatMarkValue(test.negativeMarks)} Negative · Bilingual` : "No Negative · Bilingual"}
+              <span
+                className={`shrink-0 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${
+                  isFree
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-amber-50 text-amber-900 border border-amber-200"
+                }`}
+              >
+                {isFree ? "Free" : "Paid"} {/* Paid series */}
               </span>
-              <div className="shrink-0 ml-auto">
-                <MockTestCardAction
-                  testId={test.id}
-                  testHref={testHref}
-                  pdfUrl={test.pdf_url}
-                  testTitle={testHeading}
-                  folderUrl={folderUrl}
-                  folderName={folderName}
-                  folderType={test.subject ? "subject" : "paper"}
-                  examName={test.exam.name}
-                  paperName={test.paper.name}
-                  subjectName={test.subject?.name}
-                  stateCode={test.state.code}
-                />
+            </div>
+
+            <div className="mt-3.5 flex items-center justify-between gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-xs border border-slate-100 min-w-0 max-w-full">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="font-black text-slate-900">{test.questions ?? "—"}</span>
+                <span className="text-[11px] font-medium text-slate-500">Questions</span>
+              </div>
+              <span className="text-slate-300 font-bold" aria-hidden="true">•</span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="font-black text-slate-900">{test.duration_minutes}</span>
+                <span className="text-[11px] font-medium text-slate-500">Mins</span>
+              </div>
+              <span className="text-slate-300 font-bold" aria-hidden="true">•</span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="font-black text-slate-900">{marksDisplay}</span>
+                <span className="text-[11px] font-medium text-slate-500">Marks</span>
               </div>
             </div>
-          </article>
-        );
-      })}
-    </div>
-  );
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between border-t border-slate-100 pt-3 gap-2 min-w-0 max-w-full">
+            <span className="text-xs font-semibold text-slate-500 leading-snug">
+              {test.negativeMarks > 0 ? `-${formatMarkValue(test.negativeMarks)} Negative · Bilingual` : "No Negative · Bilingual"}
+            </span>
+            <div className="shrink-0 ml-auto">
+              <MockTestCardAction
+                testId={test.id}
+                testHref={testHref}
+                pdfUrl={test.pdf_url}
+                testTitle={testHeading}
+                folderUrl={folderUrl}
+                folderName={folderName}
+                folderType={test.subject ? "subject" : "paper"}
+                examName={test.exam.name}
+                paperName={test.paper.name}
+                subjectName={test.subject?.name}
+                stateCode={test.state.code}
+              />
+            </div>
+          </div>
+        </article>
+      ),
+    };
+  });
+  return <CatalogTestGrid items={items} />;
 }
 
 function CatalogPagination({ filters, page, totalPages, basePath }: { filters: Filters; page: number; totalPages: number; basePath: string }) {
